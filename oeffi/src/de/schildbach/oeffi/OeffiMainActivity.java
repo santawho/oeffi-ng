@@ -134,62 +134,61 @@ public abstract class OeffiMainActivity extends OeffiActivity {
 
             @Override
             public boolean onMenuItemSelected(final MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.global_options_stations: {
-                        if (OeffiMainActivity.this instanceof StationsActivity)
-                            return true;
-                        final Intent intent = new Intent(OeffiMainActivity.this, StationsActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                        finish();
-                        overridePendingTransition(R.anim.enter_from_left, R.anim.exit_to_right);
+                int itemId = item.getItemId();
+                if (itemId == R.id.global_options_stations) {
+                    if (OeffiMainActivity.this instanceof StationsActivity)
                         return true;
-                    }
+                    final Intent intent = new Intent(OeffiMainActivity.this, StationsActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    finish();
+                    overridePendingTransition(R.anim.enter_from_left, R.anim.exit_to_right);
+                    return true;
+                }
 
-                    case R.id.global_options_directions: {
-                        if (OeffiMainActivity.this instanceof DirectionsActivity)
-                            return true;
-                        final Intent intent = new Intent(OeffiMainActivity.this, DirectionsActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                        finish();
-                        if (OeffiMainActivity.this instanceof StationsActivity)
-                            overridePendingTransition(R.anim.enter_from_right, R.anim.exit_to_left);
-                        else
-                            overridePendingTransition(R.anim.enter_from_left, R.anim.exit_to_right);
+                if (itemId ==  R.id.global_options_directions) {
+                    if (OeffiMainActivity.this instanceof DirectionsActivity)
                         return true;
-                    }
-
-                    case R.id.global_options_plans: {
-                        if (OeffiMainActivity.this instanceof PlansPickerActivity)
-                            return true;
-                        final Intent intent = new Intent(OeffiMainActivity.this, PlansPickerActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                        finish();
+                    final Intent intent = new Intent(OeffiMainActivity.this, DirectionsActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    finish();
+                    if (OeffiMainActivity.this instanceof StationsActivity)
                         overridePendingTransition(R.anim.enter_from_right, R.anim.exit_to_left);
-                        return true;
-                    }
+                    else
+                        overridePendingTransition(R.anim.enter_from_left, R.anim.exit_to_right);
+                    return true;
+                }
 
-                    case R.id.global_options_donate: {
-                        PreferenceActivity.start(OeffiMainActivity.this, DonateFragment.class.getName());
+                if (itemId ==  R.id.global_options_plans) {
+                    if (OeffiMainActivity.this instanceof PlansPickerActivity)
                         return true;
-                    }
+                    final Intent intent = new Intent(OeffiMainActivity.this, PlansPickerActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    finish();
+                    overridePendingTransition(R.anim.enter_from_right, R.anim.exit_to_left);
+                    return true;
+                }
 
-                    case R.id.global_options_report_bug: {
-                        ErrorReporter.sendBugMail(OeffiMainActivity.this, application.packageInfo());
-                        return true;
-                    }
+                if (itemId == R.id.global_options_donate) {
+                    PreferenceActivity.start(OeffiMainActivity.this, DonateFragment.class.getName());
+                    return true;
+                }
 
-                    case R.id.global_options_preferences: {
-                        PreferenceActivity.start(OeffiMainActivity.this);
-                        return true;
-                    }
+                if (itemId == R.id.global_options_report_bug) {
+                    ErrorReporter.sendBugMail(OeffiMainActivity.this, application.packageInfo());
+                    return true;
+                }
 
-                    case R.id.global_options_about: {
-                        PreferenceActivity.start(OeffiMainActivity.this, AboutFragment.class.getName());
-                        return true;
-                    }
+                if (itemId == R.id.global_options_preferences) {
+                    PreferenceActivity.start(OeffiMainActivity.this);
+                    return true;
+                }
+
+                if (itemId == R.id.global_options_about) {
+                    PreferenceActivity.start(OeffiMainActivity.this, AboutFragment.class.getName());
+                    return true;
                 }
 
                 return false;

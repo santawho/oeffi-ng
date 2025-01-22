@@ -73,8 +73,10 @@ import de.schildbach.oeffi.OeffiMapView;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.StationsAware;
 import de.schildbach.oeffi.directions.DirectionsActivity;
+import de.schildbach.oeffi.directions.QueryJourneyRunnable;
 import de.schildbach.oeffi.network.NetworkPickerActivity;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
+import de.schildbach.oeffi.stations.list.JourneyClickListener;
 import de.schildbach.oeffi.stations.list.StationContextMenuItemListener;
 import de.schildbach.oeffi.stations.list.StationsAdapter;
 import de.schildbach.oeffi.util.ConnectivityBroadcastReceiver;
@@ -87,6 +89,7 @@ import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.NetworkProvider.Capability;
 import de.schildbach.pte.dto.Departure;
+import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.LineDestination;
 import de.schildbach.pte.dto.Location;
@@ -120,7 +123,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class StationsActivity extends OeffiMainActivity implements StationsAware, LocationAware,
-        StationContextMenuItemListener {
+        StationContextMenuItemListener, JourneyClickListener {
     private ConnectivityManager connectivityManager;
     private LocationManager locationManager;
     private SensorManager sensorManager;
@@ -152,6 +155,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private View filterActionButton;
     private ViewGroup locationProvidersView;
 
+    private QueryJourneyRunnable queryJourneyRunnable;
     private final Handler handler = new Handler();
     private HandlerThread backgroundThread;
     private Handler backgroundHandler;
@@ -421,7 +425,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         stationListLayoutManager = new LinearLayoutManager(this);
         stationList.setLayoutManager(stationListLayoutManager);
         stationList.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
-        stationListAdapter = new StationsAdapter(this, maxDeparturesPerStation, products, this, this);
+        stationListAdapter = new StationsAdapter(this, maxDeparturesPerStation, products, this, this, this);
         stationList.setAdapter(stationListAdapter);
         ViewCompat.setOnApplyWindowInsetsListener(stationList, (v, windowInsets) -> {
             final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -1388,9 +1392,23 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         } else if (menuItemId == R.id.station_context_launcher_shortcut) {
             StationContextMenu.createLauncherShortcutDialog(StationsActivity.this, network, station).show();
             return true;
+        } else if (menuItemId == R.id.station_context_infopage) {
+            String infoUrl = station.infoUrl;
+            if (infoUrl != null) {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(infoUrl)));
+            }
+            return true;
         } else {
             return false;
         }
+    }
+
+    @Override
+    public void onJourneyClick(final View clickedView, final JourneyRef journeyRef) {
+        queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
+                this, clickedView, queryJourneyRunnable,
+                handler, backgroundHandler,
+                network, journeyRef, null, null);
     }
 
     private final LocationListener locationListener = new LocationListener() {

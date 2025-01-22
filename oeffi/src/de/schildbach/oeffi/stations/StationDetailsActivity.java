@@ -29,8 +29,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
+import android.text.Html;
+import android.text.Spanned;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -647,7 +650,9 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             // message
             if (departure.message != null || departure.line.message != null) {
                 msgView.setVisibility(View.VISIBLE);
-                msgView.setText(Joiner.on('\n').skipNulls().join(departure.message, departure.line.message));
+                Spanned html = Html.fromHtml(Joiner.on('\n').skipNulls().join(departure.message, departure.line.message));
+                msgView.setText(html);
+                msgView.setMovementMethod(LinkMovementMethod.getInstance());
             } else {
                 msgView.setVisibility(View.GONE);
                 msgView.setText(null);

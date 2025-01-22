@@ -20,6 +20,7 @@
     <string name="station_details_activity_title">Station Details</string>
     <string name="directions_activity_title">Directions</string>
     <string name="trip_details_title">Connection Details</string>
+    <string name="journey_details_title">Line Details</string>
     <string name="plans_activity_title">Network Plans</string>
     <string name="network_picker_activity_title">Pick Transportation Network</string>
 
@@ -119,6 +120,7 @@
     <string name="station_context_add_ignore_title">Ignore</string>
     <string name="station_context_remove_ignore_title">Make visible again</string>
     <string name="station_context_details_title">Show All Departures</string>
+    <string name="station_context_infopage_title">Open Info Page</string>
     <string name="station_context_map_title">Show on Map</string>
     <string name="station_context_directions_from_title">Connection From Here</string>
     <string name="station_context_directions_to_title">Connection To Here</string>

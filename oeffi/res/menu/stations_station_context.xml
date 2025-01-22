@@ -18,6 +18,9 @@
         android:id="@+id/station_context_details"
         android:title="@string/station_context_details_title" />
     <item
+        android:id="@+id/station_context_infopage"
+        android:title="@string/station_context_infopage_title" />
+    <item
         android:id="@+id/station_context_map"
         android:title="@string/station_context_map_title">
         <menu />

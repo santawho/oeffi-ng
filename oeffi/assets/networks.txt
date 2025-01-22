@@ -5,6 +5,13 @@ RT|eu|DE;AT;CH;BE;LU;NL;DK;SE;NO;FI;GB;SI;HU;RO;BG;PL;SK;IT;ES;PT
 
 # DE
 DB|de-DE|DE
+DBREGIO|de-DE|DE
+DBWEB|de-DE|DE
+DBREGIOWEB|de-DE|DE
+DBMOVAS|de-DE|DE
+DBREGIOMOVAS|de-DE|DE
+DBHAFAS|de-DE|DE
+DBREGIOHAFAS|de-DE|DE
 BVG|de-DE|Brandenburg;Berlin
 VBB|de-DE|Brandenburg
 BAYERN|de-DE|Bayern;Würzburg;Regensburg

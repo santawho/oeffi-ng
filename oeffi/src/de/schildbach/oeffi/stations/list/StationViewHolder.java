@@ -75,6 +75,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
     private final Resources res;
     private final int maxDepartures;
     private final StationContextMenuItemListener contextMenuItemListener;
+    private final JourneyClickListener journeyClickListener;
 
     private final LayoutInflater inflater;
     private final Display display;
@@ -85,8 +86,10 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
     private static final int CONDENSE_LINES_THRESHOLD = 5;
     private static final int MESSAGE_INDEX_COLOR = Color.parseColor("#c08080");
 
-    public StationViewHolder(final Context context, final View itemView, final int maxDepartures,
-            final StationContextMenuItemListener contextMenuItemListener) {
+    public StationViewHolder(
+            final Context context, final View itemView, final int maxDepartures,
+            final StationContextMenuItemListener contextMenuItemListener,
+            final JourneyClickListener journeyClickListener) {
         super(itemView);
 
         favoriteView = itemView.findViewById(R.id.station_entry_favorite);
@@ -105,6 +108,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
         this.res = context.getResources();
         this.maxDepartures = maxDepartures;
         this.contextMenuItemListener = contextMenuItemListener;
+        this.journeyClickListener = journeyClickListener;
 
         this.inflater = LayoutInflater.from(context);
         this.display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
@@ -282,6 +286,11 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
                                 lineView.setVisibility(View.INVISIBLE);
                                 lineView.setLine(lineDestination.line); // Padding only
                                 destinationView.setVisibility(View.INVISIBLE);
+                            }
+                            if (departure.journeyRef != null) {
+                                lineView.setClickable(true);
+                                lineView.setOnClickListener(clickedView ->
+                                        journeyClickListener.onJourneyClick(clickedView, departure.journeyRef));
                             }
 
                             // message index

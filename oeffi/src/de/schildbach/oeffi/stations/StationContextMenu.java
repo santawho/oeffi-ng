@@ -63,6 +63,7 @@ public class StationContextMenu extends PopupMenu {
         menu.findItem(R.id.station_context_remove_favorite).setVisible(showFavorite && isFavorite);
         menu.findItem(R.id.station_context_add_ignore).setVisible(showIgnore && !isIgnored);
         menu.findItem(R.id.station_context_remove_ignore).setVisible(showIgnore && isIgnored);
+        menu.findItem(R.id.station_context_infopage).setVisible(station.infoUrl != null);
         final MenuItem mapItem = menu.findItem(R.id.station_context_map);
         if (showMap && station.hasCoord())
             prepareMapMenu(context, mapItem.getSubMenu(), network, station);

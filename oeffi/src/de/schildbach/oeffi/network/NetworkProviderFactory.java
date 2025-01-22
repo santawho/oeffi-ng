@@ -27,7 +27,14 @@ import de.schildbach.pte.BayernProvider;
 import de.schildbach.pte.BsvagProvider;
 import de.schildbach.pte.BvgProvider;
 import de.schildbach.pte.CmtaProvider;
+import de.schildbach.pte.DbHafasProvider;
+import de.schildbach.pte.DbMovasProvider;
 import de.schildbach.pte.DbProvider;
+import de.schildbach.pte.DbRegioHafasProvider;
+import de.schildbach.pte.DbRegioMovasProvider;
+import de.schildbach.pte.DbRegioProvider;
+import de.schildbach.pte.DbRegioWebProvider;
+import de.schildbach.pte.DbWebProvider;
 import de.schildbach.pte.DingProvider;
 import de.schildbach.pte.DsbProvider;
 import de.schildbach.pte.DubProvider;
@@ -71,6 +78,7 @@ import de.schildbach.pte.ZvvProvider;
 import okhttp3.HttpUrl;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public final class NetworkProviderFactory {
@@ -87,6 +95,8 @@ public final class NetworkProviderFactory {
 
         final AbstractNetworkProvider networkProvider = forId(networkId);
         networkProvider.setUserAgent(USER_AGENT);
+        networkProvider.setUserInterfaceLanguage(Locale.getDefault().getLanguage());
+        networkProvider.setMessagesAsSimpleHtml(true);
         providerCache.put(networkId, networkProvider);
         return networkProvider;
     }
@@ -96,6 +106,22 @@ public final class NetworkProviderFactory {
             return new RtProvider();
         else if (networkId.equals(NetworkId.DB))
             return new DbProvider();
+        else if (networkId.equals(NetworkId.DBREGIO))
+            return new DbRegioProvider();
+        else if (networkId.equals(NetworkId.DBWEB))
+            return new DbWebProvider();
+        else if (networkId.equals(NetworkId.DBREGIOWEB))
+            return new DbRegioWebProvider();
+        else if (networkId.equals(NetworkId.DBMOVAS))
+            return new DbMovasProvider();
+        else if (networkId.equals(NetworkId.DBREGIOMOVAS))
+            return new DbRegioMovasProvider();
+        else if (networkId.equals(NetworkId.DBHAFAS))
+            return new DbHafasProvider("{\"type\":\"AID\",\"aid\":\"n91dB8Z77MLdoR0K\"}",
+                    "bdI8UVj40K5fvxwf".getBytes(Charsets.UTF_8));
+        else if (networkId.equals(NetworkId.DBREGIOHAFAS))
+            return new DbRegioHafasProvider("{\"type\":\"AID\",\"aid\":\"n91dB8Z77MLdoR0K\"}",
+                    "bdI8UVj40K5fvxwf".getBytes(Charsets.UTF_8));
         else if (networkId.equals(NetworkId.BVG))
             return new BvgProvider("{\"aid\":\"1Rxs112shyHLatUX4fofnmdxK\",\"type\":\"AID\"}");
         else if (networkId.equals(NetworkId.VBB))

@@ -18,6 +18,7 @@
 package de.schildbach.oeffi.directions;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -32,13 +33,19 @@ import android.graphics.drawable.ColorDrawable;
 import android.location.Criteria;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Process;
 import android.provider.CalendarContract;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
+import android.text.method.LinkMovementMethod;
 import android.text.style.RelativeSizeSpan;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
@@ -54,6 +61,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import com.google.common.base.MoreObjects;
+
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.LocationAware;
 import de.schildbach.oeffi.MyActionBar;
@@ -81,11 +89,14 @@ import de.schildbach.pte.dto.Trip;
 import de.schildbach.pte.dto.Trip.Individual;
 import de.schildbach.pte.dto.Trip.Leg;
 import de.schildbach.pte.dto.Trip.Public;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -96,13 +107,37 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class TripDetailsActivity extends OeffiActivity implements LocationListener, LocationAware {
+    public static class RenderConfig implements Serializable {
+        public boolean isJourney;
+    }
+
     private static final String INTENT_EXTRA_NETWORK = TripDetailsActivity.class.getName() + ".network";
     private static final String INTENT_EXTRA_TRIP = TripDetailsActivity.class.getName() + ".trip";
+    private static final String INTENT_EXTRA_RENDERCONFIG = TripDetailsActivity.class.getName() + ".isJourney";
+
+    public static void start(final Context context, final NetworkId network, final Trip.Public journeyLeg) {
+        final Trip trip = new Trip(
+                null,
+                journeyLeg.departure,
+                journeyLeg.arrival,
+                Collections.singletonList(journeyLeg),
+                null,
+                null,
+                null);
+        final RenderConfig renderConfig = new RenderConfig();
+        renderConfig.isJourney = true;
+        start(context, network, trip, renderConfig);
+    }
 
     public static void start(final Context context, final NetworkId network, final Trip trip) {
+        start(context, network, trip, new RenderConfig());
+    }
+
+    private static void start(final Context context, final NetworkId network, final Trip trip, final RenderConfig renderConfig) {
         final Intent intent = new Intent(context, TripDetailsActivity.class);
         intent.putExtra(INTENT_EXTRA_NETWORK, checkNotNull(network));
         intent.putExtra(INTENT_EXTRA_TRIP, checkNotNull(trip));
+        intent.putExtra(INTENT_EXTRA_RENDERCONFIG, checkNotNull(renderConfig));
         context.startActivity(intent);
     }
 
@@ -122,6 +157,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     private NetworkId network;
     private Trip trip;
+    private RenderConfig renderConfig;
     private Date highlightedTime;
     private Location highlightedLocation;
     private Point location;
@@ -130,6 +166,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private final Map<Leg, Boolean> legExpandStates = new HashMap<>();
     private Intent scheduleTripIntent;
 
+    private QueryJourneyRunnable queryJourneyRunnable;
+    private HandlerThread backgroundThread;
+    private Handler backgroundHandler;
+    private final Handler handler = new Handler();
+
     private static final int LEGSGROUP_INSERT_INDEX = 2;
 
     private static final Logger log = LoggerFactory.getLogger(TripDetailsActivity.class);
@@ -137,6 +178,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        backgroundThread = new HandlerThread("queryTripsThread", Process.THREAD_PRIORITY_BACKGROUND);
+        backgroundThread.start();
+        backgroundHandler = new Handler(backgroundThread.getLooper());
 
         inflater = getLayoutInflater();
         res = getResources();
@@ -151,8 +196,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final Intent intent = getIntent();
         network = (NetworkId) intent.getSerializableExtra(INTENT_EXTRA_NETWORK);
         trip = (Trip) intent.getSerializableExtra(INTENT_EXTRA_TRIP);
+        renderConfig = (RenderConfig) intent.getSerializableExtra(INTENT_EXTRA_RENDERCONFIG);
 
-        log.info("Showing trip from {} to {}", trip.from, trip.to);
+        log.info("Showing {} from {} to {}", renderConfig.isJourney ? "journey" : "trip", trip.from, trip.to);
 
         // try to build up paths
         for (final Leg leg : trip.legs) {
@@ -176,6 +222,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                                 leg.path.add(stopPoint);
                         }
                     }
+
+                    if (renderConfig.isJourney) {
+                        legExpandStates.put(publicLeg, true);
+                    }
                 }
 
                 if (leg.arrival != null) {
@@ -198,7 +248,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         final MyActionBar actionBar = getMyActionBar();
         setPrimaryColor(R.color.bg_action_bar_directions);
-        actionBar.setPrimaryTitle(getTitle());
+        actionBar.setPrimaryTitle(getString(renderConfig.isJourney ? R.string.journey_details_title : R.string.trip_details_title)); // getTitle()
         actionBar.setBack(v -> finish());
 
         // action bar secondary title
@@ -367,6 +417,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     @Override
     protected void onDestroy() {
+        backgroundThread.getLooper().quit();
+
         locationManager.removeUpdates(TripDetailsActivity.this);
 
         super.onDestroy();
@@ -379,6 +431,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         updateFragments();
     }
 
+    @SuppressLint("MissingPermission")
     private String requestLocationUpdates() {
         final Criteria criteria = new Criteria();
         criteria.setAccuracy(Criteria.ACCURACY_FINE);
@@ -591,6 +644,15 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         lineView.setLine(leg.line);
         if (showDestination || showAccessibility)
             lineView.setMaxWidth(res.getDimensionPixelSize(R.dimen.line_max_width));
+        if (!renderConfig.isJourney && leg.journeyRef != null) {
+            lineView.setClickable(true);
+            lineView.setOnClickListener(clickedView -> {
+                queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
+                        this, clickedView, queryJourneyRunnable,
+                        handler, backgroundHandler,
+                        network, leg.journeyRef, leg.departure, leg.arrival);
+            });
+        }
 
         final LinearLayout lineGroup = row
                 .findViewById(R.id.directions_trip_details_public_entry_line_group);
@@ -620,8 +682,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final ToggleImageButton expandButton = row
                 .findViewById(R.id.directions_trip_details_public_entry_expand);
         final Boolean checked = legExpandStates.get(leg);
-        expandButton
-                .setVisibility(intermediateStops != null && !intermediateStops.isEmpty() ? View.VISIBLE : View.GONE);
+        expandButton.setVisibility(
+                !renderConfig.isJourney && intermediateStops != null && !intermediateStops.isEmpty()
+                        ? View.VISIBLE
+                        : View.GONE);
         expandButton.setChecked(checked != null ? checked : false);
         expandButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             legExpandStates.put(leg, isChecked);
@@ -633,7 +697,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final CollapseColumns collapseColumns = new CollapseColumns();
         collapseColumns.dateChanged(now);
 
-        final View departureRow = stopRow(PearlView.Type.DEPARTURE, leg.departureStop, leg.line.style, highlightedTime,
+        final View departureRow = stopRow(PearlView.Type.DEPARTURE, leg.departureStop, leg, highlightedTime,
                 leg.departureStop.location.equals(highlightedLocation), now, collapseColumns);
         stopsView.addView(departureRow);
 
@@ -643,7 +707,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     final boolean hasStopTime = stop.getArrivalTime() != null || stop.getDepartureTime() != null;
 
                     final View stopRow = stopRow(hasStopTime ? PearlView.Type.INTERMEDIATE : PearlView.Type.PASSING,
-                            stop, leg.line.style, highlightedTime, stop.location.equals(highlightedLocation), now,
+                            stop, leg, highlightedTime, stop.location.equals(highlightedLocation), now,
                             collapseColumns);
                     stopsView.addView(stopRow);
                 }
@@ -664,7 +728,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
         }
 
-        final View arrivalRow = stopRow(PearlView.Type.ARRIVAL, leg.arrivalStop, leg.line.style, highlightedTime,
+        final View arrivalRow = stopRow(PearlView.Type.ARRIVAL, leg.arrivalStop, leg, highlightedTime,
                 leg.arrivalStop.location.equals(highlightedLocation), now, collapseColumns);
         stopsView.addView(arrivalRow);
 
@@ -674,7 +738,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         final TextView messageView = row.findViewById(R.id.directions_trip_details_public_entry_message);
         final String message = leg.message != null ? leg.message : leg.line.message;
-        messageView.setText(message);
+        if (message != null) {
+            Spanned html = Html.fromHtml(message, Html.FROM_HTML_MODE_COMPACT);
+            messageView.setText(html);
+            messageView.setMovementMethod(LinkMovementMethod.getInstance());
+        }
         messageView.setVisibility(message != null ? View.VISIBLE : View.GONE);
     }
 
@@ -723,7 +791,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
     }
 
-    private View stopRow(final PearlView.Type pearlType, final Stop stop, final Style style, final Date highlightedTime,
+    private View stopRow(final PearlView.Type pearlType, final Stop stop, final Public leg, final Date highlightedTime,
             final boolean highlightLocation, final Date now, final CollapseColumns collapseColumns) {
         final View row = inflater.inflate(R.layout.directions_trip_details_public_entry_stop, null);
 
@@ -733,6 +801,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final boolean isCancelled;
         final boolean isPositionPredicted;
         final Position position;
+        final Location location = stop.location;
+        final Style style = leg.line.style;
+
+        final boolean isEntryOrExit =
+                (leg.entryLocation != null && location.id.equals(leg.entryLocation.id))
+             || (leg.exitLocation != null && location.id.equals(leg.exitLocation.id));
 
         if (pearlType == PearlView.Type.DEPARTURE
                 || ((pearlType == PearlView.Type.INTERMEDIATE || pearlType == PearlView.Type.PASSING)
@@ -760,12 +834,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         // name
         final TextView stopNameView = row.findViewById(R.id.directions_trip_details_public_entry_stop_name);
-        stopNameView.setText(stop.location.uniqueShortName());
+        stopNameView.setText(location.uniqueShortName());
         setStrikeThru(stopNameView, isCancelled);
         if (highlightLocation) {
             stopNameView.setTextColor(colorHighlighted);
             stopNameView.setTypeface(null, Typeface.BOLD);
-        } else if (pearlType == PearlView.Type.DEPARTURE || pearlType == PearlView.Type.ARRIVAL) {
+        } else if (renderConfig.isJourney ? isEntryOrExit : (pearlType == PearlView.Type.DEPARTURE || pearlType == PearlView.Type.ARRIVAL)) {
             stopNameView.setTextColor(colorSignificant);
             stopNameView.setTypeface(null, Typeface.BOLD);
         } else if (pearlType == PearlView.Type.PASSING) {
@@ -775,7 +849,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             stopNameView.setTextColor(colorSignificant);
             stopNameView.setTypeface(null, Typeface.NORMAL);
         }
-        if (stop.location.hasId())
+        if (location.hasId())
             stopNameView.setOnClickListener(new StopClickListener(stop));
         else
             stopNameView.setOnClickListener(null);
@@ -805,9 +879,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final int stopTimeColor = highlightTime ? colorHighlighted : colorSignificant;
         stopDateView.setTextColor(stopTimeColor);
         stopTimeView.setTextColor(stopTimeColor);
+        final boolean stopTimeBold = highlightTime || (renderConfig.isJourney ? isEntryOrExit : (pearlType != PearlView.Type.INTERMEDIATE));
         stopDateView.setTypeface(null, (highlightTime ? Typeface.BOLD : 0) + (isTimePredicted ? Typeface.ITALIC : 0));
-        stopTimeView.setTypeface(null, (highlightTime || pearlType != PearlView.Type.INTERMEDIATE ? Typeface.BOLD : 0)
-                + (isTimePredicted ? Typeface.ITALIC : 0));
+        stopTimeView.setTypeface(null, (stopTimeBold ? Typeface.BOLD : 0) + (isTimePredicted ? Typeface.ITALIC : 0));
 
         // delay
         final TextView stopDelayView = row
@@ -905,22 +979,29 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final PopupMenu contextMenu = new StationContextMenu(TripDetailsActivity.this, v, network, stop.location,
                     null, false, false, true, true, false);
             contextMenu.setOnMenuItemClickListener(item -> {
-                if (item.getItemId() == R.id.station_context_details) {
+                int menuItemId = item.getItemId();
+                if (menuItemId == R.id.station_context_details) {
                     StationDetailsActivity.start(TripDetailsActivity.this, network, stop.location);
                     return true;
-                } else if (item.getItemId() == R.id.station_context_directions_from) {
+                } else if (menuItemId == R.id.station_context_directions_from) {
                     final Date arrivalTime = stop.getArrivalTime();
                     final TimeSpec.Absolute time = new TimeSpec.Absolute(DepArr.DEPART,
                             arrivalTime != null ? arrivalTime.getTime() : stop.getDepartureTime().getTime());
                     DirectionsActivity.start(TripDetailsActivity.this, stop.location, trip.to, time,
                             Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     return true;
-                } else if (item.getItemId() == R.id.station_context_directions_to) {
+                } else if (menuItemId == R.id.station_context_directions_to) {
                     final Date arrivalTime = stop.getArrivalTime();
                     final TimeSpec.Absolute time = new TimeSpec.Absolute(DepArr.ARRIVE,
                             arrivalTime != null ? arrivalTime.getTime() : stop.getDepartureTime().getTime());
                     DirectionsActivity.start(TripDetailsActivity.this, trip.from, stop.location, time,
                             Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    return true;
+                } else if (menuItemId == R.id.station_context_infopage) {
+                    String infoUrl = stop.location.infoUrl;
+                    if (infoUrl != null) {
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(infoUrl)));
+                    }
                     return true;
                 } else {
                     return false;
