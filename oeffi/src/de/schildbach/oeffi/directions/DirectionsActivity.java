@@ -1045,7 +1045,7 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
             }
 
             @Override
-            protected void onResult(final QueryTripsResult result) {
+            protected void onResult(final QueryTripsResult result, ReloadRequestData reloadRequestData) {
                 if (result.status == QueryTripsResult.Status.OK) {
                     log.debug("Got {}", result.toShortString());
 
@@ -1055,7 +1055,7 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
                     else
                         historyUri = null;
 
-                    TripsOverviewActivity.start(DirectionsActivity.this, network, time.depArr, result, historyUri);
+                    TripsOverviewActivity.start(DirectionsActivity.this, network, time.depArr, result, historyUri, reloadRequestData);
                 } else if (result.status == QueryTripsResult.Status.UNKNOWN_FROM) {
                     new Toast(DirectionsActivity.this).longToast(R.string.directions_message_unknown_from);
                 } else if (result.status == QueryTripsResult.Status.UNKNOWN_VIA) {

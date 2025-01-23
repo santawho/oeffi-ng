@@ -205,7 +205,7 @@ public class DirectionsShortcutActivity extends OeffiActivity implements Locatio
             }
 
             @Override
-            protected void onResult(final QueryTripsResult result) {
+            protected void onResult(final QueryTripsResult result, ReloadRequestData reloadRequestData) {
                 if (result.status == QueryTripsResult.Status.OK) {
                     log.debug("Got {}", result.toShortString());
 
@@ -217,7 +217,7 @@ public class DirectionsShortcutActivity extends OeffiActivity implements Locatio
                         historyUri = null;
 
                     TripsOverviewActivity.start(DirectionsShortcutActivity.this, networkProvider.id(),
-                            TimeSpec.DepArr.DEPART, result, historyUri);
+                            TimeSpec.DepArr.DEPART, result, historyUri, reloadRequestData);
                     finish();
                 } else if (result.status == QueryTripsResult.Status.UNKNOWN_FROM) {
                     errorDialog(R.string.directions_message_unknown_from);

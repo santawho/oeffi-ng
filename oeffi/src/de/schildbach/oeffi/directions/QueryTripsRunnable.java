@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLException;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -50,6 +51,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class QueryTripsRunnable implements Runnable {
+    public static class ReloadRequestData implements Serializable {
+        public Location from;
+        public Location via;
+        public Location to;
+        public Date date;
+        public boolean dep;
+        public TripOptions options;
+    }
+
     private final Resources res;
     private final ProgressDialog dialog;
     private final Handler handler;
@@ -92,11 +102,18 @@ public abstract class QueryTripsRunnable implements Runnable {
 
             try {
                 final boolean depArr = time.depArr == TimeSpec.DepArr.DEPART;
-                final QueryTripsResult result = networkProvider.queryTrips(from, via, to, new Date(time.timeInMillis()),
-                        depArr, options);
+                final Date date = new Date(time.timeInMillis());
+                final ReloadRequestData reloadRequestData = new ReloadRequestData();
+                reloadRequestData.from = from;
+                reloadRequestData.via = via;
+                reloadRequestData.to = to;
+                reloadRequestData.date = date;
+                reloadRequestData.dep = depArr;
+                reloadRequestData.options = options;
+                final QueryTripsResult result = networkProvider.queryTrips(from, via, to, date, depArr, options);
 
                 if (!cancelled.get())
-                    postOnResult(result);
+                    postOnResult(result, reloadRequestData);
 
                 break;
             } catch (final UnexpectedRedirectException x) {
@@ -131,7 +148,7 @@ public abstract class QueryTripsRunnable implements Runnable {
                                 QueryTripsResult.Status.SERVICE_DOWN);
 
                         if (!cancelled.get())
-                            postOnResult(result);
+                            postOnResult(result, null);
 
                         break;
                     } else {
@@ -212,11 +229,11 @@ public abstract class QueryTripsRunnable implements Runnable {
     protected void onPostExecute() {
     }
 
-    private void postOnResult(final QueryTripsResult result) {
-        handler.post(() -> onResult(result));
+    private void postOnResult(final QueryTripsResult result, final ReloadRequestData reloadRequestData) {
+        handler.post(() -> onResult(result, reloadRequestData));
     }
 
-    protected abstract void onResult(QueryTripsResult result);
+    protected abstract void onResult(QueryTripsResult result, ReloadRequestData reloadRequestData);
 
     private void postOnRedirect(final HttpUrl url) {
         handler.post(() -> onRedirect(url));

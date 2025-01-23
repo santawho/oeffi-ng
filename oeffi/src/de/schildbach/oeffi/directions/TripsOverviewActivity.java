@@ -41,6 +41,7 @@ import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.directions.QueryTripsRunnable.ReloadRequestData;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.pte.NetworkId;
@@ -78,9 +79,10 @@ public class TripsOverviewActivity extends OeffiActivity {
     private static final String INTENT_EXTRA_RESULT = TripsOverviewActivity.class.getName() + ".result";
     private static final String INTENT_EXTRA_ARR_DEP = TripsOverviewActivity.class.getName() + ".arr_dep";
     private static final String INTENT_EXTRA_HISTORY_URI = TripsOverviewActivity.class.getName() + ".history";
+    private static final String INTENT_EXTRA_RELOAD_REQUEST_DATA = TripsOverviewActivity.class.getName() + ".reqdata";
 
     public static void start(final Context context, final NetworkId network, final TimeSpec.DepArr depArr,
-            final QueryTripsResult result, final Uri historyUri) {
+            final QueryTripsResult result, final Uri historyUri, final ReloadRequestData reloadRequestData) {
         final Intent intent = new Intent(context, TripsOverviewActivity.class);
         if (result.queryUri != null)
             intent.setData(Uri.parse(result.queryUri));
@@ -89,10 +91,12 @@ public class TripsOverviewActivity extends OeffiActivity {
         intent.putExtra(INTENT_EXTRA_ARR_DEP, depArr == TimeSpec.DepArr.DEPART);
         if (historyUri != null)
             intent.putExtra(INTENT_EXTRA_HISTORY_URI, historyUri.toString());
+        intent.putExtra(INTENT_EXTRA_RELOAD_REQUEST_DATA, reloadRequestData);
         context.startActivity(intent);
     }
 
     private NetworkId network;
+    private ReloadRequestData reloadRequestData;
 
     private @Nullable QueryTripsContext context;
     private TripsGallery barView;
@@ -107,6 +111,7 @@ public class TripsOverviewActivity extends OeffiActivity {
                     .result();
     });
     private boolean queryMoreTripsRunning = false;
+    private boolean reloadRequested = false;
 
     private final Handler handler = new Handler();
     private HandlerThread backgroundThread;
@@ -129,6 +134,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         network = (NetworkId) intent.getSerializableExtra(INTENT_EXTRA_NETWORK);
         final QueryTripsResult result = (QueryTripsResult) intent.getSerializableExtra(INTENT_EXTRA_RESULT);
         final boolean dep = intent.getBooleanExtra(INTENT_EXTRA_ARR_DEP, true);
+        this.reloadRequestData = (ReloadRequestData) intent.getSerializableExtra(INTENT_EXTRA_RELOAD_REQUEST_DATA);
         final String historyUriStr = intent.getStringExtra(INTENT_EXTRA_HISTORY_URI);
         final Uri historyUri = historyUriStr != null ? Uri.parse(historyUriStr) : null;
 
@@ -144,7 +150,10 @@ public class TripsOverviewActivity extends OeffiActivity {
         setPrimaryColor(R.color.bg_action_bar_directions_darkdefault);
         actionBar.setBack(v -> finish());
         actionBar.setCustomTitles(R.layout.directions_trip_overview_custom_title);
-        actionBar.addProgressButton().setOnClickListener(v -> handler.post(checkMoreRunnable));
+        actionBar.addProgressButton().setOnClickListener(v -> {
+            reloadRequested = true;
+            handler.post(checkMoreRunnable);
+        });
 
         barView = findViewById(R.id.trips_bar_view);
         barView.setOnItemClickListener((parent, v, position, id) -> {
@@ -175,7 +184,7 @@ public class TripsOverviewActivity extends OeffiActivity {
             return windowInsets;
         });
 
-        processResult(result, dep);
+        processResult(result, true, dep);
     }
 
     private byte[] serialize(final Object object) {
@@ -229,12 +238,20 @@ public class TripsOverviewActivity extends OeffiActivity {
                 final int lastVisiblePosition = barView.getLastVisiblePosition() - positionOffset;
                 final int firstVisiblePosition = barView.getFirstVisiblePosition() - positionOffset;
 
+                Runnable queryTripsRunnable = null;
                 if (context != null && context.canQueryLater() && (lastVisiblePosition == AdapterView.INVALID_POSITION
-                        || lastVisiblePosition + 1 >= trips.size()))
-                    backgroundHandler.post(new QueryMoreTripsRunnable(context, true));
-                else if (context != null && context.canQueryEarlier()
-                        && (firstVisiblePosition == AdapterView.INVALID_POSITION || firstVisiblePosition <= 0))
-                    backgroundHandler.post(new QueryMoreTripsRunnable(context, false));
+                        || lastVisiblePosition + 1 >= trips.size())) {
+                    queryTripsRunnable = new QueryMoreTripsRunnable(context, true, null);
+                } else if (context != null && context.canQueryEarlier()
+                        && (firstVisiblePosition == AdapterView.INVALID_POSITION || firstVisiblePosition <= 0)) {
+                    queryTripsRunnable = new QueryMoreTripsRunnable(context, false, null);
+                } else if (reloadRequested) {
+                    reloadRequested = false;
+                    queryTripsRunnable = new QueryMoreTripsRunnable(context, true, reloadRequestData);
+                }
+
+                if (queryTripsRunnable != null)
+                    backgroundHandler.post(queryTripsRunnable);
             }
         }
     };
@@ -243,10 +260,12 @@ public class TripsOverviewActivity extends OeffiActivity {
         final private MyActionBar actionBar = getMyActionBar();
         final private QueryTripsContext context;
         final private boolean later;
+        final private ReloadRequestData reloadRequestData;
 
-        public QueryMoreTripsRunnable(final QueryTripsContext context, final boolean later) {
+        public QueryMoreTripsRunnable(final QueryTripsContext context, final boolean later, final ReloadRequestData reloadRequestData) {
             this.context = context;
             this.later = later;
+            this.reloadRequestData = reloadRequestData;
 
             queryMoreTripsRunning = true;
         }
@@ -273,12 +292,22 @@ public class TripsOverviewActivity extends OeffiActivity {
 
                 try {
                     final NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
-                    final QueryTripsResult result = networkProvider.queryMoreTrips(context, later);
+                    final QueryTripsResult result = (reloadRequestData != null)
+                        ? networkProvider.queryTrips(
+                                reloadRequestData.from,
+                                reloadRequestData.via,
+                                reloadRequestData.to,
+                                reloadRequestData.date,
+                                reloadRequestData.dep,
+                                reloadRequestData.options)
+                        : networkProvider.queryMoreTrips(
+                                context,
+                                later);
 
                     runOnUiThread(() -> {
                         log.debug("Got {} ({})", result.toShortString(), later ? "later" : "earlier");
                         if (result.status == QueryTripsResult.Status.OK) {
-                            processResult(result, later);
+                            processResult(result, reloadRequestData != null, later);
 
                             // fetch more
                             handler.postDelayed(checkMoreRunnable, 50);
@@ -325,7 +354,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         }
     }
 
-    private void processResult(final QueryTripsResult result, final boolean later) {
+    private void processResult(final QueryTripsResult result, final boolean initial, final boolean later) {
         // update header
         if (result.from != null)
             ((TextView) findViewById(R.id.directions_trip_overview_custom_title_from))
@@ -344,7 +373,9 @@ public class TripsOverviewActivity extends OeffiActivity {
             serverProductView.setVisibility(View.VISIBLE);
         }
 
-        final boolean initial = trips.isEmpty();
+        if (initial) {
+            trips.clear();
+        }
 
         // remove implausible trips and adjust untravelable legs
         for (final Iterator<Trip> i = result.trips.iterator(); i.hasNext();) {
