@@ -244,9 +244,9 @@
     <!-- directions trip details -->
     <string name="directions_trip_details_duraton">Duration %s</string>
     <string name="directions_trip_details_num_changes">%d ch.</string>
-    <string name="directions_trip_details_walk">walk &lt;b>%1$d minutes&lt;/b> %2$sto&lt;br/>%3$s</string>
-    <string name="directions_trip_details_bike">bike &lt;b>%1$d minutes&lt;/b> %2$sto&lt;br/>%3$s</string>
-    <string name="directions_trip_details_car">drive &lt;b>%1$d minutes&lt;/b> %2$sto&lt;br/>%3$s</string>
+    <string name="directions_trip_details_walk">walk of &lt;b>%1$d minutes&lt;/b> %2$sto&lt;br/>%3$s</string>
+    <string name="directions_trip_details_bike">bike ride of &lt;b>%1$d minutes&lt;/b> %2$sto&lt;br/>%3$s</string>
+    <string name="directions_trip_details_car">car ride of &lt;b>%1$d minutes&lt;/b> %2$sto&lt;br/>%3$s</string>
     <string name="directions_trip_details_transfer">&lt;b>%1$d minutes&lt;/b> %2$stransfer to&lt;br/>%3$s</string>
     <string name="directions_trip_details_realtime">Times printed in &lt;i>italics&lt;/i> are real-time.</string>
     <string name="directions_trip_details_public_entry_accessibility">Section is barrier free.</string>
@@ -281,9 +281,9 @@
     <!-- directions trip details options schedule -->
     <string name="directions_trip_details_text_long_title">Trip: %1$s ➝ %2$s</string>
     <string name="directions_trip_details_text_long_public">%1$s\ndep: %2$s, %3$s  %4$s %5$s\narr: %6$s, %7$s  %8$s %9$s</string>
-    <string name="directions_trip_details_text_long_walk">walk %1$d minutes %2$sto %3$s</string>
-    <string name="directions_trip_details_text_long_bike">bike %1$d minutes %2$sto %3$s</string>
-    <string name="directions_trip_details_text_long_car">drive %1$d minutes %2$sto %3$s</string>
+    <string name="directions_trip_details_text_long_walk">walk of %1$d minutes %2$sto %3$s</string>
+    <string name="directions_trip_details_text_long_bike">bike ride of %1$d minutes %2$sto %3$s</string>
+    <string name="directions_trip_details_text_long_car">car ride of %1$d minutes %2$sto %3$s</string>
     <string name="directions_trip_details_text_long_transfer">%1$d minutes %2$stransfer to %3$s</string>
 
     <!-- directions shortcut -->
