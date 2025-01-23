@@ -106,9 +106,33 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import javax.annotation.Nullable;
+
 public class TripDetailsActivity extends OeffiActivity implements LocationListener, LocationAware {
     public static class RenderConfig implements Serializable {
         public boolean isJourney;
+    }
+
+    public static class LegContainer {
+        public final @Nullable Trip.Leg leg;
+        public final Stop transferFrom;
+        public final Stop transferTo;
+
+        public LegContainer(final @Nullable Trip.Public baseLeg) {
+            this.leg = baseLeg;
+            this.transferFrom = null;
+            this.transferTo = null;
+        }
+
+        public LegContainer(final @Nullable Trip.Individual baseLeg, final Stop transferFrom, final Stop transferTo) {
+            this.leg = baseLeg;
+            this.transferFrom = transferFrom;
+            this.transferTo = transferTo;
+        }
+
+        public boolean isTransfer() {
+            return leg == null || leg instanceof Trip.Individual;
+        }
     }
 
     private static final String INTENT_EXTRA_NETWORK = TripDetailsActivity.class.getName() + ".network";
@@ -157,6 +181,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     private NetworkId network;
     private Trip trip;
+    private List<LegContainer> legs = new ArrayList<>();
     private RenderConfig renderConfig;
     private Date highlightedTime;
     private Location highlightedLocation;
@@ -201,7 +226,26 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         log.info("Showing {} from {} to {}", renderConfig.isJourney ? "journey" : "trip", trip.from, trip.to);
 
         // try to build up paths
-        for (final Leg leg : trip.legs) {
+        for (int iLeg = 0; iLeg < trip.legs.size(); ++iLeg) {
+            final Leg prevLeg = (iLeg > 0) ? trip.legs.get(iLeg - 1) : null;
+            final Leg leg = trip.legs.get(iLeg);
+            final Leg nextLeg = (iLeg + 1 < trip.legs.size()) ? trip.legs.get(iLeg + 1) : null;
+
+            if (leg instanceof Individual) {
+                final Stop transferFrom = (prevLeg instanceof Public) ? ((Public) prevLeg).arrivalStop : null;
+                final Stop transferTo = (nextLeg instanceof Public) ? ((Public) nextLeg).departureStop : null;
+                if (transferFrom != null && transferTo != null)
+                    legs.add(new LegContainer((Individual) leg, transferFrom, transferTo));
+                else
+                    legs.add(new LegContainer((Individual) leg, null, null));
+            } else if (leg instanceof Public){
+                if (prevLeg instanceof Public) {
+                    legs.add(new LegContainer(null,
+                            ((Public) prevLeg).arrivalStop, ((Public) leg).departureStop));
+                }
+                legs.add(new LegContainer((Public) leg));
+            }
+
             if (leg.path == null) {
                 leg.path = new ArrayList<>();
 
@@ -325,9 +369,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         updateLocations();
         updateFares(trip.fares);
         int i = LEGSGROUP_INSERT_INDEX;
-        for (final Leg leg : trip.legs) {
+        for (final LegContainer legC : legs) {
             final View row;
-            if (leg instanceof Public)
+            if (legC.leg instanceof Public)
                 row = inflater.inflate(R.layout.directions_trip_details_public_entry, null);
             else
                 row = inflater.inflate(R.layout.directions_trip_details_individual_entry, null);
@@ -364,7 +408,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 if (!hasSelection())
                     return false;
 
-                return trip.legs.get(selectedLegIndex).equals(part);
+                return legs.get(selectedLegIndex).equals(part);
             }
         });
         final TextView mapDisclaimerView = findViewById(R.id.directions_trip_details_map_disclaimer);
@@ -489,11 +533,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         updateHighlightedLocation();
 
         int i = LEGSGROUP_INSERT_INDEX;
-        for (final Leg leg : trip.legs) {
+        for (final LegContainer legC : legs) {
+            final Leg leg = legC.leg;
             if (leg instanceof Public)
                 updatePublicLeg(legsGroup.getChildAt(i), (Public) leg, now);
             else
-                updateIndividualLeg(legsGroup.getChildAt(i), (Individual) leg);
+                updateIndividualLeg(legsGroup.getChildAt(i), legC);
             i++;
         }
     }
@@ -506,7 +551,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 || firstPublicLegDepartureTime.getTime() - now.getTime() > 10 * DateUtils.MINUTE_IN_MILLIS)
             return;
 
-        for (final Trip.Leg leg : trip.legs) {
+        for (final LegContainer legC : legs) {
+            final Leg leg = legC.leg;
             if (leg instanceof Trip.Public) {
                 final Trip.Public publicLeg = (Trip.Public) leg;
                 final Date departureTime = publicLeg.getDepartureTime();
@@ -547,9 +593,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
             final float[] distanceBetweenResults = new float[1];
 
-            for (final Trip.Leg leg : trip.legs) {
-                if (leg instanceof Trip.Public) {
-                    final Trip.Public publicLeg = (Trip.Public) leg;
+            for (final LegContainer legC : legs) {
+                if (legC.leg instanceof Trip.Public) {
+                    final Trip.Public publicLeg = (Trip.Public) legC.leg;
 
                     if (publicLeg.departure.hasCoord()) {
                         android.location.Location.distanceBetween(publicLeg.departure.getLatAsDouble(),
@@ -746,35 +792,80 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         messageView.setVisibility(message != null ? View.VISIBLE : View.GONE);
     }
 
-    private void updateIndividualLeg(final View row, final Individual leg) {
+    private void updateIndividualLeg(final View row, final LegContainer legContainer) {
         final TextView textView = row.findViewById(R.id.directions_trip_details_individual_entry_text);
-        final String distanceStr = leg.distance != 0 ? "(" + leg.distance + "m) " : "";
-        final int textResId, iconResId;
-        if (leg.type == Individual.Type.WALK) {
-            textResId = R.string.directions_trip_details_walk;
-            iconResId = R.drawable.ic_directions_walk_grey600_24dp;
-        } else if (leg.type == Individual.Type.BIKE) {
-            textResId = R.string.directions_trip_details_bike;
-            iconResId = R.drawable.ic_directions_bike_grey600_24dp;
-        } else if (leg.type == Individual.Type.CAR) {
-            textResId = R.string.directions_trip_details_car;
-            iconResId = R.drawable.ic_local_taxi_grey600_24dp;
-        } else if (leg.type == Individual.Type.TRANSFER) {
-            textResId = R.string.directions_trip_details_transfer;
-            iconResId = R.drawable.ic_local_taxi_grey600_24dp;
-        } else {
-            throw new IllegalStateException("unknown type: " + leg.type);
-        }
-        textView.setText(Html.fromHtml(getString(textResId, leg.min, distanceStr, leg.arrival.uniqueShortName())));
-        textView.setCompoundDrawablesWithIntrinsicBounds(iconResId, 0, 0, 0);
+        String legText = null;
+        final Individual leg = (Individual) legContainer.leg;
+        final int iconResId;
+        int requiredSecs = 0;
+        if (leg != null) {
+            requiredSecs = leg.min * 60;
+            final String distanceStr = leg.distance != 0 ? "(" + leg.distance + "m) " : "";
+            final int textResId;
+            if (leg.type == Individual.Type.WALK) {
+                textResId = R.string.directions_trip_details_walk;
+                iconResId = R.drawable.ic_directions_walk_grey600_24dp;
+            } else if (leg.type == Individual.Type.BIKE) {
+                textResId = R.string.directions_trip_details_bike;
+                iconResId = R.drawable.ic_directions_bike_grey600_24dp;
+            } else if (leg.type == Individual.Type.CAR) {
+                textResId = R.string.directions_trip_details_car;
+                iconResId = R.drawable.ic_local_taxi_grey600_24dp;
+            } else if (leg.type == Individual.Type.TRANSFER) {
+                textResId = R.string.directions_trip_details_transfer;
+                iconResId = R.drawable.ic_local_taxi_grey600_24dp;
+            } else {
+                throw new IllegalStateException("unknown type: " + leg.type);
+            }
+            legText = getString(textResId, leg.min, distanceStr, leg.arrival.uniqueShortName());
 
-        final ImageButton mapView = row.findViewById(R.id.directions_trip_details_individual_entry_map);
-        mapView.setVisibility(View.GONE);
-        mapView.setOnClickListener(null);
-        if (leg.arrival.hasCoord()) {
-            mapView.setVisibility(View.VISIBLE);
-            mapView.setOnClickListener(new MapClickListener(leg.arrival));
+            final ImageButton mapView = row.findViewById(R.id.directions_trip_details_individual_entry_map);
+            mapView.setVisibility(View.GONE);
+            mapView.setOnClickListener(null);
+            if (leg.arrival.hasCoord()) {
+                mapView.setVisibility(View.VISIBLE);
+                mapView.setOnClickListener(new MapClickListener(leg.arrival));
+            }
+        } else {
+            iconResId = R.drawable.ic_directions_walk_grey600_24dp;
         }
+
+        String transferText = null;
+        final Stop transferFrom = legContainer.transferFrom;
+        final Stop transferTo = legContainer.transferTo;
+        if (transferFrom != null) {
+            final Date arrMinTime = transferFrom.plannedArrivalTime;
+            final Date arrMaxTime = transferFrom.predictedArrivalTime != null ? transferFrom.predictedArrivalTime : arrMinTime;
+            final Date depMinTime = transferTo.plannedDepartureTime;
+            final Date depMaxTime = transferTo.predictedDepartureTime != null ? transferTo.predictedDepartureTime : depMinTime;
+            long diffMinSecs = (depMinTime.getTime() - arrMaxTime.getTime()) / 1000 - 60;
+            long diffMaxSecs = (depMaxTime.getTime() - arrMaxTime.getTime()) / 1000 - 60;
+            long leftMinSecs = diffMinSecs - requiredSecs;
+            long leftMaxSecs = diffMaxSecs - requiredSecs;
+            if (diffMaxSecs < 0) {
+                transferText = getString(R.string.directions_trip_conneval_missed, (-diffMaxSecs - 60) / 60);
+            } else if (leftMaxSecs < 0) {
+                transferText = getString(R.string.directions_trip_conneval_difficult, diffMaxSecs / 60);
+            } else if (leftMaxSecs < 180) {
+                transferText = getString(R.string.directions_trip_conneval_endangered, diffMaxSecs / 60);
+            } else if (leftMinSecs < 0) {
+                transferText = getString(R.string.directions_trip_conneval_possibly_difficult, diffMaxSecs / 60);
+            } else if (leftMinSecs < 180) {
+                transferText = getString(R.string.directions_trip_conneval_possibly_endangered, diffMaxSecs / 60);
+            } else if (leftMinSecs != leftMaxSecs) {
+                transferText = getString(R.string.directions_trip_conneval_possibly_good, diffMaxSecs / 60);
+            } else {
+                transferText = getString(R.string.directions_trip_conneval_good, diffMaxSecs / 60);
+            }
+        }
+
+        final String text =
+                  transferText == null ? legText
+                : legText == null ? transferText
+                : getString(R.string.directions_trip_conneval_with_transfer, transferText, legText);
+
+        textView.setText(Html.fromHtml(text));
+        textView.setCompoundDrawablesWithIntrinsicBounds(iconResId, 0, 0, 0);
     }
 
     private class CollapseColumns {
@@ -1091,8 +1182,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         final StringBuilder description = new StringBuilder();
 
-        for (final Trip.Leg leg : trip.legs) {
-            final String legStr;
+        for (final LegContainer legC : legs) {
+            final Leg leg = legC.leg;
+            String legStr = null;
 
             if (leg instanceof Public) {
                 final Public publicLeg = (Public) leg;
@@ -1134,11 +1226,14 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     throw new IllegalStateException("unknown type: " + individualLeg.type);
                 legStr = getString(legStrResId, individualLeg.min, distanceStr,
                         individualLeg.arrival.uniqueShortName());
-            } else
+            } else if (leg != null) {
                 throw new IllegalStateException("cannot handle: " + leg);
+            }
 
-            description.append(legStr);
-            description.append("\n\n");
+            if (legStr != null) {
+                description.append(legStr);
+                description.append("\n\n");
+            }
         }
 
         if (description.length() > 0)

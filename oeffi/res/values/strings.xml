@@ -248,9 +248,19 @@
     <string name="directions_trip_details_bike">bike &lt;b>%1$d minutes&lt;/b> %2$sto&lt;br/>%3$s</string>
     <string name="directions_trip_details_car">drive &lt;b>%1$d minutes&lt;/b> %2$sto&lt;br/>%3$s</string>
     <string name="directions_trip_details_transfer">&lt;b>%1$d minutes&lt;/b> %2$stransfer to&lt;br/>%3$s</string>
-    <string name="directions_trip_details_realtime"><![CDATA[Times printed in <i>italics</i> are real-time.]]></string>
+    <string name="directions_trip_details_realtime">Times printed in &lt;i>italics&lt;/i> are real-time.</string>
     <string name="directions_trip_details_public_entry_accessibility">Section is barrier free.</string>
     <string name="directions_trip_details_public_entry_bicycle_carriage">Bikes may be carried.</string>
+
+    <!-- directions trip connection evaluation -->
+    <string name="directions_trip_conneval_with_transfer">%1$s with %2$s</string>
+    <string name="directions_trip_conneval_missed">&lt;b>Connection missed by %1$d minutes&lt;/b></string>
+    <string name="directions_trip_conneval_difficult">&lt;b>Connection difficult, only %1$d minutes&lt;/b></string>
+    <string name="directions_trip_conneval_endangered">&lt;b>Connection endangered, only %1$d minutes&lt;/b></string>
+    <string name="directions_trip_conneval_possibly_difficult">&lt;b>Connection only possible by own delay, currently in %1$d minutes&lt;/b></string>
+    <string name="directions_trip_conneval_possibly_endangered">&lt;b>Connection not endangered only by own delay, currently in %1$d minutes&lt;/b></string>
+    <string name="directions_trip_conneval_possibly_good">Connection currently by own delay in &lt;b>%1$d minutes&lt;/b></string>
+    <string name="directions_trip_conneval_good">Connection in &lt;b>%1$d minutes&lt;/b></string>
 
     <plurals name="directions_trip_details_public_entry_collapsed_intermediate_stops">
         <item quantity="one">…%d intermediate stop…</item>

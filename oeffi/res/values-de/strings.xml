@@ -246,9 +246,19 @@
     <string name="directions_trip_details_bike">&lt;b>%1$d Minuten&lt;/b> %2$sFahrt mit dem Fahrrad nach&lt;br/>%3$s</string>
     <string name="directions_trip_details_car">&lt;b>%1$d Minuten&lt;/b> %2$sFahrt mit dem Auto nach&lt;br/>%3$s</string>
     <string name="directions_trip_details_transfer">&lt;b>%1$d Minuten&lt;/b> %2$sTransfer nach&lt;br/>%3$s</string>
-    <string name="directions_trip_details_realtime"><![CDATA[<i>Kursiv</i> gedruckte Uhrzeiten sind Echtzeit.]]></string>
+    <string name="directions_trip_details_realtime">&lt;i>Kursiv&lt;/i> gedruckte Uhrzeiten sind Echtzeit.</string>
     <string name="directions_trip_details_public_entry_accessibility">Der Abschnitt ist barrierefrei.</string>
     <string name="directions_trip_details_public_entry_bicycle_carriage">Die Fahrradmitnahme ist möglich.</string>
+
+    <!-- directions trip connection evaluation -->
+    <string name="directions_trip_conneval_with_transfer">%1$s mit %2$s</string>
+    <string name="directions_trip_conneval_missed">&lt;b>Anschluss verpasst um %1$d Minuten&lt;/b></string>
+    <string name="directions_trip_conneval_difficult">&lt;b>Anschluss kaum zu schaffen, nur %1$d Minuten&lt;/b></string>
+    <string name="directions_trip_conneval_endangered">&lt;b>Anschluss gefährdet, nur %1$d Minuten&lt;/b></string>
+    <string name="directions_trip_conneval_possibly_difficult">&lt;b>Anschluss nur durch eigene Verspätung zu schaffen, aktuell in %1$d Minuten&lt;/b></string>
+    <string name="directions_trip_conneval_possibly_endangered">&lt;b>Anschluss nur durch eigene Verspätung nicht gefährdet, aktuell in %1$d Minuten&lt;/b></string>
+    <string name="directions_trip_conneval_possibly_good">Anschluss aktuell durch eigene Verspätung in &lt;b>%1$d Minuten&lt;/b></string>
+    <string name="directions_trip_conneval_good">Anschluss in &lt;b>%1$d Minuten&lt;/b></string>
 
     <plurals name="directions_trip_details_public_entry_collapsed_intermediate_stops">
         <item quantity="one">…%d Zwischenhalt…</item>
