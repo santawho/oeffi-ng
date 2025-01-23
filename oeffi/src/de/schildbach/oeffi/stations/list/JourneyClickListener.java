@@ -25,5 +25,5 @@ import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Location;
 
 public interface JourneyClickListener {
-    void onJourneyClick(View clickedView, final JourneyRef journeyRef);
+    void onJourneyClick(View clickedView, final JourneyRef journeyRef, final Location entryLocation);
 }

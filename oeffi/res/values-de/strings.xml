@@ -47,7 +47,7 @@
     <!-- preferences about -->
     <string name="about_title">Über Öffi</string>
     <string name="about_copyright_title">Urheberrecht</string>
-    <string name="about_copyright_summary">© 2010-2019, die Öffi-Entwickler</string>
+    <string name="about_copyright_summary">© 2010-2025, die Öffi-Entwickler</string>
     <string name="about_license_title">Lizenz</string>
     <string name="about_privacy_policy_title">Datenschutz-Bestimmungen</string>
     <string name="about_privacy_policy_url">https://oeffi.schildbach.de/privacy_policy_de.txt</string>

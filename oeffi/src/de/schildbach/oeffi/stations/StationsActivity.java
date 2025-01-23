@@ -1404,11 +1404,11 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     }
 
     @Override
-    public void onJourneyClick(final View clickedView, final JourneyRef journeyRef) {
+    public void onJourneyClick(final View clickedView, final JourneyRef journeyRef, final Location entryLocation) {
         queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
                 this, clickedView, queryJourneyRunnable,
                 handler, backgroundHandler,
-                network, journeyRef, null, null);
+                network, journeyRef, entryLocation, null);
     }
 
     private final LocationListener locationListener = new LocationListener() {

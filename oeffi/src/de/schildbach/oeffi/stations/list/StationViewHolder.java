@@ -290,7 +290,8 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
                             if (departure.journeyRef != null) {
                                 lineView.setClickable(true);
                                 lineView.setOnClickListener(clickedView ->
-                                        journeyClickListener.onJourneyClick(clickedView, departure.journeyRef));
+                                        journeyClickListener.onJourneyClick(
+                                                clickedView, departure.journeyRef, station.location));
                             }
 
                             // message index
