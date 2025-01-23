@@ -845,9 +845,17 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             if (diffMaxSecs < 0) {
                 transferText = getString(R.string.directions_trip_conneval_missed, (-diffMaxSecs - 60) / 60);
             } else if (leftMaxSecs < 0) {
-                transferText = getString(R.string.directions_trip_conneval_difficult, diffMaxSecs / 60);
+                if (diffMinSecs < 0) {
+                    transferText = getString(R.string.directions_trip_conneval_difficult_possibly_missed, diffMaxSecs / 60);
+                } else {
+                    transferText = getString(R.string.directions_trip_conneval_difficult, diffMaxSecs / 60);
+                }
             } else if (leftMaxSecs < 180) {
-                transferText = getString(R.string.directions_trip_conneval_endangered, diffMaxSecs / 60);
+                if (leftMinSecs < 0) {
+                    transferText = getString(R.string.directions_trip_conneval_endangered_possibly_difficult, diffMaxSecs / 60);
+                } else {
+                    transferText = getString(R.string.directions_trip_conneval_endangered, diffMaxSecs / 60);
+                }
             } else if (leftMinSecs < 0) {
                 transferText = getString(R.string.directions_trip_conneval_possibly_difficult, diffMaxSecs / 60);
             } else if (leftMinSecs < 180) {

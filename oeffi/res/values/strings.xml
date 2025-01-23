@@ -255,7 +255,9 @@
     <!-- directions trip connection evaluation -->
     <string name="directions_trip_conneval_with_transfer">%1$s with %2$s</string>
     <string name="directions_trip_conneval_missed">&lt;b>Connection missed by %1$d minutes&lt;/b></string>
+    <string name="directions_trip_conneval_difficult_possibly_missed">&lt;b>Connection difficult despite own delay, only %1$d minutes&lt;/b></string>
     <string name="directions_trip_conneval_difficult">&lt;b>Connection difficult, only %1$d minutes&lt;/b></string>
+    <string name="directions_trip_conneval_endangered_possibly_difficult">&lt;b>Connection endangered despite own delay, only %1$d minutes&lt;/b></string>
     <string name="directions_trip_conneval_endangered">&lt;b>Connection endangered, only %1$d minutes&lt;/b></string>
     <string name="directions_trip_conneval_possibly_difficult">&lt;b>Connection only possible by own delay, currently in %1$d minutes&lt;/b></string>
     <string name="directions_trip_conneval_possibly_endangered">&lt;b>Connection not endangered only by own delay, currently in %1$d minutes&lt;/b></string>
