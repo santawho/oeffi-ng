@@ -798,6 +798,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final Individual leg = (Individual) legContainer.leg;
         final int iconResId;
         int requiredSecs = 0;
+        final ImageButton mapView = row.findViewById(R.id.directions_trip_details_individual_entry_map);
+        mapView.setVisibility(View.GONE);
+        mapView.setOnClickListener(null);
         if (leg != null) {
             requiredSecs = leg.min * 60;
             final String distanceStr = leg.distance != 0 ? "(" + leg.distance + "m) " : "";
@@ -819,9 +822,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
             legText = getString(textResId, leg.min, distanceStr, leg.arrival.uniqueShortName());
 
-            final ImageButton mapView = row.findViewById(R.id.directions_trip_details_individual_entry_map);
-            mapView.setVisibility(View.GONE);
-            mapView.setOnClickListener(null);
             if (leg.arrival.hasCoord()) {
                 mapView.setVisibility(View.VISIBLE);
                 mapView.setOnClickListener(new MapClickListener(leg.arrival));

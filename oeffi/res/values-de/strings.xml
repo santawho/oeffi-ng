@@ -257,9 +257,9 @@
     <string name="directions_trip_conneval_difficult">&lt;b>Anschluss schwierig, nur %1$d Minuten&lt;/b></string>
     <string name="directions_trip_conneval_endangered_possibly_difficult">&lt;b>Anschluss gefährdet trotz eigener Verspätung, nur %1$d Minuten&lt;/b></string>
     <string name="directions_trip_conneval_endangered">&lt;b>Anschluss gefährdet, nur %1$d Minuten&lt;/b></string>
-    <string name="directions_trip_conneval_possibly_difficult">&lt;b>Anschluss nur durch eigene Verspätung zu schaffen, aktuell in %1$d Minuten&lt;/b></string>
+    <string name="directions_trip_conneval_possibly_difficult">&lt;b>Anschluss nur durch eigene Verspätung erreichbar, aktuell in %1$d Minuten&lt;/b></string>
     <string name="directions_trip_conneval_possibly_endangered">&lt;b>Anschluss nur durch eigene Verspätung nicht gefährdet, aktuell in %1$d Minuten&lt;/b></string>
-    <string name="directions_trip_conneval_possibly_good">Anschluss aktuell durch eigene Verspätung in &lt;b>%1$d Minuten&lt;/b></string>
+    <string name="directions_trip_conneval_possibly_good">Anschluss aktuell in &lt;b>%1$d Minuten&lt;/b> durch eigene Verspätung</string>
     <string name="directions_trip_conneval_good">Anschluss in &lt;b>%1$d Minuten&lt;/b></string>
 
     <plurals name="directions_trip_details_public_entry_collapsed_intermediate_stops">
