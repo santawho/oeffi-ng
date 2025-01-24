@@ -30,10 +30,6 @@ import de.schildbach.pte.CmtaProvider;
 import de.schildbach.pte.DbHafasProvider;
 import de.schildbach.pte.DbMovasProvider;
 import de.schildbach.pte.DbProvider;
-import de.schildbach.pte.DbRegioHafasProvider;
-import de.schildbach.pte.DbRegioMovasProvider;
-import de.schildbach.pte.DbRegioProvider;
-import de.schildbach.pte.DbRegioWebProvider;
 import de.schildbach.pte.DbWebProvider;
 import de.schildbach.pte.DingProvider;
 import de.schildbach.pte.DsbProvider;
@@ -105,22 +101,22 @@ public final class NetworkProviderFactory {
         if (networkId.equals(NetworkId.RT))
             return new RtProvider();
         else if (networkId.equals(NetworkId.DB))
-            return new DbProvider();
+            return new DbProvider.Fernverkehr();
         else if (networkId.equals(NetworkId.DBREGIO))
-            return new DbRegioProvider();
+            return new DbProvider.Regio();
         else if (networkId.equals(NetworkId.DBWEB))
-            return new DbWebProvider();
+            return new DbWebProvider.Fernverkehr();
         else if (networkId.equals(NetworkId.DBREGIOWEB))
-            return new DbRegioWebProvider();
+            return new DbWebProvider.Regio();
         else if (networkId.equals(NetworkId.DBMOVAS))
-            return new DbMovasProvider();
+            return new DbMovasProvider.Fernverkehr();
         else if (networkId.equals(NetworkId.DBREGIOMOVAS))
-            return new DbRegioMovasProvider();
+            return new DbMovasProvider.Regio();
         else if (networkId.equals(NetworkId.DBHAFAS))
-            return new DbHafasProvider("{\"type\":\"AID\",\"aid\":\"n91dB8Z77MLdoR0K\"}",
+            return new DbHafasProvider.Fernverkehr("{\"type\":\"AID\",\"aid\":\"n91dB8Z77MLdoR0K\"}",
                     "bdI8UVj40K5fvxwf".getBytes(Charsets.UTF_8));
         else if (networkId.equals(NetworkId.DBREGIOHAFAS))
-            return new DbRegioHafasProvider("{\"type\":\"AID\",\"aid\":\"n91dB8Z77MLdoR0K\"}",
+            return new DbHafasProvider.Regio("{\"type\":\"AID\",\"aid\":\"n91dB8Z77MLdoR0K\"}",
                     "bdI8UVj40K5fvxwf".getBytes(Charsets.UTF_8));
         else if (networkId.equals(NetworkId.BVG))
             return new BvgProvider("{\"aid\":\"1Rxs112shyHLatUX4fofnmdxK\",\"type\":\"AID\"}");
