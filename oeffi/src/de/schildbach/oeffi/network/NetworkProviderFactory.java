@@ -104,20 +104,20 @@ public final class NetworkProviderFactory {
             return new DbProvider.Fernverkehr();
         else if (networkId.equals(NetworkId.DBREGIO))
             return new DbProvider.Regio();
-        else if (networkId.equals(NetworkId.DBWEB))
-            return new DbWebProvider.Fernverkehr();
-        else if (networkId.equals(NetworkId.DBREGIOWEB))
-            return new DbWebProvider.Regio();
+//        else if (networkId.equals(NetworkId.DBWEB))
+//            return new DbWebProvider.Fernverkehr();
+//        else if (networkId.equals(NetworkId.DBREGIOWEB))
+//            return new DbWebProvider.Regio();
         else if (networkId.equals(NetworkId.DBMOVAS))
             return new DbMovasProvider.Fernverkehr();
         else if (networkId.equals(NetworkId.DBREGIOMOVAS))
             return new DbMovasProvider.Regio();
-        else if (networkId.equals(NetworkId.DBHAFAS))
-            return new DbHafasProvider.Fernverkehr("{\"type\":\"AID\",\"aid\":\"n91dB8Z77MLdoR0K\"}",
-                    "bdI8UVj40K5fvxwf".getBytes(Charsets.UTF_8));
-        else if (networkId.equals(NetworkId.DBREGIOHAFAS))
-            return new DbHafasProvider.Regio("{\"type\":\"AID\",\"aid\":\"n91dB8Z77MLdoR0K\"}",
-                    "bdI8UVj40K5fvxwf".getBytes(Charsets.UTF_8));
+//        else if (networkId.equals(NetworkId.DBHAFAS))
+//            return new DbHafasProvider.Fernverkehr("{\"type\":\"AID\",\"aid\":\"n91dB8Z77MLdoR0K\"}",
+//                    "bdI8UVj40K5fvxwf".getBytes(Charsets.UTF_8));
+//        else if (networkId.equals(NetworkId.DBREGIOHAFAS))
+//            return new DbHafasProvider.Regio("{\"type\":\"AID\",\"aid\":\"n91dB8Z77MLdoR0K\"}",
+//                    "bdI8UVj40K5fvxwf".getBytes(Charsets.UTF_8));
         else if (networkId.equals(NetworkId.BVG))
             return new BvgProvider("{\"aid\":\"1Rxs112shyHLatUX4fofnmdxK\",\"type\":\"AID\"}");
         else if (networkId.equals(NetworkId.VBB))
