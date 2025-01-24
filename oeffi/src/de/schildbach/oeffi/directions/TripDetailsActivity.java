@@ -244,6 +244,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                             ((Public) prevLeg).arrivalStop, ((Public) leg).departureStop));
                 }
                 legs.add(new LegContainer((Public) leg));
+
+                if (renderConfig.isJourney) {
+                    legExpandStates.put(leg, true);
+                }
             }
 
             if (leg.path == null) {
@@ -265,10 +269,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                             if (stopPoint != null)
                                 leg.path.add(stopPoint);
                         }
-                    }
-
-                    if (renderConfig.isJourney) {
-                        legExpandStates.put(publicLeg, true);
                     }
                 }
 
