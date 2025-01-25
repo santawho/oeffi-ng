@@ -52,6 +52,7 @@ import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.OeffiMapView;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.StationsAware;
+import de.schildbach.oeffi.directions.QueryJourneyRunnable;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.DividerItemDecoration;
 import de.schildbach.oeffi.util.Formats;
@@ -128,6 +129,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
     private BroadcastReceiver tickReceiver;
 
+    private QueryJourneyRunnable queryJourneyRunnable;
     private final Handler handler = new Handler();
     private HandlerThread backgroundThread;
     private Handler backgroundHandler;
@@ -423,10 +425,10 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
     }
 
     private class DeparturesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-        private final Context context;
+        private final StationDetailsActivity context;
         private final LayoutInflater inflater;
 
-        public DeparturesAdapter(final Context context) {
+        public DeparturesAdapter(final StationDetailsActivity context) {
             this.context = context;
             this.inflater = LayoutInflater.from(context);
 
@@ -476,7 +478,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 ((HeaderViewHolder) holder).bind(selectedStation, selectedLines, null);
             } else {
                 final Departure departure = getItem(position);
-                ((DepartureViewHolder) holder).bind(selectedNetwork, departure);
+                ((DepartureViewHolder) holder).bind(selectedNetwork, selectedStation, departure);
             }
         }
     }
@@ -556,10 +558,10 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         private final TextView capacity2ndView;
         private final TextView msgView;
 
-        private final Context context;
+        private final StationDetailsActivity context;
         private final java.text.DateFormat timeFormat;
 
-        public DepartureViewHolder(final Context context, final View itemView) {
+        public DepartureViewHolder(final StationDetailsActivity context, final View itemView) {
             super(itemView);
 
             timeRelView = itemView.findViewById(R.id.stations_station_entry_time_rel);
@@ -576,7 +578,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             this.timeFormat = DateFormat.getTimeFormat(context);
         }
 
-        public void bind(final NetworkId network, final Departure departure) {
+        public void bind(final NetworkId network, final Location station, final Departure departure) {
             final long currentTime = System.currentTimeMillis();
 
             final Date predictedTime = departure.predictedTime;
@@ -612,6 +614,15 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
             // line
             lineView.setLine(departure.line);
+            if (departure.journeyRef != null) {
+                lineView.setClickable(true);
+                lineView.setOnClickListener(clickedView -> {
+                    context.queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
+                            context, clickedView, context.queryJourneyRunnable,
+                            context.handler, context.backgroundHandler,
+                            network, departure.journeyRef, station, null);
+                });
+            }
 
             // destination
             final Location destination = departure.destination;
