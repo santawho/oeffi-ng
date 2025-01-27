@@ -222,14 +222,14 @@ public class QueryJourneyRunnable implements Runnable {
     }
 
     protected void onResult(final QueryJourneyResult result) {
-        if (result.status == QueryJourneyResult.Status.OK) {
+        if (result == null || result.status == QueryJourneyResult.Status.NO_JOURNEY) {
+            new Toast(parentActivity).longToast(R.string.directions_message_no_trips);
+        } else if (result.status == QueryJourneyResult.Status.OK) {
             log.debug("Got {}", result.toShortString());
 
             Trip.Public journeyLeg = result.journeyLeg;
             journeyLeg.setEntryAndExit(entryLocation, exitLocation);
             TripDetailsActivity.start(parentActivity, networkProvider.id(), journeyLeg);
-        } else if (result.status == QueryJourneyResult.Status.NO_JOURNEY) {
-            new Toast(parentActivity).longToast(R.string.directions_message_no_trips);
         } else if (result.status == QueryJourneyResult.Status.SERVICE_DOWN) {
             networkProblem();
         }
