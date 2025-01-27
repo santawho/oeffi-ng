@@ -289,9 +289,12 @@
     <!-- directions shortcut -->
     <string name="create_launcher_shortcut_dialog_name_hint">Shortcut Name, e.g. \'Work\'</string>
     <string name="create_launcher_shortcut_dialog_button_ok">Create</string>
+    <string name="create_launcher_shortcut_dialog_connection_label">for connection to location</string>
+    <string name="create_launcher_shortcut_dialog_departures_label">for departure board</string>
     <string name="directions_shortcut_error_title">Problem with shortcut</string>
     <string name="directions_shortcut_error_message_network">The transport network from the shortcut does not exist any more.</string>
     <string name="directions_shortcut_default_name">Directions</string>
+    <string name="departures_shortcut_default_name">Departures</string>
 
     <!-- directions preferences -->
     <string name="directions_preferences_title">Directions</string>

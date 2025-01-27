@@ -1,12 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:paddingBottom="@dimen/text_padding_vertical_lax"
+    android:orientation="vertical"
     android:paddingLeft="@dimen/text_padding_horizontal_lax"
+    android:paddingTop="@dimen/text_padding_vertical_lax"
     android:paddingRight="@dimen/text_padding_horizontal_lax"
-    android:paddingTop="@dimen/text_padding_vertical_lax">
+    android:paddingBottom="@dimen/text_padding_vertical_lax">
+
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RadioButton
+            android:id="@+id/create_launcher_shortcut_dialog_connection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/create_launcher_shortcut_dialog_connection_label" />
+
+        <RadioButton
+            android:id="@+id/create_launcher_shortcut_dialog_departures"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/create_launcher_shortcut_dialog_departures_label" />
+    </RadioGroup>
 
     <EditText
         android:id="@+id/create_launcher_shortcut_dialog_name"

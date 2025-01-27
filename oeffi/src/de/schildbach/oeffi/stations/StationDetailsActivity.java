@@ -34,6 +34,7 @@ import android.text.Spanned;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.text.method.LinkMovementMethod;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -72,7 +73,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -100,12 +106,28 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
     public static void start(final Context context, final NetworkId networkId, final Location station,
             @Nullable final List<Departure> departures) {
         checkArgument(station.type == LocationType.STATION);
-        final Intent intent = new Intent(context, StationDetailsActivity.class);
-        intent.putExtra(StationDetailsActivity.INTENT_EXTRA_NETWORK, checkNotNull(networkId));
-        intent.putExtra(StationDetailsActivity.INTENT_EXTRA_STATION, station);
+        final Intent intent = StationDetailsActivity.fillIntent(
+                new Intent(context, StationDetailsActivity.class),
+                networkId, station);
         if (departures != null)
             intent.putExtra(StationDetailsActivity.INTENT_EXTRA_DEPARTURES, (Serializable) departures);
         context.startActivity(intent);
+    }
+
+    public static Intent fillIntent(Intent intent, final NetworkId networkId, final Location station) {
+        checkArgument(station.type == LocationType.STATION);
+        checkNotNull(networkId);
+        intent.putExtra(StationDetailsActivity.INTENT_EXTRA_NETWORK, networkId.name());
+        try (
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+            oos.writeObject(station);
+            final String value = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
+            intent.putExtra(StationDetailsActivity.INTENT_EXTRA_STATION, value);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return intent;
     }
 
     public static final int MAX_DEPARTURES = 200;
@@ -206,8 +228,20 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         resultStatusView = findViewById(R.id.stations_station_details_result_status);
 
         final Intent intent = getIntent();
-        final NetworkId network = (NetworkId) checkNotNull(intent.getSerializableExtra(INTENT_EXTRA_NETWORK));
-        final Station station = new Station(network, (Location) intent.getSerializableExtra(INTENT_EXTRA_STATION));
+        String networkName = intent.getStringExtra(INTENT_EXTRA_NETWORK);
+        final NetworkId network = NetworkId.valueOf(checkNotNull(networkName));
+        final String stationSerialized = intent.getStringExtra(INTENT_EXTRA_STATION);
+        final Station station;
+        try (ObjectInputStream ois = new ObjectInputStream(
+                new ByteArrayInputStream(Base64.decode(checkNotNull(stationSerialized),
+                Base64.DEFAULT)))) {
+            Location location = (Location) ois.readObject();
+            station = new Station(network, location);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         if (intent.hasExtra(INTENT_EXTRA_DEPARTURES))
             station.departures = filterDepartures((List<Departure>) intent.getSerializableExtra(INTENT_EXTRA_DEPARTURES), loadProductFilter());
         selectStation(station);

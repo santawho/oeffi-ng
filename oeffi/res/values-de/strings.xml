@@ -287,9 +287,12 @@
     <!-- directions shortcut -->
     <string name="create_launcher_shortcut_dialog_name_hint">Name d. Verknüpfung, z.B. \'Arbeit\'</string>
     <string name="create_launcher_shortcut_dialog_button_ok">Erstellen</string>
+    <string name="create_launcher_shortcut_dialog_connection_label">für Verbindung zum Ort</string>
+    <string name="create_launcher_shortcut_dialog_departures_label">für Abfahrtstafel</string>
     <string name="directions_shortcut_error_title">Problem mit Verknüpfung</string>
     <string name="directions_shortcut_error_message_network">Das Verkehrsnetz aus der Verknüpfung ist nicht mehr vorhanden.</string>
     <string name="directions_shortcut_default_name">Verbindung</string>
+    <string name="departures_shortcut_default_name">Abfahrten</string>
 
     <!-- directions preferences -->
     <string name="directions_preferences_title">Verbindungen</string>
