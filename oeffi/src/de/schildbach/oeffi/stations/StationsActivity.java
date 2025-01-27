@@ -142,7 +142,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private boolean anyProviderEnabled = false;
     private boolean loading = true;
 
-    private final Set<Product> products = new HashSet<>(Product.values().length);
+    private Set<Product> products = new HashSet<>(Product.ALL);
     private String accurateLocationProvider, lowPowerLocationProvider;
 
     private MyActionBar actionBar;
@@ -456,7 +456,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         };
         registerReceiver(connectivityReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 
-        loadProductFilter();
+        products.clear();
+        products.addAll(loadProductFilter());
 
         handleIntent(getIntent());
 
@@ -507,6 +508,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
         stations.clear();
         stationsMap.clear();
+        products.clear();
+        products.addAll(loadProductFilter());
 
         stationListAdapter.notifyDataSetChanged();
         mapView.invalidate();
@@ -533,7 +536,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
     @Override
     protected void onPause() {
-        saveProductFilter();
+        saveProductFilter(products);
 
         mapView.onPause();
         super.onPause();
@@ -1205,24 +1208,6 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
             return null;
         }
     };
-
-    private void loadProductFilter() {
-        final String p = prefs.getString(Constants.PREFS_KEY_PRODUCT_FILTER, null);
-        if (p != null) {
-            products.clear();
-            for (final char c : p.toCharArray())
-                products.add(Product.fromCode(c));
-        } else {
-            products.addAll(Arrays.asList(Product.values()));
-        }
-    }
-
-    private void saveProductFilter() {
-        final StringBuilder p = new StringBuilder();
-        for (final Product product : products)
-            p.append(product.code);
-        prefs.edit().putString(Constants.PREFS_KEY_PRODUCT_FILTER, p.toString()).apply();
-    }
 
     public final List<Station> getStations() {
         return stations;

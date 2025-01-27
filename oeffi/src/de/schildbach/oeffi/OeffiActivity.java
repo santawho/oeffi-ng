@@ -31,25 +31,41 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.activity.ComponentActivity;
 import androidx.activity.EdgeToEdge;
+
+import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.network.NetworkResources;
 import de.schildbach.oeffi.util.ErrorReporter;
 import de.schildbach.pte.NetworkId;
+import de.schildbach.pte.NetworkProvider;
+import de.schildbach.pte.dto.Product;
 import de.schildbach.pte.dto.ResultHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 public abstract class OeffiActivity extends ComponentActivity {
     protected Application application;
     protected SharedPreferences prefs;
+    protected NetworkId network;
+    protected Set<Product> savedProducts;
 
     private static final Logger log = LoggerFactory.getLogger(OeffiActivity.class);
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
+        this.prefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        network = prefsGetNetworkId();
+        ErrorReporter.getInstance().setNetworkId(network);
+        savedProducts = loadProductFilter();
+
         EdgeToEdge.enable(this, Constants.STATUS_BAR_STYLE);
         super.onCreate(savedInstanceState);
         this.application = (Application) getApplication();
-        this.prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         ErrorReporter.getInstance().check(this, applicationVersionCode(), application.okHttpClient());
     }
@@ -90,6 +106,74 @@ public abstract class OeffiActivity extends ComponentActivity {
             log.warn("Ignoring unkown selected network: {}", id);
             return null;
         }
+    }
+
+    protected Collection<Product> getNetworkDefaultProducts() {
+        final NetworkProvider networkProvider = network != null ? NetworkProviderFactory.provider(network) : null;
+        return networkProvider != null ? networkProvider.defaultProducts() : Product.ALL;
+    }
+
+    protected Set<Product> loadProductFilter() {
+        Collection<Product> networkDefaultProducts = getNetworkDefaultProducts();
+        Collection<Product> keepProducts;
+        Set<Product> products = new HashSet<>(Product.values().length);
+        String networkSpecificKey = Constants.PREFS_KEY_PRODUCT_FILTER + "_" + network;
+        String value = prefs.getString(networkSpecificKey, null);
+        if (value != null) {
+            keepProducts = Product.ALL;
+        } else {
+            value = prefs.getString(Constants.PREFS_KEY_PRODUCT_FILTER, null);
+            keepProducts = networkDefaultProducts;
+        }
+        if (value != null) {
+            for (final char c : value.toCharArray())
+                products.add(Product.fromCode(c));
+            products = products.stream().filter(product -> keepProducts.contains(product)).collect(Collectors.toSet());
+        } else {
+            products.addAll(networkDefaultProducts);
+        }
+        return products;
+    }
+
+    protected void saveProductFilter(final Set<Product> products) {
+        final StringBuilder p = new StringBuilder();
+        for (final Product product : products)
+            p.append(product.code);
+        String value = p.toString();
+        String networkSpecificKey = Constants.PREFS_KEY_PRODUCT_FILTER + "_" + network;
+        prefs.edit()
+                .putString(Constants.PREFS_KEY_PRODUCT_FILTER, value)
+                .putString(networkSpecificKey, value)
+                .apply();
+    }
+
+    protected void checkChangeNetwork() {
+        boolean haveChanges = false;
+
+        final NetworkId newNetwork = prefsGetNetworkId();
+        if (newNetwork != null && newNetwork != network) {
+            log.info("Network change detected: {} -> {}", network, newNetwork);
+            ErrorReporter.getInstance().setNetworkId(newNetwork);
+
+            network = newNetwork;
+            savedProducts = loadProductFilter();
+            haveChanges = true;
+        } else {
+            Set<Product> newProducts = loadProductFilter();
+            if (newProducts.size() != savedProducts.size()) {
+                haveChanges = true;
+            } else {
+                haveChanges = !newProducts.containsAll(savedProducts);
+            }
+            if (haveChanges)
+                log.info("products change detected: {} -> {}", network, newNetwork);
+        }
+
+        if (haveChanges)
+            onChangeNetwork(network);
+    }
+
+    protected void onChangeNetwork(final NetworkId network) {
     }
 
     protected final String applicationVersionName() {

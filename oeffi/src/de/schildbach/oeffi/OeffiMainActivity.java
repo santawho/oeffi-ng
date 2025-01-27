@@ -62,7 +62,6 @@ import de.schildbach.oeffi.util.ErrorReporter;
 import de.schildbach.oeffi.util.Installer;
 import de.schildbach.oeffi.util.NavigationMenuAdapter;
 import de.schildbach.oeffi.util.UiThreadExecutor;
-import de.schildbach.pte.NetworkId;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.HttpUrl;
@@ -88,8 +87,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public abstract class OeffiMainActivity extends OeffiActivity {
-    protected NetworkId network;
-
     private DrawerLayout navigationDrawerLayout;
     private RecyclerView navigationDrawerListView;
     private MenuProvider navigationDrawerMenuProvider;
@@ -109,9 +106,6 @@ public abstract class OeffiMainActivity extends OeffiActivity {
         super.onCreate(savedInstanceState);
 
         // initialize network
-        network = prefsGetNetworkId();
-        ErrorReporter.getInstance().setNetworkId(network);
-
         final long now = System.currentTimeMillis();
         versionCode = applicationVersionCode();
         lastVersionCode = prefs.getInt(Constants.PREFS_KEY_LAST_VERSION, 0);
@@ -146,7 +140,7 @@ public abstract class OeffiMainActivity extends OeffiActivity {
                     return true;
                 }
 
-                if (itemId ==  R.id.global_options_directions) {
+                if (itemId == R.id.global_options_directions) {
                     if (OeffiMainActivity.this instanceof DirectionsActivity)
                         return true;
                     final Intent intent = new Intent(OeffiMainActivity.this, DirectionsActivity.class);
@@ -160,7 +154,7 @@ public abstract class OeffiMainActivity extends OeffiActivity {
                     return true;
                 }
 
-                if (itemId ==  R.id.global_options_plans) {
+                if (itemId == R.id.global_options_plans) {
                     if (OeffiMainActivity.this instanceof PlansPickerActivity)
                         return true;
                     final Intent intent = new Intent(OeffiMainActivity.this, PlansPickerActivity.class);
@@ -228,21 +222,6 @@ public abstract class OeffiMainActivity extends OeffiActivity {
         final String network = this.network != null ? this.network.name() : prefsGetNetwork();
         if (network != null)
             getMyActionBar().setSecondaryTitle(NetworkResources.instance(this, network).label);
-    }
-
-    private void checkChangeNetwork() {
-        final NetworkId newNetwork = prefsGetNetworkId();
-
-        if (newNetwork != null && newNetwork != network) {
-            log.info("Network change detected: {} -> {}", network, newNetwork);
-            ErrorReporter.getInstance().setNetworkId(newNetwork);
-
-            network = newNetwork;
-            onChangeNetwork(network);
-        }
-    }
-
-    protected void onChangeNetwork(final NetworkId network) {
     }
 
     protected void initNavigation() {

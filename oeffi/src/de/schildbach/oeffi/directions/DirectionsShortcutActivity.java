@@ -187,7 +187,7 @@ public class DirectionsShortcutActivity extends OeffiActivity implements Locatio
                     .valueOf(prefs.getString(Constants.PREFS_KEY_WALK_SPEED, WalkSpeed.NORMAL.name()));
             final Accessibility accessibility = Accessibility
                     .valueOf(prefs.getString(Constants.PREFS_KEY_ACCESSIBILITY, Accessibility.NEUTRAL.name()));
-            final Set<Product> products = networkProvider.defaultProducts();
+            final Set<Product> products =  loadProductFilter();
             final TripOptions options = new TripOptions(products, optimize, walkSpeed, accessibility, null);
             query(networkProvider, from, to, options);
         } else {

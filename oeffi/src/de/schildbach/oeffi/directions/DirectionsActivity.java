@@ -397,7 +397,7 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
         viewProductToggles.add(findViewById(R.id.directions_products_p));
         viewProductToggles.add(findViewById(R.id.directions_products_f));
         viewProductToggles.add(findViewById(R.id.directions_products_c));
-        initProductToggles();
+        boolean haveNonDefaultProducts = initProductToggles();
 
         final OnLongClickListener productLongClickListener = v -> {
             final DialogBuilder builder = DialogBuilder.get(DirectionsActivity.this);
@@ -605,6 +605,12 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
                 time = (TimeSpec) intent.getSerializableExtra(INTENT_EXTRA_TIME_SPEC);
         }
 
+        if (haveNonDefaultProducts) {
+            expandForm();
+        } else {
+            collapseForm();
+        }
+
         // initial focus
         if (!viewToLocation.isInTouchMode()) {
             requestFocusFirst();
@@ -615,6 +621,13 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
     protected void onResume() {
         super.onResume();
         mapView.onResume();
+
+        boolean haveNonDefaultProducts = initProductToggles();
+        if (haveNonDefaultProducts) {
+            expandForm();
+        } else {
+            collapseForm();
+        }
 
         // can do directions?
         final NetworkProvider networkProvider = network != null ? NetworkProviderFactory.provider(network) : null;
@@ -653,10 +666,12 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
 
         viewBike.setChecked(false);
 
-        initProductToggles();
-
-        collapseForm();
-        buttonExpand.setChecked(false);
+        boolean haveNonDefaultProducts = initProductToggles();
+        if (haveNonDefaultProducts) {
+            expandForm();
+        } else {
+            collapseForm();
+        }
 
         queryHistoryListAdapter.close();
         queryHistoryListAdapter = new QueryHistoryAdapter(this, network, this, this);
@@ -666,19 +681,30 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
         setActionBarSecondaryTitleFromNetwork();
     }
 
-    private void initProductToggles() {
-        final NetworkProvider networkProvider = network != null ? NetworkProviderFactory.provider(network) : null;
-        final Collection<Product> defaultProducts = networkProvider != null ? networkProvider.defaultProducts()
-                : Product.ALL;
+    private boolean initProductToggles() {
+        final Collection<Product> defaultProducts = loadProductFilter();
+        Collection<Product> networkDefaultProducts = getNetworkDefaultProducts();
         for (final ToggleImageButton view : viewProductToggles) {
             final Product product = Product.fromCode(((String) view.getTag()).charAt(0));
             final boolean checked = defaultProducts.contains(product);
             view.setChecked(checked);
         }
+        // true if different from default for network
+        return defaultProducts.size() != networkDefaultProducts.size() || !defaultProducts.containsAll(networkDefaultProducts);
+    }
+
+    private Set<Product> getProductToggles() {
+        final Set<Product> products = new HashSet<>();
+        for (final ToggleImageButton view : viewProductToggles)
+            if (view.isChecked())
+                products.add(Product.fromCode(((String) view.getTag()).charAt(0)));
+        return products;
     }
 
     @Override
     protected void onPause() {
+        saveProductFilter(getProductToggles());
+
         if (tickReceiver != null) {
             unregisterReceiver(tickReceiver);
             tickReceiver = null;
@@ -853,6 +879,7 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
     }
 
     private void expandForm() {
+        buttonExpand.setChecked(true);
         initLayoutTransitions(true);
 
         final NetworkProvider networkProvider = network != null ? NetworkProviderFactory.provider(network) : null;
@@ -866,6 +893,7 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
     }
 
     private void collapseForm() {
+        buttonExpand.setChecked(false);
         initLayoutTransitions(false);
 
         viewViaLocation.setVisibility(View.GONE);
@@ -1007,10 +1035,7 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
             return;
         }
 
-        final Set<Product> products = new HashSet<>();
-        for (final ToggleImageButton view : viewProductToggles)
-            if (view.isChecked())
-                products.add(Product.fromCode(((String) view.getTag()).charAt(0)));
+        final Set<Product> products = getProductToggles();
 
         final Set<TripFlag> flags;
         if (viewBike.isChecked()) {

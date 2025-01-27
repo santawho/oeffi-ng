@@ -75,12 +75,15 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -206,7 +209,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         final NetworkId network = (NetworkId) checkNotNull(intent.getSerializableExtra(INTENT_EXTRA_NETWORK));
         final Station station = new Station(network, (Location) intent.getSerializableExtra(INTENT_EXTRA_STATION));
         if (intent.hasExtra(INTENT_EXTRA_DEPARTURES))
-            station.departures = (List<Departure>) intent.getSerializableExtra(INTENT_EXTRA_DEPARTURES);
+            station.departures = filterDepartures((List<Departure>) intent.getSerializableExtra(INTENT_EXTRA_DEPARTURES), loadProductFilter());
         selectStation(station);
         statusMessage(getString(R.string.stations_station_details_progress));
 
@@ -293,6 +296,12 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         }
     }
 
+    private List<Departure> filterDepartures(final Collection<Departure> departures, final Collection<Product> filter) {
+        return departures.stream()
+                .filter(departure -> filter.contains(departure.line.product))
+                .collect(Collectors.toList());
+    }
+
     private void load() {
         final String requestedStationId = selectedStation.id;
         final NetworkProvider networkProvider = NetworkProviderFactory.provider(selectedNetwork);
@@ -316,6 +325,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                             updateDisclaimerSource(disclaimerSourceView, selectedNetwork.name(),
                                     product(result.header));
 
+                        Set<Product> productFilter = loadProductFilter();
                         if (result.status == QueryDeparturesResult.Status.OK) {
                             for (final StationDepartures stationDepartures : result.stationDepartures) {
                                 Location location = stationDepartures.location;
@@ -326,11 +336,12 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                                         stations.add(station);
                                     }
 
-                                    station.departures = stationDepartures.departures;
+                                    List<Departure> departures = filterDepartures(stationDepartures.departures, productFilter);
+                                    station.departures = departures;
                                     station.setLines(stationDepartures.lines);
 
                                     if (location.equals(selectedStation)) {
-                                        selectedDepartures = stationDepartures.departures;
+                                        selectedDepartures = departures;
                                         selectedLines = groupDestinationsByLine(stationDepartures.lines);
                                     }
                                 }
