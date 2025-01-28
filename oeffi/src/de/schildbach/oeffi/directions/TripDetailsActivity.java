@@ -79,6 +79,7 @@ import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Fare;
+import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.Point;
@@ -111,6 +112,7 @@ import javax.annotation.Nullable;
 public class TripDetailsActivity extends OeffiActivity implements LocationListener, LocationAware {
     public static class RenderConfig implements Serializable {
         public boolean isJourney;
+        public boolean isNavigation;
     }
 
     public static class LegContainer {
@@ -162,6 +164,18 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         intent.putExtra(INTENT_EXTRA_NETWORK, checkNotNull(network));
         intent.putExtra(INTENT_EXTRA_TRIP, checkNotNull(trip));
         intent.putExtra(INTENT_EXTRA_RENDERCONFIG, checkNotNull(renderConfig));
+        if (renderConfig.isNavigation) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+            Uri.Builder builder = new Uri.Builder().scheme("data").authority(TripDetailsActivity.class.getName());
+            for (final Trip.Leg leg: trip.legs) {
+                if (leg instanceof Trip.Public) {
+                    JourneyRef journeyRef = ((Public) leg).journeyRef;
+                    builder.appendPath(journeyRef == null ? "-" : Integer.toString(journeyRef.hashCode()));
+                }
+            }
+            Uri uri = builder.build();
+            intent.setData(uri);
+        }
         context.startActivity(intent);
     }
 
@@ -291,9 +305,14 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         });
 
         final MyActionBar actionBar = getMyActionBar();
-        setPrimaryColor(R.color.bg_action_bar_directions);
-        actionBar.setPrimaryTitle(getString(renderConfig.isJourney ? R.string.journey_details_title : R.string.trip_details_title)); // getTitle()
-        actionBar.setBack(v -> finish());
+        setPrimaryColor(renderConfig.isNavigation ? R.color.bg_action_bar_navigation : R.color.bg_action_bar_directions);
+        actionBar.setPrimaryTitle(getString(
+                renderConfig.isNavigation
+                    ? R.string.navigation_details_title
+                    : renderConfig.isJourney
+                        ? R.string.journey_details_title
+                        : R.string.trip_details_title)); // getTitle()
+        actionBar.setBack(isTaskRoot() ? null : v -> finish());
 
         // action bar secondary title
         final StringBuilder secondaryTitle = new StringBuilder();
@@ -310,6 +329,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         actionBar.setSecondaryTitle(secondaryTitle.length() > 0 ? secondaryTitle : null);
 
         // action bar buttons
+        if (renderConfig.isNavigation) {
+            actionBar.addProgressButton().setOnClickListener(buttonView -> refreshNavigation());
+        } else {
+            actionBar.addButton(R.drawable.ic_navigation_white_24dp, R.string.directions_trip_details_action_start_routing)
+                    .setOnClickListener(buttonView -> startNavigation());
+        }
+
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             trackButton = actionBar.addToggleButton(R.drawable.ic_location_white_24dp,
@@ -338,6 +364,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 updateGUI();
             });
         }
+
         actionBar.addButton(R.drawable.ic_share_white_24dp, R.string.directions_trip_details_action_share_title)
                 .setOnClickListener(v -> {
                     final PopupMenu popupMenu = new PopupMenu(TripDetailsActivity.this, v);
@@ -1260,5 +1287,15 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private static String formatTimeSpan(final long millis) {
         final long mins = millis / DateUtils.MINUTE_IN_MILLIS;
         return String.format(Locale.ENGLISH, "%d:%02d", mins / 60, mins % 60);
+    }
+
+    private void startNavigation() {
+        RenderConfig rc = new RenderConfig();
+        rc.isNavigation = true;
+        rc.isJourney = renderConfig.isJourney;
+        TripDetailsActivity.start(this, network, trip, rc);
+    }
+
+    private void refreshNavigation() {
     }
 }

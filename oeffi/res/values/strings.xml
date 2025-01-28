@@ -21,6 +21,7 @@
     <string name="directions_activity_title">Directions</string>
     <string name="trip_details_title">Connection Details</string>
     <string name="journey_details_title">Line Details</string>
+    <string name="navigation_details_title">Navigation</string>
     <string name="plans_activity_title">Network Plans</string>
     <string name="network_picker_activity_title">Pick Transportation Network</string>
 
@@ -271,6 +272,7 @@
     </plurals>
 
     <!-- directions trip details options -->
+    <string name="directions_trip_details_action_start_routing">Start navigation</string>
     <string name="directions_trip_details_action_calendar_title">Add to calendar</string>
     <string name="directions_trip_details_action_calendar_notfound">There is no calendar app installed</string>
     <string name="directions_trip_details_action_track_title">Location tracking</string>

@@ -21,6 +21,7 @@
     <string name="directions_activity_title">Verbindungsabfrage</string>
     <string name="trip_details_title">Verbindungsdetails</string>
     <string name="journey_details_title">Fahrtdetails</string>
+    <string name="navigation_details_title">Navigation</string>
     <string name="plans_activity_title">Netzpläne</string>
     <string name="network_picker_activity_title">Wähle Verkehrsnetz</string>
 
@@ -269,6 +270,7 @@
     </plurals>
 
     <!-- directions trip details options -->
+    <string name="directions_trip_details_action_start_routing">Navigation starten</string>
     <string name="directions_trip_details_action_calendar_title">Zum Kalender hinzufügen</string>
     <string name="directions_trip_details_action_calendar_notfound">Es ist keine Kalender-App installiert</string>
     <string name="directions_trip_details_action_track_title">Ortung</string>

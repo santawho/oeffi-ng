@@ -16,6 +16,7 @@
     <color name="bg_divider">#444444</color>
     <color name="bg_action_bar">#444444</color>
     <color name="bg_action_bar_stations">#444400</color>
+    <color name="bg_action_bar_navigation">#441111</color>
     <color name="bg_action_bar_directions">#114411</color>
     <color name="bg_action_bar_appendix">#555555</color>
     <color name="bg_selected_entry">#284028</color>
