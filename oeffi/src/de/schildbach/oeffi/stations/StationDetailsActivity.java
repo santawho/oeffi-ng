@@ -179,7 +179,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
         actionBar = getMyActionBar();
         setPrimaryColor(R.color.bg_action_bar_stations);
-        actionBar.setBack(v -> finish());
+        actionBar.setBack(isTaskRoot() ? null : v -> finish());
         actionBar.swapTitles();
         actionBar.addProgressButton().setOnClickListener(v -> load());
         favoriteButton = actionBar.addToggleButton(R.drawable.ic_star_24dp,

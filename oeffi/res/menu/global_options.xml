@@ -3,7 +3,12 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/global_options_stations"
+        android:id="@+id/global_options_stations_favorites"
+        android:icon="@drawable/ic_oeffi_stations"
+        android:title="@string/stations_favorite_stations_title"
+        android:titleCondensed="@string/global_options_stations_comment" />
+    <item
+        android:id="@+id/global_options_stations_nearby"
         android:icon="@drawable/ic_oeffi_stations"
         android:title="@string/stations_activity_title"
         android:titleCondensed="@string/global_options_stations_comment" />

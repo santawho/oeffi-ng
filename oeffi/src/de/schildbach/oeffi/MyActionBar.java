@@ -94,8 +94,12 @@ public class MyActionBar extends LinearLayout {
     }
 
     public void setBack(final OnClickListener onClickListener) {
-        backButtonView.setOnClickListener(onClickListener);
-        backButtonView.setVisibility(View.VISIBLE);
+        if (onClickListener == null) {
+            backButtonView.setVisibility(View.GONE);
+        } else {
+            backButtonView.setOnClickListener(onClickListener);
+            backButtonView.setVisibility(View.VISIBLE);
+        }
     }
 
     public void setPrimaryTitle(final CharSequence title) {

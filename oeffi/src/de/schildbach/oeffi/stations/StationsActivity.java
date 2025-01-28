@@ -245,7 +245,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         });
         actionBar.overflow(R.menu.stations_options, item -> {
             if (item.getItemId() == R.id.stations_options_favorites) {
-                FavoriteStationsActivity.start(StationsActivity.this);
+                FavoriteStationsActivity.start(StationsActivity.this, false);
                 return true;
             } else {
                 return false;

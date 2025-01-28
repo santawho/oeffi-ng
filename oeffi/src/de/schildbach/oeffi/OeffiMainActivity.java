@@ -54,6 +54,7 @@ import de.schildbach.oeffi.plans.PlansPickerActivity;
 import de.schildbach.oeffi.preference.AboutFragment;
 import de.schildbach.oeffi.preference.DonateFragment;
 import de.schildbach.oeffi.preference.PreferenceActivity;
+import de.schildbach.oeffi.stations.FavoriteStationsActivity;
 import de.schildbach.oeffi.stations.StationsActivity;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.DividerItemDecoration;
@@ -118,8 +119,8 @@ public abstract class OeffiMainActivity extends OeffiActivity {
 
             @Override
             public void onPrepareMenu(final Menu menu) {
-                final MenuItem stationsItem = menu.findItem(R.id.global_options_stations);
-                stationsItem.setChecked(OeffiMainActivity.this instanceof StationsActivity);
+                final MenuItem stationsNearbyItem = menu.findItem(R.id.global_options_stations_nearby);
+                stationsNearbyItem.setChecked(OeffiMainActivity.this instanceof StationsActivity);
                 final MenuItem directionsItem = menu.findItem(R.id.global_options_directions);
                 directionsItem.setChecked(OeffiMainActivity.this instanceof DirectionsActivity);
                 final MenuItem plansItem = menu.findItem(R.id.global_options_plans);
@@ -129,7 +130,14 @@ public abstract class OeffiMainActivity extends OeffiActivity {
             @Override
             public boolean onMenuItemSelected(final MenuItem item) {
                 int itemId = item.getItemId();
-                if (itemId == R.id.global_options_stations) {
+                if (itemId == R.id.global_options_stations_favorites) {
+                    FavoriteStationsActivity.start(OeffiMainActivity.this, true);
+                    finish();
+                    overridePendingTransition(R.anim.enter_from_left, R.anim.exit_to_right);
+                    return true;
+                }
+
+                if (itemId == R.id.global_options_stations_nearby) {
                     if (OeffiMainActivity.this instanceof StationsActivity)
                         return true;
                     final Intent intent = new Intent(OeffiMainActivity.this, StationsActivity.class);
