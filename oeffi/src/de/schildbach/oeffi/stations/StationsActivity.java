@@ -1052,7 +1052,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                     final int maxDepartures = maxDeparturesPerStation * 2;
 
                     backgroundHandler.post(
-                            new QueryDeparturesRunnable(handler, networkProvider, requestedStationId, maxDepartures) {
+                            new QueryDeparturesRunnable(handler, networkProvider, requestedStationId, null, maxDepartures) {
                                 @Override
                                 protected void onPreExecute() {
                                     actionBar.startProgress();

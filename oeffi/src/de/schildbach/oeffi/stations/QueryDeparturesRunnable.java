@@ -45,15 +45,18 @@ public abstract class QueryDeparturesRunnable implements Runnable {
 
     private final NetworkProvider networkProvider;
     private final String stationId;
+    private final Date fromTime;
     private final int maxDepartures;
 
     private static final Logger log = LoggerFactory.getLogger(QueryDeparturesRunnable.class);
 
-    public QueryDeparturesRunnable(final Handler handler, final NetworkProvider networkProvider, final String stationId,
-            final int maxDepartures) {
+    public QueryDeparturesRunnable(
+            final Handler handler, final NetworkProvider networkProvider,
+            final String stationId, final Date time, final int maxDepartures) {
         this.handler = handler;
         this.networkProvider = networkProvider;
         this.stationId = stationId;
+        this.fromTime = time != null ? time : new Date();
         this.maxDepartures = maxDepartures;
     }
 
@@ -75,8 +78,8 @@ public abstract class QueryDeparturesRunnable implements Runnable {
 
             try {
                 // FIXME equivs should be true
-                final QueryDeparturesResult result = networkProvider.queryDepartures(stationId, new Date(),
-                        maxDepartures, false);
+                final QueryDeparturesResult result = networkProvider.queryDepartures(
+                        stationId, fromTime, maxDepartures, false);
 
                 postOnResult(result);
                 break;

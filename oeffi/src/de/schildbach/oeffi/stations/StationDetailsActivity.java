@@ -38,6 +38,7 @@ import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ViewAnimator;
@@ -61,6 +62,7 @@ import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.Departure;
+import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.LineDestination;
 import de.schildbach.pte.dto.Location;
@@ -144,6 +146,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
     private LinkedHashMap<Line, List<Location>> selectedLines = null;
 
     private MyActionBar actionBar;
+    private ImageButton loadMoreButton;
     private ToggleImageButton favoriteButton;
     private ViewAnimator viewAnimator;
     private RecyclerView listView;
@@ -153,6 +156,8 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
     private OeffiMapView mapView;
 
     private BroadcastReceiver tickReceiver;
+    private boolean autoRefreshDisabled = false;
+    private Date nextFromTime;
 
     private QueryJourneyRunnable queryJourneyRunnable;
     private final Handler handler = new Handler();
@@ -181,7 +186,10 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         setPrimaryColor(R.color.bg_action_bar_stations);
         actionBar.setBack(isTaskRoot() ? null : v -> finish());
         actionBar.swapTitles();
-        actionBar.addProgressButton().setOnClickListener(v -> load());
+        actionBar.addProgressButton().setOnClickListener(v -> {
+            autoRefreshDisabled = false;
+            load(null);
+        });
         favoriteButton = actionBar.addToggleButton(R.drawable.ic_star_24dp,
                 R.string.stations_station_details_action_favorite_title);
         favoriteButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -199,6 +207,11 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                     NearestFavoriteStationWidgetService.scheduleImmediate(this); // refresh app-widget
                 }
             }
+        });
+        loadMoreButton = actionBar.addButton(R.drawable.ic_expand_white_24dp, R.string.stations_station_details_action_load_more);
+        loadMoreButton.setOnClickListener(buttonView -> {
+            autoRefreshDisabled = true;
+            load(nextFromTime);
         });
 
         viewAnimator = findViewById(R.id.stations_station_details_list_layout);
@@ -268,12 +281,13 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         tickReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(final Context context, final Intent intent) {
-                load();
+                if (!autoRefreshDisabled)
+                    load(null);
             }
         };
         registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
 
-        load();
+        load(null);
 
         updateFragments();
     }
@@ -336,13 +350,23 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 .collect(Collectors.toList());
     }
 
-    private void load() {
+    private void load(final Date time) {
+        final boolean modeAppend;
+        final Date fromTime;
+        if (time != null) {
+            modeAppend = true;
+            fromTime = time;
+        } else {
+            modeAppend = false;
+            fromTime = new Date();
+            nextFromTime = null;
+        }
         final String requestedStationId = selectedStation.id;
         final NetworkProvider networkProvider = NetworkProviderFactory.provider(selectedNetwork);
 
         backgroundHandler.removeCallbacksAndMessages(null);
         backgroundHandler
-                .post(new QueryDeparturesRunnable(handler, networkProvider, requestedStationId, MAX_DEPARTURES) {
+                .post(new QueryDeparturesRunnable(handler, networkProvider, requestedStationId, fromTime, MAX_DEPARTURES) {
                     @Override
                     protected void onPreExecute() {
                         actionBar.startProgress();
@@ -361,6 +385,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
                         Set<Product> productFilter = loadProductFilter();
                         if (result.status == QueryDeparturesResult.Status.OK) {
+                            boolean somethingAdded = false;
                             for (final StationDepartures stationDepartures : result.stationDepartures) {
                                 Location location = stationDepartures.location;
                                 if (location.hasId()) {
@@ -375,10 +400,32 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                                     station.setLines(stationDepartures.lines);
 
                                     if (location.equals(selectedStation)) {
-                                        selectedDepartures = departures;
+                                        somethingAdded = true;
+                                        if (modeAppend && selectedDepartures != null) {
+                                            Set<JourneyRef> oldJourneyRefs = selectedDepartures.stream().map(
+                                                    departure -> departure.journeyRef).collect(Collectors.toSet());
+                                            for (Departure departure : departures) {
+                                                if (!oldJourneyRefs.contains(departure.journeyRef))
+                                                    selectedDepartures.add(departure);
+                                            }
+                                        } else {
+                                            selectedDepartures = departures;
+                                        }
                                         selectedLines = groupDestinationsByLine(stationDepartures.lines);
                                     }
                                 }
+                            }
+
+                            if (!somethingAdded) {
+                                nextFromTime = new Date(fromTime.getTime() + 30 * 60 * 1000);
+                            } else {
+                                long maxTime = fromTime.getTime();
+                                for (Departure departure : selectedDepartures) {
+                                    long depTime = departure.plannedTime.getTime();
+                                    if (depTime > maxTime)
+                                        maxTime = depTime;
+                                }
+                                nextFromTime = new Date(maxTime);
                             }
 
                             updateGUI();
@@ -443,8 +490,10 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         actionBar.setPrimaryTitle(selectedStation.name);
         actionBar.setSecondaryTitle(selectedStation.place);
 
-        if (changed)
-            load();
+        if (changed) {
+            autoRefreshDisabled = false;
+            load(null);
+        }
     }
 
     public boolean isSelectedStation(final String stationId) {

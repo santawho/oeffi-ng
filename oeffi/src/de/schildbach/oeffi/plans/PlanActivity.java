@@ -280,7 +280,7 @@ public class PlanActivity extends ComponentActivity {
 
         if (selection.location.hasId()) {
             final NetworkProvider networkProvider = NetworkProviderFactory.provider(selection.network);
-            backgroundHandler.post(new QueryDeparturesRunnable(handler, networkProvider, selection.location.id, 0) {
+            backgroundHandler.post(new QueryDeparturesRunnable(handler, networkProvider, selection.location.id, null, 0) {
                 @Override
                 protected void onResult(final QueryDeparturesResult result) {
                     log.info("Got {}", result.toShortString());
