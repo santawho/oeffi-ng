@@ -70,6 +70,7 @@ import de.schildbach.oeffi.OeffiMapView;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.TripAware;
 import de.schildbach.oeffi.directions.TimeSpec.DepArr;
+import de.schildbach.oeffi.directions.navigation.Navigator;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.stations.LineView;
 import de.schildbach.oeffi.stations.StationContextMenu;
@@ -96,6 +97,7 @@ import de.schildbach.pte.dto.Trip.Public;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -106,30 +108,34 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import javax.annotation.Nullable;
 
-public class TripDetailsActivity extends OeffiActivity implements LocationListener, LocationAware {
+public class TripDetailsActivity extends OeffiActivity implements LocationListener, LocationAware  {
     public static class RenderConfig implements Serializable {
         public boolean isJourney;
         public boolean isNavigation;
     }
 
     public static class LegContainer {
-        public final @Nullable Trip.Leg leg;
+        public @Nullable Trip.Leg leg;
+        public final @Nullable Trip.Leg initialLeg;
         public final Stop transferFrom;
         public final Stop transferTo;
 
         public LegContainer(final @Nullable Trip.Public baseLeg) {
             this.leg = baseLeg;
+            this.initialLeg = leg;
             this.transferFrom = null;
             this.transferTo = null;
         }
 
         public LegContainer(final @Nullable Trip.Individual baseLeg, final Stop transferFrom, final Stop transferTo) {
             this.leg = baseLeg;
+            this.initialLeg = null;
             this.transferFrom = transferFrom;
             this.transferTo = transferTo;
         }
@@ -137,8 +143,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         public boolean isTransfer() {
             return leg == null || leg instanceof Trip.Individual;
         }
+
+        public void setCurrentLegState(Trip.Public updatedLeg) {
+            leg = updatedLeg;
+        }
     }
 
+    private static final long NAVIGATION_AUTO_REFRESH_INTERVAL_SECS = 10;
     private static final String INTENT_EXTRA_NETWORK = TripDetailsActivity.class.getName() + ".network";
     private static final String INTENT_EXTRA_TRIP = TripDetailsActivity.class.getName() + ".trip";
     private static final String INTENT_EXTRA_RENDERCONFIG = TripDetailsActivity.class.getName() + ".isJourney";
@@ -181,6 +192,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         context.startActivity(intent);
     }
 
+    private MyActionBar actionBar;
     private LayoutInflater inflater;
     private Resources res;
     private int colorSignificant;
@@ -190,12 +202,14 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private DisplayMetrics displayMetrics;
     private LocationManager locationManager;
     private BroadcastReceiver tickReceiver;
+    private long nextNavigationRefreshTime = 0;
 
     private ViewGroup legsGroup;
     private OeffiMapView mapView;
     private ToggleImageButton trackButton;
 
     private NetworkId network;
+    private Navigator navigator;
     private Trip trip;
     private List<LegContainer> legs = new ArrayList<>();
     private RenderConfig renderConfig;
@@ -204,10 +218,29 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private Point location;
     private int selectedLegIndex = -1;
 
-    private final Map<Leg, Boolean> legExpandStates = new HashMap<>();
-    private Intent scheduleTripIntent;
+    private static class LegKey {
+        private String key;
+        public LegKey(Leg leg) {
+            key = leg.departure.id + "/" + leg.arrival.id;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) return true;
+            if (!(other instanceof LegKey)) return false;
+            LegKey legKey = (LegKey) other;
+            return Objects.equals(key, legKey.key);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(key);
+        }
+    };
+    private final Map<LegKey, Boolean> legExpandStates = new HashMap<>();
 
     private QueryJourneyRunnable queryJourneyRunnable;
+    private Runnable navigationRefreshRunnable;
     private HandlerThread backgroundThread;
     private Handler backgroundHandler;
     private final Handler handler = new Handler();
@@ -235,69 +268,20 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         final Intent intent = getIntent();
-        network = (NetworkId) intent.getSerializableExtra(INTENT_EXTRA_NETWORK);
-        trip = (Trip) intent.getSerializableExtra(INTENT_EXTRA_TRIP);
         renderConfig = (RenderConfig) intent.getSerializableExtra(INTENT_EXTRA_RENDERCONFIG);
+        network = (NetworkId) intent.getSerializableExtra(INTENT_EXTRA_NETWORK);
+        Trip baseTrip = (Trip) intent.getSerializableExtra(INTENT_EXTRA_TRIP);
 
-        log.info("Showing {} from {} to {}", renderConfig.isJourney ? "journey" : "trip", trip.from, trip.to);
+        log.info("Showing {} from {} to {}", renderConfig.isJourney ? "journey" : "trip", baseTrip.from, baseTrip.to);
+
         NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
-
-        // try to build up paths
-        for (int iLeg = 0; iLeg < trip.legs.size(); ++iLeg) {
-            final Leg prevLeg = (iLeg > 0) ? trip.legs.get(iLeg - 1) : null;
-            final Leg leg = trip.legs.get(iLeg);
-            final Leg nextLeg = (iLeg + 1 < trip.legs.size()) ? trip.legs.get(iLeg + 1) : null;
-
-            if (leg instanceof Individual) {
-                final Stop transferFrom = (prevLeg instanceof Public) ? ((Public) prevLeg).arrivalStop : null;
-                final Stop transferTo = (nextLeg instanceof Public) ? ((Public) nextLeg).departureStop : null;
-                if (transferFrom != null && transferTo != null)
-                    legs.add(new LegContainer((Individual) leg, transferFrom, transferTo));
-                else
-                    legs.add(new LegContainer((Individual) leg, null, null));
-            } else if (leg instanceof Public){
-                if (prevLeg instanceof Public) {
-                    legs.add(new LegContainer(null,
-                            ((Public) prevLeg).arrivalStop, ((Public) leg).departureStop));
-                }
-                legs.add(new LegContainer((Public) leg));
-
-                if (renderConfig.isJourney) {
-                    legExpandStates.put(leg, true);
-                }
-            }
-
-            if (leg.path == null) {
-                leg.path = new ArrayList<>();
-
-                if (leg.departure != null) {
-                    final Point departurePoint = pointFromLocation(leg.departure);
-                    if (departurePoint != null)
-                        leg.path.add(departurePoint);
-                }
-
-                if (leg instanceof Public) {
-                    final Public publicLeg = (Public) leg;
-                    final List<Stop> intermediateStops = publicLeg.intermediateStops;
-
-                    if (intermediateStops != null) {
-                        for (final Stop stop : intermediateStops) {
-                            final Point stopPoint = pointFromLocation(stop.location);
-                            if (stopPoint != null)
-                                leg.path.add(stopPoint);
-                        }
-                    }
-                }
-
-                if (leg.arrival != null) {
-                    final Point arrivalPoint = pointFromLocation(leg.arrival);
-                    if (arrivalPoint != null)
-                        leg.path.add(arrivalPoint);
-                }
-            }
+        if (renderConfig.isNavigation) {
+            navigator = new Navigator(network, baseTrip);
+            trip = navigator.getCurrentTrip();
+        } else {
+            trip = baseTrip;
         }
-
-        scheduleTripIntent = scheduleTripIntent(trip);
+        setupFromTrip(trip);
 
         setContentView(R.layout.directions_trip_details_content);
         final View contentView = findViewById(android.R.id.content);
@@ -307,7 +291,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             return windowInsets;
         });
 
-        final MyActionBar actionBar = getMyActionBar();
+        actionBar = getMyActionBar();
         setPrimaryColor(renderConfig.isNavigation ? R.color.bg_action_bar_navigation : R.color.bg_action_bar_directions);
         actionBar.setPrimaryTitle(getString(
                 renderConfig.isNavigation
@@ -391,7 +375,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             actionBar.addButton(R.drawable.ic_today_white_24dp, R.string.directions_trip_details_action_calendar_title)
                     .setOnClickListener(v -> {
                         try {
-                            startActivity(scheduleTripIntent);
+                            startActivity(scheduleTripIntent(trip));
                         } catch (final ActivityNotFoundException x) {
                             new Toast(this).longToast(R.string.directions_trip_details_action_calendar_notfound);
                         }
@@ -462,7 +446,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         tickReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                updateGUI();
+                if (!checkAutoRefresh())
+                    updateGUI();
             }
         };
         registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
@@ -471,10 +456,21 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         updateFragments();
     }
 
+    private boolean checkAutoRefresh() {
+        if (!renderConfig.isNavigation) return false;
+        if (nextNavigationRefreshTime < 0) return false;
+        long now = new Date().getTime();
+        if (now < nextNavigationRefreshTime) return false;
+        refreshNavigation();
+        return true;
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
+        checkAutoRefresh();
         mapView.onResume();
+        updateGUI();
     }
 
     @Override
@@ -761,14 +757,14 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         final ToggleImageButton expandButton = row
                 .findViewById(R.id.directions_trip_details_public_entry_expand);
-        final Boolean checked = legExpandStates.get(leg);
+        final Boolean checked = legExpandStates.get(new LegKey(leg));
         expandButton.setVisibility(
                 !renderConfig.isJourney && intermediateStops != null && !intermediateStops.isEmpty()
                         ? View.VISIBLE
                         : View.GONE);
         expandButton.setChecked(checked != null ? checked : false);
         expandButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            legExpandStates.put(leg, isChecked);
+            legExpandStates.put(new LegKey(leg), isChecked);
             updateGUI();
         });
 
@@ -1304,5 +1300,107 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     private void refreshNavigation() {
+        if (navigationRefreshRunnable != null)
+            return;
+
+        nextNavigationRefreshTime = -1; // block auto-refresh
+        actionBar.startProgress();
+
+        navigationRefreshRunnable = () -> {
+            try {
+                Trip updatedTrip = navigator.refresh();
+                if (updatedTrip == null) {
+                    // network error, should display some error message
+                } else {
+                    runOnUiThread(() -> onTripUpdated(updatedTrip));
+                }
+            } catch (IOException e) {
+                // should display some error messages
+            } finally {
+                navigationRefreshRunnable = null;
+                runOnUiThread(() -> {
+                    actionBar.stopProgress();
+                    nextNavigationRefreshTime = new Date().getTime()
+                            + NAVIGATION_AUTO_REFRESH_INTERVAL_SECS * 1000;
+                });
+            }
+        };
+        backgroundHandler.post(navigationRefreshRunnable);
+    }
+
+    public void onTripUpdated(Trip updatedTrip) {
+        if (updatedTrip == null) return;
+        trip = updatedTrip;
+        final List<Trip.Leg> updatedPublicLegs = new ArrayList<>();
+        for (Leg leg : updatedTrip.legs) {
+            if (leg instanceof Trip.Public)
+                updatedPublicLegs.add(leg);
+        }
+        int iUpdatedLeg = 0;
+        for (LegContainer legC: legs) {
+            if (legC.initialLeg != null) {
+                final Trip.Public updatedLeg = (Trip.Public) updatedPublicLegs.get(iUpdatedLeg);
+                legC.setCurrentLegState(updatedLeg);
+                iUpdatedLeg += 1;
+            }
+        }
+        updateGUI();
+    }
+
+    private void setupFromTrip(final Trip trip) {
+        // try to build up paths
+        for (int iLeg = 0; iLeg < trip.legs.size(); ++iLeg) {
+            final Leg prevLeg = (iLeg > 0) ? trip.legs.get(iLeg - 1) : null;
+            final Leg leg = trip.legs.get(iLeg);
+            final Leg nextLeg = (iLeg + 1 < trip.legs.size()) ? trip.legs.get(iLeg + 1) : null;
+
+            if (leg instanceof Individual) {
+                final Stop transferFrom = (prevLeg instanceof Public) ? ((Public) prevLeg).arrivalStop : null;
+                final Stop transferTo = (nextLeg instanceof Public) ? ((Public) nextLeg).departureStop : null;
+                if (transferFrom != null && transferTo != null)
+                    legs.add(new LegContainer((Individual) leg, transferFrom, transferTo));
+                else
+                    legs.add(new LegContainer((Individual) leg, null, null));
+            } else if (leg instanceof Public){
+                if (prevLeg instanceof Public) {
+                    legs.add(new LegContainer(null,
+                            ((Public) prevLeg).arrivalStop, ((Public) leg).departureStop));
+                }
+                legs.add(new LegContainer((Public) leg));
+
+                if (renderConfig.isJourney) {
+                    legExpandStates.put(new LegKey(leg), true);
+                }
+            }
+
+            if (leg.path == null) {
+                leg.path = new ArrayList<>();
+
+                if (leg.departure != null) {
+                    final Point departurePoint = pointFromLocation(leg.departure);
+                    if (departurePoint != null)
+                        leg.path.add(departurePoint);
+                }
+
+                if (leg instanceof Public) {
+                    final Public publicLeg = (Public) leg;
+                    final List<Stop> intermediateStops = publicLeg.intermediateStops;
+
+                    if (intermediateStops != null) {
+                        for (final Stop stop : intermediateStops) {
+                            final Point stopPoint = pointFromLocation(stop.location);
+                            if (stopPoint != null)
+                                leg.path.add(stopPoint);
+                        }
+                    }
+                }
+
+                if (leg.arrival != null) {
+                    final Point arrivalPoint = pointFromLocation(leg.arrival);
+                    if (arrivalPoint != null)
+                        leg.path.add(arrivalPoint);
+                }
+            }
+        }
     }
 }
