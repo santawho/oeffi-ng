@@ -70,6 +70,7 @@ import de.schildbach.oeffi.OeffiMapView;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.TripAware;
 import de.schildbach.oeffi.directions.TimeSpec.DepArr;
+import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.stations.LineView;
 import de.schildbach.oeffi.stations.StationContextMenu;
 import de.schildbach.oeffi.stations.StationDetailsActivity;
@@ -78,6 +79,7 @@ import de.schildbach.oeffi.util.LocationHelper;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.pte.NetworkId;
+import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.Fare;
 import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.Line;
@@ -238,6 +240,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         renderConfig = (RenderConfig) intent.getSerializableExtra(INTENT_EXTRA_RENDERCONFIG);
 
         log.info("Showing {} from {} to {}", renderConfig.isJourney ? "journey" : "trip", trip.from, trip.to);
+        NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
 
         // try to build up paths
         for (int iLeg = 0; iLeg < trip.legs.size(); ++iLeg) {
@@ -332,8 +335,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         if (renderConfig.isNavigation) {
             actionBar.addProgressButton().setOnClickListener(buttonView -> refreshNavigation());
         } else {
-            actionBar.addButton(R.drawable.ic_navigation_white_24dp, R.string.directions_trip_details_action_start_routing)
-                    .setOnClickListener(buttonView -> startNavigation());
+            if (networkProvider.hasCapabilities(NetworkProvider.Capability.JOURNEY)) {
+                actionBar.addButton(R.drawable.ic_navigation_white_24dp, R.string.directions_trip_details_action_start_routing)
+                        .setOnClickListener(buttonView -> startNavigation());
+            }
         }
 
         if (ContextCompat.checkSelfPermission(this,
@@ -382,14 +387,16 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     });
                     popupMenu.show();
                 });
-        actionBar.addButton(R.drawable.ic_today_white_24dp, R.string.directions_trip_details_action_calendar_title)
-                .setOnClickListener(v -> {
-                    try {
-                        startActivity(scheduleTripIntent);
-                    } catch (final ActivityNotFoundException x) {
-                        new Toast(this).longToast(R.string.directions_trip_details_action_calendar_notfound);
-                    }
-                });
+        if (!renderConfig.isNavigation) {
+            actionBar.addButton(R.drawable.ic_today_white_24dp, R.string.directions_trip_details_action_calendar_title)
+                    .setOnClickListener(v -> {
+                        try {
+                            startActivity(scheduleTripIntent);
+                        } catch (final ActivityNotFoundException x) {
+                            new Toast(this).longToast(R.string.directions_trip_details_action_calendar_notfound);
+                        }
+                    });
+        }
 
         legsGroup = findViewById(R.id.directions_trip_details_legs_group);
 
