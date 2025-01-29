@@ -90,9 +90,6 @@ import de.schildbach.pte.dto.Position;
 import de.schildbach.pte.dto.Stop;
 import de.schildbach.pte.dto.Style;
 import de.schildbach.pte.dto.Trip;
-import de.schildbach.pte.dto.Trip.Individual;
-import de.schildbach.pte.dto.Trip.Leg;
-import de.schildbach.pte.dto.Trip.Public;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,31 +118,37 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     public static class LegContainer {
-        public @Nullable Trip.Leg leg;
-        public final @Nullable Trip.Leg initialLeg;
-        public final Stop transferFrom;
-        public final Stop transferTo;
+        public @Nullable Trip.Individual individualLeg;
+        public @Nullable Trip.Public publicLeg;
+        public final @Nullable Trip.Public initialLeg;
+        public final LegContainer transferFrom;
+        public final LegContainer transferTo;
 
         public LegContainer(final @Nullable Trip.Public baseLeg) {
-            this.leg = baseLeg;
-            this.initialLeg = leg;
+            this.publicLeg = baseLeg;
+            this.initialLeg = baseLeg;
+            this.individualLeg = null;
             this.transferFrom = null;
             this.transferTo = null;
         }
 
-        public LegContainer(final @Nullable Trip.Individual baseLeg, final Stop transferFrom, final Stop transferTo) {
-            this.leg = baseLeg;
-            this.initialLeg = null;
+        public LegContainer(
+                final @Nullable Trip.Individual baseLeg,
+                final LegContainer transferFrom, final LegContainer transferTo) {
+            this.individualLeg = baseLeg;
             this.transferFrom = transferFrom;
             this.transferTo = transferTo;
+            this.publicLeg = null;
+            this.initialLeg = null;
         }
 
         public boolean isTransfer() {
-            return leg == null || leg instanceof Trip.Individual;
+            return initialLeg == null;
         }
 
         public void setCurrentLegState(Trip.Public updatedLeg) {
-            leg = updatedLeg;
+            if (initialLeg != null)
+                publicLeg = updatedLeg;
         }
     }
 
@@ -182,7 +185,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             Uri.Builder builder = new Uri.Builder().scheme("data").authority(TripDetailsActivity.class.getName());
             for (final Trip.Leg leg: trip.legs) {
                 if (leg instanceof Trip.Public) {
-                    JourneyRef journeyRef = ((Public) leg).journeyRef;
+                    JourneyRef journeyRef = ((Trip.Public) leg).journeyRef;
                     builder.appendPath(journeyRef == null ? "-" : Integer.toString(journeyRef.hashCode()));
                 }
             }
@@ -199,6 +202,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private int colorInsignificant;
     private int colorHighlighted;
     private int colorPosition, colorPositionBackground;
+    private int colorLegPublicPastBackground, colorLegPublicNowBackground, colorLegPublicFutureBackground;
+    private int colorLegIndividualPastBackground, colorLegIndividualNowBackground, colorLegIndividualFutureBackground;
     private DisplayMetrics displayMetrics;
     private LocationManager locationManager;
     private BroadcastReceiver tickReceiver;
@@ -220,7 +225,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     private static class LegKey {
         private String key;
-        public LegKey(Leg leg) {
+        public LegKey(Trip.Leg leg) {
             key = leg.departure.id + "/" + leg.arrival.id;
         }
 
@@ -264,6 +269,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         colorHighlighted = res.getColor(R.color.fg_highlighted);
         colorPosition = res.getColor(R.color.fg_position);
         colorPositionBackground = res.getColor(R.color.bg_position);
+        colorLegPublicPastBackground = res.getColor(R.color.bg_trip_details_public_past);
+        colorLegPublicNowBackground = res.getColor(R.color.bg_trip_details_public_now);
+        colorLegPublicFutureBackground = res.getColor(R.color.bg_trip_details_public_future);
+        colorLegIndividualPastBackground = res.getColor(R.color.bg_trip_details_individual_past);
+        colorLegIndividualNowBackground = res.getColor(R.color.bg_trip_details_individual_now);
+        colorLegIndividualFutureBackground = res.getColor(R.color.bg_trip_details_individual_future);
         displayMetrics = res.getDisplayMetrics();
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
@@ -389,7 +400,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         int i = LEGSGROUP_INSERT_INDEX;
         for (final LegContainer legC : legs) {
             final View row;
-            if (legC.leg instanceof Public)
+            if (legC.publicLeg != null)
                 row = inflater.inflate(R.layout.directions_trip_details_public_entry, null);
             else
                 row = inflater.inflate(R.layout.directions_trip_details_individual_entry, null);
@@ -422,7 +433,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 return selectedLegIndex != -1;
             }
 
-            public boolean isSelectedLeg(final Leg part) {
+            public boolean isSelectedLeg(final Trip.Leg part) {
                 if (!hasSelection())
                     return false;
 
@@ -564,11 +575,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         int i = LEGSGROUP_INSERT_INDEX;
         for (final LegContainer legC : legs) {
-            final Leg leg = legC.leg;
-            if (leg instanceof Public)
-                updatePublicLeg(legsGroup.getChildAt(i), (Public) leg, now);
+            if (legC.publicLeg != null)
+                updatePublicLeg(legsGroup.getChildAt(i), legC, now);
             else
-                updateIndividualLeg(legsGroup.getChildAt(i), legC);
+                updateIndividualLeg(legsGroup.getChildAt(i), legC, now);
             i++;
         }
     }
@@ -582,9 +592,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             return;
 
         for (final LegContainer legC : legs) {
-            final Leg leg = legC.leg;
-            if (leg instanceof Trip.Public) {
-                final Trip.Public publicLeg = (Trip.Public) leg;
+            if (legC.publicLeg != null) {
+                final Trip.Public publicLeg = legC.publicLeg;
                 final Date departureTime = publicLeg.getDepartureTime();
                 final Date arrivalTime = publicLeg.getArrivalTime();
 
@@ -624,8 +633,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final float[] distanceBetweenResults = new float[1];
 
             for (final LegContainer legC : legs) {
-                if (legC.leg instanceof Trip.Public) {
-                    final Trip.Public publicLeg = (Trip.Public) legC.leg;
+                if (legC.publicLeg != null) {
+                    final Trip.Public publicLeg = legC.publicLeg;
 
                     if (publicLeg.departure.hasCoord()) {
                         android.location.Location.distanceBetween(publicLeg.departure.getLatAsDouble(),
@@ -708,7 +717,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
     }
 
-    private void updatePublicLeg(final View row, final Public leg, final Date now) {
+    private void updatePublicLeg(final View row, final LegContainer legC, final Date now) {
+        Trip.Public leg = legC.publicLeg;
         final Location destination = leg.destination;
         final String destinationName = destination != null ? destination.uniqueShortName() : null;
         final boolean showDestination = destinationName != null;
@@ -820,12 +830,33 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             messageView.setMovementMethod(LinkMovementMethod.getInstance());
         }
         messageView.setVisibility(message != null ? View.VISIBLE : View.GONE);
+
+        final TextView progress = row.findViewById(R.id.directions_trip_details_public_entry_progress);
+        progress.setVisibility(View.GONE);
+        Date beginTime = leg.departureStop.getDepartureTime();
+        Date endTime = leg.arrivalStop.getArrivalTime();
+        if (now.before(beginTime)) {
+            // leg is in the future
+            row.setBackgroundColor(colorLegPublicFutureBackground);
+        } else if (now.after(endTime)) {
+            // leg is in the past
+            row.setBackgroundColor(colorLegPublicPastBackground);
+        } else {
+            // leg is now
+            row.setBackgroundColor(colorLegPublicNowBackground);
+            long leftMinutes = ((endTime.getTime() - now.getTime()) - 30000) / 60000;
+            final String leftText = (leftMinutes < 1)
+                    ? getString(R.string.directions_trip_details_no_time_left)
+                    : getString(R.string.directions_trip_details_time_left, leftMinutes);
+            progress.setText(Html.fromHtml(leftText));
+            progress.setVisibility(View.VISIBLE);
+        }
     }
 
-    private void updateIndividualLeg(final View row, final LegContainer legContainer) {
+    private void updateIndividualLeg(final View row, final LegContainer legC, final Date now) {
         final TextView textView = row.findViewById(R.id.directions_trip_details_individual_entry_text);
         String legText = null;
-        final Individual leg = (Individual) legContainer.leg;
+        final Trip.Individual leg = legC.individualLeg;
         final int iconResId;
         int requiredSecs = 0;
         final ImageButton mapView = row.findViewById(R.id.directions_trip_details_individual_entry_map);
@@ -835,16 +866,16 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             requiredSecs = leg.min * 60;
             final String distanceStr = leg.distance != 0 ? "(" + leg.distance + "m) " : "";
             final int textResId;
-            if (leg.type == Individual.Type.WALK) {
+            if (leg.type == Trip.Individual.Type.WALK) {
                 textResId = R.string.directions_trip_details_walk;
                 iconResId = R.drawable.ic_directions_walk_grey600_24dp;
-            } else if (leg.type == Individual.Type.BIKE) {
+            } else if (leg.type == Trip.Individual.Type.BIKE) {
                 textResId = R.string.directions_trip_details_bike;
                 iconResId = R.drawable.ic_directions_bike_grey600_24dp;
-            } else if (leg.type == Individual.Type.CAR) {
+            } else if (leg.type == Trip.Individual.Type.CAR) {
                 textResId = R.string.directions_trip_details_car;
                 iconResId = R.drawable.ic_local_taxi_grey600_24dp;
-            } else if (leg.type == Individual.Type.TRANSFER) {
+            } else if (leg.type == Trip.Individual.Type.TRANSFER) {
                 textResId = R.string.directions_trip_details_transfer;
                 iconResId = R.drawable.ic_local_taxi_grey600_24dp;
             } else {
@@ -861,8 +892,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
 
         String transferText = null;
-        final Stop transferFrom = legContainer.transferFrom;
-        final Stop transferTo = legContainer.transferTo;
+        final Stop transferFrom = legC.transferFrom != null ? legC.transferFrom.publicLeg.arrivalStop : null;
+        final Stop transferTo = legC.transferTo != null ? legC.transferTo.publicLeg.departureStop : null;
         if (transferFrom != null) {
             final Date arrMinTime = transferFrom.plannedArrivalTime;
             final Date arrMaxTime = transferFrom.predictedArrivalTime != null ? transferFrom.predictedArrivalTime : arrMinTime;
@@ -904,6 +935,27 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         textView.setText(Html.fromHtml(text));
         textView.setCompoundDrawablesWithIntrinsicBounds(iconResId, 0, 0, 0);
+
+        final TextView progress = row.findViewById(R.id.directions_trip_details_individual_entry_progress);
+        progress.setVisibility(View.GONE);
+        Date beginTime = transferFrom != null ? transferFrom.getArrivalTime() : null;
+        Date endTime = transferTo != null ? transferTo.getDepartureTime() : null;
+        if (beginTime == null || now.before(beginTime)) {
+            // leg is in the future
+            row.setBackgroundColor(colorLegIndividualFutureBackground);
+        } else if (endTime == null || now.after(endTime)) {
+            // leg is in the past
+            row.setBackgroundColor(colorLegIndividualPastBackground);
+        } else {
+            // leg is now
+            row.setBackgroundColor(colorLegIndividualNowBackground);
+            long leftMinutes = ((endTime.getTime() - now.getTime()) - 30000) / 60000;
+            final String leftText = (leftMinutes < 1)
+                    ? getString(R.string.directions_trip_details_no_time_left)
+                    : getString(R.string.directions_trip_details_time_left, leftMinutes);
+            progress.setText(Html.fromHtml(leftText));
+            progress.setVisibility(View.VISIBLE);
+        }
     }
 
     private class CollapseColumns {
@@ -920,7 +972,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
     }
 
-    private View stopRow(final PearlView.Type pearlType, final Stop stop, final Public leg, final Date highlightedTime,
+    private View stopRow(final PearlView.Type pearlType, final Stop stop, final Trip.Public leg, final Date highlightedTime,
             final boolean highlightLocation, final Date now, final CollapseColumns collapseColumns) {
         final View row = inflater.inflate(R.layout.directions_trip_details_public_entry_stop, null);
 
@@ -1195,8 +1247,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final java.text.DateFormat dateFormat = DateFormat.getDateFormat(TripDetailsActivity.this);
         final java.text.DateFormat timeFormat = DateFormat.getTimeFormat(TripDetailsActivity.this);
 
-        final Public firstPublicLeg = trip.getFirstPublicLeg();
-        final Public lastPublicLeg = trip.getLastPublicLeg();
+        final Trip.Public firstPublicLeg = trip.getFirstPublicLeg();
+        final Trip.Public lastPublicLeg = trip.getLastPublicLeg();
         if (firstPublicLeg == null || lastPublicLeg == null)
             return null;
 
@@ -1221,11 +1273,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final StringBuilder description = new StringBuilder();
 
         for (final LegContainer legC : legs) {
-            final Leg leg = legC.leg;
+            final Trip.Leg leg = legC.publicLeg != null ? legC.publicLeg : legC.individualLeg;
             String legStr = null;
 
-            if (leg instanceof Public) {
-                final Public publicLeg = (Public) leg;
+            if (leg instanceof Trip.Public) {
+                final Trip.Public publicLeg = (Trip.Public) leg;
 
                 final String lineStr = publicLeg.line.label;
                 final Location lineDestination = publicLeg.destination;
@@ -1247,18 +1299,18 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 legStr = getString(R.string.directions_trip_details_text_long_public, lineStr + lineDestinationStr,
                         departureDateStr, departureTimeStr, departurePositionStr, departureNameStr, arrivalDateStr,
                         arrivalTimeStr, arrivalPositionStr, arrivalNameStr);
-            } else if (leg instanceof Individual) {
-                final Individual individualLeg = (Individual) leg;
+            } else if (leg instanceof Trip.Individual) {
+                final Trip.Individual individualLeg = (Trip.Individual) leg;
 
                 final String distanceStr = individualLeg.distance != 0 ? "(" + individualLeg.distance + "m) " : "";
                 final int legStrResId;
-                if (individualLeg.type == Individual.Type.WALK)
+                if (individualLeg.type == Trip.Individual.Type.WALK)
                     legStrResId = R.string.directions_trip_details_text_long_walk;
-                else if (individualLeg.type == Individual.Type.BIKE)
+                else if (individualLeg.type == Trip.Individual.Type.BIKE)
                     legStrResId = R.string.directions_trip_details_text_long_bike;
-                else if (individualLeg.type == Individual.Type.CAR)
+                else if (individualLeg.type == Trip.Individual.Type.CAR)
                     legStrResId = R.string.directions_trip_details_text_long_car;
-                else if (individualLeg.type == Individual.Type.TRANSFER)
+                else if (individualLeg.type == Trip.Individual.Type.TRANSFER)
                     legStrResId = R.string.directions_trip_details_text_long_transfer;
                 else
                     throw new IllegalStateException("unknown type: " + individualLeg.type);
@@ -1310,12 +1362,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             try {
                 Trip updatedTrip = navigator.refresh();
                 if (updatedTrip == null) {
-                    // network error, should display some error message
+                    handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));
                 } else {
                     runOnUiThread(() -> onTripUpdated(updatedTrip));
                 }
             } catch (IOException e) {
-                // should display some error messages
+                handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));
             } finally {
                 navigationRefreshRunnable = null;
                 runOnUiThread(() -> {
@@ -1332,7 +1384,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         if (updatedTrip == null) return;
         trip = updatedTrip;
         final List<Trip.Leg> updatedPublicLegs = new ArrayList<>();
-        for (Leg leg : updatedTrip.legs) {
+        for (Trip.Leg leg : updatedTrip.legs) {
             if (leg instanceof Trip.Public)
                 updatedPublicLegs.add(leg);
         }
@@ -1349,24 +1401,28 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     private void setupFromTrip(final Trip trip) {
         // try to build up paths
+        LegContainer prevC = null;
         for (int iLeg = 0; iLeg < trip.legs.size(); ++iLeg) {
-            final Leg prevLeg = (iLeg > 0) ? trip.legs.get(iLeg - 1) : null;
-            final Leg leg = trip.legs.get(iLeg);
-            final Leg nextLeg = (iLeg + 1 < trip.legs.size()) ? trip.legs.get(iLeg + 1) : null;
+            final Trip.Leg prevLeg = (iLeg > 0) ? trip.legs.get(iLeg - 1) : null;
+            final Trip.Leg leg = trip.legs.get(iLeg);
+            final Trip.Leg nextLeg = (iLeg + 1 < trip.legs.size()) ? trip.legs.get(iLeg + 1) : null;
 
-            if (leg instanceof Individual) {
-                final Stop transferFrom = (prevLeg instanceof Public) ? ((Public) prevLeg).arrivalStop : null;
-                final Stop transferTo = (nextLeg instanceof Public) ? ((Public) nextLeg).departureStop : null;
-                if (transferFrom != null && transferTo != null)
-                    legs.add(new LegContainer((Individual) leg, transferFrom, transferTo));
-                else
-                    legs.add(new LegContainer((Individual) leg, null, null));
-            } else if (leg instanceof Public){
-                if (prevLeg instanceof Public) {
-                    legs.add(new LegContainer(null,
-                            ((Public) prevLeg).arrivalStop, ((Public) leg).departureStop));
+            if (leg instanceof Trip.Individual) {
+                final LegContainer transferFrom = (prevLeg instanceof Trip.Public) ? prevC : null;
+                final LegContainer transferTo = (nextLeg instanceof Trip.Public) ? new LegContainer((Trip.Public) nextLeg) : null;
+                legs.add(new LegContainer((Trip.Individual) leg, transferFrom, transferTo));
+                if (transferTo != null) {
+                    legs.add(transferTo);
+                    ++iLeg;
                 }
-                legs.add(new LegContainer((Public) leg));
+                prevC = transferTo;
+            } else if (leg instanceof Trip.Public){
+                final LegContainer newC = new LegContainer((Trip.Public) leg);
+                if (prevC != null) {
+                    legs.add(new LegContainer(null, prevC, newC));
+                }
+                legs.add(newC);
+                prevC = newC;
 
                 if (renderConfig.isJourney) {
                     legExpandStates.put(new LegKey(leg), true);
@@ -1382,8 +1438,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                         leg.path.add(departurePoint);
                 }
 
-                if (leg instanceof Public) {
-                    final Public publicLeg = (Public) leg;
+                if (leg instanceof Trip.Public) {
+                    final Trip.Public publicLeg = (Trip.Public) leg;
                     final List<Stop> intermediateStops = publicLeg.intermediateStops;
 
                     if (intermediateStops != null) {

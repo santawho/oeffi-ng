@@ -87,6 +87,20 @@
         android:stretchColumns="5" />
 
     <TextView
+        android:id="@+id/directions_trip_details_public_entry_progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/text_padding_horizontal_lax"
+        android:layout_marginRight="@dimen/text_padding_horizontal_lax"
+        android:layout_marginTop="@dimen/text_padding_vertical_lax"
+        android:paddingTop="@dimen/text_padding_vertical"
+        android:paddingBottom="@dimen/text_padding_vertical"
+        android:gravity="center"
+        android:textSize="@dimen/font_size_large"
+        android:background="@color/bg_trip_details_time_left"
+        android:visibility="gone" />
+
+    <TextView
         android:id="@+id/directions_trip_details_public_entry_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

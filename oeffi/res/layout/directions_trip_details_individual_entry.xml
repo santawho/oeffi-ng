@@ -1,28 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    style="?android:attr/buttonBarStyle"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:paddingLeft="@dimen/text_padding_horizontal_lax">
+    android:orientation="vertical"
+    android:paddingBottom="8dp">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        style="?android:attr/buttonBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingLeft="@dimen/text_padding_horizontal_lax">
+
+        <TextView
+            android:id="@+id/directions_trip_details_individual_entry_text"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/text_padding_vertical_lax"
+            android:layout_marginBottom="@dimen/text_padding_vertical_lax"
+            android:layout_weight="1"
+            android:drawablePadding="@dimen/text_padding_horizontal_cram"
+            android:textSize="@dimen/font_size_large" />
+
+        <ImageButton
+            android:id="@+id/directions_trip_details_individual_entry_map"
+            android:layout_width="@dimen/action_bar_button_width"
+            android:layout_height="match_parent"
+            android:scaleType="center"
+            android:src="@drawable/ic_map_black_24dp"
+            android:tint="@color/fg_less_significant" />
+
+    </LinearLayout>
 
     <TextView
-        android:id="@+id/directions_trip_details_individual_entry_text"
-        android:layout_width="0px"
+        android:id="@+id/directions_trip_details_individual_entry_progress"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/text_padding_vertical_lax"
+        android:layout_marginLeft="@dimen/text_padding_horizontal_lax"
+        android:layout_marginRight="@dimen/text_padding_horizontal_lax"
         android:layout_marginTop="@dimen/text_padding_vertical_lax"
-        android:layout_weight="1"
-        android:drawablePadding="@dimen/text_padding_horizontal_cram"
-        android:textSize="@dimen/font_size_large" />
-
-    <ImageButton
-        android:id="@+id/directions_trip_details_individual_entry_map"
-        android:layout_width="@dimen/action_bar_button_width"
-        android:layout_height="match_parent"
-        android:scaleType="center"
-        android:src="@drawable/ic_map_black_24dp"
-        android:tint="@color/fg_less_significant" />
+        android:paddingTop="@dimen/text_padding_vertical"
+        android:paddingBottom="@dimen/text_padding_vertical"
+        android:gravity="center"
+        android:textSize="@dimen/font_size_large"
+        android:background="@color/bg_trip_details_time_left"
+        android:visibility="gone" />
 
 </LinearLayout>
