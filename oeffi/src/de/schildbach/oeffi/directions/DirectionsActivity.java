@@ -883,12 +883,11 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
         initLayoutTransitions(true);
 
         final NetworkProvider networkProvider = network != null ? NetworkProviderFactory.provider(network) : null;
-        final boolean hasBikeOption = network != NetworkId.BVG;
 
         viewViaLocation.setVisibility(networkProvider != null && networkProvider.hasCapabilities(NetworkProvider.Capability.TRIPS_VIA) ?
                 View.VISIBLE : View.GONE);
         viewProducts.setVisibility(View.VISIBLE);
-        if (hasBikeOption)
+        if (networkProvider != null && networkProvider.hasCapabilities(Capability.BIKE_OPTION))
             viewBike.setVisibility(View.VISIBLE);
     }
 
