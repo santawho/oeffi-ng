@@ -94,7 +94,7 @@ public class QueryJourneyRunnable implements Runnable {
         final NetworkProvider networkProvider = NetworkProviderFactory.provider(networkId);
         final QueryJourneyRunnable queryJourneyRunnable = new QueryJourneyRunnable(
             parentActivity, clickedView,
-            progressDialog, handler, backgroundHandler, networkProvider,
+            progressDialog, handler, networkProvider,
             journeyRef, entryLocation, exitLocation);
 
         log.info("Executing: {}", queryJourneyRunnable);
@@ -105,7 +105,7 @@ public class QueryJourneyRunnable implements Runnable {
 
     public QueryJourneyRunnable(
             final Activity parentActivity, final View clickedView,
-            final ProgressDialog progressDialog, final Handler handler, final Handler backgroundHandler,
+            final ProgressDialog progressDialog, final Handler handler,
             final NetworkProvider networkProvider,
             final JourneyRef journeyRef,
             final Location entryLocation, final Location exitLocation) {
