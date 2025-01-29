@@ -181,7 +181,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         intent.putExtra(INTENT_EXTRA_TRIP, checkNotNull(trip));
         intent.putExtra(INTENT_EXTRA_RENDERCONFIG, checkNotNull(renderConfig));
         if (renderConfig.isNavigation) {
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+//                    | Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+//                    | Intent.FLAG_ACTIVITY_SINGLE_TOP
+//                    | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    | Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
             Uri.Builder builder = new Uri.Builder().scheme("data").authority(TripDetailsActivity.class.getName());
             for (final Trip.Leg leg: trip.legs) {
                 if (leg instanceof Trip.Public) {
@@ -482,6 +486,14 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         checkAutoRefresh();
         mapView.onResume();
         updateGUI();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (renderConfig.isNavigation)
+            return;
+
+        super.onBackPressed();
     }
 
     @Override
@@ -887,14 +899,22 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 mapView.setVisibility(View.VISIBLE);
                 mapView.setOnClickListener(new MapClickListener(leg.arrival));
             }
-        } else {
+        } else if (legC.transferFrom != null) {
+            // walk after some public transport
             iconResId = R.drawable.ic_directions_walk_grey600_24dp;
+        } else {
+            // walk before anything
+            iconResId = 0;
         }
 
         String transferText = null;
         final Stop transferFrom = legC.transferFrom != null ? legC.transferFrom.publicLeg.arrivalStop : null;
         final Stop transferTo = legC.transferTo != null ? legC.transferTo.publicLeg.departureStop : null;
-        if (transferFrom != null) {
+        if (transferFrom == null) {
+            // walk at the beginning
+        } else if (transferTo == null) {
+            // walk at the end
+        } else {
             final Date arrMinTime = transferFrom.plannedArrivalTime;
             final Date arrMaxTime = transferFrom.predictedArrivalTime != null ? transferFrom.predictedArrivalTime : arrMinTime;
             final Date depMinTime = transferTo.plannedDepartureTime;
@@ -933,17 +953,22 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 : legText == null ? transferText
                 : getString(R.string.directions_trip_conneval_with_transfer, transferText, legText);
 
-        textView.setText(Html.fromHtml(text));
-        textView.setCompoundDrawablesWithIntrinsicBounds(iconResId, 0, 0, 0);
+        if (text == null && iconResId == 0) {
+            textView.setVisibility(View.GONE);
+        } else {
+            textView.setVisibility(View.VISIBLE);
+            textView.setText(Html.fromHtml(text != null ? text : ""));
+            textView.setCompoundDrawablesWithIntrinsicBounds(iconResId, 0, 0, 0);
+        }
 
         final TextView progress = row.findViewById(R.id.directions_trip_details_individual_entry_progress);
         progress.setVisibility(View.GONE);
         Date beginTime = transferFrom != null ? transferFrom.getArrivalTime() : null;
         Date endTime = transferTo != null ? transferTo.getDepartureTime() : null;
-        if (beginTime == null || now.before(beginTime)) {
+        if (beginTime != null && now.before(beginTime)) {
             // leg is in the future
             row.setBackgroundColor(colorLegIndividualFutureBackground);
-        } else if (endTime == null || now.after(endTime)) {
+        } else if (endTime != null && now.after(endTime)) {
             // leg is in the past
             row.setBackgroundColor(colorLegIndividualPastBackground);
         } else {
@@ -1418,7 +1443,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 prevC = transferTo;
             } else if (leg instanceof Trip.Public){
                 final LegContainer newC = new LegContainer((Trip.Public) leg);
-                if (prevC != null) {
+                if (prevC != null || iLeg == 0) {
                     legs.add(new LegContainer(null, prevC, newC));
                 }
                 legs.add(newC);
