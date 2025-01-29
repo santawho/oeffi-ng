@@ -211,13 +211,6 @@ public abstract class OeffiMainActivity extends OeffiActivity {
     }
 
     @Override
-    protected void onResume() {
-        checkChangeNetwork();
-
-        super.onResume();
-    }
-
-    @Override
     public void onConfigurationChanged(final Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 

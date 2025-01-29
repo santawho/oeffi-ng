@@ -70,6 +70,18 @@ public abstract class OeffiActivity extends ComponentActivity {
         ErrorReporter.getInstance().check(this, applicationVersionCode(), application.okHttpClient());
     }
 
+    @Override
+    protected void onResume() {
+        checkChangeNetwork();
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        savedProducts = loadProductFilter();
+        super.onPause();
+    }
+
     protected void updateFragments(final int listFrameResId, final int mapFrameResId) {
         final Resources res = getResources();
 
@@ -165,8 +177,10 @@ public abstract class OeffiActivity extends ComponentActivity {
             } else {
                 haveChanges = !newProducts.containsAll(savedProducts);
             }
-            if (haveChanges)
+            if (haveChanges) {
                 log.info("products change detected: {} -> {}", network, newNetwork);
+                savedProducts = newProducts;
+            }
         }
 
         if (haveChanges)
