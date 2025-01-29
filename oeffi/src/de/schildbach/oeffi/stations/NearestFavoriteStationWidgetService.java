@@ -65,6 +65,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLException;
+
+import java.io.Serializable;
 import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -395,7 +397,8 @@ public class NearestFavoriteStationWidgetService extends JobService {
 
         final Intent intent = new Intent(this, NearestFavoriteStationWidgetListService.class);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
-        intent.putExtra(NearestFavoriteStationWidgetListService.INTENT_EXTRA_DEPARTURES, Objects.serialize(departures));
+        intent.putExtra(NearestFavoriteStationWidgetListService.INTENT_EXTRA_DEPARTURES,
+                Objects.serialize((Serializable) departures));
         intent.putExtra(NearestFavoriteStationWidgetListService.INTENT_EXTRA_DEPARTURES + ".hash",
                 departures.hashCode());
         intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));

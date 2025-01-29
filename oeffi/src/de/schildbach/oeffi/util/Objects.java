@@ -26,9 +26,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
 public class Objects {
-    public static byte[] serialize(final Object object) {
+    public static byte[] serialize(final Serializable object) {
+        if (object == null) return null;
         try {
             final ByteArrayOutputStream os = new ByteArrayOutputStream();
             new ObjectOutputStream(os).writeObject(object);
@@ -38,11 +40,13 @@ public class Objects {
         }
     }
 
-    public static String serializeToString(final Object object) {
+    public static String serializeToString(final Serializable object) {
+        if (object == null) return null;
         return Base64.encodeToString(serialize(object), Base64.DEFAULT);
     }
 
     public static Object deserialize(final byte[] bytes) {
+        if (bytes == null) return null;
         try {
             return new ObjectInputStream(new ByteArrayInputStream(bytes)).readObject();
         } catch (final ClassNotFoundException | IOException x) {
@@ -51,6 +55,12 @@ public class Objects {
     }
 
     public static Object deserialize(final String base64) {
+        if (base64 == null) return null;
         return deserialize(Base64.decode(checkNotNull(base64), Base64.DEFAULT));
+    }
+
+    public static <T extends Serializable> T clone(T object) {
+        if (object == null) return null;
+        return (T) deserialize(serialize(object));
     }
 }
