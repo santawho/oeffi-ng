@@ -58,6 +58,7 @@ import de.schildbach.oeffi.directions.QueryJourneyRunnable;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.DividerItemDecoration;
 import de.schildbach.oeffi.util.Formats;
+import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
@@ -76,11 +77,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -120,15 +117,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         checkArgument(station.type == LocationType.STATION);
         checkNotNull(networkId);
         intent.putExtra(StationDetailsActivity.INTENT_EXTRA_NETWORK, networkId.name());
-        try (
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                ObjectOutputStream oos = new ObjectOutputStream(baos)) {
-            oos.writeObject(station);
-            final String value = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
-            intent.putExtra(StationDetailsActivity.INTENT_EXTRA_STATION, value);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        intent.putExtra(StationDetailsActivity.INTENT_EXTRA_STATION, Objects.serializeToString(station));
         return intent;
     }
 
@@ -244,17 +233,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         String networkName = intent.getStringExtra(INTENT_EXTRA_NETWORK);
         final NetworkId network = NetworkId.valueOf(checkNotNull(networkName));
         final String stationSerialized = intent.getStringExtra(INTENT_EXTRA_STATION);
-        final Station station;
-        try (ObjectInputStream ois = new ObjectInputStream(
-                new ByteArrayInputStream(Base64.decode(checkNotNull(stationSerialized),
-                Base64.DEFAULT)))) {
-            Location location = (Location) ois.readObject();
-            station = new Station(network, location);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        final Station station = new Station(network, (Location) Objects.deserialize(stationSerialized));
         if (intent.hasExtra(INTENT_EXTRA_DEPARTURES))
             station.departures = filterDepartures((List<Departure>) intent.getSerializableExtra(INTENT_EXTRA_DEPARTURES), loadProductFilter());
         selectStation(station);

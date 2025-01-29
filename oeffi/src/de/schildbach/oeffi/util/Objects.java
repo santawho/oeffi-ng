@@ -17,6 +17,10 @@
 
 package de.schildbach.oeffi.util;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import android.util.Base64;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -34,11 +38,19 @@ public class Objects {
         }
     }
 
+    public static String serializeToString(final Object object) {
+        return Base64.encodeToString(serialize(object), Base64.DEFAULT);
+    }
+
     public static Object deserialize(final byte[] bytes) {
         try {
             return new ObjectInputStream(new ByteArrayInputStream(bytes)).readObject();
         } catch (final ClassNotFoundException | IOException x) {
             throw new RuntimeException(x);
         }
+    }
+
+    public static Object deserialize(final String base64) {
+        return deserialize(Base64.decode(checkNotNull(base64), Base64.DEFAULT));
     }
 }
