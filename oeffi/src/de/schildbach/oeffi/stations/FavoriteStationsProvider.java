@@ -40,7 +40,9 @@ import java.util.List;
 public class FavoriteStationsProvider extends ContentProvider {
     private static final String DATABASE_TABLE = "favorites";
 
-    public static final Uri CONTENT_URI = Uri.parse("content://de.schildbach.oeffi.stations." + DATABASE_TABLE);
+    public static Uri CONTENT_URI() {
+        return Uri.parse("content://" + Application.getApplicationId() + ".stations." + DATABASE_TABLE);
+    };
 
     public static final String KEY_ROWID = "_id";
     public static final String KEY_TYPE = "type";
@@ -73,7 +75,7 @@ public class FavoriteStationsProvider extends ContentProvider {
         if (rowId == -1)
             return null;
         else
-            return ContentUris.withAppendedId(CONTENT_URI, rowId);
+            return ContentUris.withAppendedId(CONTENT_URI(), rowId);
     }
 
     @Override
@@ -140,7 +142,7 @@ public class FavoriteStationsProvider extends ContentProvider {
         if (!location.isIdentified() || location.type != LocationType.STATION)
             return null;
 
-        final Cursor favCursor = contentResolver.query(FavoriteStationsProvider.CONTENT_URI,
+        final Cursor favCursor = contentResolver.query(FavoriteStationsProvider.CONTENT_URI(),
                 new String[] { FavoriteStationsProvider.KEY_TYPE }, FavoriteStationsProvider.KEY_STATION_NETWORK
                         + "=? AND " + FavoriteStationsProvider.KEY_STATION_ID + "=?",
                 new String[] { network.name(), location.id }, null);

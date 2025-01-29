@@ -38,7 +38,9 @@ import java.util.List;
 public class QueryHistoryProvider extends ContentProvider {
     private static final String DATABASE_TABLE = "query_history";
 
-    public static final Uri CONTENT_URI = Uri.parse("content://de.schildbach.oeffi.directions." + DATABASE_TABLE);
+    public static Uri CONTENT_URI() {
+        return Uri.parse("content://" + Application.getApplicationId() + ".directions." + DATABASE_TABLE);
+    };
 
     public static final String KEY_ROWID = "_id";
     public static final String KEY_NETWORK = "query_network";
@@ -70,7 +72,7 @@ public class QueryHistoryProvider extends ContentProvider {
     public static final int TYPE_COORD = 4;
 
     public static Uri historyRowUri(final NetworkId network, final long rowId) {
-        return QueryHistoryProvider.CONTENT_URI.buildUpon().appendPath(network.name()).appendPath(Long.toString(rowId))
+        return QueryHistoryProvider.CONTENT_URI().buildUpon().appendPath(network.name()).appendPath(Long.toString(rowId))
                 .build();
     }
 
@@ -141,7 +143,7 @@ public class QueryHistoryProvider extends ContentProvider {
             values.put(QueryHistoryProvider.KEY_TIMES_QUERIED, isQuery ? 1 : 0);
             values.put(QueryHistoryProvider.KEY_LAST_QUERIED, isQuery ? System.currentTimeMillis() : 0);
 
-            final Uri baseUri = QueryHistoryProvider.CONTENT_URI.buildUpon().appendPath(network.name()).build();
+            final Uri baseUri = QueryHistoryProvider.CONTENT_URI().buildUpon().appendPath(network.name()).build();
             historyUri = contentResolver.insert(baseUri, values);
 
             final Cursor deleteCursor = contentResolver.query(baseUri, null, null, null,
@@ -206,7 +208,7 @@ public class QueryHistoryProvider extends ContentProvider {
             selectionArgs.add(to.name);
         }
 
-        return contentResolver.query(QueryHistoryProvider.CONTENT_URI.buildUpon().appendPath(network.name()).build(),
+        return contentResolver.query(QueryHistoryProvider.CONTENT_URI().buildUpon().appendPath(network.name()).build(),
                 null, selection.toString(), selectionArgs.toArray(new String[0]), null);
     }
 
@@ -262,7 +264,7 @@ public class QueryHistoryProvider extends ContentProvider {
 
         long rowId = helper.getWritableDatabase().insertOrThrow(DATABASE_TABLE, null, values);
 
-        final Uri rowUri = CONTENT_URI.buildUpon().appendPath(network).appendPath(Long.toString(rowId)).build();
+        final Uri rowUri = CONTENT_URI().buildUpon().appendPath(network).appendPath(Long.toString(rowId)).build();
 
         getContext().getContentResolver().notifyChange(rowUri, null);
 

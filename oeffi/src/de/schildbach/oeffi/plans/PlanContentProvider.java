@@ -63,7 +63,9 @@ import java.util.Locale;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class PlanContentProvider extends ContentProvider {
-    public static final Uri CONTENT_URI = Uri.parse("content://de.schildbach.oeffi.plans");
+    public static Uri CONTENT_URI() {
+        return Uri.parse("content://" + Application.getApplicationId() + ".plans");
+    }
 
     public static final String KEY_PLAN_ID = "plan_id";
     public static final String KEY_PLAN_NAME = "plan_name";
@@ -87,7 +89,7 @@ public class PlanContentProvider extends ContentProvider {
     private static final Logger log = LoggerFactory.getLogger(PlanContentProvider.class);
 
     public static Uri planUri(final String planId) {
-        return CONTENT_URI.buildUpon().appendPath("plan").appendPath(planId).build();
+        return CONTENT_URI().buildUpon().appendPath("plan").appendPath(planId).build();
     }
 
     public static Uri stationsUri(final String planId) {
@@ -95,7 +97,7 @@ public class PlanContentProvider extends ContentProvider {
     }
 
     public static Uri stationsUri(final NetworkId network, final String localId) {
-        return CONTENT_URI.buildUpon().appendPath("stations").appendPath(network.name().toLowerCase(Locale.US))
+        return CONTENT_URI().buildUpon().appendPath("stations").appendPath(network.name().toLowerCase(Locale.US))
                 .appendPath(localId).build();
     }
 

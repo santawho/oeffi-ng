@@ -128,7 +128,7 @@ public class PlansPickerActivity extends OeffiMainActivity implements LocationHe
 
         initNavigation();
 
-        cursor = getContentResolver().query(PlanContentProvider.CONTENT_URI, null, null, null, null);
+        cursor = getContentResolver().query(PlanContentProvider.CONTENT_URI(), null, null, null, null);
 
         listView = findViewById(android.R.id.list);
         listView.setLayoutManager(new LinearLayoutManager(this));
@@ -256,7 +256,7 @@ public class PlansPickerActivity extends OeffiMainActivity implements LocationHe
     private void requery() {
         final String sortOrder = location != null
                 ? Double.toString(location.getLatAsDouble()) + "," + Double.toString(location.getLonAsDouble()) : null;
-        final Uri.Builder uri = PlanContentProvider.CONTENT_URI.buildUpon();
+        final Uri.Builder uri = PlanContentProvider.CONTENT_URI().buildUpon();
         if (filter != null)
             uri.appendPath(SearchManager.SUGGEST_URI_PATH_QUERY).appendPath(filter);
         cursor = getContentResolver().query(uri.build(), null, null, null, sortOrder);

@@ -1278,7 +1278,7 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
 
                                 // local autocomplete
                                 final Cursor cursor = getContentResolver().query(
-                                        QueryHistoryProvider.CONTENT_URI.buildUpon().appendPath(network.name())
+                                        QueryHistoryProvider.CONTENT_URI().buildUpon().appendPath(network.name())
                                                 .appendQueryParameter(QueryHistoryProvider.QUERY_PARAM_Q, constraintStr)
                                                 .build(),
                                         null, null, null, QueryHistoryProvider.KEY_LAST_QUERIED + " DESC");

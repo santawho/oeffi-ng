@@ -45,10 +45,24 @@ import java.io.FilenameFilter;
 import java.util.concurrent.TimeUnit;
 
 public class Application extends android.app.Application {
+    private static Application instance;
+
+    public static Application getInstance() {
+        return instance;
+    }
+
+    public static String getApplicationId() {
+        return instance.getPackageName();
+    }
+
     private PackageInfo packageInfo;
     private OkHttpClient okHttpClient;
 
     private static final Logger log = LoggerFactory.getLogger(Application.class);
+
+    public Application() {
+        instance = this;
+    }
 
     @Override
     public void onCreate() {

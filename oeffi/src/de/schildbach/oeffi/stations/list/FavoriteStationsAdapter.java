@@ -58,13 +58,13 @@ public class FavoriteStationsAdapter extends RecyclerView.Adapter<FavoriteStatio
         this.contextMenuItemListener = contextMenuItemListener;
 
         cursor = network != null ? //
-                contentResolver.query(FavoriteStationsProvider.CONTENT_URI, null,
+                contentResolver.query(FavoriteStationsProvider.CONTENT_URI(), null,
                         FavoriteStationsProvider.KEY_TYPE + "=?" + " AND "
                                 + FavoriteStationsProvider.KEY_STATION_NETWORK + "=?",
                         new String[] { String.valueOf(FavoriteStationsProvider.TYPE_FAVORITE), network.name() },
                         FavoriteStationsProvider.KEY_STATION_PLACE + "," + FavoriteStationsProvider.KEY_STATION_NAME)
                 : //
-                contentResolver.query(FavoriteStationsProvider.CONTENT_URI, null,
+                contentResolver.query(FavoriteStationsProvider.CONTENT_URI(), null,
                         FavoriteStationsProvider.KEY_TYPE + "=?",
                         new String[] { String.valueOf(FavoriteStationsProvider.TYPE_FAVORITE) },
                         FavoriteStationsProvider.KEY_STATION_NETWORK + "," + FavoriteStationsProvider.KEY_STATION_PLACE
@@ -76,7 +76,7 @@ public class FavoriteStationsAdapter extends RecyclerView.Adapter<FavoriteStatio
     }
 
     public void removeEntry(final int position) {
-        final Uri uri = Uri.withAppendedPath(FavoriteStationsProvider.CONTENT_URI, String.valueOf(getItemId(position)));
+        final Uri uri = Uri.withAppendedPath(FavoriteStationsProvider.CONTENT_URI(), String.valueOf(getItemId(position)));
         contentResolver.delete(uri, null, null);
         notifyItemRemoved(position);
         cursor.requery();

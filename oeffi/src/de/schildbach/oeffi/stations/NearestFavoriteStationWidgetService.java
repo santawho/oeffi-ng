@@ -257,7 +257,7 @@ public class NearestFavoriteStationWidgetService extends JobService {
         // determine nearest station
         final List<Favorite> favorites = new ArrayList<>();
 
-        final Cursor favCursor = contentResolver.query(FavoriteStationsProvider.CONTENT_URI, null,
+        final Cursor favCursor = contentResolver.query(FavoriteStationsProvider.CONTENT_URI(), null,
                 FavoriteStationsProvider.KEY_TYPE + "=?",
                 new String[] { String.valueOf(FavoriteStationsProvider.TYPE_FAVORITE) }, null);
 

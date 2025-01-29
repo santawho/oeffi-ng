@@ -66,7 +66,7 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="de.schildbach.oeffi"
+            android:authorities="${applicationId}"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
@@ -90,7 +90,7 @@
             android:configChanges="keyboard|keyboardHidden"
             android:label="@string/stations_icon_label"
             android:launchMode="singleTop"
-            android:taskAffinity="de.schildbach.oeffi.stations">
+            android:taskAffinity="${applicationId}.stations">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -116,17 +116,17 @@
             android:exported="true"
             android:configChanges="keyboard|keyboardHidden"
             android:label="@string/station_details_activity_title"
-            android:taskAffinity="de.schildbach.oeffi.stations"
+            android:taskAffinity="${applicationId}.stations"
             android:showWhenLocked="true" />
 
         <activity
             android:name=".stations.FavoriteStationsActivity"
             android:label="@string/stations_favorite_stations_title"
-            android:taskAffinity="de.schildbach.oeffi.stations" />
+            android:taskAffinity="${applicationId}.stations" />
 
         <provider
             android:name=".stations.FavoriteStationsProvider"
-            android:authorities="de.schildbach.oeffi.stations.favorites"
+            android:authorities="${applicationId}.stations.favorites"
             android:exported="false" />
 
         <activity
@@ -170,7 +170,7 @@
             android:configChanges="keyboard|keyboardHidden"
             android:icon="@mipmap/ic_oeffi_directions_color_48dp"
             android:label="@string/directions_icon_label"
-            android:taskAffinity="de.schildbach.oeffi.directions"
+            android:taskAffinity="${applicationId}.directions"
             android:windowSoftInputMode="stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -189,21 +189,21 @@
         <activity
             android:name=".directions.TripsOverviewActivity"
             android:configChanges="keyboard|keyboardHidden"
-            android:taskAffinity="de.schildbach.oeffi.directions"
+            android:taskAffinity="${applicationId}.directions"
             android:theme="@style/My.Theme.DarkDefault" />
 
         <activity
             android:name=".directions.TripDetailsActivity"
             android:configChanges="keyboard|keyboardHidden"
             android:label="@string/trip_details_title"
-            android:taskAffinity="de.schildbach.oeffi.directions"
+            android:taskAffinity="${applicationId}.directions"
             android:showWhenLocked="true" />
 
         <activity
             android:name=".directions.DirectionsShortcutActivity"
             android:exported="true"
             android:launchMode="singleInstance"
-            android:taskAffinity="de.schildbach.oeffi.directions"
+            android:taskAffinity="${applicationId}.directions"
             android:theme="@style/My.Theme.Translucent">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -212,7 +212,7 @@
 
         <provider
             android:name=".directions.QueryHistoryProvider"
-            android:authorities="de.schildbach.oeffi.directions.query_history"
+            android:authorities="${applicationId}.directions.query_history"
             android:exported="false" />
 
         <activity
@@ -222,7 +222,7 @@
             android:icon="@mipmap/ic_oeffi_plans_color_48dp"
             android:label="@string/plans_icon_label"
             android:launchMode="singleTop"
-            android:taskAffinity="de.schildbach.oeffi.plans">
+            android:taskAffinity="${applicationId}.plans">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -243,7 +243,7 @@
             android:exported="true"
             android:configChanges="keyboard|keyboardHidden"
             android:launchMode="singleTop"
-            android:taskAffinity="de.schildbach.oeffi.plans"
+            android:taskAffinity="${applicationId}.plans"
             android:theme="@style/My.Theme.Fullscreen"
             android:showWhenLocked="true">
             <intent-filter>
@@ -259,7 +259,7 @@
 
         <provider
             android:name=".plans.PlanContentProvider"
-            android:authorities="de.schildbach.oeffi.plans"
+            android:authorities="${applicationId}.plans"
             android:exported="false" />
     </application>
 

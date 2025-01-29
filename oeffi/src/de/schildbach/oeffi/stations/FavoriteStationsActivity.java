@@ -122,7 +122,7 @@ public class FavoriteStationsActivity extends OeffiActivity
 
         if (shouldReturnResult) {
             final Intent intent = new Intent();
-            intent.setData(Uri.withAppendedPath(FavoriteStationsProvider.CONTENT_URI,
+            intent.setData(Uri.withAppendedPath(FavoriteStationsProvider.CONTENT_URI(),
                     String.valueOf(adapter.getItemId(adapterPosition))));
             setResult(RESULT_OK, intent);
             finish();

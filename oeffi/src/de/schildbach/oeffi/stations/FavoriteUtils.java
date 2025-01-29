@@ -43,14 +43,14 @@ public class FavoriteUtils {
         values.put(FavoriteStationsProvider.KEY_STATION_LAT, station.getLatAs1E6());
         values.put(FavoriteStationsProvider.KEY_STATION_LON, station.getLonAs1E6());
 
-        final Uri rowUri = contentResolver.insert(FavoriteStationsProvider.CONTENT_URI, values);
+        final Uri rowUri = contentResolver.insert(FavoriteStationsProvider.CONTENT_URI(), values);
 
         return rowUri;
     }
 
     public static int delete(final ContentResolver contentResolver, final NetworkId networkId, final String stationId) {
         final int numRows = contentResolver
-                .delete(FavoriteStationsProvider.CONTENT_URI,
+                .delete(FavoriteStationsProvider.CONTENT_URI(),
                         FavoriteStationsProvider.KEY_STATION_NETWORK + "=? AND "
                                 + FavoriteStationsProvider.KEY_STATION_ID + "=?",
                         new String[] { networkId.name(), stationId });
@@ -59,7 +59,7 @@ public class FavoriteUtils {
     }
 
     public static Map<Location, Integer> loadAll(final ContentResolver contentResolver, final NetworkId networkId) {
-        final Cursor c = contentResolver.query(FavoriteStationsProvider.CONTENT_URI, null,
+        final Cursor c = contentResolver.query(FavoriteStationsProvider.CONTENT_URI(), null,
                 FavoriteStationsProvider.KEY_STATION_NETWORK + "=?", new String[] { networkId.name() }, null);
         final int typeIndex = c.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_TYPE);
 

@@ -75,7 +75,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<QueryHistoryViewHo
         this.clickListener = clickListener;
         this.contextMenuItemListener = contextMenuItemListener;
 
-        final Uri uri = QueryHistoryProvider.CONTENT_URI.buildUpon()
+        final Uri uri = QueryHistoryProvider.CONTENT_URI().buildUpon()
                 .appendPath(network != null ? network.name() : "_NONE_").build();
         cursor = contentResolver.query(uri, null, null, null,
                 QueryHistoryProvider.KEY_FAVORITE + " DESC, " + QueryHistoryProvider.KEY_LAST_QUERIED + " DESC");
@@ -127,7 +127,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<QueryHistoryViewHo
     }
 
     public void removeAllEntries() {
-        final Uri uri = QueryHistoryProvider.CONTENT_URI.buildUpon().appendPath(network.name()).build();
+        final Uri uri = QueryHistoryProvider.CONTENT_URI().buildUpon().appendPath(network.name()).build();
         contentResolver.delete(uri, null, null);
         notifyItemRangeRemoved(0, getItemCount());
         cursor.requery();

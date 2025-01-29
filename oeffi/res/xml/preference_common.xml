@@ -6,8 +6,13 @@
         android:key="network_provider"
         android:summary="@string/global_preferences_network_provider_summary"
         android:title="@string/global_preferences_network_provider_title">
+<!--        <intent-->
+<!--            android:targetPackage="de.schildbach.oeffi"-->
+<!--            android:targetClass="de.schildbach.oeffi.network.NetworkPickerActivity" />-->
+<!--        <intent-->
+<!--            android:targetPackage="${applicationId}"-->
+<!--            android:targetClass="de.schildbach.oeffi.network.NetworkPickerActivity" />-->
         <intent
-            android:targetPackage="de.schildbach.oeffi"
             android:targetClass="de.schildbach.oeffi.network.NetworkPickerActivity" />
     </Preference>
     <CheckBoxPreference
