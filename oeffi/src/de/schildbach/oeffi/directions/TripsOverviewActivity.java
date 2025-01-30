@@ -219,19 +219,20 @@ public class TripsOverviewActivity extends OeffiActivity {
 
     @Override
     protected void onStop() {
-        handler.removeCallbacks(checkMoreRunnable);
-
         unregisterReceiver(tickReceiver);
 
         // cancel background thread
+        backgroundHandler = null;
+        handler.removeCallbacks(checkMoreRunnable);
         backgroundThread.getLooper().quit();
+        queryMoreTripsRunning = false;
 
         super.onStop();
     }
 
     private final Runnable checkMoreRunnable = new Runnable() {
         public void run() {
-            if (!queryMoreTripsRunning) {
+            if (!queryMoreTripsRunning && backgroundHandler != null) {
                 final QueryTripsContext context = TripsOverviewActivity.this.context;
 
                 final int positionOffset = context != null && context.canQueryEarlier() ? 0 : 1;
@@ -250,8 +251,10 @@ public class TripsOverviewActivity extends OeffiActivity {
                     queryTripsRunnable = new QueryMoreTripsRunnable(context, true, reloadRequestData);
                 }
 
-                if (queryTripsRunnable != null)
+                if (queryTripsRunnable != null && backgroundHandler != null) {
+                    queryMoreTripsRunning = true;
                     backgroundHandler.post(queryTripsRunnable);
+                }
             }
         }
     };
@@ -266,8 +269,6 @@ public class TripsOverviewActivity extends OeffiActivity {
             this.context = context;
             this.later = later;
             this.reloadRequestData = reloadRequestData;
-
-            queryMoreTripsRunning = true;
         }
 
         public void run() {
@@ -276,9 +277,9 @@ public class TripsOverviewActivity extends OeffiActivity {
             try {
                 doRequest();
             } finally {
-                runOnUiThread(() -> {
-                    queryMoreTripsRunning = false;
+                queryMoreTripsRunning = false;
 
+                runOnUiThread(() -> {
                     actionBar.stopProgress();
                 });
             }
