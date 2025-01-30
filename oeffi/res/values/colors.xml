@@ -39,13 +39,13 @@
     <color name="bg_position_darkdefault">#bbbbbb</color>
     <color name="bg_highlighted_darkdefault">#ff4444</color>
     <color name="bg_plan">#ffd8d8d8</color>
-    <color name="bg_trip_details_public_past">#f8f8f8</color>
-    <color name="bg_trip_details_individual_past">#e8e8e8</color>
+    <color name="bg_trip_details_public_past">#ececf8</color>
+    <color name="bg_trip_details_individual_past">#dce8e8</color>
     <color name="bg_trip_details_public_now">#fff8e0</color>
     <color name="bg_trip_details_individual_now">#efe8d0</color>
     <color name="bg_trip_details_time_left">#ff8080</color>
     <color name="bg_trip_details_public_future">#ffffff</color>
-    <color name="bg_trip_details_individual_future">#efefef</color>
+    <color name="bg_trip_details_individual_future">#eff8ef</color>
 
     <item name="alpha_bright_white" format="float" type="dimen">1</item>
 
