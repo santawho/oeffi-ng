@@ -1,6 +1,12 @@
+import java.text.SimpleDateFormat
+
 plugins {
     alias(libs.plugins.android.application)
 }
+
+def now = new Date()
+def timeStr = new SimpleDateFormat('yyyyMMddHHmm').format(now)
+def timeInt = (int) (now.getTime() / 60000)
 
 android {
     namespace 'de.schildbach.oeffi'
@@ -11,8 +17,10 @@ android {
 
         minSdk 24
         targetSdk 35
-        versionCode 990000
-        versionName "99-handmade"
+//        versionCode 990000
+//        versionName "99-handmade"
+        versionCode timeInt
+        versionName timeStr
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
