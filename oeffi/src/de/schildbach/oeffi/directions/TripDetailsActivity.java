@@ -71,6 +71,7 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.TripAware;
 import de.schildbach.oeffi.directions.TimeSpec.DepArr;
 import de.schildbach.oeffi.directions.navigation.Navigator;
+import de.schildbach.oeffi.directions.navigation.TripNavigatorActivity;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.stations.LineView;
 import de.schildbach.oeffi.stations.StationContextMenu;
@@ -82,7 +83,6 @@ import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.Fare;
-import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.Point;
@@ -176,27 +176,17 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     private static void start(final Context context, final NetworkId network, final Trip trip, final RenderConfig renderConfig) {
-        final Intent intent = new Intent(context, TripDetailsActivity.class);
+        context.startActivity(buildStartIntent(TripDetailsActivity.class, context, network, trip, renderConfig));
+    }
+
+    protected static Intent buildStartIntent(
+            final Class<? extends TripDetailsActivity> activityClass, final Context context,
+            final NetworkId network, final Trip trip, final RenderConfig renderConfig) {
+        final Intent intent = new Intent(context, activityClass);
         intent.putExtra(INTENT_EXTRA_NETWORK, checkNotNull(network));
         intent.putExtra(INTENT_EXTRA_TRIP, checkNotNull(trip));
         intent.putExtra(INTENT_EXTRA_RENDERCONFIG, checkNotNull(renderConfig));
-        if (renderConfig.isNavigation) {
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-//                    | Intent.FLAG_ACTIVITY_MULTIPLE_TASK
-//                    | Intent.FLAG_ACTIVITY_SINGLE_TOP
-//                    | Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    | Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
-            Uri.Builder builder = new Uri.Builder().scheme("data").authority(TripDetailsActivity.class.getName());
-            for (final Trip.Leg leg: trip.legs) {
-                if (leg instanceof Trip.Public) {
-                    JourneyRef journeyRef = ((Trip.Public) leg).journeyRef;
-                    builder.appendPath(journeyRef == null ? "-" : Integer.toString(journeyRef.hashCode()));
-                }
-            }
-            Uri uri = builder.build();
-            intent.setData(uri);
-        }
-        context.startActivity(intent);
+        return intent;
     }
 
     private MyActionBar actionBar;
@@ -486,14 +476,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         checkAutoRefresh();
         mapView.onResume();
         updateGUI();
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (renderConfig.isNavigation)
-            return;
-
-        super.onBackPressed();
     }
 
     @Override
@@ -1370,10 +1352,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     private void startNavigation() {
-        RenderConfig rc = new RenderConfig();
-        rc.isNavigation = true;
-        rc.isJourney = renderConfig.isJourney;
-        TripDetailsActivity.start(this, network, trip, rc);
+        TripNavigatorActivity.start(this, network, trip, renderConfig);
+        finish();
     }
 
     private void refreshNavigation() {

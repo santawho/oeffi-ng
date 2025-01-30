@@ -200,6 +200,13 @@
             android:showWhenLocked="true" />
 
         <activity
+            android:name=".directions.navigation.TripNavigatorActivity"
+            android:configChanges="keyboard|keyboardHidden"
+            android:label="@string/navigation_details_title"
+            android:taskAffinity="${applicationId}.navigation"
+            android:showWhenLocked="true" />
+
+        <activity
             android:name=".directions.DirectionsShortcutActivity"
             android:exported="true"
             android:launchMode="singleInstance"
