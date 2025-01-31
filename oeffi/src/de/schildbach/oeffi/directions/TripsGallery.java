@@ -36,6 +36,7 @@ import android.widget.Gallery;
 import com.google.common.math.LongMath;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.Formats;
+import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.Trip;
 
 import java.util.Calendar;
@@ -44,17 +45,68 @@ import java.util.GregorianCalendar;
 import java.util.List;
 
 public class TripsGallery extends Gallery {
+    private TimeSpec referenceTime = null;
+
     private OnScrollListener onScrollListener;
 
     private final Paint gridPaint = new Paint();
     private final Paint gridLabelPaint = new Paint();
-    private final Paint currenttimePaint = new Paint();
-    private final Paint currenttimeLabelBackgroundPaint = new Paint();
-    private final Paint currenttimeLabelTextPaint = new Paint();
+
+    private class TimeLine {
+        private final Paint paint = new Paint();
+        private final Paint labelBackgroundPaint = new Paint();
+        private final Paint labelTextPaint = new Paint();
+
+        TimeLine(int fgColor, int bgColor, float strokeWidth, float textSize) {
+            paint.setColor(fgColor);
+            paint.setStyle(Paint.Style.FILL_AND_STROKE);
+            paint.setStrokeWidth(strokeWidth);
+            paint.setAntiAlias(false);
+
+            labelBackgroundPaint.setColor(fgColor);
+            labelBackgroundPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+            labelBackgroundPaint.setStrokeWidth(strokeWidth);
+            labelBackgroundPaint.setAntiAlias(true);
+
+            labelTextPaint.setColor(bgColor);
+            labelTextPaint.setAntiAlias(true);
+            labelTextPaint.setTextSize(textSize);
+            labelTextPaint.setTypeface(Typeface.DEFAULT_BOLD);
+            labelTextPaint.setTextAlign(Align.CENTER);
+        }
+
+        public void draw(Canvas canvas, long time, int height, int width, boolean labelRight, boolean labelUp) {
+            final String label = timeFormat.format(time);
+            final float y = adapter.timeToCoord(time, height);
+            labelTextPaint.getTextBounds(label, 0, label.length(), bounds);
+            bounds.inset(-timeLabelPaddingHorizontal, -timeLabelPaddingVertical);
+            final int yText;
+            if (labelUp) {
+                yText = Math.round(y) - bounds.height();
+            } else {
+                yText = Math.round(y);
+            }
+            bounds.offsetTo(paddingHorizontalCram, yText);
+
+            boundsF.set(bounds);
+            if (labelRight) {
+                canvas.drawLine(0, y, width, y, paint);
+                boundsF.left = width - bounds.right;
+                boundsF.right = width - bounds.left;
+            } else {
+                canvas.drawLine(bounds.right + paddingHorizontalCram, y, width, y, paint);
+            }
+            final float roundRadius = Math.min(timeLabelPaddingHorizontal, timeLabelPaddingVertical);
+            canvas.drawRoundRect(boundsF, roundRadius, roundRadius, labelBackgroundPaint);
+            canvas.drawText(label, boundsF.centerX(), boundsF.bottom - timeLabelPaddingVertical, labelTextPaint);
+        }
+    }
+    private TimeLine currentTimeLine;
+    private TimeLine referenceTimeLine;
 
     private final Context context;
     private final int paddingHorizontal, paddingHorizontalCram;
-    private final int currentTimeLabelPaddingHorizontal, currentTimeLabelPaddingVertical;
+    private final int timeLabelPaddingHorizontal, timeLabelPaddingVertical;
     private final java.text.DateFormat timeFormat;
 
     private final TripsGalleryAdapter adapter;
@@ -77,13 +129,15 @@ public class TripsGallery extends Gallery {
         final Resources res = getResources();
         paddingHorizontal = res.getDimensionPixelSize(R.dimen.text_padding_horizontal);
         paddingHorizontalCram = res.getDimensionPixelSize(R.dimen.text_padding_horizontal_cram);
-        currentTimeLabelPaddingHorizontal = res.getDimensionPixelSize(R.dimen.text_padding_horizontal);
-        currentTimeLabelPaddingVertical = res.getDimensionPixelSize(R.dimen.text_padding_vertical);
+        timeLabelPaddingHorizontal = res.getDimensionPixelSize(R.dimen.text_padding_horizontal);
+        timeLabelPaddingVertical = res.getDimensionPixelSize(R.dimen.text_padding_vertical);
         final float strokeWidth = res.getDimension(R.dimen.trips_overview_stroke_width_darkdefault);
+        final float labelTextSize = res.getDimension(R.dimen.font_size_normal);
         final int colorSignificant = res.getColor(R.color.fg_significant_darkdefault);
         final int colorInsignificant = res.getColor(R.color.fg_insignificant_darkdefault);
         final int colorSignificantInverse = res.getColor(R.color.fg_significant_inverse_darkdefault);
         final int colorCurrentTime = res.getColor(R.color.bg_current_time_darkdefault);
+        final int colorReferenceTime = res.getColor(R.color.bg_reference_time_darkdefault);
 
         gridPaint.setColor(colorInsignificant);
         gridPaint.setStyle(Paint.Style.STROKE);
@@ -93,24 +147,11 @@ public class TripsGallery extends Gallery {
 
         gridLabelPaint.setColor(colorSignificant);
         gridLabelPaint.setAntiAlias(true);
-        gridLabelPaint.setTextSize(res.getDimension(R.dimen.font_size_normal));
+        gridLabelPaint.setTextSize(labelTextSize);
         gridLabelPaint.setTextAlign(Align.CENTER);
 
-        currenttimePaint.setColor(colorCurrentTime);
-        currenttimePaint.setStyle(Paint.Style.FILL_AND_STROKE);
-        currenttimePaint.setStrokeWidth(strokeWidth);
-        currenttimePaint.setAntiAlias(false);
-
-        currenttimeLabelBackgroundPaint.setColor(colorCurrentTime);
-        currenttimeLabelBackgroundPaint.setStyle(Paint.Style.FILL_AND_STROKE);
-        currenttimeLabelBackgroundPaint.setStrokeWidth(strokeWidth);
-        currenttimeLabelBackgroundPaint.setAntiAlias(true);
-
-        currenttimeLabelTextPaint.setColor(colorSignificantInverse);
-        currenttimeLabelTextPaint.setAntiAlias(true);
-        currenttimeLabelTextPaint.setTextSize(res.getDimension(R.dimen.font_size_normal));
-        currenttimeLabelTextPaint.setTypeface(Typeface.DEFAULT_BOLD);
-        currenttimeLabelTextPaint.setTextAlign(Align.CENTER);
+        currentTimeLine = new TimeLine(colorCurrentTime, colorSignificantInverse, strokeWidth, labelTextSize);
+        referenceTimeLine = new TimeLine(colorReferenceTime, colorSignificantInverse, strokeWidth, labelTextSize);
 
         timeFormat = DateFormat.getTimeFormat(context);
 
@@ -130,6 +171,11 @@ public class TripsGallery extends Gallery {
                 handler.post(onChildViewChangedRunnable);
             }
         });
+    }
+
+    public void setConfig(final TimeSpec referenceTime, final JourneyRef feederJourneyRef) {
+        this.referenceTime = referenceTime;
+        adapter.setConfig(referenceTime, feederJourneyRef);
     }
 
     public void setTrips(final List<Trip> trips, final boolean canScrollLater, final boolean canScrollEarlier) {
@@ -318,21 +364,18 @@ public class TripsGallery extends Gallery {
             canvas.drawText(labelTime, 0, labelTime.length(), bounds.centerX(), bounds.bottom, gridLabelPaint);
         }
 
+        final boolean currentTimeUp;
+        final boolean timeLineLabelRight = referenceTime == null || referenceTime.depArr == TimeSpec.DepArr.DEPART;
+        if (referenceTime != null && (!(referenceTime instanceof TimeSpec.Relative) || ((TimeSpec.Relative) referenceTime).diffMs != 0)) {
+            long time = referenceTime.timeInMillis();
+            currentTimeUp = time > now;
+            // draw reference time
+            referenceTimeLine.draw(canvas, time, height, width, timeLineLabelRight, !currentTimeUp);
+        } else {
+            currentTimeUp = true;
+        }
         // draw current time
-        final float y = adapter.timeToCoord(now, height);
-
-        final String label = timeFormat.format(now);
-
-        currenttimeLabelTextPaint.getTextBounds(label, 0, label.length(), bounds);
-        bounds.inset(-currentTimeLabelPaddingHorizontal, -currentTimeLabelPaddingVertical);
-        bounds.offsetTo(paddingHorizontalCram, Math.round(y) - bounds.height());
-
-        canvas.drawLine(bounds.right + paddingHorizontalCram, y, width, y, currenttimePaint);
-        final float roundRadius = Math.min(currentTimeLabelPaddingHorizontal, currentTimeLabelPaddingVertical);
-        boundsF.set(bounds);
-        canvas.drawRoundRect(boundsF, roundRadius, roundRadius, currenttimeLabelBackgroundPaint);
-        canvas.drawText(label, bounds.centerX(), bounds.bottom - currentTimeLabelPaddingVertical,
-                currenttimeLabelTextPaint);
+        currentTimeLine.draw(canvas, now, height, width, true, currentTimeUp);
     }
 
     public interface OnScrollListener {

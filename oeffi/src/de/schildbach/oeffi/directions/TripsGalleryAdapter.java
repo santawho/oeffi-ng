@@ -43,7 +43,9 @@ import android.widget.Adapter;
 import android.widget.BaseAdapter;
 import com.google.common.base.Preconditions;
 import de.schildbach.oeffi.R;
+import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.Line;
+import de.schildbach.pte.dto.Position;
 import de.schildbach.pte.dto.Stop;
 import de.schildbach.pte.dto.Style;
 import de.schildbach.pte.dto.Style.Shape;
@@ -56,11 +58,14 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class TripsGalleryAdapter extends BaseAdapter {
     private List<Trip> trips = Collections.emptyList();
+    private TimeSpec referenceTime;
+    private JourneyRef feederJourneyRef;
     private boolean canScrollLater = true, canScrollEarlier = true;
     private long minTime = 0, maxTime = 0;
 
@@ -71,13 +76,20 @@ public final class TripsGalleryAdapter extends BaseAdapter {
     private static final int VIEW_TYPE_CANNOT_SCROLL_EARLIER = 1;
     private static final int VIEW_TYPE_CANNOT_SCROLL_LATER = 2;
 
+    final int positionPaddingHorizontal;
+    final int positionPaddingVertical;
     private final Paint publicFillPaint = new Paint();
     private final Paint publicStrokePaint = new Paint();
     private final Paint publicLabelPaint = new Paint();
     private final Paint individualFillPaint = new Paint();
     private final Paint individualLabelPaint = new Paint();
     private final Paint individualTimePaint = new Paint();
+    private final Paint individualTimeDiffPaint = new Paint();
     private final Paint publicTimePaint = new Paint();
+    private final Paint publicTimeDiffPaint = new Paint();
+    private final Paint positionPaint = new Paint();
+    private final Paint positionPaintBackground = new Paint();
+    private final Paint feederStrokePaint = new Paint();
     private final Paint cannotScrollPaint = new Paint();
     private final int colorSignificantInverse;
     private final int colorDelayed;
@@ -101,6 +113,8 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         final int colorIndividual = res.getColor(R.color.bg_individual_darkdefault);
         colorSignificantInverse = res.getColor(R.color.fg_significant_inverse_darkdefault);
         colorDelayed = res.getColor(R.color.bg_delayed_darkdefault);
+        positionPaddingHorizontal = res.getDimensionPixelSize(R.dimen.text_padding_horizontal);
+        positionPaddingVertical = res.getDimensionPixelSize(R.dimen.text_padding_vertical);
 
         tripWidth = res.getDimensionPixelSize(R.dimen.trips_overview_entry_width);
 
@@ -129,13 +143,42 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         individualTimePaint.setAntiAlias(true);
         individualTimePaint.setTextAlign(Align.CENTER);
 
+        individualTimeDiffPaint.setColor(colorLessSignificant);
+        individualTimeDiffPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.ITALIC));
+        individualTimeDiffPaint.setTextSize(res.getDimension(R.dimen.font_size_normal));
+        individualTimeDiffPaint.setAntiAlias(true);
+        individualTimeDiffPaint.setTextAlign(Align.CENTER);
+
         publicTimePaint.setColor(colorSignificant);
         publicTimePaint.setTypeface(Typeface.DEFAULT_BOLD);
         publicTimePaint.setTextSize(res.getDimension(R.dimen.font_size_normal));
         publicTimePaint.setAntiAlias(true);
         publicTimePaint.setTextAlign(Align.CENTER);
 
+        publicTimeDiffPaint.setColor(colorSignificant);
+        publicTimeDiffPaint.setTypeface(Typeface.create(Typeface.DEFAULT_BOLD, Typeface.ITALIC));
+        publicTimeDiffPaint.setTextSize(res.getDimension(R.dimen.font_size_normal));
+        publicTimeDiffPaint.setAntiAlias(true);
+        publicTimeDiffPaint.setTextAlign(Align.CENTER);
+
+        positionPaintBackground.setColor(colorSignificant);
+        positionPaint.setColor(colorSignificantInverse);
+        positionPaint.setTypeface(Typeface.DEFAULT_BOLD);
+        positionPaint.setTextSize(res.getDimension(R.dimen.font_size_large));
+        positionPaint.setAntiAlias(true);
+        positionPaint.setTextAlign(Align.CENTER);
+
+        feederStrokePaint.setStyle(Paint.Style.STROKE);
+        feederStrokePaint.setColor(res.getColor(R.color.bg_highlighted_darkdefault));
+        feederStrokePaint.setStrokeWidth(strokeWidth * 2);
+        feederStrokePaint.setAntiAlias(true);
+
         cannotScrollPaint.setStyle(Paint.Style.FILL);
+    }
+
+    public void setConfig(final TimeSpec referenceTime, final JourneyRef feederJourneyRef) {
+        this.referenceTime = referenceTime;
+        this.feederJourneyRef = feederJourneyRef;
     }
 
     public void setTrips(final List<Trip> trips, final boolean canScrollLater, final boolean canScrollEarlier) {
@@ -322,6 +365,8 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         protected void onDraw(final Canvas canvas) {
             super.onDraw(canvas);
 
+            long now = System.currentTimeMillis();
+
             final int width = getWidth();
             final int centerX = width / 2;
             final int height = getHeight();
@@ -419,46 +464,104 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                 }
 
                 // then draw arr/dep times
+                Date startTime = null;
+                boolean startCancelled = false;
+                Paint startPaint = null;
+                int startYabs = 0;
+                Position departurePosition = null;
                 final Public firstPublicLeg = trip.getFirstPublicLeg();
                 final Date publicDepartureTime;
                 if (firstPublicLeg != null) {
                     final Stop publicDepartureStop = firstPublicLeg.departureStop;
                     final boolean publicDepartureCancelled = publicDepartureStop.departureCancelled;
                     publicDepartureTime = publicDepartureStop.getDepartureTime();
-                    if (publicDepartureTime != null)
-                        drawTime(canvas, centerX, height, true, publicTimePaint, publicDepartureCancelled,
+                    if (publicDepartureTime != null) {
+                        startTime = publicDepartureTime;
+                        startCancelled = publicDepartureCancelled;
+                        startPaint = publicTimeDiffPaint;
+                        departurePosition = publicDepartureStop.getDeparturePosition();
+                        startYabs = (int) timeToCoord(publicDepartureTime.getTime(), height);
+                        if (departurePosition != null && !startCancelled) {
+                            startYabs = drawPosition(canvas, centerX, startYabs, height, true, departurePosition.name);
+                        }
+                        startYabs = drawTime(canvas, centerX, startYabs, height, true, publicTimePaint, publicDepartureCancelled,
                                 publicDepartureTime, null);
+                    }
                 } else {
                     publicDepartureTime = null;
                 }
 
                 final Date individualDepartureTime = trip.getFirstDepartureTime();
-                if (individualDepartureTime != null)
-                    drawTime(canvas, centerX, height, true, individualTimePaint, false, individualDepartureTime,
+                if (individualDepartureTime != null) {
+                    final int individualYabs = drawTime(canvas, centerX, startYabs, height,
+                            true, individualTimePaint, false, individualDepartureTime,
                             publicDepartureTime);
+                    if (individualYabs != Integer.MIN_VALUE) {
+                        startTime = individualDepartureTime;
+                        startPaint = individualTimeDiffPaint;
+                        startYabs = individualYabs;
+                    }
+                }
 
+                if (startTime != null) {
+                    final long baseTime;
+                    if (referenceTime != null && referenceTime.depArr == TimeSpec.DepArr.DEPART) {
+                        final long refTime = referenceTime.timeInMillis();
+                        baseTime = Math.max(now, refTime);
+                    } else {
+                        baseTime = now;
+                    }
+                    long diff = startTime.getTime() - baseTime;
+                    if (diff > 0) {
+                        startYabs = drawRemaining(canvas, centerX, startYabs, height, true, startPaint, startCancelled, diff);
+                    }
+                }
+
+                Date endTime = null;
+                boolean endCancelled = false;
+                Paint endPaint = null;
+                int endYabs = 0;
                 final Public lastPublicLeg = trip.getLastPublicLeg();
                 final Date publicArrivalTime;
                 if (lastPublicLeg != null) {
                     final Stop publicArrivalStop = lastPublicLeg.arrivalStop;
                     final boolean publicArrivalCancelled = publicArrivalStop.arrivalCancelled;
                     publicArrivalTime = trip.getLastPublicLegArrivalTime();
-                    if (publicArrivalTime != null)
-                        drawTime(canvas, centerX, height, false, publicTimePaint, publicArrivalCancelled,
+                    if (publicArrivalTime != null) {
+                        endTime = publicArrivalTime;
+                        endCancelled = publicArrivalCancelled;
+                        endPaint = publicTimeDiffPaint;
+                        endYabs = (int) timeToCoord(publicArrivalTime.getTime(), height);
+                        endYabs = drawTime(canvas, centerX, endYabs, height, false, publicTimePaint, publicArrivalCancelled,
                                 publicArrivalTime, null);
+                    }
                 } else {
                     publicArrivalTime = null;
                 }
 
                 final Date individualArrivalTime = trip.getLastArrivalTime();
-                if (individualArrivalTime != null)
-                    drawTime(canvas, centerX, height, false, individualTimePaint, false, individualArrivalTime,
+                if (individualArrivalTime != null) {
+                    final int individualYabs = drawTime(canvas, centerX, endYabs, height,
+                            false, individualTimePaint, false, individualArrivalTime,
                             publicArrivalTime);
+                    if (individualYabs != Integer.MIN_VALUE) {
+                        endTime = individualArrivalTime;
+                        endPaint = individualTimeDiffPaint;
+                        endYabs = individualYabs;
+                    }
+                }
+
+                if (endTime != null && referenceTime != null && referenceTime.depArr == TimeSpec.DepArr.ARRIVE) {
+                    long refTime = referenceTime.timeInMillis();
+                    long diff = refTime - endTime.getTime();
+                    drawRemaining(canvas, centerX, endYabs, height, false, endPaint, endCancelled, diff);
+                }
 
                 // last, iterate all public legs
                 for (final Leg leg : legs) {
                     if (leg instanceof Public) {
                         final Public publicLeg = (Public) leg;
+                        final boolean isFeeder = feederJourneyRef != null && feederJourneyRef.equals(publicLeg.journeyRef);
                         final Line line = publicLeg.line;
                         final Style style = line.style;
                         final float radius;
@@ -503,7 +606,9 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                                     Shader.TileMode.CLAMP));
                         }
                         canvas.drawRoundRect(legBox, radius, radius, publicFillPaint);
-                        if (style != null && style.hasBorder()) {
+                        if (isFeeder) {
+                            canvas.drawRoundRect(legBox, radius, radius, feederStrokePaint);
+                        } else if (style != null && style.hasBorder()) {
                             publicStrokePaint.setColor(style.borderColor);
                             canvas.drawRoundRect(legBox, radius, radius, publicStrokePaint);
                         } else if (darkMode && Style.perceivedBrightness(fillColor) < 0.15f ||
@@ -548,36 +653,83 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             }
         }
 
-        private void drawTime(final Canvas canvas, final int centerX, final int height, final boolean above,
+        private int drawTime(final Canvas canvas, final int centerX, final int aY, final int height, final boolean above,
                 final Paint paint, final boolean strikeThru, final Date time, final @Nullable Date timeKeepOut) {
             final FontMetrics metrics = paint.getFontMetrics();
 
             final long t = time.getTime();
-            float y = timeToCoord(t, height);
+            final float y;
             final String str = timeFormat.format(t);
-
-            if (timeKeepOut != null) {
-                final long tKeepOut = timeKeepOut.getTime();
-                final float yKeepOut = timeToCoord(tKeepOut, height);
-                if (t == tKeepOut)
-                    return; // don't draw anything
-
-                final float fontHeight = (-metrics.ascent); // + 4 * density;
-                if (above)
-                    y = Math.min(y, yKeepOut - fontHeight);
-                else
-                    y = Math.max(y, yKeepOut + fontHeight);
-            }
+            final float fontHeight = (-metrics.ascent + metrics.descent); // + 4 * density;
 
             if (strikeThru)
                 paint.setFlags(paint.getFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
             else
                 paint.setFlags(paint.getFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
 
-            if (above)
+            if (timeKeepOut != null) {
+                final long tKeepOut = timeKeepOut.getTime();
+                final float yKeepOut = timeToCoord(tKeepOut, height);
+                if (t == tKeepOut)
+                    return Integer.MIN_VALUE; // don't draw anything
+
+                if (above)
+                    y = Math.min(aY, yKeepOut - fontHeight);
+                else
+                    y = Math.max(aY, yKeepOut + fontHeight);
+            } else {
+                y = aY;
+            }
+
+            if (above) {
                 canvas.drawText(str, centerX, y - metrics.descent, paint);
+                return (int) (y - fontHeight);
+            } else {
+                canvas.drawText(str, centerX, y  - metrics.ascent, paint);
+                return (int) (y + fontHeight);
+            }
+        }
+
+        private int drawRemaining(final Canvas canvas, final int centerX, final int y, final int height, final boolean above,
+                              final Paint paint, final boolean strikeThru, final long timeDiff) {
+            final FontMetrics metrics = paint.getFontMetrics();
+
+            final String str = ((timeDiff >= 0) ? "+" : "") + Long.toString(timeDiff / 60000);
+
+            if (strikeThru)
+                paint.setFlags(paint.getFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
             else
-                canvas.drawText(str, centerX, y + (-metrics.ascent), paint);
+                paint.setFlags(paint.getFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
+
+            final float fontHeight = (-metrics.ascent + metrics.descent); // + 4 * density;
+            if (above) {
+                canvas.drawText(str, centerX, y - metrics.descent, paint);
+                return (int) (y - fontHeight);
+            } else {
+                canvas.drawText(str, centerX, y - metrics.ascent, paint);
+                return (int) (y + fontHeight);
+            }
+        }
+
+        private int drawPosition(final Canvas canvas, final int centerX, final int y, final int height, final boolean above,
+                                 final String name) {
+            final FontMetrics metrics = positionPaint.getFontMetrics();
+
+            positionPaint.setFlags(positionPaint.getFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
+            final float fontHeight = (-metrics.ascent + metrics.descent); // + 4 * density;
+            positionPaint.getTextBounds(name, 0, name.length(), bounds);
+            bounds.inset(-positionPaddingHorizontal, -positionPaddingVertical);
+            if (above) {
+                bounds.offsetTo(centerX - bounds.width() / 2, (int) (y - fontHeight));
+                canvas.drawRect(bounds, positionPaintBackground);
+                canvas.drawText(name, centerX, y - metrics.descent, positionPaint);
+                return (int) (y - fontHeight);
+            } else {
+                bounds.offsetTo(centerX - bounds.width() / 2, (int) (y - fontHeight));
+                canvas.drawRect(bounds, positionPaintBackground);
+                canvas.drawText(name, centerX, y + metrics.ascent, positionPaint);
+                return (int) (y + fontHeight);
+            }
         }
 
         private final Pattern P_SPLIT_LINE_LABEL_1 = Pattern.compile("([^\\s]+)\\s+([^\\s]+)");

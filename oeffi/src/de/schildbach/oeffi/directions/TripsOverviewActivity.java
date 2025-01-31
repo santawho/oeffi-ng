@@ -46,6 +46,7 @@ import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
+import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.QueryTripsContext;
 import de.schildbach.pte.dto.QueryTripsResult;
@@ -62,6 +63,7 @@ import javax.net.ssl.SSLException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -75,14 +77,27 @@ import java.util.concurrent.TimeUnit;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class TripsOverviewActivity extends OeffiActivity {
+    public static class RenderConfig implements Serializable {
+        public TimeSpec referenceTime;
+        public JourneyRef feedingJourney;
+        public int actionBarColor;
+    }
+
     private static final String INTENT_EXTRA_NETWORK = TripsOverviewActivity.class.getName() + ".network";
     private static final String INTENT_EXTRA_RESULT = TripsOverviewActivity.class.getName() + ".result";
     private static final String INTENT_EXTRA_ARR_DEP = TripsOverviewActivity.class.getName() + ".arr_dep";
     private static final String INTENT_EXTRA_HISTORY_URI = TripsOverviewActivity.class.getName() + ".history";
     private static final String INTENT_EXTRA_RELOAD_REQUEST_DATA = TripsOverviewActivity.class.getName() + ".reqdata";
+    private static final String INTENT_EXTRA_RENDERCONFIG = TripDetailsActivity.class.getName() + ".config";
 
     public static void start(final Context context, final NetworkId network, final TimeSpec.DepArr depArr,
             final QueryTripsResult result, final Uri historyUri, final ReloadRequestData reloadRequestData) {
+        start(context, network, depArr, result, historyUri, reloadRequestData, new RenderConfig());
+    }
+
+    public static void start(final Context context, final NetworkId network, final TimeSpec.DepArr depArr,
+            final QueryTripsResult result, final Uri historyUri, final ReloadRequestData reloadRequestData,
+            final RenderConfig renderConfig) {
         final Intent intent = new Intent(context, TripsOverviewActivity.class);
         if (result.queryUri != null)
             intent.setData(Uri.parse(result.queryUri));
@@ -92,11 +107,13 @@ public class TripsOverviewActivity extends OeffiActivity {
         if (historyUri != null)
             intent.putExtra(INTENT_EXTRA_HISTORY_URI, historyUri.toString());
         intent.putExtra(INTENT_EXTRA_RELOAD_REQUEST_DATA, reloadRequestData);
+        intent.putExtra(INTENT_EXTRA_RENDERCONFIG, checkNotNull(renderConfig));
         context.startActivity(intent);
     }
 
     private NetworkId network;
     private ReloadRequestData reloadRequestData;
+    private RenderConfig renderConfig;
 
     private @Nullable QueryTripsContext context;
     private TripsGallery barView;
@@ -131,6 +148,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         super.onCreate(savedInstanceState);
 
         final Intent intent = getIntent();
+        renderConfig = (RenderConfig) intent.getSerializableExtra(INTENT_EXTRA_RENDERCONFIG);
         network = (NetworkId) intent.getSerializableExtra(INTENT_EXTRA_NETWORK);
         final QueryTripsResult result = (QueryTripsResult) intent.getSerializableExtra(INTENT_EXTRA_RESULT);
         final boolean dep = intent.getBooleanExtra(INTENT_EXTRA_ARR_DEP, true);
@@ -147,7 +165,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         });
 
         final MyActionBar actionBar = getMyActionBar();
-        setPrimaryColor(R.color.bg_action_bar_directions_darkdefault);
+        setPrimaryColor(renderConfig.actionBarColor > 0 ? renderConfig.actionBarColor : R.color.bg_action_bar_directions_darkdefault);
         actionBar.setBack(v -> finish());
         actionBar.setCustomTitles(R.layout.directions_trip_overview_custom_title);
         actionBar.addProgressButton().setOnClickListener(v -> {
@@ -156,6 +174,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         });
 
         barView = findViewById(R.id.trips_bar_view);
+        barView.setConfig(renderConfig.referenceTime, renderConfig.feedingJourney);
         barView.setOnItemClickListener((parent, v, position, id) -> {
             final Trip trip = (Trip) barView.getAdapter().getItem(position);
 

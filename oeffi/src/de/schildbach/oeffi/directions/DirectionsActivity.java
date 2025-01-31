@@ -1079,7 +1079,11 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
                     else
                         historyUri = null;
 
-                    TripsOverviewActivity.start(DirectionsActivity.this, network, time.depArr, result, historyUri, reloadRequestData);
+                    TripsOverviewActivity.RenderConfig renderConfig = new TripsOverviewActivity.RenderConfig();
+                    renderConfig.referenceTime = time;
+                    TripsOverviewActivity.start(DirectionsActivity.this,
+                            network, time.depArr, result, historyUri, reloadRequestData,
+                            renderConfig);
                 } else if (result.status == QueryTripsResult.Status.UNKNOWN_FROM) {
                     new Toast(DirectionsActivity.this).longToast(R.string.directions_message_unknown_from);
                 } else if (result.status == QueryTripsResult.Status.UNKNOWN_VIA) {

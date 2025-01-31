@@ -155,7 +155,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private static final long NAVIGATION_AUTO_REFRESH_INTERVAL_SECS = 10;
     private static final String INTENT_EXTRA_NETWORK = TripDetailsActivity.class.getName() + ".network";
     private static final String INTENT_EXTRA_TRIP = TripDetailsActivity.class.getName() + ".trip";
-    private static final String INTENT_EXTRA_RENDERCONFIG = TripDetailsActivity.class.getName() + ".isJourney";
+    private static final String INTENT_EXTRA_RENDERCONFIG = TripDetailsActivity.class.getName() + ".config";
 
     public static void start(final Context context, final NetworkId network, final Trip.Public journeyLeg) {
         final Trip trip = new Trip(

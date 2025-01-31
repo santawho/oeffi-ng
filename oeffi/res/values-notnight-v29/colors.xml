@@ -14,6 +14,7 @@
     <color name="bg_individual_darkdefault">#cccccc</color>
     <color name="bg_delayed_darkdefault">#cccccc</color>
     <color name="bg_current_time_darkdefault">#cc9900</color>
+    <color name="bg_reference_time_darkdefault">#00a0e0</color>
     <color name="bg_position_darkdefault">#757575</color>
     <color name="bg_highlighted_darkdefault">#ffaaaa</color>
 
