@@ -45,8 +45,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 
 public class TripsGallery extends Gallery {
-    private TimeSpec referenceTime = null;
-
+    private TripsOverviewActivity.RenderConfig renderConfig;
     private OnScrollListener onScrollListener;
 
     private final Paint gridPaint = new Paint();
@@ -173,9 +172,9 @@ public class TripsGallery extends Gallery {
         });
     }
 
-    public void setConfig(final TimeSpec referenceTime, final JourneyRef feederJourneyRef) {
-        this.referenceTime = referenceTime;
-        adapter.setConfig(referenceTime, feederJourneyRef);
+    public void setRenderConfig(final TripsOverviewActivity.RenderConfig renderConfig) {
+        this.renderConfig = renderConfig;
+        adapter.setRenderConfig(renderConfig);
     }
 
     public void setTrips(final List<Trip> trips, final boolean canScrollLater, final boolean canScrollEarlier) {
@@ -365,6 +364,7 @@ public class TripsGallery extends Gallery {
         }
 
         final boolean currentTimeUp;
+        TimeSpec referenceTime = renderConfig.referenceTime;
         final boolean timeLineLabelRight = referenceTime == null || referenceTime.depArr == TimeSpec.DepArr.DEPART;
         if (referenceTime != null && (!(referenceTime instanceof TimeSpec.Relative) || ((TimeSpec.Relative) referenceTime).diffMs != 0)) {
             long time = referenceTime.timeInMillis();

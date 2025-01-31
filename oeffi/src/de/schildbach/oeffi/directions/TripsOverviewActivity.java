@@ -31,6 +31,7 @@ import android.text.format.DateUtils;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.TextView;
+
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -77,9 +78,13 @@ import java.util.concurrent.TimeUnit;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class TripsOverviewActivity extends OeffiActivity {
+    private static final int DETAILS_NEW_NAVIGATION = 4711;
+
     public static class RenderConfig implements Serializable {
+        public boolean isAlternativeConnectionSearch;
         public TimeSpec referenceTime;
-        public JourneyRef feedingJourney;
+        public JourneyRef feederJourneyRef;
+        public JourneyRef connectionJourneyRef;
         public int actionBarColor;
     }
 
@@ -174,12 +179,19 @@ public class TripsOverviewActivity extends OeffiActivity {
         });
 
         barView = findViewById(R.id.trips_bar_view);
-        barView.setConfig(renderConfig.referenceTime, renderConfig.feedingJourney);
+        barView.setRenderConfig(renderConfig);
         barView.setOnItemClickListener((parent, v, position, id) -> {
             final Trip trip = (Trip) barView.getAdapter().getItem(position);
 
             if (trip != null && trip.legs != null) {
-                TripDetailsActivity.start(TripsOverviewActivity.this, network, trip);
+                TripDetailsActivity.RenderConfig config = new TripDetailsActivity.RenderConfig();
+                config.isAlternativeConnectionSearch = renderConfig.isAlternativeConnectionSearch;
+                config.queryTripsRequestData = reloadRequestData;
+                if (renderConfig.isAlternativeConnectionSearch) {
+                    TripDetailsActivity.startForResult(TripsOverviewActivity.this, DETAILS_NEW_NAVIGATION, network, trip, config);
+                } else {
+                    TripDetailsActivity.start(TripsOverviewActivity.this, network, trip, config);
+                }
 
                 final Date firstPublicLegDepartureTime = trip.getFirstPublicLegDepartureTime();
                 final Date lastPublicLegArrivalTime = trip.getLastPublicLegArrivalTime();
@@ -204,6 +216,16 @@ public class TripsOverviewActivity extends OeffiActivity {
         });
 
         processResult(result, true, dep);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == DETAILS_NEW_NAVIGATION && resultCode == RESULT_OK) {
+            // user has started another navigation
+            // then close this overview (and return to initial navigation in the background)
+            finish();
+        }
     }
 
     private byte[] serialize(final Object object) {

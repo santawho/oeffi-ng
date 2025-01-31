@@ -64,8 +64,7 @@ import java.util.regex.Pattern;
 
 public final class TripsGalleryAdapter extends BaseAdapter {
     private List<Trip> trips = Collections.emptyList();
-    private TimeSpec referenceTime;
-    private JourneyRef feederJourneyRef;
+    private TripsOverviewActivity.RenderConfig renderConfig;
     private boolean canScrollLater = true, canScrollEarlier = true;
     private long minTime = 0, maxTime = 0;
 
@@ -176,9 +175,8 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         cannotScrollPaint.setStyle(Paint.Style.FILL);
     }
 
-    public void setConfig(final TimeSpec referenceTime, final JourneyRef feederJourneyRef) {
-        this.referenceTime = referenceTime;
-        this.feederJourneyRef = feederJourneyRef;
+    public void setRenderConfig(TripsOverviewActivity.RenderConfig renderConfig) {
+        this.renderConfig = renderConfig;
     }
 
     public void setTrips(final List<Trip> trips, final boolean canScrollLater, final boolean canScrollEarlier) {
@@ -503,6 +501,8 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                     }
                 }
 
+                TimeSpec referenceTime = renderConfig.referenceTime;
+
                 if (startTime != null) {
                     final long baseTime;
                     if (referenceTime != null && referenceTime.depArr == TimeSpec.DepArr.DEPART) {
@@ -561,7 +561,8 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                 for (final Leg leg : legs) {
                     if (leg instanceof Public) {
                         final Public publicLeg = (Public) leg;
-                        final boolean isFeeder = feederJourneyRef != null && feederJourneyRef.equals(publicLeg.journeyRef);
+                        final boolean isFeeder = renderConfig.feederJourneyRef != null && renderConfig.feederJourneyRef.equals(publicLeg.journeyRef);
+                        final boolean isConnection = renderConfig.connectionJourneyRef != null && renderConfig.connectionJourneyRef.equals(publicLeg.journeyRef);
                         final Line line = publicLeg.line;
                         final Style style = line.style;
                         final float radius;
@@ -606,7 +607,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                                     Shader.TileMode.CLAMP));
                         }
                         canvas.drawRoundRect(legBox, radius, radius, publicFillPaint);
-                        if (isFeeder) {
+                        if (isFeeder || isConnection) {
                             canvas.drawRoundRect(legBox, radius, radius, feederStrokePaint);
                         } else if (style != null && style.hasBorder()) {
                             publicStrokePaint.setColor(style.borderColor);

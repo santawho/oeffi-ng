@@ -19,6 +19,7 @@ package de.schildbach.oeffi.directions;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -83,6 +84,7 @@ import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.Fare;
+import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.Point;
@@ -115,6 +117,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     public static class RenderConfig implements Serializable {
         public boolean isJourney;
         public boolean isNavigation;
+        public boolean isAlternativeConnectionSearch;
+        public QueryTripsRunnable.ReloadRequestData queryTripsRequestData;
     }
 
     public static class LegContainer {
@@ -175,8 +179,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         start(context, network, trip, new RenderConfig());
     }
 
-    private static void start(final Context context, final NetworkId network, final Trip trip, final RenderConfig renderConfig) {
+    public static void start(final Context context, final NetworkId network, final Trip trip, final RenderConfig renderConfig) {
         context.startActivity(buildStartIntent(TripDetailsActivity.class, context, network, trip, renderConfig));
+    }
+
+    public static void startForResult(final Activity context, int requestCode, final NetworkId network, final Trip trip, final RenderConfig renderConfig) {
+        context.startActivityForResult(buildStartIntent(TripDetailsActivity.class, context, network, trip, renderConfig), requestCode);
     }
 
     protected static Intent buildStartIntent(
@@ -207,7 +215,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private OeffiMapView mapView;
     private ToggleImageButton trackButton;
 
-    private NetworkId network;
+    protected NetworkId network;
     private Navigator navigator;
     private Trip trip;
     private List<LegContainer> legs = new ArrayList<>();
@@ -241,8 +249,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private QueryJourneyRunnable queryJourneyRunnable;
     private Runnable navigationRefreshRunnable;
     private HandlerThread backgroundThread;
-    private Handler backgroundHandler;
-    private final Handler handler = new Handler();
+    protected Handler backgroundHandler;
+    protected final Handler handler = new Handler();
 
     private static final int LEGSGROUP_INSERT_INDEX = 2;
 
@@ -297,7 +305,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         });
 
         actionBar = getMyActionBar();
-        setPrimaryColor(renderConfig.isNavigation ? R.color.bg_action_bar_navigation : R.color.bg_action_bar_directions);
+        setPrimaryColor(
+                renderConfig.isAlternativeConnectionSearch
+                        ? R.color.bg_action_alternative_directions
+                        : renderConfig.isNavigation
+                        ? R.color.bg_action_bar_navigation
+                        : R.color.bg_action_bar_directions);
         actionBar.setPrimaryTitle(getString(
                 renderConfig.isNavigation
                     ? R.string.navigation_details_title
@@ -1037,10 +1050,27 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             stopNameView.setTextColor(colorSignificant);
             stopNameView.setTypeface(null, Typeface.NORMAL);
         }
-        if (location.hasId())
-            stopNameView.setOnClickListener(new StopClickListener(stop));
-        else
+        if (location.hasId()) {
+            JourneyRef feederJourneyRef = leg.journeyRef;
+            JourneyRef connectionJourneyRef = leg.journeyRef;
+            if (stop.getDepartureTime() == null) {
+                // final stop of a journey, find next journey instead
+                boolean found = false;
+                for (final LegContainer legC : legs) {
+                    if (legC.publicLeg != null) {
+                        if (found) {
+                            connectionJourneyRef = legC.publicLeg.journeyRef;
+                            break;
+                        } else if (legC.publicLeg == leg) {
+                            found = true;
+                        }
+                    }
+                }
+            }
+            stopNameView.setOnClickListener(new StopClickListener(stop, feederJourneyRef, connectionJourneyRef));
+        } else {
             stopNameView.setOnClickListener(null);
+        }
 
         // pearl
         final PearlView pearlView = row.findViewById(R.id.directions_trip_details_public_entry_stop_pearl);
@@ -1143,7 +1173,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         public void onClick(final View v) {
             final PopupMenu contextMenu = new StationContextMenu(TripDetailsActivity.this, v, network, location, null,
-                    false, false, true, false, false);
+                    false, false, true, false, false, false);
             contextMenu.setOnMenuItemClickListener(item -> {
                 if (item.getItemId() == R.id.station_context_details) {
                     StationDetailsActivity.start(TripDetailsActivity.this, network, location);
@@ -1158,19 +1188,27 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     private class StopClickListener implements android.view.View.OnClickListener {
         private final Stop stop;
+        final JourneyRef feederJourneyRef;
+        final JourneyRef connectionJourneyRef;
 
-        public StopClickListener(final Stop stop) {
+        public StopClickListener(
+                final Stop stop,
+                final JourneyRef feederJourneyRef, final JourneyRef connectionJourneyRef) {
             this.stop = stop;
+            this.feederJourneyRef = feederJourneyRef;
+            this.connectionJourneyRef = connectionJourneyRef;
         }
 
         public void onClick(final View v) {
             final PopupMenu contextMenu = new StationContextMenu(TripDetailsActivity.this, v, network, stop.location,
-                    null, false, false, true, true, false);
+                    null, false, false, true, true, renderConfig.isNavigation, false);
             contextMenu.setOnMenuItemClickListener(item -> {
                 int menuItemId = item.getItemId();
                 if (menuItemId == R.id.station_context_details) {
                     StationDetailsActivity.start(TripDetailsActivity.this, network, stop.location);
                     return true;
+                } else if (menuItemId == R.id.station_context_directions_alternative_from) {
+                    return onFindAlternativeConnections(stop, feederJourneyRef, connectionJourneyRef, renderConfig.queryTripsRequestData);
                 } else if (menuItemId == R.id.station_context_directions_from) {
                     final Date arrivalTime = stop.getArrivalTime();
                     final TimeSpec.Absolute time = new TimeSpec.Absolute(DepArr.DEPART,
@@ -1353,6 +1391,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     private void startNavigation() {
         TripNavigatorActivity.start(this, network, trip, renderConfig);
+        setResult(RESULT_OK, new Intent());
         finish();
     }
 
@@ -1463,5 +1502,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 }
             }
         }
+    }
+
+    protected boolean onFindAlternativeConnections(
+            final Stop stop,
+            final JourneyRef feederJourneyRef, final JourneyRef connectionJourneyRef,
+            final QueryTripsRunnable.ReloadRequestData queryTripsRequestData) {
+        // override if implemented
+        return false;
     }
 }

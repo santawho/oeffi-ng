@@ -58,7 +58,7 @@ public class StationContextMenu extends PopupMenu {
 
     public StationContextMenu(final Context context, final View anchor, final NetworkId network, final Location station,
             final Integer favState, final boolean showFavorite, final boolean showIgnore, final boolean showMap,
-            final boolean showDirections, final boolean showShortcut) {
+            final boolean showDirections, final boolean showAlternativeDirections, final boolean showShortcut) {
         super(context, anchor);
         inflate(R.menu.stations_station_context);
         final Menu menu = getMenu();
@@ -77,6 +77,7 @@ public class StationContextMenu extends PopupMenu {
         menu.findItem(R.id.station_context_directions_from).setVisible(showDirections);
         menu.findItem(R.id.station_context_directions_to).setVisible(showDirections);
         menu.findItem(R.id.station_context_launcher_shortcut).setVisible(showShortcut);
+        menu.findItem(R.id.station_context_directions_alternative_from).setVisible(showAlternativeDirections);
     }
 
     public static AlertDialog createLauncherShortcutDialog(final Context context, final NetworkId networkId,
