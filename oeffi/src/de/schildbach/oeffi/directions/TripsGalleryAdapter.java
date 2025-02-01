@@ -704,7 +704,16 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                               final Paint paint, final boolean strikeThru, final long timeDiff) {
             final FontMetrics metrics = paint.getFontMetrics();
 
-            final String str = ((timeDiff >= 0) ? "+" : "") + Long.toString(timeDiff / 60000);
+            String str;
+            final long absDiffMinutes = Math.abs(timeDiff) / 60000;
+            if (absDiffMinutes >= 120) {
+                str = Long.toString(absDiffMinutes / 60) + "h";
+            } else {
+                str = Long.toString(absDiffMinutes);
+            }
+            if (timeDiff >= 0) {
+                str = "+" + str;
+            }
 
             if (strikeThru)
                 paint.setFlags(paint.getFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
