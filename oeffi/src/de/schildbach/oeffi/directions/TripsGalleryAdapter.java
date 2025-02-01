@@ -37,6 +37,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
@@ -89,6 +90,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
     private final Paint positionPaint = new Paint();
     private final Paint positionPaintBackground = new Paint();
     private final Paint feederStrokePaint = new Paint();
+    private final Paint connectionStrokePaint = new Paint();
     private final Paint cannotScrollPaint = new Paint();
     private final int colorSignificantInverse;
     private final int colorDelayed;
@@ -168,9 +170,14 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         positionPaint.setTextAlign(Align.CENTER);
 
         feederStrokePaint.setStyle(Paint.Style.STROKE);
-        feederStrokePaint.setColor(res.getColor(R.color.bg_highlighted_darkdefault));
+        feederStrokePaint.setColor(res.getColor(R.color.fg_trip_leg_frame_feeder));
         feederStrokePaint.setStrokeWidth(strokeWidth * 2);
         feederStrokePaint.setAntiAlias(true);
+
+        connectionStrokePaint.setStyle(Paint.Style.STROKE);
+        connectionStrokePaint.setColor(res.getColor(R.color.fg_trip_leg_frame_connection));
+        connectionStrokePaint.setStrokeWidth(strokeWidth * 2);
+        connectionStrokePaint.setAntiAlias(true);
 
         cannotScrollPaint.setStyle(Paint.Style.FILL);
     }
@@ -607,8 +614,10 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                                     Shader.TileMode.CLAMP));
                         }
                         canvas.drawRoundRect(legBox, radius, radius, publicFillPaint);
-                        if (isFeeder || isConnection) {
+                        if (isFeeder) {
                             canvas.drawRoundRect(legBox, radius, radius, feederStrokePaint);
+                        } else if (isConnection) {
+                            canvas.drawRoundRect(legBox, radius, radius, connectionStrokePaint);
                         } else if (style != null && style.hasBorder()) {
                             publicStrokePaint.setColor(style.borderColor);
                             canvas.drawRoundRect(legBox, radius, radius, publicStrokePaint);

@@ -389,7 +389,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     });
                     popupMenu.show();
                 });
-        if (!renderConfig.isNavigation) {
+        if (!renderConfig.isNavigation && !renderConfig.isAlternativeConnectionSearch) {
             actionBar.addButton(R.drawable.ic_today_white_24dp, R.string.directions_trip_details_action_calendar_title)
                     .setOnClickListener(v -> {
                         try {
@@ -1053,8 +1053,20 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         if (location.hasId()) {
             JourneyRef feederJourneyRef = leg.journeyRef;
             JourneyRef connectionJourneyRef = leg.journeyRef;
-            if (stop.getDepartureTime() == null) {
-                // final stop of a journey, find next journey instead
+            if (stop.getArrivalTime() == null) {
+                // departure stop of a journey, find previous journey as feeder
+                feederJourneyRef = null;
+                for (final LegContainer legC : legs) {
+                    if (legC.publicLeg != null) {
+                        if (legC.publicLeg == leg)
+                            break;
+                        else
+                            feederJourneyRef = legC.publicLeg.journeyRef;
+                    }
+                }
+            } else if (stop.getDepartureTime() == null) {
+                // arrival stop of a journey, find next journey as connection
+                connectionJourneyRef = null;
                 boolean found = false;
                 for (final LegContainer legC : legs) {
                     if (legC.publicLeg != null) {
