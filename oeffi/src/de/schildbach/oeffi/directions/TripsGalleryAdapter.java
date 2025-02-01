@@ -519,9 +519,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                         baseTime = now;
                     }
                     long diff = startTime.getTime() - baseTime;
-                    if (diff > 0) {
-                        startYabs = drawRemaining(canvas, centerX, startYabs, height, true, startPaint, startCancelled, diff);
-                    }
+                    startYabs = drawRemaining(canvas, centerX, startYabs, height, true, startPaint, startCancelled, diff);
                 }
 
                 Date endTime = null;
@@ -711,9 +709,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             } else {
                 str = Long.toString(absDiffMinutes);
             }
-            if (timeDiff >= 0) {
-                str = "+" + str;
-            }
+            str = (timeDiff >= 0 ? "+" : "-") + str;
 
             if (strikeThru)
                 paint.setFlags(paint.getFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
