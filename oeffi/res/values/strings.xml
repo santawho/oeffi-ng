@@ -254,8 +254,10 @@
     <string name="directions_trip_details_realtime">Times printed in &lt;i>italics&lt;/i> are real-time.</string>
     <string name="directions_trip_details_public_entry_accessibility">Section is barrier free.</string>
     <string name="directions_trip_details_public_entry_bicycle_carriage">Bikes may be carried.</string>
-    <string name="directions_trip_details_time_left">&lt;b>%1$d minutes&lt;/b> left</string>
-    <string name="directions_trip_details_no_time_left">&lt;b>!!! NOW !!!&lt;/b></string>
+    <string name="directions_trip_details_time_left_minutes">&lt;b>%1$d minutes&lt;/b> left</string>
+    <string name="directions_trip_details_time_left_hours">&lt;b>%1$d hours&lt;/b> left</string>
+    <string name="directions_trip_details_time_left_days">&lt;b>%1$d days&lt;/b> left</string>
+    <string name="directions_trip_details_no_time_left">&lt;b>*** NOW ***&lt;/b></string>
 
     <!-- directions trip connection evaluation -->
     <string name="directions_trip_conneval_with_transfer">%1$s with %2$s</string>

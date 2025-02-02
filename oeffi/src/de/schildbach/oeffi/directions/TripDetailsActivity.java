@@ -851,11 +851,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         } else {
             // leg is now
             row.setBackgroundColor(colorLegPublicNowBackground);
-            long leftMinutes = ((endTime.getTime() - now.getTime()) - 30000) / 60000;
-            final String leftText = (leftMinutes < 1)
-                    ? getString(R.string.directions_trip_details_no_time_left)
-                    : getString(R.string.directions_trip_details_time_left, leftMinutes);
-            progress.setText(Html.fromHtml(leftText));
+            progress.setText(getLeftTimeFormatted(now, endTime));
             progress.setVisibility(View.VISIBLE);
         }
     }
@@ -969,13 +965,31 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         } else {
             // leg is now
             row.setBackgroundColor(colorLegIndividualNowBackground);
-            long leftMinutes = ((endTime.getTime() - now.getTime()) - 30000) / 60000;
-            final String leftText = (leftMinutes < 1)
-                    ? getString(R.string.directions_trip_details_no_time_left)
-                    : getString(R.string.directions_trip_details_time_left, leftMinutes);
-            progress.setText(Html.fromHtml(leftText));
+            progress.setText(getLeftTimeFormatted(now, endTime));
             progress.setVisibility(View.VISIBLE);
         }
+    }
+
+    private Spanned getLeftTimeFormatted(Date now, Date endTime) {
+        long leftSeconds = (endTime.getTime() - now.getTime()) / 1000;
+        final String leftText;
+        if (leftSeconds < 45) {
+            leftText = getString(R.string.directions_trip_details_no_time_left);
+        } else {
+            final long leftMinutes = leftSeconds / 60;
+            if (leftMinutes < 120) {
+                leftText = getString(R.string.directions_trip_details_time_left_minutes, leftMinutes);
+            } else {
+                final long leftHours = leftMinutes / 60;
+                if (leftHours < 24) {
+                    leftText = getString(R.string.directions_trip_details_time_left_hours, leftHours);
+                } else {
+                    final long leftDays = leftHours / 24;
+                    leftText = getString(R.string.directions_trip_details_time_left_days, leftDays);
+                }
+            }
+        }
+        return Html.fromHtml(leftText);
     }
 
     private class CollapseColumns {

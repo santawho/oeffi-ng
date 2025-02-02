@@ -252,8 +252,10 @@
     <string name="directions_trip_details_realtime">&lt;i>Kursiv&lt;/i> gedruckte Uhrzeiten sind Echtzeit.</string>
     <string name="directions_trip_details_public_entry_accessibility">Der Abschnitt ist barrierefrei.</string>
     <string name="directions_trip_details_public_entry_bicycle_carriage">Die Fahrradmitnahme ist möglich.</string>
-    <string name="directions_trip_details_time_left">Noch &lt;b>%1$d Minuten&lt;/b></string>
-    <string name="directions_trip_details_no_time_left">&lt;b>!!! JETZT !!!&lt;/b></string>
+    <string name="directions_trip_details_time_left_minutes">Noch &lt;b>%1$d Minuten&lt;/b></string>
+    <string name="directions_trip_details_time_left_hours">Noch &lt;b>%1$d Stunden&lt;/b></string>
+    <string name="directions_trip_details_time_left_days">Noch &lt;b>%1$d Tage&lt;/b></string>
+    <string name="directions_trip_details_no_time_left">&lt;b>*** JETZT ***&lt;/b></string>
 
     <!-- directions trip connection evaluation -->
     <string name="directions_trip_conneval_with_transfer">%1$s mit %2$s</string>
