@@ -308,6 +308,8 @@
     <string name="directions_preferences_optimize_trip_summary">What\'s most important to you? This does not affect all transport networks.</string>
     <string name="directions_preferences_walk_speed_title">Walk speed</string>
     <string name="directions_preferences_walk_speed_summary">How fast you can walk? This does not affect all transport networks.</string>
+    <string name="directions_preferences_min_transfer_time_title">Minimum transfer time</string>
+    <string name="directions_preferences_min_transfer_time_summary">How long do you need for a transfer? This does not affect all transport networks.</string>
     <string name="directions_preferences_accessibility_title">Accessibility</string>
     <string name="directions_preferences_accessibility_summary">How accessible do you need the route to be? This does not affect all transport networks.</string>
 

@@ -62,6 +62,26 @@
         <item>NORMAL</item>
         <item>FAST</item>
     </string-array>
+    <string-array name="directions_min_transfer_time">
+        <item>I have no preference</item>
+        <item>As fast as possible</item>
+        <item>5 minutes</item>
+        <item>10 minutes</item>
+        <item>15 minutes</item>
+        <item>20 minutes</item>
+        <item>30 minutes</item>
+        <item>60 minutes</item>
+    </string-array>
+    <string-array name="directions_min_transfer_time_values" tools:ignore="MissingTranslation">
+        <item>-1</item>
+        <item>0</item>
+        <item>5</item>
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+        <item>30</item>
+        <item>60</item>
+    </string-array>
     <string-array name="directions_accessibility">
         <item>No constraints</item>
         <item>Limited</item>

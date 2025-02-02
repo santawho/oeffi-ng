@@ -9,6 +9,13 @@
         android:summary="@string/directions_preferences_optimize_trip_summary"
         android:title="@string/directions_preferences_optimize_trip_title" />
     <ListPreference
+        android:defaultValue="-1"
+        android:entries="@array/directions_min_transfer_time"
+        android:entryValues="@array/directions_min_transfer_time_values"
+        android:key="min_transfer_time"
+        android:summary="@string/directions_preferences_min_transfer_time_summary"
+        android:title="@string/directions_preferences_min_transfer_time_title" />
+    <ListPreference
         android:defaultValue="NORMAL"
         android:entries="@array/directions_walk_speed"
         android:entryValues="@array/directions_walk_speed_values"

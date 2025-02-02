@@ -1053,7 +1053,7 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
 
         final NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
         final TripOptions options = new TripOptions(products, prefsGetOptimizeTrip(), prefsGetWalkSpeed(),
-                prefsGetAccessibility(), flags);
+                prefsGetMinTranfserTime(), prefsGetAccessibility(), flags);
         queryTripsRunnable = new QueryTripsRunnable(getResources(), progressDialog, handler, networkProvider, from, via,
                 to, time, options) {
             @Override
@@ -1380,6 +1380,11 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
 
     private WalkSpeed prefsGetWalkSpeed() {
         return WalkSpeed.valueOf(prefs.getString(Constants.PREFS_KEY_WALK_SPEED, WalkSpeed.NORMAL.name()));
+    }
+
+    private Integer prefsGetMinTranfserTime() {
+        final int value = Integer.parseInt(prefs.getString(Constants.PREFS_KEY_MIN_TRANSFER_TIME, "-1"));
+        return value < 0 ? null : value;
     }
 
     private Accessibility prefsGetAccessibility() {

@@ -35,6 +35,16 @@
         <item>Normal</item>
         <item>Schnell</item>
     </string-array>
+    <string-array name="directions_min_transfer_time">
+        <item>Ich habe keine Vorgabe</item>
+        <item>So schnell es geht</item>
+        <item>5 Minuten</item>
+        <item>10 Minuten</item>
+        <item>15 Minuten</item>
+        <item>20 Minuten</item>
+        <item>30 Minuten</item>
+        <item>60 Minuten</item>
+    </string-array>
     <string-array name="directions_accessibility">
         <item>keine Einschränkung</item>
         <item>Bedingt barrierefrei</item>
