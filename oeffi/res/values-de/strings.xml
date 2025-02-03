@@ -259,7 +259,7 @@
 
     <!-- directions trip connection evaluation -->
     <string name="directions_trip_conneval_with_transfer">%1$s mit %2$s</string>
-    <string name="directions_trip_conneval_missed">&lt;b>Anschluss verpasst um %1$d Minuten&lt;/b></string>
+    <string name="directions_trip_conneval_missed">&lt;b>Anschluss &lt;u>verpasst&lt;/u> um %1$d Minuten&lt;/b></string>
     <string name="directions_trip_conneval_difficult_possibly_missed">&lt;b>Anschluss schwierig trotz eigener Verspätung, nur %1$d Minuten&lt;/b></string>
     <string name="directions_trip_conneval_difficult">&lt;b>Anschluss schwierig, nur %1$d Minuten&lt;/b></string>
     <string name="directions_trip_conneval_endangered_possibly_difficult">&lt;b>Anschluss gefährdet trotz eigener Verspätung, nur %1$d Minuten&lt;/b></string>

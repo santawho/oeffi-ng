@@ -475,6 +475,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                 int startYabs = 0;
                 Position departurePosition = null;
                 final Public firstPublicLeg = trip.getFirstPublicLeg();
+                final TimeSpec referenceTime = renderConfig.referenceTime;
                 final Date publicDepartureTime;
                 if (firstPublicLeg != null) {
                     final Stop publicDepartureStop = firstPublicLeg.departureStop;
@@ -487,7 +488,10 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                         departurePosition = publicDepartureStop.getDeparturePosition();
                         startYabs = (int) timeToCoord(publicDepartureTime.getTime(), height);
                         if (departurePosition != null && !startCancelled) {
-                            startYabs = drawPosition(canvas, centerX, startYabs, height, true, departurePosition.name);
+                            final long minutesFromNow = (startTime.getTime() - now) / 60000;
+                            if (minutesFromNow > -10 && minutesFromNow < 30) {
+                                startYabs = drawPosition(canvas, centerX, startYabs, height, true, departurePosition.name);
+                            }
                         }
                         startYabs = drawTime(canvas, centerX, startYabs, height, true, publicTimePaint, publicDepartureCancelled,
                                 publicDepartureTime, null);
@@ -507,8 +511,6 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                         startYabs = individualYabs;
                     }
                 }
-
-                TimeSpec referenceTime = renderConfig.referenceTime;
 
                 if (startTime != null) {
                     final long baseTime;
