@@ -3,4 +3,6 @@
 
     <bool name="layout_navigation_drawer_footer_show">true</bool>
 
+    <bool name="layout_map_show_toggleable">true</bool>
+
 </resources>

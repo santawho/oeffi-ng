@@ -43,6 +43,7 @@
     <dimen name="map_trip_stroke_width_selected_glow">24dp</dimen>
     <dimen name="layout_navigation_drawer_width">300dp</dimen>
     <dimen name="layout_list_width">370dp</dimen>
+    <dimen name="layout_list_height">470dp</dimen>
 
     <dimen name="elevation_map">0dp</dimen>
     <dimen name="elevation_content">4dp</dimen>
@@ -51,6 +52,7 @@
 
     <bool name="layout_list_show">true</bool>
     <bool name="layout_map_show">false</bool>
+    <bool name="layout_map_show_toggleable">false</bool>
     <bool name="layout_navigation_drawer_footer_show">false</bool>
 
     <integer name="max_departures_per_station">5</integer>

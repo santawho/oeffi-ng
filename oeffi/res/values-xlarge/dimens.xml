@@ -28,5 +28,6 @@
 
     <dimen name="trip_details_stop_offset">8sp</dimen>
     <dimen name="layout_list_width">430dp</dimen>
+    <dimen name="layout_list_height">530dp</dimen>
 
 </resources>

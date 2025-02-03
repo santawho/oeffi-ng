@@ -27,6 +27,7 @@ import android.preference.PreferenceManager;
 import android.text.format.DateUtils;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.activity.ComponentActivity;
@@ -90,17 +91,32 @@ public abstract class OeffiActivity extends ComponentActivity {
         listFrame.setVisibility(isInMultiWindowMode() || listShow ? View.VISIBLE : View.GONE);
 
         final View mapFrame = findViewById(mapFrameResId);
-        final boolean mapShow = res.getBoolean(R.bool.layout_map_show);
-        mapFrame.setVisibility(!isInMultiWindowMode() && mapShow ? View.VISIBLE : View.GONE);
+        boolean mapShow = !isInMultiWindowMode() && isMapEnabled(res);
+        mapFrame.setVisibility(mapShow ? View.VISIBLE : View.GONE);
 
-        listFrame.getLayoutParams().width = listShow && mapShow ? res.getDimensionPixelSize(R.dimen.layout_list_width)
-                : LinearLayout.LayoutParams.MATCH_PARENT;
+        ViewParent container = mapFrame.getParent();
+        final boolean isVertical = (container instanceof LinearLayout
+                && ((LinearLayout) container).getOrientation() == LinearLayout.VERTICAL);
+
+        if (isVertical) {
+            listFrame.getLayoutParams().height = listShow && mapShow
+                    ? res.getDimensionPixelSize(R.dimen.layout_list_height)
+                    : LinearLayout.LayoutParams.MATCH_PARENT;
+        } else {
+            listFrame.getLayoutParams().width = listShow && mapShow
+                    ? res.getDimensionPixelSize(R.dimen.layout_list_width)
+                    : LinearLayout.LayoutParams.MATCH_PARENT;
+        }
 
         final ViewGroup navigationDrawer = findViewById(R.id.navigation_drawer_layout);
         if (navigationDrawer != null) {
             final View child = navigationDrawer.getChildAt(1);
             child.getLayoutParams().width = res.getDimensionPixelSize(R.dimen.layout_navigation_drawer_width);
         }
+    }
+
+    protected boolean isMapEnabled(final Resources res) {
+        return res.getBoolean(R.bool.layout_map_show);
     }
 
     protected String prefsGetNetwork() {
@@ -216,16 +232,16 @@ public abstract class OeffiActivity extends ComponentActivity {
             final CharSequence defaultLabel) {
         final NetworkResources networkRes = NetworkResources.instance(this, network);
         final Drawable networkResIcon = networkRes.icon;
+        final String label = getString(R.string.disclaimer_network, networkRes.label != null ? networkRes.label : defaultLabel);
         if (networkRes.cooperation && networkResIcon != null) {
             final Drawable icon = networkResIcon.mutate();
             final int size = getResources().getDimensionPixelSize(R.dimen.disclaimer_network_icon_size);
             icon.setBounds(0, 0, size, size);
             disclaimerSourceView.setCompoundDrawables(icon, null, null, null);
-            disclaimerSourceView.setText(getString(R.string.disclaimer_network, networkRes.label));
         } else {
             disclaimerSourceView.setCompoundDrawables(null, null, null, null);
-            disclaimerSourceView.setText(defaultLabel);
         }
+        disclaimerSourceView.setText(label);
     }
 
     protected final CharSequence product(final ResultHeader header) {

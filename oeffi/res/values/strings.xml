@@ -281,6 +281,7 @@
     <string name="directions_trip_details_action_calendar_title">Add to calendar</string>
     <string name="directions_trip_details_action_calendar_notfound">There is no calendar app installed</string>
     <string name="directions_trip_details_action_track_title">Location tracking</string>
+    <string name="directions_trip_details_action_showmap_title">Show map</string>
     <string name="directions_trip_details_action_share_title">Share…</string>
     <string name="directions_trip_details_action_share_short_title">Share short message…</string>
     <string name="directions_trip_details_action_share_long_title">Share detailed message…</string>

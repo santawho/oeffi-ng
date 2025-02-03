@@ -224,6 +224,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private Location highlightedLocation;
     private Point location;
     private int selectedLegIndex = -1;
+    private boolean mapEnabled = false;
 
     private static class LegKey {
         private String key;
@@ -296,7 +297,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
         setupFromTrip(trip);
 
-        setContentView(R.layout.directions_trip_details_content);
+        final boolean isPortrait = res.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+        setContentView(isPortrait
+                ? R.layout.directions_trip_details_content_portrait
+                : R.layout.directions_trip_details_content_landscape);
         final View contentView = findViewById(android.R.id.content);
         ViewCompat.setOnApplyWindowInsetsListener(contentView, (v, windowInsets) -> {
             final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -370,6 +374,14 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 mapView.zoomToAll();
                 updateGUI();
             });
+        }
+
+        if (isPortrait && res.getBoolean(R.bool.layout_map_show_toggleable)) {
+            actionBar.addButton(R.drawable.ic_map_white_24dp, R.string.directions_trip_details_action_showmap_title)
+                    .setOnClickListener(v -> {
+                        mapEnabled = !mapEnabled;
+                        updateFragments();
+                    });
         }
 
         actionBar.addButton(R.drawable.ic_share_white_24dp, R.string.directions_trip_details_action_share_title)
@@ -573,6 +585,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     private void updateFragments() {
         updateFragments(R.id.directions_trip_details_list_frame, R.id.directions_trip_details_map_frame);
+    }
+
+    @Override
+    protected boolean isMapEnabled(Resources res) {
+        return mapEnabled || super.isMapEnabled(res);
     }
 
     private void updateGUI() {
@@ -973,7 +990,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private Spanned getLeftTimeFormatted(Date now, Date endTime) {
         long leftSeconds = (endTime.getTime() - now.getTime()) / 1000;
         final String leftText;
-        if (leftSeconds < 45) {
+        if (leftSeconds < 70) {
             leftText = getString(R.string.directions_trip_details_no_time_left);
         } else {
             final long leftMinutes = leftSeconds / 60;
@@ -1474,7 +1491,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         LegContainer prevC = null;
         for (int iLeg = 0; iLeg < trip.legs.size(); ++iLeg) {
             final Trip.Leg prevLeg = (iLeg > 0) ? trip.legs.get(iLeg - 1) : null;
-            final Trip.Leg leg = trip.legs.get(iLeg);
+            Trip.Leg leg = trip.legs.get(iLeg);
             final Trip.Leg nextLeg = (iLeg + 1 < trip.legs.size()) ? trip.legs.get(iLeg + 1) : null;
 
             if (leg instanceof Trip.Individual) {
@@ -1482,8 +1499,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 final LegContainer transferTo = (nextLeg instanceof Trip.Public) ? new LegContainer((Trip.Public) nextLeg) : null;
                 legs.add(new LegContainer((Trip.Individual) leg, transferFrom, transferTo));
                 if (transferTo != null) {
+                    setupPath(nextLeg);
                     legs.add(transferTo);
                     ++iLeg;
+
+                    if (renderConfig.isJourney) {
+                        legExpandStates.put(new LegKey(nextLeg), true);
+                    }
                 }
                 prevC = transferTo;
             } else if (leg instanceof Trip.Public){
@@ -1499,33 +1521,37 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 }
             }
 
-            if (leg.path == null) {
-                leg.path = new ArrayList<>();
+            setupPath(leg);
+        }
+    }
 
-                if (leg.departure != null) {
-                    final Point departurePoint = pointFromLocation(leg.departure);
-                    if (departurePoint != null)
-                        leg.path.add(departurePoint);
-                }
+    private void setupPath(final Trip.Leg leg) {
+        if (leg.path == null) {
+            leg.path = new ArrayList<>();
 
-                if (leg instanceof Trip.Public) {
-                    final Trip.Public publicLeg = (Trip.Public) leg;
-                    final List<Stop> intermediateStops = publicLeg.intermediateStops;
+            if (leg.departure != null) {
+                final Point departurePoint = pointFromLocation(leg.departure);
+                if (departurePoint != null)
+                    leg.path.add(departurePoint);
+            }
 
-                    if (intermediateStops != null) {
-                        for (final Stop stop : intermediateStops) {
-                            final Point stopPoint = pointFromLocation(stop.location);
-                            if (stopPoint != null)
-                                leg.path.add(stopPoint);
-                        }
+            if (leg instanceof Trip.Public) {
+                final Trip.Public publicLeg = (Trip.Public) leg;
+                final List<Stop> intermediateStops = publicLeg.intermediateStops;
+
+                if (intermediateStops != null) {
+                    for (final Stop stop : intermediateStops) {
+                        final Point stopPoint = pointFromLocation(stop.location);
+                        if (stopPoint != null)
+                            leg.path.add(stopPoint);
                     }
                 }
+            }
 
-                if (leg.arrival != null) {
-                    final Point arrivalPoint = pointFromLocation(leg.arrival);
-                    if (arrivalPoint != null)
-                        leg.path.add(arrivalPoint);
-                }
+            if (leg.arrival != null) {
+                final Point arrivalPoint = pointFromLocation(leg.arrival);
+                if (arrivalPoint != null)
+                    leg.path.add(arrivalPoint);
             }
         }
     }
