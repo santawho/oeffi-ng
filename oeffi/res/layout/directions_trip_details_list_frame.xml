@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/directions_trip_details_list_frame"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:elevation="@dimen/elevation_content">
+
+    <include layout="@layout/action_bar" />
+
+    <FrameLayout
+        android:id="@+id/directions_trip_details_list_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="48dp">
+
+            <LinearLayout
+                android:id="@+id/directions_trip_details_legs_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:divider="@drawable/list_divider"
+                android:orientation="vertical"
+                android:showDividers="middle">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/bg_divider"
+                    android:orientation="horizontal"
+                    android:paddingBottom="@dimen/text_padding_vertical_lax"
+                    android:paddingLeft="@dimen/text_padding_horizontal_lax"
+                    android:paddingRight="@dimen/text_padding_horizontal_lax"
+                    android:paddingTop="@dimen/text_padding_vertical_lax">
+
+                    <de.schildbach.oeffi.directions.LocationTextView
+                        android:id="@+id/directions_trip_details_location_from"
+                        android:layout_width="0px"
+                        android:layout_height="match_parent"
+                        android:layout_weight="50"
+                        android:drawablePadding="@dimen/text_padding_horizontal_lax" />
+
+                    <de.schildbach.oeffi.directions.LocationTextView
+                        android:id="@+id/directions_trip_details_location_to"
+                        android:layout_width="0px"
+                        android:layout_height="match_parent"
+                        android:layout_weight="50"
+                        android:drawablePadding="@dimen/text_padding_horizontal_lax" />
+                </LinearLayout>
+
+                <TableLayout
+                    android:id="@+id/directions_trip_details_fares"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/bg_divider"
+                    android:baselineAligned="true"
+                    android:paddingBottom="@dimen/text_padding_vertical_lax"
+                    android:paddingLeft="@dimen/text_padding_horizontal_verylax"
+                    android:paddingRight="@dimen/text_padding_horizontal_verylax"
+                    android:paddingTop="@dimen/text_padding_vertical_lax"
+                    android:stretchColumns="2" />
+
+                <TextView
+                    android:id="@+id/directions_trip_details_footer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/ic_settings_input_antenna_grey600_18dp"
+                    android:drawablePadding="@dimen/text_padding_horizontal_lax"
+                    android:drawableTint="@color/fg_less_significant"
+                    android:gravity="left|center_vertical"
+                    android:paddingBottom="@dimen/text_padding_vertical_lax"
+                    android:paddingLeft="@dimen/text_padding_horizontal_lax"
+                    android:paddingRight="@dimen/text_padding_horizontal_lax"
+                    android:paddingTop="@dimen/text_padding_vertical_verylax" />
+            </LinearLayout>
+        </ScrollView>
+
+        <LinearLayout
+            android:id="@+id/directions_trip_details_disclaimer_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginLeft="@dimen/text_padding_horizontal_verylax"
+            android:layout_marginRight="@dimen/text_padding_horizontal_verylax"
+            android:layout_marginTop="@dimen/text_padding_vertical"
+            android:layout_marginBottom="@dimen/text_padding_vertical"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/directions_trip_details_disclaimer_source"
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_weight="1"
+                android:drawablePadding="@dimen/text_padding_horizontal_lax"
+                android:gravity="bottom|left"
+                android:maxLines="2"
+                android:textSize="@dimen/font_size_disclaimer" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:gravity="bottom|right"
+                android:text="@string/disclaimer_responsibility_2line"
+                android:textSize="@dimen/font_size_disclaimer" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/directions_trip_details_next_event"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/directions_trip_details_next_event_time_fontsize_decor"
+                android:text="⧖"
+                tools:ignore="HardcodedText" />
+            <TextView
+                android:id="@+id/directions_trip_details_next_event_time_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-20dp"
+                android:layout_marginBottom="-15dp"
+                android:paddingHorizontal="20dp"
+                android:textSize="@dimen/directions_trip_details_next_event_time_fontsize"
+                android:textStyle="bold"
+                android:text="38"/>
+            <TextView
+                android:id="@+id/directions_trip_details_next_event_time_unit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/directions_trip_details_next_event_time_fontsize_decor"
+                android:textStyle="bold"
+                android:text="m"/>
+        </LinearLayout>
+        <TextView
+            android:id="@+id/directions_trip_details_next_event_target"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="@dimen/directions_trip_details_next_event_target_fontsize"
+            android:text="Frankfurt a.M. Hbf"/>
+        <LinearLayout
+            android:id="@+id/directions_trip_details_next_event_connection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+            <de.schildbach.oeffi.stations.LineView
+                android:id="@+id/directions_trip_details_next_event_connection_line"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/directions_trip_details_next_event_connection_line_fontsize"
+                android:text="12"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="10dp"
+                android:paddingHorizontal="8dp"
+                android:textSize="@dimen/directions_trip_details_next_event_connection_to_fontsize"
+                android:text="➜"
+                tools:ignore="HardcodedText" />
+            <TextView
+                android:id="@+id/directions_trip_details_next_event_connection_to"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="italic"
+                android:textSize="@dimen/directions_trip_details_next_event_connection_to_fontsize"
+                android:text="Hannover"/>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/directions_trip_details_next_event_positions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+            <TextView
+                android:id="@+id/directions_trip_details_next_event_position_from"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingVertical="0dp"
+                android:paddingHorizontal="8dp"
+                android:textStyle="bold"
+                android:textSize="@dimen/directions_trip_details_next_event_position_from_fontsize"
+                android:background="#606060"
+                android:textColor="#FFFFFF"
+                android:text="12"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="10dp"
+                android:paddingHorizontal="8dp"
+                android:textSize="@dimen/directions_trip_details_next_event_position_to_fontsize"
+                android:text="➜"
+                tools:ignore="HardcodedText" />
+            <TextView
+                android:id="@+id/directions_trip_details_next_event_position_to"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingVertical="0dp"
+                android:paddingHorizontal="8dp"
+                android:textStyle="bold"
+                android:textSize="@dimen/directions_trip_details_next_event_position_to_fontsize"
+                android:background="#606060"
+                android:textColor="#FFFFFF"
+                android:text="103"/>
+        </LinearLayout>
+        <TextView
+            android:id="@+id/directions_trip_details_next_event_departure"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="@dimen/directions_trip_details_next_event_departure_fontsize"
+            android:text="Frankfurt Hbf (tief)"/>
+        <LinearLayout
+            android:id="@+id/directions_trip_details_next_event_changeover"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+            <LinearLayout
+                android:id="@+id/directions_trip_details_next_event_transfer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/directions_trip_details_next_event_transfer_fontsize"
+                    android:text="→"
+                    tools:ignore="HardcodedText" />
+                <TextView
+                    android:id="@+id/directions_trip_details_next_event_transfer_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:textStyle="bold"
+                    android:textSize="@dimen/directions_trip_details_next_event_transfer_fontsize"
+                    android:text="20"/>
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/directions_trip_details_next_event_walk"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/directions_trip_details_next_event_transfer_fontsize"
+                    android:text="↦"
+                    tools:ignore="HardcodedText" />
+                <TextView
+                    android:id="@+id/directions_trip_details_next_event_walk_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:textSize="@dimen/directions_trip_details_next_event_transfer_fontsize"
+                    android:text="10"/>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

@@ -20,6 +20,7 @@ package de.schildbach.oeffi.directions;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.KeyguardManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -128,7 +129,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         public final LegContainer transferFrom;
         public final LegContainer transferTo;
 
-        public LegContainer(final @Nullable Trip.Public baseLeg) {
+        public LegContainer(
+                final @Nullable Trip.Public baseLeg) {
             this.publicLeg = baseLeg;
             this.initialLeg = baseLeg;
             this.individualLeg = null;
@@ -210,6 +212,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private LocationManager locationManager;
     private BroadcastReceiver tickReceiver;
     private long nextNavigationRefreshTime = 0;
+    private boolean showNextEventWhenUnlocked = false;
+    private boolean showNextEventWhenLocked = true;
 
     private ViewGroup legsGroup;
     private OeffiMapView mapView;
@@ -466,6 +470,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             v.setPadding(0, 0, 0, insets.bottom);
             return windowInsets;
         });
+
+        View nextEvent = findViewById(R.id.directions_trip_details_next_event);
+        nextEvent.setOnClickListener(view -> setShowNextEvent(false));
     }
 
     @Override
@@ -597,14 +604,46 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         updateHighlightedTime(now);
         updateHighlightedLocation();
 
+        LegContainer currentLeg = null;
         int i = LEGSGROUP_INSERT_INDEX;
-        for (final LegContainer legC : legs) {
-            if (legC.publicLeg != null)
-                updatePublicLeg(legsGroup.getChildAt(i), legC, now);
-            else
-                updateIndividualLeg(legsGroup.getChildAt(i), legC, now);
+        for (int iLeg = 0; iLeg < legs.size(); ++iLeg) {
+            final LegContainer legC = legs.get(iLeg);
+            final View legView = legsGroup.getChildAt(i);
+            final boolean isCurrent;
+            if (legC.publicLeg != null) {
+                final int iWalk = iLeg + 1;
+                LegContainer walkLegC = (iWalk < legs.size()) ? legs.get(iWalk) : null;
+                final int iNext = iLeg + 2;
+                LegContainer nextLegC = (iNext < legs.size()) ? legs.get(iNext) : null;
+                isCurrent = updatePublicLeg(legView, legC, walkLegC, nextLegC, now);
+            } else {
+                isCurrent = updateIndividualLeg(legView, legC, now);
+            }
+            if (isCurrent)
+                currentLeg = legC;
             i++;
         }
+
+        final boolean showEvent;
+        if (currentLeg == null) {
+            showEvent = false;
+            showNextEventWhenUnlocked = false;
+            showNextEventWhenLocked = false;
+        } else {
+            final KeyguardManager keyguard = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
+            if (keyguard.isKeyguardLocked()) {
+                showEvent = showNextEventWhenLocked;
+            } else {
+                showEvent = showNextEventWhenUnlocked;
+                showNextEventWhenLocked = true;
+            }
+        }
+
+        View listContent = findViewById(R.id.directions_trip_details_list_content);
+        listContent.setVisibility(showEvent ? View.GONE : View.VISIBLE);
+
+        View nextEvent = findViewById(R.id.directions_trip_details_next_event);
+        nextEvent.setVisibility(showEvent ? View.VISIBLE : View.GONE);
     }
 
     private void updateHighlightedTime(final Date now) {
@@ -741,7 +780,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
     }
 
-    private void updatePublicLeg(final View row, final LegContainer legC, final Date now) {
+    private boolean updatePublicLeg(
+            final View row,
+            final LegContainer legC, final LegContainer walkLegC, final LegContainer nextLegC,
+            final Date now) {
         Trip.Public leg = legC.publicLeg;
         final Location destination = leg.destination;
         final String destinationName = destination != null ? destination.uniqueShortName() : null;
@@ -870,10 +912,24 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             row.setBackgroundColor(colorLegPublicNowBackground);
             progress.setText(getLeftTimeFormatted(now, endTime));
             progress.setVisibility(View.VISIBLE);
+            progress.setOnClickListener(view -> setShowNextEvent(true));
+
+            setNextEventTimeLeft(now, endTime);
+            String targetName = leg.arrivalStop.location.uniqueShortName();
+            setNextEventTarget(targetName);
+            String depName = (nextLegC != null) ? nextLegC.publicLeg.departureStop.location.uniqueShortName() : null;
+            setNextEventDeparture((depName != null && !depName.equals(targetName)) ? depName : null);
+            setNextEventPositions(leg.arrivalStop.getArrivalPosition(),
+                    (nextLegC != null) ? nextLegC.publicLeg.getDeparturePosition() : null);
+            setNextEventTransport((nextLegC != null) ? nextLegC.publicLeg : null);
+            setNextEventTransferTimes(walkLegC, false);
+
+            return true;
         }
+        return false;
     }
 
-    private void updateIndividualLeg(final View row, final LegContainer legC, final Date now) {
+    private boolean updateIndividualLeg(final View row, final LegContainer legC, final Date now) {
         final TextView textView = row.findViewById(R.id.directions_trip_details_individual_entry_text);
         String legText = null;
         final Trip.Individual leg = legC.individualLeg;
@@ -984,10 +1040,155 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             row.setBackgroundColor(colorLegIndividualNowBackground);
             progress.setText(getLeftTimeFormatted(now, endTime));
             progress.setVisibility(View.VISIBLE);
+            progress.setOnClickListener(view -> setShowNextEvent(true));
+
+            setNextEventTimeLeft(now, endTime);
+            String targetName = (transferTo != null) ? transferTo.location.uniqueShortName() : null;
+            setNextEventTarget(targetName);
+            setNextEventDeparture(null);
+            setNextEventPositions(transferFrom != null ? transferFrom.getArrivalPosition() : null,
+                    transferTo != null ? transferTo.getDeparturePosition() : null);
+            setNextEventTransport(legC.transferTo != null ? legC.transferTo.publicLeg : null);
+            setNextEventTransferTimes(legC, true);
+
+            return true;
+        }
+        return false;
+    }
+
+    protected void setShowNextEvent(final boolean showNextEvent) {
+        final KeyguardManager keyguard = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
+        if (keyguard.isKeyguardLocked()) {
+            showNextEventWhenLocked = showNextEvent;
+            showNextEventWhenUnlocked = showNextEvent;
+        } else {
+            showNextEventWhenUnlocked = showNextEvent;
+            showNextEventWhenLocked = true;
+        }
+        updateGUI();
+    }
+
+    private void setNextEventTimeLeft(final Date now, final Date endTime) {
+        long leftSecs = (endTime.getTime() - now.getTime()) / 1000 + 5;
+        boolean isNegative = false;
+        final long value;
+        final String unit;
+        if (leftSecs < 0) {
+            isNegative = true;
+            leftSecs = -leftSecs;
+        }
+        if (leftSecs < 60) {
+            value = leftSecs;
+            unit = "s";
+        } else {
+            final long leftMins = leftSecs / 60;
+            if (leftMins < 60) {
+                value = leftMins;
+                unit = "m";
+            } else {
+                final long leftHours = leftMins / 60;
+                if (leftHours < 24) {
+                    value = leftHours;
+                    unit = "h";
+                } else {
+                    value = leftHours / 24;
+                    unit = "d";
+                }
+            }
+        }
+        TextView valueView = findViewById(R.id.directions_trip_details_next_event_time_value);
+        valueView.setText((isNegative ? "-" : "" ) + value);
+        valueView.setTextColor(leftSecs < 60 ? 0xFFFF4040 : 0xFF000000);
+        TextView unitView = findViewById(R.id.directions_trip_details_next_event_time_unit);
+        unitView.setText(unit);
+    }
+
+    private void setNextEventTarget(final String name) {
+        TextView targetView = findViewById(R.id.directions_trip_details_next_event_target);
+        targetView.setText(name);
+        targetView.setVisibility(name != null ? View.VISIBLE : View.GONE);
+    }
+
+    private void setNextEventPositions(final Position arrPos, final Position depPos) {
+        findViewById(R.id.directions_trip_details_next_event_positions)
+                .setVisibility((arrPos != null || depPos != null) ? View.VISIBLE : View.GONE);
+
+        final TextView from = findViewById(R.id.directions_trip_details_next_event_position_from);
+        final TextView to = findViewById(R.id.directions_trip_details_next_event_position_to);
+
+        if (arrPos != null) {
+            from.setVisibility(View.VISIBLE);
+            from.setText(arrPos.name);
+        } else {
+            from.setVisibility(View.GONE);
+        }
+
+        if (depPos != null) {
+            to.setVisibility(View.VISIBLE);
+            to.setText(depPos.name);
+        } else {
+            to.setVisibility(View.GONE);
         }
     }
 
-    private Spanned getLeftTimeFormatted(Date now, Date endTime) {
+    private void setNextEventTransport(final Trip.Public leg) {
+        if (leg == null || leg.line == null) {
+            findViewById(R.id.directions_trip_details_next_event_connection).setVisibility(View.GONE);
+        } else {
+            findViewById(R.id.directions_trip_details_next_event_connection).setVisibility(View.VISIBLE);
+
+            final LineView lineView = findViewById(R.id.directions_trip_details_next_event_connection_line);
+            lineView.setVisibility(View.VISIBLE);
+            lineView.setLine(leg.line);
+
+            final Location dest = leg.destination;
+            TextView destView = findViewById(R.id.directions_trip_details_next_event_connection_to);
+            destView.setText(dest != null ? dest.uniqueShortName() : null);
+        }
+    }
+
+    private void setNextEventTransferTimes(final LegContainer walkLegC, final boolean forWalkLeg) {
+        if (walkLegC == null) {
+            findViewById(R.id.directions_trip_details_next_event_changeover)
+                    .setVisibility(View.GONE);
+        } else {
+            findViewById(R.id.directions_trip_details_next_event_changeover)
+                    .setVisibility(View.VISIBLE);
+
+            if (!forWalkLeg && walkLegC.transferFrom != null && walkLegC.transferTo != null) {
+                findViewById(R.id.directions_trip_details_next_event_transfer)
+                        .setVisibility(View.VISIBLE);
+                final Date arrTime = walkLegC.transferFrom.publicLeg.arrivalStop.getArrivalTime();
+                final Date depTime = walkLegC.transferTo.publicLeg.departureStop.getDepartureTime();
+                long leftMins = (depTime.getTime() - arrTime.getTime()) / 60000 - 1;
+                TextView valueView = findViewById(R.id.directions_trip_details_next_event_transfer_value);
+                valueView.setText(Long.toString(leftMins));
+                valueView.setTextColor(leftMins < 3 ? 0xFFFF4040 : 0xFF000000);
+            } else {
+                findViewById(R.id.directions_trip_details_next_event_transfer)
+                        .setVisibility(View.GONE);
+            }
+
+            final int walkMins = walkLegC.individualLeg != null ? walkLegC.individualLeg.min : 0;
+            if (walkMins > 0) {
+                findViewById(R.id.directions_trip_details_next_event_walk)
+                        .setVisibility(View.VISIBLE);
+                ((TextView) findViewById(R.id.directions_trip_details_next_event_walk_value))
+                        .setText(Integer.toString(walkMins));
+            } else {
+                findViewById(R.id.directions_trip_details_next_event_walk)
+                        .setVisibility(View.GONE);
+            }
+        }
+    }
+
+    private void setNextEventDeparture(String name) {
+        TextView depView = findViewById(R.id.directions_trip_details_next_event_departure);
+        depView.setText(name);
+        depView.setVisibility(name != null ? View.VISIBLE : View.GONE);
+    }
+
+    private Spanned getLeftTimeFormatted(final Date now, final Date endTime) {
         long leftSeconds = (endTime.getTime() - now.getTime()) / 1000;
         final String leftText;
         if (leftSeconds < 70) {

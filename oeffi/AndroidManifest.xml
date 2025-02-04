@@ -197,7 +197,7 @@
             android:configChanges="keyboard|keyboardHidden"
             android:label="@string/trip_details_title"
             android:taskAffinity="${applicationId}.directions"
-            android:showWhenLocked="true" />
+            android:showWhenLocked="false" />
 
         <activity
             android:name=".directions.navigation.TripNavigatorActivity"
