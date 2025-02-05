@@ -158,7 +158,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
     }
 
-    private static final long NAVIGATION_AUTO_REFRESH_INTERVAL_SECS = 10;
+    private static final long NAVIGATION_AUTO_REFRESH_INTERVAL_SECS = 110;
     private static final String INTENT_EXTRA_NETWORK = TripDetailsActivity.class.getName() + ".network";
     private static final String INTENT_EXTRA_TRIP = TripDetailsActivity.class.getName() + ".trip";
     private static final String INTENT_EXTRA_RENDERCONFIG = TripDetailsActivity.class.getName() + ".config";
@@ -205,7 +205,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private int colorSignificant;
     private int colorInsignificant;
     private int colorHighlighted;
-    private int colorPosition, colorPositionBackground;
+    private int colorPosition, colorPositionBackground, colorPositionBackgroundChanged;
     private int colorLegPublicPastBackground, colorLegPublicNowBackground, colorLegPublicFutureBackground;
     private int colorLegIndividualPastBackground, colorLegIndividualNowBackground, colorLegIndividualFutureBackground;
     private DisplayMetrics displayMetrics;
@@ -229,6 +229,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private Point location;
     private int selectedLegIndex = -1;
     private boolean mapEnabled = false;
+    private boolean isPaused = false;
 
     private static class LegKey {
         private String key;
@@ -276,6 +277,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         colorHighlighted = res.getColor(R.color.fg_highlighted);
         colorPosition = res.getColor(R.color.fg_position);
         colorPositionBackground = res.getColor(R.color.bg_position);
+        colorPositionBackgroundChanged = res.getColor(R.color.bg_position_changed);
         colorLegPublicPastBackground = res.getColor(R.color.bg_trip_details_public_past);
         colorLegPublicNowBackground = res.getColor(R.color.bg_trip_details_public_now);
         colorLegPublicFutureBackground = res.getColor(R.color.bg_trip_details_public_future);
@@ -325,7 +327,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     : renderConfig.isJourney
                         ? R.string.journey_details_title
                         : R.string.trip_details_title)); // getTitle()
-        actionBar.setBack(isTaskRoot() ? null : v -> finish());
+        actionBar.setBack(isTaskRoot() ? null : v -> {
+            if (findViewById(R.id.directions_trip_details_next_event).getVisibility() == View.VISIBLE)
+                setShowNextEvent(false);
+            else
+                finish();
+        });
 
         // action bar secondary title
         final StringBuilder secondaryTitle = new StringBuilder();
@@ -471,7 +478,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             return windowInsets;
         });
 
-        View nextEvent = findViewById(R.id.directions_trip_details_next_event);
+        View nextEvent = findViewById(R.id.directions_trip_details_next_event_container);
         nextEvent.setOnClickListener(view -> setShowNextEvent(false));
     }
 
@@ -483,8 +490,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         tickReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (!checkAutoRefresh())
-                    updateGUI();
+                if (!isPaused) {
+                    if (!checkAutoRefresh())
+                        updateGUI();
+                }
             }
         };
         registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
@@ -494,6 +503,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     private boolean checkAutoRefresh() {
+        if (isPaused) return false;
         if (!renderConfig.isNavigation) return false;
         if (nextNavigationRefreshTime < 0) return false;
         long now = new Date().getTime();
@@ -505,6 +515,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     @Override
     protected void onResume() {
         super.onResume();
+        isPaused = false;
         checkAutoRefresh();
         mapView.onResume();
         updateGUI();
@@ -512,6 +523,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     @Override
     protected void onPause() {
+        isPaused = true;
         mapView.onPause();
         super.onPause();
     }
@@ -914,13 +926,17 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             progress.setVisibility(View.VISIBLE);
             progress.setOnClickListener(view -> setShowNextEvent(true));
 
+            setNextEventType(true);
+            setNextEventClock(now);
             setNextEventTimeLeft(now, endTime);
             String targetName = leg.arrivalStop.location.uniqueShortName();
             setNextEventTarget(targetName);
             String depName = (nextLegC != null) ? nextLegC.publicLeg.departureStop.location.uniqueShortName() : null;
             setNextEventDeparture((depName != null && !depName.equals(targetName)) ? depName : null);
-            setNextEventPositions(leg.arrivalStop.getArrivalPosition(),
-                    (nextLegC != null) ? nextLegC.publicLeg.getDeparturePosition() : null);
+            final Position arrPos = leg.arrivalStop.getArrivalPosition();
+            final Position depPos = (nextLegC != null) ? nextLegC.publicLeg.getDeparturePosition() : null;
+            setNextEventPositions(arrPos, depPos, depPos != null && !depPos.equals(
+                    nextLegC.publicLeg.departureStop.plannedDeparturePosition));
             setNextEventTransport((nextLegC != null) ? nextLegC.publicLeg : null);
             setNextEventTransferTimes(walkLegC, false);
 
@@ -1042,12 +1058,15 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             progress.setVisibility(View.VISIBLE);
             progress.setOnClickListener(view -> setShowNextEvent(true));
 
+            setNextEventType(false);
+            setNextEventClock(now);
             setNextEventTimeLeft(now, endTime);
             String targetName = (transferTo != null) ? transferTo.location.uniqueShortName() : null;
             setNextEventTarget(targetName);
             setNextEventDeparture(null);
-            setNextEventPositions(transferFrom != null ? transferFrom.getArrivalPosition() : null,
-                    transferTo != null ? transferTo.getDeparturePosition() : null);
+            final Position arrPos = transferFrom != null ? transferFrom.getArrivalPosition() : null;
+            final Position depPos = transferTo != null ? transferTo.getDeparturePosition() : null;
+            setNextEventPositions(arrPos, depPos, depPos != null && !depPos.equals(transferTo.plannedArrivalPosition));
             setNextEventTransport(legC.transferTo != null ? legC.transferTo.publicLeg : null);
             setNextEventTransferTimes(legC, true);
 
@@ -1068,37 +1087,69 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         updateGUI();
     }
 
+    private void setViewBackgroundColor(final int viewId, final int color) {
+        findViewById(viewId).setBackgroundColor(color);
+    }
+
+    private void setNextEventType(boolean isPublic) {
+        final int colorHighlight = getColor(R.color.bg_trip_details_public_now);
+        final int colorNormal = getColor(R.color.bg_level0);
+        final int colorHighIfPublic = isPublic ? colorHighlight : colorNormal;
+        final int colorHighIfChangeover = isPublic ? colorNormal : colorHighlight;
+        setViewBackgroundColor(R.id.directions_trip_details_next_event_time, colorHighlight);
+        setViewBackgroundColor(R.id.directions_trip_details_next_event_target, colorHighlight);
+        setViewBackgroundColor(R.id.directions_trip_details_next_event_positions, colorHighIfChangeover);
+        setViewBackgroundColor(R.id.directions_trip_details_next_event_departure, colorNormal);
+        setViewBackgroundColor(R.id.directions_trip_details_next_event_connection, colorHighIfChangeover);
+        setViewBackgroundColor(R.id.directions_trip_details_next_event_changeover, colorHighIfChangeover);
+        setViewBackgroundColor(R.id.directions_trip_details_next_event_clock, colorNormal);
+    }
+
+    private void setNextEventClock(final Date time) {
+        TextView clock = findViewById(R.id.directions_trip_details_next_event_clock);
+        clock.setText(Formats.formatTime(this, time.getTime()));
+    }
+
+    @SuppressLint("DefaultLocale")
     private void setNextEventTimeLeft(final Date now, final Date endTime) {
         long leftSecs = (endTime.getTime() - now.getTime()) / 1000 + 5;
         boolean isNegative = false;
-        final long value;
+        long value = 0;
+        String valueStr = null;
         final String unit;
         if (leftSecs < 0) {
             isNegative = true;
             leftSecs = -leftSecs;
         }
-        if (leftSecs < 60) {
-            value = leftSecs;
-            unit = "s";
+        if (leftSecs < 70) {
+            valueStr = getString(R.string.directions_trip_details_no_time_left);
+            unit = "";
         } else {
             final long leftMins = leftSecs / 60;
-            if (leftMins < 60) {
+            if (leftMins <= 60) {
                 value = leftMins;
-                unit = "m";
+                unit = "min";
             } else {
                 final long leftHours = leftMins / 60;
-                if (leftHours < 24) {
+                if (leftHours < 3) {
+                    valueStr = String.format("%d:%02d", leftHours, leftMins - leftHours * 60);
+                    unit = "h";
+                } else if (leftHours < 24) {
                     value = leftHours;
                     unit = "h";
                 } else {
-                    value = leftHours / 24;
+                    value = (leftHours + 12) / 24;
                     unit = "d";
                 }
             }
         }
+        if (valueStr == null)
+            valueStr = "" + value;
+        if (isNegative)
+            valueStr = "-" + valueStr;
         TextView valueView = findViewById(R.id.directions_trip_details_next_event_time_value);
-        valueView.setText((isNegative ? "-" : "" ) + value);
-        valueView.setTextColor(leftSecs < 60 ? 0xFFFF4040 : 0xFF000000);
+        valueView.setText(valueStr);
+        valueView.setTextColor(getColor(leftSecs < 60 ? R.color.fg_arrow : R.color.fg_significant));
         TextView unitView = findViewById(R.id.directions_trip_details_next_event_time_unit);
         unitView.setText(unit);
     }
@@ -1109,7 +1160,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         targetView.setVisibility(name != null ? View.VISIBLE : View.GONE);
     }
 
-    private void setNextEventPositions(final Position arrPos, final Position depPos) {
+    private void setNextEventPositions(final Position arrPos, final Position depPos, boolean depChanged) {
         findViewById(R.id.directions_trip_details_next_event_positions)
                 .setVisibility((arrPos != null || depPos != null) ? View.VISIBLE : View.GONE);
 
@@ -1126,6 +1177,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         if (depPos != null) {
             to.setVisibility(View.VISIBLE);
             to.setText(depPos.name);
+            to.setBackgroundColor(depChanged ? colorPositionBackgroundChanged : colorPositionBackground);
         } else {
             to.setVisibility(View.GONE);
         }
@@ -1234,6 +1286,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final boolean isCancelled;
         final boolean isPositionPredicted;
         final Position position;
+        final boolean positionChanged;
         final Location location = stop.location;
         final Style style = leg.line.style;
 
@@ -1251,6 +1304,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
             isPositionPredicted = stop.isDeparturePositionPredicted();
             position = stop.getDeparturePosition();
+            positionChanged = position != null && !position.equals(stop.plannedDeparturePosition);
         } else if (pearlType == PearlView.Type.ARRIVAL
                 || ((pearlType == PearlView.Type.INTERMEDIATE || pearlType == PearlView.Type.PASSING)
                         && stop.plannedArrivalTime != null)) {
@@ -1261,6 +1315,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
             isPositionPredicted = stop.isArrivalPositionPredicted();
             position = stop.getArrivalPosition();
+            positionChanged = position != null && !position.equals(stop.plannedArrivalPosition);
         } else {
             throw new IllegalStateException("cannot handle: " + pearlType);
         }
@@ -1372,7 +1427,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             stopPositionView.setText(positionStr);
             stopPositionView.setTypeface(null, Typeface.BOLD + (isPositionPredicted ? Typeface.ITALIC : 0));
             final int padding = (int) (2 * displayMetrics.density);
-            stopPositionView.setBackgroundDrawable(new ColorDrawable(colorPositionBackground));
+            stopPositionView.setBackgroundDrawable(new ColorDrawable(
+                    positionChanged ? colorPositionBackgroundChanged : colorPositionBackground));
             stopPositionView.setTextColor(colorPosition);
             stopPositionView.setPadding(padding, 0, padding, 0);
         }

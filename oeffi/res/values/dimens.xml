@@ -50,6 +50,7 @@
     <dimen name="elevation_panel">6dp</dimen>
     <dimen name="elevation_action_bar">8dp</dimen>
 
+    <dimen name="directions_trip_details_next_event_clock_fontsize">90sp</dimen>
     <dimen name="directions_trip_details_next_event_time_fontsize">90sp</dimen>
     <dimen name="directions_trip_details_next_event_time_fontsize_decor">48sp</dimen>
     <dimen name="directions_trip_details_next_event_target_fontsize">36sp</dimen>
