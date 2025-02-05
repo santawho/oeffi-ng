@@ -258,6 +258,14 @@
     <string name="directions_trip_details_time_left_hours">&lt;b>%1$d hours&lt;/b> left</string>
     <string name="directions_trip_details_time_left_days">&lt;b>%1$d days&lt;/b> left</string>
     <string name="directions_trip_details_no_time_left">&lt;b>*** NOW ***&lt;/b></string>
+    <string name="directions_trip_details_next_event_no_time_left">NOW</string>
+    <string name="directions_trip_details_next_event_action_departure">remaining until departure at</string>
+    <string name="directions_trip_details_next_event_action_ride">remaining for ride to</string>
+    <string name="directions_trip_details_next_event_action_arrival">remaining until arrival at</string>
+    <string name="directions_trip_details_next_event_action_transfer">remaining for transfer to</string>
+    <string name="directions_trip_details_next_event_action_interchange">remaining for interchange at</string>
+    <string name="directions_trip_details_next_event_action_next_transfer">then transfer to</string>
+    <string name="directions_trip_details_next_event_action_next_interchange">then interchange</string>
 
     <!-- directions trip connection evaluation -->
     <string name="directions_trip_conneval_with_transfer">%1$s with %2$s</string>

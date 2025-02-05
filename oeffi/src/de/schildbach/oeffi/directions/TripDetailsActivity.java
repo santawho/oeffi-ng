@@ -327,12 +327,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     : renderConfig.isJourney
                         ? R.string.journey_details_title
                         : R.string.trip_details_title)); // getTitle()
-        actionBar.setBack(isTaskRoot() ? null : v -> {
-            if (findViewById(R.id.directions_trip_details_next_event).getVisibility() == View.VISIBLE)
-                setShowNextEvent(false);
-            else
-                finish();
-        });
+        actionBar.setBack(isTaskRoot() ? null : v -> goBack());
 
         // action bar secondary title
         final StringBuilder secondaryTitle = new StringBuilder();
@@ -552,6 +547,25 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         super.onConfigurationChanged(config);
 
         updateFragments();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (isShowingNextEvent())
+            setShowNextEvent(false);
+        else
+            super.onBackPressed();
+    }
+
+    protected boolean isShowingNextEvent() {
+        return findViewById(R.id.directions_trip_details_next_event).getVisibility() == View.VISIBLE;
+    }
+
+    private void goBack() {
+        if (isShowingNextEvent())
+            setShowNextEvent(false);
+        else
+            finish();
     }
 
     @SuppressLint("MissingPermission")
@@ -932,13 +946,21 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             String targetName = leg.arrivalStop.location.uniqueShortName();
             setNextEventTarget(targetName);
             String depName = (nextLegC != null) ? nextLegC.publicLeg.departureStop.location.uniqueShortName() : null;
-            setNextEventDeparture((depName != null && !depName.equals(targetName)) ? depName : null);
+            boolean depChanged = depName != null && !depName.equals(targetName);
+            setNextEventDeparture(depChanged ? depName : null);
             final Position arrPos = leg.arrivalStop.getArrivalPosition();
             final Position depPos = (nextLegC != null) ? nextLegC.publicLeg.getDeparturePosition() : null;
-            setNextEventPositions(arrPos, depPos, depPos != null && !depPos.equals(
-                    nextLegC.publicLeg.departureStop.plannedDeparturePosition));
+            setNextEventPositions(arrPos, depPos, depPos != null && !depPos.equals(nextLegC.publicLeg.departureStop.plannedDeparturePosition));
             setNextEventTransport((nextLegC != null) ? nextLegC.publicLeg : null);
             setNextEventTransferTimes(walkLegC, false);
+            setNextEventActions(
+                    nextLegC != null
+                            ? R.string.directions_trip_details_next_event_action_ride
+                            : R.string.directions_trip_details_next_event_action_arrival,
+                    walkLegC == null ? 0
+                            : depChanged ? R.string.directions_trip_details_next_event_action_next_transfer
+                            : R.string.directions_trip_details_next_event_action_next_interchange
+            );
 
             return true;
         }
@@ -1061,14 +1083,21 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             setNextEventType(false);
             setNextEventClock(now);
             setNextEventTimeLeft(now, endTime);
-            String targetName = (transferTo != null) ? transferTo.location.uniqueShortName() : null;
+            final String targetName = (transferTo != null) ? transferTo.location.uniqueShortName() : null;
             setNextEventTarget(targetName);
+            final String arrName = (transferFrom != null) ? transferFrom.location.uniqueShortName() : null;
+            final boolean depChanged = arrName != null && !arrName.equals(targetName);
             setNextEventDeparture(null);
             final Position arrPos = transferFrom != null ? transferFrom.getArrivalPosition() : null;
             final Position depPos = transferTo != null ? transferTo.getDeparturePosition() : null;
             setNextEventPositions(arrPos, depPos, depPos != null && !depPos.equals(transferTo.plannedArrivalPosition));
             setNextEventTransport(legC.transferTo != null ? legC.transferTo.publicLeg : null);
             setNextEventTransferTimes(legC, true);
+            setNextEventActions(transferTo == null ? 0
+                    : transferFrom == null ? R.string.directions_trip_details_next_event_action_departure
+                    : depChanged ? R.string.directions_trip_details_next_event_action_transfer
+                    : R.string.directions_trip_details_next_event_action_interchange,
+                    0);
 
             return true;
         }
@@ -1096,6 +1125,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final int colorNormal = getColor(R.color.bg_level0);
         final int colorHighIfPublic = isPublic ? colorHighlight : colorNormal;
         final int colorHighIfChangeover = isPublic ? colorNormal : colorHighlight;
+        setViewBackgroundColor(R.id.directions_trip_details_next_event_current_action, colorHighlight);
+        setViewBackgroundColor(R.id.directions_trip_details_next_event_next_action, colorNormal);
         setViewBackgroundColor(R.id.directions_trip_details_next_event_time, colorHighlight);
         setViewBackgroundColor(R.id.directions_trip_details_next_event_target, colorHighlight);
         setViewBackgroundColor(R.id.directions_trip_details_next_event_positions, colorHighIfChangeover);
@@ -1110,6 +1141,26 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         clock.setText(Formats.formatTime(this, time.getTime()));
     }
 
+    private void setNextEventActions(final int currentId, final int nextId) {
+        TextView currentAction = findViewById(R.id.directions_trip_details_next_event_current_action);
+        if (currentId > 0) {
+            final String s = getString(currentId);
+            currentAction.setText(s);
+            currentAction.setVisibility(View.VISIBLE);
+        } else {
+            currentAction.setVisibility(View.GONE);
+        }
+
+        TextView nextAction = findViewById(R.id.directions_trip_details_next_event_next_action);
+        if (nextId > 0) {
+            final String s = getString(nextId);
+            nextAction.setText(s);
+            nextAction.setVisibility(View.VISIBLE);
+        } else {
+            nextAction.setVisibility(View.GONE);
+        }
+    }
+
     @SuppressLint("DefaultLocale")
     private void setNextEventTimeLeft(final Date now, final Date endTime) {
         long leftSecs = (endTime.getTime() - now.getTime()) / 1000 + 5;
@@ -1122,7 +1173,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             leftSecs = -leftSecs;
         }
         if (leftSecs < 70) {
-            valueStr = getString(R.string.directions_trip_details_no_time_left);
+            valueStr = getString(R.string.directions_trip_details_next_event_no_time_left);
             unit = "";
         } else {
             final long leftMins = leftSecs / 60;

@@ -69,8 +69,10 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     @SuppressLint("MissingSuperCall")
     @Override
     public void onBackPressed() {
-        moveTaskToBack(true);
-        // super.onBackPressed();
+        if (isShowingNextEvent())
+            setShowNextEvent(false);
+        else
+            moveTaskToBack(true); // super.onBackPressed();
     }
     
     protected boolean onFindAlternativeConnections(

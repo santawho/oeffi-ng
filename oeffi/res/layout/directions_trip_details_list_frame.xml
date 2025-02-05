@@ -127,6 +127,7 @@
                 android:id="@+id/directions_trip_details_next_event_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
                 android:orientation="vertical"
                 android:gravity="center">
 
@@ -134,7 +135,6 @@
                     android:id="@+id/directions_trip_details_next_event_time"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
                     android:orientation="horizontal"
                     android:gravity="center">
                     <TextView
@@ -160,11 +160,23 @@
                         android:textStyle="bold"/>
                 </LinearLayout>
                 <TextView
+                    android:id="@+id/directions_trip_details_next_event_current_action"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/font_size_normal"
+                    android:gravity="center"/>
+                <TextView
                     android:id="@+id/directions_trip_details_next_event_target"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:textSize="@dimen/directions_trip_details_next_event_target_fontsize"/>
+                <TextView
+                    android:id="@+id/directions_trip_details_next_event_next_action"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/font_size_normal"
+                    android:gravity="center"/>
                 <LinearLayout
                     android:id="@+id/directions_trip_details_next_event_positions"
                     android:layout_width="match_parent"
