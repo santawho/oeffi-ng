@@ -124,6 +124,7 @@ import java.util.Set;
 
 public class StationsActivity extends OeffiMainActivity implements StationsAware, LocationAware,
         StationContextMenuItemListener, JourneyClickListener {
+    public static final String INTENT_EXTRA_OPEN_FAVORITES = StationsActivity.class.getName() + ".open_favorites";
     private ConnectivityManager connectivityManager;
     private LocationManager locationManager;
     private SensorManager sensorManager;
@@ -245,7 +246,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         });
         actionBar.overflow(R.menu.stations_options, item -> {
             if (item.getItemId() == R.id.stations_options_favorites) {
-                FavoriteStationsActivity.start(StationsActivity.this, false);
+                FavoriteStationsActivity.start(StationsActivity.this);
                 return true;
             } else {
                 return false;
@@ -459,7 +460,11 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         products.clear();
         products.addAll(loadProductFilter());
 
-        handleIntent(getIntent());
+        Intent intent = getIntent();
+        handleIntent(intent);
+        if (intent.getBooleanExtra(INTENT_EXTRA_OPEN_FAVORITES, false)) {
+            FavoriteStationsActivity.start(this);
+        }
 
         updateGUI();
     }

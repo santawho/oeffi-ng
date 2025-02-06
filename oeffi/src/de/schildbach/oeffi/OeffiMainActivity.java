@@ -131,9 +131,16 @@ public abstract class OeffiMainActivity extends OeffiActivity {
             public boolean onMenuItemSelected(final MenuItem item) {
                 int itemId = item.getItemId();
                 if (itemId == R.id.global_options_stations_favorites) {
-                    FavoriteStationsActivity.start(OeffiMainActivity.this, true);
-                    finish();
-                    overridePendingTransition(R.anim.enter_from_left, R.anim.exit_to_right);
+                    if (OeffiMainActivity.this instanceof StationsActivity) {
+                        FavoriteStationsActivity.start(OeffiMainActivity.this);
+                    } else {
+                        final Intent intent = new Intent(OeffiMainActivity.this, StationsActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        intent.putExtra(StationsActivity.INTENT_EXTRA_OPEN_FAVORITES, true);
+                        startActivity(intent);
+                        finish();
+                        overridePendingTransition(R.anim.enter_from_left, R.anim.exit_to_right);
+                    }
                     return true;
                 }
 

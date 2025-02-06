@@ -50,10 +50,8 @@ public class FavoriteStationsActivity extends OeffiActivity
         implements StationClickListener, StationContextMenuItemListener {
     private static final String INTENT_EXTRA_NETWORK = FavoriteStationsActivity.class.getName() + ".network";
 
-    public static void start(final Context context, final boolean newTask) {
+    public static void start(final Context context) {
         final Intent intent = new Intent(context, FavoriteStationsActivity.class);
-        if (newTask)
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
     }
 
@@ -99,7 +97,7 @@ public class FavoriteStationsActivity extends OeffiActivity
         final MyActionBar actionBar = getMyActionBar();
         setPrimaryColor(R.color.bg_action_bar_stations);
         actionBar.setPrimaryTitle(getTitle());
-        actionBar.setBack(isTaskRoot() ? null : v -> finish());
+        actionBar.setBack(v -> finish());
 
         viewAnimator = findViewById(R.id.favorites_layout);
 
