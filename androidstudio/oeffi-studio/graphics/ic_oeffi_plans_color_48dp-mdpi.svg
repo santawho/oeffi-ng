@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="48px" height="48px" viewBox="-32 -32 1088 1088">
+    <defs>
+        <linearGradient id="background-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#d0a010" /> <!-- #f0c410 -->
+            <stop offset="100%" style="stop-color:#d0a010" /> <!-- #f0c410 -->
+        </linearGradient>
+        <linearGradient id="symbol-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#40a33f" />
+            <stop offset="100%" style="stop-color:#40a33f" />
+        </linearGradient>
+        <filter id="background-shadow">
+            <feOffset
+                result="offsetOut" in="SourceGraphic" dx="0" dy="32" />
+            <feColorMatrix
+                result="matrixOut" in="offsetOut" type="matrix"
+                values="0.15 0 0 0 0 0 0.15 0 0 0 0 0 0.15 0 0 0 0 0 1 0" />
+            <feGaussianBlur
+                result="blurOut" in="matrixOut" stdDeviation="32" />
+            <feBlend
+                in="SourceGraphic" in2="blurOut" mode="normal" />
+        </filter>
+    </defs>
+
+    <!-- background -->
+    <circle cx="512" cy="512" r="512" fill="url(#symbol-gradient)" />
+    <circle cx="512" cy="512" r="400" fill="url(#background-gradient)" filter="url(#background-shadow)" />
+
+    <!-- plan -->
+    <g transform="scale(0.93) translate(42,42)">
+        <!-- upper horizontal line -->
+        <path
+            style="fill:#40a33f"
+            d="M 149.625 420 C 143.11709 445.71106 139.24323 472.47699 138.375 500 L 885.625 500 C 884.75677 472.47699 880.88291 445.71106 874.375 420 L 149.625 420 z " />
+        <!-- lower horizontal line -->
+        <path
+            style="fill:#307a2f"
+            d="M 138.5625 524 C 139.43073 551.52288 143.30196 578.29012 149.8125 604 L 874.1875 604 C 880.69804 578.29012 884.56927 551.52288 885.4375 524 L 138.5625 524 z " />
+        <!-- vertical line -->
+        <path
+            style="fill:#40a33f"
+            d="M 512 138.21875 C 498.48498 138.21875 485.14397 138.94519 472 140.34375 L 472 724.84375 L 552 724.84375 L 552 140.34375 C 538.85603 138.94519 525.51502 138.21875 512 138.21875 z " />
+        <path
+            style="fill:#40a33f"
+            d="M 495.28125 668.3125 L 327 836.59375 C 351.809 850.76368 378.39123 862.17957 406.34375 870.40625 L 551.84375 724.90625 L 495.28125 668.3125 z " />
+        <!-- stop -->
+        <rect
+            style="fill:#40a33f" width="140" height="80" x="550.36188" y="210" />
+        <!-- station -->
+        <rect
+            style="fill:#ffffff;stroke:#2a6b29;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4"
+            width="120" height="308.41904" x="452" y="357.79047" rx="15" />
+    </g>
+</svg>

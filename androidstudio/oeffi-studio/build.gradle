@@ -2,6 +2,7 @@ import java.text.SimpleDateFormat
 
 plugins {
     alias(libs.plugins.android.application)
+    id 'androidsvgdrawable'
 }
 
 def now = new Date()
@@ -25,21 +26,13 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    flavorDimensions 'flavor'
+    flavorDimensions = ['flavor']
     productFlavors {
         ng {
             dimension 'flavor'
             versionNameSuffix '-ng'
             applicationIdSuffix '.ng'
             resValue "string", "app_name", "Öffi NG"
-        }
-        aosp {
-            dimension 'flavor'
-            versionNameSuffix '-aosp'
-        }
-        google {
-            dimension 'flavor'
-            versionNameSuffix '-google'
         }
     }
 
@@ -53,21 +46,23 @@ android {
         test {
             java.srcDirs = ['../../oeffi/test']
         }
-        aosp {
-            java.srcDirs = ['../../oeffi/src-aosp']
-        }
-        google {
-            java.srcDirs = ['../../oeffi/src-google']
+        ng {
+            res.srcDirs = ['./res']
         }
     }
 
     buildTypes {
+        debug {
+            debuggable true
+            minifyEnabled false
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.debug
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -97,4 +92,12 @@ dependencies {
 //    testImplementation libs.junit
 //    androidTestImplementation libs.ext.junit
 //    androidTestImplementation libs.espresso.core
+}
+
+tasks.register('svgToPng', fr.avianey.androidsvgdrawable.gradle.SvgDrawableTask) {
+    from = project.files('graphics')
+    to = file('res')
+    targetedDensities = ['xxhdpi', 'xxxhdpi']
+    outputFormat = 'PNG'
+    outputType = 'mipmap'
 }
