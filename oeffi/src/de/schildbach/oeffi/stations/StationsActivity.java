@@ -208,6 +208,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                 station.requestedAt = null;
             handler.post(initStationsRunnable);
         });
+        actionBar.addButton(R.drawable.ic_star_white_24dp, R.string.stations_options_favorites_title)
+                .setOnClickListener(view -> FavoriteStationsActivity.start(StationsActivity.this));
         actionBar.addButton(R.drawable.ic_search_white_24dp, R.string.stations_action_search_title)
                 .setOnClickListener(v -> onSearchRequested());
         filterActionButton = actionBar.addButton(R.drawable.ic_filter_list_24dp, R.string.stations_filter_title);
@@ -244,14 +246,14 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                     });
             popup.showAsDropDown(v);
         });
-        actionBar.overflow(R.menu.stations_options, item -> {
-            if (item.getItemId() == R.id.stations_options_favorites) {
-                FavoriteStationsActivity.start(StationsActivity.this);
-                return true;
-            } else {
-                return false;
-            }
-        });
+        //        actionBar.overflow(R.menu.stations_options, item -> {
+        //            if (item.getItemId() == R.id.stations_options_favorites) {
+        //                FavoriteStationsActivity.start(StationsActivity.this);
+        //                return true;
+        //            } else {
+        //                return false;
+        //            }
+        //        });
 
         initNavigation();
 
