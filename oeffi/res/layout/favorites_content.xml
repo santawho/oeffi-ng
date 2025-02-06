@@ -7,6 +7,11 @@
 
     <include layout="@layout/action_bar" />
 
+    <de.schildbach.oeffi.directions.LocationView
+        android:id="@+id/favorites_new"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
     <ViewAnimator
         android:id="@+id/favorites_layout"
         android:layout_width="match_parent"

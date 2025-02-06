@@ -158,6 +158,8 @@
     <!-- favorite stations -->
     <string name="stations_favorite_stations_title">Favorite stations</string>
     <string name="stations_favorite_stations_no_content_message">You have not favourited any stations on the selected transportation network.</string>
+    <string name="stations_favorite_stations_add_title">Add new favorite station</string>
+    <string name="stations_favorite_stations_add_location_hint">New favorite station</string>
 
     <!-- stations widget -->
     <string name="nearest_favorite_station_widget_label">Departure times of nearest favorite station</string>

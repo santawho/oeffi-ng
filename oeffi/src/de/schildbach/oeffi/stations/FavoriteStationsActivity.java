@@ -30,12 +30,15 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.directions.LocationView;
 import de.schildbach.oeffi.stations.list.FavoriteStationsAdapter;
 import de.schildbach.oeffi.stations.list.StationClickListener;
 import de.schildbach.oeffi.stations.list.StationContextMenuItemListener;
+import de.schildbach.oeffi.util.AutoCompleteLocationAdapter;
 import de.schildbach.oeffi.util.DividerItemDecoration;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Departure;
@@ -72,11 +75,11 @@ public class FavoriteStationsActivity extends OeffiActivity
         }
     }
 
-    @Nullable
     private NetworkId network;
-
+    boolean shouldReturnResult;
     private ViewAnimator viewAnimator;
     private RecyclerView listView;
+    private LocationView viewNewLocation;
     private FavoriteStationsAdapter adapter;
 
     @Override
@@ -85,6 +88,10 @@ public class FavoriteStationsActivity extends OeffiActivity
 
         final Intent intent = getIntent();
         network = (NetworkId) intent.getSerializableExtra(INTENT_EXTRA_NETWORK);
+        if (network == null)
+            network = prefsGetNetworkId();
+        else
+            shouldReturnResult = true; // TODO a bit hacky
 
         setContentView(R.layout.favorites_content);
         final View contentView = findViewById(android.R.id.content);
@@ -98,13 +105,15 @@ public class FavoriteStationsActivity extends OeffiActivity
         setPrimaryColor(R.color.bg_action_bar_stations);
         actionBar.setPrimaryTitle(getTitle());
         actionBar.setBack(v -> finish());
+        actionBar.addButton(R.drawable.ic_add_white_24dp, R.string.stations_favorite_stations_add_title)
+                .setOnClickListener(view -> viewNewLocation.setVisibility(View.VISIBLE));
 
         viewAnimator = findViewById(R.id.favorites_layout);
 
         listView = findViewById(R.id.favorites_list);
         listView.setLayoutManager(new LinearLayoutManager(this));
         listView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
-        adapter = new FavoriteStationsAdapter(this, network, this, network == null ? this : null);
+        adapter = new FavoriteStationsAdapter(this, network, this, shouldReturnResult ? null : this);
         listView.setAdapter(adapter);
         ViewCompat.setOnApplyWindowInsetsListener(listView, (v, windowInsets) -> {
             final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -112,16 +121,43 @@ public class FavoriteStationsActivity extends OeffiActivity
             return windowInsets;
         });
 
+        viewNewLocation = findViewById(R.id.favorites_new);
+        viewNewLocation.setVisibility(View.GONE);
+        viewNewLocation.setHint(R.string.stations_favorite_stations_add_location_hint);
+        viewNewLocation.setAdapter(new AutoCompleteLocationAdapter(this, network));
+        viewNewLocation.setOnEditorActionListener((v, actionId, event) -> {
+            viewNewLocation.setVisibility(View.GONE);
+            onNewStationAdded(viewNewLocation.getLocation());
+            updateGUI();
+            return true;
+        });
+
         updateGUI();
     }
 
-    public void onStationClick(final int adapterPosition, final NetworkId stationNetwork, final Location station) {
-        final boolean shouldReturnResult = network != null; // TODO hacky
+    private void onNewStationAdded(final Location newFavoriteStation) {
+        final Uri uri = FavoriteUtils.persist(getContentResolver(),
+                FavoriteStationsProvider.TYPE_FAVORITE, network, newFavoriteStation);
+
+        adapter = new FavoriteStationsAdapter(this, network, this, shouldReturnResult ? null : this);
+        listView.setAdapter(adapter);
 
         if (shouldReturnResult) {
             final Intent intent = new Intent();
-            intent.setData(Uri.withAppendedPath(FavoriteStationsProvider.CONTENT_URI(),
-                    String.valueOf(adapter.getItemId(adapterPosition))));
+            intent.setData(uri);
+            setResult(RESULT_OK, intent);
+            finish();
+        } else {
+            StationDetailsActivity.start(FavoriteStationsActivity.this, network, newFavoriteStation);
+        }
+    }
+
+    public void onStationClick(final int adapterPosition, final NetworkId stationNetwork, final Location station) {
+        if (shouldReturnResult) {
+            final Intent intent = new Intent();
+            final Uri uri = Uri.withAppendedPath(FavoriteStationsProvider.CONTENT_URI(),
+                    String.valueOf(adapter.getItemId(adapterPosition)));
+            intent.setData(uri);
             setResult(RESULT_OK, intent);
             finish();
         } else {

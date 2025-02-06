@@ -156,6 +156,8 @@
     <!-- stations pickers -->
     <string name="stations_favorite_stations_title">Haltestelle-Favoriten</string>
     <string name="stations_favorite_stations_no_content_message">Du hast bislang keine Haltestelle im eingestellten Verkehrsnetz favorisiert.</string>
+    <string name="stations_favorite_stations_add_title">Neuen Haltestelle-Favorit hinzufügen</string>
+    <string name="stations_favorite_stations_add_location_hint">Neuer Haltestellen-Favorit</string>
 
     <!-- stations widget -->
     <string name="nearest_favorite_station_widget_label">Abfahrtszeiten von nahegelegener favorisierter Haltestelle</string>
