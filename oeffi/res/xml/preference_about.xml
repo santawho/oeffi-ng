@@ -35,6 +35,14 @@
             android:action="android.intent.action.VIEW"
             android:data="@string/about_faq_summary" />
     </Preference>
+    <Preference
+        android:key="about_update"
+        android:summary="@string/about_update_summary"
+        android:title="@string/about_update_title">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="@string/about_update_url" />
+    </Preference>
 
     <PreferenceCategory android:title="@string/about_participate_title">
         <Preference
@@ -42,11 +50,11 @@
             android:title="@string/about_market_app_title" />
         <Preference
             android:key="about_source"
-            android:summary="https://gitlab.com/oeffi/oeffi"
+            android:summary="@string/about_git_url"
             android:title="@string/about_source_title">
             <intent
                 android:action="android.intent.action.VIEW"
-                android:data="https://gitlab.com/oeffi/oeffi" />
+                android:data="@string/about_git_url" />
         </Preference>
         <Preference
             android:key="about_twitter"

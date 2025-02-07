@@ -34,6 +34,7 @@ public class AboutFragment extends PreferenceFragment {
     private static final String KEY_ABOUT_VERSION = "about_version";
     private static final String KEY_ABOUT_MARKET_APP = "about_market_app";
     private static final String KEY_ABOUT_CHANGELOG = "about_changelog";
+    private static final String KEY_ABOUT_UPDATE = "about_update";
 
     private Activity activity;
     private Application application;
@@ -62,6 +63,9 @@ public class AboutFragment extends PreferenceFragment {
         final Uri changelogUri = Uri.parse(activity.getString(R.string.about_changelog_summary));
         findPreference(KEY_ABOUT_CHANGELOG).setSummary(changelogUri.toString());
         findPreference(KEY_ABOUT_CHANGELOG).setIntent(new Intent(Intent.ACTION_VIEW, changelogUri));
+        String updateUrl = activity.getString(R.string.about_update_url);
+        if (updateUrl.isEmpty())
+            removeOrDisablePreference(findPreference(KEY_ABOUT_UPDATE));
     }
 
     private void removeOrDisablePreference(final Preference preference) {

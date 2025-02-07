@@ -57,12 +57,13 @@
     <string name="about_changelog_summary">https://oeffi.schildbach.de/changelog.html</string>
     <string name="about_faq_title">FAQ</string>
     <string name="about_faq_summary">https://oeffi.schildbach.de/faq.html</string>
+    <string name="about_update_title">Update</string>
+    <string name="about_update_summary">Download latest APK</string>
     <string name="about_participate_title">Participate</string>
     <string name="about_market_app_title">Rate or Review Offi</string>
     <string name="about_donate_title">Donations</string>
     <string name="about_donate_bitcoin_title">Donate Bitcoins</string>
     <string name="about_donate_bitcoin_summary">Bitcoin is an Internet currency.</string>
-    <string name="about_donate_bitcoin_uri">bitcoin:bc1q8ruc8hanp7hrzfs48dvtuzz4ukmpe7cgsvvzrt</string>
     <string name="about_donate_euro_title">Donate Euros</string>
     <string name="about_donate_euro_summary">https://oeffi.schildbach.de/donate.html</string>
 

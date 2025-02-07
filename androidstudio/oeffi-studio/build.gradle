@@ -33,6 +33,9 @@ android {
             versionNameSuffix '-ng'
             applicationIdSuffix '.ng'
             resValue "string", "app_name", "Öffi NG"
+            resValue "string", "about_git_url", "https://gitlab.com/santawho/oeffi"
+            resValue "string", "about_changelog_summary", "https://jlemke.com/oeffi/"
+            resValue "string", "about_update_url", "https://jlemke.com/?sdm_process_download=1&download_id=429"
         }
     }
 
