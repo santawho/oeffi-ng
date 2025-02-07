@@ -34,6 +34,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.directions.LocationView;
 import de.schildbach.oeffi.stations.list.FavoriteStationsAdapter;
 import de.schildbach.oeffi.stations.list.StationClickListener;
@@ -106,15 +107,15 @@ public class FavoriteStationsActivity extends OeffiActivity
         actionBar.setPrimaryTitle(getTitle());
         actionBar.setBack(v -> finish());
         actionBar.addButton(R.drawable.ic_add_white_24dp, R.string.stations_favorite_stations_add_title)
-                .setOnClickListener(view -> viewNewLocation.setVisibility(View.VISIBLE));
+                .setOnClickListener(view -> viewNewLocation.setVisibility(
+                    viewNewLocation.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE));
 
         viewAnimator = findViewById(R.id.favorites_layout);
 
         listView = findViewById(R.id.favorites_list);
         listView.setLayoutManager(new LinearLayoutManager(this));
         listView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
-        adapter = new FavoriteStationsAdapter(this, network, this, shouldReturnResult ? null : this);
-        listView.setAdapter(adapter);
+        resetAdapter();
         ViewCompat.setOnApplyWindowInsetsListener(listView, (v, windowInsets) -> {
             final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), insets.bottom);
@@ -126,8 +127,11 @@ public class FavoriteStationsActivity extends OeffiActivity
         viewNewLocation.setHint(R.string.stations_favorite_stations_add_location_hint);
         viewNewLocation.setAdapter(new AutoCompleteLocationAdapter(this, network));
         viewNewLocation.setOnEditorActionListener((v, actionId, event) -> {
+            final Location location = viewNewLocation.getLocation();
             viewNewLocation.setVisibility(View.GONE);
-            onNewStationAdded(viewNewLocation.getLocation());
+            viewNewLocation.reset();
+            if (location != null)
+                onNewStationAdded(location);
             updateGUI();
             return true;
         });
@@ -135,12 +139,22 @@ public class FavoriteStationsActivity extends OeffiActivity
         updateGUI();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        resetAdapter();
+    }
+
+    private void resetAdapter() {
+        adapter = new FavoriteStationsAdapter(this, network, this, shouldReturnResult ? null : this);
+        listView.setAdapter(adapter);
+    }
+
     private void onNewStationAdded(final Location newFavoriteStation) {
         final Uri uri = FavoriteUtils.persist(getContentResolver(),
                 FavoriteStationsProvider.TYPE_FAVORITE, network, newFavoriteStation);
 
-        adapter = new FavoriteStationsAdapter(this, network, this, shouldReturnResult ? null : this);
-        listView.setAdapter(adapter);
+        resetAdapter();
 
         if (shouldReturnResult) {
             final Intent intent = new Intent();
@@ -174,6 +188,17 @@ public class FavoriteStationsActivity extends OeffiActivity
             adapter.removeEntry(adapterPosition);
             updateGUI();
             NearestFavoriteStationWidgetService.scheduleImmediate(this); // refresh app-widget
+            return true;
+        } else if (menuItemId == R.id.station_context_directions_from) {
+            DirectionsActivity.start(FavoriteStationsActivity.this, station, null, null,
+                    Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            return true;
+        } else if (menuItemId == R.id.station_context_directions_to) {
+            DirectionsActivity.start(FavoriteStationsActivity.this, null, station, null,
+                    Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            return true;
+        } else if (menuItemId == R.id.station_context_launcher_shortcut) {
+            StationContextMenu.createLauncherShortcutDialog(FavoriteStationsActivity.this, network, station).show();
             return true;
         } else {
             return false;

@@ -81,7 +81,10 @@ public class FavoriteStationViewHolder extends RecyclerView.ViewHolder {
             contextButton.setVisibility(View.VISIBLE);
             contextButton.setOnClickListener(v -> {
                 final PopupMenu contextMenu = new StationContextMenu(context, v, network, station,
-                        FavoriteStationsProvider.TYPE_FAVORITE, true, false, true, false, false, false);
+                        FavoriteStationsProvider.TYPE_FAVORITE,
+                        true, false,
+                        true, true,
+                        false, true);
                 contextMenu.setOnMenuItemClickListener(item -> {
                     final int position = getAdapterPosition();
                     if (position != RecyclerView.NO_POSITION)

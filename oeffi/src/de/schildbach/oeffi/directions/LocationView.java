@@ -56,7 +56,7 @@ import javax.annotation.Nullable;
 import java.util.Locale;
 
 public class LocationView extends FrameLayout implements LocationHelper.Callback {
-    public static interface Listener {
+    public interface Listener {
         void changed();
     }
 
@@ -381,8 +381,13 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
             leftDrawable.selectDrawableByResId(LocationView.locationTypeIconRes(locationType));
 
         if (getText() == null) {
-            rightDrawable.selectDrawableByResId(R.drawable.ic_more_vert_grey600_24dp);
-            chooseView.setOnClickListener(contextButtonClickListener);
+            if (contextMenuItemClickListener == null) {
+                rightDrawable.selectDrawableByResId(R.drawable.ic_clear_grey600_24dp);
+                chooseView.setOnClickListener(null);
+            } else {
+                rightDrawable.selectDrawableByResId(R.drawable.ic_more_vert_grey600_24dp);
+                chooseView.setOnClickListener(contextButtonClickListener);
+            }
         } else {
             rightDrawable.selectDrawableByResId(R.drawable.ic_clear_grey600_24dp);
             chooseView.setOnClickListener(clearButtonClickListener);
