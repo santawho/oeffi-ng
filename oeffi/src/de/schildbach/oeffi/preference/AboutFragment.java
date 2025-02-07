@@ -60,9 +60,13 @@ public class AboutFragment extends PreferenceFragment {
         } else {
             removeOrDisablePreference(findPreference(KEY_ABOUT_MARKET_APP));
         }
-        final Uri changelogUri = Uri.parse(activity.getString(R.string.about_changelog_summary));
-        findPreference(KEY_ABOUT_CHANGELOG).setSummary(changelogUri.toString());
-        findPreference(KEY_ABOUT_CHANGELOG).setIntent(new Intent(Intent.ACTION_VIEW, changelogUri));
+
+        String changeLogUrl = activity.getString(R.string.about_changelog_url);
+        if (!changeLogUrl.isEmpty()) {
+            findPreference(KEY_ABOUT_CHANGELOG).setSummary(changeLogUrl);
+            findPreference(KEY_ABOUT_CHANGELOG).setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(changeLogUrl)));
+        }
+
         String updateUrl = activity.getString(R.string.about_update_url);
         if (updateUrl.isEmpty())
             removeOrDisablePreference(findPreference(KEY_ABOUT_UPDATE));
