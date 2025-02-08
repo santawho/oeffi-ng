@@ -30,6 +30,7 @@ import android.os.Process;
 import android.text.format.DateUtils;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.core.graphics.Insets;
@@ -120,6 +121,8 @@ public class TripsOverviewActivity extends OeffiActivity {
     private ReloadRequestData reloadRequestData;
     private RenderConfig renderConfig;
 
+    private MyActionBar actionBar;
+    private ImageButton searchMoreButton;
     private @Nullable QueryTripsContext context;
     private TripsGallery barView;
     private final NavigableSet<Trip> trips = new TreeSet<>((trip1, trip2) -> {
@@ -169,11 +172,26 @@ public class TripsOverviewActivity extends OeffiActivity {
             return windowInsets;
         });
 
-        final MyActionBar actionBar = getMyActionBar();
+        actionBar = getMyActionBar();
         setPrimaryColor(renderConfig.actionBarColor > 0 ? renderConfig.actionBarColor : R.color.bg_action_bar_directions_darkdefault);
         actionBar.setBack(v -> finish());
         actionBar.setCustomTitles(R.layout.directions_trip_overview_custom_title);
+        if (NetworkProviderFactory.provider(network).hasCapabilities(NetworkProvider.Capability.MIN_TRANSFER_TIMES)) {
+            searchMoreButton = actionBar.addButton(R.drawable.ic_search_more_white_24dp, R.string.directions_overview_search_more_title);
+            searchMoreButton.setEnabled(true);
+            searchMoreButton.setOnClickListener(view -> {
+                searchMoreButton.setEnabled(false);
+                searchMoreButton.setImageDrawable(getDrawable(R.drawable.ic_search_more_grey_24dp));
+                actionBar.startProgress();
+                startSearchMore();
+            });
+            searchMoreButton.setActivated(true);
+        }
         actionBar.addProgressButton().setOnClickListener(v -> {
+            if (searchMoreButton != null) {
+                searchMoreButton.setEnabled(false);
+                searchMoreButton.setImageDrawable(getDrawable(R.drawable.ic_search_more_grey_24dp));
+            }
             reloadRequested = true;
             handler.post(checkMoreRunnable);
         });
@@ -417,6 +435,10 @@ public class TripsOverviewActivity extends OeffiActivity {
 
         if (initial) {
             trips.clear();
+            if (searchMoreButton != null) {
+                searchMoreButton.setEnabled(true);
+                searchMoreButton.setImageDrawable(getDrawable(R.drawable.ic_search_more_white_24dp));
+            }
         }
 
         // remove implausible trips and adjust untravelable legs
@@ -444,6 +466,10 @@ public class TripsOverviewActivity extends OeffiActivity {
 
         // save context for next request
         context = result.context;
+    }
+
+    private void startSearchMore() {
+        actionBar.stopProgress(); // for now
     }
 
     private static String nameAndPlace(final Location location) {

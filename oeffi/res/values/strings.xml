@@ -246,6 +246,7 @@
     <string name="directions_overview_from">Start:</string>
     <string name="directions_overview_via">Via:</string>
     <string name="directions_overview_to">End:</string>
+    <string name="directions_overview_search_more_title">Search for more connections</string>
 
     <!-- directions trip details -->
     <string name="directions_trip_details_duraton">Duration %s</string>
