@@ -104,6 +104,8 @@ public final class Formats {
     public static String makeBreakableStationName(final String originalName) {
         if (originalName == null) return null;
         // "\u200B" is a breakable whitespace with zero width
-        return originalName.replaceAll("([-,.)])", "$1\u200B");
+        return originalName
+                .replaceAll("([-,.)])", "$1\u200B")
+                .replaceAll("([(])", "\u200B$1");
     }
 }
