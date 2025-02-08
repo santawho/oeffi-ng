@@ -823,15 +823,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         lineView.setLine(leg.line);
         if (showDestination || showAccessibility)
             lineView.setMaxWidth(res.getDimensionPixelSize(R.dimen.line_max_width));
-        if (!renderConfig.isJourney && leg.journeyRef != null) {
-            lineView.setClickable(true);
-            lineView.setOnClickListener(clickedView -> {
-                queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
-                        this, clickedView, queryJourneyRunnable,
-                        handler, backgroundHandler,
-                        network, leg.journeyRef, leg.departure, leg.arrival);
-            });
-        }
 
         final LinearLayout lineGroup = row
                 .findViewById(R.id.directions_trip_details_public_entry_line_group);
@@ -857,6 +848,19 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         final View bicycleCarriageView = row.findViewById(R.id.directions_trip_details_public_entry_bicycle_carriage);
         bicycleCarriageView.setVisibility(showBicycleCarriage ? View.VISIBLE : View.GONE);
+
+        if (!renderConfig.isJourney && leg.journeyRef != null) {
+            View.OnClickListener onClickListener = clickedView -> {
+                queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
+                        this, clickedView, queryJourneyRunnable,
+                        handler, backgroundHandler,
+                        network, leg.journeyRef, leg.departure, leg.arrival);
+            };
+            lineView.setClickable(true);
+            lineView.setOnClickListener(onClickListener);
+            destinationView.setClickable(true);
+            destinationView.setOnClickListener(onClickListener);
+        }
 
         final ToggleImageButton expandButton = row
                 .findViewById(R.id.directions_trip_details_public_entry_expand);

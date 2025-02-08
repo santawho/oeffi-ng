@@ -687,15 +687,6 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
             // line
             lineView.setLine(departure.line);
-            if (departure.journeyRef != null) {
-                lineView.setClickable(true);
-                lineView.setOnClickListener(clickedView -> {
-                    context.queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
-                            context, clickedView, context.queryJourneyRunnable,
-                            context.handler, context.backgroundHandler,
-                            network, departure.journeyRef, station, null);
-                });
-            }
 
             // destination
             final Location destination = departure.destination;
@@ -705,6 +696,19 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             } else {
                 destinationView.setText(null);
                 itemView.setOnClickListener(null);
+            }
+
+            if (departure.journeyRef != null) {
+                View.OnClickListener onClickListener = clickedView -> {
+                    context.queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
+                            context, clickedView, context.queryJourneyRunnable,
+                            context.handler, context.backgroundHandler,
+                            network, departure.journeyRef, station, null);
+                };
+                lineView.setClickable(true);
+                lineView.setOnClickListener(onClickListener);
+                destinationView.setClickable(true);
+                destinationView.setOnClickListener(onClickListener);
             }
 
             // position: use german translation "Gleis" only for trains, otherwise use "Steig"

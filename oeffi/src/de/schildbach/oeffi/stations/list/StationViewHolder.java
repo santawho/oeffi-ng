@@ -288,10 +288,13 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
                                 destinationView.setVisibility(View.INVISIBLE);
                             }
                             if (departure.journeyRef != null) {
-                                lineView.setClickable(true);
-                                lineView.setOnClickListener(clickedView ->
+                                View.OnClickListener onClickListener = clickedView ->
                                         journeyClickListener.onJourneyClick(
-                                                clickedView, departure.journeyRef, station.location));
+                                                clickedView, departure.journeyRef, station.location);
+                                lineView.setClickable(true);
+                                lineView.setOnClickListener(onClickListener);
+                                destinationView.setClickable(true);
+                                destinationView.setOnClickListener(onClickListener);
                             }
 
                             // message index
