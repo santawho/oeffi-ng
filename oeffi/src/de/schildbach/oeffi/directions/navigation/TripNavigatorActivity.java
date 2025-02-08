@@ -52,14 +52,11 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 //                    | Intent.FLAG_ACTIVITY_SINGLE_TOP
 //                    | Intent.FLAG_ACTIVITY_CLEAR_TASK
                 | Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
-        Uri.Builder builder = new Uri.Builder().scheme("data").authority(activityClass.getName());
-        for (final Trip.Leg leg: trip.legs) {
-            if (leg instanceof Trip.Public) {
-                JourneyRef journeyRef = ((Trip.Public) leg).journeyRef;
-                builder.appendPath(journeyRef == null ? "-" : Integer.toString(journeyRef.hashCode()));
-            }
-        }
-        Uri uri = builder.build();
+        Uri uri = new Uri.Builder()
+                .scheme("data")
+                .authority(activityClass.getName())
+                .path(network.name() + "/" + trip.getUniqueId())
+                .build();
         intent.setData(uri);
         return intent;
     }
