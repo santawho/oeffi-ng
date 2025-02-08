@@ -54,6 +54,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TableLayout;
@@ -845,7 +846,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 .findViewById(R.id.directions_trip_details_public_entry_destination);
         if (destination != null) {
             destinationView.setVisibility(View.VISIBLE);
-            destinationView.setText(Constants.DESTINATION_ARROW_PREFIX + destinationName);
+            destinationView.setText(Constants.DESTINATION_ARROW_PREFIX + Formats.makeBreakableStationName(destinationName));
             destinationView.setOnClickListener(destination.hasId() ? new LocationClickListener(destination) : null);
         } else {
             destinationView.setVisibility(View.GONE);
@@ -942,7 +943,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
             setNextEventType(true);
             setNextEventClock(now);
-            setNextEventTimeLeft(now, endTime);
+            setNextEventTimeLeft(now, endTime, leg.arrivalStop.plannedArrivalTime, 0);
             String targetName = leg.arrivalStop.location.uniqueShortName();
             setNextEventTarget(targetName);
             String depName = (nextLegC != null) ? nextLegC.publicLeg.departureStop.location.uniqueShortName() : null;
@@ -995,7 +996,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             } else {
                 throw new IllegalStateException("unknown type: " + leg.type);
             }
-            legText = getString(textResId, leg.min, distanceStr, leg.arrival.uniqueShortName());
+            legText = getString(textResId, leg.min, distanceStr, Formats.makeBreakableStationName(leg.arrival.uniqueShortName()));
 
             if (leg.arrival.hasCoord()) {
                 mapView.setVisibility(View.VISIBLE);
@@ -1082,7 +1083,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
             setNextEventType(false);
             setNextEventClock(now);
-            setNextEventTimeLeft(now, endTime);
+            setNextEventTimeLeft(now, endTime, transferTo != null ? transferTo.plannedDepartureTime : null, leg != null ? leg.min : 0);
             final String targetName = (transferTo != null) ? transferTo.location.uniqueShortName() : null;
             setNextEventTarget(targetName);
             final String arrName = (transferFrom != null) ? transferFrom.location.uniqueShortName() : null;
@@ -1162,24 +1163,33 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     @SuppressLint("DefaultLocale")
-    private void setNextEventTimeLeft(final Date now, final Date endTime) {
-        long leftSecs = (endTime.getTime() - now.getTime()) / 1000 + 5;
+    private void setNextEventTimeLeft(final Date now, final Date endTime, final Date plannedEndTime, final int walkMins) {
+        long leftSecs = (endTime.getTime() - now.getTime()) / 1000;
+        long delaySecs = (plannedEndTime == null) ? 0 : (endTime.getTime() - plannedEndTime.getTime()) / 1000;
+        leftSecs += 5;
         boolean isNegative = false;
-        long value = 0;
-        String valueStr = null;
-        final String unit;
         if (leftSecs < 0) {
             isNegative = true;
             leftSecs = -leftSecs;
         }
+        long value = 0;
+        String valueStr = null;
+        final String unit;
+        String explainStr = null;
+        final boolean hourglassVisible;
         if (leftSecs < 70) {
             valueStr = getString(R.string.directions_trip_details_next_event_no_time_left);
             unit = "";
+            hourglassVisible = false;
         } else {
+            hourglassVisible = true;
             final long leftMins = leftSecs / 60;
             if (leftMins <= 60) {
                 value = leftMins;
                 unit = "min";
+                final long delayMins = delaySecs / 60;
+                if (delayMins != 0)
+                    explainStr = String.format("(%d%+d)", leftMins - delayMins, delayMins);
             } else {
                 final long leftHours = leftMins / 60;
                 if (leftHours < 3) {
@@ -1200,15 +1210,28 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             valueStr = "-" + valueStr;
         TextView valueView = findViewById(R.id.directions_trip_details_next_event_time_value);
         valueView.setText(valueStr);
-        valueView.setTextColor(getColor(leftSecs < 60 ? R.color.fg_arrow : R.color.fg_significant));
+        valueView.setTextColor(getColor(leftSecs - walkMins * 60 < 60 ? R.color.fg_arrow : R.color.fg_significant));
         TextView unitView = findViewById(R.id.directions_trip_details_next_event_time_unit);
         unitView.setText(unit);
+        findViewById(R.id.directions_trip_details_next_event_time_hourglass)
+                .setVisibility(hourglassVisible ? View.VISIBLE : View.GONE);
+        TextView explainView = findViewById(R.id.directions_trip_details_next_event_time_explain);
+        if (explainStr != null) {
+            explainView.setVisibility(View.VISIBLE);
+            explainView.setText(explainStr);
+        } else {
+            explainView.setVisibility(View.GONE);
+        }
     }
 
     private void setNextEventTarget(final String name) {
         TextView targetView = findViewById(R.id.directions_trip_details_next_event_target);
-        targetView.setText(name);
-        targetView.setVisibility(name != null ? View.VISIBLE : View.GONE);
+        if (name != null) {
+            targetView.setText(Formats.makeBreakableStationName(name));
+            targetView.setVisibility(View.VISIBLE);
+        } else {
+            targetView.setVisibility(View.GONE);
+        }
     }
 
     private void setNextEventPositions(final Position arrPos, final Position depPos, boolean depChanged) {
@@ -1227,7 +1250,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         if (depPos != null) {
             to.setVisibility(View.VISIBLE);
-            to.setText(depPos.name);
+            to.setText(Formats.makeBreakableStationName(depPos.name));
             to.setBackgroundColor(depChanged ? colorPositionBackgroundChanged : colorPositionBackground);
         } else {
             to.setVisibility(View.GONE);
@@ -1246,7 +1269,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
             final Location dest = leg.destination;
             TextView destView = findViewById(R.id.directions_trip_details_next_event_connection_to);
-            destView.setText(dest != null ? dest.uniqueShortName() : null);
+            destView.setText(dest != null ? Formats.makeBreakableStationName(dest.uniqueShortName()) : null);
         }
     }
 
@@ -1258,26 +1281,65 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             findViewById(R.id.directions_trip_details_next_event_changeover)
                     .setVisibility(View.VISIBLE);
 
+            final Trip.Individual individualLeg = walkLegC.individualLeg;
+            final int walkMins = individualLeg != null ? individualLeg.min : 0;
+
             if (!forWalkLeg && walkLegC.transferFrom != null && walkLegC.transferTo != null) {
                 findViewById(R.id.directions_trip_details_next_event_transfer)
                         .setVisibility(View.VISIBLE);
-                final Date arrTime = walkLegC.transferFrom.publicLeg.arrivalStop.getArrivalTime();
-                final Date depTime = walkLegC.transferTo.publicLeg.departureStop.getDepartureTime();
+                final Stop arrivalStop = walkLegC.transferFrom.publicLeg.arrivalStop;
+                final Stop departureStop = walkLegC.transferTo.publicLeg.departureStop;
+                final Date arrTime = arrivalStop.getArrivalTime();
+                final Date depTime = departureStop.getDepartureTime();
                 long leftMins = (depTime.getTime() - arrTime.getTime()) / 60000 - 1;
                 TextView valueView = findViewById(R.id.directions_trip_details_next_event_transfer_value);
                 valueView.setText(Long.toString(leftMins));
-                valueView.setTextColor(leftMins < 3 ? 0xFFFF4040 : 0xFF000000);
+                valueView.setTextColor(getColor(leftMins - walkMins < 3
+                        ? R.color.fg_arrow
+                        : R.color.fg_significant));
+
+                TextView explainView = findViewById(R.id.directions_trip_details_next_event_transfer_explain);
+                final long arrDelay = (arrTime.getTime() - arrivalStop.plannedArrivalTime.getTime()) / 60000;
+                final long depDelay = (depTime.getTime() - departureStop.plannedDepartureTime.getTime()) / 60000;
+                if (arrDelay != 0 || depDelay != 0) {
+                    explainView.setVisibility(View.VISIBLE);
+                    String explainStr = String.format("(%d", leftMins + arrDelay - depDelay);
+                    if (depDelay != 0) explainStr += String.format("%+d", depDelay);
+                    if (arrDelay != 0) explainStr += String.format("%+d", -arrDelay);
+                    explainStr += ")";
+                    explainView.setText(explainStr);
+                } else {
+                    explainView.setVisibility(View.GONE);
+                }
             } else {
                 findViewById(R.id.directions_trip_details_next_event_transfer)
                         .setVisibility(View.GONE);
             }
 
-            final int walkMins = walkLegC.individualLeg != null ? walkLegC.individualLeg.min : 0;
             if (walkMins > 0) {
                 findViewById(R.id.directions_trip_details_next_event_walk)
                         .setVisibility(View.VISIBLE);
                 ((TextView) findViewById(R.id.directions_trip_details_next_event_walk_value))
                         .setText(Integer.toString(walkMins));
+                final int iconId;
+                if (individualLeg == null)
+                    iconId = R.drawable.ic_directions_walk_grey600_24dp;
+                else switch (individualLeg.type) {
+                    case WALK:
+                    default:
+                        iconId = R.drawable.ic_directions_walk_grey600_24dp;
+                        break;
+                    case BIKE:
+                        iconId = R.drawable.ic_directions_bike_grey600_24dp;
+                        break;
+                    case CAR:
+                    case TRANSFER:
+                        iconId = R.drawable.ic_local_taxi_grey600_24dp;
+                        break;
+                }
+                ((ImageView) findViewById(R.id.directions_trip_details_next_event_walk_icon))
+                        .setImageDrawable(res.getDrawable(iconId));
+
             } else {
                 findViewById(R.id.directions_trip_details_next_event_walk)
                         .setVisibility(View.GONE);
@@ -1373,7 +1435,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         // name
         final TextView stopNameView = row.findViewById(R.id.directions_trip_details_public_entry_stop_name);
-        stopNameView.setText(location.uniqueShortName());
+        stopNameView.setText(Formats.makeBreakableStationName(location.uniqueShortName()));
         setStrikeThru(stopNameView, isCancelled);
         if (highlightLocation) {
             stopNameView.setTextColor(colorHighlighted);

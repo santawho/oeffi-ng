@@ -100,4 +100,10 @@ public final class Formats {
         else
             return String.valueOf(metersInt / 1000) + KILOMETER_SUFFIX;
     }
+
+    public static String makeBreakableStationName(final String originalName) {
+        if (originalName == null) return null;
+        // "\u200B" is a breakable whitespace with zero width
+        return originalName.replaceAll("([-,.)])", "$1\u200B");
+    }
 }

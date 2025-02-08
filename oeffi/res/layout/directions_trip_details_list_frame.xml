@@ -130,34 +130,45 @@
                 android:layout_marginTop="20dp"
                 android:orientation="vertical"
                 android:gravity="center">
-
                 <LinearLayout
                     android:id="@+id/directions_trip_details_next_event_time"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center">
-                    <TextView
-                        android:layout_width="wrap_content"
+                    android:orientation="vertical">
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textSize="@dimen/directions_trip_details_next_event_time_fontsize_decor"
-                        android:text="⧖"
-                        tools:ignore="HardcodedText" />
-                    <TextView
-                        android:id="@+id/directions_trip_details_next_event_time_value"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
                         android:layout_marginTop="-20dp"
-                        android:layout_marginBottom="-15dp"
-                        android:paddingHorizontal="20dp"
-                        android:textSize="@dimen/directions_trip_details_next_event_time_fontsize"
-                        android:textStyle="bold"/>
+                        android:layout_marginBottom="-20dp"
+                        android:gravity="center">
+                        <ImageView
+                            android:id="@+id/directions_trip_details_next_event_time_hourglass"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:src="@drawable/ic_hourglass_black_24dp"/>
+                        <TextView
+                            android:id="@+id/directions_trip_details_next_event_time_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:paddingHorizontal="20dp"
+                            android:textSize="@dimen/directions_trip_details_next_event_time_fontsize"
+                            android:textStyle="bold"/>
+                        <TextView
+                            android:id="@+id/directions_trip_details_next_event_time_unit"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/directions_trip_details_next_event_time_fontsize_decor"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
                     <TextView
-                        android:id="@+id/directions_trip_details_next_event_time_unit"
-                        android:layout_width="wrap_content"
+                        android:id="@+id/directions_trip_details_next_event_time_explain"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textSize="@dimen/directions_trip_details_next_event_time_fontsize_decor"
-                        android:textStyle="bold"/>
+                        android:gravity="end"
+                        android:layout_marginTop="-20dp"
+                        android:paddingHorizontal="8dp"
+                        android:textSize="@dimen/directions_trip_details_next_event_time_fontsize_explain"/>
                 </LinearLayout>
                 <TextView
                     android:id="@+id/directions_trip_details_next_event_current_action"
@@ -255,31 +266,33 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
-                        <TextView
+                        <ImageView
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textSize="@dimen/directions_trip_details_next_event_transfer_fontsize"
-                            android:text="→"
-                            tools:ignore="HardcodedText" />
+                            android:layout_height="match_parent"
+                            android:src="@drawable/ic_hourglass_black_24dp"/>
                         <TextView
                             android:id="@+id/directions_trip_details_next_event_transfer_value"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="10dp"
                             android:textStyle="bold"
                             android:textSize="@dimen/directions_trip_details_next_event_transfer_fontsize"/>
+                        <TextView
+                            android:id="@+id/directions_trip_details_next_event_transfer_explain"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:textSize="@dimen/directions_trip_details_next_event_transfer_explain_fontsize"/>
                     </LinearLayout>
                     <LinearLayout
                         android:id="@+id/directions_trip_details_next_event_walk"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
                         android:orientation="horizontal">
-                        <TextView
+                        <ImageView
+                            android:id="@+id/directions_trip_details_next_event_walk_icon"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textSize="@dimen/directions_trip_details_next_event_transfer_fontsize"
-                            android:text="↦"
-                            tools:ignore="HardcodedText" />
+                            android:layout_height="match_parent"/>
                         <TextView
                             android:id="@+id/directions_trip_details_next_event_walk_value"
                             android:layout_width="wrap_content"
