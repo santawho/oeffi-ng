@@ -661,8 +661,13 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
 
     @Override
     protected void onChangeNetwork(final NetworkId network) {
+        final AutoCompleteLocationAdapter autoCompleteAdapter = new AutoCompleteLocationAdapter(this, network);
+
+        viewFromLocation.setAdapter(autoCompleteAdapter);
         viewFromLocation.reset();
+        viewViaLocation.setAdapter(autoCompleteAdapter);
         viewViaLocation.reset();
+        viewToLocation.setAdapter(autoCompleteAdapter);
         viewToLocation.reset();
 
         viewBike.setChecked(false);
