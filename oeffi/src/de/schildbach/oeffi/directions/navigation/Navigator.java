@@ -59,7 +59,7 @@ public class Navigator {
         }
 
         currentTrip = new Trip(
-                baseTrip.getId(),
+                baseTrip.getUniqueId(),
                 baseTrip.from,
                 baseTrip.to,
                 newLegs,
