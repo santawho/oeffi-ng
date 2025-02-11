@@ -75,7 +75,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     protected boolean onFindAlternativeConnections(
             final Stop stop,
             final JourneyRef feederJourneyRef, final JourneyRef connectionJourneyRef,
-            QueryTripsRunnable.ReloadRequestData queryTripsRequestData) {
+            QueryTripsRunnable.TripRequestData queryTripsRequestData) {
         final Date arrivalTime = stop.getArrivalTime();
         final TimeSpec.Absolute time = new TimeSpec.Absolute(TimeSpec.DepArr.DEPART,
                 arrivalTime != null ? arrivalTime.getTime() : stop.getDepartureTime().getTime());
@@ -104,7 +104,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
             }
 
             @Override
-            protected void onResult(final QueryTripsResult result, ReloadRequestData reloadRequestData) {
+            protected void onResult(final QueryTripsResult result, TripRequestData reloadRequestData) {
                 if (result.status == QueryTripsResult.Status.OK) {
                     log.debug("Got {}", result.toShortString());
 

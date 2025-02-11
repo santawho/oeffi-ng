@@ -37,14 +37,12 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.BaseAdapter;
 import com.google.common.base.Preconditions;
 import de.schildbach.oeffi.R;
-import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Position;
 import de.schildbach.pte.dto.Stop;
@@ -59,12 +57,11 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class TripsGalleryAdapter extends BaseAdapter {
-    private List<Trip> trips = Collections.emptyList();
+    private List<TripInfo> trips = Collections.emptyList();
     private TripsOverviewActivity.RenderConfig renderConfig;
     private boolean canScrollLater = true, canScrollEarlier = true;
     private long minTime = 0, maxTime = 0;
@@ -186,7 +183,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         this.renderConfig = renderConfig;
     }
 
-    public void setTrips(final List<Trip> trips, final boolean canScrollLater, final boolean canScrollEarlier) {
+    public void setTrips(final List<TripInfo> trips, final boolean canScrollLater, final boolean canScrollEarlier) {
         this.trips = trips;
         this.canScrollLater = canScrollLater;
         this.canScrollEarlier = canScrollEarlier;
@@ -230,7 +227,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             if (view == null)
                 view = new TripView(context);
 
-            ((TripView) view).setTrip(getItem(position));
+            ((TripView) view).setTripInfo(getItem(position));
 
             return view;
         } else if (type == VIEW_TYPE_CANNOT_SCROLL_EARLIER) {
@@ -254,7 +251,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         return count;
     }
 
-    public Trip getItem(int position) {
+    public TripInfo getItem(int position) {
         if (!canScrollEarlier) {
             if (position == 0)
                 return null;
@@ -331,7 +328,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
     }
 
     private class TripView extends View {
-        private Trip trip;
+        private TripInfo tripInfo;
         private final Resources res = getResources();
         private final java.text.DateFormat timeFormat;
 
@@ -358,8 +355,10 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             ta.recycle();
         }
 
-        public void setTrip(final Trip trip) {
-            this.trip = trip;
+        public void setTripInfo(final TripInfo tripInfo) {
+            this.tripInfo = tripInfo;
+            if (tripInfo.isAdditional)
+                setBackgroundColor(context.getColor(R.color.bg_trip_overview_additional_trip));
         }
 
         private final RectF legBox = new RectF(), legBoxRotated = new RectF();
@@ -376,6 +375,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             final int centerX = width / 2;
             final int height = getHeight();
 
+            final Trip trip = tripInfo.trip;
             final List<Leg> legs = trip.legs;
 
             if (legs != null) {

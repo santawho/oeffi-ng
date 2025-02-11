@@ -207,7 +207,7 @@ public class DirectionsShortcutActivity extends OeffiActivity implements Locatio
             }
 
             @Override
-            protected void onResult(final QueryTripsResult result, ReloadRequestData reloadRequestData) {
+            protected void onResult(final QueryTripsResult result, TripRequestData reloadRequestData) {
                 if (result.status == QueryTripsResult.Status.OK) {
                     log.debug("Got {}", result.toShortString());
 

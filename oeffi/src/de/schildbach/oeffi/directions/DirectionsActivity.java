@@ -51,11 +51,8 @@ import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.Filter;
-import android.widget.Filterable;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import androidx.activity.result.ActivityResultLauncher;
@@ -109,7 +106,6 @@ import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.Point;
 import de.schildbach.pte.dto.Product;
 import de.schildbach.pte.dto.QueryTripsResult;
-import de.schildbach.pte.dto.SuggestLocationsResult;
 import de.schildbach.pte.dto.Trip;
 import de.schildbach.pte.dto.TripOptions;
 import okhttp3.HttpUrl;
@@ -130,10 +126,8 @@ import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.EnumSet;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -1075,7 +1069,7 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
             }
 
             @Override
-            protected void onResult(final QueryTripsResult result, ReloadRequestData reloadRequestData) {
+            protected void onResult(final QueryTripsResult result, TripRequestData reloadRequestData) {
                 if (result.status == QueryTripsResult.Status.OK) {
                     log.debug("Got {}", result.toShortString());
 

@@ -51,6 +51,7 @@
     <color name="bg_trip_details_time_left">#ff8080</color>
     <color name="bg_trip_details_public_future">#ffffff</color>
     <color name="bg_trip_details_individual_future">#eff8ef</color>
+    <color name="bg_trip_overview_additional_trip">#40FBD8B3</color>
 
     <item name="alpha_bright_white" format="float" type="dimen">1</item>
 

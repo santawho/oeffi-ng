@@ -177,7 +177,7 @@ public class TripsGallery extends Gallery {
         adapter.setRenderConfig(renderConfig);
     }
 
-    public void setTrips(final List<Trip> trips, final boolean canScrollLater, final boolean canScrollEarlier) {
+    public void setTrips(final List<TripInfo> trips, final boolean canScrollLater, final boolean canScrollEarlier) {
         adapter.setTrips(trips, canScrollLater, canScrollEarlier);
     }
 
@@ -196,8 +196,9 @@ public class TripsGallery extends Gallery {
             long maxTime = 0;
 
             for (int i = first; i <= last; i++) {
-                final Trip trip = adapter.getItem(i);
-                if (trip != null) {
+                final TripInfo tripInfo = adapter.getItem(i);
+                final Trip trip = tripInfo.trip;
+                if (tripInfo != null) {
                     final Date tripMinTime = trip.getMinTime();
                     if (tripMinTime != null && tripMinTime.getTime() < minTime)
                         minTime = tripMinTime.getTime();

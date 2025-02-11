@@ -23,9 +23,13 @@ import android.graphics.Typeface;
 import android.os.Handler;
 import android.text.SpannableStringBuilder;
 import android.text.style.StyleSpan;
+
+import androidx.annotation.NonNull;
+
 import com.google.common.util.concurrent.Uninterruptibles;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.util.Objects;
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.NetworkProvider.Accessibility;
 import de.schildbach.pte.NetworkProvider.WalkSpeed;
@@ -51,13 +55,18 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class QueryTripsRunnable implements Runnable {
-    public static class ReloadRequestData implements Serializable {
+    public static class TripRequestData implements Serializable {
         public Location from;
         public Location via;
         public Location to;
         public Date date;
         public boolean dep;
         public TripOptions options;
+
+        @NonNull
+        public TripRequestData clone() {
+            return Objects.clone(this);
+        }
     }
 
     private final Resources res;
@@ -103,7 +112,7 @@ public abstract class QueryTripsRunnable implements Runnable {
             try {
                 final boolean depArr = time.depArr == TimeSpec.DepArr.DEPART;
                 final Date date = new Date(time.timeInMillis());
-                final ReloadRequestData reloadRequestData = new ReloadRequestData();
+                final TripRequestData reloadRequestData = new TripRequestData();
                 reloadRequestData.from = from;
                 reloadRequestData.via = via;
                 reloadRequestData.to = to;
@@ -229,11 +238,11 @@ public abstract class QueryTripsRunnable implements Runnable {
     protected void onPostExecute() {
     }
 
-    private void postOnResult(final QueryTripsResult result, final ReloadRequestData reloadRequestData) {
+    private void postOnResult(final QueryTripsResult result, final TripRequestData reloadRequestData) {
         handler.post(() -> onResult(result, reloadRequestData));
     }
 
-    protected abstract void onResult(QueryTripsResult result, ReloadRequestData reloadRequestData);
+    protected abstract void onResult(QueryTripsResult result, TripRequestData reloadRequestData);
 
     private void postOnRedirect(final HttpUrl url) {
         handler.post(() -> onRedirect(url));

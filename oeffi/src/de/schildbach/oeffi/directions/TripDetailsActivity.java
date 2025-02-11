@@ -120,7 +120,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         public boolean isJourney;
         public boolean isNavigation;
         public boolean isAlternativeConnectionSearch;
-        public QueryTripsRunnable.ReloadRequestData queryTripsRequestData;
+        public QueryTripsRunnable.TripRequestData queryTripsRequestData;
     }
 
     public static class LegContainer {
@@ -1933,7 +1933,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     protected boolean onFindAlternativeConnections(
             final Stop stop,
             final JourneyRef feederJourneyRef, final JourneyRef connectionJourneyRef,
-            final QueryTripsRunnable.ReloadRequestData queryTripsRequestData) {
+            final QueryTripsRunnable.TripRequestData queryTripsRequestData) {
         // override if implemented
         return false;
     }
