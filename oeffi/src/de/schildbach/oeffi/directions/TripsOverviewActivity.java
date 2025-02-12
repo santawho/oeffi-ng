@@ -72,9 +72,11 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
@@ -134,18 +136,46 @@ public class TripsOverviewActivity extends OeffiActivity {
     private TripsGallery barView;
 
     private final NavigableSet<TripInfo> trips = new TreeSet<>((tripC1, tripC2) -> {
-        final Trip trip1 = tripC1.trip;
-        final Trip trip2 = tripC2.trip;
-//        if (trip1.equals(trip2))
-        if (trip1.getUniqueId().equals(trip2.getUniqueId()))
+        Trip trip1 = tripC1.trip;
+        Trip trip2 = tripC2.trip;
+
+        String id1 = trip1.getUniqueId();
+        String id2 = trip2.getUniqueId();
+
+        // if (trip1.equals(trip2))
+        if (id1.equals(id2))
             return 0;
-        else
-            return ComparisonChain.start() //
+
+        if (tripC1.isAlternativelyFed) {
+            final Trip baseTrip1 = tripC1.baseTrip;
+            String baseId1 = baseTrip1.getUniqueId();
+            if (!baseId1.equals(id2)) {
+                if (tripC2.isAlternativelyFed) {
+                    final Trip baseTrip2 = tripC2.baseTrip;
+                    String baseId2 = baseTrip2.getUniqueId();
+                    if (!baseId1.equals(baseId2)) {
+                        trip1 = baseTrip1;
+                        trip2 = baseTrip2;
+                    }
+                } else {
+                    trip1 = baseTrip1;
+                }
+            }
+        } else if (tripC2.isAlternativelyFed) {
+            final Trip baseTrip2 = tripC2.baseTrip;
+            String baseId2 = baseTrip2.getUniqueId();
+            if (!baseId2.equals(id1)) {
+                trip2 = baseTrip2;
+            }
+        }
+
+        return ComparisonChain.start() //
                     .compare(trip1.getFirstDepartureTime(), trip2.getFirstDepartureTime()) //
                     .compare(trip1.getLastArrivalTime(), trip2.getLastArrivalTime()) //
                     .compare(trip1.numChanges, trip2.numChanges, Ordering.natural().nullsLast()) //
                     .result();
     });
+
     private boolean queryMoreTripsRunning = false;
     private boolean reloadRequested = false;
     private boolean searchMoreRequested = false;
@@ -244,7 +274,7 @@ public class TripsOverviewActivity extends OeffiActivity {
             return windowInsets;
         });
 
-        processResult(result, false, false, searchMoreContext);
+        processInitialResult(result, searchMoreContext);
     }
 
     @Override
@@ -438,9 +468,8 @@ public class TripsOverviewActivity extends OeffiActivity {
         }
     }
 
-    private void processResult(
+    private void processInitialResult(
             final QueryTripsResult result,
-            final boolean earlier, final boolean later,
             final SearchMoreContext searchMoreContext) {
         // update header
         if (result.from != null)
@@ -460,6 +489,13 @@ public class TripsOverviewActivity extends OeffiActivity {
             serverProductView.setVisibility(View.VISIBLE);
         }
 
+        processResult(result, false, false, searchMoreContext);
+    }
+
+    private void processResult(
+            final QueryTripsResult result,
+            final boolean earlier, final boolean later,
+            final SearchMoreContext searchMoreContext) {
         boolean earlierOrLater = earlier || later;
         boolean initial = searchMoreContext.currentRound == 0 && !earlierOrLater;
         if (initial) {
@@ -482,10 +518,11 @@ public class TripsOverviewActivity extends OeffiActivity {
         // determine new trips
         int countNew = 0;
         for (Trip trip : result.trips) {
-            if (trips.add(searchMoreContext.newTripInfo(trip, earlierOrLater)))
+            final TripInfo tripInfo = searchMoreContext.newTripInfos(trip, earlierOrLater);
+            if (tripInfo != null && trips.add(tripInfo))
                 countNew += 1;
         }
-        searchMoreContext.tellNewTripsAdded(countNew, trips);
+        searchMoreContext.tellNewTripsAddedAndAddMoreIfNecessary(countNew, trips);
 
         // redraw
         barView.setTrips(new ArrayList<>(trips), result.context != null && result.context.canQueryLater(),
@@ -519,8 +556,11 @@ public class TripsOverviewActivity extends OeffiActivity {
         public final TripRequestData reloadRequestData;
         public final boolean departureBased;
         private int currentRound = 0;
-        private List<Integer> attemptableTransferTimes = null;
+        private final List<Integer> attemptableTransferTimes = new LinkedList<>();
         private int lastRequestedMinTransferTime = 0;
+        private final Map<String, Location> firstTransferStations = new HashMap<>();
+        private String lastRequestedFirstTransferStationId = null;
+        private final Map<String, List<Trip>> tripsTofirstTransferStations = new HashMap<>();
         public TripRequestData nextRequestData;
 
         public SearchMoreContext(
@@ -535,9 +575,12 @@ public class TripsOverviewActivity extends OeffiActivity {
 
         public void reset() {
             currentRound = 0;
-            attemptableTransferTimes = null;
+            attemptableTransferTimes.clear();
             final Integer minTransferTimeMinutes = reloadRequestData.options.minTransferTimeMinutes;
             lastRequestedMinTransferTime = minTransferTimeMinutes == null ? 0 : minTransferTimeMinutes;
+            firstTransferStations.clear();
+            lastRequestedFirstTransferStationId = null;
+            tripsTofirstTransferStations.clear();
         }
 
         public boolean canProvideSearchMore() {
@@ -548,31 +591,60 @@ public class TripsOverviewActivity extends OeffiActivity {
             return true;
         }
 
-        public TripInfo newTripInfo(final Trip trip, final boolean isEarlierOrLater) {
+        public TripInfo newTripInfos(final Trip trip, final boolean isEarlierOrLater) {
+            final ArrayList<TripInfo> list = new ArrayList<>();
+            if (!isEarlierOrLater && lastRequestedFirstTransferStationId != null) {
+                // a new short trip was found to one of the first transfer stations
+                List<Trip> tripsForStation = tripsTofirstTransferStations.get(lastRequestedFirstTransferStationId);
+                if (tripsForStation == null) {
+                    tripsForStation = new LinkedList<>();
+                    tripsTofirstTransferStations.put(lastRequestedFirstTransferStationId, tripsForStation);
+                }
+                tripsForStation.add(trip);
+                return null;
+            }
+
             TripInfo tripInfo = new TripInfo(trip);
             tripInfo.isEarlierOrLater = isEarlierOrLater;
             tripInfo.addedInRound = isEarlierOrLater ? 0 : currentRound;
             return tripInfo;
         }
 
-        public void tellNewTripsAdded(final int countNew, final NavigableSet<TripInfo> trips) {
-//            if (countNew <= 0)
-//                return;
+        public void tellNewTripsAddedAndAddMoreIfNecessary(final int countNew, final NavigableSet<TripInfo> trips) {
+            if (lastRequestedFirstTransferStationId != null) {
+                // search was for short trip to one of the first transfer stations
+                // add forged trips from existing trips and this one if applicable
+                addForgedTripsWithTripsToStation(
+                        lastRequestedFirstTransferStationId,
+                        tripsTofirstTransferStations.get(lastRequestedFirstTransferStationId),
+                        trips);
+            } else {
+                // search was for full trips
+                setupAvailableNextSearchByIncreasingTransferTimes(trips);
+            }
+        }
 
-            attemptableTransferTimes = new LinkedList<>();
+        private void setupAvailableNextSearchByIncreasingTransferTimes(final NavigableSet<TripInfo> trips) {
+            attemptableTransferTimes.clear();
             long minPlanned = Long.MAX_VALUE;
             long minPredicted = Long.MAX_VALUE;
             long limitLast = (long) lastRequestedMinTransferTime * 60000;
-            int n=0;
+            int n = 0;
             for (TripInfo tripInfo : trips) {
                 if (tripInfo.addedInRound < currentRound || tripInfo.isEarlierOrLater)
                     continue;
 
                 final Trip trip = tripInfo.trip;
                 Trip.Public prevLeg = null;
+                int publicLegIndex = 0;
                 for (Trip.Leg aLeg : trip.legs) {
                     if (aLeg instanceof Trip.Public) {
                         Trip.Public leg = (Trip.Public) aLeg;
+                        publicLegIndex += 1;
+                        if (publicLegIndex == 2) {
+                            final Location location = leg.departureStop.location;
+                            firstTransferStations.put(location.id, location);
+                        }
                         if (prevLeg != null) {
                             final long plannedArrivalTime = prevLeg.arrivalStop.plannedArrivalTime.getTime();
                             final long predictedArrivalTime = prevLeg.arrivalStop.getArrivalTime().getTime();
@@ -614,20 +686,100 @@ public class TripsOverviewActivity extends OeffiActivity {
             }
         }
 
+        private void addForgedTripsWithTripsToStation(
+                String transferStationId,
+                List<Trip> tripsToStation,
+                NavigableSet<TripInfo> trips) {
+            final List<TripInfo> newTrips = new LinkedList<>();
+            for (TripInfo tripInfo: trips) {
+                if (tripInfo.isEarlierOrLater)
+                    continue;
+
+                final Trip baseTrip = tripInfo.trip;
+                Trip.Public prevLeg = null;
+                for (Trip.Leg aLeg: baseTrip.legs) {
+                    if (!(aLeg instanceof Trip.Public))
+                        continue;
+
+                    final Trip.Public leg = (Trip.Public) aLeg;
+                    if (prevLeg != null) {
+                        if (transferStationId.equals(leg.departureStop.location.id)) {
+                            final Date departureTime = leg.departureStop.getDepartureTime();
+                            for (Trip feedingTrip: tripsToStation) {
+                                final Trip.Leg lastLeg = feedingTrip.legs.get(feedingTrip.legs.size() - 1);
+                                final Trip.Public lastPublicLeg;
+                                final Trip.Individual connectingWalkLeg;
+                                final Date arrivalTime;
+                                if (lastLeg instanceof Trip.Public) {
+                                    lastPublicLeg = (Trip.Public) lastLeg;
+                                    arrivalTime = lastPublicLeg.arrivalStop.plannedArrivalTime;
+                                } else if (lastLeg instanceof Trip.Individual){
+                                    connectingWalkLeg = (Trip.Individual) lastLeg;
+                                    final Date walkArrivalTime = connectingWalkLeg.arrivalTime;
+                                    final Trip.Leg secondLastLeg = feedingTrip.legs.get(feedingTrip.legs.size() - 2);
+                                    if (!(secondLastLeg instanceof Trip.Public))
+                                        continue;
+                                    arrivalTime = walkArrivalTime != null ? walkArrivalTime
+                                            : ((Trip.Public) secondLastLeg).arrivalStop.plannedArrivalTime;
+                                } else {
+                                    continue;
+                                }
+                                final long diff = (departureTime.getTime() - arrivalTime.getTime()) / 60000;
+                                if (diff < 0 || diff > MAX_MIN_TRANSFER_TIME_MINUTES)
+                                    continue;
+                                final Trip newTrip = makeNewTripByReplacingInitialLegsFromFeedingTrip(baseTrip, leg, feedingTrip);
+                                final TripInfo newTripInfo = new TripInfo(newTrip);
+                                newTripInfo.addedInRound = currentRound;
+                                newTripInfo.isAlternativelyFed = true;
+                                newTripInfo.baseTrip = baseTrip;
+                                newTrips.add(newTripInfo);
+                            }
+                        }
+                        break;
+                    }
+                    prevLeg = leg;
+                }
+            }
+            for (TripInfo newTrip : newTrips) {
+                if (!trips.contains(newTrip))
+                    trips.add(newTrip);
+            }
+        }
+
+        private Trip makeNewTripByReplacingInitialLegsFromFeedingTrip(
+                Trip baseTrip, Trip.Public firstLegToKeep, Trip feedingTrip) {
+            final List<Trip.Leg> legs = new LinkedList<>(feedingTrip.legs);
+            boolean copy = false;
+            for (Trip.Leg baseLeg : baseTrip.legs) {
+                if (baseLeg == firstLegToKeep)
+                    copy = true;
+                if (copy)
+                    legs.add(baseLeg);
+            }
+
+            return new Trip(
+                    null,
+                    feedingTrip.from,
+                    baseTrip.to,
+                    legs,
+                    null, null,
+                    feedingTrip.numChanges + 1 + baseTrip.numChanges);
+        }
+
         public boolean searchMorePossible() {
-            if (attemptableTransferTimes == null)
-                return false;
+            if (!attemptableTransferTimes.isEmpty())
+                return true;
 
-            if (attemptableTransferTimes.isEmpty())
-                return false;
+            if (!firstTransferStations.isEmpty())
+                return true;
 
-            return true;
+            return false;
         }
 
         public boolean prepareNextRound() {
             currentRound += 1;
 
-            if (attemptableTransferTimes != null && !attemptableTransferTimes.isEmpty()) {
+            if (!attemptableTransferTimes.isEmpty()) {
                 lastRequestedMinTransferTime = attemptableTransferTimes.get(0);
                 attemptableTransferTimes.remove(0);
 
@@ -641,6 +793,17 @@ public class TripsOverviewActivity extends OeffiActivity {
                         options.accessibility,
                         options.flags);
 
+                return true;
+            }
+
+            if (departureBased && !firstTransferStations.isEmpty()) {
+                final Location location = firstTransferStations.values().iterator().next();
+                lastRequestedFirstTransferStationId = location.id;
+                firstTransferStations.remove(lastRequestedFirstTransferStationId);
+
+                nextRequestData = reloadRequestData.clone();
+                nextRequestData.to = location;
+                nextRequestData.via = null;
                 return true;
             }
 

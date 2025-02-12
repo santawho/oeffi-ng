@@ -18,6 +18,7 @@
 package de.schildbach.oeffi.directions;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -33,7 +34,9 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.Shader.TileMode;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
@@ -41,6 +44,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.BaseAdapter;
+
+import androidx.annotation.RequiresApi;
+
 import com.google.common.base.Preconditions;
 import de.schildbach.oeffi.R;
 import de.schildbach.pte.dto.Line;
@@ -91,12 +97,15 @@ public final class TripsGalleryAdapter extends BaseAdapter {
     private final Paint cannotScrollPaint = new Paint();
     private final int colorSignificantInverse;
     private final int colorDelayed;
+    private final int colorNormalTripBackground;
     private final int colorAdditionalTripBackground;
+    private final int colorAdditionalFeederBackground;
 
     private static final float ROUNDED_CORNER_RADIUS = 8f;
     private static final float CIRCLE_CORNER_RADIUS = 16f;
     private final int tripWidth;
 
+    @RequiresApi(api = Build.VERSION_CODES.S)
     public TripsGalleryAdapter(final Context context) {
         this.context = context;
         final Resources res = context.getResources();
@@ -177,7 +186,15 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         connectionStrokePaint.setStrokeWidth(strokeWidth * 2);
         connectionStrokePaint.setAntiAlias(true);
 
-        int c = context.getColor(R.color.bg_trip_overview_additional_trip);
+        cannotScrollPaint.setStyle(Paint.Style.FILL);
+
+        colorNormalTripBackground = makeBackgroundColor(R.color.bg_level0);
+        colorAdditionalTripBackground = makeBackgroundColor(R.color.bg_trip_overview_additional_trip);
+        colorAdditionalFeederBackground = makeBackgroundColor(R.color.bg_trip_overview_additional_feeder);
+    }
+
+    private int makeBackgroundColor(final int colorId) {
+        int c = context.getColor(colorId);
         int r, g, b;
         if (darkMode) {
             r = Color.red(c) * 4;
@@ -188,9 +205,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             g = (Color.green(c) - 192) * 4;
             b = (Color.blue(c) - 192) * 4;
         }
-        colorAdditionalTripBackground = Color.argb(64, r, g, b);
-
-        cannotScrollPaint.setStyle(Paint.Style.FILL);
+        return Color.argb(64, r, g, b);
     }
 
     public void setRenderConfig(TripsOverviewActivity.RenderConfig renderConfig) {
@@ -364,15 +379,20 @@ public final class TripsGalleryAdapter extends BaseAdapter {
 
             timeFormat = DateFormat.getTimeFormat(context);
 
-            final TypedArray ta = context.obtainStyledAttributes(new int[] { android.R.attr.selectableItemBackground });
-            setBackgroundDrawable(ta.getDrawable(0));
-            ta.recycle();
+//            final TypedArray ta = context.obtainStyledAttributes(new int[] { android.R.attr.selectableItemBackground });
+//            setBackgroundDrawable(ta.getDrawable(0));
+//            ta.recycle();
         }
 
         public void setTripInfo(final TripInfo tripInfo) {
             this.tripInfo = tripInfo;
-            if (tripInfo.addedInRound > 0)
-                setBackgroundColor(colorAdditionalTripBackground);
+            final int bgColor;
+            if (tripInfo.addedInRound > 0) {
+                bgColor = tripInfo.isAlternativelyFed ? colorAdditionalFeederBackground : colorAdditionalTripBackground;
+            } else {
+                bgColor = colorNormalTripBackground;
+            }
+            setBackgroundDrawable(new RippleDrawable(ColorStateList.valueOf(0x80000000), new ColorDrawable(bgColor), null));
         }
 
         private final RectF legBox = new RectF(), legBoxRotated = new RectF();
