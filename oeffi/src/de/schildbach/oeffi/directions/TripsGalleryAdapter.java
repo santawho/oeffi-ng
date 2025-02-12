@@ -91,6 +91,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
     private final Paint cannotScrollPaint = new Paint();
     private final int colorSignificantInverse;
     private final int colorDelayed;
+    private final int colorAdditionalTripBackground;
 
     private static final float ROUNDED_CORNER_RADIUS = 8f;
     private static final float CIRCLE_CORNER_RADIUS = 16f;
@@ -175,6 +176,19 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         connectionStrokePaint.setColor(res.getColor(R.color.fg_trip_leg_frame_connection));
         connectionStrokePaint.setStrokeWidth(strokeWidth * 2);
         connectionStrokePaint.setAntiAlias(true);
+
+        int c = context.getColor(R.color.bg_trip_overview_additional_trip);
+        int r, g, b;
+        if (darkMode) {
+            r = Color.red(c) * 4;
+            g = Color.green(c) * 4;
+            b = Color.blue(c) * 4;
+        } else {
+            r = (Color.red(c) - 192) * 4;
+            g = (Color.green(c) - 192) * 4;
+            b = (Color.blue(c) - 192) * 4;
+        }
+        colorAdditionalTripBackground = Color.argb(64, r, g, b);
 
         cannotScrollPaint.setStyle(Paint.Style.FILL);
     }
@@ -357,8 +371,8 @@ public final class TripsGalleryAdapter extends BaseAdapter {
 
         public void setTripInfo(final TripInfo tripInfo) {
             this.tripInfo = tripInfo;
-            if (tripInfo.isAdditional)
-                setBackgroundColor(context.getColor(R.color.bg_trip_overview_additional_trip));
+            if (tripInfo.addedInRound > 0)
+                setBackgroundColor(colorAdditionalTripBackground);
         }
 
         private final RectF legBox = new RectF(), legBoxRotated = new RectF();

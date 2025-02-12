@@ -28,7 +28,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
@@ -209,28 +208,30 @@ public class TripsOverviewActivity extends OeffiActivity {
         barView = findViewById(R.id.trips_bar_view);
         barView.setRenderConfig(renderConfig);
         barView.setOnItemClickListener((parent, v, position, id) -> {
-            final Trip trip = (Trip) barView.getAdapter().getItem(position);
+            final TripInfo tripInfo = (TripInfo) barView.getAdapter().getItem(position);
+            if (tripInfo != null) {
+                final Trip trip = tripInfo.trip;
+                if (trip.legs != null) {
+                    TripDetailsActivity.RenderConfig config = new TripDetailsActivity.RenderConfig();
+                    config.isAlternativeConnectionSearch = renderConfig.isAlternativeConnectionSearch;
+                    config.queryTripsRequestData = reloadRequestData;
+                    if (renderConfig.isAlternativeConnectionSearch) {
+                        TripDetailsActivity.startForResult(TripsOverviewActivity.this, DETAILS_NEW_NAVIGATION, network, trip, config);
+                    } else {
+                        TripDetailsActivity.start(TripsOverviewActivity.this, network, trip, config);
+                    }
 
-            if (trip != null && trip.legs != null) {
-                TripDetailsActivity.RenderConfig config = new TripDetailsActivity.RenderConfig();
-                config.isAlternativeConnectionSearch = renderConfig.isAlternativeConnectionSearch;
-                config.queryTripsRequestData = reloadRequestData;
-                if (renderConfig.isAlternativeConnectionSearch) {
-                    TripDetailsActivity.startForResult(TripsOverviewActivity.this, DETAILS_NEW_NAVIGATION, network, trip, config);
-                } else {
-                    TripDetailsActivity.start(TripsOverviewActivity.this, network, trip, config);
-                }
+                    final Date firstPublicLegDepartureTime = trip.getFirstPublicLegDepartureTime();
+                    final Date lastPublicLegArrivalTime = trip.getLastPublicLegArrivalTime();
 
-                final Date firstPublicLegDepartureTime = trip.getFirstPublicLegDepartureTime();
-                final Date lastPublicLegArrivalTime = trip.getLastPublicLegArrivalTime();
-
-                // save last trip to history
-                if (firstPublicLegDepartureTime != null && lastPublicLegArrivalTime != null && historyUri != null) {
-                    final ContentValues values = new ContentValues();
-                    values.put(QueryHistoryProvider.KEY_LAST_DEPARTURE_TIME, firstPublicLegDepartureTime.getTime());
-                    values.put(QueryHistoryProvider.KEY_LAST_ARRIVAL_TIME, lastPublicLegArrivalTime.getTime());
-                    values.put(QueryHistoryProvider.KEY_LAST_TRIP, serialize(trip));
-                    getContentResolver().update(historyUri, values, null, null);
+                    // save last trip to history
+                    if (firstPublicLegDepartureTime != null && lastPublicLegArrivalTime != null && historyUri != null) {
+                        final ContentValues values = new ContentValues();
+                        values.put(QueryHistoryProvider.KEY_LAST_DEPARTURE_TIME, firstPublicLegDepartureTime.getTime());
+                        values.put(QueryHistoryProvider.KEY_LAST_ARRIVAL_TIME, lastPublicLegArrivalTime.getTime());
+                        values.put(QueryHistoryProvider.KEY_LAST_TRIP, serialize(trip));
+                        getContentResolver().update(historyUri, values, null, null);
+                    }
                 }
             }
         });
@@ -460,7 +461,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         }
 
         boolean earlierOrLater = earlier || later;
-        boolean initial = !earlierOrLater && searchMoreContext.initial;
+        boolean initial = searchMoreContext.currentRound == 0 && !earlierOrLater;
         if (initial) {
             trips.clear();
             searchMoreContext.reset();
@@ -517,7 +518,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         public final NetworkProvider provider;
         public final TripRequestData reloadRequestData;
         public final boolean departureBased;
-        private boolean initial = true;
+        private int currentRound = 0;
         private List<Integer> attemptableTransferTimes = null;
         private int lastRequestedMinTransferTime = 0;
         public TripRequestData nextRequestData;
@@ -533,7 +534,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         }
 
         public void reset() {
-            initial = true;
+            currentRound = 0;
             attemptableTransferTimes = null;
             final Integer minTransferTimeMinutes = reloadRequestData.options.minTransferTimeMinutes;
             lastRequestedMinTransferTime = minTransferTimeMinutes == null ? 0 : minTransferTimeMinutes;
@@ -543,21 +544,14 @@ public class TripsOverviewActivity extends OeffiActivity {
             if (!provider.hasCapabilities(NetworkProvider.Capability.MIN_TRANSFER_TIMES))
                 return false;
 
-            return departureBased;
+            // return departureBased;
+            return true;
         }
 
         public TripInfo newTripInfo(final Trip trip, final boolean isEarlierOrLater) {
             TripInfo tripInfo = new TripInfo(trip);
-
             tripInfo.isEarlierOrLater = isEarlierOrLater;
-            if (!isEarlierOrLater) {
-                if (initial) {
-                    tripInfo.isAdditional = false;
-                } else {
-                    tripInfo.isAdditional = true;
-                }
-            }
-
+            tripInfo.addedInRound = isEarlierOrLater ? 0 : currentRound;
             return tripInfo;
         }
 
@@ -571,11 +565,10 @@ public class TripsOverviewActivity extends OeffiActivity {
             long limitLast = (long) lastRequestedMinTransferTime * 60000;
             int n=0;
             for (TripInfo tripInfo : trips) {
-                if (tripInfo.isEarlierOrLater)
+                if (tripInfo.addedInRound < currentRound || tripInfo.isEarlierOrLater)
                     continue;
 
                 final Trip trip = tripInfo.trip;
-                Log.w("xxxxx", ++n + ": " + trip.getUniqueId());
                 Trip.Public prevLeg = null;
                 for (Trip.Leg aLeg : trip.legs) {
                     if (aLeg instanceof Trip.Public) {
@@ -611,11 +604,9 @@ public class TripsOverviewActivity extends OeffiActivity {
 
                 t1 = t1 / 60000 + 1;
                 if (t1 > lastRequestedMinTransferTime && t1 <= MAX_MIN_TRANSFER_TIME_MINUTES) {
-                    Log.w("xxxxx", "t1 = " + t1);
                     attemptableTransferTimes.add((int) t1);
                     if (t2 > 0) {
                         t2 = t2 / 60000 + 1;
-                        Log.w("xxxxx", "t2 = " + t2);
                         if (t2 <= MAX_MIN_TRANSFER_TIME_MINUTES)
                             attemptableTransferTimes.add((int) t2);
                     }
@@ -634,33 +625,31 @@ public class TripsOverviewActivity extends OeffiActivity {
         }
 
         public boolean prepareNextRound() {
+            currentRound += 1;
+
+            if (attemptableTransferTimes != null && !attemptableTransferTimes.isEmpty()) {
+                lastRequestedMinTransferTime = attemptableTransferTimes.get(0);
+                attemptableTransferTimes.remove(0);
+
+                nextRequestData = reloadRequestData.clone();
+                final TripOptions options = nextRequestData.options;
+                nextRequestData.options = new TripOptions(
+                        options.products,
+                        options.optimize,
+                        options.walkSpeed,
+                        lastRequestedMinTransferTime,
+                        options.accessibility,
+                        options.flags);
+
+                return true;
+            }
+
             nextRequestData = null;
-            initial = false;
-
-            if (attemptableTransferTimes == null)
-                return false;
-
-            if (attemptableTransferTimes.isEmpty())
-                return false;
-
-            lastRequestedMinTransferTime = attemptableTransferTimes.get(0);
-            attemptableTransferTimes.remove(0);
-
-            nextRequestData = reloadRequestData.clone();
-            final TripOptions options = nextRequestData.options;
-            nextRequestData.options = new TripOptions(
-                  options.products,
-                  options.optimize,
-                  options.walkSpeed,
-                  lastRequestedMinTransferTime,
-                  options.accessibility,
-                  options.flags);
-
-            return true;
+            return false;
         }
 
         public TripRequestData getNextRequestData() {
-            if (initial)
+            if (currentRound <= 0)
                 return reloadRequestData;
 
             return nextRequestData;
