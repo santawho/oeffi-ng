@@ -44,9 +44,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.BaseAdapter;
-
-import androidx.annotation.RequiresApi;
-
 import com.google.common.base.Preconditions;
 import de.schildbach.oeffi.R;
 import de.schildbach.pte.dto.Line;
@@ -105,7 +102,6 @@ public final class TripsGalleryAdapter extends BaseAdapter {
     private static final float CIRCLE_CORNER_RADIUS = 16f;
     private final int tripWidth;
 
-    @RequiresApi(api = Build.VERSION_CODES.S)
     public TripsGalleryAdapter(final Context context) {
         this.context = context;
         final Resources res = context.getResources();
