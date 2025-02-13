@@ -352,8 +352,11 @@ public class TripsOverviewActivity extends OeffiActivity {
                     queryTripsRunnable = new QueryMoreTripsRunnable(context, false, false, searchMoreContext);
                 } else if (searchMoreRequested) {
                     searchMoreRequested = false;
-                    if (searchMoreContext.prepareNextRound()) {
+                    final SearchMoreContext.NextRoundInfo nextRoundInfo = searchMoreContext.prepareNextRound(TripsOverviewActivity.this);
+                    if (nextRoundInfo != null) {
                         queryTripsRunnable = new QueryMoreTripsRunnable(context, false, false, searchMoreContext);
+                        if (nextRoundInfo.infoText != null)
+                            runOnUiThread(() -> new Toast(TripsOverviewActivity.this).toast(nextRoundInfo.infoText));
                     }
                 } else if (searchMoreContext.searchMorePossible()) {
                     runOnUiThread(() -> setSearchMoreButtonEnabled(true));
@@ -643,7 +646,9 @@ public class TripsOverviewActivity extends OeffiActivity {
                         publicLegIndex += 1;
                         if (publicLegIndex == 2) {
                             final Location location = leg.departureStop.location;
-                            firstTransferStations.put(location.id, location);
+                            final String locationId = location.id;
+                            if (!tripsTofirstTransferStations.containsKey(locationId))
+                                firstTransferStations.put(locationId, location);
                         }
                         if (prevLeg != null) {
                             final long plannedArrivalTime = prevLeg.arrivalStop.plannedArrivalTime.getTime();
@@ -767,17 +772,37 @@ public class TripsOverviewActivity extends OeffiActivity {
         }
 
         public boolean searchMorePossible() {
-            if (!attemptableTransferTimes.isEmpty())
+            if (!firstTransferStations.isEmpty())
                 return true;
 
-            if (!firstTransferStations.isEmpty())
+            if (!attemptableTransferTimes.isEmpty())
                 return true;
 
             return false;
         }
 
-        public boolean prepareNextRound() {
+        public static class NextRoundInfo {
+            public String infoText;
+        }
+
+        public NextRoundInfo prepareNextRound(Context context) {
             currentRound += 1;
+
+            if (departureBased && !firstTransferStations.isEmpty()) {
+                final Location location = firstTransferStations.values().iterator().next();
+                lastRequestedFirstTransferStationId = location.id;
+                firstTransferStations.remove(lastRequestedFirstTransferStationId);
+
+                nextRequestData = reloadRequestData.clone();
+                nextRequestData.to = location;
+                nextRequestData.via = null;
+
+                final NextRoundInfo nextRoundInfo = new NextRoundInfo();
+                nextRoundInfo.infoText = context.getString(R.string.toast_trip_additional_feeder, location.uniqueShortName());
+                return nextRoundInfo;
+            } else {
+                lastRequestedFirstTransferStationId = null;
+            }
 
             if (!attemptableTransferTimes.isEmpty()) {
                 lastRequestedMinTransferTime = attemptableTransferTimes.get(0);
@@ -793,22 +818,13 @@ public class TripsOverviewActivity extends OeffiActivity {
                         options.accessibility,
                         options.flags);
 
-                return true;
-            }
-
-            if (departureBased && !firstTransferStations.isEmpty()) {
-                final Location location = firstTransferStations.values().iterator().next();
-                lastRequestedFirstTransferStationId = location.id;
-                firstTransferStations.remove(lastRequestedFirstTransferStationId);
-
-                nextRequestData = reloadRequestData.clone();
-                nextRequestData.to = location;
-                nextRequestData.via = null;
-                return true;
+                final NextRoundInfo nextRoundInfo = new NextRoundInfo();
+                nextRoundInfo.infoText = context.getString(R.string.toast_trip_additional_transfertime, lastRequestedMinTransferTime);
+                return nextRoundInfo;
             }
 
             nextRequestData = null;
-            return false;
+            return null;
         }
 
         public TripRequestData getNextRequestData() {

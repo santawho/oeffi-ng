@@ -25,6 +25,8 @@
     <color name="bg_delayed">#444444</color>
     <color name="bg_current_time">#ffff00</color>
     <color name="bg_position">#bbbbbb</color>
+    <color name="bg_trip_overview_initial_trip">#3A2828</color>
+    <color name="bg_trip_overview_earlierorlater_trip">#383838</color>
     <color name="bg_trip_overview_additional_trip">#28283A</color>
     <color name="bg_trip_overview_additional_feeder">#283A28</color>
 

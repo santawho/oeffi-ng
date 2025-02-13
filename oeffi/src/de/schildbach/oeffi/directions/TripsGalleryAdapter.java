@@ -95,8 +95,10 @@ public final class TripsGalleryAdapter extends BaseAdapter {
     private final int colorSignificantInverse;
     private final int colorDelayed;
     private final int colorNormalTripBackground;
+    private final int colorEarlierOrLaterTripBackground;
     private final int colorAdditionalTripBackground;
     private final int colorAdditionalFeederBackground;
+    private final int colorTripPressed;
 
     private static final float ROUNDED_CORNER_RADIUS = 8f;
     private static final float CIRCLE_CORNER_RADIUS = 16f;
@@ -184,22 +186,34 @@ public final class TripsGalleryAdapter extends BaseAdapter {
 
         cannotScrollPaint.setStyle(Paint.Style.FILL);
 
-        colorNormalTripBackground = makeBackgroundColor(R.color.bg_level0);
-        colorAdditionalTripBackground = makeBackgroundColor(R.color.bg_trip_overview_additional_trip);
-        colorAdditionalFeederBackground = makeBackgroundColor(R.color.bg_trip_overview_additional_feeder);
+        final TypedArray ta = context.obtainStyledAttributes(new int[] {
+                android.R.attr.colorBackground,
+                android.R.attr.colorPressedHighlight
+        });
+        // colorNormalTripBackground = makeBackgroundColor(ta.getColor(0, context.getColor(R.color.bg_level0)));
+        colorTripPressed = makeBackgroundColor(ta.getColor(1, 0x80000000));
+        ta.recycle();
+        // colorNormalTripBackground = makeBackgroundColorFromId(R.color.bg_level0);
+        colorNormalTripBackground = makeBackgroundColorFromId(R.color.bg_trip_overview_initial_trip);
+        colorEarlierOrLaterTripBackground = makeBackgroundColorFromId(R.color.bg_trip_overview_earlierorlater_trip);
+        colorAdditionalTripBackground = makeBackgroundColorFromId(R.color.bg_trip_overview_additional_trip);
+        colorAdditionalFeederBackground = makeBackgroundColorFromId(R.color.bg_trip_overview_additional_feeder);
     }
 
-    private int makeBackgroundColor(final int colorId) {
-        int c = context.getColor(colorId);
+    private int makeBackgroundColorFromId(final int colorId) {
+        return makeBackgroundColor(context.getColor(colorId));
+    }
+
+    private int makeBackgroundColor(final int color) {
         int r, g, b;
         if (darkMode) {
-            r = Color.red(c) * 4;
-            g = Color.green(c) * 4;
-            b = Color.blue(c) * 4;
+            r = Color.red(color) * 4;
+            g = Color.green(color) * 4;
+            b = Color.blue(color) * 4;
         } else {
-            r = (Color.red(c) - 192) * 4;
-            g = (Color.green(c) - 192) * 4;
-            b = (Color.blue(c) - 192) * 4;
+            r = (Color.red(color) - 192) * 4;
+            g = (Color.green(color) - 192) * 4;
+            b = (Color.blue(color) - 192) * 4;
         }
         return Color.argb(64, r, g, b);
     }
@@ -384,11 +398,16 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             this.tripInfo = tripInfo;
             final int bgColor;
             if (tripInfo.addedInRound > 0) {
-                bgColor = tripInfo.isAlternativelyFed ? colorAdditionalFeederBackground : colorAdditionalTripBackground;
+                if (tripInfo.isAlternativelyFed)
+                    bgColor = colorAdditionalFeederBackground;
+                else
+                    bgColor = colorAdditionalTripBackground;
+            } else if (tripInfo.isEarlierOrLater) {
+                bgColor = colorEarlierOrLaterTripBackground;
             } else {
                 bgColor = colorNormalTripBackground;
             }
-            setBackgroundDrawable(new RippleDrawable(ColorStateList.valueOf(0x80000000), new ColorDrawable(bgColor), null));
+            setBackgroundDrawable(new RippleDrawable(ColorStateList.valueOf(colorTripPressed), new ColorDrawable(bgColor), null));
         }
 
         private final RectF legBox = new RectF(), legBoxRotated = new RectF();
