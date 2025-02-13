@@ -246,8 +246,8 @@
     <string name="directions_overview_via">Via:</string>
     <string name="directions_overview_to">Ende:</string>
     <string name="directions_overview_search_more_title">Nach weiteren Verbindungen suchen</string>
-    <string name="toast_trip_additional_feeder">Suche nach frühen Verbindungen nach %1$s</string>
-    <string name="toast_trip_additional_transfertime">Suche nach Verbindungen mit %1$d Minuten Umsteigezeit</string>
+    <string name="toast_trip_additional_feeder">Früher nach %1$s</string>
+    <string name="toast_trip_additional_transfertime">%1$d Minuten Umsteigezeit</string>
 
     <!-- directions trip details -->
     <string name="directions_trip_details_duraton">Dauer %s</string>

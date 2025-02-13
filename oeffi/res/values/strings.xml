@@ -247,8 +247,8 @@
     <string name="directions_overview_via">Via:</string>
     <string name="directions_overview_to">End:</string>
     <string name="directions_overview_search_more_title">Search for more connections</string>
-    <string name="toast_trip_additional_feeder">Searching for earlier connections to %1$s</string>
-    <string name="toast_trip_additional_transfertime">Searching for connections with %1$d minutes transfer time</string>
+    <string name="toast_trip_additional_feeder">Earlier to %1$s</string>
+    <string name="toast_trip_additional_transfertime">%1$d minutes transfer time</string>
 
     <!-- directions trip details -->
     <string name="directions_trip_details_duraton">Duration %s</string>
