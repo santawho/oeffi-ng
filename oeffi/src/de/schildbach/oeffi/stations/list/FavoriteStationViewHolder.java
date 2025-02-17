@@ -30,6 +30,7 @@ import de.schildbach.oeffi.stations.FavoriteStationsProvider;
 import de.schildbach.oeffi.stations.StationContextMenu;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
+import de.schildbach.pte.dto.LocationType;
 
 public class FavoriteStationViewHolder extends RecyclerView.ViewHolder {
     private final Context context;
@@ -83,8 +84,8 @@ public class FavoriteStationViewHolder extends RecyclerView.ViewHolder {
                 final PopupMenu contextMenu = new StationContextMenu(context, v, network, station,
                         FavoriteStationsProvider.TYPE_FAVORITE,
                         true, false,
-                        true, true,
-                        false, false, true);
+                        true, station.type != LocationType.ADDRESS,
+                        true, false, false, true);
                 contextMenu.setOnMenuItemClickListener(item -> {
                     final int position = getAdapterPosition();
                     if (position != RecyclerView.NO_POSITION)

@@ -57,6 +57,7 @@ import de.schildbach.oeffi.util.Objects;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.Departure;
+import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.Point;
 import de.schildbach.pte.dto.QueryDeparturesResult;
 import de.schildbach.pte.dto.StationDepartures;
@@ -266,6 +267,7 @@ public class NearestFavoriteStationWidgetService extends JobService {
         if (favCursor != null) {
             final int networkCol = favCursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_NETWORK);
             final int stationIdCol = favCursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_ID);
+            final int stationTypeCol = favCursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_TYPE);
             final int stationPlaceCol = favCursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_PLACE);
             final int stationNameCol = favCursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_NAME);
             final int stationLatCol = favCursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_LAT);
@@ -274,6 +276,7 @@ public class NearestFavoriteStationWidgetService extends JobService {
             while (favCursor.moveToNext()) {
                 final String network = favCursor.getString(networkCol);
                 final String stationId = favCursor.getString(stationIdCol);
+                String stationType = favCursor.getString(stationTypeCol);
                 String stationPlace = favCursor.getString(stationPlaceCol);
                 String stationName = favCursor.getString(stationNameCol);
                 Point stationPoint = Point.from1E6(favCursor.getInt(stationLatCol), favCursor.getInt(stationLonCol));
@@ -287,7 +290,7 @@ public class NearestFavoriteStationWidgetService extends JobService {
                         android.location.Location.distanceBetween(here.getLatitude(), here.getLongitude(),
                                 stationPoint.getLatAsDouble(), stationPoint.getLonAsDouble(), distanceBetweenResults);
                         final float distance = distanceBetweenResults[0];
-                        final Favorite favorite = new Favorite(networkId, stationId, stationPlace, stationName,
+                        final Favorite favorite = new Favorite(networkId, stationId, LocationType.valueOf(stationType), stationPlace, stationName,
                                 distance);
                         favorites.add(favorite);
                     }
@@ -432,14 +435,18 @@ public class NearestFavoriteStationWidgetService extends JobService {
     private static class Favorite implements Comparable<Favorite> {
         public final NetworkId networkId;
         public final String id;
+        public final LocationType type;
         public final String place;
         public final String name;
         public final float distance;
 
-        public Favorite(final NetworkId networkId, final String id, final String place, final String name,
+        public Favorite(
+                final NetworkId networkId, final String id, final LocationType type,
+                final String place, final String name,
                 final float distance) {
             this.networkId = networkId;
             this.id = id;
+            this.type = type;
             this.place = place;
             this.name = name;
             this.distance = distance;

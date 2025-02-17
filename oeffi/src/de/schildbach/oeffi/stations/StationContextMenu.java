@@ -58,6 +58,7 @@ public class StationContextMenu extends PopupMenu {
 
     public StationContextMenu(final Context context, final View anchor, final NetworkId network, final Location station,
             final Integer favState, final boolean showFavorite, final boolean showIgnore, final boolean showMap,
+            final boolean showDepartures,
             final boolean showDirections, final boolean showAlternativeDirections, final boolean showNavigateTo,
             final boolean showShortcut) {
         super(context, anchor);
@@ -75,6 +76,7 @@ public class StationContextMenu extends PopupMenu {
             prepareMapMenu(context, mapItem.getSubMenu(), network, station);
         else
             mapItem.setVisible(false);
+        menu.findItem(R.id.station_context_show_departures).setVisible(showDepartures);
         menu.findItem(R.id.station_context_directions_from).setVisible(showDirections);
         menu.findItem(R.id.station_context_directions_to).setVisible(showDirections);
         menu.findItem(R.id.station_context_launcher_shortcut).setVisible(showShortcut);

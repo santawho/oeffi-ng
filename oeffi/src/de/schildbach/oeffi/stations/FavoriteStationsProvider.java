@@ -47,6 +47,7 @@ public class FavoriteStationsProvider extends ContentProvider {
     public static final String KEY_ROWID = "_id";
     public static final String KEY_TYPE = "type";
     public static final String KEY_STATION_NETWORK = "station_network";
+    public static final String KEY_STATION_TYPE = "station_type";
     public static final String KEY_STATION_ID = "station_id";
     public static final String KEY_STATION_PLACE = "station_place";
     public static final String KEY_STATION_NAME = "station_name";
@@ -128,11 +129,12 @@ public class FavoriteStationsProvider extends ContentProvider {
 
     public static Location getLocation(final Cursor cursor) {
         final int idIndex = cursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_ID);
+        final int typeIndex = cursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_TYPE);
         final int placeIndex = cursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_PLACE);
         final int nameIndex = cursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_NAME);
         final int latIndex = cursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_LAT);
         final int lonIndex = cursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_LON);
-        return new Location(LocationType.STATION, cursor.getString(idIndex),
+        return new Location(LocationType.valueOf(cursor.getString(typeIndex)), cursor.getString(idIndex),
                 Point.from1E6(cursor.getInt(latIndex), cursor.getInt(lonIndex)), cursor.getString(placeIndex),
                 cursor.getString(nameIndex));
     }
@@ -240,21 +242,22 @@ public class FavoriteStationsProvider extends ContentProvider {
 
     private static class Helper extends SQLiteOpenHelper {
         private static final String DATABASE_NAME = "station_favorites";
-        private static final int DATABASE_VERSION = 5;
+        private static final int DATABASE_VERSION = 6;
 
         private static final String DATABASE_CREATE = "CREATE TABLE " + DATABASE_TABLE + " (" //
                 + KEY_ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT, " //
                 + KEY_TYPE + " INT NOT NULL DEFAULT 1, " //
                 + KEY_STATION_NETWORK + " TEXT NOT NULL, " //
                 + KEY_STATION_ID + " TEXT NOT NULL, " //
+                + KEY_STATION_TYPE + " TEXT, " //
                 + KEY_STATION_PLACE + " TEXT, " //
                 + KEY_STATION_NAME + " TEXT, " //
                 + KEY_STATION_LAT + " INT NOT NULL DEFAULT 0, " //
                 + KEY_STATION_LON + " INT NOT NULL DEFAULT 0, " //
                 + "UNIQUE (" + KEY_STATION_NETWORK + "," + KEY_STATION_ID + "));";
         private static final String DATABASE_COLUMN_LIST = KEY_ROWID + "," + KEY_TYPE + "," + KEY_STATION_NETWORK + ","
-                + KEY_STATION_ID + "," + KEY_STATION_PLACE + "," + KEY_STATION_NAME + "," + KEY_STATION_LAT + ","
-                + KEY_STATION_LON;
+                + KEY_STATION_ID + "," + KEY_STATION_TYPE + "," + KEY_STATION_PLACE + "," + KEY_STATION_NAME + ","
+                + KEY_STATION_LAT + "," + KEY_STATION_LON;
 
         public Helper(final Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -297,6 +300,9 @@ public class FavoriteStationsProvider extends ContentProvider {
                 db.execSQL("INSERT INTO " + DATABASE_TABLE + " SELECT " + DATABASE_COLUMN_LIST + " FROM "
                         + DATABASE_TABLE_OLD);
                 db.execSQL("DROP TABLE " + DATABASE_TABLE_OLD);
+            } else if (oldVersion == 5) {
+                db.execSQL(
+                        "ALTER TABLE " + DATABASE_TABLE + " ADD COLUMN " + KEY_STATION_TYPE + " TEXT DEFAULT '" + LocationType.STATION.name() + "'");
             } else {
                 throw new UnsupportedOperationException("old=" + oldVersion);
             }

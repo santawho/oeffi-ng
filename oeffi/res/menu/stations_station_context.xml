@@ -21,7 +21,7 @@
         android:id="@+id/station_context_remove_ignore"
         android:title="@string/station_context_remove_ignore_title" />
     <item
-        android:id="@+id/station_context_details"
+        android:id="@+id/station_context_show_departures"
         android:title="@string/station_context_details_title" />
     <item
         android:id="@+id/station_context_infopage"

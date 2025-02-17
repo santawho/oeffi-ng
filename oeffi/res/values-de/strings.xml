@@ -108,6 +108,7 @@
     <string name="stations_location_provider_acquiring">ermittle</string>
     <string name="stations_message_missing_capability">Abfahrtsinformationen sind in dem gewählten Verkehrsnetz nicht verfügbar.\nWähle ggf. ein anderes Netz.</string>
     <string name="stations_connectivity_warning">Offline-Modus: Dein Gerät ist nicht verbunden.\nDaher werden keine Abfahrtszeiten angezeigt.</string>
+    <string name="stations_no_departures_for_address">Für eine Adresse können keine Abfahrten angezeigt werden.</string>
 
     <!-- nearby stations error dialog -->
     <string name="stations_nearby_stations_error_title">Problem beim Laden der nahegelegenen Haltestellen</string>

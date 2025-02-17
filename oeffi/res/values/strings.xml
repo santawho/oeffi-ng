@@ -109,6 +109,7 @@
     <string name="stations_location_provider_acquiring">acquiring</string>
     <string name="stations_message_missing_capability">The selected transportation network does not serve departure times.\nConsider selecting another network.</string>
     <string name="stations_connectivity_warning">Offline mode: Your device is not connected.\nThus, departure times will not be shown.</string>
+    <string name="stations_no_departures_for_address">Cannot show departures for an address.</string>
 
     <!-- nearby stations error dialog -->
     <string name="stations_nearby_stations_error_title">Problem loading nearby stations data</string>

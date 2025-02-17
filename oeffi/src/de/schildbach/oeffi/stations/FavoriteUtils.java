@@ -33,11 +33,12 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class FavoriteUtils {
     public static Uri persist(final ContentResolver contentResolver, final int type, final NetworkId networkId,
             final Location station) {
-        checkArgument(station.type == LocationType.STATION, "not a station: %s", station);
+        // checkArgument(station.type == LocationType.STATION, "not a station: %s", station);
         final ContentValues values = new ContentValues();
         values.put(FavoriteStationsProvider.KEY_TYPE, type);
         values.put(FavoriteStationsProvider.KEY_STATION_NETWORK, networkId.name());
         values.put(FavoriteStationsProvider.KEY_STATION_ID, station.id);
+        values.put(FavoriteStationsProvider.KEY_STATION_TYPE, station.type.name());
         values.put(FavoriteStationsProvider.KEY_STATION_PLACE, station.place);
         values.put(FavoriteStationsProvider.KEY_STATION_NAME, station.name);
         values.put(FavoriteStationsProvider.KEY_STATION_LAT, station.getLatAs1E6());

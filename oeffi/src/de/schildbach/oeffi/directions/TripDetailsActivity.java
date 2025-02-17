@@ -1591,11 +1591,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         public void onClick(final View v) {
             final PopupMenu contextMenu = new StationContextMenu(TripDetailsActivity.this, v, network, location, null,
-                    false, false, true, false, false,
+                    false, false, true, true, false, false,
                     renderConfig.isJourney && ((Trip.Public) trip.legs.get(0)).exitLocation == null,
                     false);
             contextMenu.setOnMenuItemClickListener(item -> {
-                if (item.getItemId() == R.id.station_context_details) {
+                if (item.getItemId() == R.id.station_context_show_departures) {
                     StationDetailsActivity.start(TripDetailsActivity.this, network, location);
                     return true;
                 } else {
@@ -1632,12 +1632,14 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             } else {
                 showNavigateTo = false;
             }
-            final PopupMenu contextMenu = new StationContextMenu(TripDetailsActivity.this, v, network, stop.location,
-                    null, false, false, true, true, renderConfig.isNavigation,
+            final PopupMenu contextMenu = new StationContextMenu(
+                    TripDetailsActivity.this, v, network, stop.location,
+                    null, false, false, true, true, true,
+                    renderConfig.isNavigation,
                     showNavigateTo, false);
             contextMenu.setOnMenuItemClickListener(item -> {
                 int menuItemId = item.getItemId();
-                if (menuItemId == R.id.station_context_details) {
+                if (menuItemId == R.id.station_context_show_departures) {
                     StationDetailsActivity.start(TripDetailsActivity.this, network, stop.location);
                     return true;
                 } else if (menuItemId == R.id.station_context_directions_alternative_from) {

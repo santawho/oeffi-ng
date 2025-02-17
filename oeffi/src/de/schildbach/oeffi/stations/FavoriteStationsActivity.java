@@ -41,9 +41,11 @@ import de.schildbach.oeffi.stations.list.StationClickListener;
 import de.schildbach.oeffi.stations.list.StationContextMenuItemListener;
 import de.schildbach.oeffi.util.AutoCompleteLocationAdapter;
 import de.schildbach.oeffi.util.DividerItemDecoration;
+import de.schildbach.oeffi.util.Toast;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Departure;
 import de.schildbach.pte.dto.Location;
+import de.schildbach.pte.dto.LocationType;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -161,7 +163,7 @@ public class FavoriteStationsActivity extends OeffiActivity
             intent.setData(uri);
             setResult(RESULT_OK, intent);
             finish();
-        } else {
+        } else if (newFavoriteStation.type == LocationType.STATION) {
             StationDetailsActivity.start(FavoriteStationsActivity.this, network, newFavoriteStation);
         }
     }
@@ -174,6 +176,8 @@ public class FavoriteStationsActivity extends OeffiActivity
             intent.setData(uri);
             setResult(RESULT_OK, intent);
             finish();
+        } if (station.type == LocationType.ADDRESS) {
+            new Toast(this).longToast(R.string.stations_no_departures_for_address);
         } else {
             StationDetailsActivity.start(FavoriteStationsActivity.this, stationNetwork, station);
         }
@@ -181,7 +185,7 @@ public class FavoriteStationsActivity extends OeffiActivity
 
     public boolean onStationContextMenuItemClick(final int adapterPosition, final NetworkId stationNetwork,
             final Location station, final @Nullable List<Departure> departures, final int menuItemId) {
-        if (menuItemId == R.id.station_context_details) {
+        if (menuItemId == R.id.station_context_show_departures) {
             StationDetailsActivity.start(FavoriteStationsActivity.this, stationNetwork, station, departures);
             return true;
         } else if (menuItemId == R.id.station_context_remove_favorite) {

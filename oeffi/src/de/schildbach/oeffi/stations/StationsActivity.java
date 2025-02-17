@@ -1370,7 +1370,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
             if (StationsActivity.this.removeIgnore(station))
                 stationListAdapter.notifyItemChanged(adapterPosition);
             return true;
-        } else if (menuItemId == R.id.station_context_details) {
+        } else if (menuItemId == R.id.station_context_show_departures) {
             StationDetailsActivity.start(StationsActivity.this, network, station, departures);
             return true;
         } else if (menuItemId == R.id.station_context_directions_from) {
