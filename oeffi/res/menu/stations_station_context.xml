@@ -3,6 +3,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/station_context_navigate_to"
+        android:title="@string/station_context_navigate_to_title"/>
+    <item
         android:id="@+id/station_context_directions_alternative_from"
         android:title="@string/station_context_alternative_from_title"/>
     <item

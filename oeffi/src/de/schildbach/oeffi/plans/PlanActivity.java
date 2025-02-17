@@ -152,7 +152,8 @@ public class PlanActivity extends ComponentActivity {
         bubble.setOnClickListener(v -> {
             final Station selection = checkNotNull(PlanActivity.this.selection);
             final PopupMenu contextMenu = new StationContextMenu(PlanActivity.this, v, selection.network,
-                    selection.location, null, false, false, false, false, false, false);
+                    selection.location, null, false, false, false, false,
+                    false, false, false);
             contextMenu.setOnMenuItemClickListener(item -> {
                 if (item.getItemId() == R.id.station_context_details) {
                     StationDetailsActivity.start(PlanActivity.this, selection.network, selection.location);

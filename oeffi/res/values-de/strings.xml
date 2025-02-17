@@ -126,6 +126,7 @@
     <string name="station_context_directions_from_title">Verbindung von hier</string>
     <string name="station_context_directions_to_title">Verbindung nach hier</string>
     <string name="station_context_alternative_from_title">Alternative Weiterfahrt von hier</string>
+    <string name="station_context_navigate_to_title">Hierher navigieren</string>
     <string name="station_context_launcher_shortcut_title">Launcher-Verknüpfung erstellen</string>
 
     <!-- stations options menu -->
