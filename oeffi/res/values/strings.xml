@@ -142,7 +142,8 @@
     <string name="stations_search_list_empty">No stations found</string>
 
     <!-- station details -->
-    <string name="stations_station_details_action_load_more">Load later departures</string>
+    <string name="stations_station_details_action_load_later">Load later departures</string>
+    <string name="stations_station_details_action_load_earlier">Load later departures</string>
     <string name="stations_station_details_action_favorite_title">Favorite</string>
     <string name="stations_station_details_progress">Loading departures…</string>
     <string name="stations_station_details_list_empty">No departures</string>

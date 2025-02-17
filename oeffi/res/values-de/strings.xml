@@ -141,7 +141,8 @@
     <string name="stations_search_list_empty">Keine Haltestellen gefunden</string>
 
     <!-- station details -->
-    <string name="stations_station_details_action_load_more">Lade spätere Abfahrten</string>
+    <string name="stations_station_details_action_load_later">Lade spätere Abfahrten</string>
+    <string name="stations_station_details_action_load_earlier">Lade frühere Abfahrten</string>
     <string name="stations_station_details_action_favorite_title">Favorit</string>
     <string name="stations_station_details_progress">Lade Abfahrtszeiten…</string>
     <string name="stations_station_details_list_empty">Keine Abfahrten</string>

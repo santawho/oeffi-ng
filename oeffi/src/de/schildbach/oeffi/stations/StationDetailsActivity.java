@@ -34,7 +34,6 @@ import android.text.Spanned;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.text.method.LinkMovementMethod;
-import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -81,6 +80,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
@@ -135,7 +135,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
     private LinkedHashMap<Line, List<Location>> selectedLines = null;
 
     private MyActionBar actionBar;
-    private ImageButton loadMoreButton;
+    private ImageButton loadLaterButton, loadEarlierButton;
     private ToggleImageButton favoriteButton;
     private ViewAnimator viewAnimator;
     private RecyclerView listView;
@@ -146,7 +146,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
     private BroadcastReceiver tickReceiver;
     private boolean autoRefreshDisabled = false;
-    private Date nextFromTime;
+    private Date nextLaterTime, nextEarlierTime;
 
     private QueryJourneyRunnable queryJourneyRunnable;
     private final Handler handler = new Handler();
@@ -177,7 +177,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         actionBar.swapTitles();
         actionBar.addProgressButton().setOnClickListener(v -> {
             autoRefreshDisabled = false;
-            load(null);
+            load(null, false);
         });
         favoriteButton = actionBar.addToggleButton(R.drawable.ic_star_24dp,
                 R.string.stations_station_details_action_favorite_title);
@@ -197,10 +197,15 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 }
             }
         });
-        loadMoreButton = actionBar.addButton(R.drawable.ic_expand_white_24dp, R.string.stations_station_details_action_load_more);
-        loadMoreButton.setOnClickListener(buttonView -> {
+        loadLaterButton = actionBar.addButton(R.drawable.ic_later_white_24dp, R.string.stations_station_details_action_load_later);
+        loadLaterButton.setOnClickListener(buttonView -> {
             autoRefreshDisabled = true;
-            load(nextFromTime);
+            load(nextLaterTime, false);
+        });
+        loadEarlierButton = actionBar.addButton(R.drawable.ic_earlier_white_24dp, R.string.stations_station_details_action_load_earlier);
+        loadEarlierButton.setOnClickListener(buttonView -> {
+            autoRefreshDisabled = true;
+            load(nextEarlierTime, true);
         });
 
         viewAnimator = findViewById(R.id.stations_station_details_list_layout);
@@ -261,12 +266,12 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             @Override
             public void onReceive(final Context context, final Intent intent) {
                 if (!autoRefreshDisabled)
-                    load(null);
+                    load(null, false);
             }
         };
         registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
 
-        load(null);
+        load(null, false);
 
         updateFragments();
     }
@@ -329,7 +334,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 .collect(Collectors.toList());
     }
 
-    private void load(final Date time) {
+    private void load(final Date time, final boolean earlier) {
         final boolean modeAppend;
         final Date fromTime;
         if (time != null) {
@@ -338,7 +343,8 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         } else {
             modeAppend = false;
             fromTime = new Date();
-            nextFromTime = null;
+            nextLaterTime = null;
+            nextEarlierTime = new Date(fromTime.getTime() - 30 * 60 * 1000);
         }
         final String requestedStationId = selectedStation.id;
         final NetworkProvider networkProvider = NetworkProviderFactory.provider(selectedNetwork);
@@ -390,13 +396,17 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                                         } else {
                                             selectedDepartures = departures;
                                         }
+                                        Collections.sort(selectedDepartures, (d1, d2) ->
+                                                Math.toIntExact(d1.getTime().getTime() - d2.getTime().getTime()));
                                         selectedLines = groupDestinationsByLine(stationDepartures.lines);
                                     }
                                 }
                             }
 
-                            if (!somethingAdded) {
-                                nextFromTime = new Date(fromTime.getTime() + 30 * 60 * 1000);
+                            if (earlier) {
+                                nextEarlierTime = new Date(fromTime.getTime() - 30 * 60 * 1000);
+                            } else if (!somethingAdded) {
+                                nextLaterTime = new Date(fromTime.getTime() + 30 * 60 * 1000);
                             } else {
                                 long maxTime = fromTime.getTime();
                                 for (Departure departure : selectedDepartures) {
@@ -404,7 +414,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                                     if (depTime > maxTime)
                                         maxTime = depTime;
                                 }
-                                nextFromTime = new Date(maxTime);
+                                nextLaterTime = new Date(maxTime);
                             }
 
                             updateGUI();
@@ -471,7 +481,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
         if (changed) {
             autoRefreshDisabled = false;
-            load(null);
+            load(null, false);
         }
     }
 
