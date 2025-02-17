@@ -318,11 +318,7 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
         buttonExpand = actionBar.addToggleButton(R.drawable.ic_expand_white_24dp,
                 R.string.directions_action_expand_title);
         buttonExpand.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked)
-                expandForm();
-            else
-                collapseForm();
-
+            expandForm(isChecked);
             updateMap();
         });
         actionBar.addButton(R.drawable.ic_shuffle_white_24dp, R.string.directions_action_return_trip_title)
@@ -600,11 +596,7 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
                 time = (TimeSpec) intent.getSerializableExtra(INTENT_EXTRA_TIME_SPEC);
         }
 
-        if (haveNonDefaultProducts) {
-            expandForm();
-        } else {
-            collapseForm();
-        }
+        expandForm(haveNonDefaultProducts);
 
         // initial focus
         if (!viewToLocation.isInTouchMode()) {
@@ -618,11 +610,6 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
         mapView.onResume();
 
         boolean haveNonDefaultProducts = initProductToggles();
-        if (haveNonDefaultProducts) {
-            expandForm();
-        } else {
-            collapseForm();
-        }
 
         // can do directions?
         final NetworkProvider networkProvider = network != null ? NetworkProviderFactory.provider(network) : null;
@@ -647,6 +634,8 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
         };
         registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
 
+        expandForm(haveNonDefaultProducts || viewViaLocation.getLocation() != null);
+
         setActionBarSecondaryTitleFromNetwork();
         updateGUI();
         updateMap();
@@ -667,11 +656,7 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
         viewBike.setChecked(false);
 
         boolean haveNonDefaultProducts = initProductToggles();
-        if (haveNonDefaultProducts) {
-            expandForm();
-        } else {
-            collapseForm();
-        }
+        expandForm(haveNonDefaultProducts);
 
         queryHistoryListAdapter.close();
         queryHistoryListAdapter = new QueryHistoryAdapter(this, network, this, this);
@@ -878,26 +863,26 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
         mapView.zoomToAll();
     }
 
-    private void expandForm() {
-        buttonExpand.setChecked(true);
-        initLayoutTransitions(true);
+    private void expandForm(final boolean expanded) {
+        if (expanded) {
+            buttonExpand.setChecked(true);
+            initLayoutTransitions(true);
 
-        final NetworkProvider networkProvider = network != null ? NetworkProviderFactory.provider(network) : null;
+            final NetworkProvider networkProvider = network != null ? NetworkProviderFactory.provider(network) : null;
 
-        viewViaLocation.setVisibility(networkProvider != null && networkProvider.hasCapabilities(NetworkProvider.Capability.TRIPS_VIA) ?
-                View.VISIBLE : View.GONE);
-        viewProducts.setVisibility(View.VISIBLE);
-        if (networkProvider != null && networkProvider.hasCapabilities(Capability.BIKE_OPTION))
-            viewBike.setVisibility(View.VISIBLE);
-    }
+            viewViaLocation.setVisibility(networkProvider != null && networkProvider.hasCapabilities(NetworkProvider.Capability.TRIPS_VIA) ?
+                    View.VISIBLE : View.GONE);
+            viewProducts.setVisibility(View.VISIBLE);
+            if (networkProvider != null && networkProvider.hasCapabilities(Capability.BIKE_OPTION))
+                viewBike.setVisibility(View.VISIBLE);
+        } else {
+            buttonExpand.setChecked(false);
+            initLayoutTransitions(false);
 
-    private void collapseForm() {
-        buttonExpand.setChecked(false);
-        initLayoutTransitions(false);
-
-        viewViaLocation.setVisibility(View.GONE);
-        viewProducts.setVisibility(View.GONE);
-        viewBike.setVisibility(View.GONE);
+            viewViaLocation.setVisibility(View.GONE);
+            viewProducts.setVisibility(View.GONE);
+            viewBike.setVisibility(View.GONE);
+        }
     }
 
     private void initLayoutTransitions() {
