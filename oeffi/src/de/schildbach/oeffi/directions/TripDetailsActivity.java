@@ -1591,7 +1591,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         public void onClick(final View v) {
             final PopupMenu contextMenu = new StationContextMenu(TripDetailsActivity.this, v, network, location, null,
-                    false, false, true, true, false, false,
+                    false, false, true, true, false, false, false,
                     renderConfig.isJourney && ((Trip.Public) trip.legs.get(0)).exitLocation == null,
                     false);
             contextMenu.setOnMenuItemClickListener(item -> {
@@ -1634,7 +1634,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
             final PopupMenu contextMenu = new StationContextMenu(
                     TripDetailsActivity.this, v, network, stop.location,
-                    null, false, false, true, true, true,
+                    null, false, false, true, true, true, true,
                     renderConfig.isNavigation,
                     showNavigateTo, false);
             contextMenu.setOnMenuItemClickListener(item -> {
@@ -1647,43 +1647,60 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 } else if (menuItemId == R.id.station_context_navigate_to) {
                     startNavigationForJourneyToExit(stop);
                     return true;
-                } else {
-                    if (menuItemId == R.id.station_context_directions_from) {
-                        final Date arrivalTime = stop.getArrivalTime();
-                        final TimeSpec.Absolute time = new TimeSpec.Absolute(DepArr.DEPART,
-                                arrivalTime != null ? arrivalTime.getTime() : stop.getDepartureTime().getTime());
-                        DirectionsActivity.start(TripDetailsActivity.this, stop.location,
-                                renderConfig.isJourney ? ((Trip.Public) trip.legs.get(0)).entryLocation : trip.to, time,
-                                Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        return true;
-                    } else if (menuItemId == R.id.station_context_directions_to) {
-                        final Location entry;
-                        final TimeSpec.Absolute time;
-                        if (renderConfig.isJourney) {
-                            Trip.Public journeyLeg = (Trip.Public) trip.legs.get(0);
-                            entry = journeyLeg.entryLocation;
-                            final Stop entryStop = journeyLeg.findStopByLocation(entry);
-                            final Date arrivalTime = entryStop.getArrivalTime();
-                            time = new TimeSpec.Absolute(DepArr.DEPART,
-                                    arrivalTime != null ? arrivalTime.getTime() : entryStop.getDepartureTime().getTime());
-                        } else {
-                            entry = trip.from;
-                            final Date arrivalTime = stop.getArrivalTime();
-                            time = new TimeSpec.Absolute(DepArr.ARRIVE,
-                                    arrivalTime != null ? arrivalTime.getTime() : stop.getDepartureTime().getTime());
-                        }
-                        DirectionsActivity.start(TripDetailsActivity.this, entry, stop.location, time,
-                                Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        return true;
-                    } else if (menuItemId == R.id.station_context_infopage) {
-                        String infoUrl = stop.location.infoUrl;
-                        if (infoUrl != null) {
-                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(infoUrl)));
-                        }
-                        return true;
+                } else if (menuItemId == R.id.station_context_directions_from) {
+                    final Date arrivalTime = stop.getArrivalTime();
+                    final TimeSpec.Absolute time = new TimeSpec.Absolute(DepArr.DEPART,
+                            arrivalTime != null ? arrivalTime.getTime() : stop.getDepartureTime().getTime());
+                    DirectionsActivity.start(TripDetailsActivity.this, stop.location,
+                            renderConfig.isJourney ? ((Trip.Public) trip.legs.get(0)).entryLocation : trip.to, null, time,
+                            Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    return true;
+                } else if (menuItemId == R.id.station_context_directions_to) {
+                    final Location entry;
+                    final TimeSpec.Absolute time;
+                    if (renderConfig.isJourney) {
+                        Trip.Public journeyLeg = (Trip.Public) trip.legs.get(0);
+                        entry = journeyLeg.entryLocation;
+                        final Stop entryStop = journeyLeg.findStopByLocation(entry);
+                        final Date arrivalTime = entryStop.getArrivalTime();
+                        time = new TimeSpec.Absolute(DepArr.DEPART,
+                                arrivalTime != null ? arrivalTime.getTime() : entryStop.getDepartureTime().getTime());
                     } else {
-                        return false;
+                        entry = trip.from;
+                        final Date arrivalTime = stop.getArrivalTime();
+                        time = new TimeSpec.Absolute(DepArr.ARRIVE,
+                                arrivalTime != null ? arrivalTime.getTime() : stop.getDepartureTime().getTime());
                     }
+                    DirectionsActivity.start(TripDetailsActivity.this, entry, stop.location, null, time,
+                            Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    return true;
+                } else if (menuItemId == R.id.station_context_directions_via) {
+                    final Location exit;
+                    final TimeSpec.Absolute time;
+                    if (renderConfig.isJourney) {
+                        Trip.Public journeyLeg = (Trip.Public) trip.legs.get(0);
+                        exit = journeyLeg.exitLocation;
+                        final Stop exitStop = journeyLeg.findStopByLocation(exit);
+                        final Date departureTime = exitStop.getDepartureTime();
+                        time = new TimeSpec.Absolute(DepArr.DEPART,
+                                departureTime != null ? departureTime.getTime() : exitStop.getArrivalTime().getTime());
+                    } else {
+                        exit = trip.to;
+                        final Date departureTime = stop.getDepartureTime();
+                        time = new TimeSpec.Absolute(DepArr.DEPART,
+                                departureTime != null ? departureTime.getTime() : stop.getArrivalTime().getTime());
+                    }
+                    DirectionsActivity.start(TripDetailsActivity.this, null, exit, stop.location, time,
+                            Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    return true;
+                } else if (menuItemId == R.id.station_context_infopage) {
+                    String infoUrl = stop.location.infoUrl;
+                    if (infoUrl != null) {
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(infoUrl)));
+                    }
+                    return true;
+                } else {
+                    return false;
                 }
             });
             contextMenu.show();

@@ -35,6 +35,9 @@
         android:id="@+id/station_context_directions_from"
         android:title="@string/station_context_directions_from_title" />
     <item
+        android:id="@+id/station_context_directions_via"
+        android:title="@string/station_context_directions_via_title" />
+    <item
         android:id="@+id/station_context_directions_to"
         android:title="@string/station_context_directions_to_title" />
     <item

@@ -170,6 +170,7 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
 
     private static final String INTENT_EXTRA_FROM_LOCATION = DirectionsActivity.class.getName() + ".from_location";
     private static final String INTENT_EXTRA_TO_LOCATION = DirectionsActivity.class.getName() + ".to_location";
+    private static final String INTENT_EXTRA_VIA_LOCATION = DirectionsActivity.class.getName() + ".via_location";
     private static final String INTENT_EXTRA_TIME_SPEC = DirectionsActivity.class.getName() + ".time_spec";
 
     private static class PickContact extends ActivityResultContract<Void, Uri> {
@@ -233,13 +234,17 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
                     resultPickStation(contentUri, viewToLocation);
             });
 
-    public static void start(final Context context, @Nullable final Location fromLocation,
-            @Nullable final Location toLocation, @Nullable final TimeSpec timeSpec, final int intentFlags) {
+    public static void start(
+            final Context context,
+            @Nullable final Location fromLocation, @Nullable final Location toLocation, @Nullable final Location viaLocation,
+            @Nullable final TimeSpec timeSpec, final int intentFlags) {
         final Intent intent = new Intent(context, DirectionsActivity.class).addFlags(intentFlags);
         if (fromLocation != null)
             intent.putExtra(DirectionsActivity.INTENT_EXTRA_FROM_LOCATION, fromLocation);
         if (toLocation != null)
             intent.putExtra(DirectionsActivity.INTENT_EXTRA_TO_LOCATION, toLocation);
+        if (viaLocation != null)
+            intent.putExtra(DirectionsActivity.INTENT_EXTRA_VIA_LOCATION, viaLocation);
         if (timeSpec != null)
             intent.putExtra(DirectionsActivity.INTENT_EXTRA_TIME_SPEC, timeSpec);
         context.startActivity(intent);
@@ -594,6 +599,8 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
                 viewFromLocation.setLocation((Location) intent.getSerializableExtra(INTENT_EXTRA_FROM_LOCATION));
             if (intent.hasExtra(INTENT_EXTRA_TO_LOCATION))
                 viewToLocation.setLocation((Location) intent.getSerializableExtra(INTENT_EXTRA_TO_LOCATION));
+            if (intent.hasExtra(INTENT_EXTRA_VIA_LOCATION))
+                viewViaLocation.setLocation((Location) intent.getSerializableExtra(INTENT_EXTRA_VIA_LOCATION));
             if (intent.hasExtra(INTENT_EXTRA_TIME_SPEC))
                 time = (TimeSpec) intent.getSerializableExtra(INTENT_EXTRA_TIME_SPEC);
         }

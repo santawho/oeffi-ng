@@ -126,6 +126,7 @@
     <string name="station_context_infopage_title">Open Info Page</string>
     <string name="station_context_map_title">Show on Map</string>
     <string name="station_context_directions_from_title">Connection From Here</string>
+    <string name="station_context_directions_via_title">Connection Via Here</string>
     <string name="station_context_directions_to_title">Connection To Here</string>
     <string name="station_context_alternative_from_title">Alternative Continuation From Here</string>
     <string name="station_context_navigate_to_title">Navigate To Here</string>

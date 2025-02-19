@@ -85,7 +85,7 @@ public class FavoriteStationViewHolder extends RecyclerView.ViewHolder {
                         FavoriteStationsProvider.TYPE_FAVORITE,
                         true, false,
                         true, station.type != LocationType.ADDRESS,
-                        true, false, false, true);
+                        true, false, false, false, true);
                 contextMenu.setOnMenuItemClickListener(item -> {
                     final int position = getAdapterPosition();
                     if (position != RecyclerView.NO_POSITION)

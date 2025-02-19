@@ -190,7 +190,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
         contextButtonSpace.setVisibility(itemView.isActivated() ? View.VISIBLE : View.GONE);
         contextButton.setOnClickListener(itemView.isActivated() ? v -> {
             final PopupMenu contextMenu = new StationContextMenu(context, v, station.network, station.location,
-                    favState, true, true, true, true, true,
+                    favState, true, true, true, true, true, false,
                     false, false, true);
             contextMenu.setOnMenuItemClickListener(item -> {
                 final int position = getAdapterPosition();
