@@ -48,10 +48,11 @@ public class TripNavigatorActivity extends TripDetailsActivity {
             final NetworkId network, final Trip trip, final RenderConfig renderConfig) {
         Intent intent = TripDetailsActivity.buildStartIntent(activityClass, context, network, trip, renderConfig);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-//                    | Intent.FLAG_ACTIVITY_MULTIPLE_TASK
-//                    | Intent.FLAG_ACTIVITY_SINGLE_TOP
-//                    | Intent.FLAG_ACTIVITY_CLEAR_TASK
-                | Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+                | Intent.FLAG_ACTIVITY_NEW_DOCUMENT
+                // | Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+                // | Intent.FLAG_ACTIVITY_SINGLE_TOP
+                // | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                | Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS);
         Uri uri = new Uri.Builder()
                 .scheme("data")
                 .authority(activityClass.getName())
@@ -71,7 +72,12 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         else
             moveTaskToBack(true); // super.onBackPressed();
     }
-    
+
+    @Override
+    public void finish() {
+        super.finish();
+    }
+
     protected boolean onFindAlternativeConnections(
             final Stop stop,
             final JourneyRef feederJourneyRef, final JourneyRef connectionJourneyRef,
