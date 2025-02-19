@@ -56,7 +56,7 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
         contextButton = itemView.findViewById(R.id.directions_query_history_entry_context_button);
     }
 
-    public void bind(final long rowId, final Location from, final Location to, final boolean isFavorite,
+    public void bind(final long rowId, final Location from, final Location to, final Location via, final boolean isFavorite,
             final long savedTripDepartureTime, final byte[] serializedSavedTrip, final Integer fromFavState,
             final Integer toFavState, final long selectedRowId, final QueryHistoryClickListener clickListener,
             final QueryHistoryContextMenuItemListener contextMenuItemListener) {
@@ -65,7 +65,7 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
         itemView.setOnClickListener(v -> {
             final int position = getAdapterPosition();
             if (position != RecyclerView.NO_POSITION)
-                clickListener.onEntryClick(position, from, to);
+                clickListener.onEntryClick(position, from, to, via);
         });
 
         fromView.setLocation(from);

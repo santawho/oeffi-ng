@@ -20,7 +20,7 @@ package de.schildbach.oeffi.directions.list;
 import de.schildbach.pte.dto.Location;
 
 public interface QueryHistoryClickListener {
-    void onEntryClick(int adapterPosition, Location from, Location to);
+    void onEntryClick(int adapterPosition, Location from, Location to, Location via);
 
     void onSavedTripClick(int adapterPosition, byte[] serializedTrip);
 }

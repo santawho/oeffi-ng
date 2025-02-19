@@ -59,6 +59,12 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<QueryHistoryViewHo
     private final int toLonColumn;
     private final int toPlaceColumn;
     private final int toNameColumn;
+    private final int viaTypeColumn;
+    private final int viaIdColumn;
+    private final int viaLatColumn;
+    private final int viaLonColumn;
+    private final int viaPlaceColumn;
+    private final int viaNameColumn;
     private final int favoriteColumn;
     private final int savedTripDepartureTimeColumn;
     private final int savedTripColumn;
@@ -100,6 +106,12 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<QueryHistoryViewHo
         toLonColumn = cursor.getColumnIndexOrThrow(QueryHistoryProvider.KEY_TO_LON);
         toPlaceColumn = cursor.getColumnIndexOrThrow(QueryHistoryProvider.KEY_TO_PLACE);
         toNameColumn = cursor.getColumnIndexOrThrow(QueryHistoryProvider.KEY_TO_NAME);
+        viaTypeColumn = cursor.getColumnIndexOrThrow(QueryHistoryProvider.KEY_VIA_TYPE);
+        viaIdColumn = cursor.getColumnIndexOrThrow(QueryHistoryProvider.KEY_VIA_ID);
+        viaLatColumn = cursor.getColumnIndexOrThrow(QueryHistoryProvider.KEY_VIA_LAT);
+        viaLonColumn = cursor.getColumnIndexOrThrow(QueryHistoryProvider.KEY_VIA_LON);
+        viaPlaceColumn = cursor.getColumnIndexOrThrow(QueryHistoryProvider.KEY_VIA_PLACE);
+        viaNameColumn = cursor.getColumnIndexOrThrow(QueryHistoryProvider.KEY_VIA_NAME);
         favoriteColumn = cursor.getColumnIndexOrThrow(QueryHistoryProvider.KEY_FAVORITE);
         savedTripDepartureTimeColumn = cursor.getColumnIndexOrThrow(QueryHistoryProvider.KEY_LAST_DEPARTURE_TIME);
         savedTripColumn = cursor.getColumnIndexOrThrow(QueryHistoryProvider.KEY_LAST_TRIP);
@@ -112,8 +124,8 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<QueryHistoryViewHo
         cursor.close();
     }
 
-    public Uri putEntry(final Location from, final Location to) {
-        final Uri uri = QueryHistoryProvider.put(contentResolver, network, from, to, null, true);
+    public Uri putEntry(final Location from, final Location to, final Location via) {
+        final Uri uri = QueryHistoryProvider.put(contentResolver, network, from, to, via, null, true);
         notifyDataSetChanged();
         cursor.requery();
         return uri;
@@ -200,12 +212,21 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<QueryHistoryViewHo
         final String toPlace = cursor.getString(toPlaceColumn);
         final String toName = cursor.getString(toNameColumn);
         final Location to = new Location(toType, toId, toCoord, toPlace, toName);
+        final LocationType viaType = QueryHistoryProvider.convert(cursor.getInt(viaTypeColumn));
+        final String viaId = cursor.getString(viaIdColumn);
+        final int viaLat = cursor.getInt(viaLatColumn);
+        final int viaLon = cursor.getInt(viaLonColumn);
+        final Point viaCoord = viaLat != 0 || viaLon != 0 ? Point.from1E6(viaLat, viaLon) : null;
+        final String viaPlace = cursor.getString(viaPlaceColumn);
+        final String viaName = cursor.getString(viaNameColumn);
+        final Location via = viaType == LocationType.ANY ? null : new Location(viaType, viaId, viaCoord, viaPlace, viaName);
         final boolean isFavorite = cursor.getInt(favoriteColumn) == 1;
         final long savedTripDepartureTime = cursor.getLong(savedTripDepartureTimeColumn);
         final byte[] serializedSavedTrip = cursor.getBlob(savedTripColumn);
         final Integer fromFavState = FavoriteStationsProvider.favState(contentResolver, network, from);
         final Integer toFavState = FavoriteStationsProvider.favState(contentResolver, network, to);
-        holder.bind(rowId, from, to, isFavorite, savedTripDepartureTime, serializedSavedTrip, fromFavState, toFavState,
+        holder.bind(rowId, from, to, via,
+                isFavorite, savedTripDepartureTime, serializedSavedTrip, fromFavState, toFavState,
                 selectedRowId, clickListener, contextMenuItemListener);
     }
 }

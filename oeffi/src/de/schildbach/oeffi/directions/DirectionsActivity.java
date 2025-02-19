@@ -586,6 +586,8 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
                     viewFromLocation.setLocation(locations[0]);
                 if (locations[1] != null)
                     viewToLocation.setLocation(locations[1]);
+                if (locations.length >= 3 && locations[2] != null)
+                    viewViaLocation.setLocation(locations[2]);
             }
         } else {
             if (intent.hasExtra(INTENT_EXTRA_FROM_LOCATION))
@@ -596,7 +598,7 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
                 time = (TimeSpec) intent.getSerializableExtra(INTENT_EXTRA_TIME_SPEC);
         }
 
-        expandForm(haveNonDefaultProducts);
+        expandForm(haveNonDefaultProducts || viewViaLocation.getLocation() != null);
 
         // initial focus
         if (!viewToLocation.isInTouchMode()) {
@@ -909,8 +911,8 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
                 .setStartDelay(LayoutTransition.CHANGING, expand ? 0 : 300);
     }
 
-    public void onEntryClick(final int adapterPosition, final Location from, final Location to) {
-        handleReuseQuery(from, to);
+    public void onEntryClick(final int adapterPosition, final Location from, final Location to, final Location via) {
+        handleReuseQuery(from, to, via);
         queryHistoryListAdapter.setSelectedEntry(queryHistoryListAdapter.getItemId(adapterPosition));
     }
 
@@ -956,10 +958,12 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
         }
     }
 
-    private void handleReuseQuery(final Location from, final Location to) {
+    private void handleReuseQuery(final Location from, final Location to, final Location via) {
         viewFromLocation.setLocation(from);
         viewToLocation.setLocation(to);
+        viewViaLocation.setLocation(via);
         quickReturnView.setTranslationY(0); // show
+        expandForm(via != null);
     }
 
     private void handleShowSavedTrip(final byte[] serializedTrip) {
@@ -1060,7 +1064,7 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
 
                     final Uri historyUri;
                     if (result.from != null && result.from.name != null && result.to != null && result.to.name != null)
-                        historyUri = queryHistoryListAdapter.putEntry(result.from, result.to);
+                        historyUri = queryHistoryListAdapter.putEntry(result.from, result.to, result.via);
                     else
                         historyUri = null;
 

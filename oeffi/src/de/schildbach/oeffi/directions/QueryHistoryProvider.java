@@ -56,6 +56,12 @@ public class QueryHistoryProvider extends ContentProvider {
     public static final String KEY_TO_LON = "query_to_lon";
     public static final String KEY_TO_PLACE = "query_to_place";
     public static final String KEY_TO_NAME = "query_to";
+    public static final String KEY_VIA_TYPE = "query_via_type";
+    public static final String KEY_VIA_ID = "query_via_id";
+    public static final String KEY_VIA_LAT = "query_via_lat";
+    public static final String KEY_VIA_LON = "query_via_lon";
+    public static final String KEY_VIA_PLACE = "query_via_place";
+    public static final String KEY_VIA_NAME = "query_via";
     public static final String KEY_FAVORITE = "favorite";
     public static final String KEY_TIMES_QUERIED = "times_queried";
     public static final String KEY_LAST_QUERIED = "last_queried";
@@ -76,9 +82,11 @@ public class QueryHistoryProvider extends ContentProvider {
                 .build();
     }
 
-    public static Uri put(final ContentResolver contentResolver, final NetworkId network, final Location from,
-            final Location to, final Boolean favorite, final boolean isQuery) {
-        final Cursor cursor = cursor(contentResolver, network, from, to);
+    public static Uri put(
+            final ContentResolver contentResolver, final NetworkId network,
+            final Location from, final Location to, final Location via,
+            final Boolean favorite, final boolean isQuery) {
+        final Cursor cursor = cursor(contentResolver, network, from, to, via);
 
         final Uri historyUri;
 
@@ -136,6 +144,12 @@ public class QueryHistoryProvider extends ContentProvider {
             values.put(QueryHistoryProvider.KEY_TO_LON, to.hasCoord() ? to.getLonAs1E6() : 0);
             values.put(QueryHistoryProvider.KEY_TO_PLACE, to.place);
             values.put(QueryHistoryProvider.KEY_TO_NAME, to.name);
+            values.put(QueryHistoryProvider.KEY_VIA_TYPE, QueryHistoryProvider.convert(via == null ? LocationType.ANY : via.type));
+            values.put(QueryHistoryProvider.KEY_VIA_ID, via == null ? null : via.id);
+            values.put(QueryHistoryProvider.KEY_VIA_LAT, via != null && via.hasCoord() ? via.getLatAs1E6() : 0);
+            values.put(QueryHistoryProvider.KEY_VIA_LON, via != null && via.hasCoord() ? via.getLonAs1E6() : 0);
+            values.put(QueryHistoryProvider.KEY_VIA_PLACE, via == null ? null : via.place);
+            values.put(QueryHistoryProvider.KEY_VIA_NAME, via == null ? null : via.name);
 
             if (favorite != null)
                 values.put(QueryHistoryProvider.KEY_FAVORITE, favorite);
@@ -167,8 +181,9 @@ public class QueryHistoryProvider extends ContentProvider {
         return historyUri;
     }
 
-    public static Cursor cursor(final ContentResolver contentResolver, final NetworkId network, final Location from,
-            final Location to) {
+    public static Cursor cursor(
+            final ContentResolver contentResolver, final NetworkId network,
+            final Location from, final Location to, final Location via) {
         final StringBuilder selection = new StringBuilder();
         final List<String> selectionArgs = new ArrayList<>();
 
@@ -208,11 +223,34 @@ public class QueryHistoryProvider extends ContentProvider {
             selectionArgs.add(to.name);
         }
 
+        if (via == null) {
+            selection.append(" AND ").append(QueryHistoryProvider.KEY_VIA_TYPE).append("=?");
+            selectionArgs.add(Integer.toString(QueryHistoryProvider.convert(LocationType.ANY)));
+        } else {
+            selection.append(" AND ").append(QueryHistoryProvider.KEY_VIA_TYPE).append("=?");
+            selectionArgs.add(Integer.toString(QueryHistoryProvider.convert(via.type)));
+
+            if (via.hasId()) {
+                selection.append(" AND ").append(QueryHistoryProvider.KEY_VIA_ID).append("=?");
+                selectionArgs.add(via.id);
+            } else {
+                if (via.place != null) {
+                    selection.append(" AND ").append(QueryHistoryProvider.KEY_VIA_PLACE).append("=?");
+                    selectionArgs.add(via.place);
+                } else {
+                    selection.append(" AND ").append(QueryHistoryProvider.KEY_VIA_PLACE).append(" IS NULL");
+                }
+
+                selection.append(" AND ").append(QueryHistoryProvider.KEY_VIA_NAME).append("=?");
+                selectionArgs.add(via.name);
+            }
+        }
+
         return contentResolver.query(QueryHistoryProvider.CONTENT_URI().buildUpon().appendPath(network.name()).build(),
                 null, selection.toString(), selectionArgs.toArray(new String[0]), null);
     }
 
-    private static final int convert(final LocationType type) {
+    private static int convert(final LocationType type) {
         if (type == LocationType.ANY)
             return TYPE_ANY;
         if (type == LocationType.STATION)
@@ -226,7 +264,7 @@ public class QueryHistoryProvider extends ContentProvider {
         throw new IllegalArgumentException("unknown type: " + type);
     }
 
-    public static final LocationType convert(final int type) {
+    public static LocationType convert(final int type) {
         if (type == TYPE_ANY)
             return LocationType.ANY;
         if (type == TYPE_STATION)
@@ -439,7 +477,7 @@ public class QueryHistoryProvider extends ContentProvider {
 
     private static class QueryHistoryHelper extends SQLiteOpenHelper {
         private static final String DATABASE_NAME = "oeffi";
-        private static final int DATABASE_VERSION = 6;
+        private static final int DATABASE_VERSION = 7;
 
         private static final String DATABASE_CREATE = "CREATE TABLE " + DATABASE_TABLE + " (" //
                 + KEY_ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT, " //
@@ -456,16 +494,23 @@ public class QueryHistoryProvider extends ContentProvider {
                 + KEY_TO_LON + " INTEGER NOT NULL, " //
                 + KEY_TO_PLACE + " TEXT, " //
                 + KEY_TO_NAME + " TEXT NOT NULL, " //
+                + KEY_VIA_TYPE + " INTEGER NOT NULL DEFAULT " + convert(LocationType.ANY) + ", " //
+                + KEY_VIA_ID + " TEXT, " //
+                + KEY_VIA_LAT + " INTEGER NOT NULL DEFAULT 0, " //
+                + KEY_VIA_LON + " INTEGER NOT NULL DEFAULT 0, " //
+                + KEY_VIA_PLACE + " TEXT, " //
+                + KEY_VIA_NAME + " TEXT, " //
                 + KEY_FAVORITE + " INTEGER DEFAULT 0, " //
                 + KEY_TIMES_QUERIED + " INTEGER NOT NULL DEFAULT 0, " //
                 + KEY_LAST_QUERIED + " INTEGER NOT NULL, " // TODO NULL
                 + KEY_LAST_DEPARTURE_TIME + " INTEGER NOT NULL DEFAULT 0, " //
                 + KEY_LAST_ARRIVAL_TIME + " INTEGER NOT NULL DEFAULT 0, " //
                 + KEY_LAST_TRIP + " BLOB);";
-        private static final String DATABASE_COLUMN_LIST = KEY_ROWID + "," + KEY_NETWORK + "," + KEY_FROM_TYPE + ","
-                + KEY_FROM_ID + "," + KEY_FROM_LAT + "," + KEY_FROM_LON + "," + KEY_FROM_PLACE + "," + KEY_FROM_NAME
-                + "," + KEY_TO_TYPE + "," + KEY_TO_ID + "," + KEY_TO_LAT + "," + KEY_TO_LON + "," + KEY_TO_PLACE + ","
-                + KEY_TO_NAME + "," + KEY_FAVORITE + "," + KEY_TIMES_QUERIED + "," + KEY_LAST_QUERIED + ","
+        private static final String DATABASE_COLUMN_LIST = KEY_ROWID + "," + KEY_NETWORK
+                + "," + KEY_FROM_TYPE + "," + KEY_FROM_ID + "," + KEY_FROM_LAT + "," + KEY_FROM_LON + "," + KEY_FROM_PLACE + "," + KEY_FROM_NAME
+                + "," + KEY_TO_TYPE + "," + KEY_TO_ID + "," + KEY_TO_LAT + "," + KEY_TO_LON + "," + KEY_TO_PLACE + "," + KEY_TO_NAME
+                + "," + KEY_VIA_TYPE + "," + KEY_VIA_ID + "," + KEY_VIA_LAT + "," + KEY_VIA_LON + "," + KEY_VIA_PLACE + "," + KEY_VIA_NAME
+                + "," + KEY_FAVORITE + "," + KEY_TIMES_QUERIED + "," + KEY_LAST_QUERIED + ","
                 + KEY_LAST_DEPARTURE_TIME + "," + KEY_LAST_ARRIVAL_TIME + "," + KEY_LAST_TRIP;
 
         public QueryHistoryHelper(final Context context) {
@@ -523,6 +568,13 @@ public class QueryHistoryProvider extends ContentProvider {
                 db.execSQL("DROP TABLE " + DATABASE_TABLE_OLD);
                 db.execSQL("UPDATE " + DATABASE_TABLE + " SET " + KEY_FROM_ID + "=NULL WHERE " + KEY_FROM_ID + "=0");
                 db.execSQL("UPDATE " + DATABASE_TABLE + " SET " + KEY_TO_ID + "=NULL WHERE " + KEY_TO_ID + "=0");
+            } else if (oldVersion == 6) {
+                db.execSQL("ALTER TABLE " + DATABASE_TABLE + " ADD COLUMN " + KEY_VIA_TYPE + " INT NOT NULL DEFAULT " + convert(LocationType.ANY));
+                db.execSQL("ALTER TABLE " + DATABASE_TABLE + " ADD COLUMN " + KEY_VIA_ID + "  TEXT");
+                db.execSQL("ALTER TABLE " + DATABASE_TABLE + " ADD COLUMN " + KEY_VIA_LAT + " INT NOT NULL DEFAULT 0");
+                db.execSQL("ALTER TABLE " + DATABASE_TABLE + " ADD COLUMN " + KEY_VIA_LON + " INT NOT NULL DEFAULT 0");
+                db.execSQL("ALTER TABLE " + DATABASE_TABLE + " ADD COLUMN " + KEY_VIA_NAME + " TEXT");
+                db.execSQL("ALTER TABLE " + DATABASE_TABLE + " ADD COLUMN " + KEY_VIA_PLACE + " TEXT");
             } else {
                 throw new UnsupportedOperationException("old=" + oldVersion);
             }

@@ -314,6 +314,10 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
     }
 
     public void setLocation(final Location location) {
+        if (location == null) {
+            reset();
+            return;
+        }
         locationType = location.type;
         id = location.id;
         coord = location.coord;
