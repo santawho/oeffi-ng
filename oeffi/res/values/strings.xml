@@ -334,6 +334,11 @@
     <string name="directions_preferences_accessibility_title">Accessibility</string>
     <string name="directions_preferences_accessibility_summary">How accessible do you need the route to be? This does not affect all transport networks.</string>
 
+    <!-- navigation -->
+    <string name="directions_trip_navigation_action_cancel">Stop navigation</string>
+    <string name="navigation_notification_channel_name">Navigation</string>
+    <string name="navigation_notification_channel_description">Navigation instructions</string>
+
     <!-- plans picker -->
     <string name="plans_picker_context_open_title">Open plan</string>
     <string name="plans_picker_context_remove_title">Remove plan</string>

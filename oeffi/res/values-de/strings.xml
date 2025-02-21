@@ -333,6 +333,11 @@
     <string name="directions_preferences_accessibility_title">Barrierefreiheit</string>
     <string name="directions_preferences_accessibility_summary">Wie barrierefrei muss die Route sein? Diese Einstellung wirkt sich nicht auf alle Verkehrsnetze aus.</string>
 
+    <!-- navigation -->
+    <string name="directions_trip_navigation_action_cancel">Navigation beenden</string>
+    <string name="navigation_notification_channel_name">Navigation</string>
+    <string name="navigation_notification_channel_description">Navigationsanweisungen</string>
+
     <!-- plans picker -->
     <string name="plans_picker_context_open_title">Plan öffnen</string>
     <string name="plans_picker_context_remove_title">Plan löschen</string>

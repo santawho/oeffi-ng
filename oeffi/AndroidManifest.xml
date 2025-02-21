@@ -154,6 +154,9 @@
                 android:resource="@xml/nearest_favorite_station_widget" />
         </receiver>
 
+        <receiver android:name=".directions.navigation.NavigationNotification$Receiver">
+        </receiver>
+
         <service
             android:name=".stations.NearestFavoriteStationWidgetService"
             android:permission="android.permission.BIND_JOB_SERVICE"
@@ -275,4 +278,5 @@
     <!-- remove unnecessary merged nodes -->
     <permission android:name="${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" tools:node="remove" />
     <uses-permission android:name="${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" tools:node="remove" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 </manifest>

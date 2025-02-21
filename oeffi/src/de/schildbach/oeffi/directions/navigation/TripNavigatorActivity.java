@@ -7,9 +7,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 
+import androidx.annotation.NonNull;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Date;
 
 import javax.net.ssl.SSLException;
@@ -32,6 +35,8 @@ import okhttp3.HttpUrl;
 public class TripNavigatorActivity extends TripDetailsActivity {
     private static final Logger log = LoggerFactory.getLogger(TripNavigatorActivity.class);
 
+    private static final long NAVIGATION_AUTO_REFRESH_INTERVAL_SECS = 110;
+
     public static void start(
             final Activity contextActivity,
             final NetworkId network, final Trip trip, final RenderConfig renderConfig) {
@@ -39,14 +44,15 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         rc.isNavigation = true;
         rc.isJourney = renderConfig.isJourney;
         rc.queryTripsRequestData = renderConfig.queryTripsRequestData;
-        Intent intent = buildStartIntent(TripNavigatorActivity.class, contextActivity, network, trip, rc);
+        Intent intent = buildStartIntent(contextActivity, network, trip, rc);
         contextActivity.startActivity(intent);
     }
 
     protected static Intent buildStartIntent(
-            final Class<? extends TripDetailsActivity> activityClass, final Context context,
+            final Context context,
             final NetworkId network, final Trip trip, final RenderConfig renderConfig) {
-        Intent intent = TripDetailsActivity.buildStartIntent(activityClass, context, network, trip, renderConfig);
+        renderConfig.isNavigation = true;
+        Intent intent = TripDetailsActivity.buildStartIntent(TripNavigatorActivity.class, context, network, trip, renderConfig);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_NEW_DOCUMENT
                 // | Intent.FLAG_ACTIVITY_MULTIPLE_TASK
@@ -55,14 +61,45 @@ public class TripNavigatorActivity extends TripDetailsActivity {
                 | Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS);
         Uri uri = new Uri.Builder()
                 .scheme("data")
-                .authority(activityClass.getName())
+                .authority(TripNavigatorActivity.class.getName())
                 .path(network.name() + "/" + trip.getUniqueId())
                 .build();
         intent.setData(uri);
         return intent;
     }
-    
+
+    private Navigator navigator;
     private QueryTripsRunnable queryTripsRunnable;
+    private NavigationNotification navigationNotification;
+    private Runnable navigationRefreshRunnable;
+    private long nextNavigationRefreshTime = 0;
+
+    @Override
+    protected void setupFromTrip(final Trip trip) {
+        navigator = new Navigator(network, trip);
+        super.setupFromTrip(navigator.getCurrentTrip());
+    }
+
+    @Override
+    protected void setupActionBar() {
+        setPrimaryColor(renderConfig.isAlternativeConnectionSearch
+                        ? R.color.bg_action_alternative_directions
+                        : R.color.bg_action_bar_navigation);
+        actionBar.setPrimaryTitle(getString(R.string.navigation_details_title));
+        actionBar.addProgressButton().setOnClickListener(buttonView -> refreshNavigation());
+    }
+
+    @Override
+    protected void addActionBarButtons() {
+        actionBar.addButton(R.drawable.ic_clear_white_24dp, R.string.directions_trip_navigation_action_cancel)
+                .setOnClickListener(view -> stopNavigation());
+    }
+
+    private void stopNavigation() {
+        if (navigationNotification != null)
+            navigationNotification.remove(this);
+        finish();
+    }
 
     @SuppressLint("MissingSuperCall")
     @Override
@@ -76,6 +113,58 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     @Override
     public void finish() {
         super.finish();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (NavigationNotification.requestPermissions(this, 1))
+            updateNotification(trip, true);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults, int deviceId) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults, deviceId);
+        updateNotification(trip, true);
+    }
+
+    protected boolean checkAutoRefresh() {
+        if (isPaused) return false;
+        if (nextNavigationRefreshTime < 0) return false;
+        long now = new Date().getTime();
+        if (now < nextNavigationRefreshTime) return false;
+        refreshNavigation();
+        return true;
+    }
+
+    private void refreshNavigation() {
+        if (navigationRefreshRunnable != null)
+            return;
+
+        nextNavigationRefreshTime = -1; // block auto-refresh
+        actionBar.startProgress();
+
+        navigationRefreshRunnable = () -> {
+            try {
+                Trip updatedTrip = navigator.refresh();
+                if (updatedTrip == null) {
+                    handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));
+                } else {
+                    updateNotification(updatedTrip, true);
+                    runOnUiThread(() -> onTripUpdated(updatedTrip));
+                }
+            } catch (IOException e) {
+                handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));
+            } finally {
+                navigationRefreshRunnable = null;
+                runOnUiThread(() -> {
+                    actionBar.stopProgress();
+                    nextNavigationRefreshTime = new Date().getTime()
+                            + NAVIGATION_AUTO_REFRESH_INTERVAL_SECS * 1000;
+                });
+            }
+        };
+        backgroundHandler.post(navigationRefreshRunnable);
     }
 
     protected boolean onFindAlternativeConnections(
@@ -168,5 +257,12 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
         backgroundHandler.post(queryTripsRunnable);
         return true;
+    }
+
+    private void updateNotification(final Trip trip, final boolean foreGround) {
+        if (navigationNotification == null) {
+            navigationNotification = new NavigationNotification(trip, getIntent());
+        }
+        navigationNotification.update(this, trip, foreGround);
     }
 }

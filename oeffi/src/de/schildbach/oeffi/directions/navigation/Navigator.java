@@ -14,7 +14,7 @@ import de.schildbach.pte.dto.Stop;
 import de.schildbach.pte.dto.Trip;
 
 public class Navigator {
-    final NetworkId network;
+    private final NetworkId network;
     private final Trip baseTrip;
     private Trip currentTrip;
 

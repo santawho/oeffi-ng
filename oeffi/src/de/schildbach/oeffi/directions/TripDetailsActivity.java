@@ -73,7 +73,6 @@ import de.schildbach.oeffi.OeffiMapView;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.TripAware;
 import de.schildbach.oeffi.directions.TimeSpec.DepArr;
-import de.schildbach.oeffi.directions.navigation.Navigator;
 import de.schildbach.oeffi.directions.navigation.TripNavigatorActivity;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.stations.LineView;
@@ -98,11 +97,9 @@ import de.schildbach.pte.dto.Trip;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -160,10 +157,20 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
     }
 
-    private static final long NAVIGATION_AUTO_REFRESH_INTERVAL_SECS = 110;
-    private static final String INTENT_EXTRA_NETWORK = TripDetailsActivity.class.getName() + ".network";
-    private static final String INTENT_EXTRA_TRIP = TripDetailsActivity.class.getName() + ".trip";
-    private static final String INTENT_EXTRA_RENDERCONFIG = TripDetailsActivity.class.getName() + ".config";
+    public static final String INTENT_EXTRA_NETWORK = TripDetailsActivity.class.getName() + ".network";
+    public static final String INTENT_EXTRA_TRIP = TripDetailsActivity.class.getName() + ".trip";
+    public static final String INTENT_EXTRA_RENDERCONFIG = TripDetailsActivity.class.getName() + ".config";
+
+    public static class IntentData {
+        public final NetworkId network;
+        public final Trip trip;
+        public final RenderConfig renderConfig;
+        public IntentData(final Intent intent) {
+            network = (NetworkId) intent.getSerializableExtra(INTENT_EXTRA_NETWORK);
+            trip = (Trip) intent.getSerializableExtra(INTENT_EXTRA_TRIP);
+            renderConfig = (RenderConfig) intent.getSerializableExtra(INTENT_EXTRA_RENDERCONFIG);
+        }
+    }
 
     public static void start(final Context context, final NetworkId network, final Trip.Public journeyLeg) {
         final Trip trip = new Trip(
@@ -201,7 +208,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         return intent;
     }
 
-    private MyActionBar actionBar;
+    protected MyActionBar actionBar;
     private LayoutInflater inflater;
     private Resources res;
     private int colorSignificant;
@@ -213,7 +220,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private DisplayMetrics displayMetrics;
     private LocationManager locationManager;
     private BroadcastReceiver tickReceiver;
-    private long nextNavigationRefreshTime = 0;
     private boolean showNextEventWhenUnlocked = false;
     private boolean showNextEventWhenLocked = true;
 
@@ -222,16 +228,15 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private ToggleImageButton trackButton;
 
     protected NetworkId network;
-    private Navigator navigator;
-    private Trip trip;
+    protected Trip trip;
     private List<LegContainer> legs = new ArrayList<>();
-    private RenderConfig renderConfig;
+    protected RenderConfig renderConfig;
     private Date highlightedTime;
     private Location highlightedLocation;
     private Point location;
     private int selectedLegIndex = -1;
     private boolean mapEnabled = false;
-    private boolean isPaused = false;
+    protected boolean isPaused = false;
 
     private static class LegKey {
         private String key;
@@ -255,7 +260,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private final Map<LegKey, Boolean> legExpandStates = new HashMap<>();
 
     private QueryJourneyRunnable queryJourneyRunnable;
-    private Runnable navigationRefreshRunnable;
     private HandlerThread backgroundThread;
     protected Handler backgroundHandler;
     protected final Handler handler = new Handler();
@@ -289,21 +293,14 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         displayMetrics = res.getDisplayMetrics();
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-        final Intent intent = getIntent();
-        renderConfig = (RenderConfig) intent.getSerializableExtra(INTENT_EXTRA_RENDERCONFIG);
-        network = (NetworkId) intent.getSerializableExtra(INTENT_EXTRA_NETWORK);
-        Trip baseTrip = (Trip) intent.getSerializableExtra(INTENT_EXTRA_TRIP);
+        final IntentData intentData = new IntentData(getIntent());
+        renderConfig = intentData.renderConfig;
+        network = intentData.network;
+        Trip baseTrip = intentData.trip;
 
         log.info("Showing {} from {} to {}", renderConfig.isJourney ? "journey" : "trip", baseTrip.from, baseTrip.to);
 
-        NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
-        if (renderConfig.isNavigation) {
-            navigator = new Navigator(network, baseTrip);
-            trip = navigator.getCurrentTrip();
-        } else {
-            trip = baseTrip;
-        }
-        setupFromTrip(trip);
+        setupFromTrip(baseTrip);
 
         final boolean isPortrait = res.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
         setContentView(isPortrait
@@ -317,18 +314,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         });
 
         actionBar = getMyActionBar();
-        setPrimaryColor(
-                renderConfig.isAlternativeConnectionSearch
-                        ? R.color.bg_action_alternative_directions
-                        : renderConfig.isNavigation
-                        ? R.color.bg_action_bar_navigation
-                        : R.color.bg_action_bar_directions);
-        actionBar.setPrimaryTitle(getString(
-                renderConfig.isNavigation
-                    ? R.string.navigation_details_title
-                    : renderConfig.isJourney
-                        ? R.string.journey_details_title
-                        : R.string.trip_details_title)); // getTitle()
         actionBar.setBack(isTaskRoot() ? null : v -> goBack());
 
         // action bar secondary title
@@ -344,16 +329,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
 
         actionBar.setSecondaryTitle(secondaryTitle.length() > 0 ? secondaryTitle : null);
-
-        // action bar buttons
-        if (renderConfig.isNavigation) {
-            actionBar.addProgressButton().setOnClickListener(buttonView -> refreshNavigation());
-        } else if (!renderConfig.isJourney) {
-            if (networkProvider.hasCapabilities(NetworkProvider.Capability.JOURNEY)) {
-                actionBar.addButton(R.drawable.ic_navigation_white_24dp, R.string.directions_trip_details_action_start_routing)
-                        .setOnClickListener(buttonView -> startNavigation(trip, renderConfig));
-            }
-        }
+        setupActionBar();
 
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -419,6 +395,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                         }
                     });
         }
+        addActionBarButtons();
 
         legsGroup = findViewById(R.id.directions_trip_details_legs_group);
 
@@ -479,6 +456,25 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         nextEvent.setOnClickListener(view -> setShowNextEvent(false));
     }
 
+    protected void setupActionBar() {
+        setPrimaryColor(renderConfig.isAlternativeConnectionSearch
+                        ? R.color.bg_action_alternative_directions
+                        : R.color.bg_action_bar_directions);
+        actionBar.setPrimaryTitle(getString(renderConfig.isJourney
+                        ? R.string.journey_details_title
+                        : R.string.trip_details_title));
+        if (!renderConfig.isJourney) {
+            NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
+            if (networkProvider.hasCapabilities(NetworkProvider.Capability.JOURNEY)) {
+                actionBar.addButton(R.drawable.ic_navigation_white_24dp, R.string.directions_trip_details_action_start_routing)
+                        .setOnClickListener(buttonView -> startNavigation(trip, renderConfig));
+            }
+        }
+    }
+
+    protected void addActionBarButtons() {
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -499,14 +495,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         updateFragments();
     }
 
-    private boolean checkAutoRefresh() {
-        if (isPaused) return false;
-        if (!renderConfig.isNavigation) return false;
-        if (nextNavigationRefreshTime < 0) return false;
-        long now = new Date().getTime();
-        if (now < nextNavigationRefreshTime) return false;
-        refreshNavigation();
-        return true;
+    protected boolean checkAutoRefresh() {
+        return false;
     }
 
     @Override
@@ -1901,35 +1891,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         finish();
     }
 
-    private void refreshNavigation() {
-        if (navigationRefreshRunnable != null)
-            return;
-
-        nextNavigationRefreshTime = -1; // block auto-refresh
-        actionBar.startProgress();
-
-        navigationRefreshRunnable = () -> {
-            try {
-                Trip updatedTrip = navigator.refresh();
-                if (updatedTrip == null) {
-                    handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));
-                } else {
-                    runOnUiThread(() -> onTripUpdated(updatedTrip));
-                }
-            } catch (IOException e) {
-                handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));
-            } finally {
-                navigationRefreshRunnable = null;
-                runOnUiThread(() -> {
-                    actionBar.stopProgress();
-                    nextNavigationRefreshTime = new Date().getTime()
-                            + NAVIGATION_AUTO_REFRESH_INTERVAL_SECS * 1000;
-                });
-            }
-        };
-        backgroundHandler.post(navigationRefreshRunnable);
-    }
-
     public void onTripUpdated(Trip updatedTrip) {
         if (updatedTrip == null) return;
         trip = updatedTrip;
@@ -1949,7 +1910,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         updateGUI();
     }
 
-    private void setupFromTrip(final Trip trip) {
+    protected void setupFromTrip(final Trip trip) {
+        this.trip = trip;
         // try to build up paths
         LegContainer prevC = null;
         for (int iLeg = 0; iLeg < trip.legs.size(); ++iLeg) {
