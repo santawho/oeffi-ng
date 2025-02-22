@@ -154,8 +154,8 @@
                 android:resource="@xml/nearest_favorite_station_widget" />
         </receiver>
 
-        <receiver android:name=".directions.navigation.NavigationNotification$Receiver">
-        </receiver>
+        <receiver android:name=".directions.navigation.NavigationNotification$RefreshReceiver" />
+        <receiver android:name=".directions.navigation.NavigationNotification$DeleteReceiver" />
 
         <service
             android:name=".stations.NearestFavoriteStationWidgetService"

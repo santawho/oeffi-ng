@@ -2,10 +2,12 @@ package de.schildbach.oeffi.directions.navigation;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 
@@ -36,6 +38,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     private static final Logger log = LoggerFactory.getLogger(TripNavigatorActivity.class);
 
     private static final long NAVIGATION_AUTO_REFRESH_INTERVAL_SECS = 110;
+    public static final String INTENT_EXTRA_DELETEREQUEST = TripNavigatorActivity.class.getName() + ".deleterequest";
 
     public static void start(
             final Activity contextActivity,
@@ -44,22 +47,24 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         rc.isNavigation = true;
         rc.isJourney = renderConfig.isJourney;
         rc.queryTripsRequestData = renderConfig.queryTripsRequestData;
-        Intent intent = buildStartIntent(contextActivity, network, trip, rc);
+        Intent intent = buildStartIntent(contextActivity, network, trip, rc, false);
         contextActivity.startActivity(intent);
     }
 
     protected static Intent buildStartIntent(
             final Context context,
-            final NetworkId network, final Trip trip, final RenderConfig renderConfig) {
+            final NetworkId network, final Trip trip, final RenderConfig renderConfig,
+            final boolean deleteRequest) {
         renderConfig.isNavigation = true;
-        Intent intent = TripDetailsActivity.buildStartIntent(TripNavigatorActivity.class, context, network, trip, renderConfig);
+        final Intent intent = TripDetailsActivity.buildStartIntent(TripNavigatorActivity.class, context, network, trip, renderConfig);
+        intent.putExtra(INTENT_EXTRA_DELETEREQUEST, deleteRequest);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_NEW_DOCUMENT
                 // | Intent.FLAG_ACTIVITY_MULTIPLE_TASK
                 // | Intent.FLAG_ACTIVITY_SINGLE_TOP
                 // | Intent.FLAG_ACTIVITY_CLEAR_TASK
                 | Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS);
-        Uri uri = new Uri.Builder()
+        final Uri uri = new Uri.Builder()
                 .scheme("data")
                 .authority(TripNavigatorActivity.class.getName())
                 .path(network.name() + "/" + trip.getUniqueId())
@@ -73,6 +78,14 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     private NavigationNotification navigationNotification;
     private Runnable navigationRefreshRunnable;
     private long nextNavigationRefreshTime = 0;
+    private boolean navigationNotificationBeingDeleted;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        final Intent intent = getIntent();
+        handleDeleteNotification(intent);
+    }
 
     @Override
     protected void setupFromTrip(final Trip trip) {
@@ -96,8 +109,10 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     }
 
     private void stopNavigation() {
-        if (navigationNotification != null)
+        if (navigationNotification != null) {
             navigationNotification.remove(this);
+            navigationNotification = null;
+        }
         finish();
     }
 
@@ -118,8 +133,43 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (NavigationNotification.requestPermissions(this, 1))
-            updateNotification(trip, true);
+        if (!navigationNotificationBeingDeleted) {
+            if (NavigationNotification.requestPermissions(this, 1))
+                updateNotification(trip, true);
+        }
+    }
+
+    @Override
+    protected void onNewIntent(@NonNull Intent intent) {
+        super.onNewIntent(intent);
+        if (!handleDeleteNotification(intent)) {
+            checkAutoRefresh();
+        }
+    }
+
+    private boolean handleDeleteNotification(final Intent intent) {
+        final boolean deleteRequest = intent.getBooleanExtra(INTENT_EXTRA_DELETEREQUEST, false);
+        if (!deleteRequest)
+            return false;
+        navigationNotificationBeingDeleted = true;
+        if (navigationNotification != null) {
+            navigationNotification.remove(this);
+            navigationNotification = null;
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.navigation_stopnav_title)
+                .setMessage(R.string.navigation_stopnav_text)
+                .setPositiveButton(R.string.navigation_stopnav_stop, (dialogInterface, i) -> {
+                    stopNavigation();
+                })
+                .setNegativeButton(R.string.navigation_stopnav_continue, (dialogInterface, i) -> {
+                    checkAutoRefresh();
+                    updateNotification(trip, true);
+                })
+                .create().show();
+
+        return true;
     }
 
     @Override
@@ -128,6 +178,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         updateNotification(trip, true);
     }
 
+    @Override
     protected boolean checkAutoRefresh() {
         if (isPaused) return false;
         if (nextNavigationRefreshTime < 0) return false;

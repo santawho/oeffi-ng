@@ -1,7 +1,5 @@
 package de.schildbach.oeffi.directions.navigation;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -57,15 +55,6 @@ public class NavigationNotification {
     private String notificationTag;
     private long nextRefreshTime;
 
-    public static class Receiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final TripDetailsActivity.IntentData intentData = new TripDetailsActivity.IntentData(intent);
-            final NavigationNotification navigationNotification = new NavigationNotification(intentData.trip, intent);
-            navigationNotification.refresh(context);
-        }
-    }
-
     public NavigationNotification(final Trip trip, final Intent intent) {
         notificationTag = trip.getUniqueId();
         intentData = new TripDetailsActivity.IntentData(intent);
@@ -79,7 +68,6 @@ public class NavigationNotification {
         // final RemoteViews notificationLayoutExpanded = new RemoteViews(context.getPackageName(), R.layout.navigation_notification);
         // changes |= setupNotificationView(notificationLayoutExpanded, trip);
 
-        final PendingIntent pendingActivityIntent = getPendingActivityIntent(context);
         getNotificationManager(context).notify(notificationTag, intentData.trip.getUniqueId().hashCode(),
                 new NotificationCompat.Builder(context, CHANNEL_ID)
                         .setSmallIcon(R.drawable.ic_oeffi_directions_grey600_36dp)
@@ -87,8 +75,9 @@ public class NavigationNotification {
                         .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
                         .setCustomContentView(notificationLayout)
                         // .setCustomBigContentView(notificationLayoutExpanded)
-                        .setContentIntent(pendingActivityIntent)
-                        .setDeleteIntent(pendingActivityIntent)
+                        .setContentIntent(getPendingActivityIntent(context, false))
+                        //.setDeleteIntent(getPendingActivityIntent(context, true))
+                        .setDeleteIntent(getPendingDeleteIntent(context))
                         .setAutoCancel(false)
                         .setOngoing(true)
                         .setSilent(foreGround || !changes)
@@ -96,26 +85,55 @@ public class NavigationNotification {
 
         if (nextRefreshTime > 0) {
             getAlarmManager(context)
-                .setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextRefreshTime, getPendingAlarmIntent(context));
+                .setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextRefreshTime, getPendingRefreshIntent(context));
         }
     }
 
     public void remove(final Context context) {
         getNotificationManager(context).cancel(notificationTag, intentData.trip.getUniqueId().hashCode());
-        getAlarmManager(context).cancel(getPendingAlarmIntent(context));
+        getAlarmManager(context).cancel(getPendingRefreshIntent(context));
     }
 
-    private PendingIntent getPendingActivityIntent(final Context context) {
-        final Intent intent = TripNavigatorActivity.buildStartIntent(context, intentData.network, intentData.trip, intentData.renderConfig);
-        return PendingIntent.getActivity(context, intentData.trip.getUniqueId().hashCode(), intent, PendingIntent.FLAG_IMMUTABLE);
+    private PendingIntent getPendingActivityIntent(final Context context, boolean deleteRequest) {
+        final Intent intent = TripNavigatorActivity.buildStartIntent(context, intentData.network, intentData.trip, intentData.renderConfig, deleteRequest);
+        int requestCode = intentData.trip.getUniqueId().hashCode();
+        if (deleteRequest)
+            requestCode = requestCode + 1;
+        return PendingIntent.getActivity(context, requestCode, intent, PendingIntent.FLAG_IMMUTABLE);
     }
 
-    private PendingIntent getPendingAlarmIntent(final Context context) {
-        final Intent intent = new Intent(context, NavigationNotification.Receiver.class);
+    public static class DeleteReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final TripDetailsActivity.IntentData intentData = new TripDetailsActivity.IntentData(intent);
+            final NavigationNotification navigationNotification = new NavigationNotification(intentData.trip, intent);
+            navigationNotification.update(context, intentData.trip, true);
+        }
+    }
+
+    private PendingIntent getPendingDeleteIntent(final Context context) {
+        final Intent intent = new Intent(context, NavigationNotification.DeleteReceiver.class);
         intent.putExtra(TripDetailsActivity.INTENT_EXTRA_NETWORK, intentData.network);
         intent.putExtra(TripDetailsActivity.INTENT_EXTRA_TRIP, intentData.trip);
         intent.putExtra(TripDetailsActivity.INTENT_EXTRA_RENDERCONFIG, intentData.renderConfig);
-        return PendingIntent.getBroadcast(context, intentData.trip.getUniqueId().hashCode(), intent, PendingIntent.FLAG_IMMUTABLE);
+        return PendingIntent.getBroadcast(context, intentData.trip.getUniqueId().hashCode() + 2, intent, PendingIntent.FLAG_IMMUTABLE);
+    }
+
+    public static class RefreshReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final TripDetailsActivity.IntentData intentData = new TripDetailsActivity.IntentData(intent);
+            final NavigationNotification navigationNotification = new NavigationNotification(intentData.trip, intent);
+            navigationNotification.refresh(context);
+        }
+    }
+
+    private PendingIntent getPendingRefreshIntent(final Context context) {
+        final Intent intent = new Intent(context, NavigationNotification.RefreshReceiver.class);
+        intent.putExtra(TripDetailsActivity.INTENT_EXTRA_NETWORK, intentData.network);
+        intent.putExtra(TripDetailsActivity.INTENT_EXTRA_TRIP, intentData.trip);
+        intent.putExtra(TripDetailsActivity.INTENT_EXTRA_RENDERCONFIG, intentData.renderConfig);
+        return PendingIntent.getBroadcast(context, intentData.trip.getUniqueId().hashCode() + 3, intent, PendingIntent.FLAG_IMMUTABLE);
     }
 
     private boolean setupNotificationView(final RemoteViews view, final Trip trip) {
