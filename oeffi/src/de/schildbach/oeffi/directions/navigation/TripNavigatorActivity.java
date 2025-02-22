@@ -135,7 +135,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         super.onResume();
         if (!navigationNotificationBeingDeleted) {
             if (NavigationNotification.requestPermissions(this, 1))
-                updateNotification(trip, true);
+                updateNotification(tripRenderer.trip, true);
         }
     }
 
@@ -165,7 +165,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
                 })
                 .setNegativeButton(R.string.navigation_stopnav_continue, (dialogInterface, i) -> {
                     checkAutoRefresh();
-                    updateNotification(trip, true);
+                    updateNotification(tripRenderer.trip, true);
                 })
                 .create().show();
 
@@ -175,7 +175,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults, int deviceId) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults, deviceId);
-        updateNotification(trip, true);
+        updateNotification(tripRenderer.trip, true);
     }
 
     @Override
