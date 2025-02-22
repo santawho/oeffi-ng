@@ -10,13 +10,14 @@
         android:id="@+id/navigation_notification_next_event_time"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingTop="4dp">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="-20dp"
-            android:layout_marginBottom="-20dp"
+            android:layout_marginTop="-10dp"
+            android:layout_marginBottom="-10dp"
             android:gravity="center">
             <ImageView
                 android:id="@+id/navigation_notification_next_event_time_hourglass"
@@ -28,13 +29,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="20dp"
-                android:textSize="@dimen/directions_trip_details_next_event_time_fontsize"
+                android:textSize="@dimen/navigation_notification_next_event_time_fontsize"
                 android:textStyle="bold"/>
             <TextView
                 android:id="@+id/navigation_notification_next_event_time_unit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="@dimen/directions_trip_details_next_event_time_fontsize_decor"
+                android:textSize="@dimen/navigation_notification_next_event_time_fontsize_decor"
                 android:textStyle="bold"/>
         </LinearLayout>
         <TextView
@@ -44,25 +45,25 @@
             android:gravity="end"
             android:layout_marginTop="-20dp"
             android:paddingHorizontal="8dp"
-            android:textSize="@dimen/directions_trip_details_next_event_time_fontsize_explain"/>
+            android:textSize="@dimen/navigation_notification_next_event_time_fontsize_explain"/>
     </LinearLayout>
     <TextView
         android:id="@+id/navigation_notification_next_event_current_action"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="@dimen/font_size_normal"
+        android:textSize="@dimen/font_size_small"
         android:gravity="center"/>
     <TextView
         android:id="@+id/navigation_notification_next_event_target"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:textSize="@dimen/directions_trip_details_next_event_target_fontsize"/>
+        android:textSize="@dimen/navigation_notification_next_event_target_fontsize"/>
     <TextView
         android:id="@+id/navigation_notification_next_event_next_action"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="@dimen/font_size_normal"
+        android:textSize="@dimen/font_size_small"
         android:gravity="center"/>
     <LinearLayout
         android:id="@+id/navigation_notification_next_event_positions"
@@ -77,7 +78,7 @@
             android:paddingVertical="0dp"
             android:paddingHorizontal="8dp"
             android:textStyle="bold"
-            android:textSize="@dimen/directions_trip_details_next_event_position_from_fontsize"
+            android:textSize="@dimen/navigation_notification_next_event_position_from_fontsize"
             android:background="@color/bg_position"
             android:textColor="@color/fg_position"/>
         <TextView
@@ -85,7 +86,7 @@
             android:layout_height="wrap_content"
             android:paddingBottom="10dp"
             android:paddingHorizontal="8dp"
-            android:textSize="@dimen/directions_trip_details_next_event_position_to_fontsize"
+            android:textSize="@dimen/navigation_notification_next_event_position_to_fontsize"
             android:text="➜"
             tools:ignore="HardcodedText" />
         <TextView
@@ -95,7 +96,7 @@
             android:paddingVertical="0dp"
             android:paddingHorizontal="8dp"
             android:textStyle="bold"
-            android:textSize="@dimen/directions_trip_details_next_event_position_to_fontsize"
+            android:textSize="@dimen/navigation_notification_next_event_position_to_fontsize"
             android:background="@color/bg_position"
             android:textColor="@color/fg_position"/>
     </LinearLayout>
@@ -104,29 +105,26 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:textSize="@dimen/directions_trip_details_next_event_departure_fontsize"/>
+        android:textSize="@dimen/navigation_notification_next_event_departure_fontsize"/>
     <LinearLayout
         android:id="@+id/navigation_notification_next_event_connection"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center">
-<!--        <de.schildbach.oeffi.stations.LineView-->
-<!--            android:id="@+id/navigation_notification_next_event_connection_line"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:textSize="@dimen/directions_trip_details_next_event_connection_line_fontsize"/>-->
         <TextView
             android:id="@+id/navigation_notification_next_event_connection_line"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/directions_trip_details_next_event_connection_line_fontsize"/>
+            android:paddingHorizontal="5dp"
+            android:paddingVertical="2dp"
+            android:textSize="@dimen/navigation_notification_next_event_connection_line_fontsize"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingBottom="10dp"
             android:paddingHorizontal="8dp"
-            android:textSize="@dimen/directions_trip_details_next_event_connection_to_fontsize"
+            android:textSize="@dimen/navigation_notification_next_event_connection_to_fontsize"
             android:text="➜"
             tools:ignore="HardcodedText" />
         <TextView
@@ -134,7 +132,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="italic"
-            android:textSize="@dimen/directions_trip_details_next_event_connection_to_fontsize"/>
+            android:textSize="@dimen/navigation_notification_next_event_connection_to_fontsize"/>
     </LinearLayout>
     <LinearLayout
         android:id="@+id/navigation_notification_next_event_changeover"
@@ -156,13 +154,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textStyle="bold"
-                android:textSize="@dimen/directions_trip_details_next_event_transfer_fontsize"/>
+                android:textSize="@dimen/navigation_notification_next_event_transfer_fontsize"/>
             <TextView
                 android:id="@+id/navigation_notification_next_event_transfer_explain"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="6dp"
-                android:textSize="@dimen/directions_trip_details_next_event_transfer_explain_fontsize"/>
+                android:textSize="@dimen/navigation_notification_next_event_transfer_explain_fontsize"/>
         </LinearLayout>
         <LinearLayout
             android:id="@+id/navigation_notification_next_event_walk"
@@ -179,17 +177,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textStyle="bold"
-                android:textSize="@dimen/directions_trip_details_next_event_transfer_fontsize"/>
+                android:textSize="@dimen/navigation_notification_next_event_transfer_fontsize"/>
         </LinearLayout>
     </LinearLayout>
-    <TextView
-        android:id="@+id/navigation_notification_next_event_clock"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:gravity="center"
-        android:textStyle="bold"
-        android:textSize="@dimen/directions_trip_details_next_event_clock_fontsize"
-        android:textColor="@color/fg_less_significant">
-    </TextView>
 </LinearLayout>

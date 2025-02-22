@@ -1060,7 +1060,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         TextView valueView = findViewById(R.id.directions_trip_details_next_event_time_value);
         String valueStr = tripRenderer.nextEventTimeLeftValue;
         if (TripRenderer.NO_TIME_LEFT_VALUE.equals(valueStr))
-            valueView.setText(R.string.directions_trip_details_no_time_left);
+            valueView.setText(R.string.directions_trip_details_next_event_no_time_left);
         else
             valueView.setText(valueStr);
         valueView.setTextColor(getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_arrow : R.color.fg_significant));

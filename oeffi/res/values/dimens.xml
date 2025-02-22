@@ -63,6 +63,18 @@
     <dimen name="directions_trip_details_next_event_transfer_fontsize">36sp</dimen>
     <dimen name="directions_trip_details_next_event_transfer_explain_fontsize">24sp</dimen>
 
+    <dimen name="navigation_notification_next_event_time_fontsize">42sp</dimen>
+    <dimen name="navigation_notification_next_event_time_fontsize_decor">24sp</dimen>
+    <dimen name="navigation_notification_next_event_time_fontsize_explain">16sp</dimen>
+    <dimen name="navigation_notification_next_event_target_fontsize">20sp</dimen>
+    <dimen name="navigation_notification_next_event_position_from_fontsize">18sp</dimen>
+    <dimen name="navigation_notification_next_event_position_to_fontsize">24sp</dimen>
+    <dimen name="navigation_notification_next_event_departure_fontsize">12sp</dimen>
+    <dimen name="navigation_notification_next_event_connection_line_fontsize">18sp</dimen>
+    <dimen name="navigation_notification_next_event_connection_to_fontsize">16sp</dimen>
+    <dimen name="navigation_notification_next_event_transfer_fontsize">18sp</dimen>
+    <dimen name="navigation_notification_next_event_transfer_explain_fontsize">12sp</dimen>
+
     <bool name="layout_list_show">true</bool>
     <bool name="layout_map_show">false</bool>
     <bool name="layout_map_show_toggleable">false</bool>
