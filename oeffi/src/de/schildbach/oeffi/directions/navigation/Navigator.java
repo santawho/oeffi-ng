@@ -89,7 +89,7 @@ public class Navigator {
                 if (locId.equals(depId)) {
                     departureStop = stop;
                     continue;
-                } else if (locId.equals(arrId)) {
+                } else if (departureStop != null && locId.equals(arrId)) {
                     arrivalStop = stop;
                     break;
                 }
