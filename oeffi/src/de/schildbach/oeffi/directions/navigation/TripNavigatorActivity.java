@@ -39,6 +39,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
     private static final long NAVIGATION_AUTO_REFRESH_INTERVAL_SECS = 110;
     public static final String INTENT_EXTRA_DELETEREQUEST = TripNavigatorActivity.class.getName() + ".deleterequest";
+    public static final String INTENT_EXTRA_NEXTEVENT = TripNavigatorActivity.class.getName() + ".nextevent";
 
     public static void start(
             final Activity contextActivity,
@@ -47,17 +48,18 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         rc.isNavigation = true;
         rc.isJourney = renderConfig.isJourney;
         rc.queryTripsRequestData = renderConfig.queryTripsRequestData;
-        Intent intent = buildStartIntent(contextActivity, network, trip, rc, false);
+        Intent intent = buildStartIntent(contextActivity, network, trip, rc, false, false);
         contextActivity.startActivity(intent);
     }
 
     protected static Intent buildStartIntent(
             final Context context,
             final NetworkId network, final Trip trip, final RenderConfig renderConfig,
-            final boolean deleteRequest) {
+            final boolean deleteRequest, final boolean showNextEvent) {
         renderConfig.isNavigation = true;
         final Intent intent = TripDetailsActivity.buildStartIntent(TripNavigatorActivity.class, context, network, trip, renderConfig);
         intent.putExtra(INTENT_EXTRA_DELETEREQUEST, deleteRequest);
+        intent.putExtra(INTENT_EXTRA_NEXTEVENT, showNextEvent);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_NEW_DOCUMENT
                 // | Intent.FLAG_ACTIVITY_MULTIPLE_TASK
@@ -85,6 +87,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         super.onCreate(savedInstanceState);
         final Intent intent = getIntent();
         handleDeleteNotification(intent);
+        handleSwitchToNextEvent(intent);
     }
 
     @Override
@@ -144,7 +147,13 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         super.onNewIntent(intent);
         if (!handleDeleteNotification(intent)) {
             checkAutoRefresh();
+            handleSwitchToNextEvent(intent);
         }
+    }
+
+    private void handleSwitchToNextEvent(final Intent intent) {
+        final boolean showNextEvent = intent.getBooleanExtra(INTENT_EXTRA_NEXTEVENT, false);
+        setShowNextEvent(showNextEvent);
     }
 
     private boolean handleDeleteNotification(final Intent intent) {

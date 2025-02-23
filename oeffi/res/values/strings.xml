@@ -338,10 +338,12 @@
     <string name="directions_trip_navigation_action_cancel">Stop navigation</string>
     <string name="navigation_notification_channel_name">Navigation</string>
     <string name="navigation_notification_channel_description">Navigation instructions</string>
+    <string name="navigation_notification_subtext">to %1$s</string>
     <string name="navigation_stopnav_title">Navigation Cancellation</string>
     <string name="navigation_stopnav_text">Do you really want to stop this navigation?</string>
     <string name="navigation_stopnav_stop">Stop</string>
     <string name="navigation_stopnav_continue">Continue</string>
+    <string name="navigation_stopnav_showtrip">Itinerary</string>
 
     <!-- plans picker -->
     <string name="plans_picker_context_open_title">Open plan</string>
