@@ -22,6 +22,8 @@ import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
+import de.schildbach.pte.dto.Line;
+import de.schildbach.pte.dto.Position;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -107,5 +109,12 @@ public final class Formats {
         return originalName
                 .replaceAll("([-,.)])", "$1\u200B")
                 .replaceAll("([(])", "\u200B$1");
+    }
+
+    public static String formatPosition(final Context context, final Position position, final Line line) {
+        // position: use german translation "Gleis" only for trains, otherwise use "Steig"
+        return context.getString(
+                line.isTrain() ? R.string.position_platform_train : R.string.position_platform,
+                position);
     }
 }

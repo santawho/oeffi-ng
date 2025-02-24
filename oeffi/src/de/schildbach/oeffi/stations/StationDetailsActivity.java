@@ -82,7 +82,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -721,16 +720,9 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 destinationView.setOnClickListener(onClickListener);
             }
 
-            // position: use german translation "Gleis" only for trains, otherwise use "Steig"
-            boolean isTrain = departure.line.product != null &&
-                    EnumSet.of(Product.HIGH_SPEED_TRAIN, Product.REGIONAL_TRAIN, Product.SUBURBAN_TRAIN,
-                            Product.SUBWAY).contains(departure.line.product);
             positionView.setText(departure.position != null ?
                     Constants.DESTINATION_ARROW_INVISIBLE_PREFIX +
-                            context.getString(isTrain ?
-                                            R.string.position_platform_train :
-                                            R.string.position_platform,
-                                    departure.position) :
+                            Formats.formatPosition(context, departure.position, departure.line) :
                     null);
 
             // capacity
