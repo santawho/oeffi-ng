@@ -104,11 +104,8 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -558,7 +555,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         return mapEnabled || super.isMapEnabled(res);
     }
 
-    private void updateGUI() {
+    protected void updateGUI() {
         final Date now = new Date();
         updateHighlightedTime(now);
         updateHighlightedLocation();

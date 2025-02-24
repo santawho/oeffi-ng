@@ -4,12 +4,15 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,6 +84,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     private Runnable navigationRefreshRunnable;
     private long nextNavigationRefreshTime = 0;
     private boolean navigationNotificationBeingDeleted;
+    private BroadcastReceiver updateTriggerReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +92,35 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         final Intent intent = getIntent();
         handleDeleteNotification(intent);
         handleSwitchToNextEvent(intent);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        // trigger from notification refresher
+        updateTriggerReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (!isPaused) {
+                    nextNavigationRefreshTime = 1; // forces refresh
+                    if (!checkAutoRefresh())
+                        updateGUI();
+                }
+            }
+        };
+        ContextCompat.registerReceiver(this, updateTriggerReceiver,
+                new IntentFilter(NavigationNotification.ACTION_UPDATE_TRIGGER),
+                ContextCompat.RECEIVER_EXPORTED);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (updateTriggerReceiver != null) {
+            unregisterReceiver(updateTriggerReceiver);
+            updateTriggerReceiver = null;
+        }
     }
 
     @Override
@@ -321,8 +354,8 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
     private void updateNotification(final Trip trip, final boolean foreGround) {
         if (navigationNotification == null) {
-            navigationNotification = new NavigationNotification(trip, getIntent());
+            navigationNotification = new NavigationNotification(this, trip, getIntent());
         }
-        navigationNotification.update(this, null, trip, foreGround);
+        navigationNotification.update(this, trip, foreGround);
     }
 }

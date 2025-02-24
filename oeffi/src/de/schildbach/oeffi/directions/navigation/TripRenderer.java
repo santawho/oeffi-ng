@@ -2,6 +2,7 @@ package de.schildbach.oeffi.directions.navigation;
 
 import android.annotation.SuppressLint;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -79,12 +80,21 @@ public class TripRenderer {
         }
     };
 
+    public static class NotificationData implements Serializable {
+        int legIndex;
+        boolean isArrival;
+        Date eventTime;
+        Position position;
+        long leftTimeReminded;
+    }
+
     public final Trip trip;
     private final boolean isJourney;
 
     public List<LegContainer> legs = new ArrayList<>();
     public LegContainer currentLeg;
     public final Map<LegKey, Boolean> legExpandStates = new HashMap<>();
+    public NotificationData notificationData;
 
     public TripRenderer(final Trip trip, final boolean isJourney, final Date now) {
         this.trip = trip;
@@ -132,6 +142,7 @@ public class TripRenderer {
     }
 
     public void evaluateByTime(final Date now) {
+        notificationData = new NotificationData();
         for (int iLeg = 0; iLeg < legs.size(); ++iLeg) {
             final TripRenderer.LegContainer legC = legs.get(iLeg);
             final boolean isCurrent;
@@ -144,8 +155,10 @@ public class TripRenderer {
             } else {
                 isCurrent = updateIndividualLeg(legC, now);
             }
-            if (isCurrent)
+            if (isCurrent) {
                 currentLeg = legC;
+                notificationData.legIndex = iLeg;
+             }
         }
     }
 
@@ -185,6 +198,9 @@ public class TripRenderer {
                             : R.string.directions_trip_details_next_event_action_next_interchange
             );
 
+            notificationData.isArrival = true;
+            notificationData.eventTime = endTime;
+            notificationData.position = depPos;
             return true;
         }
         return false;
@@ -223,6 +239,9 @@ public class TripRenderer {
                             : R.string.directions_trip_details_next_event_action_interchange,
                     0);
 
+            notificationData.isArrival = false;
+            notificationData.eventTime = endTime;
+            notificationData.position = depPos;
             return true;
         }
         return false;
@@ -287,6 +306,8 @@ public class TripRenderer {
     }
 
     public Date nextEventEarliestTime;
+    public Date nextEventEstimatedTime;
+    public long nextEventTimeLeftMs;
     public String nextEventTimeLeftValue;
     public String nextEventTimeLeftUnit;
     public boolean nextEventTimeLeftCritical;
@@ -295,10 +316,12 @@ public class TripRenderer {
 
     @SuppressLint("DefaultLocale")
     private void setNextEventTimeLeft(final Date now, final Date endTime, final Date plannedEndTime, final int walkMins) {
+        nextEventEstimatedTime = endTime;
         nextEventEarliestTime = endTime;
         if (plannedEndTime != null && plannedEndTime.before(endTime))
             nextEventEarliestTime = plannedEndTime;
-        long leftSecs = (endTime.getTime() - now.getTime()) / 1000;
+        nextEventTimeLeftMs = endTime.getTime() - now.getTime();
+        long leftSecs = nextEventTimeLeftMs / 1000;
         long delaySecs = (plannedEndTime == null) ? 0 : (endTime.getTime() - plannedEndTime.getTime()) / 1000;
         leftSecs += 5;
         boolean isNegative = false;
