@@ -178,7 +178,7 @@ public class TripRenderer {
             // leg is now
             setNextEventType(true);
             setNextEventClock(now);
-            setNextEventTimeLeft(now, endTime, leg.arrivalStop.plannedArrivalTime, 0);
+            final boolean eventIsNow = setNextEventTimeLeft(now, endTime, leg.arrivalStop.plannedArrivalTime, 0);
             String targetName = leg.arrivalStop.location.uniqueShortName();
             setNextEventTarget(targetName);
             String depName = (nextLegC != null) ? nextLegC.publicLeg.departureStop.location.uniqueShortName() : null;
@@ -191,9 +191,13 @@ public class TripRenderer {
             setNextEventTransferTimes(walkLegC, false);
             setNextEventActions(
                     nextLegC != null
-                            ? R.string.directions_trip_details_next_event_action_ride
-                            : R.string.directions_trip_details_next_event_action_arrival,
-                    walkLegC == null ? 0
+                            ? (eventIsNow
+                                ? R.string.directions_trip_details_next_event_action_ride_now
+                                : R.string.directions_trip_details_next_event_action_ride)
+                            : (eventIsNow
+                                ? R.string.directions_trip_details_next_event_action_arrival_now
+                                : R.string.directions_trip_details_next_event_action_arrival),
+                        walkLegC == null ? 0
                             : depChanged ? R.string.directions_trip_details_next_event_action_next_transfer
                             : R.string.directions_trip_details_next_event_action_next_interchange
             );
@@ -222,7 +226,7 @@ public class TripRenderer {
             // leg is now
             setNextEventType(false);
             setNextEventClock(now);
-            setNextEventTimeLeft(now, endTime, transferTo != null ? transferTo.plannedDepartureTime : null, leg != null ? leg.min : 0);
+            final boolean eventIsNow = setNextEventTimeLeft(now, endTime, transferTo != null ? transferTo.plannedDepartureTime : null, leg != null ? leg.min : 0);
             final String targetName = (transferTo != null) ? transferTo.location.uniqueShortName() : null;
             setNextEventTarget(targetName);
             final String arrName = (transferFrom != null) ? transferFrom.location.uniqueShortName() : null;
@@ -234,9 +238,15 @@ public class TripRenderer {
             setNextEventTransport(legC.transferTo != null ? legC.transferTo.publicLeg : null);
             setNextEventTransferTimes(legC, true);
             setNextEventActions(transferTo == null ? 0
-                            : transferFrom == null ? R.string.directions_trip_details_next_event_action_departure
-                            : depChanged ? R.string.directions_trip_details_next_event_action_transfer
-                            : R.string.directions_trip_details_next_event_action_interchange,
+                            : transferFrom == null ? (eventIsNow
+                                        ? R.string.directions_trip_details_next_event_action_departure_now
+                                        : R.string.directions_trip_details_next_event_action_departure)
+                            : depChanged ? (eventIsNow
+                                        ? R.string.directions_trip_details_next_event_action_transfer_now
+                                        : R.string.directions_trip_details_next_event_action_transfer)
+                            : (eventIsNow
+                                        ? R.string.directions_trip_details_next_event_action_interchange_now
+                                        : R.string.directions_trip_details_next_event_action_interchange),
                     0);
 
             notificationData.isArrival = false;
@@ -315,7 +325,8 @@ public class TripRenderer {
     public String nextEventTimeLeftExplainStr;
 
     @SuppressLint("DefaultLocale")
-    private void setNextEventTimeLeft(final Date now, final Date endTime, final Date plannedEndTime, final int walkMins) {
+    private boolean setNextEventTimeLeft(final Date now, final Date endTime, final Date plannedEndTime, final int walkMins) {
+        boolean retValue = false;
         nextEventEstimatedTime = endTime;
         nextEventEarliestTime = endTime;
         if (plannedEndTime != null && plannedEndTime.before(endTime))
@@ -335,6 +346,7 @@ public class TripRenderer {
         String explainStr = null;
         final boolean hourglassVisible;
         if (leftSecs < 70) {
+            retValue = true;
             valueStr = NO_TIME_LEFT_VALUE;
             unit = "";
             hourglassVisible = false;
@@ -371,6 +383,8 @@ public class TripRenderer {
         nextEventTimeLeftCritical = leftSecs - walkMins * 60 < 60;
         nextEventTimeHourglassVisible = hourglassVisible;
         nextEventTimeLeftExplainStr = explainStr;
+
+        return retValue;
     }
 
     public String nextEventTargetName;

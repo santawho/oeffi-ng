@@ -141,7 +141,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     @Override
     protected void addActionBarButtons() {
         actionBar.addButton(R.drawable.ic_clear_white_24dp, R.string.directions_trip_navigation_action_cancel)
-                .setOnClickListener(view -> stopNavigation());
+                .setOnClickListener(view -> askStopNavigation());
     }
 
     private void stopNavigation() {
@@ -193,6 +193,12 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         final boolean deleteRequest = intent.getBooleanExtra(INTENT_EXTRA_DELETEREQUEST, false);
         if (!deleteRequest)
             return false;
+
+        askStopNavigation();
+        return true;
+    }
+
+    private void askStopNavigation() {
         navigationNotificationBeingDeleted = true;
         if (navigationNotification != null) {
             navigationNotification.remove(this);
@@ -210,8 +216,6 @@ public class TripNavigatorActivity extends TripDetailsActivity {
                     updateNotification(tripRenderer.trip, true);
                 })
                 .create().show();
-
-        return true;
     }
 
     @Override

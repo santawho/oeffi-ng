@@ -1,6 +1,7 @@
 package de.schildbach.oeffi.directions.navigation;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -104,6 +105,7 @@ public class NavigationNotification {
         return null;
     }
 
+    @SuppressLint("ScheduleExactAlarm")
     public void update(final Context context, final Trip trip, final boolean foreGround) {
         createNotificationChannel(context);
         final Date now = new Date();
@@ -128,7 +130,7 @@ public class NavigationNotification {
                 nextRefreshTime = 0;
             }
         }
-//nextRefreshTime = nowTime + 10000;
+//nextRefreshTime = nowTime + 30000;
         timeoutAt = new Date(trip.getLastArrivalTime().getTime() + KEEP_NOTIFICATION_FOR_MINUTES * 60000);
         final RemoteViews notificationLayout = new RemoteViews(context.getPackageName(), R.layout.navigation_notification);
         setupNotificationView(context, notificationLayout, tripRenderer, now);
@@ -139,50 +141,75 @@ public class NavigationNotification {
         boolean changes = false;
         boolean reminder = false;
         if (lastNotified != null) {
-            if (newNotified.legIndex != lastNotified.legIndex)
+            if (newNotified.legIndex != lastNotified.legIndex) {
+                log.info("switching leg from {} to {}", lastNotified.legIndex, newNotified.legIndex);
                 changes = true;
-            if (newNotified.position != null && !newNotified.position.equals(lastNotified.position))
+            }
+            if (newNotified.position != null && !newNotified.position.equals(lastNotified.position)) {
+                log.info("switching position from {} to {}", lastNotified.position, newNotified.position);
                 changes = true;
+            }
             if (lastNotified.eventTime != null) {
-                if (Math.abs(newNotified.eventTime.getTime() - lastNotified.eventTime.getTime()) < 120000)
+                final long diff = Math.abs(newNotified.eventTime.getTime() - lastNotified.eventTime.getTime());
+                if (diff < 120000) {
+                    log.info("timediff = {} keeping last time", diff);
                     newNotified.eventTime = lastNotified.eventTime;
-                else
+                } else {
+                    log.info("timediff = {} accepting new time", diff);
                     changes = true;
+                }
             }
             if (tripRenderer.nextEventTimeLeftMs < REMINDER_SECOND_MS) {
+                log.info("next event {} < 2 mins : {}", tripRenderer.nextEventTimeLeftMs, lastNotified.leftTimeReminded);
                 if (lastNotified.leftTimeReminded > REMINDER_SECOND_MS) {
+                    log.info("reminding 2 mins = {}", REMINDER_SECOND_MS);
                     reminder = true;
                     newNotified.leftTimeReminded = REMINDER_SECOND_MS;
                 }
             } else if (tripRenderer.nextEventTimeLeftMs < REMINDER_FIRST_MS) {
+                log.info("next event {} < 6 mins : {}", tripRenderer.nextEventTimeLeftMs, lastNotified.leftTimeReminded);
                 if (lastNotified.leftTimeReminded > REMINDER_FIRST_MS) {
+                    log.info("reminding 6 mins = {}", REMINDER_FIRST_MS);
                     reminder = true;
                     newNotified.leftTimeReminded = REMINDER_FIRST_MS;
                 }
             } else {
+                log.info("next event {} > 6 mins : {}", tripRenderer.nextEventTimeLeftMs, lastNotified.leftTimeReminded);
                 if (lastNotified.leftTimeReminded <= REMINDER_SECOND_MS) {
+                    log.info("resetting");
                     newNotified.leftTimeReminded = Long.MAX_VALUE;
+                } else {
+                    log.info("keeping");
+                    newNotified.leftTimeReminded = lastNotified.leftTimeReminded;
                 }
             }
         } else {
+            log.info("first notification !!");
             if (tripRenderer.nextEventTimeLeftMs < REMINDER_SECOND_MS) {
+                log.info("next event {} < 2 mins", tripRenderer.nextEventTimeLeftMs);
                 reminder = true;
                 newNotified.leftTimeReminded = REMINDER_SECOND_MS;
             } else if (tripRenderer.nextEventTimeLeftMs < REMINDER_FIRST_MS) {
+                log.info("next event {} < 6 mins", tripRenderer.nextEventTimeLeftMs);
                 reminder = true;
                 newNotified.leftTimeReminded = REMINDER_FIRST_MS;
             }  else {
+                log.info("next event {} > 6 mins", tripRenderer.nextEventTimeLeftMs);
                 newNotified.leftTimeReminded = Long.MAX_VALUE;
             }
         }
+
+        log.info("changes = {}, reminder = {}", changes, reminder);
 
         final Bundle extras = new Bundle();
         extras.putByteArray(EXTRA_LASTNOTIFIED, Objects.serialize(newNotified));
 
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_oeffi_directions)
-//                .setSmallIcon(R.drawable.ic_oeffi_directions_grey600_36dp)
-//                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_oeffi_directions))
+//                .setSmallIcon(R.drawable.ic_oeffi_directions)
+//                .setSmallIcon(R.drawable.ic_oeffi_directions,1)
+                .setSmallIcon(R.drawable.ic_oeffi_directions_grey600_36dp)
+//                .setSmallIcon(IconCompat.createWithResource(context, R.mipmap.ic_oeffi_directions_color_48dp))
+//                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_oeffi_directions_color_48dp))
                 .setColorized(true).setColor(context.getColor(R.color.bg_trip_details_public_now))
                 .setSubText(context.getString(R.string.navigation_notification_subtext,
                         trip.getLastPublicLeg().arrivalStop.location.uniqueShortName()))
@@ -219,9 +246,15 @@ public class NavigationNotification {
         if (nextRefreshTime > 0) {
             log.info("refreshing in {} secs at {}",
                     (nextRefreshTime - nowTime) / 1000,
-                    new SimpleDateFormat("HH:mm").format(nextRefreshTime));
-            getAlarmManager(context)
-                .setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextRefreshTime, getPendingRefreshIntent(context));
+                    new SimpleDateFormat("HH:mm:ss").format(nextRefreshTime));
+            final AlarmManager alarmManager = getAlarmManager(context);
+//            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextRefreshTime, getPendingRefreshIntent(context));
+//            if (alarmManager.canScheduleExactAlarms()) {
+//                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextRefreshTime, getPendingRefreshIntent(context));
+//            } else {
+//
+//            }
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextRefreshTime, getPendingRefreshIntent(context));
         } else {
             log.info("stop refreshing");
         }
@@ -286,7 +319,7 @@ public class NavigationNotification {
         private Handler backgroundHandler;
 
         public RefreshReceiver() {
-            backgroundThread = new HandlerThread("queryTripsThread", Process.THREAD_PRIORITY_BACKGROUND);
+            backgroundThread = new HandlerThread("Navigation.queryTripsThread", Process.THREAD_PRIORITY_BACKGROUND);
             backgroundThread.start();
             backgroundHandler = new Handler(backgroundThread.getLooper());
         }
@@ -319,7 +352,7 @@ public class NavigationNotification {
         return PendingIntent.getBroadcast(context, intentData.trip.getUniqueId().hashCode() + 8, intent, PendingIntent.FLAG_IMMUTABLE);
     }
 
-    private boolean setupNotificationView(
+    private void setupNotificationView(
             final Context context, final RemoteViews remoteViews,
             final TripRenderer tripRenderer, final Date now) {
         final int colorHighlight = context.getColor(R.color.bg_trip_details_public_now);
@@ -445,8 +478,6 @@ public class NavigationNotification {
         remoteViews.setTextViewText(R.id.navigation_notification_next_event_departure, tripRenderer.nextEventDepartureName);
         remoteViews.setViewVisibility(R.id.navigation_notification_next_event_departure,
                 tripRenderer.nextEventDepartureName != null ? View.VISIBLE : View.GONE);
-
-        return false;
     }
 
     private static void remoteViewsSetBackgroundColor(final RemoteViews remoteViews, int viewId, int color) {

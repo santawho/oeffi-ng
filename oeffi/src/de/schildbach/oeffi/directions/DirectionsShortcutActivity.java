@@ -92,7 +92,7 @@ public class DirectionsShortcutActivity extends OeffiActivity implements Locatio
 
         locationHelper = new LocationHelper((LocationManager) getSystemService(Context.LOCATION_SERVICE), this);
 
-        backgroundThread = new HandlerThread("queryTripsThread", Process.THREAD_PRIORITY_BACKGROUND);
+        backgroundThread = new HandlerThread("DirectionsShortcut.queryTripsThread", Process.THREAD_PRIORITY_BACKGROUND);
         backgroundThread.start();
         backgroundHandler = new Handler(backgroundThread.getLooper());
 

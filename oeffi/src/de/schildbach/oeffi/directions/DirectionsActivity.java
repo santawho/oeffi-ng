@@ -304,7 +304,7 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
             time = new TimeSpec.Relative(0);
         }
 
-        backgroundThread = new HandlerThread("queryTripsThread", Process.THREAD_PRIORITY_BACKGROUND);
+        backgroundThread = new HandlerThread("Directions.queryTripsThread", Process.THREAD_PRIORITY_BACKGROUND);
         backgroundThread.start();
         backgroundHandler = new Handler(backgroundThread.getLooper());
 

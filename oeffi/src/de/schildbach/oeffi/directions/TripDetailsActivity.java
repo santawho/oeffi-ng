@@ -210,7 +210,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        backgroundThread = new HandlerThread("queryTripsThread", Process.THREAD_PRIORITY_BACKGROUND);
+        backgroundThread = new HandlerThread("TripDetails.queryTripsThread", Process.THREAD_PRIORITY_BACKGROUND);
         backgroundThread.start();
         backgroundHandler = new Handler(backgroundThread.getLooper());
 
