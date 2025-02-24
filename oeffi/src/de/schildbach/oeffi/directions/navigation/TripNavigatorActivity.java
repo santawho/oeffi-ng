@@ -323,6 +323,6 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         if (navigationNotification == null) {
             navigationNotification = new NavigationNotification(trip, getIntent());
         }
-        navigationNotification.update(this, trip, foreGround);
+        navigationNotification.update(this, null, trip, foreGround);
     }
 }

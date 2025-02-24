@@ -10,27 +10,35 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.BitmapFactory;
 import android.os.Build;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Process;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.RemoteViews;
-import android.widget.TextView;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
+import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Trip;
 
 public class NavigationNotification {
     private static final String CHANNEL_ID = "navigation";
     private static final long KEEP_NOTIFICATION_FOR_MINUTES = 30;
     private static final String INTENT_EXTRA_REOPEN = NavigationNotification.class.getName() + ".reopen";
+
+    private static final Logger log = LoggerFactory.getLogger(NavigationNotification.class);
 
     private static void createNotificationChannel(final Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -68,11 +76,31 @@ public class NavigationNotification {
         intentData = new TripDetailsActivity.IntentData(intent);
     }
 
-    public void update(final Context context, final Trip trip, final boolean foreGround) {
+    public void update(final Context context, final Trip oldTrip, final Trip trip, final boolean foreGround) {
         createNotificationChannel(context);
         final Date now = new Date();
+        final long nowTime = now.getTime();
         boolean changes = false;
         final TripRenderer tripRenderer = new TripRenderer(trip, false, now);
+        if (tripRenderer.nextEventEarliestTime != null) {
+            final long timeLeft = tripRenderer.nextEventEarliestTime.getTime() - nowTime;
+            if (timeLeft < 240000) {
+                // last 4 minutes and after, 30 secs refresh interval
+                nextRefreshTime = nowTime + 30000;
+            } else {
+                // approaching, refresh after 25% of the remaining time
+                nextRefreshTime = nowTime + timeLeft / 4;
+            }
+        } else {
+            final long timeOver = nowTime - trip.getLastArrivalTime().getTime();
+            if (timeOver < 300000) {
+                // max 5 minutes after the trip, 60 secs refresh interval
+                nextRefreshTime = nowTime + 60000;
+            } else {
+                // no refresh
+                nextRefreshTime = 0;
+            }
+        }
         timeoutAt = new Date(trip.getLastArrivalTime().getTime() + KEEP_NOTIFICATION_FOR_MINUTES * 60000);
         final RemoteViews notificationLayout = new RemoteViews(context.getPackageName(), R.layout.navigation_notification);
         changes |= setupNotificationView(context, notificationLayout, tripRenderer, now);
@@ -84,7 +112,8 @@ public class NavigationNotification {
 //                .setSmallIcon(R.drawable.ic_oeffi_directions_grey600_36dp)
 //                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_oeffi_directions))
                 .setColorized(true).setColor(context.getColor(R.color.bg_trip_details_public_now))
-                .setSubText(context.getString(R.string.navigation_notification_subtext, trip.getLastPublicLeg().destination.uniqueShortName()))
+                .setSubText(context.getString(R.string.navigation_notification_subtext,
+                        trip.getLastPublicLeg().arrivalStop.location.uniqueShortName()))
                 .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
                 .setCustomContentView(notificationLayout)
                 // .setCustomBigContentView(notificationLayoutExpanded)
@@ -94,7 +123,7 @@ public class NavigationNotification {
                 .setAutoCancel(false)
                 .setOngoing(true)
                 .setUsesChronometer(true)
-                .setWhen(now.getTime())
+                .setWhen(nowTime)
                 .setSilent(foreGround || !changes)
                 .addAction(R.drawable.ic_clear_white_24dp, context.getString(R.string.navigation_stopnav_stop),
                         getPendingActivityIntent(context, true, false)) // getPendingDeleteIntent(context, false))
@@ -102,7 +131,7 @@ public class NavigationNotification {
                         getPendingActivityIntent(context, false, false));
 
         if (timeoutAt != null) {
-            final long duration = timeoutAt.getTime() - now.getTime();
+            final long duration = timeoutAt.getTime() - nowTime;
             if (duration <= 1000) {
                 remove(context);
                 return;
@@ -113,8 +142,13 @@ public class NavigationNotification {
         getNotificationManager(context).notify(notificationTag, intentData.trip.getUniqueId().hashCode(), builder.build());
 
         if (nextRefreshTime > 0) {
+            log.info("refreshing in {} secs at {}",
+                    (nextRefreshTime - nowTime) / 1000,
+                    new SimpleDateFormat("HH:mm").format(nextRefreshTime));
             getAlarmManager(context)
                 .setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextRefreshTime, getPendingRefreshIntent(context));
+        } else {
+            log.info("stop refreshing");
         }
     }
 
@@ -144,7 +178,7 @@ public class NavigationNotification {
             final TripDetailsActivity.IntentData intentData = new TripDetailsActivity.IntentData(intent);
             final NavigationNotification navigationNotification = new NavigationNotification(intentData.trip, intent);
             if (intent.getBooleanExtra(INTENT_EXTRA_REOPEN, false)) {
-                navigationNotification.update(context, intentData.trip, true);
+                navigationNotification.update(context, null, intentData.trip, true);
             } else {
                 navigationNotification.remove(context);
             }
@@ -162,12 +196,41 @@ public class NavigationNotification {
                 intent, PendingIntent.FLAG_IMMUTABLE);
     }
 
+    private void refresh(final Context context, final NetworkId network, final Trip oldTrip) throws IOException {
+        final Navigator navigator = new Navigator(network, oldTrip);
+        final Trip newTrip = navigator.refresh();
+        if (newTrip != null)
+            update(context, oldTrip, newTrip, false);
+    }
+
     public static class RefreshReceiver extends BroadcastReceiver {
+        private Runnable navigationRefreshRunnable;
+        private HandlerThread backgroundThread;
+        private Handler backgroundHandler;
+
+        public RefreshReceiver() {
+            backgroundThread = new HandlerThread("queryTripsThread", Process.THREAD_PRIORITY_BACKGROUND);
+            backgroundThread.start();
+            backgroundHandler = new Handler(backgroundThread.getLooper());
+        }
+
         @Override
         public void onReceive(Context context, Intent intent) {
             final TripDetailsActivity.IntentData intentData = new TripDetailsActivity.IntentData(intent);
             final NavigationNotification navigationNotification = new NavigationNotification(intentData.trip, intent);
-            navigationNotification.refresh(context);
+            if (navigationRefreshRunnable != null)
+                return;
+
+            navigationRefreshRunnable = () -> {
+                try {
+                    navigationNotification.refresh(context, intentData.network, intentData.trip);
+                } catch (IOException e) {
+                    log.error("error when refreshing trip", e);
+                } finally {
+                    navigationRefreshRunnable = null;
+                }
+            };
+            backgroundHandler.post(navigationRefreshRunnable);
         }
     }
 
@@ -306,16 +369,10 @@ public class NavigationNotification {
         remoteViews.setViewVisibility(R.id.navigation_notification_next_event_departure,
                 tripRenderer.nextEventDepartureName != null ? View.VISIBLE : View.GONE);
 
-        nextRefreshTime = now.getTime() + 10000;
-        return true;
+        return false;
     }
 
     private static void remoteViewsSetBackgroundColor(final RemoteViews remoteViews, int viewId, int color) {
         remoteViews.setInt(viewId, "setBackgroundColor", color);
-    }
-
-    private void refresh(final Context context) {
-        final Trip trip = intentData.trip;
-        update(context, trip, false);
     }
 }

@@ -286,6 +286,7 @@ public class TripRenderer {
         nextEventNextStringId = nextId;
     }
 
+    public Date nextEventEarliestTime;
     public String nextEventTimeLeftValue;
     public String nextEventTimeLeftUnit;
     public boolean nextEventTimeLeftCritical;
@@ -294,6 +295,9 @@ public class TripRenderer {
 
     @SuppressLint("DefaultLocale")
     private void setNextEventTimeLeft(final Date now, final Date endTime, final Date plannedEndTime, final int walkMins) {
+        nextEventEarliestTime = endTime;
+        if (plannedEndTime != null && plannedEndTime.before(endTime))
+            nextEventEarliestTime = plannedEndTime;
         long leftSecs = (endTime.getTime() - now.getTime()) / 1000;
         long delaySecs = (plannedEndTime == null) ? 0 : (endTime.getTime() - plannedEndTime.getTime()) / 1000;
         leftSecs += 5;
