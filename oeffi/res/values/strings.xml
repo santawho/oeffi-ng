@@ -394,6 +394,8 @@
     <string name="alert_crash_report_positive">Send</string>
     <string name="alert_crash_report_download">Download</string>
     <string name="alert_crash_report_negative">Dismiss</string>
+    <string name="alert_update_available_title">Update available</string>
+    <string name="alert_update_available_message">An update of this application is available. Do you want to download now?</string>
 
     <!-- products -->
     <string name="product_i">Highspeed</string>

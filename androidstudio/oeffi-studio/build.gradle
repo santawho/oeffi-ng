@@ -5,9 +5,15 @@ plugins {
     id 'androidsvgdrawable'
 }
 
+
 def now = new Date()
-def timeStr = new SimpleDateFormat('yyyyMMddHHmm').format(now)
 def timeInt = (int) (now.getTime() / 60000)
+def timeFmt = new SimpleDateFormat('yyyyMMddHHmm')
+timeFmt.setTimeZone(TimeZone.getTimeZone('UTC'))
+def timeStr = timeFmt.format(now)
+timeFmt = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US)
+timeFmt.setTimeZone(TimeZone.getTimeZone('UTC'))
+def timeModifiedStr = timeFmt.format(new Date(now.getTime() + 60000 * 5))
 
 android {
     namespace 'de.schildbach.oeffi'
@@ -35,7 +41,9 @@ android {
             resValue "string", "app_name", "Öffi NG"
             resValue "string", "about_git_url", "https://gitlab.com/santawho/oeffi"
             resValue "string", "about_changelog_url", "https://jlemke.com/oeffi/"
-            resValue "string", "about_update_url", "https://jlemke.com/?sdm_process_download=1&download_id=429"
+//            resValue "string", "about_update_url", "https://jlemke.com/?sdm_process_download=1&download_id=429"
+            resValue "string", "about_update_url", "https://jlemke.com/wp-content/uploads/oeffi-studio-ng-release.apk"
+            resValue "string", "about_update_modified", timeModifiedStr  // If-Modified-Since: xxx, 25 Feb 2025 17:10:00 GMT
         }
     }
 

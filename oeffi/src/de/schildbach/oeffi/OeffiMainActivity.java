@@ -19,6 +19,7 @@ package de.schildbach.oeffi;
 
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorSet;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -67,6 +68,7 @@ import de.schildbach.pte.NetworkId;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.slf4j.Logger;
@@ -89,6 +91,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public abstract class OeffiMainActivity extends OeffiActivity {
+    private static boolean stillCheckForUpdate = true;
     private DrawerLayout navigationDrawerLayout;
     private RecyclerView navigationDrawerListView;
     private MenuProvider navigationDrawerMenuProvider;
@@ -206,7 +209,7 @@ public abstract class OeffiMainActivity extends OeffiActivity {
         };
 
         if (prefsGetNetwork() == null) {
-//            NetworkPickerActivity.start(this);
+            // NetworkPickerActivity.start(this);
             prefs.edit().putString(Constants.PREFS_KEY_NETWORK_PROVIDER, NetworkId.DEUTSCHLANDTICKET.name()).commit();
 
             prefs.edit().putLong(Constants.PREFS_KEY_LAST_INFO_AT, now).apply();
@@ -224,6 +227,50 @@ public abstract class OeffiMainActivity extends OeffiActivity {
         super.onConfigurationChanged(newConfig);
 
         updateNavigation();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (stillCheckForUpdate) {
+            stillCheckForUpdate = false;
+            checkForUpdate();
+        }
+    }
+
+    private void checkForUpdate() {
+        final String updateUrl = getString(R.string.about_update_url);
+        final String modifiedStr = getString(R.string.about_update_modified);
+        new Thread(() -> {
+            final Request request = new Request.Builder()
+                    .url(updateUrl).head()
+                    .addHeader("If-Modified-Since", modifiedStr)
+                    .build();
+            try (Response response = new OkHttpClient().newCall(request).execute()) {
+                final int code = response.code();
+                if (code == 200) {
+                    final String lastModifiedStr = response.header("Last-Modified");
+                    if (lastModifiedStr != null) {
+                        final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
+                        final Date thisModified = dateFormat.parse(modifiedStr);
+                        final Date lastModified = dateFormat.parse(lastModifiedStr);
+                        if (lastModified != null && lastModified.after(thisModified)) {
+                            runOnUiThread(() -> {
+                                new AlertDialog.Builder(this)
+                                        .setTitle(R.string.alert_update_available_title)
+                                        .setMessage(R.string.alert_update_available_message)
+                                        .setPositiveButton(android.R.string.ok, (d, i) ->
+                                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(updateUrl))))
+                                        .setNegativeButton(android.R.string.cancel, null)
+                                        .create().show();
+                            });
+                        }
+                    }
+                }
+            } catch (IOException | ParseException e) {
+                log.error("cannot HEAD {}: {}", updateUrl, e.getMessage());
+            }
+        }).start();
     }
 
     protected abstract String taskName();

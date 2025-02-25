@@ -6,5 +6,6 @@
     <string name="about_git_url">https://gitlab.com/oeffi/oeffi</string>
     <string name="about_changelog_url" />
     <string name="about_update_url" />
+    <string name="about_update_modified" />
 
 </resources>
