@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -47,7 +48,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     public static void start(
             final Activity contextActivity,
             final NetworkId network, final Trip trip, final RenderConfig renderConfig) {
-        RenderConfig rc = new RenderConfig();
+            RenderConfig rc = new RenderConfig();
         rc.isNavigation = true;
         rc.isJourney = renderConfig.isJourney;
         rc.queryTripsRequestData = renderConfig.queryTripsRequestData;
@@ -85,6 +86,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     private long nextNavigationRefreshTime = 0;
     private boolean navigationNotificationBeingDeleted;
     private BroadcastReceiver updateTriggerReceiver;
+    private boolean permissionRequestRunning;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -170,8 +172,12 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     protected void onResume() {
         super.onResume();
         if (!navigationNotificationBeingDeleted) {
-            if (NavigationNotification.requestPermissions(this, 1))
-                updateNotification(tripRenderer.trip, true);
+            if (!permissionRequestRunning) {
+                if (NavigationNotification.requestPermissions(this, 1))
+                    updateNotification(tripRenderer.trip, true);
+                else
+                    permissionRequestRunning = true;
+            }
         }
     }
 
@@ -221,7 +227,19 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults, int deviceId) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults, deviceId);
-        updateNotification(tripRenderer.trip, true);
+        boolean granted = true;
+        for (int grantResult : grantResults) {
+            if (grantResult != PackageManager.PERMISSION_GRANTED) {
+                granted = false;
+                break;
+            }
+        }
+        if (granted) {
+            permissionRequestRunning = false;
+            updateNotification(tripRenderer.trip, true);
+        } else {
+            // warning ??
+        }
     }
 
     @Override

@@ -1,5 +1,7 @@
 package de.schildbach.oeffi.directions.navigation;
 
+import static android.media.AudioAttributes.USAGE_ALARM;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -12,10 +14,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
+import android.media.ToneGenerator;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.Process;
 import android.service.notification.StatusBarNotification;
 import android.view.View;
@@ -46,6 +53,10 @@ public class NavigationNotification {
     private static final String INTENT_EXTRA_REOPEN = NavigationNotification.class.getName() + ".reopen";
     private static final String EXTRA_LASTNOTIFIED = NavigationNotification.class.getName() + ".lastnotified";
     public static final String ACTION_UPDATE_TRIGGER = NavigationNotification.class.getName() + ".updatetrigger";
+    private static final long[] VIBRATION_PATTERN = { 200, 200, 500, 200, 200 };
+    private static Uri ALARM_SOUND_URI(final Context context) {
+        return Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.nav_alarm);
+    }
 
     private static final Logger log = LoggerFactory.getLogger(NavigationNotification.class);
 
@@ -53,9 +64,12 @@ public class NavigationNotification {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = context.getString(R.string.navigation_notification_channel_name);
             String description = context.getString(R.string.navigation_notification_channel_description);
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            int importance = NotificationManager.IMPORTANCE_HIGH;
             final NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
             channel.setDescription(description);
+            channel.enableVibration(true);
+            channel.setVibrationPattern(VIBRATION_PATTERN);
+            channel.setSound(ALARM_SOUND_URI(context), new AudioAttributes.Builder().setUsage(USAGE_ALARM).build());
             getNotificationManager(context).createNotificationChannel(channel);
         }
     }
@@ -68,30 +82,30 @@ public class NavigationNotification {
         return (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     }
 
+    private static final String[] REQUIRED_PERMISSION = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU ? new String[] {
+            Manifest.permission.POST_NOTIFICATIONS,
+//            Manifest.permission.SCHEDULE_EXACT_ALARM,
+//            Manifest.permission.USE_EXACT_ALARM,
+    } : new String[]{};
+
     public static boolean requestPermissions(final Activity activity, final int requestCode) {
-        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED)
+        boolean all = true;
+        for (String permission : REQUIRED_PERMISSION) {
+            if (ContextCompat.checkSelfPermission(activity, permission) != PackageManager.PERMISSION_GRANTED)
+                all = false;
+        }
+        if (all)
             return true;
-        ActivityCompat.requestPermissions(activity, new String[] { Manifest.permission.POST_NOTIFICATIONS }, requestCode);
+        ActivityCompat.requestPermissions(activity, REQUIRED_PERMISSION, requestCode);
         return false;
     }
 
     private final TripDetailsActivity.IntentData intentData;
     private final String notificationTag;
-    private long nextRefreshTime;
-    private Date timeoutAt;
-    private TripRenderer.NotificationData lastNotified;
-
 
     public NavigationNotification(final Context context, final Trip trip, final Intent intent) {
         notificationTag = trip.getUniqueId();
         intentData = new TripDetailsActivity.IntentData(intent);
-        final Notification activeNotification = findActiveNotification(context);
-        if (activeNotification != null) {
-            final Bundle extras = activeNotification.extras;
-            if (extras != null) {
-                this.lastNotified = (TripRenderer.NotificationData) Objects.deserialize(extras.getByteArray(EXTRA_LASTNOTIFIED));
-            }
-        }
     }
 
     private Notification findActiveNotification(final Context context) {
@@ -105,29 +119,48 @@ public class NavigationNotification {
         return null;
     }
 
+    private TripRenderer.NotificationData getLastNotified(final Context context) {
+        final Notification activeNotification = findActiveNotification(context);
+        if (activeNotification != null) {
+            final Bundle extras = activeNotification.extras;
+            if (extras != null) {
+                return (TripRenderer.NotificationData) Objects.deserialize(extras.getByteArray(EXTRA_LASTNOTIFIED));
+            }
+        }
+        return null;
+    }
+
+    private void soundBeep() {
+        final ToneGenerator toneGenerator = new ToneGenerator(AudioManager.STREAM_NOTIFICATION, ToneGenerator.MAX_VOLUME);
+        toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP2);
+        new Handler(Looper.getMainLooper()).postDelayed(() -> toneGenerator.release(), 1000);
+    }
+
     @SuppressLint("ScheduleExactAlarm")
     public void update(final Context context, final Trip trip, final boolean foreGround) {
         createNotificationChannel(context);
         final Date now = new Date();
         final long nowTime = now.getTime();
         final TripRenderer tripRenderer = new TripRenderer(trip, false, now);
+        long nextRefreshTimeMs;
+        Date timeoutAt;
         if (tripRenderer.nextEventEarliestTime != null) {
             final long timeLeft = tripRenderer.nextEventEarliestTime.getTime() - nowTime;
             if (timeLeft < 240000) {
                 // last 4 minutes and after, 30 secs refresh interval
-                nextRefreshTime = nowTime + 30000;
+                nextRefreshTimeMs = nowTime + 30000;
             } else {
                 // approaching, refresh after 25% of the remaining time
-                nextRefreshTime = nowTime + timeLeft / 4;
+                nextRefreshTimeMs = nowTime + timeLeft / 4;
             }
         } else {
             final long timeOver = nowTime - trip.getLastArrivalTime().getTime();
             if (timeOver < 300000) {
                 // max 5 minutes after the trip, 60 secs refresh interval
-                nextRefreshTime = nowTime + 60000;
+                nextRefreshTimeMs = nowTime + 60000;
             } else {
                 // no refresh
-                nextRefreshTime = 0;
+                nextRefreshTimeMs = 0;
             }
         }
 //nextRefreshTime = nowTime + 30000;
@@ -140,6 +173,9 @@ public class NavigationNotification {
         final TripRenderer.NotificationData newNotified = tripRenderer.notificationData;
         boolean changes = false;
         boolean reminder = false;
+        long nextReminderTimeMs = 0;
+        final long nextEventTimeLeftMs = tripRenderer.nextEventTimeLeftMs;
+        final TripRenderer.NotificationData lastNotified = getLastNotified(context);
         if (lastNotified != null) {
             if (newNotified.legIndex != lastNotified.legIndex) {
                 log.info("switching leg from {} to {}", lastNotified.legIndex, newNotified.legIndex);
@@ -159,55 +195,65 @@ public class NavigationNotification {
                     changes = true;
                 }
             }
-            if (tripRenderer.nextEventTimeLeftMs < REMINDER_SECOND_MS) {
-                log.info("next event {} < 2 mins : {}", tripRenderer.nextEventTimeLeftMs, lastNotified.leftTimeReminded);
+            newNotified.leftTimeReminded = lastNotified.leftTimeReminded;
+            if (nextEventTimeLeftMs < REMINDER_SECOND_MS) {
+                log.info("next event {} < 2 mins : {}", nextEventTimeLeftMs, lastNotified.leftTimeReminded);
+                nextReminderTimeMs = nowTime + nextEventTimeLeftMs;
                 if (lastNotified.leftTimeReminded > REMINDER_SECOND_MS) {
                     log.info("reminding 2 mins = {}", REMINDER_SECOND_MS);
                     reminder = true;
                     newNotified.leftTimeReminded = REMINDER_SECOND_MS;
                 }
-            } else if (tripRenderer.nextEventTimeLeftMs < REMINDER_FIRST_MS) {
-                log.info("next event {} < 6 mins : {}", tripRenderer.nextEventTimeLeftMs, lastNotified.leftTimeReminded);
+            } else if (nextEventTimeLeftMs < REMINDER_FIRST_MS) {
+                log.info("next event {} < 6 mins : {}", nextEventTimeLeftMs, lastNotified.leftTimeReminded);
+                nextReminderTimeMs = nowTime + nextEventTimeLeftMs - REMINDER_SECOND_MS;
                 if (lastNotified.leftTimeReminded > REMINDER_FIRST_MS) {
                     log.info("reminding 6 mins = {}", REMINDER_FIRST_MS);
                     reminder = true;
                     newNotified.leftTimeReminded = REMINDER_FIRST_MS;
                 }
             } else {
-                log.info("next event {} > 6 mins : {}", tripRenderer.nextEventTimeLeftMs, lastNotified.leftTimeReminded);
+                log.info("next event {} > 6 mins : {}", nextEventTimeLeftMs, lastNotified.leftTimeReminded);
+                nextReminderTimeMs = nowTime + nextEventTimeLeftMs - REMINDER_FIRST_MS;
                 if (lastNotified.leftTimeReminded <= REMINDER_SECOND_MS) {
                     log.info("resetting");
                     newNotified.leftTimeReminded = Long.MAX_VALUE;
-                } else {
-                    log.info("keeping");
-                    newNotified.leftTimeReminded = lastNotified.leftTimeReminded;
                 }
             }
         } else {
             log.info("first notification !!");
-            if (tripRenderer.nextEventTimeLeftMs < REMINDER_SECOND_MS) {
-                log.info("next event {} < 2 mins", tripRenderer.nextEventTimeLeftMs);
+            if (nextEventTimeLeftMs < REMINDER_SECOND_MS) {
+                log.info("next event {} < 2 mins", nextEventTimeLeftMs);
+                nextReminderTimeMs = nowTime + nextEventTimeLeftMs;
                 reminder = true;
                 newNotified.leftTimeReminded = REMINDER_SECOND_MS;
-            } else if (tripRenderer.nextEventTimeLeftMs < REMINDER_FIRST_MS) {
-                log.info("next event {} < 6 mins", tripRenderer.nextEventTimeLeftMs);
+            } else if (nextEventTimeLeftMs < REMINDER_FIRST_MS) {
+                log.info("next event {} < 6 mins", nextEventTimeLeftMs);
+                nextReminderTimeMs = nowTime + nextEventTimeLeftMs - REMINDER_SECOND_MS;
                 reminder = true;
                 newNotified.leftTimeReminded = REMINDER_FIRST_MS;
             }  else {
-                log.info("next event {} > 6 mins", tripRenderer.nextEventTimeLeftMs);
+                log.info("next event {} > 6 mins", nextEventTimeLeftMs);
+                nextReminderTimeMs = nowTime + nextEventTimeLeftMs - REMINDER_FIRST_MS;
                 newNotified.leftTimeReminded = Long.MAX_VALUE;
             }
         }
+        if (nextReminderTimeMs < nextRefreshTimeMs + 20000)
+            nextRefreshTimeMs = nextReminderTimeMs;
 
-        log.info("changes = {}, reminder = {}", changes, reminder);
+        final boolean playAlarm = reminder || changes; // && !foreGround
+        log.info("changes = {}, reminder = {}, playAlarm = {}", changes, reminder, playAlarm);
+        if (!playAlarm)
+            soundBeep();
 
         final Bundle extras = new Bundle();
         extras.putByteArray(EXTRA_LASTNOTIFIED, Objects.serialize(newNotified));
 
-        final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+        final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, CHANNEL_ID)
 //                .setSmallIcon(R.drawable.ic_oeffi_directions)
 //                .setSmallIcon(R.drawable.ic_oeffi_directions,1)
                 .setSmallIcon(R.drawable.ic_oeffi_directions_grey600_36dp)
+//                .setSmallIcon(R.mipmap.ic_oeffi_directions_color_48dp)
 //                .setSmallIcon(IconCompat.createWithResource(context, R.mipmap.ic_oeffi_directions_color_48dp))
 //                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_oeffi_directions_color_48dp))
                 .setColorized(true).setColor(context.getColor(R.color.bg_trip_details_public_now))
@@ -223,12 +269,17 @@ public class NavigationNotification {
                 .setOngoing(true)
                 .setUsesChronometer(true)
                 .setWhen(nowTime)
-                .setSilent(!(reminder || changes)) // || foreGround
+                .setSilent(!playAlarm)
                 .setExtras(extras)
                 .addAction(R.drawable.ic_clear_white_24dp, context.getString(R.string.navigation_stopnav_stop),
                         getPendingActivityIntent(context, true, false)) // getPendingDeleteIntent(context, false))
                 .addAction(R.drawable.ic_navigation_white_24dp, context.getString(R.string.navigation_stopnav_showtrip),
                         getPendingActivityIntent(context, false, false));
+
+        if (playAlarm) {
+            notificationBuilder.setSound(ALARM_SOUND_URI(context), AudioManager.STREAM_ALARM);
+            notificationBuilder.setVibrate(VIBRATION_PATTERN);
+        }
 
         if (timeoutAt != null) {
             final long duration = timeoutAt.getTime() - nowTime;
@@ -236,25 +287,22 @@ public class NavigationNotification {
                 remove(context);
                 return;
             }
-            builder.setTimeoutAfter(duration);
+            notificationBuilder.setTimeoutAfter(duration);
         }
 
-        lastNotified = newNotified;
-        final Notification notification = builder.build();
+        final Notification notification = notificationBuilder.build();
         getNotificationManager(context).notify(notificationTag, intentData.trip.getUniqueId().hashCode(), notification);
 
-        if (nextRefreshTime > 0) {
-            log.info("refreshing in {} secs at {}",
-                    (nextRefreshTime - nowTime) / 1000,
-                    new SimpleDateFormat("HH:mm:ss").format(nextRefreshTime));
+        if (nextRefreshTimeMs > 0) {
+            final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+            log.info("refreshing in {} secs at {} reminder at {}",
+                    (nextRefreshTimeMs - nowTime) / 1000,
+                    timeFormat.format(nextRefreshTimeMs),
+                    timeFormat.format(nextReminderTimeMs));
             final AlarmManager alarmManager = getAlarmManager(context);
-//            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextRefreshTime, getPendingRefreshIntent(context));
-//            if (alarmManager.canScheduleExactAlarms()) {
-//                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextRefreshTime, getPendingRefreshIntent(context));
-//            } else {
-//
-//            }
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextRefreshTime, getPendingRefreshIntent(context));
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()) {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextRefreshTimeMs, getPendingRefreshIntent(context));
+            }
         } else {
             log.info("stop refreshing");
         }
