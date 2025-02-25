@@ -185,7 +185,7 @@ public class NavigationNotification {
                 log.info("switching position from {} to {}", lastNotified.position, newNotified.position);
                 changes = true;
             }
-            if (lastNotified.eventTime != null) {
+            if (newNotified.eventTime != null && lastNotified.eventTime != null) {
                 final long diff = Math.abs(newNotified.eventTime.getTime() - lastNotified.eventTime.getTime());
                 if (diff < 120000) {
                     log.info("timediff = {} keeping last time", diff);
