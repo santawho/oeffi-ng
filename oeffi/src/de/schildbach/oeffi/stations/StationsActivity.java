@@ -982,6 +982,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         // if station has products declared, use that for matching
         final Set<Product> products = station.location.products;
         if (products != null) {
+            if (products.isEmpty())
+                return false;
             final Set<Product> copy = EnumSet.copyOf(products);
             copy.retainAll(productFilter);
             return !copy.isEmpty();
