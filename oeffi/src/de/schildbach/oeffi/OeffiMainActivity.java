@@ -63,6 +63,7 @@ import de.schildbach.oeffi.util.ErrorReporter;
 import de.schildbach.oeffi.util.Installer;
 import de.schildbach.oeffi.util.NavigationMenuAdapter;
 import de.schildbach.oeffi.util.UiThreadExecutor;
+import de.schildbach.pte.NetworkId;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.HttpUrl;
@@ -205,7 +206,8 @@ public abstract class OeffiMainActivity extends OeffiActivity {
         };
 
         if (prefsGetNetwork() == null) {
-            NetworkPickerActivity.start(this);
+//            NetworkPickerActivity.start(this);
+            prefs.edit().putString(Constants.PREFS_KEY_NETWORK_PROVIDER, NetworkId.DEUTSCHLANDTICKET.name()).commit();
 
             prefs.edit().putLong(Constants.PREFS_KEY_LAST_INFO_AT, now).apply();
 

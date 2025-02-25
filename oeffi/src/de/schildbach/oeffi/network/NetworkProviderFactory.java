@@ -100,6 +100,8 @@ public final class NetworkProviderFactory {
     private static AbstractNetworkProvider forId(final NetworkId networkId) {
         if (networkId.equals(NetworkId.RT))
             return new RtProvider();
+        else if (networkId.equals(NetworkId.DEUTSCHLANDTICKET))
+            return new DbProvider.DeutschlandTicket();
         else if (networkId.equals(NetworkId.DB))
             return new DbProvider.Fernverkehr();
         else if (networkId.equals(NetworkId.DBREGIO))
