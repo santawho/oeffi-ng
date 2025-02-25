@@ -255,7 +255,8 @@
     <string name="toast_trip_additional_transfertime">%1$d minutes transfer time</string>
 
     <!-- directions trip details -->
-    <string name="directions_trip_details_duraton">Duration %s</string>
+    <string name="directions_trip_details_not_travelable">Not feasible</string>
+    <string name="directions_trip_details_duration">Duration %s</string>
     <string name="directions_trip_details_num_changes">%d ch.</string>
     <string name="directions_trip_details_walk">walk of &lt;b>%1$d minutes&lt;/b> %2$sto&lt;br/>%3$s</string>
     <string name="directions_trip_details_bike">bike ride of &lt;b>%1$d minutes&lt;/b> %2$sto&lt;br/>%3$s</string>

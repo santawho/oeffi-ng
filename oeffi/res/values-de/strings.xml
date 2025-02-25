@@ -254,7 +254,8 @@
     <string name="toast_trip_additional_transfertime">%1$d Minuten Umsteigezeit</string>
 
     <!-- directions trip details -->
-    <string name="directions_trip_details_duraton">Dauer %s</string>
+    <string name="directions_trip_details_not_travelable">Nicht durchführbar</string>
+    <string name="directions_trip_details_duration">Dauer %s</string>
     <string name="directions_trip_details_num_changes">%d Umst.</string>
     <string name="directions_trip_details_walk">&lt;b>%1$d Minuten&lt;/b> %2$sFußweg nach&lt;br/>%3$s</string>
     <string name="directions_trip_details_bike">&lt;b>%1$d Minuten&lt;/b> %2$sFahrt mit dem Fahrrad nach&lt;br/>%3$s</string>

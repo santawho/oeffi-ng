@@ -202,7 +202,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     protected Handler backgroundHandler;
     protected final Handler handler = new Handler();
 
-    private static final int LEGSGROUP_INSERT_INDEX = 2;
+    private static final int LEGSGROUP_INSERT_INDEX = 3;
 
     private static final Logger log = LoggerFactory.getLogger(TripDetailsActivity.class);
 
@@ -258,7 +258,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final StringBuilder secondaryTitle = new StringBuilder();
         final Long duration = tripRenderer.trip.getPublicDuration();
         if (duration != null)
-            secondaryTitle.append(getString(R.string.directions_trip_details_duraton, formatTimeSpan(duration)));
+            secondaryTitle.append(getString(R.string.directions_trip_details_duration, formatTimeSpan(duration)));
 
         if (tripRenderer.trip.numChanges != null && tripRenderer.trip.numChanges > 0) {
             if (secondaryTitle.length() > 0)
@@ -335,6 +335,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
         addActionBarButtons();
 
+        if (!tripRenderer.isTravelable())
+            findViewById(R.id.directions_trip_details_not_travelable).setVisibility(View.VISIBLE);
+
         legsGroup = findViewById(R.id.directions_trip_details_legs_group);
 
         updateLocations();
@@ -401,12 +404,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         actionBar.setPrimaryTitle(getString(renderConfig.isJourney
                         ? R.string.journey_details_title
                         : R.string.trip_details_title));
-        if (!renderConfig.isJourney) {
-            NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
-            if (networkProvider.hasCapabilities(NetworkProvider.Capability.JOURNEY)) {
-                actionBar.addButton(R.drawable.ic_navigation_white_24dp, R.string.directions_trip_details_action_start_routing)
-                        .setOnClickListener(buttonView -> startNavigation(tripRenderer.trip, renderConfig));
-            }
+        if (!renderConfig.isJourney
+                && tripRenderer.isTravelable()
+                && NetworkProviderFactory.provider(network).hasCapabilities(NetworkProvider.Capability.JOURNEY)) {
+            final ImageButton navigateButton = actionBar.addButton(
+                    R.drawable.ic_navigation_white_24dp,
+                    R.string.directions_trip_details_action_start_routing);
+            navigateButton.setOnClickListener(buttonView -> startNavigation(tripRenderer.trip, renderConfig));
         }
     }
 

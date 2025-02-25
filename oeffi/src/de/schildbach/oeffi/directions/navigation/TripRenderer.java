@@ -95,12 +95,20 @@ public class TripRenderer {
     public LegContainer currentLeg;
     public final Map<LegKey, Boolean> legExpandStates = new HashMap<>();
     public NotificationData notificationData;
+    private Boolean travelable;
 
     public TripRenderer(final Trip trip, final boolean isJourney, final Date now) {
         this.trip = trip;
         this.isJourney = isJourney;
         setupFromTrip(trip);
         evaluateByTime(now);
+    }
+
+    public boolean isTravelable() {
+        if (travelable == null) {
+            travelable = trip.isTravelable();
+        }
+        return travelable;
     }
 
     private void setupFromTrip(final Trip trip) {

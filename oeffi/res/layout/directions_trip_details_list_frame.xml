@@ -67,6 +67,19 @@
                     android:stretchColumns="2" />
 
                 <TextView
+                    android:id="@+id/directions_trip_details_not_travelable"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/bg_highlighted_darkdefault"
+                    android:textColor="@color/fg_significant_darkdefault"
+                    android:textStyle="bold"
+                    android:textSize="@dimen/font_size_xlarge"
+                    android:text="@string/directions_trip_details_not_travelable"
+                    android:padding="8dp"
+                    android:gravity="center"
+                    android:visibility="gone"/>
+
+                <TextView
                     android:id="@+id/directions_trip_details_footer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
