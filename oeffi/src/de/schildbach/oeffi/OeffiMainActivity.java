@@ -251,7 +251,7 @@ public abstract class OeffiMainActivity extends OeffiActivity {
                 if (code == 200) {
                     final String lastModifiedStr = response.header("Last-Modified");
                     if (lastModifiedStr != null) {
-                        final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
+                        final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
                         final Date thisModified = dateFormat.parse(modifiedStr);
                         final Date lastModified = dateFormat.parse(lastModifiedStr);
                         if (lastModified != null && lastModified.after(thisModified)) {
