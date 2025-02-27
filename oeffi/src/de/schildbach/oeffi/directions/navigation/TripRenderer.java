@@ -152,6 +152,7 @@ public class TripRenderer {
 
     public void evaluateByTime(final Date now) {
         notificationData = new NotificationData();
+        setNextEventClock(now);
         for (int iLeg = 0; iLeg < legs.size(); ++iLeg) {
             final TripRenderer.LegContainer legC = legs.get(iLeg);
             final boolean isCurrent;
@@ -186,7 +187,6 @@ public class TripRenderer {
         } else {
             // leg is now
             setNextEventType(true);
-            setNextEventClock(now);
             final boolean eventIsNow = setNextEventTimeLeft(now, endTime, leg.arrivalStop.plannedArrivalTime, 0);
             String targetName = leg.arrivalStop.location.uniqueShortName();
             setNextEventTarget(targetName);
@@ -225,8 +225,8 @@ public class TripRenderer {
         final Trip.Individual leg = legC.individualLeg;
         final Stop transferFrom = legC.transferFrom != null ? legC.transferFrom.publicLeg.arrivalStop : null;
         final Stop transferTo = legC.transferTo != null ? legC.transferTo.publicLeg.departureStop : null;
-        Date beginTime = transferFrom != null ? transferFrom.getArrivalTime() : null;
-        Date endTime = transferTo != null ? transferTo.getDepartureTime() : null;
+        Date beginTime = transferFrom != null ? transferFrom.getArrivalTime() : leg == null ? null : leg.departureTime;
+        Date endTime = transferTo != null ? transferTo.getDepartureTime() : leg == null ? null : leg.arrivalTime;
         if (beginTime != null && now.before(beginTime)) {
             // leg is in the future
         } else if (endTime != null && now.after(endTime)) {
@@ -234,7 +234,6 @@ public class TripRenderer {
         } else {
             // leg is now
             setNextEventType(false);
-            setNextEventClock(now);
             final boolean eventIsNow = setNextEventTimeLeft(now, endTime, transferTo != null ? transferTo.plannedDepartureTime : null, leg != null ? leg.min : 0);
             final String targetName = (transferTo != null) ? transferTo.location.uniqueShortName() : null;
             setNextEventTarget(targetName);

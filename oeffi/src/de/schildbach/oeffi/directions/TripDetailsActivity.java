@@ -997,8 +997,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         final TextView progress = row.findViewById(R.id.directions_trip_details_individual_entry_progress);
         progress.setVisibility(View.GONE);
-        Date beginTime = transferFrom != null ? transferFrom.getArrivalTime() : null;
-        Date endTime = transferTo != null ? transferTo.getDepartureTime() : null;
+        Date beginTime = transferFrom != null ? transferFrom.getArrivalTime() : leg == null ? null : leg.departureTime;
+        Date endTime = transferTo != null ? transferTo.getDepartureTime() : leg == null ? null : leg.arrivalTime;
         if (beginTime != null && now.before(beginTime)) {
             // leg is in the future
             row.setBackgroundColor(colorLegIndividualFutureBackground);
