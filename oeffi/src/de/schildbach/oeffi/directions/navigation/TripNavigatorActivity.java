@@ -148,7 +148,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
     private void stopNavigation() {
         if (navigationNotification != null) {
-            navigationNotification.remove(this);
+            navigationNotification.remove();
             navigationNotification = null;
         }
         finish();
@@ -174,7 +174,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         if (!navigationNotificationBeingDeleted) {
             if (!permissionRequestRunning) {
                 if (NavigationNotification.requestPermissions(this, 1))
-                    updateNotification(tripRenderer.trip, true);
+                    updateNotification(tripRenderer.trip);
                 else
                     permissionRequestRunning = true;
             }
@@ -206,11 +206,6 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
     private void askStopNavigation() {
         navigationNotificationBeingDeleted = true;
-        if (navigationNotification != null) {
-            navigationNotification.remove(this);
-            navigationNotification = null;
-        }
-
         new AlertDialog.Builder(this)
                 .setTitle(R.string.navigation_stopnav_title)
                 .setMessage(R.string.navigation_stopnav_text)
@@ -218,8 +213,9 @@ public class TripNavigatorActivity extends TripDetailsActivity {
                     stopNavigation();
                 })
                 .setNegativeButton(R.string.navigation_stopnav_continue, (dialogInterface, i) -> {
+                    navigationNotificationBeingDeleted = false;
                     doCheckAutoRefresh(true);
-                    updateNotification(tripRenderer.trip, true);
+                    updateNotification(tripRenderer.trip);
                 })
                 .create().show();
     }
@@ -236,7 +232,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         }
         if (granted) {
             permissionRequestRunning = false;
-            updateNotification(tripRenderer.trip, true);
+            updateNotification(tripRenderer.trip);
         } else {
             // warning ??
         }
@@ -270,7 +266,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
                     handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));
                 } else {
                     if (doNotifcationUpdate)
-                        updateNotification(updatedTrip, true);
+                        updateNotification(updatedTrip);
                     runOnUiThread(() -> onTripUpdated(updatedTrip));
                 }
             } catch (IOException e) {
@@ -379,10 +375,10 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         return true;
     }
 
-    private void updateNotification(final Trip trip, final boolean foreGround) {
-        if (navigationNotification == null) {
-            navigationNotification = new NavigationNotification(this, trip, getIntent());
-        }
-        navigationNotification.update(this, trip, foreGround);
+    private void updateNotification(final Trip trip) {
+        navigationNotification = new NavigationNotification(this, getIntent());
+        backgroundHandler.post(() -> {
+            navigationNotification.updateFromForeground(trip);
+        });
     }
 }

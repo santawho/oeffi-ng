@@ -121,14 +121,25 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     public static final String INTENT_EXTRA_TRIP = TripDetailsActivity.class.getName() + ".trip";
     public static final String INTENT_EXTRA_RENDERCONFIG = TripDetailsActivity.class.getName() + ".config";
 
-    public static class IntentData {
+    public static class IntentData implements Serializable {
         public final NetworkId network;
         public final Trip trip;
         public final RenderConfig renderConfig;
+
+        public IntentData(
+                final NetworkId network,
+                final Trip trip,
+                final RenderConfig renderConfig) {
+            this.network = network;
+            this.trip = trip;
+            this.renderConfig = renderConfig;
+        }
+
         public IntentData(final Intent intent) {
-            network = (NetworkId) intent.getSerializableExtra(INTENT_EXTRA_NETWORK);
-            trip = (Trip) intent.getSerializableExtra(INTENT_EXTRA_TRIP);
-            renderConfig = (RenderConfig) intent.getSerializableExtra(INTENT_EXTRA_RENDERCONFIG);
+            this(
+                    (NetworkId) intent.getSerializableExtra(INTENT_EXTRA_NETWORK),
+                    (Trip) intent.getSerializableExtra(INTENT_EXTRA_TRIP),
+                    (RenderConfig) intent.getSerializableExtra(INTENT_EXTRA_RENDERCONFIG));
         }
     }
 
