@@ -81,6 +81,7 @@ public class TripRenderer {
     };
 
     public static class NotificationData implements Serializable {
+        long refreshRequiredAt;
         int legIndex;
         boolean isArrival;
         Date eventTime;

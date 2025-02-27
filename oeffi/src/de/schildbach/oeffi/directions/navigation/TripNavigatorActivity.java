@@ -106,7 +106,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
             public void onReceive(Context context, Intent intent) {
                 if (!isPaused) {
                     nextNavigationRefreshTime = 1; // forces refresh
-                    if (!checkAutoRefresh())
+                    if (!doCheckAutoRefresh(false))
                         updateGUI();
                 }
             }
@@ -137,7 +137,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
                         ? R.color.bg_action_alternative_directions
                         : R.color.bg_action_bar_navigation);
         actionBar.setPrimaryTitle(getString(R.string.navigation_details_title));
-        actionBar.addProgressButton().setOnClickListener(buttonView -> refreshNavigation());
+        actionBar.addProgressButton().setOnClickListener(buttonView -> refreshNavigation(true));
     }
 
     @Override
@@ -185,7 +185,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     protected void onNewIntent(@NonNull Intent intent) {
         super.onNewIntent(intent);
         if (!handleDeleteNotification(intent)) {
-            checkAutoRefresh();
+            doCheckAutoRefresh(true);
             handleSwitchToNextEvent(intent);
         }
     }
@@ -218,7 +218,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
                     stopNavigation();
                 })
                 .setNegativeButton(R.string.navigation_stopnav_continue, (dialogInterface, i) -> {
-                    checkAutoRefresh();
+                    doCheckAutoRefresh(true);
                     updateNotification(tripRenderer.trip, true);
                 })
                 .create().show();
@@ -244,15 +244,19 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
     @Override
     protected boolean checkAutoRefresh() {
+        return doCheckAutoRefresh(true);
+    }
+
+    private boolean doCheckAutoRefresh(final boolean doNotifcationUpdate) {
         if (isPaused) return false;
         if (nextNavigationRefreshTime < 0) return false;
         long now = new Date().getTime();
         if (now < nextNavigationRefreshTime) return false;
-        refreshNavigation();
+        refreshNavigation(doNotifcationUpdate);
         return true;
     }
 
-    private void refreshNavigation() {
+    private void refreshNavigation(final boolean doNotifcationUpdate) {
         if (navigationRefreshRunnable != null)
             return;
 
@@ -265,7 +269,8 @@ public class TripNavigatorActivity extends TripDetailsActivity {
                 if (updatedTrip == null) {
                     handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));
                 } else {
-                    updateNotification(updatedTrip, true);
+                    if (doNotifcationUpdate)
+                        updateNotification(updatedTrip, true);
                     runOnUiThread(() -> onTripUpdated(updatedTrip));
                 }
             } catch (IOException e) {
