@@ -11,3 +11,5 @@ build/
 
 # Android SDK
 local.properties
+passwords.properties
+
