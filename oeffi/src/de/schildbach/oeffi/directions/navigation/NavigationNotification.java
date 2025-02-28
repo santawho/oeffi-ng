@@ -252,7 +252,7 @@ public class NavigationNotification {
             log.info("next event {} < 2 mins : {}", nextEventTimeLeftMs, lastNotified.leftTimeReminded);
             nextReminderTimeMs = nowTime + nextEventTimeLeftMs;
             if (lastNotified.leftTimeReminded > REMINDER_SECOND_MS) {
-                log.info("reminding 2 mins = {}", REMINDER_SECOND_MS);
+                log.info("reminding 2 mins = {}", nextReminderTimeMs);
                 reminder = true;
                 newNotified.leftTimeReminded = REMINDER_SECOND_MS;
             }
@@ -260,7 +260,7 @@ public class NavigationNotification {
             log.info("next event {} < 6 mins : {}", nextEventTimeLeftMs, lastNotified.leftTimeReminded);
             nextReminderTimeMs = nowTime + nextEventTimeLeftMs - REMINDER_SECOND_MS;
             if (lastNotified.leftTimeReminded > REMINDER_FIRST_MS) {
-                log.info("reminding 6 mins = {}", REMINDER_FIRST_MS);
+                log.info("reminding 6 mins = {}", nextReminderTimeMs);
                 reminder = true;
                 newNotified.leftTimeReminded = REMINDER_FIRST_MS;
             }
