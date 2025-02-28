@@ -442,19 +442,26 @@ public class NavigationNotification {
         }
 
         String valueStr = tripRenderer.nextEventTimeLeftValue;
-        if (TripRenderer.NO_TIME_LEFT_VALUE.equals(valueStr))
-            valueStr = context.getString(R.string.directions_trip_details_next_event_no_time_left);
-        remoteViews.setTextViewText(R.id.navigation_notification_next_event_time_value, valueStr);
-        remoteViews.setTextColor(R.id.navigation_notification_next_event_time_value,
-                context.getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_arrow : R.color.fg_significant));
-        remoteViews.setTextViewText(R.id.navigation_notification_next_event_time_unit, tripRenderer.nextEventTimeLeftUnit);
-        remoteViews.setViewVisibility(R.id.navigation_notification_next_event_time_hourglass,
-                tripRenderer.nextEventTimeHourglassVisible ? View.VISIBLE : View.GONE);
-        if (tripRenderer.nextEventTimeLeftExplainStr != null) {
-            remoteViews.setViewVisibility(R.id.navigation_notification_next_event_time_explain, View.VISIBLE);
-            remoteViews.setTextViewText(R.id.navigation_notification_next_event_time_explain, tripRenderer.nextEventTimeLeftExplainStr);
+        if (valueStr == null) {
+            remoteViews.setViewVisibility(R.id.navigation_notification_next_event_time, View.GONE);
+            remoteViews.setViewVisibility(R.id.navigation_notification_next_event_finished, View.VISIBLE);
+            remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_finished, colorHighlight);
+            remoteViews.setTextColor(R.id.navigation_notification_next_event_finished, context.getColor(R.color.fg_significant));
         } else {
-            remoteViews.setViewVisibility(R.id.navigation_notification_next_event_time_explain, View.GONE);
+            if (TripRenderer.NO_TIME_LEFT_VALUE.equals(valueStr))
+                valueStr = context.getString(R.string.directions_trip_details_next_event_no_time_left);
+            remoteViews.setTextViewText(R.id.navigation_notification_next_event_time_value, valueStr);
+            remoteViews.setTextColor(R.id.navigation_notification_next_event_time_value,
+                    context.getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_arrow : R.color.fg_significant));
+            remoteViews.setTextViewText(R.id.navigation_notification_next_event_time_unit, tripRenderer.nextEventTimeLeftUnit);
+            remoteViews.setViewVisibility(R.id.navigation_notification_next_event_time_hourglass,
+                    tripRenderer.nextEventTimeHourglassVisible ? View.VISIBLE : View.GONE);
+            if (tripRenderer.nextEventTimeLeftExplainStr != null) {
+                remoteViews.setViewVisibility(R.id.navigation_notification_next_event_time_explain, View.VISIBLE);
+                remoteViews.setTextViewText(R.id.navigation_notification_next_event_time_explain, tripRenderer.nextEventTimeLeftExplainStr);
+            } else {
+                remoteViews.setViewVisibility(R.id.navigation_notification_next_event_time_explain, View.GONE);
+            }
         }
 
         if (tripRenderer.nextEventTargetName != null) {

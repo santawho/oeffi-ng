@@ -3,9 +3,18 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_marginTop="20dp"
     android:orientation="vertical"
     android:gravity="center">
+    <TextView
+        android:id="@+id/navigation_notification_next_event_finished"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:text="@string/directions_trip_details_finished"
+        android:gravity="center"
+        android:paddingHorizontal="20dp"
+        android:textSize="@dimen/navigation_notification_next_event_time_fontsize"
+        android:textStyle="bold"/>
     <LinearLayout
         android:id="@+id/navigation_notification_next_event_time"
         android:layout_width="match_parent"

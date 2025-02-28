@@ -67,7 +67,7 @@
                     android:stretchColumns="2" />
 
                 <TextView
-                    android:id="@+id/directions_trip_details_not_travelable"
+                    android:id="@+id/directions_trip_details_not_feasible"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@color/bg_highlighted_darkdefault"
@@ -78,6 +78,18 @@
                     android:padding="8dp"
                     android:gravity="center"
                     android:visibility="gone"/>
+
+                <TextView
+                    android:id="@+id/directions_trip_details_finished"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/directions_trip_details_finished"
+                    android:paddingTop="@dimen/text_padding_vertical"
+                    android:paddingBottom="@dimen/text_padding_vertical"
+                    android:gravity="center"
+                    android:textSize="@dimen/font_size_large"
+                    android:background="@color/bg_trip_details_time_left"
+                    android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/directions_trip_details_footer"

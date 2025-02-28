@@ -255,6 +255,7 @@
 
     <!-- directions trip details -->
     <string name="directions_trip_details_not_travelable">Nicht durchführbar</string>
+    <string name="directions_trip_details_finished">Beendet</string>
     <string name="directions_trip_details_duration">Dauer %s</string>
     <string name="directions_trip_details_num_changes">%d Umst.</string>
     <string name="directions_trip_details_walk">&lt;b>%1$d Minuten&lt;/b> %2$sFußweg nach&lt;br/>%3$s</string>

@@ -347,7 +347,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         addActionBarButtons();
 
         if (!tripRenderer.isTravelable())
-            findViewById(R.id.directions_trip_details_not_travelable).setVisibility(View.VISIBLE);
+            findViewById(R.id.directions_trip_details_not_feasible).setVisibility(View.VISIBLE);
 
         legsGroup = findViewById(R.id.directions_trip_details_legs_group);
 
@@ -603,7 +603,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             showEvent = false;
             showNextEventWhenUnlocked = false;
             showNextEventWhenLocked = false;
+            findViewById(R.id.directions_trip_details_finished).setVisibility(View.VISIBLE);
         } else {
+            findViewById(R.id.directions_trip_details_finished).setVisibility(View.GONE);
             final KeyguardManager keyguard = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
             if (keyguard.isKeyguardLocked()) {
                 showEvent = showNextEventWhenLocked;
