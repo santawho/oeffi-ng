@@ -346,7 +346,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
         addActionBarButtons();
 
-        if (!tripRenderer.isTravelable())
+        if (!tripRenderer.isFeasible())
             findViewById(R.id.directions_trip_details_not_feasible).setVisibility(View.VISIBLE);
 
         legsGroup = findViewById(R.id.directions_trip_details_legs_group);
@@ -416,7 +416,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                         ? R.string.journey_details_title
                         : R.string.trip_details_title));
         if (!renderConfig.isJourney
-                && tripRenderer.isTravelable()
+                // && tripRenderer.isFeasible()
                 && NetworkProviderFactory.provider(network).hasCapabilities(NetworkProvider.Capability.JOURNEY)) {
             final ImageButton navigateButton = actionBar.addButton(
                     R.drawable.ic_navigation_white_24dp,
@@ -1001,7 +1001,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         progress.setVisibility(View.GONE);
         Date beginTime = transferFrom != null ? transferFrom.getArrivalTime() : leg == null ? null : leg.departureTime;
         Date endTime = transferTo != null ? transferTo.getDepartureTime() : leg == null ? null : leg.arrivalTime;
-        if (beginTime != null && now.before(beginTime)) {
+        if (transferFrom != null && beginTime != null && now.before(beginTime)) {
             // leg is in the future
             row.setBackgroundColor(colorLegIndividualFutureBackground);
         } else if (endTime != null && now.after(endTime)) {
@@ -1278,7 +1278,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         if (location.hasId()) {
             JourneyRef feederJourneyRef = leg.journeyRef;
             JourneyRef connectionJourneyRef = leg.journeyRef;
-            if (stop.getArrivalTime() == null) {
+            if (stop.location.id.equals(leg.departureStop.location.id)
+                    && stop.plannedDepartureTime != null
+                    && stop.plannedDepartureTime.equals(leg.departureStop.plannedDepartureTime)) {
                 // departure stop of a journey, find previous journey as feeder
                 feederJourneyRef = null;
                 for (final TripRenderer.LegContainer legC : tripRenderer.legs) {
@@ -1289,7 +1291,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                             feederJourneyRef = legC.publicLeg.journeyRef;
                     }
                 }
-            } else if (stop.getDepartureTime() == null) {
+            } else if (stop.location.id.equals(leg.arrivalStop.location.id)
+                    && stop.plannedArrivalTime != null
+                    && stop.plannedArrivalTime.equals(leg.arrivalStop.plannedArrivalTime)) {
                 // arrival stop of a journey, find next journey as connection
                 connectionJourneyRef = null;
                 boolean found = false;
@@ -1304,7 +1308,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     }
                 }
             }
-            stopNameView.setOnClickListener(new StopClickListener(stop, feederJourneyRef, connectionJourneyRef));
+            stopNameView.setOnClickListener(new StopClickListener(stop, leg.journeyRef, feederJourneyRef, connectionJourneyRef));
         } else {
             stopNameView.setOnClickListener(null);
         }
@@ -1428,13 +1432,17 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     private class StopClickListener implements android.view.View.OnClickListener {
         private final Stop stop;
+        final JourneyRef currentJourneyRef;
         final JourneyRef feederJourneyRef;
         final JourneyRef connectionJourneyRef;
 
         public StopClickListener(
                 final Stop stop,
-                final JourneyRef feederJourneyRef, final JourneyRef connectionJourneyRef) {
+                final JourneyRef currentJourneyRef,
+                final JourneyRef feederJourneyRef,
+                final JourneyRef connectionJourneyRef) {
             this.stop = stop;
+            this.currentJourneyRef = currentJourneyRef;
             this.feederJourneyRef = feederJourneyRef;
             this.connectionJourneyRef = connectionJourneyRef;
         }
@@ -1463,7 +1471,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     StationDetailsActivity.start(TripDetailsActivity.this, network, stop.location);
                     return true;
                 } else if (menuItemId == R.id.station_context_directions_alternative_from) {
-                    return onFindAlternativeConnections(stop, feederJourneyRef, connectionJourneyRef, renderConfig.queryTripsRequestData);
+                    return onFindAlternativeConnections(stop, currentJourneyRef, feederJourneyRef, connectionJourneyRef, renderConfig.queryTripsRequestData);
                 } else if (menuItemId == R.id.station_context_navigate_to) {
                     startNavigationForJourneyToExit(stop);
                     return true;
@@ -1739,7 +1747,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     protected boolean onFindAlternativeConnections(
             final Stop stop,
-            final JourneyRef feederJourneyRef, final JourneyRef connectionJourneyRef,
+            final JourneyRef currentJourneyRef,
+            final JourneyRef feederJourneyRef,
+            final JourneyRef connectionJourneyRef,
             final QueryTripsRunnable.TripRequestData queryTripsRequestData) {
         // override if implemented
         return false;

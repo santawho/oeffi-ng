@@ -107,7 +107,7 @@ public class TripRenderer {
         evaluateByTime(now);
     }
 
-    public boolean isTravelable() {
+    public boolean isFeasible() {
         if (travelable == null) {
             travelable = trip.isTravelable();
         }
@@ -234,7 +234,7 @@ public class TripRenderer {
         Date beginTime = transferFrom != null ? transferFrom.getArrivalTime() : leg == null ? null : leg.departureTime;
         Date endTime = transferTo != null ? transferTo.getDepartureTime() : leg == null ? null : leg.arrivalTime;
         Date plannedEndTime = transferTo != null ? transferTo.plannedDepartureTime : leg == null ? null : leg.arrivalTime;
-        if (beginTime != null && now.before(beginTime)) {
+        if (transferFrom != null && beginTime != null && now.before(beginTime)) {
             // leg is in the future
         } else if (endTime != null && now.after(endTime)) {
             // leg is in the past

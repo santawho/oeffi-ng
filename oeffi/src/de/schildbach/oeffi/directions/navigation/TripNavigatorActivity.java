@@ -283,9 +283,12 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         backgroundHandler.post(navigationRefreshRunnable);
     }
 
+    @Override
     protected boolean onFindAlternativeConnections(
             final Stop stop,
-            final JourneyRef feederJourneyRef, final JourneyRef connectionJourneyRef,
+            final JourneyRef currentJourneyRef,
+            final JourneyRef feederJourneyRef,
+            final JourneyRef connectionJourneyRef,
             QueryTripsRunnable.TripRequestData queryTripsRequestData) {
         final Date arrivalTime = stop.getArrivalTime();
         final TimeSpec.Absolute time = new TimeSpec.Absolute(TimeSpec.DepArr.DEPART,
@@ -295,6 +298,11 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         overviewConfig.referenceTime = time;
         overviewConfig.feederJourneyRef = feederJourneyRef;
         overviewConfig.connectionJourneyRef = connectionJourneyRef;
+        if (currentJourneyRef != null) {
+            overviewConfig.prependTrip = tripRenderer.trip;
+            overviewConfig.prependToJourneyRef = currentJourneyRef;
+            overviewConfig.prependToStop = stop;
+        }
         overviewConfig.actionBarColor = R.color.bg_action_alternative_directions;
 
         final ProgressDialog progressDialog = ProgressDialog.show(TripNavigatorActivity.this, null,
