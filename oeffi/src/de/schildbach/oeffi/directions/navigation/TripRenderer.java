@@ -85,7 +85,9 @@ public class TripRenderer {
         int legIndex;
         boolean isArrival;
         Date eventTime;
+        Date plannedEventTime;
         Position position;
+        Position plannedPosition;
         long leftTimeReminded;
     }
 
@@ -180,6 +182,7 @@ public class TripRenderer {
         Trip.Public leg = legC.publicLeg;
         Date beginTime = leg.departureStop.getDepartureTime();
         Date endTime = leg.arrivalStop.getArrivalTime();
+        Date plannedEndTime = leg.arrivalStop.plannedArrivalTime;
         if (now.before(beginTime)) {
             // leg is in the future
         } else if (now.after(endTime)) {
@@ -187,7 +190,7 @@ public class TripRenderer {
         } else {
             // leg is now
             setNextEventType(true);
-            final boolean eventIsNow = setNextEventTimeLeft(now, endTime, leg.arrivalStop.plannedArrivalTime, 0);
+            final boolean eventIsNow = setNextEventTimeLeft(now, endTime, plannedEndTime, 0);
             String targetName = leg.arrivalStop.location.uniqueShortName();
             setNextEventTarget(targetName);
             String depName = (nextLegC != null) ? nextLegC.publicLeg.departureStop.location.uniqueShortName() : null;
@@ -195,7 +198,8 @@ public class TripRenderer {
             setNextEventDeparture(depChanged ? depName : null);
             final Position arrPos = leg.arrivalStop.getArrivalPosition();
             final Position depPos = (nextLegC != null) ? nextLegC.publicLeg.getDeparturePosition() : null;
-            setNextEventPositions(arrPos, depPos, depPos != null && !depPos.equals(nextLegC.publicLeg.departureStop.plannedDeparturePosition));
+            final Position plannedDepPos = (nextLegC != null) ? nextLegC.publicLeg.departureStop.plannedDeparturePosition : null;
+            setNextEventPositions(arrPos, depPos, depPos != null && !depPos.equals(plannedDepPos));
             setNextEventTransport((nextLegC != null) ? nextLegC.publicLeg : null);
             setNextEventTransferTimes(walkLegC, false);
             setNextEventActions(
@@ -213,7 +217,9 @@ public class TripRenderer {
 
             notificationData.isArrival = true;
             notificationData.eventTime = endTime;
+            notificationData.plannedEventTime = plannedEndTime;
             notificationData.position = depPos;
+            notificationData.plannedPosition = plannedDepPos;
             return true;
         }
         return false;
@@ -227,6 +233,7 @@ public class TripRenderer {
         final Stop transferTo = legC.transferTo != null ? legC.transferTo.publicLeg.departureStop : null;
         Date beginTime = transferFrom != null ? transferFrom.getArrivalTime() : leg == null ? null : leg.departureTime;
         Date endTime = transferTo != null ? transferTo.getDepartureTime() : leg == null ? null : leg.arrivalTime;
+        Date plannedEndTime = transferTo != null ? transferTo.plannedDepartureTime : leg == null ? null : leg.arrivalTime;
         if (beginTime != null && now.before(beginTime)) {
             // leg is in the future
         } else if (endTime != null && now.after(endTime)) {
@@ -234,7 +241,7 @@ public class TripRenderer {
         } else {
             // leg is now
             setNextEventType(false);
-            final boolean eventIsNow = setNextEventTimeLeft(now, endTime, transferTo != null ? transferTo.plannedDepartureTime : null, leg != null ? leg.min : 0);
+            final boolean eventIsNow = setNextEventTimeLeft(now, endTime, transferTo != null ? plannedEndTime : null, leg != null ? leg.min : 0);
             final String targetName = (transferTo != null) ? transferTo.location.uniqueShortName() : null;
             setNextEventTarget(targetName);
             final String arrName = (transferFrom != null) ? transferFrom.location.uniqueShortName() : null;
@@ -242,7 +249,8 @@ public class TripRenderer {
             setNextEventDeparture(null);
             final Position arrPos = transferFrom != null ? transferFrom.getArrivalPosition() : null;
             final Position depPos = transferTo != null ? transferTo.getDeparturePosition() : null;
-            setNextEventPositions(arrPos, depPos, depPos != null && !depPos.equals(transferTo.plannedArrivalPosition));
+            final Position plannedDepPos = transferTo != null ? transferTo.plannedDeparturePosition : null;
+            setNextEventPositions(arrPos, depPos, depPos != null && !depPos.equals(plannedDepPos));
             setNextEventTransport(legC.transferTo != null ? legC.transferTo.publicLeg : null);
             setNextEventTransferTimes(legC, true);
             setNextEventActions(transferTo == null ? 0
@@ -259,7 +267,9 @@ public class TripRenderer {
 
             notificationData.isArrival = false;
             notificationData.eventTime = endTime;
+            notificationData.plannedEventTime = plannedEndTime;
             notificationData.position = depPos;
+            notificationData.plannedPosition = plannedDepPos;
             return true;
         }
         return false;

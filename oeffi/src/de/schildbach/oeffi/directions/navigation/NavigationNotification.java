@@ -216,77 +216,66 @@ public class NavigationNotification {
         // setupNotificationView(context, notificationLayoutExpanded, tripRenderer, now, newNotified);
 
         final TripRenderer.NotificationData newNotified = tripRenderer.notificationData;
-        boolean changes = false;
+        boolean timeChanged = false;
+        boolean posChanged = false;
         boolean reminder = false;
         long nextReminderTimeMs = 0;
         final long nextEventTimeLeftMs = tripRenderer.nextEventTimeLeftMs;
-        if (lastNotified != null) {
-            if (newNotified.legIndex != lastNotified.legIndex) {
+        if (lastNotified == null || newNotified.legIndex != lastNotified.legIndex) {
+            if (lastNotified == null)
+                log.info("first notification !!");
+            else
                 log.info("switching leg from {} to {}", lastNotified.legIndex, newNotified.legIndex);
-                reminder = true;
+            reminder = true;
+            lastNotified = new TripRenderer.NotificationData();
+            lastNotified.legIndex = newNotified.legIndex;
+            lastNotified.leftTimeReminded = Long.MAX_VALUE;
+            lastNotified.eventTime = newNotified.plannedEventTime;
+            lastNotified.position = newNotified.plannedPosition;
+        }
+        if (newNotified.position != null && !newNotified.position.equals(lastNotified.position)) {
+            log.info("switching position from {} to {}", lastNotified.position, newNotified.position);
+            posChanged = true;
+        }
+        if (newNotified.eventTime != null && lastNotified.eventTime != null) {
+            final long diff = Math.abs(newNotified.eventTime.getTime() - lastNotified.eventTime.getTime());
+            if (diff < 120000) {
+                log.info("timediff = {} keeping last time", diff);
+                newNotified.eventTime = lastNotified.eventTime;
             } else {
-                if (newNotified.position != null && !newNotified.position.equals(lastNotified.position)) {
-                    log.info("switching position from {} to {}", lastNotified.position, newNotified.position);
-                    changes = true;
-                }
-                if (newNotified.eventTime != null && lastNotified.eventTime != null) {
-                    final long diff = Math.abs(newNotified.eventTime.getTime() - lastNotified.eventTime.getTime());
-                    if (diff < 120000) {
-                        log.info("timediff = {} keeping last time", diff);
-                        newNotified.eventTime = lastNotified.eventTime;
-                    } else {
-                        log.info("timediff = {} accepting new time", diff);
-                        changes = true;
-                    }
-                }
+                log.info("timediff = {} accepting new time", diff);
+                timeChanged = true;
             }
-            newNotified.leftTimeReminded = lastNotified.leftTimeReminded;
-            if (nextEventTimeLeftMs < REMINDER_SECOND_MS) {
-                log.info("next event {} < 2 mins : {}", nextEventTimeLeftMs, lastNotified.leftTimeReminded);
-                nextReminderTimeMs = nowTime + nextEventTimeLeftMs;
-                if (lastNotified.leftTimeReminded > REMINDER_SECOND_MS) {
-                    log.info("reminding 2 mins = {}", REMINDER_SECOND_MS);
-                    reminder = true;
-                    newNotified.leftTimeReminded = REMINDER_SECOND_MS;
-                }
-            } else if (nextEventTimeLeftMs < REMINDER_FIRST_MS) {
-                log.info("next event {} < 6 mins : {}", nextEventTimeLeftMs, lastNotified.leftTimeReminded);
-                nextReminderTimeMs = nowTime + nextEventTimeLeftMs - REMINDER_SECOND_MS;
-                if (lastNotified.leftTimeReminded > REMINDER_FIRST_MS) {
-                    log.info("reminding 6 mins = {}", REMINDER_FIRST_MS);
-                    reminder = true;
-                    newNotified.leftTimeReminded = REMINDER_FIRST_MS;
-                }
-            } else {
-                log.info("next event {} > 6 mins : {}", nextEventTimeLeftMs, lastNotified.leftTimeReminded);
-                nextReminderTimeMs = nowTime + nextEventTimeLeftMs - REMINDER_FIRST_MS;
-                if (lastNotified.leftTimeReminded <= REMINDER_SECOND_MS) {
-                    log.info("resetting");
-                    newNotified.leftTimeReminded = Long.MAX_VALUE;
-                }
-            }
-        } else {
-            log.info("first notification !!");
-            if (nextEventTimeLeftMs < REMINDER_SECOND_MS) {
-                log.info("next event {} < 2 mins", nextEventTimeLeftMs);
-                nextReminderTimeMs = nowTime + nextEventTimeLeftMs;
+        }
+        newNotified.leftTimeReminded = lastNotified.leftTimeReminded;
+        if (nextEventTimeLeftMs < REMINDER_SECOND_MS) {
+            log.info("next event {} < 2 mins : {}", nextEventTimeLeftMs, lastNotified.leftTimeReminded);
+            nextReminderTimeMs = nowTime + nextEventTimeLeftMs;
+            if (lastNotified.leftTimeReminded > REMINDER_SECOND_MS) {
+                log.info("reminding 2 mins = {}", REMINDER_SECOND_MS);
                 reminder = true;
                 newNotified.leftTimeReminded = REMINDER_SECOND_MS;
-            } else if (nextEventTimeLeftMs < REMINDER_FIRST_MS) {
-                log.info("next event {} < 6 mins", nextEventTimeLeftMs);
-                nextReminderTimeMs = nowTime + nextEventTimeLeftMs - REMINDER_SECOND_MS;
+            }
+        } else if (nextEventTimeLeftMs < REMINDER_FIRST_MS) {
+            log.info("next event {} < 6 mins : {}", nextEventTimeLeftMs, lastNotified.leftTimeReminded);
+            nextReminderTimeMs = nowTime + nextEventTimeLeftMs - REMINDER_SECOND_MS;
+            if (lastNotified.leftTimeReminded > REMINDER_FIRST_MS) {
+                log.info("reminding 6 mins = {}", REMINDER_FIRST_MS);
                 reminder = true;
                 newNotified.leftTimeReminded = REMINDER_FIRST_MS;
-            }  else {
-                log.info("next event {} > 6 mins", nextEventTimeLeftMs);
-                nextReminderTimeMs = nowTime + nextEventTimeLeftMs - REMINDER_FIRST_MS;
+            }
+        } else {
+            log.info("next event {} > 6 mins : {}", nextEventTimeLeftMs, lastNotified.leftTimeReminded);
+            nextReminderTimeMs = nowTime + nextEventTimeLeftMs - REMINDER_FIRST_MS;
+            if (lastNotified.leftTimeReminded <= REMINDER_SECOND_MS) {
+                log.info("resetting");
                 newNotified.leftTimeReminded = Long.MAX_VALUE;
             }
         }
         if (nextReminderTimeMs < nextRefreshTimeMs + 20000)
             nextRefreshTimeMs = nextReminderTimeMs;
 
-        log.info("changes = {}, reminder = {}, playAlarm = {}", changes, reminder);
+        log.info("timeChanged={}, posChanged={} reminder={}", timeChanged, posChanged, reminder);
 
         final Bundle extras = new Bundle();
         extras.putByteArray(EXTRA_INTENTDATA, Objects.serialize(intentData));
@@ -320,7 +309,7 @@ public class NavigationNotification {
                 .addAction(R.drawable.ic_navigation_white_24dp, context.getString(R.string.navigation_stopnav_showtrip),
                         getPendingActivityIntent(false, false));
 
-        if (changes) {
+        if (timeChanged || posChanged) {
             notificationBuilder.setSilent(true);
         } else if (reminder) {
             notificationBuilder
@@ -334,7 +323,7 @@ public class NavigationNotification {
         final Notification notification = notificationBuilder.build();
         getNotificationManager(context).notify(notificationTag, 0, notification);
 
-        if (changes) {
+        if (timeChanged || posChanged) {
             final Ringtone alarmTone = RingtoneManager.getRingtone(context, ResourceUri.fromResource(context, R.raw.nav_alarm));
             alarmTone.setAudioAttributes(new AudioAttributes.Builder().setUsage(USAGE_ALARM).build());
             alarmTone.play();
@@ -353,7 +342,7 @@ public class NavigationNotification {
             log.info("stop refreshing");
         }
 
-        return changes || reminder;
+        return timeChanged || posChanged || reminder;
     }
 
     public void updateFromForeground(final Trip newTrip) {
