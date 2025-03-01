@@ -13,6 +13,7 @@ def timeStr = timeFmt.format(now)
 timeFmt = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US)
 timeFmt.setTimeZone(TimeZone.getTimeZone('UTC'))
 def timeModifiedStr = timeFmt.format(new Date(now.getTime() + 60000 * 5))
+def githubTag = "v${timeStr}"
 
 def oeffi_ng_password = System.getenv('OEFFI_NG_JKS_PASSWORD')
 if (!oeffi_ng_password) {
@@ -133,4 +134,32 @@ tasks.register('svgToPng', fr.avianey.androidsvgdrawable.gradle.SvgDrawableTask)
     targetedDensities = ['xxhdpi', 'xxxhdpi']
     outputFormat = 'PNG'
     outputType = 'mipmap'
+}
+
+afterEvaluate {
+    assembleNgRelease.doLast {
+        // runs always afetr the NG release build. Why the following ??
+//        android.applicationVariants.all { variant ->
+//            println "variant.buildType.name = ${variant.buildType.name}"
+//            if (variant.buildType.name == 'release') {
+//                def releaseBuildTask = tasks.create(name: "release") {
+//                    println("....................  test   ..............................")
+//                }
+//                releaseBuildTask.mustRunAfter variant.assembleProvider
+//            }
+//        }
+        createRelease(githubTag, new File("${project.projectDir}/build/outputs/apk/ng/release/oeffi-studio-ng-release.apk"))
+    }
+}
+
+def createRelease(def tagName, def File apkFile) {
+    println "Creating release ${tagName} from ${apkFile.absolutePath}"
+    if (!apkFile.exists()) {
+        println "${apkFile.absolutePath} does not exist"
+        throw "${apkFile.absolutePath} does not exist";
+    }
+    // create tag
+    // push tag
+    // create release
+    // upload asset
 }
