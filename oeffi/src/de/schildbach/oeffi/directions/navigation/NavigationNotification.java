@@ -7,7 +7,6 @@ import static de.schildbach.oeffi.directions.navigation.NavigationAlarmManager.L
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -25,12 +24,9 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
-import android.os.Process;
 import android.os.Vibrator;
 import android.service.notification.StatusBarNotification;
-import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -42,20 +38,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
 
-import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.ResourceUri;
-import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Trip;
 
 public class NavigationNotification {
+    private static final int SOUND_ALARM = R.raw.nav_alarm;
+    private static final int SOUND_REMIND_NORMAL = R.raw.nav_remind_down;
+    private static final int SOUND_REMIND_IMPORTANT = R.raw.nav_remind_downup;
+    private static final int SOUND_REMIND_NEXTLEG = R.raw.nav_remind_up;
     private static final String CHANNEL_ID = "navigation";
     private static final String TAG_PREFIX = NavigationNotification.class.getName() + ":";
 
@@ -84,7 +79,7 @@ public class NavigationNotification {
             channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
 //            channel.enableVibration(true);
             channel.setVibrationPattern(VIBRATION_PATTERN_REMIND);
-            channel.setSound(ResourceUri.fromResource(context, R.raw.nav_remind),
+            channel.setSound(ResourceUri.fromResource(context, SOUND_REMIND_NORMAL),
                     new AudioAttributes.Builder().setUsage(USAGE_ALARM).build());
             getNotificationManager(context).createNotificationChannel(channel);
         }
@@ -218,7 +213,7 @@ public class NavigationNotification {
         final TripRenderer.NotificationData newNotified = tripRenderer.notificationData;
         boolean timeChanged = false;
         boolean posChanged = false;
-        boolean reminder = false;
+        int reminder = 0;
         long nextReminderTimeMs = 0;
         final long nextEventTimeLeftMs = tripRenderer.nextEventTimeLeftMs;
         if (lastNotified == null || newNotified.legIndex != lastNotified.legIndex) {
@@ -226,7 +221,7 @@ public class NavigationNotification {
                 log.info("first notification !!");
             else
                 log.info("switching leg from {} to {}", lastNotified.legIndex, newNotified.legIndex);
-            reminder = true;
+            reminder = SOUND_REMIND_NEXTLEG;
             lastNotified = new TripRenderer.NotificationData();
             lastNotified.legIndex = newNotified.legIndex;
             lastNotified.leftTimeReminded = Long.MAX_VALUE;
@@ -253,7 +248,7 @@ public class NavigationNotification {
             nextReminderTimeMs = nowTime + nextEventTimeLeftMs;
             if (lastNotified.leftTimeReminded > REMINDER_SECOND_MS) {
                 log.info("reminding 2 mins = {}", nextReminderTimeMs);
-                reminder = true;
+                reminder = SOUND_REMIND_IMPORTANT;
                 newNotified.leftTimeReminded = REMINDER_SECOND_MS;
             }
         } else if (nextEventTimeLeftMs < REMINDER_FIRST_MS) {
@@ -261,7 +256,7 @@ public class NavigationNotification {
             nextReminderTimeMs = nowTime + nextEventTimeLeftMs - REMINDER_SECOND_MS;
             if (lastNotified.leftTimeReminded > REMINDER_FIRST_MS) {
                 log.info("reminding 6 mins = {}", nextReminderTimeMs);
-                reminder = true;
+                reminder = SOUND_REMIND_NORMAL;
                 newNotified.leftTimeReminded = REMINDER_FIRST_MS;
             }
         } else {
@@ -311,11 +306,11 @@ public class NavigationNotification {
 
         if (timeChanged || posChanged) {
             notificationBuilder.setSilent(true);
-        } else if (reminder) {
+        } else if (reminder != 0) {
             notificationBuilder
                     .setSilent(false)
                     .setVibrate(VIBRATION_PATTERN_REMIND)
-                    .setSound(ResourceUri.fromResource(context, R.raw.nav_remind), AudioManager.STREAM_ALARM);
+                    .setSound(ResourceUri.fromResource(context, reminder), AudioManager.STREAM_ALARM);
         } else {
             notificationBuilder.setSilent(true);
         }
@@ -324,7 +319,7 @@ public class NavigationNotification {
         getNotificationManager(context).notify(notificationTag, 0, notification);
 
         if (timeChanged || posChanged) {
-            final Ringtone alarmTone = RingtoneManager.getRingtone(context, ResourceUri.fromResource(context, R.raw.nav_alarm));
+            final Ringtone alarmTone = RingtoneManager.getRingtone(context, ResourceUri.fromResource(context, SOUND_ALARM));
             alarmTone.setAudioAttributes(new AudioAttributes.Builder().setUsage(USAGE_ALARM).build());
             alarmTone.play();
             ((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(VIBRATION_PATTERN_ALARM, -1);
@@ -342,7 +337,7 @@ public class NavigationNotification {
             log.info("stop refreshing");
         }
 
-        return timeChanged || posChanged || reminder;
+        return timeChanged || posChanged || reminder != 0;
     }
 
     public void updateFromForeground(final Trip newTrip) {
