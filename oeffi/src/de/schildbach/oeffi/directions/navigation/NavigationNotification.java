@@ -267,7 +267,7 @@ public class NavigationNotification {
                 newNotified.leftTimeReminded = Long.MAX_VALUE;
             }
         }
-        if (nextReminderTimeMs < nextRefreshTimeMs + 20000)
+        if (nextReminderTimeMs > 0 && nextReminderTimeMs < nextRefreshTimeMs + 20000)
             nextRefreshTimeMs = nextReminderTimeMs;
 
         log.info("timeChanged={}, posChanged={} reminder={}", timeChanged, posChanged, reminder);
@@ -306,7 +306,7 @@ public class NavigationNotification {
 
         if (timeChanged || posChanged) {
             notificationBuilder.setSilent(true);
-        } else if (reminder != 0) {
+        } else if (reminder == SOUND_REMIND_NORMAL) {
             notificationBuilder
                     .setSilent(false)
                     .setVibrate(VIBRATION_PATTERN_REMIND)
@@ -323,6 +323,11 @@ public class NavigationNotification {
             alarmTone.setAudioAttributes(new AudioAttributes.Builder().setUsage(USAGE_ALARM).build());
             alarmTone.play();
             ((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(VIBRATION_PATTERN_ALARM, -1);
+        } else if (reminder != 0 && reminder != SOUND_REMIND_NORMAL) {
+            final Ringtone alarmTone = RingtoneManager.getRingtone(context, ResourceUri.fromResource(context, reminder));
+            alarmTone.setAudioAttributes(new AudioAttributes.Builder().setUsage(USAGE_ALARM).build());
+            alarmTone.play();
+            ((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(VIBRATION_PATTERN_REMIND, -1);
         }
 
         newNotified.refreshRequiredAt = nextRefreshTimeMs;
