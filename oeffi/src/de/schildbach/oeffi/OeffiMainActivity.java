@@ -242,11 +242,8 @@ public abstract class OeffiMainActivity extends OeffiActivity {
         final String updateUrl = getString(R.string.about_update_url);
         final String modifiedStr = getString(R.string.about_update_modified);
         new Thread(() -> {
-            final Request request = new Request.Builder()
-                    .url(updateUrl).head()
-                    .addHeader("If-Modified-Since", modifiedStr)
-                    .build();
-            try (Response response = new OkHttpClient().newCall(request).execute()) {
+            try (Response response = new OkHttpClient().newCall(
+                    new Request.Builder().url(updateUrl).head().build()).execute()) {
                 final int code = response.code();
                 if (code == 200) {
                     final String lastModifiedStr = response.header("Last-Modified");

@@ -1,4 +1,5 @@
 import java.text.SimpleDateFormat
+import groovy.json.JsonSlurper
 
 plugins {
     alias(libs.plugins.android.application)
@@ -16,11 +17,20 @@ def timeModifiedStr = timeFmt.format(new Date(now.getTime() + 60000 * 5))
 def githubTag = "v${timeStr}"
 
 def oeffi_ng_password = System.getenv('OEFFI_NG_JKS_PASSWORD')
+ext {
+    github_user = 'NOUSER';
+    github_repo = 'NOREPO';
+    github_token = 'NOTOKEN';
+}
+
 if (!oeffi_ng_password) {
     file('../../passwords.properties').withInputStream {
         def props = new Properties()
         props.load(it)
         oeffi_ng_password = props.get('oeffi_ng.jks.password')
+        project.github_user = props.get('github.user')
+        project.github_repo = props.get('github.repo')
+        project.github_token = props.get('github.token')
     }
 }
 
@@ -60,8 +70,8 @@ android {
             resValue "string", "about_git_url", "https://gitlab.com/santawho/oeffi"
             resValue "string", "about_changelog_url", "https://jlemke.com/oeffi/"
 //            resValue "string", "about_update_url", "https://jlemke.com/?sdm_process_download=1&download_id=429"
-            resValue "string", "about_update_url", "https://jlemke.com/wp-content/uploads/oeffi-studio-ng-release.apk"
-//            resValue "string", "about_update_url", "https://github.com/santawho/oeffi-ng/releases/latest/download/oeffi-studio-ng-release.apk"
+//            resValue "string", "about_update_url", "https://jlemke.com/wp-content/uploads/oeffi-studio-ng-release.apk"
+            resValue "string", "about_update_url", "https://github.com/santawho/oeffi-ng/releases/latest/download/oeffi-ng.apk"
             resValue "string", "about_update_modified", timeModifiedStr  // If-Modified-Since: xxx, 25 Feb 2025 17:10:00 GMT
         }
     }
@@ -152,14 +162,42 @@ afterEvaluate {
     }
 }
 
+
 def createRelease(def tagName, def File apkFile) {
     println "Creating release ${tagName} from ${apkFile.absolutePath}"
     if (!apkFile.exists()) {
         println "${apkFile.absolutePath} does not exist"
         throw "${apkFile.absolutePath} does not exist";
     }
-    // create tag
-    // push tag
-    // create release
-    // upload asset
+    "git tag ${tagName}".execute()
+    "git push --tags".execute()
+    def conn = ((HttpURLConnection) new URL("https://api.github.com/repos/${project.github_user}/${project.github_repo}/releases").openConnection())
+    conn.requestMethod = 'POST'
+    conn.setRequestProperty('Accept', 'application/vnd.github+json')
+    conn.setRequestProperty('Authorization', "Bearer ${project.github_token}")
+    conn.setRequestProperty('X-GitHub-Api-Version', '2022-11-28')
+    conn.doOutput = true
+    conn.outputStream.write("{\"tag_name\":\"${tagName}\"}".getBytes('UTF-8'))
+    def respCode = conn.getResponseCode();
+    def respBody = conn.getInputStream().getText()
+    println("create release: ${respCode}: ${respBody}");
+    if (!respCode.equals(201))
+        throw respBody
+    def resp = (Map) new JsonSlurper().parseText(respBody)
+    def releaseId = resp.id;
+    def uploadUrl = "https://uploads.github.com/repos/${project.github_user}/${project.github_repo}/releases/${releaseId}/assets?name=oeffi-ng.apk"
+    println "upload to ${uploadUrl}"
+    conn = ((HttpURLConnection) new URL(uploadUrl).openConnection())
+    conn.requestMethod = 'POST'
+    conn.setRequestProperty('Content-Type', 'application/octet-stream')
+    conn.setRequestProperty('Accept', 'application/vnd.github+json')
+    conn.setRequestProperty('Authorization', "Bearer ${project.github_token}")
+    conn.setRequestProperty('X-GitHub-Api-Version', '2022-11-28')
+    conn.doOutput = true
+    conn.outputStream.write(apkFile.readBytes());
+    respCode = conn.getResponseCode();
+    respBody = conn.getInputStream().getText()
+    println("upload APK: ${respCode}: ${respBody}");
+    if (!respCode.equals(201))
+        throw respBody
 }
