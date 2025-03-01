@@ -2,3 +2,6 @@
 	path = public-transport-enabler
 	url = https://gitlab.com/oeffi/public-transport-enabler.git
 	branch = oeffi
+[submodule "oeffi-ng.wiki"]
+	path = oeffi-ng.wiki
+	url = https://github.com/santawho/oeffi-ng.wiki.git
