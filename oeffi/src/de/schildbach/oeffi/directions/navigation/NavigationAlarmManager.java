@@ -98,7 +98,7 @@ public class NavigationAlarmManager {
         }
     }
 
-    private void refresh() throws IOException {
+    private void refresh() {
         refreshAt = NavigationNotification.refreshAll(getContext());
         final long minNext = new Date().getTime() + MIN_PERIOD_MS;
         if (refreshAt < minNext)

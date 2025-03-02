@@ -1139,7 +1139,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             findViewById(R.id.directions_trip_details_next_event_changeover)
                     .setVisibility(View.VISIBLE);
 
-            if (tripRenderer.nextEventTransferWalkAvailable) {
+            if (tripRenderer.nextEventTransferAvailable) {
                 findViewById(R.id.directions_trip_details_next_event_transfer)
                         .setVisibility(View.VISIBLE);
                 TextView transferValueView = findViewById(R.id.directions_trip_details_next_event_transfer_value);
@@ -1160,7 +1160,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                         .setVisibility(View.GONE);
             }
 
-            if (tripRenderer.nextEventTransferWalkTimeValue != null) {
+            if (tripRenderer.nextEventTransferWalkAvailable) {
                 findViewById(R.id.directions_trip_details_next_event_walk)
                         .setVisibility(View.VISIBLE);
                 ((TextView) findViewById(R.id.directions_trip_details_next_event_walk_value))
