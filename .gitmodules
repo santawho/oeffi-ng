@@ -1,7 +1,7 @@
 [submodule "public-transport-enabler"]
 	path = public-transport-enabler
-	url = https://gitlab.com/oeffi/public-transport-enabler.git
-	branch = oeffi
+	url = https://github.com/santawho/public-transport-enabler.git
+	branch = nextgen
 [submodule "oeffi-ng.wiki"]
-	path = oeffi-ng.wiki
+	path = androidstudio/oeffi-ng.wiki
 	url = https://github.com/santawho/oeffi-ng.wiki.git
