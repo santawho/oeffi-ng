@@ -286,6 +286,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     @Override
     protected boolean onFindAlternativeConnections(
             final Stop stop,
+            final boolean isLegDeparture,
             final JourneyRef currentJourneyRef,
             final JourneyRef feederJourneyRef,
             final JourneyRef connectionJourneyRef,
@@ -302,6 +303,8 @@ public class TripNavigatorActivity extends TripDetailsActivity {
             overviewConfig.prependTrip = tripRenderer.trip;
             overviewConfig.prependToJourneyRef = currentJourneyRef;
             overviewConfig.prependToStop = stop;
+            overviewConfig.prependToStopIsLegDeparture = isLegDeparture;
+
         }
         overviewConfig.actionBarColor = R.color.bg_action_alternative_directions;
 

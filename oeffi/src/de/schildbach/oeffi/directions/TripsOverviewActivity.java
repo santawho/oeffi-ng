@@ -95,6 +95,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         public Trip prependTrip;
         public JourneyRef prependToJourneyRef;
         public Stop prependToStop;
+        public boolean prependToStopIsLegDeparture;
         public int actionBarColor;
     }
 
@@ -558,7 +559,9 @@ public class TripsOverviewActivity extends OeffiActivity {
             if (firstPublicLeg == null)
                 continue;
             final Date departureTime = firstPublicLeg.getDepartureTime();
-            if (departureTime == null || departureTime.before(renderConfig.prependToStop.plannedArrivalTime))
+            if (departureTime == null || departureTime.before(renderConfig.prependToStopIsLegDeparture
+                    ? renderConfig.prependToStop.plannedDepartureTime
+                    : renderConfig.prependToStop.plannedArrivalTime))
                 continue;
             final List<Trip.Leg> newLegs = new LinkedList<>();
             newLegs.addAll(prependLegs);

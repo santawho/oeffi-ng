@@ -1278,10 +1278,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         if (location.hasId()) {
             JourneyRef feederJourneyRef = leg.journeyRef;
             JourneyRef connectionJourneyRef = leg.journeyRef;
+            boolean stopIsLegDeparture = false;
             if (stop.location.id.equals(leg.departureStop.location.id)
                     && stop.plannedDepartureTime != null
                     && stop.plannedDepartureTime.equals(leg.departureStop.plannedDepartureTime)) {
                 // departure stop of a journey, find previous journey as feeder
+                stopIsLegDeparture = true;
                 feederJourneyRef = null;
                 for (final TripRenderer.LegContainer legC : tripRenderer.legs) {
                     if (legC.publicLeg != null) {
@@ -1308,7 +1310,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     }
                 }
             }
-            stopNameView.setOnClickListener(new StopClickListener(stop, leg.journeyRef, feederJourneyRef, connectionJourneyRef));
+            stopNameView.setOnClickListener(new StopClickListener(
+                    stop, stopIsLegDeparture,
+                    leg.journeyRef, feederJourneyRef, connectionJourneyRef));
         } else {
             stopNameView.setOnClickListener(null);
         }
@@ -1432,16 +1436,19 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     private class StopClickListener implements android.view.View.OnClickListener {
         private final Stop stop;
+        final boolean stopIsLegDeparture;
         final JourneyRef currentJourneyRef;
         final JourneyRef feederJourneyRef;
         final JourneyRef connectionJourneyRef;
 
         public StopClickListener(
                 final Stop stop,
+                final boolean stopIsLegDeparture,
                 final JourneyRef currentJourneyRef,
                 final JourneyRef feederJourneyRef,
                 final JourneyRef connectionJourneyRef) {
             this.stop = stop;
+            this.stopIsLegDeparture = stopIsLegDeparture;
             this.currentJourneyRef = currentJourneyRef;
             this.feederJourneyRef = feederJourneyRef;
             this.connectionJourneyRef = connectionJourneyRef;
@@ -1471,7 +1478,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     StationDetailsActivity.start(TripDetailsActivity.this, network, stop.location);
                     return true;
                 } else if (menuItemId == R.id.station_context_directions_alternative_from) {
-                    return onFindAlternativeConnections(stop, currentJourneyRef, feederJourneyRef, connectionJourneyRef, renderConfig.queryTripsRequestData);
+                    return onFindAlternativeConnections(
+                            stop, stopIsLegDeparture,
+                            currentJourneyRef, feederJourneyRef, connectionJourneyRef,
+                            renderConfig.queryTripsRequestData);
                 } else if (menuItemId == R.id.station_context_navigate_to) {
                     startNavigationForJourneyToExit(stop);
                     return true;
@@ -1747,6 +1757,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     protected boolean onFindAlternativeConnections(
             final Stop stop,
+            final boolean isLegDeparture,
             final JourneyRef currentJourneyRef,
             final JourneyRef feederJourneyRef,
             final JourneyRef connectionJourneyRef,
