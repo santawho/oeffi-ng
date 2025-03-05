@@ -20,6 +20,7 @@ package de.schildbach.oeffi.directions;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.KeyguardManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -59,6 +60,9 @@ import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TableLayout;
 import android.widget.TextView;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -280,34 +284,40 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         actionBar.setSecondaryTitle(secondaryTitle.length() > 0 ? secondaryTitle : null);
         setupActionBar();
 
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            trackButton = actionBar.addToggleButton(R.drawable.ic_location_white_24dp,
-                    R.string.directions_trip_details_action_track_title);
-            trackButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (isChecked) {
-                    final String provider = requestLocationUpdates();
-                    if (provider != null) {
-                        final android.location.Location lastKnownLocation = locationManager
-                                .getLastKnownLocation(provider);
-                        if (lastKnownLocation != null
-                                && (lastKnownLocation.getLatitude() != 0 || lastKnownLocation.getLongitude() != 0))
-                            location = LocationHelper.locationToPoint(lastKnownLocation);
-                        else
-                            location = null;
-                        mapView.setLocationAware(TripDetailsActivity.this);
+        final ActivityResultLauncher<String> requestLocationPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(), granted -> {
+                    if (granted)
+                        enableTracking();
+                    else {
+                        trackButton.setChecked(false);
+                        new AlertDialog.Builder(this)
+                                .setTitle(R.string.stations_list_cannot_acquire_location)
+                                .setMessage(R.string.stations_list_cannot_acquire_location_hint)
+                                .setPositiveButton(android.R.string.ok, null)
+                                .create().show();
                     }
+                });
+
+        trackButton = actionBar.addToggleButton(R.drawable.ic_location_white_24dp,
+                R.string.directions_trip_details_action_track_title);
+        trackButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                if (ContextCompat.checkSelfPermission(this,
+                        Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    enableTracking();
                 } else {
-                    locationManager.removeUpdates(TripDetailsActivity.this);
-                    location = null;
-
-                    mapView.setLocationAware(null);
+                    requestLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
                 }
+            } else {
+                locationManager.removeUpdates(TripDetailsActivity.this);
+                location = null;
 
-                mapView.zoomToAll();
-                updateGUI();
-            });
-        }
+                mapView.setLocationAware(null);
+            }
+
+            mapView.zoomToAll();
+            updateGUI();
+        });
 
         if (isPortrait && res.getBoolean(R.bool.layout_map_show_toggleable)) {
             actionBar.addButton(R.drawable.ic_map_white_24dp, R.string.directions_trip_details_action_showmap_title)
@@ -511,6 +521,21 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             setShowNextEvent(false);
         else
             finish();
+    }
+
+    private void enableTracking() {
+        final String provider = requestLocationUpdates();
+        if (provider != null) {
+            @SuppressLint("MissingPermission")
+            final android.location.Location lastKnownLocation = locationManager
+                    .getLastKnownLocation(provider);
+            if (lastKnownLocation != null
+                    && (lastKnownLocation.getLatitude() != 0 || lastKnownLocation.getLongitude() != 0))
+                location = LocationHelper.locationToPoint(lastKnownLocation);
+            else
+                location = null;
+            mapView.setLocationAware(TripDetailsActivity.this);
+        }
     }
 
     @SuppressLint("MissingPermission")
