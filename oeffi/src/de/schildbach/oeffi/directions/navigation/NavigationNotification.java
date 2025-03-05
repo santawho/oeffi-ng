@@ -1,9 +1,5 @@
 package de.schildbach.oeffi.directions.navigation;
 
-import static android.media.AudioAttributes.USAGE_ALARM;
-
-import static de.schildbach.oeffi.directions.navigation.NavigationAlarmManager.LOG_TIME_FORMAT;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -47,10 +43,26 @@ import de.schildbach.oeffi.util.ResourceUri;
 import de.schildbach.pte.dto.Trip;
 
 public class NavigationNotification {
-    private static final int SOUND_ALARM = R.raw.nav_alarm;
-    private static final int SOUND_REMIND_NORMAL = R.raw.nav_remind_down;
-    private static final int SOUND_REMIND_IMPORTANT = R.raw.nav_remind_downup;
-    private static final int SOUND_REMIND_NEXTLEG = R.raw.nav_remind_up;
+    private static final int SOUND_ALARM;
+    private static final int SOUND_REMIND_NORMAL;
+    private static final int SOUND_REMIND_IMPORTANT;
+    private static final int SOUND_REMIND_NEXTLEG;
+
+    private static final boolean DEVELOPMENT_TEST_PHASE = true;
+
+    static {
+        if (DEVELOPMENT_TEST_PHASE) {
+            SOUND_ALARM = R.raw.nav_lowvolume_alarm;
+            SOUND_REMIND_NORMAL = R.raw.nav_lowvolume_remind_down;
+            SOUND_REMIND_IMPORTANT = R.raw.nav_lowvolume_remind_downup;
+            SOUND_REMIND_NEXTLEG = R.raw.nav_lowvolume_remind_up;
+        } else {
+            SOUND_ALARM = R.raw.nav_alarm;
+            SOUND_REMIND_NORMAL = R.raw.nav_remind_down;
+            SOUND_REMIND_IMPORTANT = R.raw.nav_remind_downup;
+            SOUND_REMIND_NEXTLEG = R.raw.nav_remind_up;
+        }
+    }
     private static final String CHANNEL_ID = "navigation";
     private static final String TAG_PREFIX = NavigationNotification.class.getName() + ":";
 
@@ -80,7 +92,7 @@ public class NavigationNotification {
 //            channel.enableVibration(true);
             channel.setVibrationPattern(VIBRATION_PATTERN_REMIND);
             channel.setSound(ResourceUri.fromResource(context, SOUND_REMIND_NORMAL),
-                    new AudioAttributes.Builder().setUsage(USAGE_ALARM).build());
+                    new AudioAttributes.Builder().setUsage(getAudioUsageForSound(SOUND_REMIND_NORMAL)).build());
             getNotificationManager(context).createNotificationChannel(channel);
         }
         notificationChannelCreated = true;
@@ -88,6 +100,14 @@ public class NavigationNotification {
 
     private static NotificationManager getNotificationManager(final Context context) {
         return (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+    }
+
+    private static int getAudioStreamForSound(final int soundId) {
+        return AudioManager.STREAM_NOTIFICATION;
+    }
+
+    private static int getAudioUsageForSound(final int soundId) {
+        return AudioAttributes.USAGE_NOTIFICATION_EVENT;
     }
 
     private static final String[] REQUIRED_PERMISSION = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU ? new String[] {
@@ -234,7 +254,7 @@ public class NavigationNotification {
         }
         if (newNotified.eventTime != null && lastNotified.eventTime != null) {
             final long diff = Math.abs(newNotified.eventTime.getTime() - lastNotified.eventTime.getTime());
-            if (diff < 120000) {
+            if (diff < 180000) {
                 log.info("timediff = {} keeping last time", diff);
                 newNotified.eventTime = lastNotified.eventTime;
             } else {
@@ -313,7 +333,7 @@ public class NavigationNotification {
             notificationBuilder
                     .setSilent(false)
                     .setVibrate(VIBRATION_PATTERN_REMIND)
-                    .setSound(ResourceUri.fromResource(context, reminder), AudioManager.STREAM_ALARM);
+                    .setSound(ResourceUri.fromResource(context, reminder), getAudioStreamForSound(reminder));
         } else {
             notificationBuilder.setSilent(true);
         }
@@ -323,12 +343,12 @@ public class NavigationNotification {
 
         if (timeChanged || posChanged) {
             final Ringtone alarmTone = RingtoneManager.getRingtone(context, ResourceUri.fromResource(context, SOUND_ALARM));
-            alarmTone.setAudioAttributes(new AudioAttributes.Builder().setUsage(USAGE_ALARM).build());
+            alarmTone.setAudioAttributes(new AudioAttributes.Builder().setUsage(getAudioUsageForSound(SOUND_ALARM)).build());
             alarmTone.play();
             ((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(VIBRATION_PATTERN_ALARM, -1);
         } else if (reminder != 0 && reminder != SOUND_REMIND_NORMAL) {
             final Ringtone alarmTone = RingtoneManager.getRingtone(context, ResourceUri.fromResource(context, reminder));
-            alarmTone.setAudioAttributes(new AudioAttributes.Builder().setUsage(USAGE_ALARM).build());
+            alarmTone.setAudioAttributes(new AudioAttributes.Builder().setUsage(getAudioUsageForSound(reminder)).build());
             alarmTone.play();
             ((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(VIBRATION_PATTERN_REMIND, -1);
         }
@@ -339,8 +359,8 @@ public class NavigationNotification {
         if (nextRefreshTimeMs > 0) {
             log.info("refreshing in {} secs at {} reminder at {}",
                     (nextRefreshTimeMs - nowTime) / 1000,
-                    LOG_TIME_FORMAT.format(nextRefreshTimeMs),
-                    LOG_TIME_FORMAT.format(nextReminderTimeMs));
+                    NavigationAlarmManager.LOG_TIME_FORMAT.format(nextRefreshTimeMs),
+                    NavigationAlarmManager.LOG_TIME_FORMAT.format(nextReminderTimeMs));
         } else {
             log.info("stop refreshing");
         }
