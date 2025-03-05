@@ -179,6 +179,13 @@
                             android:paddingHorizontal="20dp"
                             android:textSize="@dimen/directions_trip_details_next_event_time_fontsize"
                             android:textStyle="bold"/>
+                        <Chronometer
+                            android:id="@+id/directions_trip_details_next_event_time_chronometer"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:paddingHorizontal="20dp"
+                            android:textSize="@dimen/directions_trip_details_next_event_time_fontsize"
+                            android:textStyle="bold"/>
                         <TextView
                             android:id="@+id/directions_trip_details_next_event_time_unit"
                             android:layout_width="wrap_content"

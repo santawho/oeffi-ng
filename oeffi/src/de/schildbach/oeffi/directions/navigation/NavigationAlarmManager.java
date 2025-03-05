@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import de.schildbach.oeffi.Application;
+import de.schildbach.oeffi.util.ClockUtils;
 
 public class NavigationAlarmManager {
     private final static long MIN_PERIOD_MS = 30000;
@@ -112,12 +113,15 @@ public class NavigationAlarmManager {
                 break;
             }
             final long timeToWait = refreshAt - new Date().getTime();
-            if (timeToWait > 2000) {
+            if (timeToWait > 0) {
                 log.info("new real refresh at {}", LOG_TIME_FORMAT.format(refreshAt));
 
                 final AlarmManager alarmManager = getSystemAlarmManager();
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()) {
-                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, refreshAt, getPendingRefreshIntent());
+                    alarmManager.setExactAndAllowWhileIdle(
+                            // AlarmManager.RTC_WAKEUP, refreshAt,
+                            AlarmManager.ELAPSED_REALTIME_WAKEUP, ClockUtils.clockToElapsedTime(refreshAt),
+                            getPendingRefreshIntent());
                 }
                 break;
             }

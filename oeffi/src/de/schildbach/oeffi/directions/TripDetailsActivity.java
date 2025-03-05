@@ -54,6 +54,7 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Chronometer;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -83,6 +84,7 @@ import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.stations.LineView;
 import de.schildbach.oeffi.stations.StationContextMenu;
 import de.schildbach.oeffi.stations.StationDetailsActivity;
+import de.schildbach.oeffi.util.ClockUtils;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.LocationHelper;
 import de.schildbach.oeffi.util.Toast;
@@ -1096,13 +1098,38 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             nextAction.setVisibility(View.GONE);
         }
 
-        TextView valueView = findViewById(R.id.directions_trip_details_next_event_time_value);
+        final TextView valueView = findViewById(R.id.directions_trip_details_next_event_time_value);
+        final Chronometer valueChronoView = findViewById(R.id.directions_trip_details_next_event_time_chronometer);
+        valueChronoView.stop();
         String valueStr = tripRenderer.nextEventTimeLeftValue;
-        if (TripRenderer.NO_TIME_LEFT_VALUE.equals(valueStr))
-            valueView.setText(R.string.directions_trip_details_next_event_no_time_left);
-        else
-            valueView.setText(valueStr);
-        valueView.setTextColor(getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_arrow : R.color.fg_significant));
+        final long minsLeft = tripRenderer.nextEventTimeLeftMs / 60000;
+        if (valueStr == null) {
+            // nothing to do
+        } else if (minsLeft < 10) {
+            valueView.setVisibility(View.VISIBLE);
+            valueChronoView.setVisibility(View.GONE);
+            valueView.setTextColor(getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_arrow : R.color.fg_significant));
+            if (TripRenderer.NO_TIME_LEFT_VALUE.equals(valueStr))
+                valueView.setText(R.string.directions_trip_details_next_event_no_time_left);
+            else
+                valueView.setText(valueStr);
+        } else {
+            valueChronoView.setVisibility(View.VISIBLE);
+            valueView.setVisibility(View.GONE);
+            valueChronoView.setTextColor(getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_arrow : R.color.fg_significant));
+            valueChronoView.setBase(ClockUtils.clockToElapsedTime(tripRenderer.nextEventEstimatedTime.getTime()));
+            valueChronoView.setCountDown(true);
+            final String format;
+            if (minsLeft < 60)
+                format = "%1$.2s";
+            else if (minsLeft < 600)
+                format = "%1$.4s";
+            else
+                format = "%1$.5s";
+            valueChronoView.setFormat(format);
+            valueChronoView.start();
+        }
+        // valueView.setTextColor(getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_arrow : R.color.fg_significant));
         TextView unitView = findViewById(R.id.directions_trip_details_next_event_time_unit);
         unitView.setText(tripRenderer.nextEventTimeLeftUnit);
         findViewById(R.id.directions_trip_details_next_event_time_hourglass)

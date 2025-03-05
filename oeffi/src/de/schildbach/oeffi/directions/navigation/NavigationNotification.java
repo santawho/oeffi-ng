@@ -38,6 +38,7 @@ import java.util.Date;
 
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
+import de.schildbach.oeffi.util.ClockUtils;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.ResourceUri;
 import de.schildbach.pte.dto.Trip;
@@ -204,6 +205,9 @@ public class NavigationNotification {
             if (timeLeft < 240000) {
                 // last 4 minutes and after, 30 secs refresh interval
                 nextRefreshTimeMs = nowTime + 30000;
+            } else if (timeLeft < 600000) {
+                // last 10 minutes and after, 60 secs refresh interval
+                nextRefreshTimeMs = nowTime + 60000;
             } else {
                 // approaching, refresh after 25% of the remaining time
                 nextRefreshTimeMs = nowTime + timeLeft / 4;
@@ -234,7 +238,10 @@ public class NavigationNotification {
         boolean timeChanged = false;
         boolean posChanged = false;
         int reminder = 0;
-        final long nextEventTimeLeftMs = tripRenderer.nextEventTimeLeftMs;
+        final long nextEventTimeLeftTo10MinsBoundaryMs = nowTime
+                + tripRenderer.nextEventTimeLeftMs - (tripRenderer.nextEventTimeLeftMs / 600000) * 600000;
+        if (nextEventTimeLeftTo10MinsBoundaryMs < nextRefreshTimeMs)
+            nextRefreshTimeMs = nextEventTimeLeftTo10MinsBoundaryMs;
         if (lastNotified == null || newNotified.legIndex != lastNotified.legIndex) {
             if (lastNotified == null)
                 log.info("first notification !!");
@@ -263,6 +270,7 @@ public class NavigationNotification {
             }
         }
         newNotified.leftTimeReminded = lastNotified.leftTimeReminded;
+        final long nextEventTimeLeftMs = tripRenderer.nextEventTimeLeftMs;
         long nextReminderTimeMs = 0;
         if (tripRenderer.currentLeg != null) {
             if (nextEventTimeLeftMs < REMINDER_SECOND_MS + 20000) {
@@ -477,11 +485,32 @@ public class NavigationNotification {
             remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_finished, colorHighlight);
             remoteViews.setTextColor(R.id.navigation_notification_next_event_finished, context.getColor(R.color.fg_significant));
         } else {
-            if (TripRenderer.NO_TIME_LEFT_VALUE.equals(valueStr))
-                valueStr = context.getString(R.string.directions_trip_details_next_event_no_time_left);
-            remoteViews.setTextViewText(R.id.navigation_notification_next_event_time_value, valueStr);
-            remoteViews.setTextColor(R.id.navigation_notification_next_event_time_value,
-                    context.getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_arrow : R.color.fg_significant));
+            final long minsLeft = tripRenderer.nextEventTimeLeftMs / 60000;
+            if (minsLeft < 10) {
+                if (TripRenderer.NO_TIME_LEFT_VALUE.equals(valueStr))
+                    valueStr = context.getString(R.string.directions_trip_details_next_event_no_time_left);
+                remoteViews.setViewVisibility(R.id.navigation_notification_next_event_time_value, View.VISIBLE);
+                remoteViews.setViewVisibility(R.id.navigation_notification_next_event_time_chronometer, View.GONE);
+                remoteViews.setTextViewText(R.id.navigation_notification_next_event_time_value, valueStr);
+                remoteViews.setTextColor(R.id.navigation_notification_next_event_time_value,
+                        context.getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_arrow : R.color.fg_significant));
+            } else {
+                remoteViews.setViewVisibility(R.id.navigation_notification_next_event_time_value, View.GONE);
+                remoteViews.setViewVisibility(R.id.navigation_notification_next_event_time_chronometer, View.VISIBLE);
+                final String format;
+                if (minsLeft < 60)
+                    format = "%1$.2s";
+                else if (minsLeft < 600)
+                    format = "%1$.4s";
+                else
+                    format = "%1$.5s";
+                remoteViews.setChronometer(R.id.navigation_notification_next_event_time_chronometer,
+                        ClockUtils.clockToElapsedTime(tripRenderer.nextEventEstimatedTime.getTime()),
+                        format, true);
+                remoteViews.setChronometerCountDown(R.id.navigation_notification_next_event_time_chronometer, true);
+                remoteViews.setTextColor(R.id.navigation_notification_next_event_time_chronometer,
+                        context.getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_arrow : R.color.fg_significant));
+            }
             remoteViews.setTextViewText(R.id.navigation_notification_next_event_time_unit, tripRenderer.nextEventTimeLeftUnit);
             remoteViews.setViewVisibility(R.id.navigation_notification_next_event_time_hourglass,
                     tripRenderer.nextEventTimeHourglassVisible ? View.VISIBLE : View.GONE);
