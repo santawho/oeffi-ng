@@ -76,18 +76,22 @@
                     </LinearLayout>
                 </LinearLayout>
 
-                <TableLayout
-                    android:id="@+id/directions_trip_details_fares"
+                <HorizontalScrollView
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone"
-                    android:background="@color/bg_divider"
-                    android:baselineAligned="true"
-                    android:paddingBottom="@dimen/text_padding_vertical_lax"
-                    android:paddingLeft="@dimen/text_padding_horizontal_verylax"
-                    android:paddingRight="@dimen/text_padding_horizontal_verylax"
-                    android:paddingTop="@dimen/text_padding_vertical_lax"
-                    android:stretchColumns="2" />
+                    android:layout_height="wrap_content">
+                    <TableLayout
+                        android:id="@+id/directions_trip_details_fares"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        android:background="@color/bg_divider"
+                        android:baselineAligned="true"
+                        android:paddingBottom="@dimen/text_padding_vertical_lax"
+                        android:paddingLeft="@dimen/text_padding_horizontal_verylax"
+                        android:paddingRight="@dimen/text_padding_horizontal_verylax"
+                        android:paddingTop="@dimen/text_padding_vertical_lax"
+                        android:stretchColumns="2" />
+                </HorizontalScrollView>
 
                 <TextView
                     android:id="@+id/directions_trip_details_not_feasible"
@@ -158,7 +162,8 @@
                 android:layout_gravity="bottom"
                 android:gravity="bottom|right"
                 android:text="@string/disclaimer_responsibility_2line"
-                android:textSize="@dimen/font_size_disclaimer" />
+                android:textSize="@dimen/font_size_disclaimer"
+                tools:ignore="TextSizeCheck" />
         </LinearLayout>
     </FrameLayout>
 
