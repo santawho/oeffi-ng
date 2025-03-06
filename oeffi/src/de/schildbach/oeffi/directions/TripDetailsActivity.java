@@ -755,32 +755,39 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     private void updateFares(final List<Fare> fares) {
         final TableLayout faresTable = findViewById(R.id.directions_trip_details_fares);
-        if (tripRenderer.trip.fares != null && !tripRenderer.trip.fares.isEmpty()) {
-            faresTable.setVisibility(View.VISIBLE);
+        if (tripRenderer.trip.fares == null || tripRenderer.trip.fares.isEmpty())
+            return;
 
-            final String[] fareTypes = res.getStringArray(R.array.fare_types);
+        final String[] fareTypes = res.getStringArray(R.array.fare_types);
 
-            int i = 0;
-            for (final Fare fare : fares) {
-                final View fareRow = inflater.inflate(R.layout.directions_trip_details_fares_row, null);
-                ((TextView) fareRow.findViewById(R.id.directions_trip_details_fare_entry_row_type))
-                        .setText(fareTypes[fare.type.ordinal()]);
-                ((TextView) fareRow.findViewById(R.id.directions_trip_details_fare_entry_row_name)).setText(fare.name);
-                ((TextView) fareRow.findViewById(R.id.directions_trip_details_fare_entry_row_fare))
-                        .setText(String.format(Locale.US, "%s%.2f", fare.currency.getSymbol(), fare.fare));
-                final TextView unitView = fareRow
-                        .findViewById(R.id.directions_trip_details_fare_entry_row_unit);
-                if (fare.units != null && fare.unitName != null)
-                    unitView.setText(String.format("(%s %s)", fare.units, fare.unitName));
-                else if (fare.units == null && fare.unitName == null)
-                    unitView.setText(null);
-                else
-                    unitView.setText(String.format("(%s)", MoreObjects.firstNonNull(fare.units, fare.unitName)));
-                faresTable.addView(fareRow, i++);
-            }
-        } else {
-            faresTable.setVisibility(View.GONE);
+        int i = 0;
+        for (final Fare fare : fares) {
+            final View fareRow = inflater.inflate(R.layout.directions_trip_details_fares_row, null);
+            ((TextView) fareRow.findViewById(R.id.directions_trip_details_fare_entry_row_type))
+                    .setText(fareTypes[fare.type.ordinal()]);
+            ((TextView) fareRow.findViewById(R.id.directions_trip_details_fare_entry_row_name)).setText(fare.name);
+            ((TextView) fareRow.findViewById(R.id.directions_trip_details_fare_entry_row_fare))
+                    .setText(String.format(Locale.US, "%s%.2f", fare.currency.getSymbol(), fare.fare));
+            final TextView unitView = fareRow
+                    .findViewById(R.id.directions_trip_details_fare_entry_row_unit);
+            if (fare.units != null && fare.unitName != null)
+                unitView.setText(String.format("(%s %s)", fare.units, fare.unitName));
+            else if (fare.units == null && fare.unitName == null)
+                unitView.setText(null);
+            else
+                unitView.setText(String.format("(%s)", MoreObjects.firstNonNull(fare.units, fare.unitName)));
+            faresTable.addView(fareRow, i++);
         }
+
+        final ToggleImageButton toggleFares = findViewById(R.id.directions_trip_details_toggle_fares);
+        toggleFares.setVisibility(View.VISIBLE);
+        toggleFares.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            findViewById(R.id.directions_trip_details_fares)
+                    .setVisibility(isChecked ? View.VISIBLE : View.GONE);
+        });
+        final TextView faresSymbol = findViewById(R.id.directions_trip_details_toggle_fares_symbol);
+        faresSymbol.setVisibility(View.VISIBLE);
+        faresSymbol.setText(fares.get(0).currency.getSymbol());
     }
 
     private boolean updatePublicLeg(

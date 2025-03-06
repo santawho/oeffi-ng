@@ -24,6 +24,7 @@
     <color name="bg_level0_darkdefault">#222222</color>
     <color name="bg_level1">#ffffff</color>
     <color name="bg_divider">#dddddd</color>
+    <color name="bg_divider_highlight">#bbbbbb</color>
     <color name="bg_action_bar">#555555</color>
     <color name="bg_action_bar_stations">#777700</color>
     <color name="bg_action_bar_navigation">#772222</color>
