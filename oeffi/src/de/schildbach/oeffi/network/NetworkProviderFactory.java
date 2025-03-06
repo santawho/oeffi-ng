@@ -27,10 +27,9 @@ import de.schildbach.pte.BayernProvider;
 import de.schildbach.pte.BsvagProvider;
 import de.schildbach.pte.BvgProvider;
 import de.schildbach.pte.CmtaProvider;
-import de.schildbach.pte.DbHafasProvider;
 import de.schildbach.pte.DbMovasProvider;
 import de.schildbach.pte.DbProvider;
-import de.schildbach.pte.DbWebProvider;
+import de.schildbach.pte.DeutschlandTicketProvider;
 import de.schildbach.pte.DingProvider;
 import de.schildbach.pte.DsbProvider;
 import de.schildbach.pte.DubProvider;
@@ -101,15 +100,19 @@ public final class NetworkProviderFactory {
         if (networkId.equals(NetworkId.RT))
             return new RtProvider();
         else if (networkId.equals(NetworkId.DEUTSCHLANDTICKET))
-            return new DbProvider.DeutschlandTicket();
+            return new DeutschlandTicketProvider();
         else if (networkId.equals(NetworkId.DB))
             return new DbProvider.Fernverkehr();
         else if (networkId.equals(NetworkId.DBREGIO))
             return new DbProvider.Regio();
+//        else if (networkId.equals(NetworkId.DBDEUTSCHLANDTICKETWEB))
+//            return new DbWebProvider.DeutschlandTicket();
 //        else if (networkId.equals(NetworkId.DBWEB))
 //            return new DbWebProvider.Fernverkehr();
 //        else if (networkId.equals(NetworkId.DBREGIOWEB))
 //            return new DbWebProvider.Regio();
+        else if (networkId.equals(NetworkId.DBDEUTSCHLANDTICKETMOVAS))
+            return new DbMovasProvider.DeutschlandTicket();
         else if (networkId.equals(NetworkId.DBMOVAS))
             return new DbMovasProvider.Fernverkehr();
         else if (networkId.equals(NetworkId.DBREGIOMOVAS))
