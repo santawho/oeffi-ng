@@ -478,6 +478,7 @@ public class NavigationNotification {
             remoteViews.setViewVisibility(R.id.navigation_notification_next_event_next_action, View.GONE);
         }
 
+        final String chronoFormat = tripRenderer.nextEventTimeLeftChronometerFormat;
         String valueStr = tripRenderer.nextEventTimeLeftValue;
         if (valueStr == null) {
             remoteViews.setViewVisibility(R.id.navigation_notification_next_event_time, View.GONE);
@@ -485,30 +486,22 @@ public class NavigationNotification {
             remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_finished, colorHighlight);
             remoteViews.setTextColor(R.id.navigation_notification_next_event_finished, context.getColor(R.color.fg_significant));
         } else {
-            final long minsLeft = tripRenderer.nextEventTimeLeftMs / 60000;
-            if (minsLeft < 10) {
+            if (chronoFormat != null) {
+                remoteViews.setViewVisibility(R.id.navigation_notification_next_event_time_value, View.GONE);
+                remoteViews.setViewVisibility(R.id.navigation_notification_next_event_time_chronometer, View.VISIBLE);
+                remoteViews.setChronometer(R.id.navigation_notification_next_event_time_chronometer,
+                        ClockUtils.clockToElapsedTime(tripRenderer.nextEventEstimatedTime.getTime()),
+                        chronoFormat, true);
+                remoteViews.setChronometerCountDown(R.id.navigation_notification_next_event_time_chronometer, true);
+                remoteViews.setTextColor(R.id.navigation_notification_next_event_time_chronometer,
+                        context.getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_arrow : R.color.fg_significant));
+            } else {
                 if (TripRenderer.NO_TIME_LEFT_VALUE.equals(valueStr))
                     valueStr = context.getString(R.string.directions_trip_details_next_event_no_time_left);
                 remoteViews.setViewVisibility(R.id.navigation_notification_next_event_time_value, View.VISIBLE);
                 remoteViews.setViewVisibility(R.id.navigation_notification_next_event_time_chronometer, View.GONE);
                 remoteViews.setTextViewText(R.id.navigation_notification_next_event_time_value, valueStr);
                 remoteViews.setTextColor(R.id.navigation_notification_next_event_time_value,
-                        context.getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_arrow : R.color.fg_significant));
-            } else {
-                remoteViews.setViewVisibility(R.id.navigation_notification_next_event_time_value, View.GONE);
-                remoteViews.setViewVisibility(R.id.navigation_notification_next_event_time_chronometer, View.VISIBLE);
-                final String format;
-                if (minsLeft < 60)
-                    format = "%1$.2s";
-                else if (minsLeft < 600)
-                    format = "%1$.4s";
-                else
-                    format = "%1$.5s";
-                remoteViews.setChronometer(R.id.navigation_notification_next_event_time_chronometer,
-                        ClockUtils.clockToElapsedTime(tripRenderer.nextEventEstimatedTime.getTime()),
-                        format, true);
-                remoteViews.setChronometerCountDown(R.id.navigation_notification_next_event_time_chronometer, true);
-                remoteViews.setTextColor(R.id.navigation_notification_next_event_time_chronometer,
                         context.getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_arrow : R.color.fg_significant));
             }
             remoteViews.setTextViewText(R.id.navigation_notification_next_event_time_unit, tripRenderer.nextEventTimeLeftUnit);

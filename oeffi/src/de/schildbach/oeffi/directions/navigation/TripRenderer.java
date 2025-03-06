@@ -338,6 +338,7 @@ public class TripRenderer {
     public long nextEventTimeLeftMs;
     public String nextEventTimeLeftValue;
     public String nextEventTimeLeftUnit;
+    public String nextEventTimeLeftChronometerFormat;
     public boolean nextEventTimeLeftCritical;
     public boolean nextEventTimeHourglassVisible;
     public String nextEventTimeLeftExplainStr;
@@ -361,6 +362,7 @@ public class TripRenderer {
         long value = 0;
         String valueStr = null;
         final String unit;
+        String chronoFormat = null;
         String explainStr = null;
         final boolean hourglassVisible;
         if (leftSecs < 70) {
@@ -371,17 +373,20 @@ public class TripRenderer {
         } else {
             hourglassVisible = true;
             final long leftMins = leftSecs / 60;
-            if (leftMins <= 60) {
+            if (leftMins < 60) {
                 value = leftMins;
                 unit = "min";
                 final long delayMins = delaySecs / 60;
                 if (delayMins != 0)
                     explainStr = String.format("(%d%+d)", leftMins - delayMins, delayMins);
+                if (leftMins >= 10)
+                    chronoFormat = "%1$.2s";
             } else {
                 final long leftHours = leftMins / 60;
                 if (leftHours < 3) {
                     valueStr = String.format("%d:%02d", leftHours, leftMins - leftHours * 60);
                     unit = "h";
+                    chronoFormat = "%1$.4s";
                 } else if (leftHours < 24) {
                     value = leftHours;
                     unit = "h";
@@ -398,6 +403,7 @@ public class TripRenderer {
 
         nextEventTimeLeftValue = valueStr;
         nextEventTimeLeftUnit = unit;
+        nextEventTimeLeftChronometerFormat = chronoFormat;
         nextEventTimeLeftCritical = leftSecs - walkMins * 60 < 60;
         nextEventTimeHourglassVisible = hourglassVisible;
         nextEventTimeLeftExplainStr = explainStr;

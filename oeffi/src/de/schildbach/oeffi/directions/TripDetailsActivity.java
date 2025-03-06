@@ -1101,33 +1101,26 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final TextView valueView = findViewById(R.id.directions_trip_details_next_event_time_value);
         final Chronometer valueChronoView = findViewById(R.id.directions_trip_details_next_event_time_chronometer);
         valueChronoView.stop();
-        String valueStr = tripRenderer.nextEventTimeLeftValue;
-        final long minsLeft = tripRenderer.nextEventTimeLeftMs / 60000;
-        if (valueStr == null) {
-            // nothing to do
-        } else if (minsLeft < 10) {
-            valueView.setVisibility(View.VISIBLE);
-            valueChronoView.setVisibility(View.GONE);
-            valueView.setTextColor(getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_arrow : R.color.fg_significant));
-            if (TripRenderer.NO_TIME_LEFT_VALUE.equals(valueStr))
-                valueView.setText(R.string.directions_trip_details_next_event_no_time_left);
-            else
-                valueView.setText(valueStr);
-        } else {
-            valueChronoView.setVisibility(View.VISIBLE);
-            valueView.setVisibility(View.GONE);
-            valueChronoView.setTextColor(getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_arrow : R.color.fg_significant));
-            valueChronoView.setBase(ClockUtils.clockToElapsedTime(tripRenderer.nextEventEstimatedTime.getTime()));
-            valueChronoView.setCountDown(true);
-            final String format;
-            if (minsLeft < 60)
-                format = "%1$.2s";
-            else if (minsLeft < 600)
-                format = "%1$.4s";
-            else
-                format = "%1$.5s";
-            valueChronoView.setFormat(format);
-            valueChronoView.start();
+        final String valueStr = tripRenderer.nextEventTimeLeftValue;
+        final String chronoFormat = tripRenderer.nextEventTimeLeftChronometerFormat;
+        if (valueStr != null) {
+            if (chronoFormat != null) {
+                valueChronoView.setVisibility(View.VISIBLE);
+                valueView.setVisibility(View.GONE);
+                valueChronoView.setTextColor(getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_arrow : R.color.fg_significant));
+                valueChronoView.setBase(ClockUtils.clockToElapsedTime(tripRenderer.nextEventEstimatedTime.getTime()));
+                valueChronoView.setCountDown(true);
+                valueChronoView.setFormat(chronoFormat);
+                valueChronoView.start();
+            } else {
+                valueView.setVisibility(View.VISIBLE);
+                valueChronoView.setVisibility(View.GONE);
+                valueView.setTextColor(getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_arrow : R.color.fg_significant));
+                if (TripRenderer.NO_TIME_LEFT_VALUE.equals(valueStr))
+                    valueView.setText(R.string.directions_trip_details_next_event_no_time_left);
+                else
+                    valueView.setText(valueStr);
+            }
         }
         // valueView.setTextColor(getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_arrow : R.color.fg_significant));
         TextView unitView = findViewById(R.id.directions_trip_details_next_event_time_unit);
