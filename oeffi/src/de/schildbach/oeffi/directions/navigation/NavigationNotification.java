@@ -273,8 +273,9 @@ public class NavigationNotification {
         boolean posChanged = false;
         boolean transferCriticalChanged = false;
         int reminder = 0;
+        final long nextEventTimeLeftMs = tripRenderer.nextEventTimeLeftMs;
         final long nextEventTimeLeftTo10MinsBoundaryMs = nowTime
-                + tripRenderer.nextEventTimeLeftMs - (tripRenderer.nextEventTimeLeftMs / 600000) * 600000;
+                + nextEventTimeLeftMs - (nextEventTimeLeftMs / 600000) * 600000;
         if (nextEventTimeLeftTo10MinsBoundaryMs < nextRefreshTimeMs)
             nextRefreshTimeMs = nextEventTimeLeftTo10MinsBoundaryMs;
         if (lastNotified == null || newNotified.legIndex != lastNotified.legIndex) {
@@ -296,13 +297,20 @@ public class NavigationNotification {
             posChanged = true;
         }
         if (newNotified.eventTime != null && lastNotified.eventTime != null) {
-            final long diff = Math.abs(newNotified.eventTime.getTime() - lastNotified.eventTime.getTime());
-            if (diff < 180000) {
-                log.info("timediff = {} keeping last time", diff);
-                newNotified.eventTime = lastNotified.eventTime;
+            final long leftSecs = nextEventTimeLeftMs / 1000;
+            final long diffSecs = Math.abs(newNotified.eventTime.getTime() - lastNotified.eventTime.getTime()) / 1000;
+            if (leftSecs < 1800) {
+                timeChanged = diffSecs >= 180; // 3 mins during last 30 mins
+            } else if (leftSecs < 3600) {
+                timeChanged = diffSecs >= 300; // 5 mins during last 60 mins
             } else {
-                log.info("timediff = {} accepting new time", diff);
-                timeChanged = true;
+                timeChanged = diffSecs >= 600; // 10 mins when more than 1 hour
+            }
+            if (timeChanged) {
+                log.info("timediff = {} accepting new time", diffSecs);
+            } else {
+                log.info("timediff = {} keeping last time", diffSecs);
+                newNotified.eventTime = lastNotified.eventTime;
             }
         }
         if (newNotified.transferCritical != lastNotified.transferCritical) {
@@ -310,7 +318,6 @@ public class NavigationNotification {
             transferCriticalChanged = newNotified.transferCritical;
         }
         newNotified.leftTimeReminded = lastNotified.leftTimeReminded;
-        final long nextEventTimeLeftMs = tripRenderer.nextEventTimeLeftMs;
         long nextReminderTimeMs = 0;
         if (tripRenderer.currentLeg != null) {
             if (nextEventTimeLeftMs < REMINDER_SECOND_MS + 20000) {
