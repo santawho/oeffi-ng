@@ -89,6 +89,7 @@ public class TripRenderer {
         Position position;
         Position plannedPosition;
         long leftTimeReminded;
+        boolean transferCritical;
     }
 
     public final Trip trip;

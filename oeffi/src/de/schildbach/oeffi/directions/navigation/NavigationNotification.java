@@ -237,6 +237,7 @@ public class NavigationNotification {
         final TripRenderer.NotificationData newNotified = tripRenderer.notificationData;
         boolean timeChanged = false;
         boolean posChanged = false;
+        boolean transferCriticalChanged = false;
         int reminder = 0;
         final long nextEventTimeLeftTo10MinsBoundaryMs = nowTime
                 + tripRenderer.nextEventTimeLeftMs - (tripRenderer.nextEventTimeLeftMs / 600000) * 600000;
@@ -254,6 +255,7 @@ public class NavigationNotification {
             lastNotified.leftTimeReminded = Long.MAX_VALUE;
             lastNotified.eventTime = newNotified.plannedEventTime;
             lastNotified.position = newNotified.plannedPosition;
+            lastNotified.transferCritical = false;
         }
         if (newNotified.position != null && !newNotified.position.equals(lastNotified.position)) {
             log.info("switching position from {} to {}", lastNotified.position, newNotified.position);
@@ -268,6 +270,10 @@ public class NavigationNotification {
                 log.info("timediff = {} accepting new time", diff);
                 timeChanged = true;
             }
+        }
+        if (newNotified.transferCritical != lastNotified.transferCritical) {
+            log.info("transferCritical switching to {}", newNotified.transferCritical);
+            transferCriticalChanged = newNotified.transferCritical;
         }
         newNotified.leftTimeReminded = lastNotified.leftTimeReminded;
         final long nextEventTimeLeftMs = tripRenderer.nextEventTimeLeftMs;
@@ -301,7 +307,9 @@ public class NavigationNotification {
                 nextRefreshTimeMs = nextReminderTimeMs;
         }
 
-        log.info("timeChanged={}, posChanged={} reminder={}", timeChanged, posChanged, reminder);
+        final boolean anyChanges = timeChanged || posChanged || transferCriticalChanged;
+        log.info("timeChanged={}, posChanged={} transferCriticalChanged={} reminder={}",
+                timeChanged, posChanged, transferCriticalChanged, reminder);
 
         final Bundle extras = new Bundle();
         extras.putByteArray(EXTRA_INTENTDATA, Objects.serialize(intentData));
@@ -335,7 +343,7 @@ public class NavigationNotification {
                 .addAction(R.drawable.ic_navigation_white_24dp, context.getString(R.string.navigation_stopnav_showtrip),
                         getPendingActivityIntent(false, false));
 
-        if (timeChanged || posChanged) {
+        if (anyChanges) {
             notificationBuilder.setSilent(true);
         } else if (reminder == SOUND_REMIND_NORMAL) {
             notificationBuilder
@@ -349,7 +357,7 @@ public class NavigationNotification {
         final Notification notification = notificationBuilder.build();
         getNotificationManager(context).notify(notificationTag, 0, notification);
 
-        if (timeChanged || posChanged) {
+        if (anyChanges) {
             final Ringtone alarmTone = RingtoneManager.getRingtone(context, ResourceUri.fromResource(context, SOUND_ALARM));
             alarmTone.setAudioAttributes(new AudioAttributes.Builder().setUsage(getAudioUsageForSound(SOUND_ALARM)).build());
             alarmTone.play();
@@ -373,7 +381,7 @@ public class NavigationNotification {
             log.info("stop refreshing");
         }
 
-        return timeChanged || posChanged || reminder != 0;
+        return anyChanges || reminder != 0;
     }
 
     public void updateFromForeground(final Trip newTrip) {
