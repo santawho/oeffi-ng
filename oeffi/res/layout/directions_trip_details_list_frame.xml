@@ -34,44 +34,49 @@
                     android:layout_height="wrap_content"
                     android:background="@color/bg_divider"
                     android:orientation="horizontal"
-                    android:paddingBottom="@dimen/text_padding_vertical_lax"
-                    android:paddingLeft="@dimen/text_padding_horizontal_lax"
-                    android:paddingRight="@dimen/text_padding_horizontal_lax"
-                    android:paddingTop="@dimen/text_padding_vertical_lax">
-
-                    <de.schildbach.oeffi.directions.LocationTextView
-                        android:id="@+id/directions_trip_details_location_from"
-                        android:layout_width="0px"
-                        android:layout_height="match_parent"
-                        android:layout_weight="50"
-                        android:drawablePadding="@dimen/text_padding_horizontal_lax" />
-
-                    <de.schildbach.oeffi.directions.LocationTextView
-                        android:id="@+id/directions_trip_details_location_to"
-                        android:layout_width="0px"
-                        android:layout_height="match_parent"
-                        android:layout_weight="50"
-                        android:drawablePadding="@dimen/text_padding_horizontal_lax" />
+                    android:paddingHorizontal="@dimen/text_padding_horizontal"
+                    android:paddingVertical="@dimen/text_padding_vertical_lax">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:paddingHorizontal="@dimen/text_padding_horizontal"
+                        android:orientation="horizontal">
+                        <de.schildbach.oeffi.directions.LocationTextView
+                            android:id="@+id/directions_trip_details_location_from"
+                            android:layout_width="0px"
+                            android:layout_height="match_parent"
+                            android:layout_weight="50"
+                            android:drawablePadding="@dimen/text_padding_horizontal_lax" />
+                        <de.schildbach.oeffi.directions.LocationTextView
+                            android:id="@+id/directions_trip_details_location_to"
+                            android:layout_width="0px"
+                            android:layout_height="match_parent"
+                            android:layout_weight="50"
+                            android:drawablePadding="@dimen/text_padding_horizontal_lax" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/directions_trip_details_toggle_fares"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:visibility="gone"
                         android:background="@color/bg_divider_highlight"
-                        android:paddingHorizontal="4dp"
+                        android:layout_marginRight="@dimen/text_padding_horizontal_lax"
+                        android:paddingHorizontal="@dimen/text_padding_horizontal"
                         android:orientation="horizontal">
                         <TextView
                             android:id="@+id/directions_trip_details_toggle_fares_symbol"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
-                            android:visibility="gone"
                             android:gravity="center"
                             android:textStyle="bold"
                             android:textSize="@dimen/font_size_large"/>
                         <de.schildbach.oeffi.util.ToggleImageButton
-                            android:id="@+id/directions_trip_details_toggle_fares"
+                            android:id="@+id/directions_trip_details_toggle_fares_button"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
-                            android:visibility="gone"
                             android:src="@drawable/ic_expand_black_24dp"/>
                     </LinearLayout>
                 </LinearLayout>

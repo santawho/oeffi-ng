@@ -779,15 +779,14 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             faresTable.addView(fareRow, i++);
         }
 
-        final ToggleImageButton toggleFares = findViewById(R.id.directions_trip_details_toggle_fares);
-        toggleFares.setVisibility(View.VISIBLE);
-        toggleFares.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            findViewById(R.id.directions_trip_details_fares)
-                    .setVisibility(isChecked ? View.VISIBLE : View.GONE);
-        });
-        final TextView faresSymbol = findViewById(R.id.directions_trip_details_toggle_fares_symbol);
-        faresSymbol.setVisibility(View.VISIBLE);
-        faresSymbol.setText(fares.get(0).currency.getSymbol());
+        findViewById(R.id.directions_trip_details_toggle_fares).setVisibility(View.VISIBLE);
+        ((ToggleImageButton)findViewById(R.id.directions_trip_details_toggle_fares_button))
+                .setOnCheckedChangeListener((buttonView, isChecked) -> {
+                    findViewById(R.id.directions_trip_details_fares)
+                            .setVisibility(isChecked ? View.VISIBLE : View.GONE);
+                });
+        ((TextView)findViewById(R.id.directions_trip_details_toggle_fares_symbol))
+                .setText(fares.get(0).currency.getSymbol());
     }
 
     private boolean updatePublicLeg(
