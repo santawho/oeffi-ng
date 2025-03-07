@@ -343,6 +343,7 @@
 
     <!-- navigation -->
     <string name="directions_trip_navigation_action_cancel">Stop navigation</string>
+    <string name="directions_trip_navigation_action_sound">Toggle notification sounds</string>
     <string name="navigation_notification_channel_name">Navigation</string>
     <string name="navigation_notification_channel_description">Navigation instructions</string>
     <string name="navigation_notification_subtext">to %1$s</string>

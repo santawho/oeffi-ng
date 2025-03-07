@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Date;
 
 import de.schildbach.oeffi.R;
@@ -73,6 +74,7 @@ public class NavigationNotification {
     private static final String INTENT_EXTRA_REOPEN = NavigationNotification.class.getName() + ".reopen";
     private static final String EXTRA_INTENTDATA = NavigationNotification.class.getName() + ".intentdata";
     private static final String EXTRA_LASTNOTIFIED = NavigationNotification.class.getName() + ".lastnotified";
+    private static final String EXTRA_CONFIGURATION = NavigationNotification.class.getName() + ".config";
     public static final String ACTION_UPDATE_TRIGGER = NavigationNotification.class.getName() + ".updatetrigger";
     private static final long[] VIBRATION_PATTERN_REMIND = { 0, 1000, 500, 1500 };
     private static final long[] VIBRATION_PATTERN_ALARM = { 0, 1000, 500, 1500, 1000, 1000, 500, 1500 };
@@ -143,7 +145,10 @@ public class NavigationNotification {
                     (TripDetailsActivity.IntentData) Objects.deserialize(extras.getByteArray(EXTRA_INTENTDATA));
             final TripRenderer.NotificationData notificationData =
                     (TripRenderer.NotificationData) Objects.deserialize(extras.getByteArray(EXTRA_LASTNOTIFIED));
-            final NavigationNotification navigationNotification = new NavigationNotification(context, intentData, notificationData);
+            final Configuration configuration =
+                    (Configuration) Objects.deserialize(extras.getByteArray(EXTRA_CONFIGURATION));
+            final NavigationNotification navigationNotification = new NavigationNotification(
+                    context, intentData, configuration, notificationData);
             final long refreshAt = navigationNotification.refresh();
             if (refreshAt > 0 && refreshAt < minRefreshAt)
                 minRefreshAt = refreshAt;
@@ -151,41 +156,69 @@ public class NavigationNotification {
         return minRefreshAt;
     }
 
+    public static final class Configuration implements Serializable {
+        boolean soundEnabled;
+    }
+
     private final Context context;
     private final String notificationTag;
     private final TripDetailsActivity.IntentData intentData;
     private TripRenderer.NotificationData lastNotified;
+    private Configuration configuration;
 
     public NavigationNotification(
             final Context context,
             final Intent intent) {
-        this(context, new TripDetailsActivity.IntentData(intent), null);
+        this(context, new TripDetailsActivity.IntentData(intent), null, null);
     }
 
-    public NavigationNotification(
+    private NavigationNotification(
             final Context context,
             final TripDetailsActivity.IntentData intentData,
+            final Configuration configuration,
             final TripRenderer.NotificationData lastNotified) {
         this.context = context;
         this.intentData = intentData;
         notificationTag = TAG_PREFIX + intentData.trip.getUniqueId();
-        this.lastNotified = lastNotified != null ? lastNotified : getLastNotified();
+        final Bundle extras = getActiveNotificationExtras();
+        if (extras == null) {
+            this.configuration = configuration != null ? configuration : new Configuration();
+            this.lastNotified = lastNotified;
+        } else {
+            this.configuration = configuration != null ? configuration :
+                    (Configuration) Objects.deserialize(extras.getByteArray(EXTRA_CONFIGURATION));
+            this.lastNotified = lastNotified != null ? lastNotified :
+                    (TripRenderer.NotificationData) Objects.deserialize(extras.getByteArray(EXTRA_LASTNOTIFIED));
+        }
     }
 
-    private TripRenderer.NotificationData getLastNotified() {
+    public void updateFromForeground(final Trip newTrip, final Configuration configuration) {
+        if (configuration != null)
+            this.configuration = configuration;
+        update(newTrip);
+        final long refreshAt = lastNotified.refreshRequiredAt;
+        if (refreshAt > 0)
+            NavigationAlarmManager.getInstance().start(refreshAt);
+    }
+
+    private Notification getActiveNotification() {
         final StatusBarNotification[] activeNotifications = getNotificationManager(context).getActiveNotifications();
         for (StatusBarNotification statusBarNotification : activeNotifications) {
             final String tag = statusBarNotification.getTag();
             if (tag == null || !tag.equals(notificationTag))
                 continue;
-            final Notification notification = statusBarNotification.getNotification();
-            final Bundle extras = notification.extras;
-            if (extras == null)
-                return null;
-            return (TripRenderer.NotificationData) Objects.deserialize(extras.getByteArray(EXTRA_LASTNOTIFIED));
+            return statusBarNotification.getNotification();
         }
         return null;
     }
+
+    private Bundle getActiveNotificationExtras() {
+        final Notification notification = getActiveNotification();
+        if (notification == null)
+            return null;
+        return notification.extras;
+    }
+
 
     private void soundBeep(int beepType) {
         final ToneGenerator toneGenerator = new ToneGenerator(AudioManager.STREAM_NOTIFICATION, ToneGenerator.MAX_VOLUME);
@@ -194,7 +227,8 @@ public class NavigationNotification {
     }
 
     @SuppressLint("ScheduleExactAlarm")
-    private boolean update(final Trip trip) {
+    private boolean update(final Trip aTrip) {
+        final Trip trip = aTrip != null ? aTrip : intentData.trip;
         createNotificationChannel(context);
         final Date now = new Date();
         final long nowTime = now.getTime();
@@ -314,6 +348,7 @@ public class NavigationNotification {
         final Bundle extras = new Bundle();
         extras.putByteArray(EXTRA_INTENTDATA, Objects.serialize(intentData));
         extras.putByteArray(EXTRA_LASTNOTIFIED, Objects.serialize(newNotified));
+        extras.putByteArray(EXTRA_CONFIGURATION, Objects.serialize(configuration));
 
         final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setPriority(NotificationCompat.PRIORITY_MAX)
@@ -347,7 +382,7 @@ public class NavigationNotification {
             notificationBuilder.setSilent(true);
         } else if (reminder == SOUND_REMIND_NORMAL) {
             notificationBuilder
-                    .setSilent(false)
+                    .setSilent(!configuration.soundEnabled)
                     .setVibrate(VIBRATION_PATTERN_REMIND)
                     .setSound(ResourceUri.fromResource(context, reminder), getAudioStreamForSound(reminder));
         } else {
@@ -358,15 +393,9 @@ public class NavigationNotification {
         getNotificationManager(context).notify(notificationTag, 0, notification);
 
         if (anyChanges) {
-            final Ringtone alarmTone = RingtoneManager.getRingtone(context, ResourceUri.fromResource(context, SOUND_ALARM));
-            alarmTone.setAudioAttributes(new AudioAttributes.Builder().setUsage(getAudioUsageForSound(SOUND_ALARM)).build());
-            alarmTone.play();
-            ((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(VIBRATION_PATTERN_ALARM, -1);
+            playAlarmSoundAndVibration(SOUND_ALARM, VIBRATION_PATTERN_ALARM);
         } else if (reminder != 0 && reminder != SOUND_REMIND_NORMAL) {
-            final Ringtone alarmTone = RingtoneManager.getRingtone(context, ResourceUri.fromResource(context, reminder));
-            alarmTone.setAudioAttributes(new AudioAttributes.Builder().setUsage(getAudioUsageForSound(reminder)).build());
-            alarmTone.play();
-            ((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(VIBRATION_PATTERN_REMIND, -1);
+            playAlarmSoundAndVibration(reminder, VIBRATION_PATTERN_REMIND);
         }
 
         newNotified.refreshRequiredAt = nextRefreshTimeMs;
@@ -384,11 +413,13 @@ public class NavigationNotification {
         return anyChanges || reminder != 0;
     }
 
-    public void updateFromForeground(final Trip newTrip) {
-        update(newTrip);
-        final long refreshAt = lastNotified.refreshRequiredAt;
-        if (refreshAt > 0)
-            NavigationAlarmManager.getInstance().start(refreshAt);
+    private void playAlarmSoundAndVibration(final int soundId, final long[] vibrationPattern) {
+        if (configuration.soundEnabled) {
+            final Ringtone alarmTone = RingtoneManager.getRingtone(context, ResourceUri.fromResource(context, soundId));
+            alarmTone.setAudioAttributes(new AudioAttributes.Builder().setUsage(getAudioUsageForSound(soundId)).build());
+            alarmTone.play();
+        }
+        ((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(vibrationPattern, -1);
     }
 
     public void remove() {
@@ -409,7 +440,7 @@ public class NavigationNotification {
         public void onReceive(Context context, Intent intent) {
             final NavigationNotification navigationNotification = new NavigationNotification(context, intent);
             if (intent.getBooleanExtra(INTENT_EXTRA_REOPEN, false)) {
-                navigationNotification.update(navigationNotification.intentData.trip);
+                navigationNotification.update(null);
             } else {
                 navigationNotification.remove();
             }
@@ -449,7 +480,7 @@ public class NavigationNotification {
                 soundBeep(ToneGenerator.TONE_PROP_BEEP2);
         } else {
             soundBeep(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD);
-            update(intentData.trip);
+            update(null);
         }
         return lastNotified.refreshRequiredAt;
     }

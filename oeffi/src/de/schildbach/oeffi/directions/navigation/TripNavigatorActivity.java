@@ -30,6 +30,7 @@ import de.schildbach.oeffi.directions.TripDetailsActivity;
 import de.schildbach.oeffi.directions.TripsOverviewActivity;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.Toast;
+import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.JourneyRef;
@@ -81,12 +82,12 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
     private Navigator navigator;
     private QueryTripsRunnable queryTripsRunnable;
-    private NavigationNotification navigationNotification;
     private Runnable navigationRefreshRunnable;
     private long nextNavigationRefreshTime = 0;
     private boolean navigationNotificationBeingDeleted;
     private BroadcastReceiver updateTriggerReceiver;
     private boolean permissionRequestRunning;
+    private boolean soundEnabled = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -144,14 +145,23 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     protected void addActionBarButtons() {
         actionBar.addButton(R.drawable.ic_clear_white_24dp, R.string.directions_trip_navigation_action_cancel)
                 .setOnClickListener(view -> askStopNavigation());
+
+        final ToggleImageButton soundButton = actionBar.addToggleButton(R.drawable.ic_sound_white_24dp,
+                R.string.directions_trip_navigation_action_sound);
+        soundButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            soundEnabled = isChecked;
+            updateNotification(null);
+        });
+        soundButton.setChecked(soundEnabled);
     }
 
     private void stopNavigation() {
-        if (navigationNotification != null) {
-            navigationNotification.remove();
-            navigationNotification = null;
-        }
+        getCurrentNotification().remove();
         finish();
+    }
+
+    private NavigationNotification getCurrentNotification() {
+        return new NavigationNotification(this, getIntent());
     }
 
     @SuppressLint("MissingSuperCall")
@@ -173,10 +183,11 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         super.onResume();
         if (!navigationNotificationBeingDeleted) {
             if (!permissionRequestRunning) {
-                if (NavigationNotification.requestPermissions(this, 1))
-                    updateNotification(tripRenderer.trip);
-                else
+                if (NavigationNotification.requestPermissions(this, 1)) {
+                    updateNotification(null);
+                } else {
                     permissionRequestRunning = true;
+                }
             }
         }
     }
@@ -215,7 +226,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
                 .setNegativeButton(R.string.navigation_stopnav_continue, (dialogInterface, i) -> {
                     navigationNotificationBeingDeleted = false;
                     doCheckAutoRefresh(true);
-                    updateNotification(tripRenderer.trip);
+                    updateNotification(null);
                 })
                 .create().show();
     }
@@ -232,7 +243,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         }
         if (granted) {
             permissionRequestRunning = false;
-            updateNotification(tripRenderer.trip);
+            updateNotification(null);
         } else {
             // warning ??
         }
@@ -386,10 +397,10 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         return true;
     }
 
-    private void updateNotification(final Trip trip) {
-        navigationNotification = new NavigationNotification(this, getIntent());
-        backgroundHandler.post(() -> {
-            navigationNotification.updateFromForeground(trip);
-        });
+    private void updateNotification(final Trip aTrip) {
+        final Trip trip = aTrip != null ? aTrip : tripRenderer.trip;
+        NavigationNotification.Configuration configuration = new NavigationNotification.Configuration();
+        configuration.soundEnabled = soundEnabled;
+        backgroundHandler.post(() -> getCurrentNotification().updateFromForeground(trip, configuration));
     }
 }

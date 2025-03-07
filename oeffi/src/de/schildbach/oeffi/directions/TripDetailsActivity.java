@@ -271,19 +271,27 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         actionBar = getMyActionBar();
         actionBar.setBack(isTaskRoot() ? null : v -> goBack());
 
-        // action bar secondary title
-        final StringBuilder secondaryTitle = new StringBuilder();
         final Long duration = tripRenderer.trip.getPublicDuration();
-        if (duration != null)
-            secondaryTitle.append(getString(R.string.directions_trip_details_duration, formatTimeSpan(duration)));
+        final String durationText = duration == null ? null :
+                getString(R.string.directions_trip_details_duration, formatTimeSpan(duration));
+        final int numChanges = tripRenderer.trip.numChanges == null ? 0 : tripRenderer.trip.numChanges;
+        final String numChangesText = numChanges <= 0 ? null :
+                getString(R.string.directions_trip_details_num_changes, numChanges);
 
-        if (tripRenderer.trip.numChanges != null && tripRenderer.trip.numChanges > 0) {
-            if (secondaryTitle.length() > 0)
-                secondaryTitle.append(" / ");
-            secondaryTitle.append(getString(R.string.directions_trip_details_num_changes, tripRenderer.trip.numChanges));
-        }
+        ((TextView)findViewById(R.id.directions_trip_details_duration)).setText(durationText);
+        ((TextView)findViewById(R.id.directions_trip_details_numchanges)).setText(numChangesText);
 
-        actionBar.setSecondaryTitle(secondaryTitle.length() > 0 ? secondaryTitle : null);
+        // action bar secondary title
+        //  final StringBuilder secondaryTitle = new StringBuilder();
+        //  if (duration != null)
+        //    secondaryTitle.append(durationText);
+        //  if (numChangesText != null) {
+        //    if (secondaryTitle.length() > 0)
+        //        secondaryTitle.append(" / ");
+        //    secondaryTitle.append(numChangesText);
+        //  }
+        //  actionBar.setSecondaryTitle(secondaryTitle.length() > 0 ? secondaryTitle : null);
+
         setupActionBar();
 
         final ActivityResultLauncher<String> requestLocationPermissionLauncher = registerForActivityResult(
