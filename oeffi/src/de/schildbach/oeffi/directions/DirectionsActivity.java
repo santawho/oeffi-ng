@@ -677,14 +677,12 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
 
     private boolean initProductToggles() {
         final Collection<Product> defaultProducts = loadProductFilter();
-        Collection<Product> networkDefaultProducts = getNetworkDefaultProducts();
         for (final ToggleImageButton view : viewProductToggles) {
             final Product product = Product.fromCode(((String) view.getTag()).charAt(0));
             final boolean checked = defaultProducts.contains(product);
             view.setChecked(checked);
         }
-        // true if different from default for network
-        return defaultProducts.size() != networkDefaultProducts.size() || !defaultProducts.containsAll(networkDefaultProducts);
+        return productsAreNetworkDefault(defaultProducts);
     }
 
     private Set<Product> getProductToggles() {
@@ -693,6 +691,11 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
             if (view.isChecked())
                 products.add(Product.fromCode(((String) view.getTag()).charAt(0)));
         return products;
+    }
+
+    private boolean productsAreNetworkDefault(final Collection<Product> products) {
+        Collection<Product> networkDefaultProducts = getNetworkDefaultProducts();
+        return products.size() != networkDefaultProducts.size() || !products.containsAll(networkDefaultProducts);
     }
 
     @Override
@@ -970,7 +973,7 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
         viewToLocation.setLocation(to);
         viewViaLocation.setLocation(via);
         quickReturnView.setTranslationY(0); // show
-        expandForm(via != null);
+        expandForm(productsAreNetworkDefault(getProductToggles()) || via != null);
     }
 
     private void handleShowSavedTrip(final byte[] serializedTrip) {
