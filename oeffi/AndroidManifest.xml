@@ -280,8 +280,10 @@
             android:authorities="${applicationId}.plans"
             android:exported="false" />
 
-        <activity android:name=".LogViewerActivity"
-            android:launchMode="singleInstance">
+        <activity
+            android:name=".LogViewerActivity"
+            android:launchMode="singleInstance"
+            android:theme="@style/My.Theme.DarkDefault">
         </activity>
     </application>
 </manifest>
