@@ -97,13 +97,14 @@ public class TripRenderer {
 
     public List<LegContainer> legs = new ArrayList<>();
     public LegContainer currentLeg;
-    public final Map<LegKey, Boolean> legExpandStates = new HashMap<>();
+    public final Map<LegKey, Boolean> legExpandStates;
     public NotificationData notificationData;
     private Boolean travelable;
 
-    public TripRenderer(final Trip trip, final boolean isJourney, final Date now) {
+    public TripRenderer(final TripRenderer previous, final Trip trip, final boolean isJourney, final Date now) {
         this.trip = trip;
         this.isJourney = isJourney;
+        this.legExpandStates = previous != null ? previous.legExpandStates : new HashMap<>();
         setupFromTrip(trip);
         evaluateByTime(now);
     }

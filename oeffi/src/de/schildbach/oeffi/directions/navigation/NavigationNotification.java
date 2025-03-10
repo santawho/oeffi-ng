@@ -232,7 +232,7 @@ public class NavigationNotification {
         createNotificationChannel(context);
         final Date now = new Date();
         final long nowTime = now.getTime();
-        final TripRenderer tripRenderer = new TripRenderer(trip, false, now);
+        final TripRenderer tripRenderer = new TripRenderer(null, trip, false, now);
         long nextRefreshTimeMs;
         if (tripRenderer.nextEventEarliestTime != null) {
             final long timeLeft = tripRenderer.nextEventEarliestTime.getTime() - nowTime;

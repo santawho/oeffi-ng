@@ -1793,7 +1793,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     public void onTripUpdated(final Trip updatedTrip) {
         if (updatedTrip == null) return;
-        tripRenderer = new TripRenderer(updatedTrip, renderConfig.isJourney, new Date());
+        tripRenderer = new TripRenderer(tripRenderer, updatedTrip, renderConfig.isJourney, new Date());
         final List<Trip.Leg> updatedPublicLegs = new ArrayList<>();
         for (Trip.Leg leg : updatedTrip.legs) {
             if (leg instanceof Trip.Public)
@@ -1811,7 +1811,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     protected void setupFromTrip(final Trip trip) {
-        this.tripRenderer = new TripRenderer(trip, renderConfig.isJourney, new Date());
+        this.tripRenderer = new TripRenderer(tripRenderer, trip, renderConfig.isJourney, new Date());
     }
 
     protected boolean onFindAlternativeConnections(
