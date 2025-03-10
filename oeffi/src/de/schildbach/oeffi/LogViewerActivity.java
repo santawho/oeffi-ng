@@ -3,8 +3,13 @@ package de.schildbach.oeffi;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ScrollView;
 import android.widget.TextView;
+
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +40,13 @@ public class LogViewerActivity extends OeffiActivity {
         actionBar.setBackgroundColor(getResources().getColor(R.color.bg_action_bar_logviewer));
         actionBar.setPrimaryTitle(R.string.global_options_show_log_title);
         actionBar.addProgressButton().setOnClickListener(view -> refresh());
+
+        final View contentView = findViewById(android.R.id.content);
+        ViewCompat.setOnApplyWindowInsetsListener(contentView, (v, windowInsets) -> {
+            final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(0, 0, 0, insets.bottom);
+            return windowInsets;
+        });
     }
 
     @Override
