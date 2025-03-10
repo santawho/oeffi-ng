@@ -71,7 +71,9 @@ public class NavigationNotification {
     private static final long KEEP_NOTIFICATION_FOR_MINUTES = 30;
     private static final long REMINDER_FIRST_MS = 6 * 60 * 1000;
     private static final long REMINDER_SECOND_MS = 2 * 60 * 1000;
-    private static final String INTENT_EXTRA_REOPEN = NavigationNotification.class.getName() + ".reopen";
+    private static final int ACTION_REFRESH = 1;
+    private static final int ACTION_DELETE = 2;
+    private static final String INTENT_EXTRA_ACTION = NavigationNotification.class.getName() + ".action";
     private static final String EXTRA_INTENTDATA = NavigationNotification.class.getName() + ".intentdata";
     private static final String EXTRA_LASTNOTIFIED = NavigationNotification.class.getName() + ".lastnotified";
     private static final String EXTRA_CONFIGURATION = NavigationNotification.class.getName() + ".config";
@@ -267,6 +269,7 @@ public class NavigationNotification {
         setupNotificationView(notificationLayout, tripRenderer, now);
         // final RemoteViews notificationLayoutExpanded = new RemoteViews(context.getPackageName(), R.layout.navigation_notification);
         // setupNotificationView(context, notificationLayoutExpanded, tripRenderer, now, newNotified);
+        notificationLayout.setOnClickPendingIntent(R.id.navigation_notification_next_event, getPendingActionIntent(ACTION_REFRESH));
 
         final TripRenderer.NotificationData newNotified = tripRenderer.notificationData;
         boolean timeChanged = false;
@@ -371,19 +374,22 @@ public class NavigationNotification {
                 .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
                 .setCustomContentView(notificationLayout)
                 // .setCustomBigContentView(notificationLayoutExpanded)
-                .setContentIntent(getPendingActivityIntent(false, true))
+                // .setContentIntent(getPendingActivityIntent(false, true))
+                .setContentIntent(getPendingActionIntent(ACTION_REFRESH))
                 //.setDeleteIntent(getPendingActivityIntent(context, true))
-                .setDeleteIntent(getPendingDeleteIntent(true))
+                .setDeleteIntent(getPendingActionIntent(ACTION_DELETE))
                 .setAutoCancel(false)
                 .setOngoing(true)
                 .setUsesChronometer(true)
                 .setWhen(nowTime)
                 .setTimeoutAfter(duration)
                 .setExtras(extras)
+                .addAction(R.drawable.ic_clear_white_24dp, context.getString(R.string.navigation_opennav_shownextevent),
+                        getPendingActivityIntent(false, true))
+                .addAction(R.drawable.ic_navigation_white_24dp, context.getString(R.string.navigation_opennav_showtrip),
+                        getPendingActivityIntent(false, false))
                 .addAction(R.drawable.ic_clear_white_24dp, context.getString(R.string.navigation_stopnav_stop),
-                        getPendingActivityIntent(true, false)) // getPendingDeleteIntent(context, false))
-                .addAction(R.drawable.ic_navigation_white_24dp, context.getString(R.string.navigation_stopnav_showtrip),
-                        getPendingActivityIntent(false, false));
+                        getPendingActivityIntent(true, false));
 
         if (anyChanges) {
             notificationBuilder.setSilent(true);
@@ -442,30 +448,37 @@ public class NavigationNotification {
                 intent, PendingIntent.FLAG_IMMUTABLE);
     }
 
-    public static class DeleteReceiver extends BroadcastReceiver {
+    public static class ActionReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            final NavigationNotification navigationNotification = new NavigationNotification(context, intent);
-            if (intent.getBooleanExtra(INTENT_EXTRA_REOPEN, false)) {
-                navigationNotification.update(null);
-            } else {
-                navigationNotification.remove();
-            }
+            NavigationAlarmManager.runOnHandlerThread(() -> {
+                final NavigationNotification navigationNotification = new NavigationNotification(context, intent);
+                switch (intent.getIntExtra(INTENT_EXTRA_ACTION, 0)) {
+                    case ACTION_REFRESH:
+                        navigationNotification.update(null);
+                        break;
+                    case ACTION_DELETE:
+                        navigationNotification.remove();
+                        break;
+                    default:
+                        break;
+                }
+            });
         }
     }
 
-    private PendingIntent getPendingDeleteIntent(final boolean reopen) {
-        final Intent intent = new Intent(context, DeleteReceiver.class);
+    private PendingIntent getPendingActionIntent(final int action) {
+        final Intent intent = new Intent(context, ActionReceiver.class);
         intent.setData(new Uri.Builder()
                 .scheme("data")
-                .authority(DeleteReceiver.class.getName())
+                .authority(ActionReceiver.class.getName())
                 .path(intentData.network.name() + "/" + intentData.trip.getUniqueId())
                 .build());
         intent.putExtra(TripDetailsActivity.INTENT_EXTRA_NETWORK, intentData.network);
         intent.putExtra(TripDetailsActivity.INTENT_EXTRA_TRIP, intentData.trip);
         intent.putExtra(TripDetailsActivity.INTENT_EXTRA_RENDERCONFIG, intentData.renderConfig);
-        intent.putExtra(INTENT_EXTRA_REOPEN, reopen);
-        return PendingIntent.getBroadcast(context, (reopen ? 1 : 0), intent, PendingIntent.FLAG_IMMUTABLE);
+        intent.putExtra(INTENT_EXTRA_ACTION, action);
+        return PendingIntent.getBroadcast(context, action, intent, PendingIntent.FLAG_IMMUTABLE);
     }
 
     private long refresh() {

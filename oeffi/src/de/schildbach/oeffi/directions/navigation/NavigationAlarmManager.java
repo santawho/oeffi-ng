@@ -77,8 +77,12 @@ public class NavigationAlarmManager {
     public static class RefreshReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            getInstance().backgroundHandler.post(() -> getInstance().onRefreshTimer());
+            runOnHandlerThread(() -> getInstance().onRefreshTimer());
         }
+    }
+
+    public static void runOnHandlerThread(final Runnable runnable) {
+        getInstance().backgroundHandler.post(runnable);
     }
 
     private PendingIntent getPendingRefreshIntent() {

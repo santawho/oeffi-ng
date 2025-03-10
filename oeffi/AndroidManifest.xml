@@ -161,7 +161,7 @@
         </receiver>
 
         <receiver android:name=".directions.navigation.NavigationAlarmManager$RefreshReceiver" />
-        <receiver android:name=".directions.navigation.NavigationNotification$DeleteReceiver" />
+        <receiver android:name=".directions.navigation.NavigationNotification$ActionReceiver" />
 
         <service
             android:name=".stations.NearestFavoriteStationWidgetService"
