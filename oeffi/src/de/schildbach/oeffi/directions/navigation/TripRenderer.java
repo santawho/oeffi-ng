@@ -25,6 +25,7 @@ public class TripRenderer {
     public static final String NO_TIME_LEFT_VALUE = "@@@";
 
     public static class LegContainer {
+        public int legIndex;
         public @Nullable Trip.Individual individualLeg;
         public @Nullable Trip.Public publicLeg;
         public final @Nullable Trip.Public initialLeg;
@@ -32,7 +33,9 @@ public class TripRenderer {
         public final LegContainer transferTo;
 
         public LegContainer(
+                final int legIndex,
                 final @Nullable Trip.Public baseLeg) {
+            this.legIndex = legIndex;
             this.publicLeg = baseLeg;
             this.initialLeg = baseLeg;
             this.individualLeg = null;
@@ -41,8 +44,10 @@ public class TripRenderer {
         }
 
         public LegContainer(
+                final int legIndex,
                 final @Nullable Trip.Individual baseLeg,
                 final LegContainer transferFrom, final LegContainer transferTo) {
+            this.legIndex = legIndex;
             this.individualLeg = baseLeg;
             this.transferFrom = transferFrom;
             this.transferTo = transferTo;
@@ -82,12 +87,14 @@ public class TripRenderer {
 
     public static class NotificationData implements Serializable {
         long refreshRequiredAt;
-        int legIndex;
+        int currentLegIndex;
         boolean isArrival;
         Date eventTime;
+        int publicArrivalLegIndex;
+        int publicDepartureLegIndex;
         Date plannedEventTime;
-        Position position;
-        Position plannedPosition;
+        Position departurePosition;
+        Position plannedDeparturePosition;
         long leftTimeReminded;
         boolean transferCritical;
     }
@@ -99,7 +106,7 @@ public class TripRenderer {
     public LegContainer currentLeg;
     public final Map<LegKey, Boolean> legExpandStates;
     public NotificationData notificationData;
-    private Boolean travelable;
+    private Boolean feasible;
 
     public TripRenderer(final TripRenderer previous, final Trip trip, final boolean isJourney, final Date now) {
         this.trip = trip;
@@ -110,10 +117,10 @@ public class TripRenderer {
     }
 
     public boolean isFeasible() {
-        if (travelable == null) {
-            travelable = trip.isTravelable();
+        if (feasible == null) {
+            feasible = trip.isTravelable();
         }
-        return travelable;
+        return feasible;
     }
 
     private void setupFromTrip(final Trip trip) {
@@ -121,12 +128,13 @@ public class TripRenderer {
         for (int iLeg = 0; iLeg < trip.legs.size(); ++iLeg) {
             final Trip.Leg prevLeg = (iLeg > 0) ? trip.legs.get(iLeg - 1) : null;
             Trip.Leg leg = trip.legs.get(iLeg);
-            final Trip.Leg nextLeg = (iLeg + 1 < trip.legs.size()) ? trip.legs.get(iLeg + 1) : null;
+            final int iNext = iLeg + 1;
+            final Trip.Leg nextLeg = (iNext < trip.legs.size()) ? trip.legs.get(iNext) : null;
 
             if (leg instanceof Trip.Individual) {
                 final LegContainer transferFrom = (prevLeg instanceof Trip.Public) ? prevC : null;
-                final LegContainer transferTo = (nextLeg instanceof Trip.Public) ? new LegContainer((Trip.Public) nextLeg) : null;
-                legs.add(new LegContainer((Trip.Individual) leg, transferFrom, transferTo));
+                final LegContainer transferTo = (nextLeg instanceof Trip.Public) ? new LegContainer(iNext, (Trip.Public) nextLeg) : null;
+                legs.add(new LegContainer(iLeg, (Trip.Individual) leg, transferFrom, transferTo));
                 if (transferTo != null) {
                     setupPath(nextLeg);
                     legs.add(transferTo);
@@ -138,9 +146,9 @@ public class TripRenderer {
                 }
                 prevC = transferTo;
             } else if (leg instanceof Trip.Public) {
-                final LegContainer newC = new LegContainer((Trip.Public) leg);
+                final LegContainer newC = new LegContainer(iLeg, (Trip.Public) leg);
                 if (prevC != null || iLeg == 0) {
-                    legs.add(new LegContainer(null, prevC, newC));
+                    legs.add(new LegContainer(-1, null, prevC, newC));
                 }
                 legs.add(newC);
                 prevC = newC;
@@ -171,7 +179,7 @@ public class TripRenderer {
             }
             if (isCurrent) {
                 currentLeg = legC;
-                notificationData.legIndex = iLeg;
+                notificationData.currentLegIndex = iLeg;
              }
         }
     }
@@ -217,11 +225,14 @@ public class TripRenderer {
                             : R.string.directions_trip_details_next_event_action_next_interchange
             );
 
+            notificationData.publicArrivalLegIndex = legC.legIndex;
+            notificationData.publicDepartureLegIndex = -1;
             notificationData.isArrival = true;
             notificationData.eventTime = endTime;
             notificationData.plannedEventTime = plannedEndTime;
-            notificationData.position = depPos;
-            notificationData.plannedPosition = plannedDepPos;
+            notificationData.departurePosition = depPos;
+            notificationData.plannedDeparturePosition = plannedDepPos;
+            notificationData.transferCritical = nextEventTransferLeftTimeCritical;
             return true;
         }
         return false;
@@ -267,11 +278,14 @@ public class TripRenderer {
                                         : R.string.directions_trip_details_next_event_action_interchange),
                     0);
 
+            notificationData.publicArrivalLegIndex = legC.transferFrom != null ? legC.transferFrom.legIndex : -1;
+            notificationData.publicDepartureLegIndex = legC.transferTo != null ? legC.transferTo.legIndex : -1;
             notificationData.isArrival = false;
             notificationData.eventTime = endTime;
             notificationData.plannedEventTime = plannedEndTime;
-            notificationData.position = depPos;
-            notificationData.plannedPosition = plannedDepPos;
+            notificationData.departurePosition = depPos;
+            notificationData.plannedDeparturePosition = plannedDepPos;
+            notificationData.transferCritical = nextEventTransferLeftTimeCritical;
             return true;
         }
         return false;

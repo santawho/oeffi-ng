@@ -275,28 +275,32 @@ public class NavigationNotification {
         boolean timeChanged = false;
         boolean posChanged = false;
         boolean transferCriticalChanged = false;
-        int reminder = 0;
+        int reminderSoundId = 0;
         final long nextEventTimeLeftMs = tripRenderer.nextEventTimeLeftMs;
         final long nextEventTimeLeftTo10MinsBoundaryMs = nowTime
                 + nextEventTimeLeftMs - (nextEventTimeLeftMs / 600000) * 600000;
         if (nextEventTimeLeftTo10MinsBoundaryMs < nextRefreshTimeMs)
             nextRefreshTimeMs = nextEventTimeLeftTo10MinsBoundaryMs;
-        if (lastNotified == null || newNotified.legIndex != lastNotified.legIndex) {
-            if (lastNotified == null)
+        if (lastNotified == null || newNotified.currentLegIndex != lastNotified.currentLegIndex) {
+            if (lastNotified == null) {
                 log.info("first notification !!");
-            else
-                log.info("switching leg from {} to {}", lastNotified.legIndex, newNotified.legIndex);
-            if (lastNotified != null)
-                reminder = SOUND_REMIND_NEXTLEG;
-            lastNotified = new TripRenderer.NotificationData();
-            lastNotified.legIndex = newNotified.legIndex;
+                lastNotified = new TripRenderer.NotificationData();
+                lastNotified.currentLegIndex = -1;
+                lastNotified.publicDepartureLegIndex = -1;
+                lastNotified.publicArrivalLegIndex = -1;
+            } else {
+                log.info("switching leg from {} to {}", lastNotified.currentLegIndex, newNotified.currentLegIndex);
+                reminderSoundId = SOUND_REMIND_NEXTLEG;
+            }
             lastNotified.leftTimeReminded = Long.MAX_VALUE;
             lastNotified.eventTime = newNotified.plannedEventTime;
-            lastNotified.position = newNotified.plannedPosition;
-            lastNotified.transferCritical = false;
+            if (newNotified.publicDepartureLegIndex != lastNotified.publicDepartureLegIndex)
+                lastNotified.departurePosition = newNotified.plannedDeparturePosition;
+            if (newNotified.publicArrivalLegIndex != lastNotified.publicArrivalLegIndex)
+                lastNotified.transferCritical = false;
         }
-        if (newNotified.position != null && !newNotified.position.equals(lastNotified.position)) {
-            log.info("switching position from {} to {}", lastNotified.position, newNotified.position);
+        if (newNotified.departurePosition != null && !newNotified.departurePosition.equals(lastNotified.departurePosition)) {
+            log.info("switching position from {} to {}", lastNotified.departurePosition, newNotified.departurePosition);
             posChanged = true;
         }
         if (newNotified.eventTime != null && lastNotified.eventTime != null) {
@@ -310,9 +314,9 @@ public class NavigationNotification {
                 timeChanged = diffSecs >= 600; // 10 mins when more than 1 hour
             }
             if (timeChanged) {
-                log.info("timediff = {} accepting new time", diffSecs);
+                log.info("time changed: leftSecs={}, diffSecs={}, accepting new time", leftSecs, diffSecs);
             } else {
-                log.info("timediff = {} keeping last time", diffSecs);
+                log.info("time not changed: leftSecs={}, diffSecs={}, keeping new time", leftSecs, diffSecs);
                 newNotified.eventTime = lastNotified.eventTime;
             }
         }
@@ -328,7 +332,7 @@ public class NavigationNotification {
                 nextReminderTimeMs = nowTime + nextEventTimeLeftMs;
                 if (lastNotified.leftTimeReminded > REMINDER_SECOND_MS) {
                     log.info("reminding 2 mins = {}", nextReminderTimeMs);
-                    reminder = SOUND_REMIND_IMPORTANT;
+                    reminderSoundId = SOUND_REMIND_IMPORTANT;
                     newNotified.leftTimeReminded = REMINDER_SECOND_MS;
                 }
             } else if (nextEventTimeLeftMs < REMINDER_FIRST_MS + 20000) {
@@ -336,7 +340,7 @@ public class NavigationNotification {
                 nextReminderTimeMs = nowTime + nextEventTimeLeftMs - REMINDER_SECOND_MS;
                 if (lastNotified.leftTimeReminded > REMINDER_FIRST_MS) {
                     log.info("reminding 6 mins = {}", nextReminderTimeMs);
-                    reminder = SOUND_REMIND_NORMAL;
+                    reminderSoundId = SOUND_REMIND_NORMAL;
                     newNotified.leftTimeReminded = REMINDER_FIRST_MS;
                 }
             } else {
@@ -352,8 +356,8 @@ public class NavigationNotification {
         }
 
         final boolean anyChanges = timeChanged || posChanged || transferCriticalChanged;
-        log.info("timeChanged={}, posChanged={} transferCriticalChanged={} reminder={}",
-                timeChanged, posChanged, transferCriticalChanged, reminder);
+        log.info("timeChanged={}, posChanged={} transferCriticalChanged={} reminderSoundId={}",
+                timeChanged, posChanged, transferCriticalChanged, reminderSoundId);
 
         final Bundle extras = new Bundle();
         extras.putByteArray(EXTRA_INTENTDATA, Objects.serialize(intentData));
@@ -393,11 +397,11 @@ public class NavigationNotification {
 
         if (anyChanges) {
             notificationBuilder.setSilent(true);
-        } else if (reminder == SOUND_REMIND_NORMAL) {
+        } else if (reminderSoundId == SOUND_REMIND_NORMAL) {
             notificationBuilder
                     .setSilent(!configuration.soundEnabled)
                     .setVibrate(VIBRATION_PATTERN_REMIND)
-                    .setSound(ResourceUri.fromResource(context, reminder), getAudioStreamForSound(reminder));
+                    .setSound(ResourceUri.fromResource(context, reminderSoundId), getAudioStreamForSound(reminderSoundId));
         } else {
             notificationBuilder.setSilent(true);
         }
@@ -407,8 +411,8 @@ public class NavigationNotification {
 
         if (anyChanges) {
             playAlarmSoundAndVibration(SOUND_ALARM, VIBRATION_PATTERN_ALARM);
-        } else if (reminder != 0 && reminder != SOUND_REMIND_NORMAL) {
-            playAlarmSoundAndVibration(reminder, VIBRATION_PATTERN_REMIND);
+        } else if (reminderSoundId != 0 && reminderSoundId != SOUND_REMIND_NORMAL) {
+            playAlarmSoundAndVibration(reminderSoundId, VIBRATION_PATTERN_REMIND);
         }
 
         newNotified.refreshRequiredAt = nextRefreshTimeMs;
@@ -423,7 +427,7 @@ public class NavigationNotification {
             log.info("stop refreshing");
         }
 
-        return anyChanges || reminder != 0;
+        return anyChanges || reminderSoundId != 0;
     }
 
     private void playAlarmSoundAndVibration(final int soundId, final long[] vibrationPattern) {
