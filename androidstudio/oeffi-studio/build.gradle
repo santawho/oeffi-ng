@@ -68,11 +68,7 @@ android {
             applicationIdSuffix '.ng'
             resValue "string", "app_name", "Öffi NG"
             resValue "string", "about_git_url", "https://github.com/santawho/oeffi-ng"
-//            resValue "string", "about_git_url", "https://gitlab.com/santawho/oeffi"
             resValue "string", "about_changelog_url", "https://github.com/santawho/oeffi-ng/wiki"
-//            resValue "string", "about_changelog_url", "https://jlemke.com/oeffi/"
-//            resValue "string", "about_update_url", "https://jlemke.com/?sdm_process_download=1&download_id=429"
-//            resValue "string", "about_update_url", "https://jlemke.com/wp-content/uploads/oeffi-studio-ng-release.apk"
             resValue "string", "about_update_url", "https://github.com/santawho/oeffi-ng/releases/latest/download/oeffi-ng.apk"
             resValue "string", "about_update_modified", timeModifiedStr  // If-Modified-Since: xxx, 25 Feb 2025 17:10:00 GMT
         }
