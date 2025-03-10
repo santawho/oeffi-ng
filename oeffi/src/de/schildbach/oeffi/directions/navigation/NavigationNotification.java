@@ -180,13 +180,14 @@ public class NavigationNotification {
             final Configuration configuration,
             final TripRenderer.NotificationData lastNotified) {
         this.context = context;
-        this.intentData = intentData;
         notificationTag = TAG_PREFIX + intentData.trip.getUniqueId();
         final Bundle extras = getActiveNotificationExtras();
         if (extras == null) {
+            this.intentData = intentData;
             this.configuration = configuration != null ? configuration : new Configuration();
             this.lastNotified = lastNotified;
         } else {
+            this.intentData = (TripDetailsActivity.IntentData) Objects.deserialize(extras.getByteArray(EXTRA_INTENTDATA));
             this.configuration = configuration != null ? configuration :
                     (Configuration) Objects.deserialize(extras.getByteArray(EXTRA_CONFIGURATION));
             this.lastNotified = lastNotified != null ? lastNotified :
@@ -198,7 +199,7 @@ public class NavigationNotification {
         if (configuration != null)
             this.configuration = configuration;
         update(newTrip);
-        final long refreshAt = lastNotified.refreshRequiredAt;
+        final long refreshAt = lastNotified.refreshNotificationRequiredAt;
         if (refreshAt > 0)
             NavigationAlarmManager.getInstance().start(refreshAt);
     }
@@ -231,31 +232,39 @@ public class NavigationNotification {
     @SuppressLint("ScheduleExactAlarm")
     private boolean update(final Trip aTrip) {
         final Trip trip = aTrip != null ? aTrip : intentData.trip;
+        log.info("updating with {} trip loaded at {}", aTrip != null ? "new" : "old", NavigationAlarmManager.LOG_TIME_FORMAT.format(trip.loadedAt));
+        final long tripLoadedAt = trip.loadedAt.getTime();
         createNotificationChannel(context);
         final Date now = new Date();
         final long nowTime = now.getTime();
         final TripRenderer tripRenderer = new TripRenderer(null, trip, false, now);
         long nextRefreshTimeMs;
+        long nextTripReloadTimeMs;
         if (tripRenderer.nextEventEarliestTime != null) {
             final long timeLeft = tripRenderer.nextEventEarliestTime.getTime() - nowTime;
             if (timeLeft < 240000) {
                 // last 4 minutes and after, 30 secs refresh interval
                 nextRefreshTimeMs = nowTime + 30000;
+                nextTripReloadTimeMs = tripLoadedAt + 60000;
             } else if (timeLeft < 600000) {
                 // last 10 minutes and after, 60 secs refresh interval
                 nextRefreshTimeMs = nowTime + 60000;
+                nextTripReloadTimeMs = tripLoadedAt + 120000;
             } else {
                 // approaching, refresh after 25% of the remaining time
                 nextRefreshTimeMs = nowTime + timeLeft / 4;
+                nextTripReloadTimeMs = nextRefreshTimeMs;
             }
         } else {
             final long timeOver = nowTime - trip.getLastArrivalTime().getTime();
             if (timeOver < 300000) {
                 // max 5 minutes after the trip, 60 secs refresh interval
                 nextRefreshTimeMs = nowTime + 60000;
+                nextTripReloadTimeMs = nextRefreshTimeMs;
             } else {
                 // no refresh
                 nextRefreshTimeMs = 0;
+                nextTripReloadTimeMs = 0;
             }
         }
 //nextRefreshTimeMs = nowTime + 30000;
@@ -269,7 +278,8 @@ public class NavigationNotification {
         setupNotificationView(notificationLayout, tripRenderer, now);
         // final RemoteViews notificationLayoutExpanded = new RemoteViews(context.getPackageName(), R.layout.navigation_notification);
         // setupNotificationView(context, notificationLayoutExpanded, tripRenderer, now, newNotified);
-        notificationLayout.setOnClickPendingIntent(R.id.navigation_notification_next_event, getPendingActionIntent(ACTION_REFRESH));
+        notificationLayout.setOnClickPendingIntent(R.id.navigation_notification_next_event,
+                getPendingActionIntent(ACTION_REFRESH, trip));
 
         final TripRenderer.NotificationData newNotified = tripRenderer.notificationData;
         boolean timeChanged = false;
@@ -359,8 +369,26 @@ public class NavigationNotification {
         log.info("timeChanged={}, posChanged={} transferCriticalChanged={} reminderSoundId={}",
                 timeChanged, posChanged, transferCriticalChanged, reminderSoundId);
 
+
+        if (nextTripReloadTimeMs > 0 && nextTripReloadTimeMs < nextRefreshTimeMs)
+            nextRefreshTimeMs = nextTripReloadTimeMs;
+
+        newNotified.refreshNotificationRequiredAt = nextRefreshTimeMs;
+        newNotified.refreshTripRequiredAt = nextTripReloadTimeMs;
+
+        if (nextRefreshTimeMs > 0) {
+            log.info("refreshing in {} secs at {}, reminder at {}, trip reload at {}",
+                    (nextRefreshTimeMs - nowTime) / 1000,
+                    NavigationAlarmManager.LOG_TIME_FORMAT.format(nextRefreshTimeMs),
+                    NavigationAlarmManager.LOG_TIME_FORMAT.format(nextReminderTimeMs),
+                    NavigationAlarmManager.LOG_TIME_FORMAT.format(nextTripReloadTimeMs));
+        } else {
+            log.info("stop refreshing");
+        }
+
         final Bundle extras = new Bundle();
-        extras.putByteArray(EXTRA_INTENTDATA, Objects.serialize(intentData));
+        extras.putByteArray(EXTRA_INTENTDATA, Objects.serialize(
+                new TripDetailsActivity.IntentData(intentData.network, trip, intentData.renderConfig)));
         extras.putByteArray(EXTRA_LASTNOTIFIED, Objects.serialize(newNotified));
         extras.putByteArray(EXTRA_CONFIGURATION, Objects.serialize(configuration));
 
@@ -379,9 +407,9 @@ public class NavigationNotification {
                 .setCustomContentView(notificationLayout)
                 // .setCustomBigContentView(notificationLayoutExpanded)
                 // .setContentIntent(getPendingActivityIntent(false, true))
-                .setContentIntent(getPendingActionIntent(ACTION_REFRESH))
+                .setContentIntent(getPendingActionIntent(ACTION_REFRESH, trip))
                 //.setDeleteIntent(getPendingActivityIntent(context, true))
-                .setDeleteIntent(getPendingActionIntent(ACTION_DELETE))
+                .setDeleteIntent(getPendingActionIntent(ACTION_DELETE, trip))
                 .setAutoCancel(false)
                 .setOngoing(true)
                 .setUsesChronometer(true)
@@ -389,11 +417,11 @@ public class NavigationNotification {
                 .setTimeoutAfter(duration)
                 .setExtras(extras)
                 .addAction(R.drawable.ic_clear_white_24dp, context.getString(R.string.navigation_opennav_shownextevent),
-                        getPendingActivityIntent(false, true))
+                        getPendingActivityIntent(false, true, trip))
                 .addAction(R.drawable.ic_navigation_white_24dp, context.getString(R.string.navigation_opennav_showtrip),
-                        getPendingActivityIntent(false, false))
+                        getPendingActivityIntent(false, false, trip))
                 .addAction(R.drawable.ic_clear_white_24dp, context.getString(R.string.navigation_stopnav_stop),
-                        getPendingActivityIntent(true, false));
+                        getPendingActivityIntent(true, false, trip));
 
         if (anyChanges) {
             notificationBuilder.setSilent(true);
@@ -415,18 +443,7 @@ public class NavigationNotification {
             playAlarmSoundAndVibration(reminderSoundId, VIBRATION_PATTERN_REMIND);
         }
 
-        newNotified.refreshRequiredAt = nextRefreshTimeMs;
         lastNotified = newNotified;
-
-        if (nextRefreshTimeMs > 0) {
-            log.info("refreshing in {} secs at {} reminder at {}",
-                    (nextRefreshTimeMs - nowTime) / 1000,
-                    NavigationAlarmManager.LOG_TIME_FORMAT.format(nextRefreshTimeMs),
-                    NavigationAlarmManager.LOG_TIME_FORMAT.format(nextReminderTimeMs));
-        } else {
-            log.info("stop refreshing");
-        }
-
         return anyChanges || reminderSoundId != 0;
     }
 
@@ -443,9 +460,11 @@ public class NavigationNotification {
         getNotificationManager(context).cancel(notificationTag, 0);
     }
 
-    private PendingIntent getPendingActivityIntent(final boolean deleteRequest, final boolean showNextEvent) {
+    private PendingIntent getPendingActivityIntent(
+            final boolean deleteRequest, final boolean showNextEvent,
+            final Trip trip) {
         final Intent intent = TripNavigatorActivity.buildStartIntent(
-                context, intentData.network, intentData.trip, intentData.renderConfig,
+                context, intentData.network, trip, intentData.renderConfig,
                 deleteRequest, showNextEvent);
         return PendingIntent.getActivity(context,
                 (deleteRequest ? 1 : 0) + (showNextEvent ? 2 : 0),
@@ -471,42 +490,48 @@ public class NavigationNotification {
         }
     }
 
-    private PendingIntent getPendingActionIntent(final int action) {
+    private PendingIntent getPendingActionIntent(final int action, final Trip trip) {
         final Intent intent = new Intent(context, ActionReceiver.class);
         intent.setData(new Uri.Builder()
                 .scheme("data")
                 .authority(ActionReceiver.class.getName())
-                .path(intentData.network.name() + "/" + intentData.trip.getUniqueId())
+                .path(intentData.network.name() + "/" + trip.getUniqueId())
                 .build());
         intent.putExtra(TripDetailsActivity.INTENT_EXTRA_NETWORK, intentData.network);
-        intent.putExtra(TripDetailsActivity.INTENT_EXTRA_TRIP, intentData.trip);
+        intent.putExtra(TripDetailsActivity.INTENT_EXTRA_TRIP, trip);
         intent.putExtra(TripDetailsActivity.INTENT_EXTRA_RENDERCONFIG, intentData.renderConfig);
         intent.putExtra(INTENT_EXTRA_ACTION, action);
         return PendingIntent.getBroadcast(context, action, intent, PendingIntent.FLAG_IMMUTABLE);
     }
 
     private long refresh() {
+        log.info("refreshing notification");
         final long now = new Date().getTime();
-        final long refreshRequiredAt = lastNotified.refreshRequiredAt;
+        final long refreshRequiredAt = lastNotified.refreshNotificationRequiredAt;
         if (now < refreshRequiredAt)
             return refreshRequiredAt; // ignore multiple alarms in short time
-        Trip newTrip;
-        try {
-            final Navigator navigator = new Navigator(intentData.network, intentData.trip);
-            newTrip = navigator.refresh();
-        } catch (IOException e) {
-            newTrip = null;
-        }
-        if (newTrip != null) {
-            final boolean alarmPlayed = update(newTrip);
-            context.sendBroadcast(new Intent(ACTION_UPDATE_TRIGGER));
-            if (!alarmPlayed)
-                soundBeep(ToneGenerator.TONE_PROP_BEEP2);
+        Trip newTrip = null;
+        if (lastNotified.refreshTripRequiredAt > 0 && now >= lastNotified.refreshTripRequiredAt) {
+            try {
+                log.info("refreshing trip");
+                final Navigator navigator = new Navigator(intentData.network, intentData.trip);
+                newTrip = navigator.refresh();
+            } catch (IOException e) {
+                log.error("error while refreshing trip", e);
+            }
+            if (newTrip != null) {
+                final boolean alarmPlayed = update(newTrip);
+                context.sendBroadcast(new Intent(ACTION_UPDATE_TRIGGER));
+                if (!alarmPlayed)
+                    soundBeep(ToneGenerator.TONE_PROP_BEEP2);
+            } else {
+                soundBeep(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD);
+                update(null);
+            }
         } else {
-            soundBeep(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD);
             update(null);
         }
-        return lastNotified.refreshRequiredAt;
+        return lastNotified.refreshNotificationRequiredAt;
     }
 
     private void setupNotificationView(

@@ -38,7 +38,7 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
-import java.util.Collections;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -52,7 +52,6 @@ import de.schildbach.oeffi.util.Toast;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.JourneyRef;
-import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.QueryJourneyResult;
 import de.schildbach.pte.dto.Trip;
@@ -229,7 +228,7 @@ public class QueryJourneyRunnable implements Runnable {
 
             Trip.Public journeyLeg = result.journeyLeg;
             journeyLeg.setEntryAndExit(entryLocation, exitLocation);
-            TripDetailsActivity.start(parentActivity, networkProvider.id(), journeyLeg);
+            TripDetailsActivity.start(parentActivity, networkProvider.id(), journeyLeg, new Date());
         } else if (result.status == QueryJourneyResult.Status.SERVICE_DOWN) {
             networkProblem();
         }

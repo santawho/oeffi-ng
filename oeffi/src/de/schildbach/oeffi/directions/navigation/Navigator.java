@@ -2,6 +2,7 @@ package de.schildbach.oeffi.directions.navigation;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import de.schildbach.oeffi.network.NetworkProviderFactory;
@@ -59,6 +60,7 @@ public class Navigator {
         }
 
         currentTrip = new Trip(
+                new Date(),
                 baseTrip.getUniqueId(),
                 baseTrip.from,
                 baseTrip.to,

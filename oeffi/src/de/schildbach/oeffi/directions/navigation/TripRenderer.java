@@ -86,17 +86,25 @@ public class TripRenderer {
     };
 
     public static class NotificationData implements Serializable {
-        long refreshRequiredAt;
-        int currentLegIndex;
-        boolean isArrival;
-        Date eventTime;
-        int publicArrivalLegIndex;
-        int publicDepartureLegIndex;
-        Date plannedEventTime;
-        Position departurePosition;
-        Position plannedDeparturePosition;
-        long leftTimeReminded;
-        boolean transferCritical;
+        private static int idc;
+        public final int id;
+
+        public NotificationData() {
+            this.id = ++idc;
+        }
+
+        public long refreshNotificationRequiredAt;
+        public long refreshTripRequiredAt;
+        public int currentLegIndex;
+        public boolean isArrival;
+        public Date eventTime;
+        public int publicArrivalLegIndex;
+        public int publicDepartureLegIndex;
+        public Date plannedEventTime;
+        public Position departurePosition;
+        public Position plannedDeparturePosition;
+        public long leftTimeReminded;
+        public boolean transferCritical;
     }
 
     public final Trip trip;

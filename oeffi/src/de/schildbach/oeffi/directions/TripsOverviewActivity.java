@@ -570,6 +570,7 @@ public class TripsOverviewActivity extends OeffiActivity {
             if (!renderConfig.prependToJourneyRef.equals(firstPublicLeg.journeyRef))
                 newNumChanges += 1;
             final Trip newTrip = new Trip(
+                    inTrip.loadedAt,
                     inTrip.getId(),
                     inTrip.from,
                     inTrip.to,
@@ -884,6 +885,7 @@ public class TripsOverviewActivity extends OeffiActivity {
             }
 
             return new Trip(
+                    baseTrip.loadedAt,
                     null,
                     feedingTrip.from,
                     baseTrip.to,

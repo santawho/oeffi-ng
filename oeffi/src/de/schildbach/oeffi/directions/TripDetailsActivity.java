@@ -149,8 +149,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
     }
 
-    public static void start(final Context context, final NetworkId network, final Trip.Public journeyLeg) {
+    public static void start(final Context context, final NetworkId network, final Trip.Public journeyLeg, final Date loadedAt) {
         final Trip trip = new Trip(
+                loadedAt,
                 null,
                 journeyLeg.departure,
                 journeyLeg.arrival,
@@ -1775,6 +1776,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 intermediateStops, journeyLeg.path,
                 journeyLeg.message, journeyLeg.journeyRef);
         final Trip journeyTrip = new Trip(
+                tripRenderer.trip.loadedAt,
                 null,
                 entryLocation,
                 exitLocation,
