@@ -279,5 +279,9 @@
             android:name=".plans.PlanContentProvider"
             android:authorities="${applicationId}.plans"
             android:exported="false" />
+
+        <activity android:name=".LogViewerActivity"
+            android:launchMode="singleInstance">
+        </activity>
     </application>
 </manifest>

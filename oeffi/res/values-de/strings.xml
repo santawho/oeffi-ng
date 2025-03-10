@@ -30,6 +30,7 @@
     <string name="global_options_directions_comment">Von Tür zu Tür</string>
     <string name="global_options_plans_comment">Für den groben Überblick</string>
     <string name="global_options_donate_title">Spenden</string>
+    <string name="global_options_show_log_title">Log anzeigen</string>
     <string name="global_options_report_bug_title">Fehler melden</string>
     <string name="global_options_preferences_title">Einstellungen</string>
     <string name="global_options_about_title">Über Öffi</string>

@@ -45,6 +45,8 @@ import java.io.FilenameFilter;
 import java.util.concurrent.TimeUnit;
 
 public class Application extends android.app.Application {
+    private static final Logger log = LoggerFactory.getLogger(Application.class);
+
     private static Application instance;
 
     public static Application getInstance() {
@@ -57,11 +59,14 @@ public class Application extends android.app.Application {
 
     private PackageInfo packageInfo;
     private OkHttpClient okHttpClient;
-
-    private static final Logger log = LoggerFactory.getLogger(Application.class);
+    private File logFile;
 
     public Application() {
         instance = this;
+    }
+
+    public File getLogFile() {
+        return logFile;
     }
 
     @Override
@@ -174,7 +179,7 @@ public class Application extends android.app.Application {
 
     private void initLogging() {
         final File logDir = new File(getFilesDir(), "log");
-        final File logFile = new File(logDir, "oeffi.log");
+        logFile = new File(logDir, "oeffi.log");
         final LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 
         final PatternLayoutEncoder filePattern = new PatternLayoutEncoder();

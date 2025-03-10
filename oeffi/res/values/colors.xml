@@ -56,6 +56,7 @@
     <color name="bg_trip_overview_earlierorlater_trip">#E0E0E0</color>
     <color name="bg_trip_overview_additional_trip">#E0F0FD</color>
     <color name="bg_trip_overview_additional_feeder">#E0FDF0</color>
+    <color name="bg_action_bar_logviewer">#4444EE</color>
 
     <item name="alpha_bright_white" format="float" type="dimen">1</item>
 

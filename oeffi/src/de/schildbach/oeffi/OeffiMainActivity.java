@@ -194,6 +194,11 @@ public abstract class OeffiMainActivity extends OeffiActivity {
                     return true;
                 }
 
+                if (itemId == R.id.global_options_show_log) {
+                    LogViewerActivity.start(OeffiMainActivity.this);
+                    return true;
+                }
+
                 if (itemId == R.id.global_options_preferences) {
                     PreferenceActivity.start(OeffiMainActivity.this);
                     return true;

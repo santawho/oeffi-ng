@@ -28,6 +28,11 @@
         android:orderInCategory="999"
         android:title="@string/global_options_donate_title" />
     <item
+        android:id="@+id/global_options_show_log"
+        android:icon="@drawable/ic_showlog_grey600_24dp"
+        android:orderInCategory="999"
+        android:title="@string/global_options_show_log_title" />
+    <item
         android:id="@+id/global_options_report_bug"
         android:icon="@drawable/ic_ladybug_grey600_24dp"
         android:orderInCategory="999"
