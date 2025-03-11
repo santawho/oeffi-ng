@@ -45,6 +45,7 @@ import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.QueryTripsRunnable.TripRequestData;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
+import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
@@ -264,7 +265,7 @@ public class TripsOverviewActivity extends OeffiActivity {
                         final ContentValues values = new ContentValues();
                         values.put(QueryHistoryProvider.KEY_LAST_DEPARTURE_TIME, firstPublicLegDepartureTime.getTime());
                         values.put(QueryHistoryProvider.KEY_LAST_ARRIVAL_TIME, lastPublicLegArrivalTime.getTime());
-                        values.put(QueryHistoryProvider.KEY_LAST_TRIP, serialize(trip));
+                        values.put(QueryHistoryProvider.KEY_LAST_TRIP, Objects.serialize(trip));
                         getContentResolver().update(historyUri, values, null, null);
                     }
                 }
@@ -289,18 +290,6 @@ public class TripsOverviewActivity extends OeffiActivity {
             // user has started another navigation
             // then close this overview (and return to initial navigation in the background)
             finish();
-        }
-    }
-
-    private byte[] serialize(final Object object) {
-        try {
-            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            final ObjectOutputStream os = new ObjectOutputStream(baos);
-            os.writeObject(object);
-            os.close();
-            return baos.toByteArray();
-        } catch (final IOException x) {
-            throw new RuntimeException(x);
         }
     }
 
@@ -572,6 +561,7 @@ public class TripsOverviewActivity extends OeffiActivity {
             final Trip newTrip = new Trip(
                     inTrip.loadedAt,
                     inTrip.getId(),
+                    inTrip.tripRef,
                     inTrip.from,
                     inTrip.to,
                     newLegs,
@@ -886,6 +876,7 @@ public class TripsOverviewActivity extends OeffiActivity {
 
             return new Trip(
                     baseTrip.loadedAt,
+                    null,
                     null,
                     feedingTrip.from,
                     baseTrip.to,

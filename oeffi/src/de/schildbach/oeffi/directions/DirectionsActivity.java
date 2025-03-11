@@ -91,6 +91,7 @@ import de.schildbach.oeffi.util.DividerItemDecoration;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GeocoderThread;
 import de.schildbach.oeffi.util.LocationUriParser;
+import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.oeffi.util.ZoomControls;
@@ -108,6 +109,7 @@ import de.schildbach.pte.dto.Product;
 import de.schildbach.pte.dto.QueryTripsResult;
 import de.schildbach.pte.dto.Trip;
 import de.schildbach.pte.dto.TripOptions;
+import de.schildbach.pte.dto.TripRef;
 import okhttp3.HttpUrl;
 import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.api.IMapController;
@@ -118,11 +120,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.net.ssl.SSLException;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InvalidClassException;
-import java.io.ObjectInputStream;
-import java.io.StreamCorruptedException;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -977,26 +975,35 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
     }
 
     private void handleShowSavedTrip(final byte[] serializedTrip) {
-        final Trip trip = (Trip) deserialize(serializedTrip);
-        if (trip != null)
-            TripDetailsActivity.start(this, network, trip);
-        else
+        final Trip trip = (Trip) Objects.deserialize(serializedTrip);
+        if (trip == null) {
             new Toast(this).longToast(R.string.directions_query_history_invalid_blob);
-    }
-
-    private Object deserialize(final byte[] bytes) {
-        try {
-            final ObjectInputStream is = new ObjectInputStream(new ByteArrayInputStream(bytes));
-            final Object object = is.readObject();
-            is.close();
-
-            return object;
-        } catch (final InvalidClassException | ClassNotFoundException | StreamCorruptedException x) {
-            x.printStackTrace();
-            return null;
-        } catch (final IOException x) {
-            throw new RuntimeException(x);
+            return;
         }
+        final TripRef tripRef = trip.tripRef;
+        if (tripRef != null) {
+            final NetworkProvider networkProvider = NetworkProviderFactory.provider(tripRef.network);
+            if (networkProvider.hasCapabilities(Capability.TRIP_RELOAD)) {
+                final TripOptions options = new TripOptions(null, prefsGetOptimizeTrip(), prefsGetWalkSpeed(),
+                        prefsGetMinTranfserTime(), prefsGetAccessibility(), null);
+                queryTripsRunnable = new MyQueryTripsRunnable(networkProvider, tripRef, options) {
+                    @Override
+                    protected void onResultOk(final QueryTripsResult result, final TripRequestData reloadRequestData) {
+                        final List<Trip> trips = result.trips;
+                        final Trip useTrip = (trips != null && trips.size() == 1) ? trips.get(0) : trip;
+                        TripDetailsActivity.start(DirectionsActivity.this, network, useTrip);
+                    }
+
+                    @Override
+                    protected void onResultFailed(final QueryTripsResult result, final TripRequestData reloadRequestData) {
+                        TripDetailsActivity.start(DirectionsActivity.this, network, trip);
+                    }
+                };
+                backgroundHandler.post(queryTripsRunnable);
+                return;
+            }
+        }
+        TripDetailsActivity.start(this, network, trip);
     }
 
     private boolean saneLocation(final @Nullable Location location, final boolean allowIncompleteAddress) {
@@ -1043,143 +1050,41 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
             flags = null;
         }
 
-        final ProgressDialog progressDialog = ProgressDialog.show(DirectionsActivity.this, null,
-                getString(R.string.directions_query_progress), true, true, dialog -> {
-                    if (queryTripsRunnable != null)
-                        queryTripsRunnable.cancel();
-                });
-        progressDialog.setCanceledOnTouchOutside(false);
-
         final NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
         final TripOptions options = new TripOptions(products, prefsGetOptimizeTrip(), prefsGetWalkSpeed(),
                 prefsGetMinTranfserTime(), prefsGetAccessibility(), flags);
-        queryTripsRunnable = new QueryTripsRunnable(getResources(), progressDialog, handler, networkProvider, from, via,
-                to, time, options) {
+        queryTripsRunnable = new MyQueryTripsRunnable(networkProvider, from, via, to, time, options) {
             @Override
             protected void onPreExecute() {
+                super.onPreExecute();
                 viewGo.setClickable(false);
             }
 
             @Override
             protected void onPostExecute() {
+                super.onPostExecute();
                 viewGo.setClickable(true);
-                if (!isDestroyed())
-                    progressDialog.dismiss();
             }
 
             @Override
-            protected void onResult(final QueryTripsResult result, TripRequestData reloadRequestData) {
-                if (result.status == QueryTripsResult.Status.OK) {
-                    log.debug("Got {}", result.toShortString());
+            protected void onResultOk(final QueryTripsResult result, final TripRequestData reloadRequestData) {
+                final Uri historyUri;
+                if (result.from != null && result.from.name != null && result.to != null && result.to.name != null)
+                    historyUri = queryHistoryListAdapter.putEntry(result.from, result.to, result.via);
+                else
+                    historyUri = null;
 
-                    final Uri historyUri;
-                    if (result.from != null && result.from.name != null && result.to != null && result.to.name != null)
-                        historyUri = queryHistoryListAdapter.putEntry(result.from, result.to, result.via);
-                    else
-                        historyUri = null;
-
-                    TripsOverviewActivity.RenderConfig renderConfig = new TripsOverviewActivity.RenderConfig();
-                    renderConfig.referenceTime = time;
-                    TripsOverviewActivity.start(DirectionsActivity.this,
-                            network, time.depArr, result, historyUri, reloadRequestData,
-                            renderConfig);
-                } else if (result.status == QueryTripsResult.Status.UNKNOWN_FROM) {
-                    new Toast(DirectionsActivity.this).longToast(R.string.directions_message_unknown_from);
-                } else if (result.status == QueryTripsResult.Status.UNKNOWN_VIA) {
-                    new Toast(DirectionsActivity.this).longToast(R.string.directions_message_unknown_via);
-                } else if (result.status == QueryTripsResult.Status.UNKNOWN_TO) {
-                    new Toast(DirectionsActivity.this).longToast(R.string.directions_message_unknown_to);
-                } else if (result.status == QueryTripsResult.Status.UNKNOWN_LOCATION) {
-                    new Toast(DirectionsActivity.this).longToast(R.string.directions_message_unknown_location);
-                } else if (result.status == QueryTripsResult.Status.TOO_CLOSE) {
-                    new Toast(DirectionsActivity.this).longToast(R.string.directions_message_too_close);
-                } else if (result.status == QueryTripsResult.Status.UNRESOLVABLE_ADDRESS) {
-                    new Toast(DirectionsActivity.this).longToast(R.string.directions_message_unresolvable_address);
-                } else if (result.status == QueryTripsResult.Status.NO_TRIPS) {
-                    new Toast(DirectionsActivity.this).longToast(R.string.directions_message_no_trips);
-                } else if (result.status == QueryTripsResult.Status.INVALID_DATE) {
-                    new Toast(DirectionsActivity.this).longToast(R.string.directions_message_invalid_date);
-                } else if (result.status == QueryTripsResult.Status.SERVICE_DOWN) {
-                    networkProblem();
-                } else if (result.status == QueryTripsResult.Status.AMBIGUOUS) {
-                    final List<Location> autocompletes = result.ambiguousFrom != null ? result.ambiguousFrom
-                            : (result.ambiguousVia != null ? result.ambiguousVia : result.ambiguousTo);
-                    if (autocompletes != null) {
-                        final DialogBuilder builder = DialogBuilder.get(DirectionsActivity.this);
-                        builder.setTitle(getString(R.string.ambiguous_address_title));
-                        builder.setAdapter(new AmbiguousLocationAdapter(DirectionsActivity.this, autocompletes),
-                                (dialog, which) -> {
-                                    final LocationView locationView = result.ambiguousFrom != null
-                                            ? viewFromLocation
-                                            : (result.ambiguousVia != null ? viewViaLocation : viewToLocation);
-                                    locationView.setLocation(autocompletes.get(which));
-                                    viewGo.performClick();
-                                });
-                        builder.create().show();
-                    } else {
-                        new Toast(DirectionsActivity.this).longToast(R.string.directions_message_ambiguous_location);
-                    }
-                }
+                TripsOverviewActivity.RenderConfig renderConfig = new TripsOverviewActivity.RenderConfig();
+                renderConfig.referenceTime = time;
+                TripsOverviewActivity.start(DirectionsActivity.this,
+                        network, time.depArr, result, historyUri, reloadRequestData,
+                        renderConfig);
             }
 
             @Override
-            protected void onRedirect(final HttpUrl url) {
-                final DialogBuilder builder = DialogBuilder.warn(DirectionsActivity.this,
-                        R.string.directions_alert_redirect_title);
-                builder.setMessage(getString(R.string.directions_alert_redirect_message, url.host()));
-                builder.setPositiveButton(R.string.directions_alert_redirect_button_follow,
-                        (dialog, which) -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url.toString()))));
-                builder.setNegativeButton(R.string.directions_alert_redirect_button_dismiss, null);
-                builder.show();
-            }
-
-            @Override
-            protected void onBlocked(final HttpUrl url) {
-                final DialogBuilder builder = DialogBuilder.warn(DirectionsActivity.this,
-                        R.string.directions_alert_blocked_title);
-                builder.setMessage(getString(R.string.directions_alert_blocked_message, url.host()));
-                builder.setPositiveButton(R.string.directions_alert_blocked_button_retry,
-                        (dialog, which) -> viewGo.performClick());
-                builder.setNegativeButton(R.string.directions_alert_blocked_button_dismiss, null);
-                builder.show();
-            }
-
-            @Override
-            protected void onInternalError(final HttpUrl url) {
-                final DialogBuilder builder = DialogBuilder.warn(DirectionsActivity.this,
-                        R.string.directions_alert_internal_error_title);
-                builder.setMessage(getString(R.string.directions_alert_internal_error_message, url.host()));
-                builder.setPositiveButton(R.string.directions_alert_internal_error_button_retry,
-                        (dialog, which) -> viewGo.performClick());
-                builder.setNegativeButton(R.string.directions_alert_internal_error_button_dismiss, null);
-                builder.show();
-            }
-
-            @Override
-            protected void onSSLException(final SSLException x) {
-                final DialogBuilder builder = DialogBuilder.warn(DirectionsActivity.this,
-                        R.string.directions_alert_ssl_exception_title);
-                builder.setMessage(getString(R.string.directions_alert_ssl_exception_message,
-                        Throwables.getRootCause(x).toString()));
-                builder.setNeutralButton(R.string.directions_alert_ssl_exception_button_dismiss, null);
-                builder.show();
-            }
-
-            private void networkProblem() {
-                final DialogBuilder builder = DialogBuilder.warn(DirectionsActivity.this,
-                        R.string.alert_network_problem_title);
-                builder.setMessage(R.string.alert_network_problem_message);
-                builder.setPositiveButton(R.string.alert_network_problem_retry, (dialog, which) -> {
-                    dialog.dismiss();
-                    viewGo.performClick();
-                });
-                builder.setOnCancelListener(dialog -> dialog.dismiss());
-                builder.show();
+            protected void onResultFailed(final QueryTripsResult result, final TripRequestData reloadRequestData) {
             }
         };
-
-        log.info("Executing: {}", queryTripsRunnable);
-
         backgroundHandler.post(queryTripsRunnable);
     }
 
@@ -1275,5 +1180,149 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
                 final int type) {
             child.setTranslationY(Floats.constrainToRange(child.getTranslationY() - dyConsumed, -child.getHeight(), 0));
         }
+    }
+
+    public abstract class MyQueryTripsRunnable extends QueryTripsRunnable {
+        public MyQueryTripsRunnable(
+                final NetworkProvider networkProvider,
+                final Location from, final Location via, final Location to, final TimeSpec time,
+                final TripOptions options) {
+            super(DirectionsActivity.this.getResources(),
+                    DirectionsActivity.this.getProgressDialog(),
+                    DirectionsActivity.this.handler,
+                    networkProvider, from, via, to, time, options);
+        }
+
+        public MyQueryTripsRunnable(
+                final NetworkProvider networkProvider,
+                final TripRef tripRef,
+                final TripOptions options) {
+            super(DirectionsActivity.this.getResources(),
+                    DirectionsActivity.this.getProgressDialog(),
+                    DirectionsActivity.this.handler,
+                    networkProvider, tripRef, options);
+        }
+
+        @Override
+        protected void onPostExecute() {
+            if (!isDestroyed())
+                progressDialog.dismiss();
+        }
+
+        protected abstract void onResultOk(final QueryTripsResult result, TripRequestData reloadRequestData);
+
+        protected abstract void onResultFailed(final QueryTripsResult result, TripRequestData reloadRequestData);
+
+        @Override
+        protected void onResult(final QueryTripsResult result, TripRequestData reloadRequestData) {
+            if (result.status == QueryTripsResult.Status.OK) {
+                log.debug("Got {}", result.toShortString());
+                onResultOk(result, reloadRequestData);
+                return;
+            }
+            if (result.status == QueryTripsResult.Status.UNKNOWN_FROM) {
+                new Toast(DirectionsActivity.this).longToast(R.string.directions_message_unknown_from);
+            } else if (result.status == QueryTripsResult.Status.UNKNOWN_VIA) {
+                new Toast(DirectionsActivity.this).longToast(R.string.directions_message_unknown_via);
+            } else if (result.status == QueryTripsResult.Status.UNKNOWN_TO) {
+                new Toast(DirectionsActivity.this).longToast(R.string.directions_message_unknown_to);
+            } else if (result.status == QueryTripsResult.Status.UNKNOWN_LOCATION) {
+                new Toast(DirectionsActivity.this).longToast(R.string.directions_message_unknown_location);
+            } else if (result.status == QueryTripsResult.Status.TOO_CLOSE) {
+                new Toast(DirectionsActivity.this).longToast(R.string.directions_message_too_close);
+            } else if (result.status == QueryTripsResult.Status.UNRESOLVABLE_ADDRESS) {
+                new Toast(DirectionsActivity.this).longToast(R.string.directions_message_unresolvable_address);
+            } else if (result.status == QueryTripsResult.Status.NO_TRIPS) {
+                new Toast(DirectionsActivity.this).longToast(R.string.directions_message_no_trips);
+            } else if (result.status == QueryTripsResult.Status.INVALID_DATE) {
+                new Toast(DirectionsActivity.this).longToast(R.string.directions_message_invalid_date);
+            } else if (result.status == QueryTripsResult.Status.SERVICE_DOWN) {
+                networkProblem();
+            } else if (result.status == QueryTripsResult.Status.AMBIGUOUS) {
+                final List<Location> autocompletes = result.ambiguousFrom != null ? result.ambiguousFrom
+                        : (result.ambiguousVia != null ? result.ambiguousVia : result.ambiguousTo);
+                if (autocompletes != null) {
+                    final DialogBuilder builder = DialogBuilder.get(DirectionsActivity.this);
+                    builder.setTitle(getString(R.string.ambiguous_address_title));
+                    builder.setAdapter(new AmbiguousLocationAdapter(DirectionsActivity.this, autocompletes),
+                            (dialog, which) -> {
+                                final LocationView locationView = result.ambiguousFrom != null
+                                        ? viewFromLocation
+                                        : (result.ambiguousVia != null ? viewViaLocation : viewToLocation);
+                                locationView.setLocation(autocompletes.get(which));
+                                viewGo.performClick();
+                            });
+                    builder.create().show();
+                } else {
+                    new Toast(DirectionsActivity.this).longToast(R.string.directions_message_ambiguous_location);
+                }
+            }
+            onResultFailed(result, reloadRequestData);
+        }
+
+        @Override
+        protected void onRedirect(final HttpUrl url) {
+            final DialogBuilder builder = DialogBuilder.warn(DirectionsActivity.this,
+                    R.string.directions_alert_redirect_title);
+            builder.setMessage(getString(R.string.directions_alert_redirect_message, url.host()));
+            builder.setPositiveButton(R.string.directions_alert_redirect_button_follow,
+                    (dialog, which) -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url.toString()))));
+            builder.setNegativeButton(R.string.directions_alert_redirect_button_dismiss, null);
+            builder.show();
+        }
+
+        @Override
+        protected void onBlocked(final HttpUrl url) {
+            final DialogBuilder builder = DialogBuilder.warn(DirectionsActivity.this,
+                    R.string.directions_alert_blocked_title);
+            builder.setMessage(getString(R.string.directions_alert_blocked_message, url.host()));
+            builder.setPositiveButton(R.string.directions_alert_blocked_button_retry,
+                    (dialog, which) -> viewGo.performClick());
+            builder.setNegativeButton(R.string.directions_alert_blocked_button_dismiss, null);
+            builder.show();
+        }
+
+        @Override
+        protected void onInternalError(final HttpUrl url) {
+            final DialogBuilder builder = DialogBuilder.warn(DirectionsActivity.this,
+                    R.string.directions_alert_internal_error_title);
+            builder.setMessage(getString(R.string.directions_alert_internal_error_message, url.host()));
+            builder.setPositiveButton(R.string.directions_alert_internal_error_button_retry,
+                    (dialog, which) -> viewGo.performClick());
+            builder.setNegativeButton(R.string.directions_alert_internal_error_button_dismiss, null);
+            builder.show();
+        }
+
+        @Override
+        protected void onSSLException(final SSLException x) {
+            final DialogBuilder builder = DialogBuilder.warn(DirectionsActivity.this,
+                    R.string.directions_alert_ssl_exception_title);
+            builder.setMessage(getString(R.string.directions_alert_ssl_exception_message,
+                    Throwables.getRootCause(x).toString()));
+            builder.setNeutralButton(R.string.directions_alert_ssl_exception_button_dismiss, null);
+            builder.show();
+        }
+
+        private void networkProblem() {
+            final DialogBuilder builder = DialogBuilder.warn(DirectionsActivity.this,
+                    R.string.alert_network_problem_title);
+            builder.setMessage(R.string.alert_network_problem_message);
+            builder.setPositiveButton(R.string.alert_network_problem_retry, (dialog, which) -> {
+                dialog.dismiss();
+                viewGo.performClick();
+            });
+            builder.setOnCancelListener(dialog -> dialog.dismiss());
+            builder.show();
+        }
+    }
+
+    private ProgressDialog getProgressDialog() {
+        final ProgressDialog progressDialog = ProgressDialog.show(this, null,
+                getString(R.string.directions_query_progress), true, true, dialog -> {
+                    if (queryTripsRunnable != null)
+                        queryTripsRunnable.cancel();
+                });
+        progressDialog.setCanceledOnTouchOutside(false);
+        return progressDialog;
     }
 }

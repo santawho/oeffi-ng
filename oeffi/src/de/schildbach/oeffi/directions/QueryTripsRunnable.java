@@ -36,6 +36,7 @@ import de.schildbach.pte.NetworkProvider.WalkSpeed;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.QueryTripsResult;
 import de.schildbach.pte.dto.TripOptions;
+import de.schildbach.pte.dto.TripRef;
 import de.schildbach.pte.exception.BlockedException;
 import de.schildbach.pte.exception.InternalErrorException;
 import de.schildbach.pte.exception.NotFoundException;
@@ -69,8 +70,8 @@ public abstract class QueryTripsRunnable implements Runnable {
         }
     }
 
-    private final Resources res;
-    private final ProgressDialog dialog;
+    protected final Resources res;
+    protected final ProgressDialog progressDialog;
     private final Handler handler;
 
     private final NetworkProvider networkProvider;
@@ -80,25 +81,50 @@ public abstract class QueryTripsRunnable implements Runnable {
     private final Location to;
     private final TimeSpec time;
     private final TripOptions options;
+    private final TripRef tripRef;
 
     private AtomicBoolean cancelled = new AtomicBoolean(false);
 
     private static final Logger log = LoggerFactory.getLogger(QueryTripsRunnable.class);
 
-    public QueryTripsRunnable(final Resources res, final ProgressDialog dialog, final Handler handler,
-            final NetworkProvider networkProvider, final Location from, final Location via, final Location to,
-            final TimeSpec time, final TripOptions options) {
+    public QueryTripsRunnable(
+            final Resources res, final ProgressDialog dialog, final Handler handler,
+            final NetworkProvider networkProvider,
+            final Location from, final Location via, final Location to, final TimeSpec time,
+            final TripOptions options) {
         this.res = res;
-        this.dialog = dialog;
+        this.progressDialog = dialog;
         this.handler = handler;
 
         this.networkProvider = networkProvider;
+        this.options = options;
 
         this.from = from;
         this.via = via;
         this.to = to;
         this.time = time;
+
+        tripRef = null;
+    }
+
+    public QueryTripsRunnable(
+            final Resources res, final ProgressDialog dialog, final Handler handler,
+            final NetworkProvider networkProvider,
+            final TripRef tripRef,
+            final TripOptions options) {
+        this.res = res;
+        this.progressDialog = dialog;
+        this.handler = handler;
+
+        this.networkProvider = networkProvider;
         this.options = options;
+
+        this.tripRef = tripRef;
+
+        this.from = null;
+        this.via = null;
+        this.to = null;
+        this.time = null;
     }
 
     public void run() {
@@ -110,16 +136,23 @@ public abstract class QueryTripsRunnable implements Runnable {
             tries++;
 
             try {
-                final boolean depArr = time.depArr == TimeSpec.DepArr.DEPART;
-                final Date date = new Date(time.timeInMillis());
-                final TripRequestData reloadRequestData = new TripRequestData();
-                reloadRequestData.from = from;
-                reloadRequestData.via = via;
-                reloadRequestData.to = to;
-                reloadRequestData.date = date;
-                reloadRequestData.dep = depArr;
-                reloadRequestData.options = options;
-                final QueryTripsResult result = networkProvider.queryTrips(from, via, to, date, depArr, options);
+                final QueryTripsResult result;
+                final TripRequestData reloadRequestData;
+                if (tripRef != null) {
+                    result = networkProvider.queryReloadTrip(tripRef);
+                    reloadRequestData = null;
+                } else {
+                    final boolean depArr = time.depArr == TimeSpec.DepArr.DEPART;
+                    final Date date = new Date(time.timeInMillis());
+                    reloadRequestData = new TripRequestData();
+                    reloadRequestData.from = from;
+                    reloadRequestData.via = via;
+                    reloadRequestData.to = to;
+                    reloadRequestData.date = date;
+                    reloadRequestData.dep = depArr;
+                    reloadRequestData.options = options;
+                    result = networkProvider.queryTrips(from, via, to, date, depArr, options);
+                }
 
                 if (!cancelled.get())
                     postOnResult(result, reloadRequestData);
@@ -222,7 +255,7 @@ public abstract class QueryTripsRunnable implements Runnable {
                 }
             }
 
-            dialog.setMessage(progressMessage);
+            progressDialog.setMessage(progressMessage);
 
             onPreExecute();
         });

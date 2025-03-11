@@ -153,6 +153,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final Trip trip = new Trip(
                 loadedAt,
                 null,
+                null,
                 journeyLeg.departure,
                 journeyLeg.arrival,
                 Collections.singletonList(journeyLeg),
@@ -1777,6 +1778,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 journeyLeg.message, journeyLeg.journeyRef);
         final Trip journeyTrip = new Trip(
                 tripRenderer.trip.loadedAt,
+                null,
                 null,
                 entryLocation,
                 exitLocation,

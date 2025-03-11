@@ -62,6 +62,7 @@ public class Navigator {
         currentTrip = new Trip(
                 new Date(),
                 baseTrip.getUniqueId(),
+                baseTrip.tripRef,
                 baseTrip.from,
                 baseTrip.to,
                 newLegs,
