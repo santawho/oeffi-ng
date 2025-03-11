@@ -330,6 +330,11 @@ public abstract class OeffiMainActivity extends OeffiActivity {
             heartbeat.start();
         });
 
+        findViewById(R.id.navigation_drawer_share).setOnClickListener(v -> {
+            navigationDrawerLayout.closeDrawer(Gravity.LEFT);
+            shareApp();
+        });
+
         actionBar.setDrawer(v -> toggleNavigation());
 
         updateNavigation();
@@ -687,5 +692,17 @@ public abstract class OeffiMainActivity extends OeffiActivity {
             return DateUtils.WEEK_IN_MILLIS * Integer.parseInt(exp.substring(0, exp.length() - 1));
         else
             throw new IllegalArgumentException("cannot parse time expression: '" + exp + "'");
+    }
+
+    private void shareApp() {
+        final String updateUrl = getString(R.string.about_update_url);
+        final String shareTitle = getString(R.string.global_options_share_app_title);
+        final String shareText = getString(R.string.global_options_share_app_text, updateUrl);
+        final Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+        intent.putExtra(Intent.EXTRA_SUBJECT, shareTitle);
+        intent.putExtra(Intent.EXTRA_TEXT, shareText);
+        startActivity(Intent.createChooser(intent, shareTitle));
     }
 }

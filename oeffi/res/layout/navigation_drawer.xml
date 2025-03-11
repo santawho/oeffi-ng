@@ -14,6 +14,35 @@
         android:layout_weight="1" />
 
     <LinearLayout
+        android:id="@+id/navigation_drawer_share"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingVertical="@dimen/text_padding_vertical_verylax"
+        android:background="@color/bg_divider">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="@dimen/text_padding_horizontal_verylax"
+            android:gravity="center"
+            android:src="@drawable/ic_share_grey600_24dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="@dimen/text_padding_horizontal_verylax"
+            android:layout_marginRight="@dimen/text_padding_horizontal_verylax"
+            android:gravity="center"
+            android:textSize="@dimen/font_size_large"
+            android:text="@string/global_options_share_app_title"/>
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="@dimen/text_padding_horizontal_verylax"
+            android:layout_marginRight="@dimen/text_padding_horizontal_verylax"
+            android:gravity="center"
+            android:src="@drawable/qr_update"/>
+    </LinearLayout>
+    <LinearLayout
         android:id="@+id/navigation_drawer_footer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

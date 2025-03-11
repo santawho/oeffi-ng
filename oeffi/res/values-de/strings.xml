@@ -34,6 +34,8 @@
     <string name="global_options_report_bug_title">Fehler melden</string>
     <string name="global_options_preferences_title">Einstellungen</string>
     <string name="global_options_about_title">Über Öffi</string>
+    <string name="global_options_share_app_title">Teile Öffi-NG</string>
+    <string name="global_options_share_app_text">Dies ist der Link, um die Öffi-NG App zu installieren.\n\n%1$s</string>
 
     <!-- preferences -->
     <string name="global_preferences_title">Allgemein</string>
