@@ -32,9 +32,12 @@ public class Objects {
     public static byte[] serialize(final Serializable object) {
         if (object == null) return null;
         try {
-            final ByteArrayOutputStream os = new ByteArrayOutputStream();
-            new ObjectOutputStream(os).writeObject(object);
-            return os.toByteArray();
+            final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            final ObjectOutputStream oos = new ObjectOutputStream(bos);
+            oos.writeObject(object);
+            final byte[] bytes = bos.toByteArray();
+            oos.close();
+            return bytes;
         } catch (final IOException x) {
             throw new RuntimeException(x);
         }
@@ -48,7 +51,10 @@ public class Objects {
     public static Object deserialize(final byte[] bytes) {
         if (bytes == null) return null;
         try {
-            return new ObjectInputStream(new ByteArrayInputStream(bytes)).readObject();
+            final ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
+            final Object obj = ois.readObject();
+            ois.close();
+            return obj;
         } catch (final ClassNotFoundException | IOException x) {
             throw new RuntimeException(x);
         }
