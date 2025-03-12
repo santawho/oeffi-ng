@@ -1,3 +1,4 @@
+import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
 import groovy.json.JsonSlurper
 
@@ -5,9 +6,6 @@ plugins {
     alias(libs.plugins.android.application)
     id 'androidsvgdrawable'
 }
-
-def ASSET_NAME_APK_FILE = "oeffi-ng.apk"
-def ASSET_NAME_MANIFEST = "manifest.json"
 
 def now = new Date()
 def timeInt = (int) (now.getTime() / 60000)
@@ -19,26 +17,30 @@ timeFmt.setTimeZone(TimeZone.getTimeZone('UTC'))
 def timeModifiedStr = timeFmt.format(new Date(now.getTime() + 60000 * 5))
 def githubTag = "v${timeStr}"
 
-def oeffi_ng_password = System.getenv('OEFFI_NG_JKS_PASSWORD')
+def CREDENTIALS = [:]
 ext {
-    github_user = 'NOUSER';
-    github_repo = 'NOREPO';
-    github_token = 'NOTOKEN';
+    oeffi = [:]
 }
 
+def oeffi_ng_password = System.getenv('OEFFI_NG_JKS_PASSWORD')
 if (!oeffi_ng_password) {
     file('../../passwords.properties').withInputStream {
         def props = new Properties()
         props.load(it)
         oeffi_ng_password = props.get('oeffi_ng.jks.password')
-        project.github_user = props.get('github.user')
-        project.github_repo = props.get('github.repo')
-        project.github_token = props.get('github.token')
+        CREDENTIALS.github_user = props.get('github.user')
+        CREDENTIALS.github_repo = props.get('github.repo')
+        CREDENTIALS.github_token = props.get('github.token')
     }
 }
 
-def GITHUB_URL = "https://github.com/${project.github_user}/${project.github_repo}"
-def GITHUB_RELEASE_URL = "${GITHUB_URL}/releases/latest/download"
+CREDENTIALS.github_url = "https://github.com/${CREDENTIALS.github_user}/${CREDENTIALS.github_repo}"
+CREDENTIALS.github_release_url = "${CREDENTIALS.github_url}/releases/latest/download"
+CREDENTIALS.asset_name_apk_file = "oeffi-ng.apk"
+CREDENTIALS.asset_name_manifest = "manifest.json"
+
+project.oeffi.CREDENTIALS = CREDENTIALS
+
 
 android {
     namespace 'de.schildbach.oeffi'
@@ -73,10 +75,10 @@ android {
             versionNameSuffix '-ng'
             applicationIdSuffix '.ng'
             resValue "string", "app_name", "Öffi NG"
-            resValue "string", "about_git_url", "${GITHUB_URL}"
-            resValue "string", "about_changelog_url", "${GITHUB_URL}/wiki"
-            resValue "string", "about_update_apk_url", "${GITHUB_RELEASE_URL}/${ASSET_NAME_APK_FILE}"
-            resValue "string", "about_update_manifest_url", "${GITHUB_RELEASE_URL}/${ASSET_NAME_MANIFEST}"
+            resValue "string", "about_git_url", "${CREDENTIALS.github_url}"
+            resValue "string", "about_changelog_url", "${CREDENTIALS.github_url}/wiki"
+            resValue "string", "about_update_apk_url", "${CREDENTIALS.github_release_url}/${CREDENTIALS.asset_name_apk_file}"
+            resValue "string", "about_update_manifest_url", "${CREDENTIALS.github_release_url}/${CREDENTIALS.asset_name_manifest}"
             resValue "string", "about_update_modified", timeModifiedStr  // If-Modified-Since: xxx, 25 Feb 2025 17:10:00 GMT
         }
     }
@@ -168,10 +170,10 @@ afterEvaluate {
 }
 
 def githubCreateRelease(String tagName) {
-    def conn = ((HttpURLConnection) new URL("https://api.github.com/repos/${project.github_user}/${project.github_repo}/releases").openConnection())
+    def conn = ((HttpURLConnection) new URL("https://api.github.com/repos/${project.oeffi.CREDENTIALS.github_user}/${project.oeffi.CREDENTIALS.github_repo}/releases").openConnection())
     conn.requestMethod = 'POST'
     conn.setRequestProperty('Accept', 'application/vnd.github+json')
-    conn.setRequestProperty('Authorization', "Bearer ${project.github_token}")
+    conn.setRequestProperty('Authorization', "Bearer ${project.oeffi.CREDENTIALS.github_token}")
     conn.setRequestProperty('X-GitHub-Api-Version', '2022-11-28')
     conn.doOutput = true
     conn.outputStream.write("{\"tag_name\":\"${tagName}\"}".getBytes('UTF-8'))
@@ -181,23 +183,23 @@ def githubCreateRelease(String tagName) {
     if (!respCode.equals(201))
         throw respBody
     def resp = (Map) new JsonSlurper().parseText(respBody)
-    return resp.id;
+    return resp.id.toString();
 }
 
 def uploadToGithub(String releaseId, String assetName, byte[] uploadBytes) {
-    def uploadUrl = "https://uploads.github.com/repos/${project.github_user}/${project.github_repo}/releases/${releaseId}/assets?name=${assetName}"
+    def uploadUrl = "https://uploads.github.com/repos/${project.oeffi.CREDENTIALS.github_user}/${project.oeffi.CREDENTIALS.github_repo}/releases/${releaseId}/assets?name=${assetName}"
     println "upload to ${uploadUrl}"
-    conn = ((HttpURLConnection) new URL(uploadUrl).openConnection())
+    def conn = ((HttpURLConnection) new URL(uploadUrl).openConnection())
     conn.requestMethod = 'POST'
     conn.setRequestProperty('Content-Type', 'application/octet-stream')
     conn.setRequestProperty('Accept', 'application/vnd.github+json')
-    conn.setRequestProperty('Authorization', "Bearer ${project.github_token}")
+    conn.setRequestProperty('Authorization', "Bearer ${project.oeffi.CREDENTIALS.github_token}")
     conn.setRequestProperty('X-GitHub-Api-Version', '2022-11-28')
     conn.doOutput = true
     conn.outputStream.write(uploadBytes);
-    respCode = conn.getResponseCode();
-    respBody = conn.getInputStream().getText()
-    println("upload APK: ${respCode}: ${respBody}");
+    def respCode = conn.getResponseCode();
+    def respBody = conn.getInputStream().getText()
+    println("upload ${assetName}: ${respCode}: ${respBody}");
     if (!respCode.equals(201))
         throw respBody
 }
@@ -211,9 +213,9 @@ def createRelease(String tagName, File apkFile) {
     "git tag ${tagName}".execute()
     "git push --tags".execute()
 
-    def manifestJson = "{\"tag\"}: \"${tagName}\""
+    def manifestJson = "{\"tag\": \"${tagName}\"}"
 
     def releaseId = githubCreateRelease(tagName);
-    uploadToGithub(releaseId, ASSET_NAME_APK_FILE, uploadFile.readBytes())
-    uploadToGithub(releaseId, ASSET_NAME_MANIFEST, StandardCharsets.UTF_8.encode(manifestJson))
+    uploadToGithub(releaseId, project.oeffi.CREDENTIALS.asset_name_apk_file, apkFile.readBytes())
+    uploadToGithub(releaseId, project.oeffi.CREDENTIALS.asset_name_manifest, manifestJson.getBytes("UTF-8"))
 }
