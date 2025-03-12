@@ -67,7 +67,7 @@ public class AboutFragment extends PreferenceFragment {
             findPreference(KEY_ABOUT_CHANGELOG).setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(changeLogUrl)));
         }
 
-        String updateUrl = activity.getString(R.string.about_update_url);
+        String updateUrl = activity.getString(R.string.about_update_apk_url);
         if (updateUrl.isEmpty())
             removeOrDisablePreference(findPreference(KEY_ABOUT_UPDATE));
     }

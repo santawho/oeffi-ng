@@ -6,6 +6,9 @@ plugins {
     id 'androidsvgdrawable'
 }
 
+def ASSET_NAME_APK_FILE = "oeffi-ng.apk"
+def ASSET_NAME_MANIFEST = "manifest.json"
+
 def now = new Date()
 def timeInt = (int) (now.getTime() / 60000)
 def timeFmt = new SimpleDateFormat('yyyyMMddHHmm')
@@ -33,6 +36,9 @@ if (!oeffi_ng_password) {
         project.github_token = props.get('github.token')
     }
 }
+
+def GITHUB_URL = "https://github.com/${project.github_user}/${project.github_repo}"
+def GITHUB_RELEASE_URL = "${GITHUB_URL}/releases/latest/download"
 
 android {
     namespace 'de.schildbach.oeffi'
@@ -67,9 +73,10 @@ android {
             versionNameSuffix '-ng'
             applicationIdSuffix '.ng'
             resValue "string", "app_name", "Öffi NG"
-            resValue "string", "about_git_url", "https://github.com/santawho/oeffi-ng"
-            resValue "string", "about_changelog_url", "https://github.com/santawho/oeffi-ng/wiki"
-            resValue "string", "about_update_url", "https://github.com/santawho/oeffi-ng/releases/latest/download/oeffi-ng.apk"
+            resValue "string", "about_git_url", "${GITHUB_URL}"
+            resValue "string", "about_changelog_url", "${GITHUB_URL}/wiki"
+            resValue "string", "about_update_apk_url", "${GITHUB_RELEASE_URL}/${ASSET_NAME_APK_FILE}"
+            resValue "string", "about_update_manifest_url", "${GITHUB_RELEASE_URL}/${ASSET_NAME_MANIFEST}"
             resValue "string", "about_update_modified", timeModifiedStr  // If-Modified-Since: xxx, 25 Feb 2025 17:10:00 GMT
         }
     }
@@ -160,15 +167,7 @@ afterEvaluate {
     }
 }
 
-
-def createRelease(def tagName, def File apkFile) {
-    println "Creating release ${tagName} from ${apkFile.absolutePath}"
-    if (!apkFile.exists()) {
-        println "${apkFile.absolutePath} does not exist"
-        throw "${apkFile.absolutePath} does not exist";
-    }
-    "git tag ${tagName}".execute()
-    "git push --tags".execute()
+def githubCreateRelease(String tagName) {
     def conn = ((HttpURLConnection) new URL("https://api.github.com/repos/${project.github_user}/${project.github_repo}/releases").openConnection())
     conn.requestMethod = 'POST'
     conn.setRequestProperty('Accept', 'application/vnd.github+json')
@@ -182,8 +181,11 @@ def createRelease(def tagName, def File apkFile) {
     if (!respCode.equals(201))
         throw respBody
     def resp = (Map) new JsonSlurper().parseText(respBody)
-    def releaseId = resp.id;
-    def uploadUrl = "https://uploads.github.com/repos/${project.github_user}/${project.github_repo}/releases/${releaseId}/assets?name=oeffi-ng.apk"
+    return resp.id;
+}
+
+def uploadToGithub(String releaseId, String assetName, byte[] uploadBytes) {
+    def uploadUrl = "https://uploads.github.com/repos/${project.github_user}/${project.github_repo}/releases/${releaseId}/assets?name=${assetName}"
     println "upload to ${uploadUrl}"
     conn = ((HttpURLConnection) new URL(uploadUrl).openConnection())
     conn.requestMethod = 'POST'
@@ -192,10 +194,26 @@ def createRelease(def tagName, def File apkFile) {
     conn.setRequestProperty('Authorization', "Bearer ${project.github_token}")
     conn.setRequestProperty('X-GitHub-Api-Version', '2022-11-28')
     conn.doOutput = true
-    conn.outputStream.write(apkFile.readBytes());
+    conn.outputStream.write(uploadBytes);
     respCode = conn.getResponseCode();
     respBody = conn.getInputStream().getText()
     println("upload APK: ${respCode}: ${respBody}");
     if (!respCode.equals(201))
         throw respBody
+}
+
+def createRelease(String tagName, File apkFile) {
+    println "Creating release ${tagName} from ${apkFile.absolutePath}"
+    if (!apkFile.exists()) {
+        println "${apkFile.absolutePath} does not exist"
+        throw "${apkFile.absolutePath} does not exist";
+    }
+    "git tag ${tagName}".execute()
+    "git push --tags".execute()
+
+    def manifestJson = "{\"tag\"}: \"${tagName}\""
+
+    def releaseId = githubCreateRelease(tagName);
+    uploadToGithub(releaseId, ASSET_NAME_APK_FILE, uploadFile.readBytes())
+    uploadToGithub(releaseId, ASSET_NAME_MANIFEST, StandardCharsets.UTF_8.encode(manifestJson))
 }

@@ -244,33 +244,36 @@ public abstract class OeffiMainActivity extends OeffiActivity {
     }
 
     private void checkForUpdate() {
-        final String updateUrl = getString(R.string.about_update_url);
+        final String manifestUrl = getString(R.string.about_update_manifest_url);
+        final String updateUrl = getString(R.string.about_update_apk_url);
         final String modifiedStr = getString(R.string.about_update_modified);
         new Thread(() -> {
             try (Response response = new OkHttpClient().newCall(
-                    new Request.Builder().url(updateUrl).head().build()).execute()) {
+                    new Request.Builder().url(manifestUrl).head().build()).execute()) {
                 final int code = response.code();
-                if (code == 200) {
-                    final String lastModifiedStr = response.header("Last-Modified");
-                    if (lastModifiedStr != null) {
-                        final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
-                        final Date thisModified = dateFormat.parse(modifiedStr);
-                        final Date lastModified = dateFormat.parse(lastModifiedStr);
-                        if (lastModified != null && lastModified.after(thisModified)) {
-                            runOnUiThread(() -> {
-                                new AlertDialog.Builder(this)
-                                        .setTitle(R.string.alert_update_available_title)
-                                        .setMessage(R.string.alert_update_available_message)
-                                        .setPositiveButton(android.R.string.ok, (d, i) ->
-                                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(updateUrl))))
-                                        .setNegativeButton(android.R.string.cancel, null)
-                                        .create().show();
-                            });
-                        }
+                if (code != 200) {
+                    log.error("cannot HEAD {}: code {}", manifestUrl, code);
+                    return;
+                }
+                final String lastModifiedStr = response.header("Last-Modified");
+                if (lastModifiedStr != null) {
+                    final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+                    final Date thisModified = dateFormat.parse(modifiedStr);
+                    final Date lastModified = dateFormat.parse(lastModifiedStr);
+                    if (lastModified != null && lastModified.after(thisModified)) {
+                        runOnUiThread(() -> {
+                            new AlertDialog.Builder(this)
+                                    .setTitle(R.string.alert_update_available_title)
+                                    .setMessage(R.string.alert_update_available_message)
+                                    .setPositiveButton(android.R.string.ok, (d, i) ->
+                                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(updateUrl))))
+                                    .setNegativeButton(android.R.string.cancel, null)
+                                    .create().show();
+                        });
                     }
                 }
             } catch (IOException | ParseException e) {
-                log.error("cannot HEAD {}: {}", updateUrl, e.getMessage());
+                log.error("cannot HEAD {}: {}", manifestUrl, e.getMessage());
             }
         }).start();
     }
@@ -695,7 +698,7 @@ public abstract class OeffiMainActivity extends OeffiActivity {
     }
 
     private void shareApp() {
-        final String updateUrl = getString(R.string.about_update_url);
+        final String updateUrl = getString(R.string.about_update_apk_url);
         final String shareTitle = getString(R.string.global_options_share_app_title);
         final String shareText = getString(R.string.global_options_share_app_text, updateUrl);
         final Intent intent = new Intent(Intent.ACTION_SEND);

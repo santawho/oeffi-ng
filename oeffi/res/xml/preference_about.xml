@@ -44,7 +44,7 @@
         android:title="@string/about_update_title">
         <intent
             android:action="android.intent.action.VIEW"
-            android:data="@string/about_update_url" />
+            android:data="@string/about_update_apk_url" />
     </Preference>
 
     <PreferenceCategory android:title="@string/about_participate_title">
