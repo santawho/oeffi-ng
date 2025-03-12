@@ -17,25 +17,51 @@
 
 package de.schildbach.oeffi;
 
+import android.animation.AnimatorInflater;
+import android.animation.AnimatorSet;
 import android.app.ActivityManager.TaskDescription;
+import android.app.Dialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.graphics.Color;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.format.DateUtils;
+import android.util.DisplayMetrics;
+import android.view.Gravity;
+import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.activity.ComponentActivity;
 import androidx.activity.EdgeToEdge;
+import androidx.core.view.MenuProvider;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.network.NetworkResources;
+import de.schildbach.oeffi.plans.PlansPickerActivity;
+import de.schildbach.oeffi.preference.AboutFragment;
+import de.schildbach.oeffi.preference.DonateFragment;
+import de.schildbach.oeffi.preference.PreferenceActivity;
+import de.schildbach.oeffi.stations.FavoriteStationsActivity;
+import de.schildbach.oeffi.stations.StationsActivity;
+import de.schildbach.oeffi.util.DividerItemDecoration;
 import de.schildbach.oeffi.util.ErrorReporter;
+import de.schildbach.oeffi.util.NavigationMenuAdapter;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.Product;
@@ -50,9 +76,15 @@ import java.util.stream.Collectors;
 
 public abstract class OeffiActivity extends ComponentActivity {
     protected Application application;
+    private final Handler handler = new Handler();
+
     protected SharedPreferences prefs;
     protected NetworkId network;
     protected Set<Product> savedProducts;
+
+    private DrawerLayout navigationDrawerLayout;
+    private MenuProvider navigationDrawerMenuProvider;
+    private View navigationDrawerFooterView;
 
     private static final Logger log = LoggerFactory.getLogger(OeffiActivity.class);
 
@@ -81,6 +113,194 @@ public abstract class OeffiActivity extends ComponentActivity {
     protected void onPause() {
         savedProducts = loadProductFilter();
         super.onPause();
+    }
+    
+    protected void initNavigation() {
+        navigationDrawerMenuProvider = new MenuProvider() {
+            @Override
+            public void onCreateMenu(final Menu menu, final MenuInflater inflater) {
+                inflater.inflate(R.menu.global_options, menu);
+            }
+
+            @Override
+            public void onPrepareMenu(final Menu menu) {
+                final MenuItem stationsNearbyItem = menu.findItem(R.id.global_options_stations_nearby);
+                stationsNearbyItem.setChecked(OeffiActivity.this instanceof StationsActivity);
+                final MenuItem directionsItem = menu.findItem(R.id.global_options_directions);
+                directionsItem.setChecked(OeffiActivity.this instanceof DirectionsActivity);
+                final MenuItem plansItem = menu.findItem(R.id.global_options_plans);
+                plansItem.setChecked(OeffiActivity.this instanceof PlansPickerActivity);
+            }
+
+            @Override
+            public boolean onMenuItemSelected(final MenuItem item) {
+                int itemId = item.getItemId();
+                if (itemId == R.id.global_options_stations_favorites) {
+                    if (OeffiActivity.this instanceof StationsActivity) {
+                        FavoriteStationsActivity.start(OeffiActivity.this);
+                    } else {
+                        final Intent intent = new Intent(OeffiActivity.this, StationsActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        intent.putExtra(StationsActivity.INTENT_EXTRA_OPEN_FAVORITES, true);
+                        startActivity(intent);
+                        finish();
+                        overridePendingTransition(R.anim.enter_from_left, R.anim.exit_to_right);
+                    }
+                    return true;
+                }
+
+                if (itemId == R.id.global_options_stations_nearby) {
+                    if (OeffiActivity.this instanceof StationsActivity)
+                        return true;
+                    final Intent intent = new Intent(OeffiActivity.this, StationsActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    finish();
+                    overridePendingTransition(R.anim.enter_from_left, R.anim.exit_to_right);
+                    return true;
+                }
+
+                if (itemId == R.id.global_options_directions) {
+                    if (OeffiActivity.this instanceof DirectionsActivity)
+                        return true;
+                    final Intent intent = new Intent(OeffiActivity.this, DirectionsActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    finish();
+                    if (OeffiActivity.this instanceof StationsActivity)
+                        overridePendingTransition(R.anim.enter_from_right, R.anim.exit_to_left);
+                    else
+                        overridePendingTransition(R.anim.enter_from_left, R.anim.exit_to_right);
+                    return true;
+                }
+
+                if (itemId == R.id.global_options_plans) {
+                    if (OeffiActivity.this instanceof PlansPickerActivity)
+                        return true;
+                    final Intent intent = new Intent(OeffiActivity.this, PlansPickerActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    finish();
+                    overridePendingTransition(R.anim.enter_from_right, R.anim.exit_to_left);
+                    return true;
+                }
+
+                if (itemId == R.id.global_options_donate) {
+                    PreferenceActivity.start(OeffiActivity.this, DonateFragment.class.getName());
+                    return true;
+                }
+
+                if (itemId == R.id.global_options_report_bug) {
+                    ErrorReporter.sendBugMail(OeffiActivity.this, application.packageInfo());
+                    return true;
+                }
+
+                if (itemId == R.id.global_options_show_log) {
+                    LogViewerActivity.start(OeffiActivity.this);
+                    return true;
+                }
+
+                if (itemId == R.id.global_options_preferences) {
+                    PreferenceActivity.start(OeffiActivity.this);
+                    return true;
+                }
+
+                if (itemId == R.id.global_options_about) {
+                    PreferenceActivity.start(OeffiActivity.this, AboutFragment.class.getName());
+                    return true;
+                }
+
+                return false;
+            }
+        };
+
+        navigationDrawerLayout = findViewById(R.id.navigation_drawer_layout);
+        final RecyclerView navigationDrawerListView = findViewById(R.id.navigation_drawer_list);
+        navigationDrawerFooterView = findViewById(R.id.navigation_drawer_footer);
+        final View navigationDrawerFooterHeartView = findViewById(R.id.navigation_drawer_footer_heart);
+
+        final AnimatorSet heartbeat = (AnimatorSet) AnimatorInflater.loadAnimator(OeffiActivity.this,
+                R.animator.heartbeat);
+        heartbeat.setTarget(navigationDrawerFooterHeartView);
+
+        final NavigationMenuAdapter menuAdapter = new NavigationMenuAdapter(this,
+                item -> {
+                    navigationDrawerMenuProvider.onMenuItemSelected(item);
+                    navigationDrawerLayout.closeDrawers();
+                    return false;
+                });
+        final Menu menu = menuAdapter.getMenu();
+        navigationDrawerMenuProvider.onCreateMenu(menu, getMenuInflater());
+        navigationDrawerMenuProvider.onPrepareMenu(menu);
+
+        navigationDrawerListView.setLayoutManager(new LinearLayoutManager(this));
+        navigationDrawerListView
+                .addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
+        navigationDrawerListView.setAdapter(menuAdapter);
+
+        navigationDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
+            public void onDrawerOpened(final View drawerView) {
+                handler.postDelayed(() -> heartbeat.start(), 2000);
+            }
+
+            public void onDrawerClosed(final View drawerView) {
+            }
+
+            public void onDrawerSlide(final View drawerView, final float slideOffset) {
+            }
+
+            public void onDrawerStateChanged(final int newState) {
+            }
+        });
+
+        navigationDrawerFooterView.setOnClickListener(v -> {
+            handler.removeCallbacksAndMessages(null);
+            heartbeat.start();
+        });
+
+        findViewById(R.id.navigation_drawer_share).setOnClickListener(v -> {
+            navigationDrawerLayout.closeDrawer(Gravity.LEFT);
+            shareApp();
+        });
+        findViewById(R.id.navigation_drawer_share_qrcode).setOnClickListener(v -> {
+            navigationDrawerLayout.closeDrawer(Gravity.LEFT);
+            showImageDialog(R.drawable.qr_update);
+        });
+
+        getMyActionBar().setDrawer(v -> toggleNavigation());
+
+        updateNavigation();
+    }
+
+    protected void updateNavigation() {
+        if (navigationDrawerFooterView != null)
+            navigationDrawerFooterView.setVisibility(
+                    getResources().getBoolean(R.bool.layout_navigation_drawer_footer_show) ? View.VISIBLE : View.GONE);
+    }
+
+    protected boolean isNavigationOpen() {
+        return navigationDrawerLayout.isDrawerOpen(Gravity.LEFT);
+    }
+
+    private void toggleNavigation() {
+        if (navigationDrawerLayout.isDrawerOpen(Gravity.LEFT))
+            navigationDrawerLayout.closeDrawer(Gravity.LEFT);
+        else
+            navigationDrawerLayout.openDrawer(Gravity.LEFT);
+    }
+
+    protected void closeNavigation() {
+        navigationDrawerLayout.closeDrawer(Gravity.LEFT);
+    }
+
+    @Override
+    public boolean onKeyDown(final int keyCode, final KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_MENU) {
+            toggleNavigation();
+            return true;
+        } else {
+            return super.onKeyDown(keyCode, event);
+        }
     }
 
     protected void updateFragments(final int listFrameResId, final int mapFrameResId) {
@@ -266,5 +486,29 @@ public abstract class OeffiActivity extends ComponentActivity {
         }
 
         return str;
+    }
+
+    protected void shareApp() {
+        final String updateUrl = getString(R.string.about_update_apk_url);
+        final String shareTitle = getString(R.string.global_options_share_app_title);
+        final String shareText = getString(R.string.global_options_share_app_text, updateUrl);
+        final Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+        intent.putExtra(Intent.EXTRA_SUBJECT, shareTitle);
+        intent.putExtra(Intent.EXTRA_TEXT, shareText);
+        startActivity(Intent.createChooser(intent, shareTitle));
+    }
+
+    protected void showImageDialog(final int imageResId) {
+        final DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
+        final int sizePixels = (Math.min(displayMetrics.widthPixels, displayMetrics.heightPixels) * 3) / 4;
+        final ImageView imageView = new ImageView(this);
+        imageView.setImageBitmap(Bitmap.createScaledBitmap(
+                ((BitmapDrawable) getDrawable(imageResId)).getBitmap(),
+                sizePixels, sizePixels, false));
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(imageView);
+        dialog.show();
     }
 }

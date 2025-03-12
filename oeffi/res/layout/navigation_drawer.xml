@@ -23,7 +23,7 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginLeft="@dimen/text_padding_horizontal_verylax"
+            android:layout_marginStart="@dimen/text_padding_horizontal_verylax"
             android:gravity="center"
             android:src="@drawable/ic_share_grey600_24dp"/>
         <TextView
@@ -34,7 +34,12 @@
             android:gravity="center"
             android:textSize="@dimen/font_size_large"
             android:text="@string/global_options_share_app_title"/>
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"/>
         <ImageView
+            android:id="@+id/navigation_drawer_share_qrcode"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginLeft="@dimen/text_padding_horizontal_verylax"

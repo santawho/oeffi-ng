@@ -17,8 +17,6 @@
 
 package de.schildbach.oeffi;
 
-import android.animation.AnimatorInflater;
-import android.animation.AnimatorSet;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -32,37 +30,19 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.format.DateUtils;
-import android.view.Gravity;
-import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import androidx.core.view.MenuProvider;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import de.schildbach.oeffi.directions.DirectionsActivity;
+
 import de.schildbach.oeffi.network.NetworkPickerActivity;
 import de.schildbach.oeffi.network.NetworkResources;
-import de.schildbach.oeffi.plans.PlansPickerActivity;
-import de.schildbach.oeffi.preference.AboutFragment;
-import de.schildbach.oeffi.preference.DonateFragment;
-import de.schildbach.oeffi.preference.PreferenceActivity;
-import de.schildbach.oeffi.stations.FavoriteStationsActivity;
-import de.schildbach.oeffi.stations.StationsActivity;
 import de.schildbach.oeffi.util.DialogBuilder;
-import de.schildbach.oeffi.util.DividerItemDecoration;
 import de.schildbach.oeffi.util.Downloader;
-import de.schildbach.oeffi.util.ErrorReporter;
 import de.schildbach.oeffi.util.Installer;
-import de.schildbach.oeffi.util.NavigationMenuAdapter;
 import de.schildbach.oeffi.util.UiThreadExecutor;
 import de.schildbach.pte.NetworkId;
 import okhttp3.Call;
@@ -92,15 +72,8 @@ import java.util.regex.Pattern;
 
 public abstract class OeffiMainActivity extends OeffiActivity {
     private static boolean stillCheckForUpdate = true;
-    private DrawerLayout navigationDrawerLayout;
-    private RecyclerView navigationDrawerListView;
-    private MenuProvider navigationDrawerMenuProvider;
-    private View navigationDrawerFooterView;
-    private View navigationDrawerFooterHeartView;
 
-    private int versionCode, lastVersionCode;
-
-    private final Handler handler = new Handler();
+    private int versionCode;
 
     private static final int DIALOG_MESSAGE = 102;
 
@@ -113,105 +86,7 @@ public abstract class OeffiMainActivity extends OeffiActivity {
         // initialize network
         final long now = System.currentTimeMillis();
         versionCode = applicationVersionCode();
-        lastVersionCode = prefs.getInt(Constants.PREFS_KEY_LAST_VERSION, 0);
-
-        navigationDrawerMenuProvider = new MenuProvider() {
-            @Override
-            public void onCreateMenu(final Menu menu, final MenuInflater inflater) {
-                inflater.inflate(R.menu.global_options, menu);
-            }
-
-            @Override
-            public void onPrepareMenu(final Menu menu) {
-                final MenuItem stationsNearbyItem = menu.findItem(R.id.global_options_stations_nearby);
-                stationsNearbyItem.setChecked(OeffiMainActivity.this instanceof StationsActivity);
-                final MenuItem directionsItem = menu.findItem(R.id.global_options_directions);
-                directionsItem.setChecked(OeffiMainActivity.this instanceof DirectionsActivity);
-                final MenuItem plansItem = menu.findItem(R.id.global_options_plans);
-                plansItem.setChecked(OeffiMainActivity.this instanceof PlansPickerActivity);
-            }
-
-            @Override
-            public boolean onMenuItemSelected(final MenuItem item) {
-                int itemId = item.getItemId();
-                if (itemId == R.id.global_options_stations_favorites) {
-                    if (OeffiMainActivity.this instanceof StationsActivity) {
-                        FavoriteStationsActivity.start(OeffiMainActivity.this);
-                    } else {
-                        final Intent intent = new Intent(OeffiMainActivity.this, StationsActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        intent.putExtra(StationsActivity.INTENT_EXTRA_OPEN_FAVORITES, true);
-                        startActivity(intent);
-                        finish();
-                        overridePendingTransition(R.anim.enter_from_left, R.anim.exit_to_right);
-                    }
-                    return true;
-                }
-
-                if (itemId == R.id.global_options_stations_nearby) {
-                    if (OeffiMainActivity.this instanceof StationsActivity)
-                        return true;
-                    final Intent intent = new Intent(OeffiMainActivity.this, StationsActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                    finish();
-                    overridePendingTransition(R.anim.enter_from_left, R.anim.exit_to_right);
-                    return true;
-                }
-
-                if (itemId == R.id.global_options_directions) {
-                    if (OeffiMainActivity.this instanceof DirectionsActivity)
-                        return true;
-                    final Intent intent = new Intent(OeffiMainActivity.this, DirectionsActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                    finish();
-                    if (OeffiMainActivity.this instanceof StationsActivity)
-                        overridePendingTransition(R.anim.enter_from_right, R.anim.exit_to_left);
-                    else
-                        overridePendingTransition(R.anim.enter_from_left, R.anim.exit_to_right);
-                    return true;
-                }
-
-                if (itemId == R.id.global_options_plans) {
-                    if (OeffiMainActivity.this instanceof PlansPickerActivity)
-                        return true;
-                    final Intent intent = new Intent(OeffiMainActivity.this, PlansPickerActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                    finish();
-                    overridePendingTransition(R.anim.enter_from_right, R.anim.exit_to_left);
-                    return true;
-                }
-
-                if (itemId == R.id.global_options_donate) {
-                    PreferenceActivity.start(OeffiMainActivity.this, DonateFragment.class.getName());
-                    return true;
-                }
-
-                if (itemId == R.id.global_options_report_bug) {
-                    ErrorReporter.sendBugMail(OeffiMainActivity.this, application.packageInfo());
-                    return true;
-                }
-
-                if (itemId == R.id.global_options_show_log) {
-                    LogViewerActivity.start(OeffiMainActivity.this);
-                    return true;
-                }
-
-                if (itemId == R.id.global_options_preferences) {
-                    PreferenceActivity.start(OeffiMainActivity.this);
-                    return true;
-                }
-
-                if (itemId == R.id.global_options_about) {
-                    PreferenceActivity.start(OeffiMainActivity.this, AboutFragment.class.getName());
-                    return true;
-                }
-
-                return false;
-            }
-        };
+        final int lastVersionCode = prefs.getInt(Constants.PREFS_KEY_LAST_VERSION, 0);
 
         if (prefsGetNetwork() == null) {
             // NetworkPickerActivity.start(this);
@@ -284,94 +159,6 @@ public abstract class OeffiMainActivity extends OeffiActivity {
         final String network = this.network != null ? this.network.name() : prefsGetNetwork();
         if (network != null)
             getMyActionBar().setSecondaryTitle(NetworkResources.instance(this, network).label);
-    }
-
-    protected void initNavigation() {
-        navigationDrawerLayout = (DrawerLayout) findViewById(R.id.navigation_drawer_layout);
-        navigationDrawerListView = (RecyclerView) findViewById(R.id.navigation_drawer_list);
-        navigationDrawerFooterView = findViewById(R.id.navigation_drawer_footer);
-        navigationDrawerFooterHeartView = findViewById(R.id.navigation_drawer_footer_heart);
-
-        final AnimatorSet heartbeat = (AnimatorSet) AnimatorInflater.loadAnimator(OeffiMainActivity.this,
-                R.animator.heartbeat);
-        heartbeat.setTarget(navigationDrawerFooterHeartView);
-
-        final MyActionBar actionBar = getMyActionBar();
-
-        final NavigationMenuAdapter menuAdapter = new NavigationMenuAdapter(this,
-                item -> {
-                    navigationDrawerMenuProvider.onMenuItemSelected(item);
-                    navigationDrawerLayout.closeDrawers();
-                    return false;
-                });
-        final Menu menu = menuAdapter.getMenu();
-        navigationDrawerMenuProvider.onCreateMenu(menu, getMenuInflater());
-        navigationDrawerMenuProvider.onPrepareMenu(menu);
-
-        navigationDrawerListView.setLayoutManager(new LinearLayoutManager(this));
-        navigationDrawerListView
-                .addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
-        navigationDrawerListView.setAdapter(menuAdapter);
-
-        navigationDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
-            public void onDrawerOpened(final View drawerView) {
-                handler.postDelayed(() -> heartbeat.start(), 2000);
-            }
-
-            public void onDrawerClosed(final View drawerView) {
-            }
-
-            public void onDrawerSlide(final View drawerView, final float slideOffset) {
-            }
-
-            public void onDrawerStateChanged(final int newState) {
-            }
-        });
-
-        navigationDrawerFooterView.setOnClickListener(v -> {
-            handler.removeCallbacksAndMessages(null);
-            heartbeat.start();
-        });
-
-        findViewById(R.id.navigation_drawer_share).setOnClickListener(v -> {
-            navigationDrawerLayout.closeDrawer(Gravity.LEFT);
-            shareApp();
-        });
-
-        actionBar.setDrawer(v -> toggleNavigation());
-
-        updateNavigation();
-    }
-
-    protected void updateNavigation() {
-        if (navigationDrawerFooterView != null)
-            navigationDrawerFooterView.setVisibility(
-                    getResources().getBoolean(R.bool.layout_navigation_drawer_footer_show) ? View.VISIBLE : View.GONE);
-    }
-
-    protected boolean isNavigationOpen() {
-        return navigationDrawerLayout.isDrawerOpen(Gravity.LEFT);
-    }
-
-    private void toggleNavigation() {
-        if (navigationDrawerLayout.isDrawerOpen(Gravity.LEFT))
-            navigationDrawerLayout.closeDrawer(Gravity.LEFT);
-        else
-            navigationDrawerLayout.openDrawer(Gravity.LEFT);
-    }
-
-    protected void closeNavigation() {
-        navigationDrawerLayout.closeDrawer(Gravity.LEFT);
-    }
-
-    @Override
-    public boolean onKeyDown(final int keyCode, final KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_MENU) {
-            toggleNavigation();
-            return true;
-        } else {
-            return super.onKeyDown(keyCode, event);
-        }
     }
 
     @Override
@@ -695,17 +482,5 @@ public abstract class OeffiMainActivity extends OeffiActivity {
             return DateUtils.WEEK_IN_MILLIS * Integer.parseInt(exp.substring(0, exp.length() - 1));
         else
             throw new IllegalArgumentException("cannot parse time expression: '" + exp + "'");
-    }
-
-    private void shareApp() {
-        final String updateUrl = getString(R.string.about_update_apk_url);
-        final String shareTitle = getString(R.string.global_options_share_app_title);
-        final String shareText = getString(R.string.global_options_share_app_text, updateUrl);
-        final Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
-        intent.putExtra(Intent.EXTRA_SUBJECT, shareTitle);
-        intent.putExtra(Intent.EXTRA_TEXT, shareText);
-        startActivity(Intent.createChooser(intent, shareTitle));
     }
 }

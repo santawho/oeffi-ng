@@ -153,6 +153,8 @@ public class TripNavigatorActivity extends TripDetailsActivity {
             updateNotification(null);
         });
         soundButton.setChecked(soundEnabled);
+
+        initNavigation();
     }
 
     private void stopNavigation() {
