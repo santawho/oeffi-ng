@@ -27,6 +27,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.zip.Deflater;
+import java.util.zip.Inflater;
 
 public class Objects {
     public static byte[] serialize(final Serializable object) {
@@ -48,6 +50,17 @@ public class Objects {
         return Base64.encodeToString(serialize(object), Base64.NO_WRAP);
     }
 
+    public static String serializeAndCompressToString(final Serializable object) {
+        if (object == null) return null;
+        final byte[] serialized = serialize(object);
+        final Deflater deflater = new Deflater();
+        deflater.setInput(serialized);
+        deflater.finish();
+        final byte[] compressed = new byte[serialized.length * 2];
+        final int length = deflater.deflate(compressed);
+        return Base64.encodeToString(compressed, 0, length, Base64.NO_WRAP);
+    }
+
     public static Object deserialize(final byte[] bytes) {
         if (bytes == null) return null;
         try {
@@ -60,9 +73,24 @@ public class Objects {
         }
     }
 
-    public static Object deserialize(final String base64) {
+    public static Object deserializeFromString(final String base64) {
         if (base64 == null) return null;
         return deserialize(Base64.decode(checkNotNull(base64), Base64.DEFAULT));
+    }
+
+    public static Object deserializeFromCompressedString(final String base64) throws Exception {
+        if (base64 == null) return null;
+        final byte[] compressed = Base64.decode(checkNotNull(base64), Base64.DEFAULT);
+        final Inflater inflater = new Inflater();
+        inflater.setInput(compressed);
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        while (!inflater.finished()) {
+            int decompressedSize = inflater.inflate(buffer);
+            os.write(buffer, 0, decompressedSize);
+        }
+        final byte[] serialized = os.toByteArray();
+        return deserialize(serialized);
     }
 
     public static <T extends Serializable> T clone(T object) {

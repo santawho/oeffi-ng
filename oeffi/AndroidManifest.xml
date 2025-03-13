@@ -230,7 +230,8 @@
 
         <activity
             android:name=".directions.AppLinkActivity"
-            android:exported="true">
+            android:exported="true"
+            android:launchMode="singleTask">
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 

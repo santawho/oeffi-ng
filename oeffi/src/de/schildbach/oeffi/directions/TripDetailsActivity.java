@@ -101,6 +101,7 @@ import de.schildbach.pte.dto.Position;
 import de.schildbach.pte.dto.Stop;
 import de.schildbach.pte.dto.Style;
 import de.schildbach.pte.dto.Trip;
+import de.schildbach.pte.dto.TripRef;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1763,9 +1764,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         if (NetworkProviderFactory.provider(network)
                 .hasCapabilities(NetworkProvider.Capability.TRIP_RELOAD)) {
-            final String linkUrl = AppLinkActivity.getNetworkLinkUrl(this,
-                    network, "trip", Objects.serializeToString(trip.tripRef))
-                    .toString();
+            final String linkUrl = getTripLinkUrl(this, network, trip.tripRef);
             description.append(linkUrl);
             description.append("\n\n");
         }
@@ -1774,6 +1773,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             description.setLength(description.length() - 2);
 
         return description.toString();
+    }
+
+    public static String getTripLinkUrl(final Context context, final NetworkId network, final TripRef tripRef) {
+        return AppLinkActivity.getNetworkLinkUrl(context,
+                        network, "trip", Objects.serializeAndCompressToString(tripRef)
+        ).toString();
     }
 
     private static String formatTimeSpan(final long millis) {

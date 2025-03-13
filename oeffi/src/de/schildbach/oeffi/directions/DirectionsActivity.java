@@ -625,12 +625,12 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
     @Override
     protected void onStart() {
         super.onStart();
-        try {
-            if (linkArgs != null) {
+        if (linkArgs != null) {
+            try {
                 final String action = linkArgs[0];
                 if ("trip".equals(action) && linkArgs.length == 2) {
-                    final TripRef tripRef = (TripRef) Objects.deserialize(linkArgs[1]);
-                    loadTripByTripRef(tripRef, trip -> {
+                    final TripRef tripRef = (TripRef) Objects.deserializeFromCompressedString(linkArgs[1]);
+                    loadTripByTripRef(tripRef, (trip) -> {
                         if (trip != null) {
                             TripDetailsActivity.start(DirectionsActivity.this,
                                     network, trip,
@@ -639,9 +639,10 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
                         }
                     });
                 }
+            } catch (Exception e) {
+                log.error("cannot execute link command {}", linkArgs, e);
+                finish();
             }
-        } catch (Exception e) {
-            log.error("cannot execute link command {}", linkArgs, e);
         }
     }
 

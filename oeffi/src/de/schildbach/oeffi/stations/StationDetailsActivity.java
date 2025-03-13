@@ -237,7 +237,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         String networkName = intent.getStringExtra(INTENT_EXTRA_NETWORK);
         final NetworkId network = NetworkId.valueOf(checkNotNull(networkName));
         final String stationSerialized = intent.getStringExtra(INTENT_EXTRA_STATION);
-        final Station station = new Station(network, (Location) Objects.deserialize(stationSerialized));
+        final Station station = new Station(network, (Location) Objects.deserializeFromString(stationSerialized));
         if (intent.hasExtra(INTENT_EXTRA_DEPARTURES))
             station.departures = filterDepartures((List<Departure>) intent.getSerializableExtra(INTENT_EXTRA_DEPARTURES), loadProductFilter());
         selectStation(station);
