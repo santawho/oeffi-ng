@@ -32,8 +32,6 @@ public class Constants {
     public static final String PLAN_INDEX_FILENAME = "plans-index.txt";
     public static final String PLAN_STATIONS_FILENAME = "plans-stations.txt";
 
-    public static final String REPORT_EMAIL = "oeffi.app@gmail.com";
-
     public static final long LOCATION_UPDATE_FREQ_MS = 10 * DateUtils.SECOND_IN_MILLIS;
     public static final int LOCATION_UPDATE_DISTANCE = 3;
     public static final long LOCATION_FOREGROUND_UPDATE_TIMEOUT_MS = 1 * DateUtils.MINUTE_IN_MILLIS;

@@ -46,26 +46,29 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     public static final String INTENT_EXTRA_DELETEREQUEST = TripNavigatorActivity.class.getName() + ".deleterequest";
     public static final String INTENT_EXTRA_NEXTEVENT = TripNavigatorActivity.class.getName() + ".nextevent";
 
-    public static void start(
+    public static void startNavigation(
             final Activity contextActivity,
-            final NetworkId network, final Trip trip, final RenderConfig renderConfig) {
+            final NetworkId network, final Trip trip, final RenderConfig renderConfig,
+            final boolean sameWindow) {
             RenderConfig rc = new RenderConfig();
         rc.isNavigation = true;
         rc.isJourney = renderConfig.isJourney;
         rc.queryTripsRequestData = renderConfig.queryTripsRequestData;
-        Intent intent = buildStartIntent(contextActivity, network, trip, rc, false, false);
+        Intent intent = buildStartIntent(contextActivity, network, trip, rc, false, false, sameWindow);
         contextActivity.startActivity(intent);
     }
 
     protected static Intent buildStartIntent(
             final Context context,
             final NetworkId network, final Trip trip, final RenderConfig renderConfig,
-            final boolean deleteRequest, final boolean showNextEvent) {
+            final boolean deleteRequest, final boolean showNextEvent,
+            final boolean sameWindow) {
         renderConfig.isNavigation = true;
         final Intent intent = TripDetailsActivity.buildStartIntent(TripNavigatorActivity.class, context, network, trip, renderConfig);
         intent.putExtra(INTENT_EXTRA_DELETEREQUEST, deleteRequest);
         intent.putExtra(INTENT_EXTRA_NEXTEVENT, showNextEvent);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+        intent.addFlags(
+                sameWindow ? Intent.FLAG_ACTIVITY_CLEAR_TASK : Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_NEW_DOCUMENT
                 // | Intent.FLAG_ACTIVITY_MULTIPLE_TASK
                 // | Intent.FLAG_ACTIVITY_SINGLE_TOP
@@ -153,8 +156,6 @@ public class TripNavigatorActivity extends TripDetailsActivity {
             updateNotification(null);
         });
         soundButton.setChecked(soundEnabled);
-
-        initNavigation();
     }
 
     private void stopNavigation() {

@@ -9,4 +9,8 @@
     <string name="about_update_manifest_url" />
     <string name="about_update_modified" />
 
+    <string name="error_reporter_mail_address">oeffi.app@gmail.com</string>
+
+    <string name="app_url_host">oeffi.schildbach.de</string>
+    <string name="app_url_path_prefix">app/</string>
 </resources>

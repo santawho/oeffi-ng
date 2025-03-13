@@ -128,6 +128,7 @@ import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class DirectionsActivity extends OeffiMainActivity implements QueryHistoryClickListener,
         QueryHistoryContextMenuItemListener {
@@ -246,6 +247,16 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
         if (timeSpec != null)
             intent.putExtra(DirectionsActivity.INTENT_EXTRA_TIME_SPEC, timeSpec);
         context.startActivity(intent);
+    }
+
+    public static Intent handleAppLink(
+            final Context context,
+            final List<String> actionArgs) {
+        final String action = actionArgs.get(0);
+        if ("trip".equals(action)) {
+            return new Intent(context, DirectionsActivity.class);
+        }
+        return null;
     }
 
     private class LocationContextMenuItemClickListener implements PopupMenu.OnMenuItemClickListener {
@@ -608,6 +619,29 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
         // initial focus
         if (!viewToLocation.isInTouchMode()) {
             requestFocusFirst();
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        try {
+            if (linkArgs != null) {
+                final String action = linkArgs[0];
+                if ("trip".equals(action) && linkArgs.length == 2) {
+                    final TripRef tripRef = (TripRef) Objects.deserialize(linkArgs[1]);
+                    loadTripByTripRef(tripRef, trip -> {
+                        if (trip != null) {
+                            TripDetailsActivity.start(DirectionsActivity.this,
+                                    network, trip,
+                                    Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            finish();
+                        }
+                    });
+                }
+            }
+        } catch (Exception e) {
+            log.error("cannot execute link command {}", linkArgs, e);
         }
     }
 
@@ -980,30 +1014,38 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
             new Toast(this).longToast(R.string.directions_query_history_invalid_blob);
             return;
         }
-        final TripRef tripRef = trip.tripRef;
-        if (tripRef != null) {
-            final NetworkProvider networkProvider = NetworkProviderFactory.provider(tripRef.network);
-            if (networkProvider.hasCapabilities(Capability.TRIP_RELOAD)) {
-                final TripOptions options = new TripOptions(null, prefsGetOptimizeTrip(), prefsGetWalkSpeed(),
-                        prefsGetMinTranfserTime(), prefsGetAccessibility(), null);
-                queryTripsRunnable = new MyQueryTripsRunnable(networkProvider, tripRef, options) {
-                    @Override
-                    protected void onResultOk(final QueryTripsResult result, final TripRequestData reloadRequestData) {
-                        final List<Trip> trips = result.trips;
-                        final Trip useTrip = (trips != null && trips.size() == 1) ? trips.get(0) : trip;
-                        TripDetailsActivity.start(DirectionsActivity.this, network, useTrip);
-                    }
+        loadTripByTripRef(trip.tripRef, (loadedTrip) -> {
+            final Trip useTrip = loadedTrip != null ? loadedTrip : trip;
+            TripDetailsActivity.start(DirectionsActivity.this, network, useTrip);
+        });
+    }
 
-                    @Override
-                    protected void onResultFailed(final QueryTripsResult result, final TripRequestData reloadRequestData) {
-                        TripDetailsActivity.start(DirectionsActivity.this, network, trip);
-                    }
-                };
-                backgroundHandler.post(queryTripsRunnable);
-                return;
-            }
+    private void loadTripByTripRef(final TripRef tripRef, final Consumer<Trip> tripHandler) {
+        if (tripRef == null) {
+            tripHandler.accept(null);
+            return;
         }
-        TripDetailsActivity.start(this, network, trip);
+        final NetworkProvider networkProvider = NetworkProviderFactory.provider(tripRef.network);
+        if (!networkProvider.hasCapabilities(Capability.TRIP_RELOAD)) {
+            tripHandler.accept(null);
+            return;
+        }
+        final TripOptions options = new TripOptions(null, prefsGetOptimizeTrip(), prefsGetWalkSpeed(),
+                prefsGetMinTranfserTime(), prefsGetAccessibility(), null);
+        queryTripsRunnable = new MyQueryTripsRunnable(networkProvider, tripRef, options) {
+            @Override
+            protected void onResultOk(final QueryTripsResult result, final TripRequestData reloadRequestData) {
+                final List<Trip> trips = result.trips;
+                final Trip useTrip = (trips != null && trips.size() == 1) ? trips.get(0) : null;
+                tripHandler.accept(useTrip);
+            }
+
+            @Override
+            protected void onResultFailed(final QueryTripsResult result, final TripRequestData reloadRequestData) {
+                tripHandler.accept(null);
+            }
+        };
+        backgroundHandler.post(queryTripsRunnable);
     }
 
     private boolean saneLocation(final @Nullable Location location, final boolean allowIncompleteAddress) {

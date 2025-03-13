@@ -465,7 +465,7 @@ public class NavigationNotification {
             final Trip trip) {
         final Intent intent = TripNavigatorActivity.buildStartIntent(
                 context, intentData.network, trip, intentData.renderConfig,
-                deleteRequest, showNextEvent);
+                deleteRequest, showNextEvent, false);
         return PendingIntent.getActivity(context,
                 (deleteRequest ? 1 : 0) + (showNextEvent ? 2 : 0),
                 intent, PendingIntent.FLAG_IMMUTABLE);

@@ -87,6 +87,7 @@ import de.schildbach.oeffi.stations.StationDetailsActivity;
 import de.schildbach.oeffi.util.ClockUtils;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.LocationHelper;
+import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.pte.NetworkId;
@@ -165,12 +166,29 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         start(context, network, trip, renderConfig);
     }
 
-    public static void start(final Context context, final NetworkId network, final Trip trip) {
-        start(context, network, trip, new RenderConfig());
+    public static void start(
+            final Context context,
+            final NetworkId network,
+            final Trip trip) {
+        start(context, network, trip, 0);
+    }
+
+    public static void start(
+            final Context context,
+            final NetworkId network,
+            final Trip trip,
+            final int intentFlags) {
+        start(context, network, trip, new RenderConfig(), intentFlags);
     }
 
     public static void start(final Context context, final NetworkId network, final Trip trip, final RenderConfig renderConfig) {
-        context.startActivity(buildStartIntent(TripDetailsActivity.class, context, network, trip, renderConfig));
+        start(context, network, trip, renderConfig, 0);
+    }
+
+    public static void start(final Context context, final NetworkId network, final Trip trip, final RenderConfig renderConfig, final int intentFlags) {
+        final Intent intent = buildStartIntent(TripDetailsActivity.class, context, network, trip, renderConfig);
+        intent.addFlags(intentFlags);
+        context.startActivity(intent);
     }
 
     public static void startForResult(final Activity context, int requestCode, final NetworkId network, final Trip trip, final RenderConfig renderConfig) {
@@ -367,6 +385,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     });
         }
         addActionBarButtons();
+
+        if (isTaskRoot())
+            initNavigation();
 
         if (!tripRenderer.isFeasible())
             findViewById(R.id.directions_trip_details_not_feasible).setVisibility(View.VISIBLE);
@@ -1740,6 +1761,15 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
         }
 
+        if (NetworkProviderFactory.provider(network)
+                .hasCapabilities(NetworkProvider.Capability.TRIP_RELOAD)) {
+            final String linkUrl = AppLinkActivity.getNetworkLinkUrl(this,
+                    network, "trip", Objects.serializeToString(trip.tripRef))
+                    .toString();
+            description.append(linkUrl);
+            description.append("\n\n");
+        }
+
         if (description.length() > 0)
             description.setLength(description.length() - 2);
 
@@ -1790,7 +1820,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     private void startNavigation(final Trip trip, final RenderConfig renderConfig) {
-        TripNavigatorActivity.start(this, network, trip, renderConfig);
+        TripNavigatorActivity.startNavigation(this, network, trip, renderConfig, isTaskRoot());
         setResult(RESULT_OK, new Intent());
         finish();
     }

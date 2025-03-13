@@ -45,7 +45,7 @@ public class Objects {
 
     public static String serializeToString(final Serializable object) {
         if (object == null) return null;
-        return Base64.encodeToString(serialize(object), Base64.DEFAULT);
+        return Base64.encodeToString(serialize(object), Base64.NO_WRAP);
     }
 
     public static Object deserialize(final byte[] bytes) {

@@ -259,7 +259,8 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
             intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, attachments);
         }
 
-        intent.putExtra(Intent.EXTRA_EMAIL, new String[] { Constants.REPORT_EMAIL });
+        final String mailAddress = context.getString(R.string.error_reporter_mail_address);
+        intent.putExtra(Intent.EXTRA_EMAIL, new String[] {mailAddress});
         intent.putExtra(Intent.EXTRA_TEXT, report.toString());
         intent.putExtra(Intent.EXTRA_SUBJECT, subject);
 
@@ -317,6 +318,12 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
     public void check(final Context context, final int applicationVersionCode, final OkHttpClient okHttpClient) {
         if (!stackTraceFile.exists())
             return;
+
+        String changeLogUrl = context.getString(R.string.about_changelog_url);
+        if (!changeLogUrl.isEmpty()) {
+            dialog(context, null);
+            return;
+        }
 
         final HttpUrl.Builder url = HttpUrl.parse(context.getString(R.string.about_changelog_summary)).newBuilder();
         url.addQueryParameter("version", Integer.toString(applicationVersionCode));

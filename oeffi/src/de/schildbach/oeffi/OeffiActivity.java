@@ -75,24 +75,46 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public abstract class OeffiActivity extends ComponentActivity {
+    protected static final String INTENT_EXTRA_LINK_ARGS = OeffiActivity.class.getName() + ".link_args";
+    protected static final String INTENT_EXTRA_NETWORK_NAME = OeffiActivity.class.getName() + ".network";
+
     protected Application application;
     private final Handler handler = new Handler();
 
     protected SharedPreferences prefs;
     protected NetworkId network;
+    protected String[] linkArgs;
     protected Set<Product> savedProducts;
 
     private DrawerLayout navigationDrawerLayout;
     private MenuProvider navigationDrawerMenuProvider;
     private View navigationDrawerFooterView;
 
-    private static final Logger log = LoggerFactory.getLogger(OeffiActivity.class);
+    protected Logger log;
+
+    protected OeffiActivity() {
+         log = LoggerFactory.getLogger(this.getClass());
+    }
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         this.prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        network = prefsGetNetworkId();
+        final Intent intent = getIntent();
+        linkArgs = intent.getStringArrayExtra(INTENT_EXTRA_LINK_ARGS);
+        final String networkName = intent.getStringExtra(INTENT_EXTRA_NETWORK_NAME);
+
+        if (network == null) {
+            if (networkName != null) {
+                try {
+                    network = NetworkId.valueOf(networkName);
+                } catch (IllegalArgumentException e) {
+                    log.warn("ignoring bad network from intent: {}", networkName);
+                }
+            }
+            if (network == null)
+                network = prefsGetNetworkId();
+        }
         ErrorReporter.getInstance().setNetworkId(network);
         savedProducts = loadProductFilter();
 

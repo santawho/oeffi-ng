@@ -1,4 +1,3 @@
-import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
 import groovy.json.JsonSlurper
 
@@ -34,6 +33,7 @@ if (!oeffi_ng_password) {
     }
 }
 
+CREDENTIALS.report_email = "oeffi.report@santawho.de"
 CREDENTIALS.github_url = "https://github.com/${CREDENTIALS.github_user}/${CREDENTIALS.github_repo}"
 CREDENTIALS.github_release_url = "${CREDENTIALS.github_url}/releases/latest/download"
 CREDENTIALS.asset_name_apk_file = "oeffi-ng.apk"
@@ -72,14 +72,18 @@ android {
     productFlavors {
         ng {
             dimension 'flavor'
+            applicationId "de.santawho.oeffi_ng"
+            // applicationIdSuffix '.ng'
             versionNameSuffix '-ng'
-            applicationIdSuffix '.ng'
             resValue "string", "app_name", "Öffi NG"
             resValue "string", "about_git_url", "${CREDENTIALS.github_url}"
             resValue "string", "about_changelog_url", "${CREDENTIALS.github_url}/wiki"
             resValue "string", "about_update_apk_url", "${CREDENTIALS.github_release_url}/${CREDENTIALS.asset_name_apk_file}"
             resValue "string", "about_update_manifest_url", "${CREDENTIALS.github_release_url}/${CREDENTIALS.asset_name_manifest}"
             resValue "string", "about_update_modified", timeModifiedStr  // If-Modified-Since: xxx, 25 Feb 2025 17:10:00 GMT
+            resValue "string", "error_reporter_mail_address", "${CREDENTIALS.report_email}"
+            resValue "string", "app_url_host", "santawho.de"
+            resValue "string", "app_url_path_prefix", "/@apps/oeffi-ng/"
         }
     }
 
