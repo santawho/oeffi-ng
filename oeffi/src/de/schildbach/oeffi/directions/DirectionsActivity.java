@@ -111,6 +111,9 @@ import de.schildbach.pte.dto.Trip;
 import de.schildbach.pte.dto.TripOptions;
 import de.schildbach.pte.dto.TripRef;
 import okhttp3.HttpUrl;
+
+import org.msgpack.core.MessagePack;
+import org.msgpack.core.MessageUnpacker;
 import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.api.IMapController;
 import org.osmdroid.views.MapView;
@@ -625,19 +628,26 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
     @Override
     protected void onStart() {
         super.onStart();
-        if (linkArgs != null) {
+        if (linkArgs != null && network != null) {
             try {
                 final String action = linkArgs[0];
                 if ("trip".equals(action) && linkArgs.length == 2) {
-                    final TripRef tripRef = (TripRef) Objects.deserializeFromCompressedString(linkArgs[1]);
-                    loadTripByTripRef(tripRef, (trip) -> {
-                        if (trip != null) {
-                            TripDetailsActivity.start(DirectionsActivity.this,
-                                    network, trip,
-                                    Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            finish();
-                        }
-                    });
+                    final NetworkProvider provider = NetworkProviderFactory.provider(network);
+                    if (provider.hasCapabilities(Capability.TRIP_RELOAD)) {
+                        // final TripRef tripRef = (TripRef) Objects.deserializeFromCompressedString(linkArgs[1]);
+                        final byte[] bytes = Objects.uncompressFromString(linkArgs[1]);
+                        final MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(bytes);
+                        final TripRef tripRef = provider.unpackTripRefFromMessage(unpacker);
+                        unpacker.close();
+                        loadTripByTripRef(tripRef, (trip) -> {
+                            if (trip != null) {
+                                TripDetailsActivity.start(DirectionsActivity.this,
+                                        network, trip,
+                                        Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                finish();
+                            }
+                        });
+                    }
                 }
             } catch (Exception e) {
                 log.error("cannot execute link command {}", linkArgs, e);
@@ -655,8 +665,7 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
 
         // can do directions?
         final NetworkProvider networkProvider = network != null ? NetworkProviderFactory.provider(network) : null;
-        final boolean hasDirectionsCap = networkProvider != null ? networkProvider.hasCapabilities(Capability.TRIPS)
-                : false;
+        final boolean hasDirectionsCap = networkProvider != null && networkProvider.hasCapabilities(Capability.TRIPS);
         viewFromLocation.setImeOptions(EditorInfo.IME_ACTION_NEXT);
         viewViaLocation.setImeOptions(EditorInfo.IME_ACTION_NEXT);
         viewToLocation.setImeOptions(hasDirectionsCap ? EditorInfo.IME_ACTION_GO : EditorInfo.IME_ACTION_NONE);

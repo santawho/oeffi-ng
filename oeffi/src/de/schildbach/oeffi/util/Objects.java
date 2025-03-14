@@ -52,11 +52,15 @@ public class Objects {
 
     public static String serializeAndCompressToString(final Serializable object) {
         if (object == null) return null;
-        final byte[] serialized = serialize(object);
+        return compressToString(serialize(object));
+    }
+
+    public static String compressToString(final byte[] bytes) {
+        if (bytes == null) return null;
         final Deflater deflater = new Deflater();
-        deflater.setInput(serialized);
+        deflater.setInput(bytes);
         deflater.finish();
-        final byte[] compressed = new byte[serialized.length * 2];
+        final byte[] compressed = new byte[bytes.length * 2];
         final int length = deflater.deflate(compressed);
         return Base64.encodeToString(compressed, 0, length, Base64.NO_WRAP);
     }
@@ -78,7 +82,7 @@ public class Objects {
         return deserialize(Base64.decode(checkNotNull(base64), Base64.DEFAULT));
     }
 
-    public static Object deserializeFromCompressedString(final String base64) throws Exception {
+    public static byte[] uncompressFromString(final String base64) throws Exception {
         if (base64 == null) return null;
         final byte[] compressed = Base64.decode(checkNotNull(base64), Base64.DEFAULT);
         final Inflater inflater = new Inflater();
@@ -89,8 +93,11 @@ public class Objects {
             int decompressedSize = inflater.inflate(buffer);
             os.write(buffer, 0, decompressedSize);
         }
-        final byte[] serialized = os.toByteArray();
-        return deserialize(serialized);
+        return os.toByteArray();
+    }
+
+    public static Object deserializeFromCompressedString(final String base64) throws Exception {
+        return deserialize(uncompressFromString(base64));
     }
 
     public static <T extends Serializable> T clone(T object) {

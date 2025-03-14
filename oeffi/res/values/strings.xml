@@ -313,6 +313,7 @@
     <string name="directions_trip_details_action_share_title">Share…</string>
     <string name="directions_trip_details_action_share_short_title">Share short message…</string>
     <string name="directions_trip_details_action_share_long_title">Share detailed message…</string>
+    <string name="directions_trip_details_action_share_link_title">Share with link…</string>
     <string name="directions_trip_details_text_short">dep %1$s %2$s\n%3$s  %4$s\n\narr %5$s %6$s\n%7$s  %8$s</string>
 
     <!-- directions trip details options schedule -->

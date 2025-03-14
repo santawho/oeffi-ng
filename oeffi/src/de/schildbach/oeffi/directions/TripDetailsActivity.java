@@ -103,6 +103,8 @@ import de.schildbach.pte.dto.Style;
 import de.schildbach.pte.dto.Trip;
 import de.schildbach.pte.dto.TripRef;
 
+import org.msgpack.core.MessageBufferPacker;
+import org.msgpack.core.MessagePack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -363,11 +365,15 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     final PopupMenu popupMenu = new PopupMenu(TripDetailsActivity.this, v);
                     popupMenu.inflate(R.menu.directions_trip_details_action_share);
                     popupMenu.setOnMenuItemClickListener(item -> {
-                        if (item.getItemId() == R.id.directions_trip_details_action_share_short) {
+                        final int itemId = item.getItemId();
+                        if (itemId == R.id.directions_trip_details_action_share_short) {
                             shareTripShort();
                             return true;
-                        } else if (item.getItemId() == R.id.directions_trip_details_action_share_long) {
-                            shareTripLong();
+                        } else if (itemId == R.id.directions_trip_details_action_share_long) {
+                            shareTripLong(false, true);
+                            return true;
+                        } else if (itemId == R.id.directions_trip_details_action_share_link) {
+                            shareTripLong(true, true);
                             return true;
                         } else {
                             return false;
@@ -379,7 +385,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             actionBar.addButton(R.drawable.ic_today_white_24dp, R.string.directions_trip_details_action_calendar_title)
                     .setOnClickListener(v -> {
                         try {
-                            startActivity(scheduleTripIntent(tripRenderer.trip));
+                            startActivity(scheduleTripIntent(tripRenderer.trip, true));
                         } catch (final ActivityNotFoundException x) {
                             new Toast(this).longToast(R.string.directions_trip_details_action_calendar_notfound);
                         }
@@ -1651,22 +1657,32 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     }
 
-    private void shareTripLong() {
+    private void shareTripLong(final boolean withLink, final boolean asHtml) {
         final Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
         intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.directions_trip_details_text_long_title,
                 tripRenderer.trip.from.uniqueShortName(), tripRenderer.trip.to.uniqueShortName()));
-        intent.putExtra(Intent.EXTRA_TEXT, tripToLongText(tripRenderer.trip));
+//        if (asHtml) {
+////            intent.setType("text/html");
+////            intent.putExtra(Intent.EXTRA_HTML_TEXT, Html.fromHtml(tripToLongText(tripRenderer.trip, withLink, true)));
+////            intent.putExtra(Intent.EXTRA_TEXT, Html.fromHtml(tripToLongText(tripRenderer.trip, withLink, true)));
+////            intent.putExtra(Intent.EXTRA_TEXT, tripToLongText(tripRenderer.trip, withLink, true));
+////            intent.putExtra(Intent.EXTRA_HTML_TEXT, tripToLongText(tripRenderer.trip, withLink, true));
+//        } else {
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_TEXT, tripToLongText(tripRenderer.trip, withLink, false));
+//        }
         startActivity(
-                Intent.createChooser(intent, getString(R.string.directions_trip_details_action_share_long_title)));
+                Intent.createChooser(intent, getString(withLink
+                        ? R.string.directions_trip_details_action_share_link_title
+                        : R.string.directions_trip_details_action_share_long_title)));
     }
 
-    private Intent scheduleTripIntent(final Trip trip) {
+    private Intent scheduleTripIntent(final Trip trip, final boolean withLink) {
         final Intent intent = new Intent(Intent.ACTION_INSERT);
         intent.setData(CalendarContract.Events.CONTENT_URI);
         intent.putExtra(CalendarContract.Events.TITLE, getString(R.string.directions_trip_details_text_long_title,
                 trip.from.uniqueShortName(), trip.to.uniqueShortName()));
-        intent.putExtra(CalendarContract.Events.DESCRIPTION, tripToLongText(trip));
+        intent.putExtra(CalendarContract.Events.DESCRIPTION, tripToLongText(trip, withLink, false));
         intent.putExtra(CalendarContract.Events.EVENT_LOCATION, trip.from.uniqueShortName());
         final Date firstDepartureTime = trip.getFirstDepartureTime();
         if (firstDepartureTime != null)
@@ -1702,7 +1718,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 departureLineStr, departureNameStr, arrivalDateStr, arrivalTimeStr, arrivalLineStr, arrivalNameStr);
     }
 
-    private String tripToLongText(final Trip trip) {
+    private String tripToLongText(final Trip trip, final boolean withLink, final boolean asHtml) {
         final java.text.DateFormat dateFormat = DateFormat.getDateFormat(TripDetailsActivity.this);
         final java.text.DateFormat timeFormat = DateFormat.getTimeFormat(TripDetailsActivity.this);
 
@@ -1762,11 +1778,19 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
         }
 
-        if (NetworkProviderFactory.provider(network)
+        if (withLink && NetworkProviderFactory.provider(network)
                 .hasCapabilities(NetworkProvider.Capability.TRIP_RELOAD)) {
             final String linkUrl = getTripLinkUrl(this, network, trip.tripRef);
-            description.append(linkUrl);
-            description.append("\n\n");
+            if (linkUrl != null) {
+                if (asHtml) {
+                    description.append("<a href=\"");
+                    description.append(linkUrl);
+                    description.append("\">Open in Öffi-NG</a>");
+                } else {
+                    description.append(linkUrl);
+                }
+                description.append("\n\n");
+            }
         }
 
         if (description.length() > 0)
@@ -1776,9 +1800,17 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     public static String getTripLinkUrl(final Context context, final NetworkId network, final TripRef tripRef) {
-        return AppLinkActivity.getNetworkLinkUrl(context,
-                        network, "trip", Objects.serializeAndCompressToString(tripRef)
-        ).toString();
+        try {
+            // final String stringifiedTripRef Objects.serializeAndCompressToString(tripRef);
+            final MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
+            tripRef.packToMessage(packer);
+            packer.close();
+            final String stringifiedTripRef = Objects.compressToString(packer.toByteArray());
+            return AppLinkActivity.getNetworkLinkUrl(context, network, "trip", stringifiedTripRef).toString();
+        } catch (Exception e) {
+            log.error("cannot build URL from tripref", e);
+            return null;
+        }
     }
 
     private static String formatTimeSpan(final long millis) {

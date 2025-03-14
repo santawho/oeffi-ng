@@ -8,5 +8,8 @@
     <item
         android:id="@+id/directions_trip_details_action_share_long"
         android:title="@string/directions_trip_details_action_share_long_title" />
+    <item
+        android:id="@+id/directions_trip_details_action_share_link"
+        android:title="@string/directions_trip_details_action_share_link_title" />
 
 </menu>
