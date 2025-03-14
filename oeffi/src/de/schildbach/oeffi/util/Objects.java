@@ -50,19 +50,25 @@ public class Objects {
         return Base64.encodeToString(serialize(object), Base64.NO_WRAP);
     }
 
-    public static String serializeAndCompressToString(final Serializable object) {
+    public static String serializeAndCompressToString(final Serializable object) throws IOException {
         if (object == null) return null;
         return compressToString(serialize(object));
     }
 
-    public static String compressToString(final byte[] bytes) {
+    public static String compressToString(final byte[] bytes) throws IOException {
         if (bytes == null) return null;
         final Deflater deflater = new Deflater();
         deflater.setInput(bytes);
         deflater.finish();
-        final byte[] compressed = new byte[bytes.length * 2];
-        final int length = deflater.deflate(compressed);
-        return Base64.encodeToString(compressed, 0, length, Base64.NO_WRAP);
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        while (!deflater.finished()) {
+            int compressedSize = deflater.deflate(buffer);
+            os.write(buffer, 0, compressedSize);
+        }
+        os.close();
+        final byte[] compressed = os.toByteArray();
+        return Base64.encodeToString(compressed, Base64.NO_WRAP);
     }
 
     public static Object deserialize(final byte[] bytes) {
@@ -93,6 +99,7 @@ public class Objects {
             int decompressedSize = inflater.inflate(buffer);
             os.write(buffer, 0, decompressedSize);
         }
+        os.close();
         return os.toByteArray();
     }
 
