@@ -102,13 +102,6 @@ public class NavigationAlarmManager {
         }
     }
 
-    private void refresh() {
-        refreshAt = NavigationNotification.refreshAll(getContext());
-        final long minNext = new Date().getTime() + MIN_PERIOD_MS;
-        if (refreshAt < minNext)
-            refreshAt = minNext;
-    }
-
     private void restart() throws IOException {
         while (!stopped) {
             if (refreshAt == Long.MAX_VALUE) {
@@ -131,5 +124,12 @@ public class NavigationAlarmManager {
             log.info("new real at {} is in past, refreshing now", LOG_TIME_FORMAT.format(refreshAt));
             refresh();
         }
+    }
+
+    private void refresh() {
+        refreshAt = NavigationNotification.refreshAll(getContext());
+        final long minNext = new Date().getTime() + MIN_PERIOD_MS;
+        if (refreshAt < minNext)
+            refreshAt = minNext;
     }
 }

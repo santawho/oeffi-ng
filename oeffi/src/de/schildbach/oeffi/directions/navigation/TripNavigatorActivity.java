@@ -159,12 +159,8 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     }
 
     private void stopNavigation() {
-        getCurrentNotification().remove();
+        NavigationNotification.remove(this, getIntent());
         finish();
-    }
-
-    private NavigationNotification getCurrentNotification() {
-        return new NavigationNotification(this, getIntent());
     }
 
     @SuppressLint("MissingSuperCall")
@@ -406,6 +402,6 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         final Trip trip = aTrip != null ? aTrip : tripRenderer.trip;
         NavigationNotification.Configuration configuration = new NavigationNotification.Configuration();
         configuration.soundEnabled = soundEnabled;
-        backgroundHandler.post(() -> getCurrentNotification().updateFromForeground(trip, configuration));
+        NavigationNotification.updateFromForeground(this, getIntent(), trip, configuration);
     }
 }

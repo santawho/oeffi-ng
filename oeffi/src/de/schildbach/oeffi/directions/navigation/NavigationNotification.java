@@ -42,6 +42,8 @@ import de.schildbach.oeffi.directions.TripDetailsActivity;
 import de.schildbach.oeffi.util.ClockUtils;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.ResourceUri;
+import de.schildbach.pte.DbWebProvider;
+import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Trip;
 
 public class NavigationNotification {
@@ -139,6 +141,11 @@ public class NavigationNotification {
         for (StatusBarNotification statusBarNotification : activeNotifications) {
             if (!statusBarNotification.getTag().startsWith(TAG_PREFIX))
                 continue;
+            log.info("refresh notification with tag={} posttime={}, id={}, key={}",
+                    statusBarNotification.getTag(),
+                    statusBarNotification.getPostTime(),
+                    statusBarNotification.getId(),
+                    statusBarNotification.getKey());
             final Notification notification = statusBarNotification.getNotification();
             final Bundle extras = notification.extras;
             if (extras == null)
@@ -156,6 +163,12 @@ public class NavigationNotification {
                 minRefreshAt = refreshAt;
         }
         return minRefreshAt;
+    }
+
+    public static void remove(final Context context, final Intent intent) {
+        NavigationAlarmManager.runOnHandlerThread(() -> {
+            new NavigationNotification(context, intent).remove();
+        });
     }
 
     public static final class Configuration implements Serializable {
@@ -180,7 +193,28 @@ public class NavigationNotification {
             final Configuration configuration,
             final TripRenderer.NotificationData lastNotified) {
         this.context = context;
-        notificationTag = TAG_PREFIX + intentData.trip.getUniqueId();
+        final Trip trip = intentData.trip;
+        final String uniqueId = trip.getUniqueId();
+        final StringBuilder b = new StringBuilder();
+        for (Trip.Leg leg : trip.legs) {
+            if (leg instanceof Trip.Public) {
+                final Trip.Public publeg = (Trip.Public) leg;
+                final DbWebProvider.DbWebJourneyRef journeyRef = (DbWebProvider.DbWebJourneyRef) publeg.journeyRef;
+                b.append(",j=");
+                b.append(journeyRef.journeyId);
+                final Line line = journeyRef.line;
+                b.append(",n=");
+                b.append(line.network);
+                b.append(",p=");
+                b.append(line.product);
+                b.append(",l=");
+                b.append(line.label);
+                b.append(",d=");
+                b.append(publeg.departureStop.location.id);
+            }
+        }
+        log.info("NOTIFICATION for TRIP: {}", b.toString());
+        notificationTag = TAG_PREFIX + uniqueId;
         final Bundle extras = getActiveNotificationExtras();
         if (extras == null) {
             this.intentData = intentData;
@@ -195,6 +229,14 @@ public class NavigationNotification {
         }
     }
 
+    public static void updateFromForeground(
+            final Context context, final Intent intent,
+            final Trip trip, final Configuration configuration) {
+        NavigationAlarmManager.runOnHandlerThread(() -> {
+            new NavigationNotification(context, intent).updateFromForeground(trip, configuration);
+        });
+    }
+
     public void updateFromForeground(final Trip newTrip, final Configuration configuration) {
         if (configuration != null)
             this.configuration = configuration;
@@ -205,14 +247,27 @@ public class NavigationNotification {
     }
 
     private Notification getActiveNotification() {
+        log.info("looking for active notifications for tag={}", notificationTag);
+        StatusBarNotification latestStatusBarNotification = null;
         final StatusBarNotification[] activeNotifications = getNotificationManager(context).getActiveNotifications();
         for (StatusBarNotification statusBarNotification : activeNotifications) {
             final String tag = statusBarNotification.getTag();
-            if (tag == null || !tag.equals(notificationTag))
-                continue;
-            return statusBarNotification.getNotification();
+            if (tag == null || !tag.equals(notificationTag)) {
+                log.info("found other notification with tag={}", tag);
+            } else {
+                log.info("found matching notification with posttime={}, id={}, key={}",
+                        statusBarNotification.getPostTime(),
+                        statusBarNotification.getId(),
+                        statusBarNotification.getKey());
+                if (latestStatusBarNotification == null
+                        || latestStatusBarNotification.getPostTime() < statusBarNotification.getPostTime()) {
+                    latestStatusBarNotification = statusBarNotification;
+                }
+            }
         }
-        return null;
+        if (latestStatusBarNotification == null)
+            return null;
+        return latestStatusBarNotification.getNotification();
     }
 
     private Bundle getActiveNotificationExtras() {
@@ -435,6 +490,7 @@ public class NavigationNotification {
         }
 
         final Notification notification = notificationBuilder.build();
+        log.info("set notification with tag={}", notificationTag);
         getNotificationManager(context).notify(notificationTag, 0, notification);
 
         if (anyChanges) {
