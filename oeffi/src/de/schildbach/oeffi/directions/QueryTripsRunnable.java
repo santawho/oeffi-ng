@@ -57,6 +57,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class QueryTripsRunnable implements Runnable {
     public static class TripRequestData implements Serializable {
+        private static final long serialVersionUID = -7668471328026069655L;
+
         public Location from;
         public Location via;
         public Location to;

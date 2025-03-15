@@ -86,6 +86,8 @@ public class TripRenderer {
     };
 
     public static class NotificationData implements Serializable {
+        private static final long serialVersionUID = -699098832883209694L;
+
         private static int idc;
         public final int id;
 

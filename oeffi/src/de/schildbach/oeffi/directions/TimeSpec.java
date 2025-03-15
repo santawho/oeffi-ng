@@ -41,6 +41,8 @@ public abstract class TimeSpec implements Serializable {
     }
 
     public static final class Absolute extends TimeSpec {
+        private static final long serialVersionUID = -1384741768418053020L;
+
         public final long timeMs;
 
         public Absolute(final DepArr depArr, final long timeMs) {
@@ -60,6 +62,8 @@ public abstract class TimeSpec implements Serializable {
     }
 
     public static final class Relative extends TimeSpec {
+        private static final long serialVersionUID = 8082677158593413075L;
+
         public final long diffMs;
 
         public Relative(final long diffMs) {

@@ -122,6 +122,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class TripDetailsActivity extends OeffiActivity implements LocationListener, LocationAware  {
     public static class RenderConfig implements Serializable {
+        private static final long serialVersionUID = 6006525041994219717L;
+
         public boolean isJourney;
         public boolean isNavigation;
         public boolean isAlternativeConnectionSearch;
@@ -133,6 +135,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     public static final String INTENT_EXTRA_RENDERCONFIG = TripDetailsActivity.class.getName() + ".config";
 
     public static class IntentData implements Serializable {
+        private static final long serialVersionUID = 8180214631776887395L;
+
         public final NetworkId network;
         public final Trip trip;
         public final RenderConfig renderConfig;

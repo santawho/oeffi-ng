@@ -89,6 +89,8 @@ public class TripsOverviewActivity extends OeffiActivity {
     private static final int DETAILS_NEW_NAVIGATION = 4711;
 
     public static class RenderConfig implements Serializable {
+        private static final long serialVersionUID = 1567241493704301720L;
+
         public boolean isAlternativeConnectionSearch;
         public TimeSpec referenceTime;
         public JourneyRef feederJourneyRef;

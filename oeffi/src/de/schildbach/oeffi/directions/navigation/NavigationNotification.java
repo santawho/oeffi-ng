@@ -172,6 +172,8 @@ public class NavigationNotification {
     }
 
     public static final class Configuration implements Serializable {
+        private static final long serialVersionUID = -3466636027523660100L;
+
         boolean soundEnabled;
     }
 
