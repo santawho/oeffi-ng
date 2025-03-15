@@ -27,6 +27,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Debug;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
@@ -316,6 +317,8 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
     private final static Pattern PATTERN_VERSION = Pattern.compile("<dt id=\"(\\d+)\">([^<]*)</dt>");
 
     public void check(final Context context, final int applicationVersionCode, final OkHttpClient okHttpClient) {
+        if (Debug.isDebuggerConnected())
+            return;
         if (!stackTraceFile.exists())
             return;
 

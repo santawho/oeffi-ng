@@ -64,6 +64,7 @@ import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -1556,10 +1557,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             } else {
                 showNavigateTo = false;
             }
+            final boolean isLastPublicStop = stop.location.equals(getLastPublicLocation());
             final PopupMenu contextMenu = new StationContextMenu(
                     TripDetailsActivity.this, v, network, stop.location,
                     null, false, false, true, true, true, true,
-                    renderConfig.isNavigation,
+                    renderConfig.isNavigation && !isLastPublicStop,
                     showNavigateTo, false);
             contextMenu.setOnMenuItemClickListener(item -> {
                 int menuItemId = item.getItemId();
@@ -1632,6 +1634,14 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             });
             contextMenu.show();
         }
+    }
+
+    @Nullable
+    protected Location getLastPublicLocation() {
+        final Trip.Public lastPublicLeg = tripRenderer.trip.getLastPublicLeg();
+        if (lastPublicLeg == null)
+            return null;
+        return lastPublicLeg.arrivalStop.location;
     }
 
     private class MapClickListener implements android.view.View.OnClickListener {

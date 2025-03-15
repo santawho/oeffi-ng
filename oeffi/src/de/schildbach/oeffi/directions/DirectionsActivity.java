@@ -67,7 +67,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.common.base.Throwables;
 import com.google.common.primitives.Floats;
-import de.schildbach.oeffi.Constants;
+
 import de.schildbach.oeffi.FromViaToAware;
 import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiMainActivity;
@@ -97,11 +97,8 @@ import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.oeffi.util.ZoomControls;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
-import de.schildbach.pte.NetworkProvider.Accessibility;
 import de.schildbach.pte.NetworkProvider.Capability;
-import de.schildbach.pte.NetworkProvider.Optimize;
 import de.schildbach.pte.NetworkProvider.TripFlag;
-import de.schildbach.pte.NetworkProvider.WalkSpeed;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.Point;
@@ -1040,9 +1037,7 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
             tripHandler.accept(null);
             return;
         }
-        final TripOptions options = new TripOptions(null, prefsGetOptimizeTrip(), prefsGetWalkSpeed(),
-                prefsGetMinTranfserTime(), prefsGetAccessibility(), null);
-        queryTripsRunnable = new MyQueryTripsRunnable(networkProvider, tripRef, options) {
+        queryTripsRunnable = new MyQueryTripsRunnable(networkProvider, tripRef, getTripOptionsFromPrefs()) {
             @Override
             protected void onResultOk(final QueryTripsResult result, final TripRequestData reloadRequestData) {
                 final List<Trip> trips = result.trips;
@@ -1196,27 +1191,6 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
 
             return row;
         }
-    }
-
-    private Optimize prefsGetOptimizeTrip() {
-        final String optimize = prefs.getString(Constants.PREFS_KEY_OPTIMIZE_TRIP, null);
-        if (optimize != null)
-            return Optimize.valueOf(optimize);
-        else
-            return null;
-    }
-
-    private WalkSpeed prefsGetWalkSpeed() {
-        return WalkSpeed.valueOf(prefs.getString(Constants.PREFS_KEY_WALK_SPEED, WalkSpeed.NORMAL.name()));
-    }
-
-    private Integer prefsGetMinTranfserTime() {
-        final int value = Integer.parseInt(prefs.getString(Constants.PREFS_KEY_MIN_TRANSFER_TIME, "-1"));
-        return value < 0 ? null : value;
-    }
-
-    private Accessibility prefsGetAccessibility() {
-        return Accessibility.valueOf(prefs.getString(Constants.PREFS_KEY_ACCESSIBILITY, Accessibility.NEUTRAL.name()));
     }
 
     private static final class QuickReturnBehavior extends CoordinatorLayout.Behavior<View> {

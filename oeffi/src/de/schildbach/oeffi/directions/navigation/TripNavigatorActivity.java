@@ -332,7 +332,9 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         final NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
         queryTripsRunnable = new QueryTripsRunnable(getResources(), progressDialog, handler,
                 networkProvider, stop.location, null,
-                queryTripsRequestData.to, time, queryTripsRequestData.options) {
+                queryTripsRequestData != null ? queryTripsRequestData.to : getLastPublicLocation(),
+                time,
+                queryTripsRequestData != null ? queryTripsRequestData.options : getTripOptionsFromPrefs()) {
             @Override
             protected void onPostExecute() {
                 if (!isDestroyed())

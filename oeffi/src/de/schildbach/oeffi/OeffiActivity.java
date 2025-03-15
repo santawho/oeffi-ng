@@ -45,6 +45,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.activity.ComponentActivity;
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.core.view.MenuProvider;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -66,6 +67,8 @@ import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.Product;
 import de.schildbach.pte.dto.ResultHeader;
+import de.schildbach.pte.dto.TripOptions;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -378,14 +381,35 @@ public abstract class OeffiActivity extends ComponentActivity {
         }
     }
 
-    protected Collection<Product> getNetworkDefaultProducts() {
+    protected NetworkProvider.Optimize prefsGetOptimizeTrip() {
+        final String optimize = prefs.getString(Constants.PREFS_KEY_OPTIMIZE_TRIP, null);
+        if (optimize != null)
+            return NetworkProvider.Optimize.valueOf(optimize);
+        else
+            return null;
+    }
+
+    protected NetworkProvider.WalkSpeed prefsGetWalkSpeed() {
+        return NetworkProvider.WalkSpeed.valueOf(prefs.getString(Constants.PREFS_KEY_WALK_SPEED, NetworkProvider.WalkSpeed.NORMAL.name()));
+    }
+
+    protected Integer prefsGetMinTranfserTime() {
+        final int value = Integer.parseInt(prefs.getString(Constants.PREFS_KEY_MIN_TRANSFER_TIME, "-1"));
+        return value < 0 ? null : value;
+    }
+
+    protected NetworkProvider.Accessibility prefsGetAccessibility() {
+        return NetworkProvider.Accessibility.valueOf(prefs.getString(Constants.PREFS_KEY_ACCESSIBILITY, NetworkProvider.Accessibility.NEUTRAL.name()));
+    }
+
+    protected Set<Product> getNetworkDefaultProducts() {
         final NetworkProvider networkProvider = network != null ? NetworkProviderFactory.provider(network) : null;
         return networkProvider != null ? networkProvider.defaultProducts() : Product.ALL;
     }
 
     protected Set<Product> loadProductFilter() {
-        Collection<Product> networkDefaultProducts = getNetworkDefaultProducts();
-        Collection<Product> keepProducts;
+        Set<Product> networkDefaultProducts = getNetworkDefaultProducts();
+        Set<Product> keepProducts;
         Set<Product> products = new HashSet<>(Product.values().length);
         String networkSpecificKey = Constants.PREFS_KEY_PRODUCT_FILTER + "_" + network;
         String value = prefs.getString(networkSpecificKey, null);
@@ -415,6 +439,12 @@ public abstract class OeffiActivity extends ComponentActivity {
                 .putString(Constants.PREFS_KEY_PRODUCT_FILTER, value)
                 .putString(networkSpecificKey, value)
                 .apply();
+    }
+
+    @NonNull
+    protected TripOptions getTripOptionsFromPrefs() {
+        return new TripOptions(loadProductFilter(), prefsGetOptimizeTrip(), prefsGetWalkSpeed(),
+                prefsGetMinTranfserTime(), prefsGetAccessibility(), null);
     }
 
     protected void checkChangeNetwork() {
