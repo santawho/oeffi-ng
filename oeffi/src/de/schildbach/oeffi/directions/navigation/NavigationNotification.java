@@ -338,6 +338,8 @@ public class NavigationNotification {
         setupNotificationView(notificationLayout, tripRenderer, now);
         // final RemoteViews notificationLayoutExpanded = new RemoteViews(context.getPackageName(), R.layout.navigation_notification);
         // setupNotificationView(context, notificationLayoutExpanded, tripRenderer, now, newNotified);
+        notificationLayout.setOnClickPendingIntent(R.id.navigation_notification_open_full,
+                getPendingActivityIntent(false, true, trip));
         notificationLayout.setOnClickPendingIntent(R.id.navigation_notification_next_event,
                 getPendingActionIntent(ACTION_REFRESH, trip));
 
