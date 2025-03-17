@@ -230,6 +230,8 @@
     <string name="directions_alert_ssl_exception_button_dismiss">Dismiss</string>
     <string name="directions_action_return_trip_title">Return trip</string>
     <string name="directions_action_expand_title">Expand</string>
+    <string name="directions_alert_bad_link_title">Bad Link</string>
+    <string name="directions_alert_bad_link_message">This link is bad or incomplete</string>
 
     <!-- query history -->
     <string name="directions_query_history_empty">No saved queries yet</string>

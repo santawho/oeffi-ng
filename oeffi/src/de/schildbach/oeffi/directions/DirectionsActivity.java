@@ -648,7 +648,10 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
                 }
             } catch (Exception e) {
                 log.error("cannot execute link command {}", linkArgs, e);
-                finish();
+                DialogBuilder.warn(this, R.string.directions_alert_bad_link_title)
+                        .setMessage(R.string.directions_alert_bad_link_message)
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .show();
             }
         }
     }

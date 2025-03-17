@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
@@ -96,10 +97,13 @@ public class Objects {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
         while (!inflater.finished()) {
+            if (inflater.needsInput())
+                throw new DataFormatException("incomplete zip data");
             int decompressedSize = inflater.inflate(buffer);
             os.write(buffer, 0, decompressedSize);
         }
         os.close();
+        inflater.end();
         return os.toByteArray();
     }
 
