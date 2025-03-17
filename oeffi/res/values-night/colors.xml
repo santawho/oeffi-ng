@@ -26,10 +26,19 @@
     <color name="bg_delayed">#444444</color>
     <color name="bg_current_time">#ffff00</color>
     <color name="bg_position">#bbbbbb</color>
+    <color name="bg_trip_details_public_past">#3a3a2e</color>
+    <color name="bg_trip_details_individual_past">#313d3d</color>
+    <color name="bg_trip_details_public_now">#403822</color>
+    <color name="bg_trip_details_individual_now">#665f47</color>
+    <color name="bg_trip_details_time_left">#AA5555</color>
+    <color name="bg_trip_details_public_future">#222222</color>
+    <color name="bg_trip_details_individual_future">#2a432a</color>
     <color name="bg_trip_overview_initial_trip">#3A2828</color>
     <color name="bg_trip_overview_earlierorlater_trip">#383838</color>
     <color name="bg_trip_overview_additional_trip">#28283A</color>
     <color name="bg_trip_overview_additional_feeder">#283A28</color>
+    <color name="fg_trip_next_event_normal">#ffffff</color>
+    <color name="fg_trip_next_event_important">#ff6666</color>
 
     <item name="alpha_bright_white" format="float" type="dimen">0.8</item>
 

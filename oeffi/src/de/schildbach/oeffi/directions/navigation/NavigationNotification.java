@@ -668,7 +668,7 @@ public class NavigationNotification {
                         chronoFormat, true);
                 remoteViews.setChronometerCountDown(R.id.navigation_notification_next_event_time_chronometer, true);
                 remoteViews.setTextColor(R.id.navigation_notification_next_event_time_chronometer,
-                        context.getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_arrow : R.color.fg_significant));
+                        context.getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_trip_next_event_important : R.color.fg_trip_next_event_normal));
             } else {
                 if (TripRenderer.NO_TIME_LEFT_VALUE.equals(valueStr))
                     valueStr = context.getString(R.string.directions_trip_details_next_event_no_time_left);
@@ -676,7 +676,7 @@ public class NavigationNotification {
                 remoteViews.setViewVisibility(R.id.navigation_notification_next_event_time_chronometer, View.GONE);
                 remoteViews.setTextViewText(R.id.navigation_notification_next_event_time_value, valueStr);
                 remoteViews.setTextColor(R.id.navigation_notification_next_event_time_value,
-                        context.getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_arrow : R.color.fg_significant));
+                        context.getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_trip_next_event_important : R.color.fg_trip_next_event_normal));
             }
             remoteViews.setTextViewText(R.id.navigation_notification_next_event_time_unit, tripRenderer.nextEventTimeLeftUnit);
             remoteViews.setViewVisibility(R.id.navigation_notification_next_event_time_hourglass,
@@ -748,8 +748,8 @@ public class NavigationNotification {
                 remoteViews.setTextViewText(R.id.navigation_notification_next_event_transfer_value, tripRenderer.nextEventTransferLeftTimeValue);
                 remoteViews.setTextColor(R.id.navigation_notification_next_event_transfer_value,
                         context.getColor(tripRenderer.nextEventTransferLeftTimeCritical
-                                ? R.color.fg_arrow
-                                : R.color.fg_significant));
+                                ? R.color.fg_trip_next_event_important
+                                : R.color.fg_trip_next_event_normal));
 
                 if (tripRenderer.nextEventTransferExplain != null) {
                     remoteViews.setViewVisibility(R.id.navigation_notification_next_event_transfer_explain, View.VISIBLE);

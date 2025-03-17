@@ -13,6 +13,7 @@
             android:id="@+id/navigation_notification_next_event_finished"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/fg_trip_next_event_normal"
             android:visibility="gone"
             android:text="@string/directions_trip_details_finished"
             android:gravity="center"
@@ -36,11 +37,13 @@
                     android:id="@+id/navigation_notification_next_event_time_hourglass"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
+                    android:tint="@color/fg_trip_next_event_normal"
                     android:src="@drawable/ic_hourglass_black_24dp"/>
                 <TextView
                     android:id="@+id/navigation_notification_next_event_time_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/fg_trip_next_event_normal"
                     android:paddingHorizontal="20dp"
                     android:textSize="@dimen/navigation_notification_next_event_time_fontsize"
                     android:textStyle="bold"/>
@@ -48,6 +51,7 @@
                     android:id="@+id/navigation_notification_next_event_time_chronometer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/fg_trip_next_event_normal"
                     android:paddingHorizontal="20dp"
                     android:textSize="@dimen/navigation_notification_next_event_time_fontsize"
                     android:textStyle="bold"/>
@@ -55,6 +59,7 @@
                     android:id="@+id/navigation_notification_next_event_time_unit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/fg_trip_next_event_normal"
                     android:textSize="@dimen/navigation_notification_next_event_time_fontsize_decor"
                     android:textStyle="bold"/>
             </LinearLayout>
@@ -62,6 +67,7 @@
                 android:id="@+id/navigation_notification_next_event_time_explain"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="@color/fg_trip_next_event_normal"
                 android:gravity="end"
                 android:layout_marginTop="-20dp"
                 android:paddingHorizontal="8dp"
@@ -71,18 +77,21 @@
             android:id="@+id/navigation_notification_next_event_current_action"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/fg_trip_next_event_normal"
             android:textSize="@dimen/font_size_small"
             android:gravity="center"/>
         <TextView
             android:id="@+id/navigation_notification_next_event_target"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/fg_trip_next_event_normal"
             android:gravity="center"
             android:textSize="@dimen/navigation_notification_next_event_target_fontsize"/>
         <TextView
             android:id="@+id/navigation_notification_next_event_next_action"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/fg_trip_next_event_normal"
             android:textSize="@dimen/font_size_small"
             android:gravity="center"/>
         <LinearLayout
@@ -106,6 +115,7 @@
                 android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColor="@color/fg_trip_next_event_normal"
                 android:paddingBottom="10dp"
                 android:paddingHorizontal="8dp"
                 android:textSize="@dimen/navigation_notification_next_event_position_to_fontsize"
@@ -115,10 +125,12 @@
                 android:id="@+id/navigation_notification_next_event_positions_walk_icon"
                 android:visibility="gone"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:tint="@color/fg_trip_next_event_normal"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColor="@color/fg_trip_next_event_normal"
                 android:paddingBottom="10dp"
                 android:paddingHorizontal="8dp"
                 android:textSize="@dimen/navigation_notification_next_event_position_to_fontsize"
@@ -139,6 +151,7 @@
             android:id="@+id/navigation_notification_next_event_departure"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/fg_trip_next_event_normal"
             android:gravity="center"
             android:textSize="@dimen/navigation_notification_next_event_departure_fontsize"/>
         <LinearLayout
@@ -151,12 +164,14 @@
                 android:id="@+id/navigation_notification_next_event_connection_line"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColor="@color/fg_trip_next_event_normal"
                 android:paddingHorizontal="5dp"
                 android:paddingVertical="2dp"
                 android:textSize="@dimen/navigation_notification_next_event_connection_line_fontsize"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColor="@color/fg_trip_next_event_normal"
                 android:paddingBottom="10dp"
                 android:paddingHorizontal="8dp"
                 android:textSize="@dimen/navigation_notification_next_event_connection_to_fontsize"
@@ -166,6 +181,7 @@
                 android:id="@+id/navigation_notification_next_event_connection_to"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColor="@color/fg_trip_next_event_normal"
                 android:textStyle="italic"
                 android:textSize="@dimen/navigation_notification_next_event_connection_to_fontsize"/>
         </LinearLayout>
@@ -184,17 +200,20 @@
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:tint="@color/fg_trip_next_event_normal"
                     android:src="@drawable/ic_hourglass_black_24dp"/>
                 <TextView
                     android:id="@+id/navigation_notification_next_event_transfer_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/fg_trip_next_event_normal"
                     android:textStyle="bold"
                     android:textSize="@dimen/navigation_notification_next_event_transfer_fontsize"/>
                 <TextView
                     android:id="@+id/navigation_notification_next_event_transfer_explain"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/fg_trip_next_event_normal"
                     android:layout_marginStart="6dp"
                     android:textSize="@dimen/navigation_notification_next_event_transfer_explain_fontsize"/>
             </LinearLayout>
@@ -208,11 +227,13 @@
                 <ImageView
                     android:id="@+id/navigation_notification_next_event_walk_icon"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:tint="@color/fg_trip_next_event_normal"/>
                 <TextView
                     android:id="@+id/navigation_notification_next_event_walk_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/fg_trip_next_event_normal"
                     android:textStyle="bold"
                     android:textSize="@dimen/navigation_notification_next_event_transfer_fontsize"/>
             </LinearLayout>
@@ -222,6 +243,7 @@
         android:id="@+id/navigation_notification_open_full"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:tint="@color/fg_trip_next_event_normal"
         android:scaleX="2"
         android:scaleY="2"
         android:translationX="@dimen/text_padding_horizontal_verylax"

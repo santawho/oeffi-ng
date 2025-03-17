@@ -1156,7 +1156,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             if (chronoFormat != null) {
                 valueChronoView.setVisibility(View.VISIBLE);
                 valueView.setVisibility(View.GONE);
-                valueChronoView.setTextColor(getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_arrow : R.color.fg_significant));
+                valueChronoView.setTextColor(getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_trip_next_event_important : R.color.fg_trip_next_event_normal));
                 valueChronoView.setBase(ClockUtils.clockToElapsedTime(tripRenderer.nextEventEstimatedTime.getTime()));
                 valueChronoView.setCountDown(true);
                 valueChronoView.setFormat(chronoFormat);
@@ -1164,14 +1164,14 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             } else {
                 valueView.setVisibility(View.VISIBLE);
                 valueChronoView.setVisibility(View.GONE);
-                valueView.setTextColor(getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_arrow : R.color.fg_significant));
+                valueView.setTextColor(getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_trip_next_event_important : R.color.fg_trip_next_event_normal));
                 if (TripRenderer.NO_TIME_LEFT_VALUE.equals(valueStr))
                     valueView.setText(R.string.directions_trip_details_next_event_no_time_left);
                 else
                     valueView.setText(valueStr);
             }
         }
-        // valueView.setTextColor(getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_arrow : R.color.fg_significant));
+        // valueView.setTextColor(getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_trip_next_event_important : R.color.fg_trip_next_event_normal));
         TextView unitView = findViewById(R.id.directions_trip_details_next_event_time_unit);
         unitView.setText(tripRenderer.nextEventTimeLeftUnit);
         findViewById(R.id.directions_trip_details_next_event_time_hourglass)
@@ -1247,8 +1247,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 TextView transferValueView = findViewById(R.id.directions_trip_details_next_event_transfer_value);
                 transferValueView.setText(tripRenderer.nextEventTransferLeftTimeValue);
                 transferValueView.setTextColor(getColor(tripRenderer.nextEventTransferLeftTimeCritical
-                        ? R.color.fg_arrow
-                        : R.color.fg_significant));
+                        ? R.color.fg_trip_next_event_important
+                        : R.color.fg_trip_next_event_normal));
 
                 TextView transferExplainView = findViewById(R.id.directions_trip_details_next_event_transfer_explain);
                 if (tripRenderer.nextEventTransferExplain != null) {
