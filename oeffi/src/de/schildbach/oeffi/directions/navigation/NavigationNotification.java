@@ -48,6 +48,7 @@ import de.schildbach.pte.dto.Trip;
 
 public class NavigationNotification {
     private static final int SOUND_ALARM;
+    private static final int SOUND_REMIND_VIA_NOTIFICATION;
     private static final int SOUND_REMIND_NORMAL;
     private static final int SOUND_REMIND_IMPORTANT;
     private static final int SOUND_REMIND_NEXTLEG;
@@ -60,11 +61,13 @@ public class NavigationNotification {
             SOUND_REMIND_NORMAL = R.raw.nav_lowvolume_remind_down;
             SOUND_REMIND_IMPORTANT = R.raw.nav_lowvolume_remind_downup;
             SOUND_REMIND_NEXTLEG = R.raw.nav_lowvolume_remind_up;
+            SOUND_REMIND_VIA_NOTIFICATION = -1;
         } else {
             SOUND_ALARM = R.raw.nav_alarm;
             SOUND_REMIND_NORMAL = R.raw.nav_remind_down;
             SOUND_REMIND_IMPORTANT = R.raw.nav_remind_downup;
             SOUND_REMIND_NEXTLEG = R.raw.nav_remind_up;
+            SOUND_REMIND_VIA_NOTIFICATION = -1;
         }
     }
     private static final String CHANNEL_ID = "navigation";
@@ -98,8 +101,8 @@ public class NavigationNotification {
             channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
 //            channel.enableVibration(true);
             channel.setVibrationPattern(VIBRATION_PATTERN_REMIND);
-            channel.setSound(ResourceUri.fromResource(context, SOUND_REMIND_NORMAL),
-                    new AudioAttributes.Builder().setUsage(getAudioUsageForSound(SOUND_REMIND_NORMAL)).build());
+            channel.setSound(ResourceUri.fromResource(context, SOUND_REMIND_VIA_NOTIFICATION),
+                    new AudioAttributes.Builder().setUsage(getAudioUsageForSound(SOUND_REMIND_VIA_NOTIFICATION)).build());
             getNotificationManager(context).createNotificationChannel(channel);
         }
         notificationChannelCreated = true;
@@ -505,7 +508,7 @@ public class NavigationNotification {
 
         if (anyChanges) {
             notificationBuilder.setSilent(true);
-        } else if (reminderSoundId == SOUND_REMIND_NORMAL) {
+        } else if (reminderSoundId == SOUND_REMIND_VIA_NOTIFICATION) {
             notificationBuilder
                     .setSilent(!configuration.soundEnabled)
                     .setVibrate(VIBRATION_PATTERN_REMIND)
@@ -520,7 +523,7 @@ public class NavigationNotification {
 
         if (anyChanges) {
             playAlarmSoundAndVibration(SOUND_ALARM, VIBRATION_PATTERN_ALARM);
-        } else if (reminderSoundId != 0 && reminderSoundId != SOUND_REMIND_NORMAL) {
+        } else if (reminderSoundId != 0 && reminderSoundId != SOUND_REMIND_VIA_NOTIFICATION) {
             playAlarmSoundAndVibration(reminderSoundId, VIBRATION_PATTERN_REMIND);
         }
 
