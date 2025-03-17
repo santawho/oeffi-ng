@@ -687,6 +687,12 @@ public class NavigationNotification {
             remoteViews.setViewVisibility(R.id.navigation_notification_next_event_position_to, View.GONE);
         }
 
+        if (tripRenderer.nextEventStopChange) {
+            remoteViews.setImageViewResource(R.id.navigation_notification_next_event_positions_walk_icon, tripRenderer.nextEventTransferIconId);
+            remoteViews.setViewVisibility(R.id.navigation_notification_next_event_positions_walk_icon, View.VISIBLE);
+            remoteViews.setViewVisibility(R.id.navigation_notification_next_event_positions_walk_arrow, View.VISIBLE);
+        }
+
         if (tripRenderer.nextEventTransportLine == null) {
             remoteViews.setViewVisibility(R.id.navigation_notification_next_event_connection, View.GONE);
         } else {

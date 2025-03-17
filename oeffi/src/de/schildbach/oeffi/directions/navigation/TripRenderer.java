@@ -200,9 +200,11 @@ public class TripRenderer {
             final TripRenderer.LegContainer nextLegC,
             final Date now) {
         Trip.Public leg = legC.publicLeg;
-        Date beginTime = leg.departureStop.getDepartureTime();
-        Date endTime = leg.arrivalStop.getArrivalTime();
-        Date plannedEndTime = leg.arrivalStop.plannedArrivalTime;
+        final Stop departureStop = leg.departureStop;
+        final Stop arrivalStop = leg.arrivalStop;
+        Date beginTime = departureStop.getDepartureTime();
+        Date endTime = arrivalStop.getArrivalTime();
+        Date plannedEndTime = arrivalStop.plannedArrivalTime;
         if (now.before(beginTime)) {
             // leg is in the future
         } else if (now.after(endTime)) {
@@ -211,16 +213,18 @@ public class TripRenderer {
             // leg is now
             setNextEventType(true);
             final boolean eventIsNow = setNextEventTimeLeft(now, endTime, plannedEndTime, 0);
-            String targetName = leg.arrivalStop.location.uniqueShortName();
+            String targetName = arrivalStop.location.uniqueShortName();
             setNextEventTarget(targetName);
-            String depName = (nextLegC != null) ? nextLegC.publicLeg.departureStop.location.uniqueShortName() : null;
+            final Trip.Public nextPublicLeg = (nextLegC != null) ? nextLegC.publicLeg : null;
+            final Stop nextDepartureStop = (nextPublicLeg != null) ? nextPublicLeg.departureStop : null;
+            String depName = (nextDepartureStop != null) ? nextDepartureStop.location.uniqueShortName() : null;
             boolean depChanged = depName != null && !depName.equals(targetName);
             setNextEventDeparture(depChanged ? depName : null);
-            final Position arrPos = leg.arrivalStop.getArrivalPosition();
-            final Position depPos = (nextLegC != null) ? nextLegC.publicLeg.getDeparturePosition() : null;
-            final Position plannedDepPos = (nextLegC != null) ? nextLegC.publicLeg.departureStop.plannedDeparturePosition : null;
-            setNextEventPositions(arrPos, depPos, depPos != null && !depPos.equals(plannedDepPos));
-            setNextEventTransport((nextLegC != null) ? nextLegC.publicLeg : null);
+            final Position arrPos = arrivalStop.getArrivalPosition();
+            final Position depPos = (nextPublicLeg != null) ? nextPublicLeg.getDeparturePosition() : null;
+            final Position plannedDepPos = (nextPublicLeg != null) ? nextDepartureStop.plannedDeparturePosition : null;
+            setNextEventPositions(arrivalStop, arrPos, nextDepartureStop, depPos, depPos != null && !depPos.equals(plannedDepPos));
+            setNextEventTransport(nextPublicLeg);
             setNextEventTransferTimes(walkLegC, false);
             setNextEventActions(
                     nextLegC != null
@@ -273,7 +277,7 @@ public class TripRenderer {
             final Position arrPos = transferFrom != null ? transferFrom.getArrivalPosition() : null;
             final Position depPos = transferTo != null ? transferTo.getDeparturePosition() : null;
             final Position plannedDepPos = transferTo != null ? transferTo.plannedDeparturePosition : null;
-            setNextEventPositions(arrPos, depPos, depPos != null && !depPos.equals(plannedDepPos));
+            setNextEventPositions(transferFrom, arrPos, transferTo, depPos, depPos != null && !depPos.equals(plannedDepPos));
             setNextEventTransport(legC.transferTo != null ? legC.transferTo.publicLeg : null);
             setNextEventTransferTimes(legC, true);
             setNextEventActions(transferTo == null ? 0
@@ -444,11 +448,20 @@ public class TripRenderer {
     }
 
     public boolean nextEventPositionsAvailable;
+    public Stop nextEventArrivalStop;
+    public Stop nextEventDepartureStop;
+    public boolean nextEventStopChange;
     public String nextEventArrivalPosName;
     public String nextEventDeparturePosName;
     public boolean nextEventDeparturePosChanged;
 
-    private void setNextEventPositions(final Position arrPos, final Position depPos, boolean depChanged) {
+    private void setNextEventPositions(
+            final Stop arrStop, final Position arrPos,
+            final Stop depStop, final Position depPos,
+            boolean depChanged) {
+        nextEventArrivalStop = arrStop;
+        nextEventDepartureStop = depStop;
+        nextEventStopChange = (arrStop != null && depStop != null) && !arrStop.location.id.equals(depStop.location.id);
         nextEventPositionsAvailable = arrPos != null || depPos != null;
         nextEventArrivalPosName = arrPos != null ? Formats.makeBreakableStationName(arrPos.name) : null;
         nextEventDeparturePosName = depPos != null ? Formats.makeBreakableStationName(depPos.name) : null;

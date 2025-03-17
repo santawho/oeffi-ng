@@ -292,6 +292,21 @@
                         android:background="@color/bg_position"
                         android:textColor="@color/fg_position"/>
                     <TextView
+                        android:id="@+id/directions_trip_details_next_event_positions_walk_arrow"
+                        android:visibility="gone"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingBottom="10dp"
+                        android:paddingHorizontal="8dp"
+                        android:textSize="@dimen/directions_trip_details_next_event_position_to_fontsize"
+                        android:text="➜"
+                        tools:ignore="HardcodedText" />
+                    <ImageView
+                        android:id="@+id/directions_trip_details_next_event_positions_walk_icon"
+                        android:visibility="gone"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:paddingBottom="10dp"

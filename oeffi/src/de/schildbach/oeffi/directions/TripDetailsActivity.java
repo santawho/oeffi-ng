@@ -1213,6 +1213,14 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             to.setVisibility(View.GONE);
         }
 
+        if (tripRenderer.nextEventStopChange) {
+            final ImageView positionsWalkIcon = findViewById(R.id.directions_trip_details_next_event_positions_walk_icon);
+            positionsWalkIcon.setImageDrawable(res.getDrawable(tripRenderer.nextEventTransferIconId));
+            positionsWalkIcon.setVisibility(View.VISIBLE);
+            findViewById(R.id.directions_trip_details_next_event_positions_walk_arrow)
+                    .setVisibility(View.VISIBLE);
+        }
+
         if (tripRenderer.nextEventTransportLine == null) {
             findViewById(R.id.directions_trip_details_next_event_connection).setVisibility(View.GONE);
         } else {
