@@ -23,6 +23,7 @@ import de.schildbach.pte.dto.Trip;
 
 public class TripRenderer {
     public static final String NO_TIME_LEFT_VALUE = "@@@";
+    public static final int TRANSFER_CRITICAL_MINUTES = 3;
 
     public static class LegContainer {
         public int legIndex;
@@ -31,6 +32,7 @@ public class TripRenderer {
         public final @Nullable Trip.Public initialLeg;
         public final LegContainer transferFrom;
         public final LegContainer transferTo;
+        public final boolean transferCritical;
 
         public LegContainer(
                 final int legIndex,
@@ -41,16 +43,19 @@ public class TripRenderer {
             this.individualLeg = null;
             this.transferFrom = null;
             this.transferTo = null;
+            this.transferCritical = false;
         }
 
         public LegContainer(
                 final int legIndex,
                 final @Nullable Trip.Individual baseLeg,
-                final LegContainer transferFrom, final LegContainer transferTo) {
+                final LegContainer transferFrom, final LegContainer transferTo,
+                final boolean transferCritical) {
             this.legIndex = legIndex;
             this.individualLeg = baseLeg;
             this.transferFrom = transferFrom;
             this.transferTo = transferTo;
+            this.transferCritical = transferCritical;
             this.publicLeg = null;
             this.initialLeg = null;
         }
@@ -106,7 +111,8 @@ public class TripRenderer {
         public Position departurePosition;
         public Position plannedDeparturePosition;
         public long leftTimeReminded;
-        public boolean transferCritical;
+        public boolean nextTransferCritical;
+        public String transfersCritical;
     }
 
     public final Trip trip;
@@ -133,6 +139,21 @@ public class TripRenderer {
         return feasible;
     }
 
+    private static boolean isTransferCritical(
+            final Trip.Individual individualLeg,
+            final LegContainer transferFrom,
+            final LegContainer transferTo) {
+        if (transferFrom == null || transferTo == null)
+            return false;
+        final Stop arrivalStop = transferFrom.publicLeg.arrivalStop;
+        final Stop departureStop = transferTo.publicLeg.departureStop;
+        final Date arrTime = arrivalStop.getArrivalTime();
+        final Date depTime = departureStop.getDepartureTime();
+        final int leftMins = (int) ((depTime.getTime() - arrTime.getTime()) / 60000 - 1);
+        final int walkMins = individualLeg != null ? individualLeg.min : 0;
+        return leftMins - walkMins < TRANSFER_CRITICAL_MINUTES;
+    }
+
     private void setupFromTrip(final Trip trip) {
         LegContainer prevC = null;
         for (int iLeg = 0; iLeg < trip.legs.size(); ++iLeg) {
@@ -142,9 +163,10 @@ public class TripRenderer {
             final Trip.Leg nextLeg = (iNext < trip.legs.size()) ? trip.legs.get(iNext) : null;
 
             if (leg instanceof Trip.Individual) {
+                final Trip.Individual individualLeg = (Trip.Individual) leg;
                 final LegContainer transferFrom = (prevLeg instanceof Trip.Public) ? prevC : null;
                 final LegContainer transferTo = (nextLeg instanceof Trip.Public) ? new LegContainer(iNext, (Trip.Public) nextLeg) : null;
-                legs.add(new LegContainer(iLeg, (Trip.Individual) leg, transferFrom, transferTo));
+                legs.add(new LegContainer(iLeg, individualLeg, transferFrom, transferTo, isTransferCritical(individualLeg, transferFrom, transferTo)));
                 if (transferTo != null) {
                     setupPath(nextLeg);
                     legs.add(transferTo);
@@ -156,9 +178,10 @@ public class TripRenderer {
                 }
                 prevC = transferTo;
             } else if (leg instanceof Trip.Public) {
-                final LegContainer newC = new LegContainer(iLeg, (Trip.Public) leg);
+                final Trip.Public publicLeg = (Trip.Public) leg;
+                final LegContainer newC = new LegContainer(iLeg, publicLeg);
                 if (prevC != null || iLeg == 0) {
-                    legs.add(new LegContainer(-1, null, prevC, newC));
+                    legs.add(new LegContainer(-1, null, prevC, newC, isTransferCritical(null, prevC, newC)));
                 }
                 legs.add(newC);
                 prevC = newC;
@@ -190,8 +213,14 @@ public class TripRenderer {
             if (isCurrent) {
                 currentLeg = legC;
                 notificationData.currentLegIndex = iLeg;
-             }
+            }
         }
+        final char[] legsCriticality = new char[legs.size()];
+        for (int iLeg = 0; iLeg < legs.size(); ++iLeg) {
+            final TripRenderer.LegContainer legC = legs.get(iLeg);
+            legsCriticality[iLeg] = legC.transferCritical ? '*' : '-';
+        }
+        notificationData.transfersCritical = new String(legsCriticality);
     }
 
     private boolean updatePublicLeg(
@@ -240,13 +269,13 @@ public class TripRenderer {
             );
 
             notificationData.publicArrivalLegIndex = legC.legIndex;
-            notificationData.publicDepartureLegIndex = -1;
+            notificationData.publicDepartureLegIndex = nextPublicLeg != null ? nextLegC.legIndex: -1;
             notificationData.isArrival = true;
             notificationData.eventTime = endTime;
             notificationData.plannedEventTime = plannedEndTime;
             notificationData.departurePosition = depPos;
             notificationData.plannedDeparturePosition = plannedDepPos;
-            notificationData.transferCritical = nextEventTransferLeftTimeCritical;
+            notificationData.nextTransferCritical = nextEventTransferLeftTimeCritical;
             return true;
         }
         return false;
@@ -299,7 +328,7 @@ public class TripRenderer {
             notificationData.plannedEventTime = plannedEndTime;
             notificationData.departurePosition = depPos;
             notificationData.plannedDeparturePosition = plannedDepPos;
-            notificationData.transferCritical = nextEventTransferLeftTimeCritical;
+            notificationData.nextTransferCritical = nextEventTransferLeftTimeCritical;
             return true;
         }
         return false;
@@ -510,7 +539,7 @@ public class TripRenderer {
             final Date depTime = departureStop.getDepartureTime();
             long leftMins = (depTime.getTime() - arrTime.getTime()) / 60000 - 1;
             nextEventTransferLeftTimeValue = Long.toString(leftMins);
-            nextEventTransferLeftTimeCritical = leftMins - walkMins < 3;
+            nextEventTransferLeftTimeCritical = leftMins - walkMins < TRANSFER_CRITICAL_MINUTES;
 
             final long arrDelay = (arrTime.getTime() - arrivalStop.plannedArrivalTime.getTime()) / 60000;
             final long depDelay = (depTime.getTime() - departureStop.plannedDepartureTime.getTime()) / 60000;

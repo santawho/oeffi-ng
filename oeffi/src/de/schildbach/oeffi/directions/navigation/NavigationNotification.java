@@ -341,7 +341,8 @@ public class NavigationNotification {
         final TripRenderer.NotificationData newNotified = tripRenderer.notificationData;
         boolean timeChanged = false;
         boolean posChanged = false;
-        boolean transferCriticalChanged = false;
+        boolean nextTransferCriticalChanged = false;
+        boolean anyTransferCriticalChanged = false;
         int reminderSoundId = 0;
         final long nextEventTimeLeftMs = tripRenderer.nextEventTimeLeftMs;
         final long nextEventTimeLeftTo10MinsBoundaryMs = nowTime
@@ -364,7 +365,7 @@ public class NavigationNotification {
             if (newNotified.publicDepartureLegIndex != lastNotified.publicDepartureLegIndex)
                 lastNotified.departurePosition = newNotified.plannedDeparturePosition;
             if (newNotified.publicArrivalLegIndex != lastNotified.publicArrivalLegIndex)
-                lastNotified.transferCritical = false;
+                lastNotified.nextTransferCritical = false;
         }
         if (newNotified.departurePosition != null && !newNotified.departurePosition.equals(lastNotified.departurePosition)) {
             log.info("switching position from {} to {}", lastNotified.departurePosition, newNotified.departurePosition);
@@ -387,9 +388,32 @@ public class NavigationNotification {
                 newNotified.eventTime = lastNotified.eventTime;
             }
         }
-        if (newNotified.transferCritical != lastNotified.transferCritical) {
-            log.info("transferCritical switching to {}", newNotified.transferCritical);
-            transferCriticalChanged = newNotified.transferCritical;
+        if (newNotified.nextTransferCritical != lastNotified.nextTransferCritical) {
+            log.info("transferCritical switching to {}", newNotified.nextTransferCritical);
+            nextTransferCriticalChanged = newNotified.nextTransferCritical;
+        }
+        if (!newNotified.transfersCritical.equals(lastNotified.transfersCritical)) {
+            final String lastTransfersCritical = lastNotified.transfersCritical;
+            final String nextTransfersCritical = newNotified.transfersCritical;
+            log.info("criticalTransfers switching from {} to {}", lastTransfersCritical, nextTransfersCritical);
+            final int length = nextTransfersCritical.length();
+            if (lastTransfersCritical == null || length != lastTransfersCritical.length()) {
+                for (int i = 0; i < length; i += 1) {
+                    final char next = nextTransfersCritical.charAt(i);
+                    if (next != '-') {
+                        anyTransferCriticalChanged = true;
+                        break;
+                    }
+                }
+            } else {
+                for (int i = 0; i < length; i += 1) {
+                    final char next = nextTransfersCritical.charAt(i);
+                    if (next != '-' && next != lastTransfersCritical.charAt(i)) {
+                        anyTransferCriticalChanged = true;
+                        break;
+                    }
+                }
+            }
         }
         newNotified.leftTimeReminded = lastNotified.leftTimeReminded;
         long nextReminderTimeMs = 0;
@@ -422,10 +446,9 @@ public class NavigationNotification {
                 nextRefreshTimeMs = nextReminderTimeMs;
         }
 
-        final boolean anyChanges = timeChanged || posChanged || transferCriticalChanged;
-        log.info("timeChanged={}, posChanged={} transferCriticalChanged={} reminderSoundId={}",
-                timeChanged, posChanged, transferCriticalChanged, reminderSoundId);
-
+        final boolean anyChanges = timeChanged || posChanged || nextTransferCriticalChanged || anyTransferCriticalChanged;
+        log.info("timeChanged={}, posChanged={} nextTransferCriticalChanged={} anyTransferCriticalChanged={} reminderSoundId={}",
+                timeChanged, posChanged, nextTransferCriticalChanged, anyTransferCriticalChanged, reminderSoundId);
 
         if (nextTripReloadTimeMs > 0 && nextTripReloadTimeMs < nextRefreshTimeMs)
             nextRefreshTimeMs = nextTripReloadTimeMs;
