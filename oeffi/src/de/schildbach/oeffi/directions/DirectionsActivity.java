@@ -107,6 +107,7 @@ import de.schildbach.pte.dto.QueryTripsResult;
 import de.schildbach.pte.dto.Trip;
 import de.schildbach.pte.dto.TripOptions;
 import de.schildbach.pte.dto.TripRef;
+import de.schildbach.pte.dto.TripShare;
 import okhttp3.HttpUrl;
 
 import org.msgpack.core.MessagePack;
@@ -130,8 +131,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class DirectionsActivity extends OeffiMainActivity implements QueryHistoryClickListener,
-        QueryHistoryContextMenuItemListener {
+public class DirectionsActivity extends OeffiMainActivity
+        implements QueryHistoryClickListener, QueryHistoryContextMenuItemListener {
+    public static final String LINK_IDENTIFIER_TRIP = "trip";
+    public static final String LINK_IDENTIFIER_SHARE_TRIP = "share-trip";
+
     private ConnectivityManager connectivityManager;
     private LocationManager locationManager;
 
@@ -253,7 +257,8 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
             final Context context,
             final List<String> actionArgs) {
         final String action = actionArgs.get(0);
-        if ("trip".equals(action)) {
+        if (LINK_IDENTIFIER_TRIP.equals(action)
+            || LINK_IDENTIFIER_SHARE_TRIP.equals(action)) {
             return new Intent(context, DirectionsActivity.class);
         }
         return null;
@@ -628,22 +633,30 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
         if (linkArgs != null && network != null) {
             try {
                 final String action = linkArgs[0];
-                if ("trip".equals(action) && linkArgs.length == 2) {
-                    final NetworkProvider provider = NetworkProviderFactory.provider(network);
+                final NetworkProvider provider = NetworkProviderFactory.provider(network);
+                final Consumer<Trip> startTripDetailsActivity = (trip) -> {
+                    if (trip != null) {
+                        TripDetailsActivity.start(DirectionsActivity.this,
+                                network, trip,
+                                Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        finish();
+                    }
+                };
+                if (LINK_IDENTIFIER_TRIP.equals(action) && linkArgs.length == 2) {
                     if (provider.hasCapabilities(Capability.TRIP_RELOAD)) {
-                        // final TripRef tripRef = (TripRef) Objects.deserializeFromCompressedString(linkArgs[1]);
                         final byte[] bytes = Objects.uncompressFromString(linkArgs[1]);
                         final MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(bytes);
                         final TripRef tripRef = provider.unpackTripRefFromMessage(unpacker);
                         unpacker.close();
-                        loadTripByTripRef(tripRef, (trip) -> {
-                            if (trip != null) {
-                                TripDetailsActivity.start(DirectionsActivity.this,
-                                        network, trip,
-                                        Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                finish();
-                            }
-                        });
+                        loadTripByTripRef(tripRef, startTripDetailsActivity);
+                    }
+                } else if (LINK_IDENTIFIER_SHARE_TRIP.equals(action) && linkArgs.length == 2) {
+                    if (provider.hasCapabilities(Capability.TRIP_SHARING)) {
+                        final byte[] bytes = Objects.uncompressFromString(linkArgs[1]);
+                        final MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(bytes);
+                        final TripShare tripShare = provider.unpackTripShareFromMessage(unpacker);
+                        unpacker.close();
+                        loadTripByTripShare(tripShare, startTripDetailsActivity);
                     }
                 }
             } catch (Exception e) {
@@ -1056,6 +1069,33 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
         backgroundHandler.post(queryTripsRunnable);
     }
 
+    private void loadTripByTripShare(final TripShare tripShare, final Consumer<Trip> tripHandler) {
+        if (tripShare == null) {
+            tripHandler.accept(null);
+            return;
+        }
+        final TripRef tripRef = tripShare.simplifiedTripRef;
+        final NetworkProvider networkProvider = NetworkProviderFactory.provider(tripRef.network);
+        if (!networkProvider.hasCapabilities(Capability.TRIP_SHARING)) {
+            tripHandler.accept(null);
+            return;
+        }
+        queryTripsRunnable = new MyQueryTripsRunnable(networkProvider, tripShare, getTripOptionsFromPrefs()) {
+            @Override
+            protected void onResultOk(final QueryTripsResult result, final TripRequestData reloadRequestData) {
+                final List<Trip> trips = result.trips;
+                final Trip useTrip = (trips != null && trips.size() == 1) ? trips.get(0) : null;
+                tripHandler.accept(useTrip);
+            }
+
+            @Override
+            protected void onResultFailed(final QueryTripsResult result, final TripRequestData reloadRequestData) {
+                tripHandler.accept(null);
+            }
+        };
+        backgroundHandler.post(queryTripsRunnable);
+    }
+
     private boolean saneLocation(final @Nullable Location location, final boolean allowIncompleteAddress) {
         if (location == null)
             return false;
@@ -1230,6 +1270,16 @@ public class DirectionsActivity extends OeffiMainActivity implements QueryHistor
                     DirectionsActivity.this.getProgressDialog(),
                     DirectionsActivity.this.handler,
                     networkProvider, tripRef, options);
+        }
+
+        public MyQueryTripsRunnable(
+                final NetworkProvider networkProvider,
+                final TripShare tripShare,
+                final TripOptions options) {
+            super(DirectionsActivity.this.getResources(),
+                    DirectionsActivity.this.getProgressDialog(),
+                    DirectionsActivity.this.handler,
+                    networkProvider, tripShare, options);
         }
 
         @Override

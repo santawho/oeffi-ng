@@ -37,6 +37,7 @@ import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.QueryTripsResult;
 import de.schildbach.pte.dto.TripOptions;
 import de.schildbach.pte.dto.TripRef;
+import de.schildbach.pte.dto.TripShare;
 import de.schildbach.pte.exception.BlockedException;
 import de.schildbach.pte.exception.InternalErrorException;
 import de.schildbach.pte.exception.NotFoundException;
@@ -84,6 +85,7 @@ public abstract class QueryTripsRunnable implements Runnable {
     private final TimeSpec time;
     private final TripOptions options;
     private final TripRef tripRef;
+    private final TripShare tripShare;
 
     private AtomicBoolean cancelled = new AtomicBoolean(false);
 
@@ -106,7 +108,8 @@ public abstract class QueryTripsRunnable implements Runnable {
         this.to = to;
         this.time = time;
 
-        tripRef = null;
+        this.tripRef = null;
+        this.tripShare = null;
     }
 
     public QueryTripsRunnable(
@@ -122,6 +125,29 @@ public abstract class QueryTripsRunnable implements Runnable {
         this.options = options;
 
         this.tripRef = tripRef;
+        this.tripShare = null;
+
+        this.from = null;
+        this.via = null;
+        this.to = null;
+        this.time = null;
+
+    }
+
+    public QueryTripsRunnable(
+            final Resources res, final ProgressDialog dialog, final Handler handler,
+            final NetworkProvider networkProvider,
+            final TripShare tripShare,
+            final TripOptions options) {
+        this.res = res;
+        this.progressDialog = dialog;
+        this.handler = handler;
+
+        this.networkProvider = networkProvider;
+        this.options = options;
+
+        this.tripRef = null;
+        this.tripShare = tripShare;
 
         this.from = null;
         this.via = null;
@@ -140,7 +166,10 @@ public abstract class QueryTripsRunnable implements Runnable {
             try {
                 final QueryTripsResult result;
                 final TripRequestData reloadRequestData;
-                if (tripRef != null) {
+                if (tripShare != null) {
+                    result = networkProvider.loadSharedTrip(tripShare);
+                    reloadRequestData = null;
+                } else if (tripRef != null) {
                     result = networkProvider.queryReloadTrip(tripRef);
                     reloadRequestData = null;
                 } else {

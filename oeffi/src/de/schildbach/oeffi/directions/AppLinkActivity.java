@@ -14,6 +14,8 @@ import de.schildbach.oeffi.R;
 import de.schildbach.pte.NetworkId;
 
 public class AppLinkActivity extends OeffiActivity {
+    public static final String LINK_IDENTIFIER_NETWORK = "network";
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,7 +40,7 @@ public class AppLinkActivity extends OeffiActivity {
                 List<String> actionArgs = urlPath.subList(pathPrefix.split("/").length - 1, urlPath.size());
                 if (!actionArgs.isEmpty()) {
                     final String networkName;
-                    if ("network".equals(actionArgs.get(0)) && actionArgs.size() >= 3) {
+                    if (LINK_IDENTIFIER_NETWORK.equals(actionArgs.get(0)) && actionArgs.size() >= 3) {
                         networkName = actionArgs.get(1);
                         actionArgs = actionArgs.subList(2, actionArgs.size());
                     } else {
@@ -87,7 +89,7 @@ public class AppLinkActivity extends OeffiActivity {
                 .authority(context.getString(R.string.app_url_host))
                 .appendEncodedPath(context.getString(R.string.app_url_path_prefix).substring(1));
         if (networkId != null) {
-            builder.appendEncodedPath("network").appendEncodedPath(networkId.name());
+            builder.appendEncodedPath(LINK_IDENTIFIER_NETWORK).appendEncodedPath(networkId.name());
         }
         for (final String arg : args) {
             builder.appendPath(arg);

@@ -102,7 +102,7 @@ import de.schildbach.pte.dto.Position;
 import de.schildbach.pte.dto.Stop;
 import de.schildbach.pte.dto.Style;
 import de.schildbach.pte.dto.Trip;
-import de.schildbach.pte.dto.TripRef;
+import de.schildbach.pte.dto.TripShare;
 
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;
@@ -375,10 +375,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                             shareTripShort();
                             return true;
                         } else if (itemId == R.id.directions_trip_details_action_share_long) {
-                            shareTripLong(false, true);
+                            shareTripLong(false);
                             return true;
                         } else if (itemId == R.id.directions_trip_details_action_share_link) {
-                            shareTripLong(true, true);
+                            shareTripLong(true);
                             return true;
                         } else {
                             return false;
@@ -1679,20 +1679,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     }
 
-    private void shareTripLong(final boolean withLink, final boolean asHtml) {
+    private void shareTripLong(final boolean withLink) {
         final Intent intent = new Intent(Intent.ACTION_SEND);
         intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.directions_trip_details_text_long_title,
                 tripRenderer.trip.from.uniqueShortName(), tripRenderer.trip.to.uniqueShortName()));
-//        if (asHtml) {
-////            intent.setType("text/html");
-////            intent.putExtra(Intent.EXTRA_HTML_TEXT, Html.fromHtml(tripToLongText(tripRenderer.trip, withLink, true)));
-////            intent.putExtra(Intent.EXTRA_TEXT, Html.fromHtml(tripToLongText(tripRenderer.trip, withLink, true)));
-////            intent.putExtra(Intent.EXTRA_TEXT, tripToLongText(tripRenderer.trip, withLink, true));
-////            intent.putExtra(Intent.EXTRA_HTML_TEXT, tripToLongText(tripRenderer.trip, withLink, true));
-//        } else {
-            intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_TEXT, tripToLongText(tripRenderer.trip, withLink, false));
-//        }
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, tripToLongText(tripRenderer.trip, withLink));
         startActivity(
                 Intent.createChooser(intent, getString(withLink
                         ? R.string.directions_trip_details_action_share_link_title
@@ -1704,7 +1696,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         intent.setData(CalendarContract.Events.CONTENT_URI);
         intent.putExtra(CalendarContract.Events.TITLE, getString(R.string.directions_trip_details_text_long_title,
                 trip.from.uniqueShortName(), trip.to.uniqueShortName()));
-        intent.putExtra(CalendarContract.Events.DESCRIPTION, tripToLongText(trip, withLink, false));
+        intent.putExtra(CalendarContract.Events.DESCRIPTION, tripToLongText(trip, withLink));
         intent.putExtra(CalendarContract.Events.EVENT_LOCATION, trip.from.uniqueShortName());
         final Date firstDepartureTime = trip.getFirstDepartureTime();
         if (firstDepartureTime != null)
@@ -1740,7 +1732,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 departureLineStr, departureNameStr, arrivalDateStr, arrivalTimeStr, arrivalLineStr, arrivalNameStr);
     }
 
-    private String tripToLongText(final Trip trip, final boolean withLink, final boolean asHtml) {
+    private String tripToLongText(final Trip trip, final boolean withLink) {
         final java.text.DateFormat dateFormat = DateFormat.getDateFormat(TripDetailsActivity.this);
         final java.text.DateFormat timeFormat = DateFormat.getTimeFormat(TripDetailsActivity.this);
 
@@ -1800,17 +1792,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
         }
 
-        if (withLink && NetworkProviderFactory.provider(network)
-                .hasCapabilities(NetworkProvider.Capability.TRIP_RELOAD)) {
-            final String linkUrl = getTripLinkUrl(this, network, trip.tripRef);
+        if (withLink) {
+            final String linkUrl = getTripLinkUrl(this, network, trip);
             if (linkUrl != null) {
-                if (asHtml) {
-                    description.append("<a href=\"");
-                    description.append(linkUrl);
-                    description.append("\">Open in Öffi-NG</a>");
-                } else {
-                    description.append(linkUrl);
-                }
+                description.append(linkUrl);
                 description.append("\n\n");
             }
         }
@@ -1821,14 +1806,28 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         return description.toString();
     }
 
-    public static String getTripLinkUrl(final Context context, final NetworkId network, final TripRef tripRef) {
+    public static String getTripLinkUrl(final Context context, final NetworkId network, final Trip trip) {
         try {
-            // final String stringifiedTripRef Objects.serializeAndCompressToString(tripRef);
-            final MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
-            tripRef.packToMessage(packer);
-            packer.close();
-            final String stringifiedTripRef = Objects.compressToString(packer.toByteArray());
-            return AppLinkActivity.getNetworkLinkUrl(context, network, "trip", stringifiedTripRef).toString();
+            final NetworkProvider provider = NetworkProviderFactory.provider(network);
+            if (provider.hasCapabilities(NetworkProvider.Capability.TRIP_SHARING)) {
+                final TripShare tripShare = provider.shareTrip(trip);
+                final MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
+                tripShare.packToMessage(packer);
+                packer.close();
+                final String stringifiedTripShare = Objects.compressToString(packer.toByteArray());
+                return AppLinkActivity.getNetworkLinkUrl(context, network,
+                        DirectionsActivity.LINK_IDENTIFIER_SHARE_TRIP, stringifiedTripShare).toString();
+            } else if (provider.hasCapabilities(NetworkProvider.Capability.TRIP_RELOAD)) {
+                // final String stringifiedTripRef Objects.serializeAndCompressToString(tripRef);
+                final MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
+                trip.tripRef.packToMessage(packer);
+                packer.close();
+                final String stringifiedTripRef = Objects.compressToString(packer.toByteArray());
+                return AppLinkActivity.getNetworkLinkUrl(context, network,
+                        DirectionsActivity.LINK_IDENTIFIER_TRIP, stringifiedTripRef).toString();
+            } else {
+                return null;
+            }
         } catch (Exception e) {
             log.error("cannot build URL from tripref", e);
             return null;
