@@ -1074,8 +1074,7 @@ public class DirectionsActivity extends OeffiMainActivity
             tripHandler.accept(null);
             return;
         }
-        final TripRef tripRef = tripShare.simplifiedTripRef;
-        final NetworkProvider networkProvider = NetworkProviderFactory.provider(tripRef.network);
+        final NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
         if (!networkProvider.hasCapabilities(Capability.TRIP_SHARING)) {
             tripHandler.accept(null);
             return;

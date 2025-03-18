@@ -70,6 +70,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Supplier;
 
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.LocationAware;
@@ -371,29 +372,38 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     popupMenu.inflate(R.menu.directions_trip_details_action_share);
                     popupMenu.setOnMenuItemClickListener(item -> {
                         final int itemId = item.getItemId();
+                        final Supplier<Intent> intentSupplier;
                         if (itemId == R.id.directions_trip_details_action_share_short) {
-                            shareTripShort();
-                            return true;
+                            intentSupplier = () -> shareTripShort();
                         } else if (itemId == R.id.directions_trip_details_action_share_long) {
-                            shareTripLong(false);
-                            return true;
+                            intentSupplier = () -> shareTripLong(false);
                         } else if (itemId == R.id.directions_trip_details_action_share_link) {
-                            shareTripLong(true);
-                            return true;
+                            intentSupplier = () -> shareTripLong(true);
                         } else {
-                            return false;
+                            intentSupplier = null;
                         }
+                        if (intentSupplier == null)
+                            return false;
+
+                        backgroundHandler.post(() -> {
+                            final Intent intent = intentSupplier.get();
+                            runOnUiThread(() -> startActivity(intent));
+                        });
+                        return true;
                     });
                     popupMenu.show();
                 });
         if (!renderConfig.isNavigation && !renderConfig.isAlternativeConnectionSearch) {
             actionBar.addButton(R.drawable.ic_today_white_24dp, R.string.directions_trip_details_action_calendar_title)
                     .setOnClickListener(v -> {
-                        try {
-                            startActivity(scheduleTripIntent(tripRenderer.trip, true));
-                        } catch (final ActivityNotFoundException x) {
-                            new Toast(this).longToast(R.string.directions_trip_details_action_calendar_notfound);
-                        }
+                        backgroundHandler.post(() -> {
+                            try {
+                                final Intent intent = scheduleTripIntent(tripRenderer.trip, true);
+                                runOnUiThread(() -> startActivity(intent));
+                            } catch (final ActivityNotFoundException x) {
+                                new Toast(this).longToast(R.string.directions_trip_details_action_calendar_notfound);
+                            }
+                        });
                     });
         }
         addActionBarButtons();
@@ -1670,25 +1680,22 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
     }
 
-    private void shareTripShort() {
+    private Intent shareTripShort() {
         final Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
         intent.putExtra(Intent.EXTRA_TEXT, tripToShortText(tripRenderer.trip));
-        startActivity(
-                Intent.createChooser(intent, getString(R.string.directions_trip_details_action_share_short_title)));
-
+        return Intent.createChooser(intent, getString(R.string.directions_trip_details_action_share_short_title));
     }
 
-    private void shareTripLong(final boolean withLink) {
+    private Intent shareTripLong(final boolean withLink) {
         final Intent intent = new Intent(Intent.ACTION_SEND);
         intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.directions_trip_details_text_long_title,
                 tripRenderer.trip.from.uniqueShortName(), tripRenderer.trip.to.uniqueShortName()));
         intent.setType("text/plain");
         intent.putExtra(Intent.EXTRA_TEXT, tripToLongText(tripRenderer.trip, withLink));
-        startActivity(
-                Intent.createChooser(intent, getString(withLink
+        return Intent.createChooser(intent, getString(withLink
                         ? R.string.directions_trip_details_action_share_link_title
-                        : R.string.directions_trip_details_action_share_long_title)));
+                        : R.string.directions_trip_details_action_share_long_title));
     }
 
     private Intent scheduleTripIntent(final Trip trip, final boolean withLink) {
