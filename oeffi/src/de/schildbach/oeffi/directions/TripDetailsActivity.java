@@ -379,8 +379,19 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                             intentSupplier = () -> shareTripLong(false);
                         } else if (itemId == R.id.directions_trip_details_action_share_link) {
                             intentSupplier = () -> shareTripLong(true);
+                        } else if (itemId == R.id.directions_trip_details_action_open_link) {
+                            final NetworkProvider provider = NetworkProviderFactory.provider(network);
+                            if (provider.hasCapabilities(NetworkProvider.Capability.TRIP_LINKING)) {
+                                try {
+                                    final String link = provider.getOpenLink(tripRenderer.trip);
+                                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(link)));
+                                } catch (Exception e) {
+                                    log.error("cannot get link", e);
+                                }
+                            }
+                            return true;
                         } else {
-                            intentSupplier = null;
+                            return false;
                         }
                         if (intentSupplier == null)
                             return false;
