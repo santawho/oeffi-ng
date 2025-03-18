@@ -109,7 +109,14 @@ android {
         }
         debug {
             debuggable true
-//            applicationIdSuffix '.debug'
+            applicationIdSuffix '.debug'
+            versionNameSuffix '-debug'
+            productFlavors {
+                ng {
+                    resValue "string", "app_name", "Öffi NG Debug"
+                    resValue "string", "app_url_path_prefix", "/@apps/oeffi-ng-debug/"
+                }
+            }
         }
         preview {
 //            minifyEnabled true

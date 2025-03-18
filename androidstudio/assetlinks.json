@@ -1,9 +1,26 @@
-[{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "de.santawho.oeffi_ng",
-    "sha256_cert_fingerprints":
-    ["6D:2C:7C:F1:9C:1F:0E:BD:E7:95:3A:F9:33:66:6E:03:B3:11:DF:8B:F6:EB:46:BD:E0:68:30:FC:6A:3B:8F:5E"]
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "de.santawho.oeffi_ng",
+      "sha256_cert_fingerprints": [
+        "6D:2C:7C:F1:9C:1F:0E:BD:E7:95:3A:F9:33:66:6E:03:B3:11:DF:8B:F6:EB:46:BD:E0:68:30:FC:6A:3B:8F:5E"
+      ]
+    }
+  },
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "de.santawho.oeffi_ng.debug",
+      "sha256_cert_fingerprints": [
+        "6D:2C:7C:F1:9C:1F:0E:BD:E7:95:3A:F9:33:66:6E:03:B3:11:DF:8B:F6:EB:46:BD:E0:68:30:FC:6A:3B:8F:5E"
+      ]
+    }
   }
-}]
+]
