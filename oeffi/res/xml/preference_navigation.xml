@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:defaultValue="USAGE_NOTIFICATION_EVENT"
+        android:entries="@array/navigation_sound_channel"
+        android:entryValues="@array/navigation_sound_channel_values"
+        android:key="navigation_sound_channel"
+        android:summary="@string/navigation_preferences_sound_channel_summary"
+        android:title="@string/navigation_preferences_sound_channel_title" />
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="navigation_reduced_sounds"
+        android:summary="@string/navigation_preferences_reduced_sounds_summary"
+        android:title="@string/navigation_preferences_reduced_sounds_title" />
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="navigation_refresh_beep"
+        android:summary="@string/navigation_preferences_refresh_beep_summary"
+        android:title="@string/navigation_preferences_refresh_beep_title" />
+
+</PreferenceScreen>

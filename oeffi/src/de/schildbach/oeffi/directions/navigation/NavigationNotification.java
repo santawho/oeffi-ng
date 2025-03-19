@@ -10,18 +10,18 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.AudioAttributes;
+import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
-import android.media.ToneGenerator;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.service.notification.StatusBarNotification;
 import android.view.View;
 import android.widget.RemoteViews;
@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 
+import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
 import de.schildbach.oeffi.util.ClockUtils;
@@ -47,29 +48,27 @@ import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Trip;
 
 public class NavigationNotification {
-    private static final int SOUND_ALARM;
-    private static final int SOUND_REMIND_VIA_NOTIFICATION;
-    private static final int SOUND_REMIND_NORMAL;
-    private static final int SOUND_REMIND_IMPORTANT;
-    private static final int SOUND_REMIND_NEXTLEG;
+    private static final int SOUND_ALARM = R.raw.nav_alarm;
+    private static final int SOUND_REMIND_VIA_NOTIFICATION = -1;
+    private static final int SOUND_REMIND_NORMAL = R.raw.nav_remind_down;
+    private static final int SOUND_REMIND_IMPORTANT = R.raw.nav_remind_downup;
+    private static final int SOUND_REMIND_NEXTLEG = R.raw.nav_remind_up;
 
-    private static final boolean DEVELOPMENT_TEST_PHASE = true;
-
-    static {
-        if (DEVELOPMENT_TEST_PHASE) {
-            SOUND_ALARM = R.raw.nav_lowvolume_alarm;
-            SOUND_REMIND_NORMAL = R.raw.nav_lowvolume_remind_down;
-            SOUND_REMIND_IMPORTANT = R.raw.nav_lowvolume_remind_downup;
-            SOUND_REMIND_NEXTLEG = R.raw.nav_lowvolume_remind_up;
-            SOUND_REMIND_VIA_NOTIFICATION = -1;
-        } else {
-            SOUND_ALARM = R.raw.nav_alarm;
-            SOUND_REMIND_NORMAL = R.raw.nav_remind_down;
-            SOUND_REMIND_IMPORTANT = R.raw.nav_remind_downup;
-            SOUND_REMIND_NEXTLEG = R.raw.nav_remind_up;
-            SOUND_REMIND_VIA_NOTIFICATION = -1;
+    private static int getActualSound(final int soundId) {
+        int newId = soundId;
+        if (prefs.getBoolean(Constants.PREFS_KEY_NAVIGATION_REDUCED_SOUNDS, false)) {
+            if (soundId == SOUND_ALARM)
+                newId = R.raw.nav_lowvolume_alarm;
+            else if (soundId == SOUND_REMIND_NORMAL)
+                newId = R.raw.nav_lowvolume_remind_down;
+            else if (soundId == SOUND_REMIND_IMPORTANT)
+                newId = R.raw.nav_lowvolume_remind_downup;
+            else if (soundId == SOUND_REMIND_NEXTLEG)
+                newId = R.raw.nav_lowvolume_remind_up;
         }
+        return newId;
     }
+
     private static final String CHANNEL_ID = "navigation";
     private static final String TAG_PREFIX = NavigationNotification.class.getName() + ":";
 
@@ -90,6 +89,8 @@ public class NavigationNotification {
 
     private static boolean notificationChannelCreated;
 
+    private static SharedPreferences prefs;
+
     private static void createNotificationChannel(final Context context) {
         if (notificationChannelCreated)
             return;
@@ -101,8 +102,10 @@ public class NavigationNotification {
             channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
 //            channel.enableVibration(true);
             channel.setVibrationPattern(VIBRATION_PATTERN_REMIND);
-            channel.setSound(ResourceUri.fromResource(context, SOUND_REMIND_VIA_NOTIFICATION),
-                    new AudioAttributes.Builder().setUsage(getAudioUsageForSound(SOUND_REMIND_VIA_NOTIFICATION)).build());
+            if (SOUND_REMIND_VIA_NOTIFICATION >= 0) {
+                channel.setSound(ResourceUri.fromResource(context, SOUND_REMIND_VIA_NOTIFICATION),
+                        new AudioAttributes.Builder().setUsage(getAudioUsageForSound(SOUND_REMIND_VIA_NOTIFICATION)).build());
+            }
             getNotificationManager(context).createNotificationChannel(channel);
         }
         notificationChannelCreated = true;
@@ -117,7 +120,16 @@ public class NavigationNotification {
     }
 
     private static int getAudioUsageForSound(final int soundId) {
-        return AudioAttributes.USAGE_NOTIFICATION_EVENT;
+        final String usageName = NavigationNotification.prefs.getString(Constants.PREFS_KEY_NAVIGATION_SOUND_CHANNEL, null);
+        int usage = AudioAttributes.USAGE_NOTIFICATION_EVENT;
+        if (usageName != null) {
+            try {
+                usage = AudioAttributes.class.getField(usageName).getInt(null);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                log.error("bad sound usage: {}", usageName, e);
+            }
+        }
+        return usage;
     }
 
     private static final String[] REQUIRED_PERMISSION = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU ? new String[] {
@@ -232,6 +244,8 @@ public class NavigationNotification {
             this.lastNotified = lastNotified != null ? lastNotified :
                     (TripRenderer.NotificationData) Objects.deserialize(extras.getByteArray(EXTRA_LASTNOTIFIED));
         }
+        if (NavigationNotification.prefs == null)
+            NavigationNotification.prefs = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
     public static void updateFromForeground(
@@ -282,13 +296,6 @@ public class NavigationNotification {
         if (notification == null)
             return null;
         return notification.extras;
-    }
-
-
-    private void soundBeep(int beepType) {
-        final ToneGenerator toneGenerator = new ToneGenerator(AudioManager.STREAM_NOTIFICATION, ToneGenerator.MAX_VOLUME);
-        toneGenerator.startTone(beepType);
-        new Handler(Looper.getMainLooper()).postDelayed(() -> toneGenerator.release(), 1000);
     }
 
     @SuppressLint("ScheduleExactAlarm")
@@ -526,22 +533,55 @@ public class NavigationNotification {
         getNotificationManager(context).notify(notificationTag, 0, notification);
 
         if (anyChanges) {
-            playAlarmSoundAndVibration(SOUND_ALARM, VIBRATION_PATTERN_ALARM);
+            playAlarmSoundAndVibration(-1, SOUND_ALARM, VIBRATION_PATTERN_ALARM);
         } else if (reminderSoundId != 0 && reminderSoundId != SOUND_REMIND_VIA_NOTIFICATION) {
-            playAlarmSoundAndVibration(reminderSoundId, VIBRATION_PATTERN_REMIND);
+            playAlarmSoundAndVibration(-1, reminderSoundId, VIBRATION_PATTERN_REMIND);
         }
 
         lastNotified = newNotified;
         return anyChanges || reminderSoundId != 0;
     }
 
-    private void playAlarmSoundAndVibration(final int soundId, final long[] vibrationPattern) {
+    private void playAlarmSoundAndVibration(final int soundUsage, final int aSoundId, final long[] vibrationPattern) {
+        final int actualSoundId = getActualSound(aSoundId);
         if (configuration.soundEnabled) {
-            final Ringtone alarmTone = RingtoneManager.getRingtone(context, ResourceUri.fromResource(context, soundId));
-            alarmTone.setAudioAttributes(new AudioAttributes.Builder().setUsage(getAudioUsageForSound(soundId)).build());
+            final int usage = soundUsage >= 0 ? soundUsage : getAudioUsageForSound(actualSoundId);
+            final AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .setUsage(usage)
+                    .build();
+            final Ringtone alarmTone = RingtoneManager.getRingtone(context, ResourceUri.fromResource(context, actualSoundId));
+            alarmTone.setAudioAttributes(audioAttributes);
+            final AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+            final AudioFocusRequest audioFocusRequest =
+                    new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
+                            .setAudioAttributes(audioAttributes)
+                            .setAcceptsDelayedFocusGain(false)
+                            .setWillPauseWhenDucked(false)
+                            .build();
+            audioManager.requestAudioFocus(audioFocusRequest);
             alarmTone.play();
+            new Thread(() -> {
+                while (alarmTone.isPlaying()) {
+                    log.info("sound is playing");
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        break;
+                    }
+                }
+                log.info("sound has stopped");
+                audioManager.abandonAudioFocusRequest(audioFocusRequest);
+            }).start();
         }
-        ((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(vibrationPattern, -1);
+        if (vibrationPattern != null) {
+            ((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(vibrationPattern, -1);
+        }
+    }
+
+    private void playBeep(final int soundUsage, final int soundId) {
+        if (prefs.getBoolean(Constants.PREFS_KEY_NAVIGATION_REFRESH_BEEP, true))
+            playAlarmSoundAndVibration(soundUsage, soundId, null);
     }
 
     public void remove() {
@@ -610,10 +650,11 @@ public class NavigationNotification {
             if (newTrip != null) {
                 final boolean alarmPlayed = update(newTrip);
                 context.sendBroadcast(new Intent(ACTION_UPDATE_TRIGGER));
-                if (!alarmPlayed)
-                    soundBeep(ToneGenerator.TONE_PROP_BEEP2);
+                if (!alarmPlayed) {
+                    playBeep(AudioAttributes.USAGE_NOTIFICATION, R.raw.nav_refresh_beep);
+                }
             } else {
-                soundBeep(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD);
+                playBeep(AudioAttributes.USAGE_NOTIFICATION, R.raw.nav_refresh_error);
                 update(null);
             }
         } else {
