@@ -246,9 +246,11 @@ public class NavigationNotification {
         if (configuration != null)
             this.configuration = configuration;
         update(newTrip);
-        final long refreshAt = lastNotified.refreshNotificationRequiredAt;
-        if (refreshAt > 0)
-            NavigationAlarmManager.getInstance().start(refreshAt);
+        if (lastNotified != null) {
+            final long refreshAt = lastNotified.refreshNotificationRequiredAt;
+            if (refreshAt > 0)
+                NavigationAlarmManager.getInstance().start(refreshAt);
+        }
     }
 
     private Notification getActiveNotification() {

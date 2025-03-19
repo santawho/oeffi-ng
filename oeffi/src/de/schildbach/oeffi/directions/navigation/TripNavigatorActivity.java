@@ -160,7 +160,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
     private void stopNavigation() {
         NavigationNotification.remove(this, getIntent());
-        finish();
+        finishAndRemoveTask();
     }
 
     @SuppressLint("MissingSuperCall")
@@ -170,11 +170,6 @@ public class TripNavigatorActivity extends TripDetailsActivity {
             setShowNextEvent(false);
         else
             moveTaskToBack(true); // super.onBackPressed();
-    }
-
-    @Override
-    public void finish() {
-        super.finish();
     }
 
     @Override
