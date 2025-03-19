@@ -1237,7 +1237,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final ImageView positionsWalkIcon = findViewById(R.id.directions_trip_details_next_event_positions_walk_icon);
         final View positionsWalkArrow = findViewById(R.id.directions_trip_details_next_event_positions_walk_arrow);
         if (tripRenderer.nextEventStopChange) {
-            positionsWalkIcon.setImageDrawable(res.getDrawable(tripRenderer.nextEventTransferIconId));
+            final int iconId = tripRenderer.nextEventTransferIconId;
+            positionsWalkIcon.setImageDrawable(res.getDrawable(iconId != 0 ? iconId : R.drawable.ic_directions_walk_grey600_24dp));
             positionsWalkIcon.setVisibility(View.VISIBLE);
             positionsWalkArrow.setVisibility(View.VISIBLE);
         } else {
