@@ -1234,12 +1234,15 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             to.setVisibility(View.GONE);
         }
 
+        final ImageView positionsWalkIcon = findViewById(R.id.directions_trip_details_next_event_positions_walk_icon);
+        final View positionsWalkArrow = findViewById(R.id.directions_trip_details_next_event_positions_walk_arrow);
         if (tripRenderer.nextEventStopChange) {
-            final ImageView positionsWalkIcon = findViewById(R.id.directions_trip_details_next_event_positions_walk_icon);
             positionsWalkIcon.setImageDrawable(res.getDrawable(tripRenderer.nextEventTransferIconId));
             positionsWalkIcon.setVisibility(View.VISIBLE);
-            findViewById(R.id.directions_trip_details_next_event_positions_walk_arrow)
-                    .setVisibility(View.VISIBLE);
+            positionsWalkArrow.setVisibility(View.GONE);
+        } else {
+            positionsWalkIcon.setVisibility(View.VISIBLE);
+            positionsWalkArrow.setVisibility(View.GONE);
         }
 
         if (tripRenderer.nextEventTransportLine == null) {
