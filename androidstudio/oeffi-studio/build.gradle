@@ -84,6 +84,11 @@ android {
             resValue "string", "error_reporter_mail_address", "${CREDENTIALS.report_email}"
             resValue "string", "app_url_host", "santawho.de"
             resValue "string", "app_url_path_prefix", "/@apps/oeffi-ng/"
+            resValue "string", "about_faq_summary", "https://github.com/santawho/oeffi-ng/wiki/faq"
+            resValue "string", "about_privacy_policy_url", "https://github.com/santawho/oeffi-ng/wiki/privacy-policy"
+            resValue "bool", "flags_show_donate", "false"
+            resValue "bool", "flags_show_twitter", "false"
+            resValue "bool", "flags_show_navigation_drawer_footer", "false"
         }
     }
 

@@ -54,7 +54,8 @@ public class PreferenceActivity extends android.preference.PreferenceActivity {
     @Override
     public void onBuildHeaders(final List<Header> target) {
         loadHeadersFromResource(R.xml.preference_headers, target);
-        loadHeadersFromResource(R.xml.preference_headers_donate, target);
+        if (getResources().getBoolean(R.bool.flags_show_donate))
+            loadHeadersFromResource(R.xml.preference_headers_donate, target);
     }
 
     @Override

@@ -64,7 +64,7 @@
     <application
         android:name=".Application"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_oeffi_stations_color_48dp"
+        android:icon="@mipmap/ic_oeffi_ng_stations_color_48dp"
         android:label="@string/app_name"
         android:localeConfig="@xml/locale_config"
         android:networkSecurityConfig="@xml/network_security_config"
@@ -177,7 +177,7 @@
             android:name=".directions.DirectionsActivity"
             android:exported="true"
             android:configChanges="keyboard|keyboardHidden"
-            android:icon="@mipmap/ic_oeffi_directions_color_48dp"
+            android:icon="@mipmap/ic_oeffi_ng_directions_color_48dp"
             android:label="@string/directions_icon_label"
             android:taskAffinity="${applicationId}.directions"
             android:windowSoftInputMode="stateHidden">
@@ -254,7 +254,7 @@
             android:name=".plans.PlansPickerActivity"
             android:exported="true"
             android:configChanges="keyboard|keyboardHidden"
-            android:icon="@mipmap/ic_oeffi_plans_color_48dp"
+            android:icon="@mipmap/ic_oeffi_ng_plans_color_48dp"
             android:label="@string/plans_icon_label"
             android:launchMode="singleTop"
             android:taskAffinity="${applicationId}.plans">

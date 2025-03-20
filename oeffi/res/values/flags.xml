@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="flags_show_donate">true</bool>
+    <bool name="flags_show_twitter">true</bool>
+    <bool name="flags_show_navigation_drawer_footer">true</bool>
+</resources>

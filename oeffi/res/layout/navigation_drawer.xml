@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="@dimen/layout_navigation_drawer_width"
     android:layout_height="match_parent"
-    android:layout_gravity="left"
+    android:layout_gravity="start"
     android:background="@color/bg_level0"
     android:orientation="vertical">
 
@@ -73,4 +73,8 @@
             android:textSize="@dimen/font_size_small" />
     </LinearLayout>
 
+    <Space
+        android:id="@+id/navigation_drawer_bottom_offset"
+        android:layout_width="match_parent"
+        android:layout_height="0dp" />
 </LinearLayout>

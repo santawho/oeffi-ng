@@ -46,7 +46,10 @@ import android.widget.TextView;
 import androidx.activity.ComponentActivity;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
+import androidx.core.graphics.Insets;
 import androidx.core.view.MenuProvider;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -294,13 +297,26 @@ public abstract class OeffiActivity extends ComponentActivity {
 
         getMyActionBar().setDrawer(v -> toggleNavigation());
 
+        final View bottomOffset = findViewById(R.id.navigation_drawer_bottom_offset);
+        ViewCompat.setOnApplyWindowInsetsListener(bottomOffset, (view, windowInsets) -> {
+            final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            final ViewGroup.LayoutParams layoutParams = bottomOffset.getLayoutParams();
+            layoutParams.height = insets.bottom;
+            bottomOffset.setLayoutParams(layoutParams);
+            return windowInsets;
+        });
+
         updateNavigation();
     }
 
     protected void updateNavigation() {
-        if (navigationDrawerFooterView != null)
-            navigationDrawerFooterView.setVisibility(
-                    getResources().getBoolean(R.bool.layout_navigation_drawer_footer_show) ? View.VISIBLE : View.GONE);
+        if (navigationDrawerFooterView != null) {
+            final Resources resources = getResources();
+            final boolean showFooter =
+                       resources.getBoolean(R.bool.flags_show_navigation_drawer_footer)
+                    && resources.getBoolean(R.bool.layout_navigation_drawer_footer_show);
+            navigationDrawerFooterView.setVisibility(showFooter ? View.VISIBLE : View.GONE);
+        }
     }
 
     protected boolean isNavigationOpen() {
