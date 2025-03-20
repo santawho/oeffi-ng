@@ -418,7 +418,16 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         protected void onDraw(final Canvas canvas) {
             super.onDraw(canvas);
 
-            long now = System.currentTimeMillis();
+            final long now = System.currentTimeMillis();
+
+            final long baseTime;
+            final TimeSpec referenceTime = renderConfig.referenceTime;
+            if (referenceTime != null && referenceTime.depArr == TimeSpec.DepArr.DEPART) {
+                final long refTime = referenceTime.timeInMillis();
+                baseTime = Math.max(now, refTime);
+            } else {
+                baseTime = now;
+            }
 
             final int width = getWidth();
             final int centerX = width / 2;
@@ -522,9 +531,8 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                 boolean startCancelled = false;
                 Paint startPaint = null;
                 int startYabs = 0;
-                Position departurePosition = null;
+                Position departurePosition;
                 final Public firstPublicLeg = trip.getFirstPublicLeg();
-                final TimeSpec referenceTime = renderConfig.referenceTime;
                 final Date publicDepartureTime;
                 if (firstPublicLeg != null) {
                     final Stop publicDepartureStop = firstPublicLeg.departureStop;
@@ -534,12 +542,14 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                         startTime = publicDepartureTime;
                         startCancelled = publicDepartureCancelled;
                         startPaint = publicTimeDiffPaint;
-                        departurePosition = publicDepartureStop.getDeparturePosition();
                         startYabs = (int) timeToCoord(publicDepartureTime.getTime(), height);
+                        departurePosition = publicDepartureStop.getDeparturePosition();
                         if (departurePosition != null && !startCancelled) {
-                            final long minutesFromNow = (startTime.getTime() - now) / 60000;
-                            if (minutesFromNow > -10 && minutesFromNow < 30) {
-                                startYabs = drawPosition(canvas, centerX, startYabs, height, true, departurePosition.name);
+//                            final long minutesFromNow = (startTime.getTime() - now) / 60000;
+//                            if (minutesFromNow > -10 && minutesFromNow < 30) {
+                            final long minutesFromRequestedTime = (startTime.getTime() - baseTime) / 60000;
+                            if (minutesFromRequestedTime > -10 && minutesFromRequestedTime < 30) {
+                                startYabs = drawPosition(canvas, centerX, startYabs, height, -1, departurePosition.name);
                             }
                         }
                         startYabs = drawTime(canvas, centerX, startYabs, height, true, publicTimePaint, publicDepartureCancelled,
@@ -562,13 +572,6 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                 }
 
                 if (startTime != null) {
-                    final long baseTime;
-                    if (referenceTime != null && referenceTime.depArr == TimeSpec.DepArr.DEPART) {
-                        final long refTime = referenceTime.timeInMillis();
-                        baseTime = Math.max(now, refTime);
-                    } else {
-                        baseTime = now;
-                    }
                     long diff = startTime.getTime() - baseTime;
                     startYabs = drawRemaining(canvas, centerX, startYabs, height, true, startPaint, startCancelled, diff);
                 }
@@ -641,9 +644,13 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                             labelColor = Color.WHITE;
                         }
 
-                        final long tDeparture = publicLeg.departureStop.getDepartureTime().getTime();
+                        final Stop departureStop = publicLeg.departureStop;
+                        final boolean departureCancelled = departureStop.departureCancelled;
+                        final long tDeparture = departureStop.getDepartureTime().getTime();
                         final float yDeparture = timeToCoord(tDeparture, height);
-                        final long tArrival = publicLeg.arrivalStop.getArrivalTime().getTime();
+                        final Stop arrivalStop = publicLeg.arrivalStop;
+                        final boolean arrivalCancelled = arrivalStop.arrivalCancelled;
+                        final long tArrival = arrivalStop.getArrivalTime().getTime();
                         final float yArrival = timeToCoord(tArrival, height);
 
                         // line box
@@ -693,6 +700,11 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                         publicLabelPaint.setTextSize(24f / scale * density);
                         publicLabelPaint.setTextScaleX(scale);
 
+                        if (departureCancelled || arrivalCancelled)
+                            publicLabelPaint.setFlags(publicLabelPaint.getFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                        else
+                            publicLabelPaint.setFlags(publicLabelPaint.getFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
+
                         // draw really centered on line box
                         if (scale < 4f) {
                             publicLabelPaint.getTextBounds(lineLabels[0], 0, lineLabels[0].length(), bounds);
@@ -705,6 +717,20 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                                         publicLabelPaint);
                                 canvas.drawText(lineLabels[1], legBox.centerX(),
                                         legBox.centerY() + bounds.height() + lineSpacing / 2, publicLabelPaint);
+                            }
+                        }
+
+                        if (referenceTime.depArr == TimeSpec.DepArr.DEPART) {
+                            final long millisFromRequestedTime = tDeparture - baseTime;
+                            final long minutesFromRequestedTime = millisFromRequestedTime / 60000;
+                            if (!departureCancelled && (minutesFromRequestedTime > -10 && minutesFromRequestedTime < 30)
+                            ) {
+                                startYabs = (int) legBox.top;
+                                departurePosition = departureStop.getDeparturePosition();
+                                if (departurePosition != null)
+                                    startYabs = drawPosition(canvas, centerX, startYabs, height, -1, departurePosition.name);
+                                if (publicLeg != firstPublicLeg)
+                                    startYabs = drawRemaining(canvas, centerX, startYabs, height, true, publicTimeDiffPaint, false, millisFromRequestedTime);
                             }
                         }
                     }
@@ -777,7 +803,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             }
         }
 
-        private int drawPosition(final Canvas canvas, final int centerX, final int y, final int height, final boolean above,
+        private int drawPosition(final Canvas canvas, final int centerX, final int y, final int height, final int direction,
                                  final String name) {
             final FontMetrics metrics = positionPaint.getFontMetrics();
 
@@ -785,16 +811,22 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             final float fontHeight = (-metrics.ascent + metrics.descent); // + 4 * density;
             positionPaint.getTextBounds(name, 0, name.length(), bounds);
             bounds.inset(-positionPaddingHorizontal, -positionPaddingVertical);
-            if (above) {
+            if (direction <= -2) {
                 bounds.offsetTo(centerX - bounds.width() / 2, (int) (y - fontHeight));
                 canvas.drawRect(bounds, positionPaintBackground);
                 canvas.drawText(name, centerX, y - metrics.descent, positionPaint);
                 return (int) (y - fontHeight);
-            } else {
-                bounds.offsetTo(centerX - bounds.width() / 2, (int) (y - fontHeight));
+            } else if (direction >= 2) {
+                bounds.offsetTo(centerX - bounds.width() / 2, y);
                 canvas.drawRect(bounds, positionPaintBackground);
-                canvas.drawText(name, centerX, y + metrics.ascent, positionPaint);
+                canvas.drawText(name, centerX, y + fontHeight - metrics.descent, positionPaint);
                 return (int) (y + fontHeight);
+            } else {
+                final int fh = (int) (fontHeight / 2);
+                bounds.offsetTo(centerX - bounds.width() / 2, y - fh);
+                canvas.drawRect(bounds, positionPaintBackground);
+                canvas.drawText(name, centerX, y + fh - metrics.descent, positionPaint);
+                return direction < 0 ? y - fh : y + fh;
             }
         }
 

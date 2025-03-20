@@ -365,10 +365,10 @@ public class TripsGallery extends Gallery {
         }
 
         final boolean currentTimeUp;
-        TimeSpec referenceTime = renderConfig.referenceTime;
-        final boolean timeLineLabelRight = referenceTime == null || referenceTime.depArr == TimeSpec.DepArr.DEPART;
+        final TimeSpec referenceTime = renderConfig.referenceTime;
         if (referenceTime != null && (!(referenceTime instanceof TimeSpec.Relative) || ((TimeSpec.Relative) referenceTime).diffMs != 0)) {
-            long time = referenceTime.timeInMillis();
+            final boolean timeLineLabelRight = referenceTime.depArr == TimeSpec.DepArr.DEPART;
+            final long time = referenceTime.timeInMillis();
             currentTimeUp = time > now;
             // draw reference time
             referenceTimeLine.draw(canvas, time, height, width, timeLineLabelRight, !currentTimeUp);
