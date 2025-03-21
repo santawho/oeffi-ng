@@ -169,7 +169,7 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
 
             setLocation(location);
 
-            afterLocationViewInput();
+            afterLocationViewInput(false);
             fireChanged();
         });
 
@@ -280,7 +280,7 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
         hint = res.getString(R.string.acquire_location_start, provider);
         updateAppearance();
 
-        afterLocationViewInput();
+        afterLocationViewInput(true);
     }
 
     public void onLocationStop(final boolean timedOut) {
@@ -405,14 +405,12 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
             textView.setHint(null);
     }
 
-    private void afterLocationViewInput() {
-        if (textView.isFocused()) {
-            final int options = textView.getImeOptions();
-            if (options == EditorInfo.IME_ACTION_GO)
-                textView.onEditorAction(EditorInfo.IME_ACTION_DONE);
-            else
-                textView.onEditorAction(options);
-        }
+    private void afterLocationViewInput(final boolean blockActionGo) {
+        int action = textView.getImeOptions() & EditorInfo.IME_MASK_ACTION;
+        if (blockActionGo && action == EditorInfo.IME_ACTION_GO)
+            action = 0;
+        if (action != 0)
+            textView.onEditorAction(action);
     }
 
     public void exchangeWith(final LocationView other) {
