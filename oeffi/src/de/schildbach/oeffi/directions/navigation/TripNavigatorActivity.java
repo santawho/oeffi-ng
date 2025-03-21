@@ -299,19 +299,8 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         final Date arrivalTime = stop.getArrivalTime();
         final TimeSpec.Absolute time = new TimeSpec.Absolute(TimeSpec.DepArr.DEPART,
                 arrivalTime != null ? arrivalTime.getTime() : stop.getDepartureTime().getTime());
-        TripsOverviewActivity.RenderConfig overviewConfig = new TripsOverviewActivity.RenderConfig();
-        overviewConfig.isAlternativeConnectionSearch = true;
-        overviewConfig.referenceTime = time;
-        overviewConfig.feederJourneyRef = feederJourneyRef;
-        overviewConfig.connectionJourneyRef = connectionJourneyRef;
-        if (currentJourneyRef != null) {
-            overviewConfig.prependTrip = tripRenderer.trip;
-            overviewConfig.prependToJourneyRef = currentJourneyRef;
-            overviewConfig.prependToStop = stop;
-            overviewConfig.prependToStopIsLegDeparture = isLegDeparture;
-
-        }
-        overviewConfig.actionBarColor = R.color.bg_action_alternative_directions;
+        final TripsOverviewActivity.RenderConfig overviewConfig = getOverviewConfig(
+                stop, isLegDeparture, currentJourneyRef, feederJourneyRef, connectionJourneyRef, time);
 
         final ProgressDialog progressDialog = ProgressDialog.show(TripNavigatorActivity.this, null,
                 getString(R.string.directions_query_progress), true, true, dialog -> {
@@ -398,5 +387,19 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         NavigationNotification.Configuration configuration = new NavigationNotification.Configuration();
         configuration.soundEnabled = soundEnabled;
         NavigationNotification.updateFromForeground(this, getIntent(), trip, configuration);
+    }
+
+    @Override
+    protected TripsOverviewActivity.RenderConfig getOverviewConfig(
+            final Stop stop,
+            final boolean isLegDeparture,
+            final JourneyRef currentJourneyRef,
+            final JourneyRef feederJourneyRef,
+            final JourneyRef connectionJourneyRef,
+            final TimeSpec.Absolute time) {
+        final TripsOverviewActivity.RenderConfig overviewConfig = super.getOverviewConfig(
+                stop, isLegDeparture, currentJourneyRef, feederJourneyRef, connectionJourneyRef, time);
+        overviewConfig.actionBarColor = R.color.bg_action_alternative_directions;
+        return overviewConfig;
     }
 }

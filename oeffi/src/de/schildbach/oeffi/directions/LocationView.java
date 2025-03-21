@@ -220,7 +220,19 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
         addView(chooseView, new LocationView.LayoutParams(LocationView.LayoutParams.WRAP_CONTENT,
                 LocationView.LayoutParams.MATCH_PARENT, Gravity.RIGHT | Gravity.CENTER_VERTICAL));
 
+        setEnabled(isEnabled());
         updateAppearance();
+    }
+
+    @Override
+    public void setEnabled(final boolean enabled) {
+        super.setEnabled(enabled);
+        if (textView != null) {
+            textView.setEnabled(enabled);
+            textView.setTextColor(getResources().getColor(enabled ? R.color.fg_significant : R.color.fg_insignificant));
+        }
+        if (chooseView != null)
+            chooseView.setEnabled(enabled);
     }
 
     private void setText(final CharSequence text) {

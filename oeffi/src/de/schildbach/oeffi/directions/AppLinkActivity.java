@@ -75,7 +75,7 @@ public class AppLinkActivity extends OeffiActivity {
 
     private void startFallbackActivity() {
         DirectionsActivity.start(this,
-                null, null, null, null,
+                null, null, null, null, null,
                 Intent.FLAG_ACTIVITY_CLEAR_TASK);
     }
 

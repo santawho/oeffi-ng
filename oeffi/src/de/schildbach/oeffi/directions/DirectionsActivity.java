@@ -159,6 +159,7 @@ public class DirectionsActivity extends OeffiMainActivity
     private OeffiMapView mapView;
 
     private TimeSpec time = null;
+    private TripsOverviewActivity.RenderConfig renderConfig;
 
     private QueryTripsRunnable queryTripsRunnable;
     private HandlerThread backgroundThread;
@@ -175,6 +176,7 @@ public class DirectionsActivity extends OeffiMainActivity
     private static final String INTENT_EXTRA_TO_LOCATION = DirectionsActivity.class.getName() + ".to_location";
     private static final String INTENT_EXTRA_VIA_LOCATION = DirectionsActivity.class.getName() + ".via_location";
     private static final String INTENT_EXTRA_TIME_SPEC = DirectionsActivity.class.getName() + ".time_spec";
+    private static final String INTENT_EXTRA_RENDERCONFIG = DirectionsActivity.class.getName() + ".config";
 
     private static class PickContact extends ActivityResultContract<Void, Uri> {
         @Override
@@ -239,8 +241,12 @@ public class DirectionsActivity extends OeffiMainActivity
 
     public static void start(
             final Context context,
-            @Nullable final Location fromLocation, @Nullable final Location toLocation, @Nullable final Location viaLocation,
-            @Nullable final TimeSpec timeSpec, final int intentFlags) {
+            @Nullable final Location fromLocation,
+            @Nullable final Location toLocation,
+            @Nullable final Location viaLocation,
+            @Nullable final TimeSpec timeSpec,
+            @Nullable final TripsOverviewActivity.RenderConfig renderConfig,
+            final int intentFlags) {
         final Intent intent = new Intent(context, DirectionsActivity.class).addFlags(intentFlags);
         if (fromLocation != null)
             intent.putExtra(DirectionsActivity.INTENT_EXTRA_FROM_LOCATION, fromLocation);
@@ -250,6 +256,8 @@ public class DirectionsActivity extends OeffiMainActivity
             intent.putExtra(DirectionsActivity.INTENT_EXTRA_VIA_LOCATION, viaLocation);
         if (timeSpec != null)
             intent.putExtra(DirectionsActivity.INTENT_EXTRA_TIME_SPEC, timeSpec);
+        if (renderConfig != null)
+            intent.putExtra(INTENT_EXTRA_RENDERCONFIG, renderConfig);
         context.startActivity(intent);
     }
 
@@ -309,6 +317,12 @@ public class DirectionsActivity extends OeffiMainActivity
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        final Intent intent = getIntent();
+        if (intent.hasExtra(INTENT_EXTRA_RENDERCONFIG))
+            renderConfig = (TripsOverviewActivity.RenderConfig) intent.getSerializableExtra(INTENT_EXTRA_RENDERCONFIG);
+        else
+            renderConfig = new TripsOverviewActivity.RenderConfig();
+
         connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
@@ -331,7 +345,7 @@ public class DirectionsActivity extends OeffiMainActivity
         });
 
         final MyActionBar actionBar = getMyActionBar();
-        setPrimaryColor(R.color.bg_action_bar_directions);
+        setPrimaryColor(renderConfig.actionBarColor > 0 ? renderConfig.actionBarColor : R.color.bg_action_bar_directions);
         actionBar.setPrimaryTitle(R.string.directions_activity_title);
         actionBar.setTitlesOnClickListener(v -> NetworkPickerActivity.start(DirectionsActivity.this));
         buttonExpand = actionBar.addToggleButton(R.drawable.ic_expand_white_24dp,
@@ -373,6 +387,8 @@ public class DirectionsActivity extends OeffiMainActivity
         viewFromLocation.setListener(locationChangeListener);
         viewFromLocation.setContextMenuItemClickListener(new LocationContextMenuItemClickListener(viewFromLocation,
                 requestLocationPermissionFromLauncher, pickContactFromLauncher, pickStationFromLauncher));
+        if (renderConfig.isAlternativeConnectionSearch)
+            viewFromLocation.setEnabled(false);
 
         viewViaLocation = findViewById(R.id.directions_via);
         viewViaLocation.setAdapter(autoCompleteAdapter);
@@ -588,9 +604,7 @@ public class DirectionsActivity extends OeffiMainActivity
         registerReceiver(connectivityReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 
         // populate
-        final Intent intent = getIntent();
         final Uri intentData = intent.getData();
-
         if (intentData != null) {
             log.info("Got intent: {}, data={}", intent, intentData);
 
@@ -1163,7 +1177,6 @@ public class DirectionsActivity extends OeffiMainActivity
                 else
                     historyUri = null;
 
-                TripsOverviewActivity.RenderConfig renderConfig = new TripsOverviewActivity.RenderConfig();
                 renderConfig.referenceTime = time;
                 TripsOverviewActivity.start(DirectionsActivity.this,
                         network, time.depArr, result, historyUri, reloadRequestData,

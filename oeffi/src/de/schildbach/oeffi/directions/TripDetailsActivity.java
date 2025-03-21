@@ -1628,60 +1628,29 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 if (menuItemId == R.id.station_context_show_departures) {
                     StationDetailsActivity.start(TripDetailsActivity.this, network, stop.location);
                     return true;
+                } else if (menuItemId == R.id.station_context_navigate_to) {
+                    startNavigationForJourneyToExit(stop);
+                    return true;
                 } else if (menuItemId == R.id.station_context_directions_alternative_from) {
                     return onFindAlternativeConnections(
                             stop, stopIsLegDeparture,
                             currentJourneyRef, feederJourneyRef, connectionJourneyRef,
                             renderConfig.queryTripsRequestData);
-                } else if (menuItemId == R.id.station_context_navigate_to) {
-                    startNavigationForJourneyToExit(stop);
-                    return true;
                 } else if (menuItemId == R.id.station_context_directions_from) {
-                    final Date arrivalTime = stop.getArrivalTime();
-                    final TimeSpec.Absolute time = new TimeSpec.Absolute(DepArr.DEPART,
-                            arrivalTime != null ? arrivalTime.getTime() : stop.getDepartureTime().getTime());
-                    DirectionsActivity.start(TripDetailsActivity.this, stop.location,
-                            renderConfig.isJourney ? ((Trip.Public) tripRenderer.trip.legs.get(0)).entryLocation : tripRenderer.trip.to, null, time,
-                            Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    return true;
+                    return onDirectionsFrom(
+                            stop, stopIsLegDeparture,
+                            currentJourneyRef, feederJourneyRef, connectionJourneyRef,
+                            renderConfig.queryTripsRequestData, null);
                 } else if (menuItemId == R.id.station_context_directions_to) {
-                    final Location entry;
-                    final TimeSpec.Absolute time;
-                    if (renderConfig.isJourney) {
-                        Trip.Public journeyLeg = (Trip.Public) tripRenderer.trip.legs.get(0);
-                        entry = journeyLeg.entryLocation;
-                        final Stop entryStop = journeyLeg.findStopByLocation(entry);
-                        final Date arrivalTime = entryStop.getArrivalTime();
-                        time = new TimeSpec.Absolute(DepArr.DEPART,
-                                arrivalTime != null ? arrivalTime.getTime() : entryStop.getDepartureTime().getTime());
-                    } else {
-                        entry = tripRenderer.trip.from;
-                        final Date arrivalTime = stop.getArrivalTime();
-                        time = new TimeSpec.Absolute(DepArr.ARRIVE,
-                                arrivalTime != null ? arrivalTime.getTime() : stop.getDepartureTime().getTime());
-                    }
-                    DirectionsActivity.start(TripDetailsActivity.this, entry, stop.location, null, time,
-                            Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    return true;
+                    return onDirectionsTo(
+                            stop, stopIsLegDeparture,
+                            currentJourneyRef, feederJourneyRef, connectionJourneyRef,
+                            renderConfig.queryTripsRequestData, null);
                 } else if (menuItemId == R.id.station_context_directions_via) {
-                    final Location exit;
-                    final TimeSpec.Absolute time;
-                    if (renderConfig.isJourney) {
-                        Trip.Public journeyLeg = (Trip.Public) tripRenderer.trip.legs.get(0);
-                        exit = journeyLeg.exitLocation;
-                        final Stop exitStop = journeyLeg.findStopByLocation(exit);
-                        final Date departureTime = exitStop.getDepartureTime();
-                        time = new TimeSpec.Absolute(DepArr.DEPART,
-                                departureTime != null ? departureTime.getTime() : exitStop.getArrivalTime().getTime());
-                    } else {
-                        exit = tripRenderer.trip.to;
-                        final Date departureTime = stop.getDepartureTime();
-                        time = new TimeSpec.Absolute(DepArr.DEPART,
-                                departureTime != null ? departureTime.getTime() : stop.getArrivalTime().getTime());
-                    }
-                    DirectionsActivity.start(TripDetailsActivity.this, null, exit, stop.location, time,
-                            Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    return true;
+                    return onDirectionsVia(
+                            stop, stopIsLegDeparture,
+                            currentJourneyRef, feederJourneyRef, connectionJourneyRef,
+                            renderConfig.queryTripsRequestData, null);
                 } else if (menuItemId == R.id.station_context_infopage) {
                     String infoUrl = stop.location.infoUrl;
                     if (infoUrl != null) {
@@ -1960,5 +1929,113 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final QueryTripsRunnable.TripRequestData queryTripsRequestData) {
         // override if implemented
         return false;
+    }
+
+    protected TripsOverviewActivity.RenderConfig getOverviewConfig(
+            final Stop stop,
+            final boolean isLegDeparture,
+            final JourneyRef currentJourneyRef,
+            final JourneyRef feederJourneyRef,
+            final JourneyRef connectionJourneyRef,
+            final TimeSpec.Absolute time) {
+        TripsOverviewActivity.RenderConfig overviewConfig = new TripsOverviewActivity.RenderConfig();
+        overviewConfig.isAlternativeConnectionSearch = true;
+        overviewConfig.referenceTime = time;
+        overviewConfig.feederJourneyRef = feederJourneyRef;
+        overviewConfig.connectionJourneyRef = connectionJourneyRef;
+        if (currentJourneyRef != null) {
+            overviewConfig.prependTrip = tripRenderer.trip;
+            overviewConfig.prependToJourneyRef = currentJourneyRef;
+            overviewConfig.prependToStop = stop;
+            overviewConfig.prependToStopIsLegDeparture = isLegDeparture;
+        }
+        return overviewConfig;
+    }
+
+    protected boolean onDirectionsFrom(
+            final Stop stop,
+            final boolean isLegDeparture,
+            final JourneyRef currentJourneyRef,
+            final JourneyRef feederJourneyRef,
+            final JourneyRef connectionJourneyRef,
+            final QueryTripsRunnable.TripRequestData queryTripsRequestData,
+            final TripsOverviewActivity.RenderConfig overviewConfig) {
+        final Date arrivalTime = stop.getArrivalTime();
+        final TimeSpec.Absolute time = new TimeSpec.Absolute(DepArr.DEPART,
+                arrivalTime != null ? arrivalTime.getTime() : stop.getDepartureTime().getTime());
+        DirectionsActivity.start(TripDetailsActivity.this,
+                stop.location,
+                renderConfig.isJourney ? ((Trip.Public) tripRenderer.trip.legs.get(0)).entryLocation : tripRenderer.trip.to,
+                null,
+                time,
+                getOverviewConfig(stop, isLegDeparture, currentJourneyRef, feederJourneyRef, connectionJourneyRef, time),
+                Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        return true;
+    }
+
+    private boolean onDirectionsTo(
+            final Stop stop,
+            final boolean isLegDeparture,
+            final JourneyRef currentJourneyRef,
+            final JourneyRef feederJourneyRef,
+            final JourneyRef connectionJourneyRef,
+            final QueryTripsRunnable.TripRequestData queryTripsRequestData,
+            final TripsOverviewActivity.RenderConfig overviewConfig) {
+        final Location entry;
+        final TimeSpec.Absolute time;
+        if (renderConfig.isJourney) {
+            Trip.Public journeyLeg = (Trip.Public) tripRenderer.trip.legs.get(0);
+            entry = journeyLeg.entryLocation;
+            final Stop entryStop = journeyLeg.findStopByLocation(entry);
+            final Date arrivalTime = entryStop.getArrivalTime();
+            time = new TimeSpec.Absolute(DepArr.DEPART,
+                    arrivalTime != null ? arrivalTime.getTime() : entryStop.getDepartureTime().getTime());
+        } else {
+            entry = tripRenderer.trip.from;
+            final Date arrivalTime = stop.getArrivalTime();
+            time = new TimeSpec.Absolute(DepArr.ARRIVE,
+                    arrivalTime != null ? arrivalTime.getTime() : stop.getDepartureTime().getTime());
+        }
+        DirectionsActivity.start(this,
+                entry,
+                stop.location,
+                null,
+                time,
+                null,
+                Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        return true;
+    }
+
+    private boolean onDirectionsVia(
+            final Stop stop,
+            final boolean isLegDeparture,
+            final JourneyRef currentJourneyRef,
+            final JourneyRef feederJourneyRef,
+            final JourneyRef connectionJourneyRef,
+            final QueryTripsRunnable.TripRequestData queryTripsRequestData,
+            final TripsOverviewActivity.RenderConfig overviewConfig) {
+        final Location exit;
+        final TimeSpec.Absolute time;
+        if (renderConfig.isJourney) {
+            Trip.Public journeyLeg = (Trip.Public) tripRenderer.trip.legs.get(0);
+            exit = journeyLeg.exitLocation;
+            final Stop exitStop = journeyLeg.findStopByLocation(exit);
+            final Date departureTime = exitStop.getDepartureTime();
+            time = new TimeSpec.Absolute(DepArr.DEPART,
+                    departureTime != null ? departureTime.getTime() : exitStop.getArrivalTime().getTime());
+        } else {
+            exit = tripRenderer.trip.to;
+            final Date departureTime = stop.getDepartureTime();
+            time = new TimeSpec.Absolute(DepArr.DEPART,
+                    departureTime != null ? departureTime.getTime() : stop.getArrivalTime().getTime());
+        }
+        DirectionsActivity.start(this,
+                null,
+                exit,
+                stop.location,
+                time,
+                null,
+                Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        return true;
     }
 }
