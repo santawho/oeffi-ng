@@ -315,7 +315,8 @@
     <string name="directions_trip_details_action_share_short_title">Kurznachricht teilen…</string>
     <string name="directions_trip_details_action_share_long_title">Detaillierte Nachricht teilen…</string>
     <string name="directions_trip_details_action_share_link_title">Mit Link teilen…</string>
-    <string name="directions_trip_details_action_open_link_title">In Provider-App öffnen</string>
+    <string name="directions_trip_details_action_open_share_link_title">In Provider-App öffnen (über "Teilen")</string>
+    <string name="directions_trip_details_action_open_direct_link_title">In Provider-App öffnen (direkter Link)</string>
     <string name="directions_trip_details_text_short">ab %1$s %2$s\n%3$s  %4$s\n\nan %5$s %6$s\n%7$s  %8$s</string>
 
     <!-- directions trip details options schedule -->

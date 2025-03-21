@@ -379,15 +379,38 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                             intentSupplier = () -> shareTripLong(false);
                         } else if (itemId == R.id.directions_trip_details_action_share_link) {
                             intentSupplier = () -> shareTripLong(true);
-                        } else if (itemId == R.id.directions_trip_details_action_open_link) {
+                        } else if (itemId == R.id.directions_trip_details_action_open_direct_link) {
                             final NetworkProvider provider = NetworkProviderFactory.provider(network);
                             if (provider.hasCapabilities(NetworkProvider.Capability.TRIP_LINKING)) {
-                                try {
-                                    final String link = provider.getOpenLink(tripRenderer.trip);
-                                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(link)));
-                                } catch (Exception e) {
-                                    log.error("cannot get link", e);
-                                }
+                                backgroundHandler.post(() -> {
+                                    try {
+                                        final String link = provider.getOpenLink(tripRenderer.trip);
+                                        runOnUiThread(() -> {
+                                            final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
+                                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                            startActivity(intent);
+                                        });
+                                    } catch (Exception e) {
+                                        log.error("cannot get open link", e);
+                                    }
+                                });
+                            }
+                            return true;
+                        } else if (itemId == R.id.directions_trip_details_action_open_share_link) {
+                            final NetworkProvider provider = NetworkProviderFactory.provider(network);
+                            if (provider.hasCapabilities(NetworkProvider.Capability.TRIP_SHARING)) {
+                                backgroundHandler.post(() -> {
+                                    try {
+                                        final String link = provider.getShareLink(tripRenderer.trip);
+                                        runOnUiThread(() -> {
+                                            final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
+                                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                            startActivity(intent);
+                                        });
+                                    } catch (Exception e) {
+                                        log.error("cannot get share link", e);
+                                    }
+                                });
                             }
                             return true;
                         } else {
