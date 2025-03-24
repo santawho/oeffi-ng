@@ -562,15 +562,16 @@ public class NavigationNotification {
             audioManager.requestAudioFocus(audioFocusRequest);
             alarmTone.play();
             new Thread(() -> {
+                log.info("sound starts playing: {}", actualSoundId);
                 while (alarmTone.isPlaying()) {
-                    log.info("sound is playing");
+//                    log.info("sound is playing");
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
                         break;
                     }
                 }
-                log.info("sound has stopped");
+                log.info("sound has stopped: {}", actualSoundId);
                 audioManager.abandonAudioFocusRequest(audioFocusRequest);
             }).start();
         }
@@ -759,7 +760,9 @@ public class NavigationNotification {
         }
 
         if (tripRenderer.nextEventStopChange) {
-            remoteViews.setImageViewResource(R.id.navigation_notification_next_event_positions_walk_icon, tripRenderer.nextEventTransferIconId);
+            final int iconId = tripRenderer.nextEventTransferIconId;
+            remoteViews.setImageViewResource(R.id.navigation_notification_next_event_positions_walk_icon,
+                    iconId != 0 ? iconId : R.drawable.ic_directions_walk_grey600_24dp);
             remoteViews.setViewVisibility(R.id.navigation_notification_next_event_positions_walk_icon, View.VISIBLE);
             remoteViews.setViewVisibility(R.id.navigation_notification_next_event_positions_walk_arrow, View.VISIBLE);
         }

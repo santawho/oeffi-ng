@@ -39,8 +39,8 @@ public class NavigationAlarmManager {
     private HandlerThread backgroundThread;
     private Handler backgroundHandler;
 
-    public NavigationAlarmManager() {
-        backgroundThread = new HandlerThread("Navigation.queryTripsThread", Process.THREAD_PRIORITY_BACKGROUND);
+    private NavigationAlarmManager() {
+        backgroundThread = new HandlerThread("NavAlarmThread", Process.THREAD_PRIORITY_BACKGROUND);
         backgroundThread.start();
         backgroundHandler = new Handler(backgroundThread.getLooper());
     }
@@ -49,13 +49,16 @@ public class NavigationAlarmManager {
         if (!stopped) {
             if (newRefreshAt + MIN_PERIOD_MS < refreshAt) {
                 refreshAt = newRefreshAt;
+                log.info("start alarm: setting real refresh at {}", LOG_TIME_FORMAT.format(refreshAt));
                 try {
                     restart();
                 } catch (IOException e) {
                     log.error("error when starting trip refresher", e);
                 }
             } else {
-                log.info("keeping real refresh at {}", LOG_TIME_FORMAT.format(refreshAt));
+                log.info("start alarm: keeping real refresh at {} instead of new at {}",
+                        LOG_TIME_FORMAT.format(refreshAt),
+                        LOG_TIME_FORMAT.format(newRefreshAt));
             }
         }
     }
@@ -77,6 +80,7 @@ public class NavigationAlarmManager {
     public static class RefreshReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
+            log.info("refresh alarm was fired");
             runOnHandlerThread(() -> getInstance().onRefreshTimer());
         }
     }
@@ -92,6 +96,7 @@ public class NavigationAlarmManager {
     }
 
     private void onRefreshTimer() {
+        log.info("refresh alarm being handled");
         try {
             if (!stopped) {
                 refresh();
@@ -105,18 +110,23 @@ public class NavigationAlarmManager {
     private void restart() throws IOException {
         while (!stopped) {
             if (refreshAt == Long.MAX_VALUE) {
-                log.info("no navigation running, stopping alarms");
+                log.info("restart alarm: no navigation running, stopping alarms");
                 break;
             }
-            final long timeToWait = refreshAt - new Date().getTime();
+            long timeToWait = refreshAt - new Date().getTime();
             if (timeToWait > 0) {
-                log.info("new real refresh at {}", LOG_TIME_FORMAT.format(refreshAt));
-
+                if (timeToWait < 5000) {
+                    timeToWait = 5000;
+                    log.info("restart alarm: refresh at {}, time to wait at least = {}", LOG_TIME_FORMAT.format(refreshAt), timeToWait);
+                } else {
+                    log.info("restart alarm: refresh at {}, time to wait = {}", LOG_TIME_FORMAT.format(refreshAt), timeToWait);
+                }
                 final AlarmManager alarmManager = getSystemAlarmManager();
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()) {
+                    long triggerAtMillis = ClockUtils.elapsedTimePlus(timeToWait);
                     alarmManager.setExactAndAllowWhileIdle(
                             // AlarmManager.RTC_WAKEUP, refreshAt,
-                            AlarmManager.ELAPSED_REALTIME_WAKEUP, ClockUtils.clockToElapsedTime(refreshAt),
+                            AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtMillis,
                             getPendingRefreshIntent());
                 }
                 break;
@@ -128,8 +138,14 @@ public class NavigationAlarmManager {
 
     private void refresh() {
         refreshAt = NavigationNotification.refreshAll(getContext());
+        log.info("refresh alarm: next notification refresh of all at {}", LOG_TIME_FORMAT.format(refreshAt));
         final long minNext = new Date().getTime() + MIN_PERIOD_MS;
-        if (refreshAt < minNext)
+        log.info("refresh alarm: not earlier than at {}", LOG_TIME_FORMAT.format(minNext));
+        if (refreshAt < minNext) {
             refreshAt = minNext;
+            log.info("refresh alarm: setting next refresh at {}", LOG_TIME_FORMAT.format(refreshAt));
+        } else {
+            log.info("refresh alarm: keeping next refresh at {}", LOG_TIME_FORMAT.format(refreshAt));
+        }
     }
 }

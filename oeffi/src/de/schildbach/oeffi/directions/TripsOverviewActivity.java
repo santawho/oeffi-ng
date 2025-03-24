@@ -602,8 +602,9 @@ public class TripsOverviewActivity extends OeffiActivity {
         // update server product
         if (result.header != null) {
             final TextView serverProductView = findViewById(R.id.trips_server_product);
-            serverProductView.setText(product(result.header));
-            serverProductView.setVisibility(View.VISIBLE);
+            updateDisclaimerSource(serverProductView, network.name(), null);
+//            serverProductView.setText(product(result.header));
+//            serverProductView.setVisibility(View.VISIBLE);
         }
 
         processResult(result, false, false, searchMoreContext);

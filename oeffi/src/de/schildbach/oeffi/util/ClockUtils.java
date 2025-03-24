@@ -14,4 +14,9 @@ public class ClockUtils {
         final long nowElapsed = SystemClock.elapsedRealtime();
         return clock - nowClock + nowElapsed;
     }
+
+    public static long elapsedTimePlus(final long plusMillis) {
+        final long nowElapsed = SystemClock.elapsedRealtime();
+        return nowElapsed + plusMillis;
+    }
 }

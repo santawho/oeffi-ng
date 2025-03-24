@@ -530,6 +530,7 @@ public abstract class OeffiActivity extends ComponentActivity {
             disclaimerSourceView.setCompoundDrawables(null, null, null, null);
         }
         disclaimerSourceView.setText(label);
+        disclaimerSourceView.setVisibility(View.VISIBLE);
     }
 
     protected final CharSequence product(final ResultHeader header) {
