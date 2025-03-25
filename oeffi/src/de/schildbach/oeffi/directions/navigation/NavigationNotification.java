@@ -433,7 +433,7 @@ public class NavigationNotification {
         long nextReminderTimeMs = 0;
         if (tripRenderer.currentLeg != null) {
             if (nextEventTimeLeftMs < REMINDER_SECOND_MS + 20000) {
-                log.info("next event {} < 2 mins : {}", nextEventTimeLeftMs, lastNotified.leftTimeReminded);
+                log.info("next event {} < 2 mins : already reminded {}", nextEventTimeLeftMs, lastNotified.leftTimeReminded);
                 nextReminderTimeMs = nowTime + nextEventTimeLeftMs;
                 if (lastNotified.leftTimeReminded > REMINDER_SECOND_MS) {
                     log.info("reminding 2 mins = {}", nextReminderTimeMs);
@@ -441,20 +441,25 @@ public class NavigationNotification {
                     newNotified.leftTimeReminded = REMINDER_SECOND_MS;
                 }
             } else if (nextEventTimeLeftMs < REMINDER_FIRST_MS + 20000) {
-                log.info("next event {} < 6 mins : {}", nextEventTimeLeftMs, lastNotified.leftTimeReminded);
+                log.info("next event {} < 6 mins : already reminded {}", nextEventTimeLeftMs, lastNotified.leftTimeReminded);
                 nextReminderTimeMs = nowTime + nextEventTimeLeftMs - REMINDER_SECOND_MS;
                 if (lastNotified.leftTimeReminded > REMINDER_FIRST_MS) {
                     log.info("reminding 6 mins = {}", nextReminderTimeMs);
                     reminderSoundId = SOUND_REMIND_NORMAL;
                     newNotified.leftTimeReminded = REMINDER_FIRST_MS;
                 }
-            } else {
-                log.info("next event {} > 6 mins : {}", nextEventTimeLeftMs, lastNotified.leftTimeReminded);
+            } else if (nextEventTimeLeftMs < REMINDER_FIRST_MS + 120000) {
+                log.info("next event {} > 6 mins but < 6+2 : already reminded {}", nextEventTimeLeftMs, lastNotified.leftTimeReminded);
                 nextReminderTimeMs = nowTime + nextEventTimeLeftMs - REMINDER_FIRST_MS;
                 if (lastNotified.leftTimeReminded <= REMINDER_SECOND_MS) {
                     log.info("resetting");
                     newNotified.leftTimeReminded = Long.MAX_VALUE;
                 }
+            } else {
+                log.info("next event {} > 6+2 mins : already reminded {}", nextEventTimeLeftMs, lastNotified.leftTimeReminded);
+                nextReminderTimeMs = nowTime + nextEventTimeLeftMs - REMINDER_FIRST_MS;
+                log.info("resetting");
+                newNotified.leftTimeReminded = Long.MAX_VALUE;
             }
             if (nextReminderTimeMs > 0 && nextReminderTimeMs < nextRefreshTimeMs + 20000)
                 nextRefreshTimeMs = nextReminderTimeMs;
