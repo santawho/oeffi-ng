@@ -24,8 +24,13 @@ import android.view.SubMenu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.PopupMenu;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.daimajia.swipe.SimpleSwipeListener;
+import com.daimajia.swipe.SwipeLayout;
+
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.LocationTextView;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
@@ -43,6 +48,12 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
     private final View favoriteView;
     private final Button tripView;
     private final ImageButton contextButton;
+    private final SwipeLayout swipeLayout;
+    private final MySwipeListener swipeListener;
+    public QueryHistoryContextMenuItemListener contextMenuItemListener;
+    private Location from;
+    private Location to;
+    private byte[] serializedSavedTrip;
 
     public QueryHistoryViewHolder(final View itemView, final Context context, final NetworkId network) {
         super(itemView);
@@ -54,12 +65,21 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
         favoriteView = itemView.findViewById(R.id.directions_query_history_entry_favorite);
         tripView = itemView.findViewById(R.id.directions_query_history_entry_trip);
         contextButton = itemView.findViewById(R.id.directions_query_history_entry_context_button);
+
+        this.swipeLayout = (SwipeLayout) itemView;
+        swipeListener = new MySwipeListener();
+        swipeLayout.addSwipeListener(swipeListener);
     }
 
     public void bind(final long rowId, final Location from, final Location to, final Location via, final boolean isFavorite,
             final long savedTripDepartureTime, final byte[] serializedSavedTrip, final Integer fromFavState,
             final Integer toFavState, final long selectedRowId, final QueryHistoryClickListener clickListener,
             final QueryHistoryContextMenuItemListener contextMenuItemListener) {
+        this.contextMenuItemListener = contextMenuItemListener;
+        this.from = from;
+        this.to = to;
+        this.serializedSavedTrip = serializedSavedTrip;
+
         final boolean selected = rowId == selectedRowId;
         itemView.setActivated(selected);
         itemView.setOnClickListener(v -> {
@@ -146,5 +166,60 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
             });
             contextMenu.show();
         });
+    }
+
+    private class MySwipeListener extends SimpleSwipeListener {
+        final ImageView starView;
+        boolean starOpened;
+        boolean removeOpened;
+        boolean isFavorite;
+
+        public MySwipeListener() {
+            this.starView = swipeLayout.findViewById(R.id.directions_query_history_entry_swipe_star);
+            setStarDrawable();
+
+            swipeLayout.addRevealListener(R.id.directions_query_history_entry_swipe_star,
+                    (child, edge, fraction, distance) -> {
+                        starOpened = fraction > 0.999;
+                    });
+            swipeLayout.addRevealListener(R.id.directions_query_history_entry_swipe_remove,
+                    (child, edge, fraction, distance) -> {
+                        removeOpened = fraction > 0.999;
+                    });
+        }
+
+        @Override
+        public void onHandRelease(final SwipeLayout layout, final float xvel, final float yvel) {
+            super.onHandRelease(layout, xvel, yvel);
+            final int position = getAdapterPosition();
+
+            if (starOpened) {
+                starOpened = false;
+                isFavorite = !isFavorite;
+                setStarDrawable();
+                contextMenuItemListener.onQueryHistoryContextMenuItemClick(
+                        position, from, to,
+                        serializedSavedTrip,
+                        isFavorite
+                            ? R.id.directions_query_history_context_add_favorite
+                            : R.id.directions_query_history_context_remove_favorite,
+                        null);
+            }
+
+            if (removeOpened) {
+                removeOpened = false;
+                contextMenuItemListener.onQueryHistoryContextMenuItemClick(
+                        position, from, to,
+                        serializedSavedTrip,
+                        R.id.directions_query_history_context_remove_entry,
+                        null);
+            }
+        }
+
+        private void setStarDrawable() {
+            starView.setImageDrawable(isFavorite
+                    ? context.getDrawable(R.drawable.ic_star_border_white_24dp)
+                    : context.getDrawable(R.drawable.ic_star_white_24dp));
+        }
     }
 }

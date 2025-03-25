@@ -1,77 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<com.daimajia.swipe.SwipeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/list_entry_background"
-    android:descendantFocusability="blocksDescendants"
-    android:focusable="true"
-    android:foreground="?android:attr/selectableItemBackground">
-
-    <LinearLayout
-        style="?android:attr/buttonBarStyle"
+    app:drag_edge="left|right"
+    app:show_mode="lay_down">
+    <ImageView
+        android:id="@+id/directions_query_history_entry_swipe_star"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:paddingVertical="@dimen/text_padding_vertical_verylax"
+        android:paddingHorizontal="@dimen/text_padding_horizontal_verylax"
+        android:src="@drawable/ic_star_white_24dp"
+        android:tint="@color/fg_significant"/>
+    <ImageView
+        android:id="@+id/directions_query_history_entry_swipe_remove"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:paddingVertical="@dimen/text_padding_vertical_verylax"
+        android:paddingHorizontal="@dimen/text_padding_horizontal_verylax"
+        android:src="@drawable/ic_clear_black_24dp"
+        android:tint="@color/fg_significant"/>
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:background="@drawable/list_entry_background"
+        android:descendantFocusability="blocksDescendants"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground">
 
         <LinearLayout
-            android:layout_width="0px"
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="3"
-            android:orientation="vertical">
+            android:orientation="horizontal">
 
-            <de.schildbach.oeffi.directions.LocationTextView
-                android:id="@+id/directions_query_history_entry_from"
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:layout_width="0px"
                 android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:orientation="vertical">
+
+                <de.schildbach.oeffi.directions.LocationTextView
+                    android:id="@+id/directions_query_history_entry_from"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawablePadding="@dimen/text_padding_horizontal_lax"
+                    android:drawableTint="@color/fg_less_significant"
+                    android:gravity="center_vertical"
+                    android:paddingLeft="@dimen/text_padding_horizontal_verylax"
+                    android:paddingRight="@dimen/text_padding_horizontal_cram"
+                    android:paddingTop="@dimen/text_padding_vertical_verylax" />
+
+                <de.schildbach.oeffi.directions.LocationTextView
+                    android:id="@+id/directions_query_history_entry_to"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawablePadding="@dimen/text_padding_horizontal_lax"
+                    android:drawableTint="@color/fg_less_significant"
+                    android:gravity="center_vertical"
+                    android:paddingBottom="@dimen/text_padding_vertical_verylax"
+                    android:paddingLeft="@dimen/text_padding_horizontal_verylax"
+                    android:paddingRight="@dimen/text_padding_horizontal_cram" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/directions_query_history_entry_trip"
+                android:layout_width="0px"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_weight="2"
+                android:drawableLeft="@drawable/ic_beenhere_grey600_24dp"
                 android:drawablePadding="@dimen/text_padding_horizontal_lax"
                 android:drawableTint="@color/fg_less_significant"
-                android:gravity="center_vertical"
-                android:paddingLeft="@dimen/text_padding_horizontal_verylax"
-                android:paddingRight="@dimen/text_padding_horizontal_cram"
-                android:paddingTop="@dimen/text_padding_vertical_verylax" />
-
-            <de.schildbach.oeffi.directions.LocationTextView
-                android:id="@+id/directions_query_history_entry_to"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:drawablePadding="@dimen/text_padding_horizontal_lax"
-                android:drawableTint="@color/fg_less_significant"
-                android:gravity="center_vertical"
-                android:paddingBottom="@dimen/text_padding_vertical_verylax"
-                android:paddingLeft="@dimen/text_padding_horizontal_verylax"
+                android:gravity="left|center_vertical"
+                android:paddingLeft="@dimen/text_padding_horizontal_lax"
                 android:paddingRight="@dimen/text_padding_horizontal_cram" />
         </LinearLayout>
 
-        <Button
-            android:id="@+id/directions_query_history_entry_trip"
-            android:layout_width="0px"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:layout_weight="2"
-            android:drawableLeft="@drawable/ic_beenhere_grey600_24dp"
-            android:drawablePadding="@dimen/text_padding_horizontal_lax"
-            android:drawableTint="@color/fg_less_significant"
-            android:gravity="left|center_vertical"
-            android:paddingLeft="@dimen/text_padding_horizontal_lax"
-            android:paddingRight="@dimen/text_padding_horizontal_cram" />
-    </LinearLayout>
+        <TextView
+            android:id="@+id/directions_query_history_entry_favorite"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|left"
+            android:shadowColor="#000"
+            android:shadowRadius="1"
+            android:text="★"
+            android:textColor="#ff8c00"
+            tools:ignore="HardcodedText" />
 
-    <TextView
-        android:id="@+id/directions_query_history_entry_favorite"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|left"
-        android:shadowColor="#000"
-        android:shadowRadius="1"
-        android:text="★"
-        android:textColor="#ff8c00"
-        tools:ignore="HardcodedText" />
+        <ImageButton
+            android:id="@+id/directions_query_history_entry_context_button"
+            style="@style/My.Widget.ImageButton.Context"
+            android:layout_gravity="top|right" />
 
-    <ImageButton
-        android:id="@+id/directions_query_history_entry_context_button"
-        style="@style/My.Widget.ImageButton.Context"
-        android:layout_gravity="top|right" />
-
-</FrameLayout>
+    </FrameLayout>
+</com.daimajia.swipe.SwipeLayout>
