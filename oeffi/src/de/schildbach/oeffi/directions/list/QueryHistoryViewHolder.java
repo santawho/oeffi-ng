@@ -54,6 +54,11 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
     private Location from;
     private Location to;
     private byte[] serializedSavedTrip;
+    private boolean isFavorite;
+    private Integer fromFavState;
+    private Integer toFavState;
+    private boolean hasSavedTrip;
+    private PopupMenu contextMenu;
 
     public QueryHistoryViewHolder(final View itemView, final Context context, final NetworkId network) {
         super(itemView);
@@ -79,21 +84,16 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
         this.from = from;
         this.to = to;
         this.serializedSavedTrip = serializedSavedTrip;
-
-        final boolean selected = rowId == selectedRowId;
-        itemView.setActivated(selected);
-        itemView.setOnClickListener(v -> {
-            final int position = getAdapterPosition();
-            if (position != RecyclerView.NO_POSITION)
-                clickListener.onEntryClick(position, from, to, via);
-        });
+        this.isFavorite = isFavorite;
+        this.fromFavState = fromFavState;
+        this.toFavState = toFavState;
 
         fromView.setLocation(from);
         toView.setLocation(to);
 
         favoriteView.setVisibility(isFavorite ? View.VISIBLE : View.INVISIBLE);
 
-        final boolean hasSavedTrip = savedTripDepartureTime > 0;
+        hasSavedTrip = savedTripDepartureTime > 0;
         if (hasSavedTrip) {
             tripView.setVisibility(View.VISIBLE);
             final long now = System.currentTimeMillis();
@@ -108,64 +108,82 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
             tripView.setVisibility(View.GONE);
         }
 
-        contextButton.setVisibility(selected ? View.VISIBLE : View.GONE);
-        contextButton.setOnClickListener(v -> {
-            final PopupMenu contextMenu = new PopupMenu(context, v);
-            final MenuInflater inflater = contextMenu.getMenuInflater();
-            final Menu menu = contextMenu.getMenu();
-            inflater.inflate(R.menu.directions_query_history_context, menu);
-            menu.findItem(R.id.directions_query_history_context_show_trip).setVisible(hasSavedTrip);
-            menu.findItem(R.id.directions_query_history_context_remove_trip).setVisible(hasSavedTrip);
-            menu.findItem(R.id.directions_query_history_context_add_favorite).setVisible(!isFavorite);
-            menu.findItem(R.id.directions_query_history_context_remove_favorite).setVisible(isFavorite);
-            final SubMenu fromMenu;
-            if (from.isIdentified()) {
-                fromMenu = menu.addSubMenu(from.uniqueShortName());
-                inflater.inflate(R.menu.directions_query_history_location_context, fromMenu);
-                fromMenu.findItem(R.id.directions_query_history_location_context_details)
-                        .setVisible(from.type == LocationType.STATION);
-                fromMenu.findItem(R.id.directions_query_history_location_context_add_favorite)
-                        .setVisible(from.type == LocationType.STATION && (fromFavState == null
-                                || fromFavState != FavoriteStationsProvider.TYPE_FAVORITE));
-                final SubMenu mapMenu = fromMenu.findItem(R.id.directions_query_history_location_context_map)
-                        .getSubMenu();
-                StationContextMenu.prepareMapMenu(context, mapMenu, network, from);
-            } else {
-                fromMenu = null;
-            }
-            final SubMenu toMenu;
-            if (to.isIdentified()) {
-                toMenu = menu.addSubMenu(to.uniqueShortName());
-                inflater.inflate(R.menu.directions_query_history_location_context, toMenu);
-                toMenu.findItem(R.id.directions_query_history_location_context_details)
-                        .setVisible(to.type == LocationType.STATION);
-                toMenu.findItem(R.id.directions_query_history_location_context_add_favorite)
-                        .setVisible(to.type == LocationType.STATION
-                                && (toFavState == null || toFavState != FavoriteStationsProvider.TYPE_FAVORITE));
-                final SubMenu mapMenu = toMenu.findItem(R.id.directions_query_history_location_context_map)
-                        .getSubMenu();
-                StationContextMenu.prepareMapMenu(context, mapMenu, network, to);
-            } else {
-                toMenu = null;
-            }
-            contextMenu.setOnMenuItemClickListener(item -> {
-                final int position = getAdapterPosition();
-                if (position != RecyclerView.NO_POSITION) {
-                    if (fromMenu != null && item == fromMenu.findItem(item.getItemId()))
-                        return contextMenuItemListener.onQueryHistoryContextMenuItemClick(position, from, to,
-                                serializedSavedTrip, item.getItemId(), from);
-                    else if (toMenu != null && item == toMenu.findItem(item.getItemId()))
-                        return contextMenuItemListener.onQueryHistoryContextMenuItemClick(position, from, to,
-                                serializedSavedTrip, item.getItemId(), to);
-                    else
-                        return contextMenuItemListener.onQueryHistoryContextMenuItemClick(position, from, to,
-                                serializedSavedTrip, item.getItemId(), null);
-                } else {
-                    return false;
-                }
-            });
-            contextMenu.show();
+        final boolean selected = rowId == selectedRowId;
+        itemView.setActivated(selected);
+        itemView.setOnClickListener(v -> {
+            final int position = getAdapterPosition();
+            if (position != RecyclerView.NO_POSITION)
+                clickListener.onEntryClick(position, from, to, via);
         });
+        itemView.setOnLongClickListener(v -> {
+            showContextMenu(v);
+            return true;
+        });
+
+        contextButton.setVisibility(selected ? View.VISIBLE : View.GONE);
+        contextButton.setOnClickListener(this::showContextMenu);
+    }
+
+    private void showContextMenu(final View view) {
+        final PopupMenu contextMenu = new PopupMenu(context, view);
+        final MenuInflater inflater = contextMenu.getMenuInflater();
+        final Menu menu = contextMenu.getMenu();
+        inflater.inflate(R.menu.directions_query_history_context, menu);
+        menu.findItem(R.id.directions_query_history_context_show_trip).setVisible(hasSavedTrip);
+        menu.findItem(R.id.directions_query_history_context_remove_trip).setVisible(hasSavedTrip);
+        menu.findItem(R.id.directions_query_history_context_add_favorite).setVisible(!isFavorite);
+        menu.findItem(R.id.directions_query_history_context_remove_favorite).setVisible(isFavorite);
+        final SubMenu fromMenu;
+        if (from.isIdentified()) {
+            fromMenu = menu.addSubMenu(from.uniqueShortName());
+            inflater.inflate(R.menu.directions_query_history_location_context, fromMenu);
+            fromMenu.findItem(R.id.directions_query_history_location_context_details)
+                    .setVisible(from.type == LocationType.STATION);
+            fromMenu.findItem(R.id.directions_query_history_location_context_add_favorite)
+                    .setVisible(from.type == LocationType.STATION && (fromFavState == null
+                            || fromFavState != FavoriteStationsProvider.TYPE_FAVORITE));
+            final SubMenu mapMenu = fromMenu.findItem(R.id.directions_query_history_location_context_map)
+                    .getSubMenu();
+            StationContextMenu.prepareMapMenu(context, mapMenu, network, from);
+        } else {
+            fromMenu = null;
+        }
+        final SubMenu toMenu;
+        if (to.isIdentified()) {
+            toMenu = menu.addSubMenu(to.uniqueShortName());
+            inflater.inflate(R.menu.directions_query_history_location_context, toMenu);
+            toMenu.findItem(R.id.directions_query_history_location_context_details)
+                    .setVisible(to.type == LocationType.STATION);
+            toMenu.findItem(R.id.directions_query_history_location_context_add_favorite)
+                    .setVisible(to.type == LocationType.STATION
+                            && (toFavState == null || toFavState != FavoriteStationsProvider.TYPE_FAVORITE));
+            final SubMenu mapMenu = toMenu.findItem(R.id.directions_query_history_location_context_map)
+                    .getSubMenu();
+            StationContextMenu.prepareMapMenu(context, mapMenu, network, to);
+        } else {
+            toMenu = null;
+        }
+        contextMenu.setOnMenuItemClickListener(item -> {
+            final int position = getAdapterPosition();
+            if (position != RecyclerView.NO_POSITION) {
+                if (fromMenu != null && item == fromMenu.findItem(item.getItemId()))
+                    return contextMenuItemListener.onQueryHistoryContextMenuItemClick(position, from, to,
+                            serializedSavedTrip, item.getItemId(), from);
+                else if (toMenu != null && item == toMenu.findItem(item.getItemId()))
+                    return contextMenuItemListener.onQueryHistoryContextMenuItemClick(position, from, to,
+                            serializedSavedTrip, item.getItemId(), to);
+                else
+                    return contextMenuItemListener.onQueryHistoryContextMenuItemClick(position, from, to,
+                            serializedSavedTrip, item.getItemId(), null);
+            } else {
+                return false;
+            }
+        });
+        contextMenu.setOnDismissListener(popupMenu -> {
+            this.contextMenu = null;
+        });
+        contextMenu.show();
+        this.contextMenu = contextMenu;
     }
 
     private class MySwipeListener extends SimpleSwipeListener {
@@ -186,6 +204,15 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
                     (child, edge, fraction, distance) -> {
                         removeOpened = fraction > 0.999;
                     });
+        }
+
+        @Override
+        public void onStartOpen(final SwipeLayout layout) {
+            super.onStartOpen(layout);
+            if (contextMenu != null) {
+                contextMenu.dismiss();
+                contextMenu = null;
+            }
         }
 
         @Override
