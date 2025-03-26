@@ -103,8 +103,9 @@ public class NavigationNotification {
 //            channel.enableVibration(true);
             channel.setVibrationPattern(VIBRATION_PATTERN_REMIND);
             if (SOUND_REMIND_VIA_NOTIFICATION >= 0) {
+                final int usage = getAudioUsageForSound(SOUND_REMIND_VIA_NOTIFICATION, false);
                 channel.setSound(ResourceUri.fromResource(context, SOUND_REMIND_VIA_NOTIFICATION),
-                        new AudioAttributes.Builder().setUsage(getAudioUsageForSound(SOUND_REMIND_VIA_NOTIFICATION)).build());
+                        new AudioAttributes.Builder().setUsage(usage).build());
             }
             getNotificationManager(context).createNotificationChannel(channel);
         }
@@ -119,14 +120,30 @@ public class NavigationNotification {
         return AudioManager.STREAM_NOTIFICATION;
     }
 
-    private static int getAudioUsageForSound(final int soundId) {
-        final String usageName = NavigationNotification.prefs.getString(Constants.PREFS_KEY_NAVIGATION_SOUND_CHANNEL, null);
+    private static int getAudioUsageForSound(final int soundId, boolean onRide) {
         int usage = AudioAttributes.USAGE_NOTIFICATION_EVENT;
-        if (usageName != null) {
-            try {
-                usage = AudioAttributes.class.getField(usageName).getInt(null);
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                log.error("bad sound usage: {}", usageName, e);
+        String prefKey = null;
+        if (soundId == SOUND_REMIND_NORMAL
+            || soundId == SOUND_REMIND_IMPORTANT
+            || soundId == SOUND_ALARM) {
+            prefKey = onRide
+                    ? Constants.PREFS_KEY_NAVIGATION_SOUND_CHANNEL_RIDE
+                    : Constants.PREFS_KEY_NAVIGATION_SOUND_CHANNEL_TRANSFER;
+        } else if (soundId == SOUND_REMIND_NEXTLEG) {
+            prefKey = Constants.PREFS_KEY_NAVIGATION_SOUND_CHANNEL_RIDE;
+        }
+        if (prefKey != null) {
+            if (Constants.PREFS_KEY_NAVIGATION_SOUND_CHANNEL_RIDE.equals(prefKey))
+                usage = AudioAttributes.USAGE_NOTIFICATION_EVENT;
+            else if (Constants.PREFS_KEY_NAVIGATION_SOUND_CHANNEL_TRANSFER.equals(prefKey))
+                usage = AudioAttributes.USAGE_ALARM;
+            final String usageName = NavigationNotification.prefs.getString(prefKey, null);
+            if (usageName != null) {
+                try {
+                    usage = AudioAttributes.class.getField(usageName).getInt(null);
+                } catch (NoSuchFieldException | IllegalAccessException e) {
+                    log.error("bad sound usage: {}", usageName, e);
+                }
             }
         }
         return usage;
@@ -358,6 +375,7 @@ public class NavigationNotification {
         boolean nextTransferCriticalChanged = false;
         boolean anyTransferCriticalChanged = false;
         int reminderSoundId = 0;
+        boolean onRide = tripRenderer.nextEventTypeIsPublic;
         final long nextEventTimeLeftMs = tripRenderer.nextEventTimeLeftMs;
         final long nextEventTimeLeftTo10MinsBoundaryMs = nowTime
                 + nextEventTimeLeftMs - (nextEventTimeLeftMs / 600000) * 600000;
@@ -538,56 +556,31 @@ public class NavigationNotification {
         getNotificationManager(context).notify(notificationTag, 0, notification);
 
         if (anyChanges) {
-            playAlarmSoundAndVibration(-1, SOUND_ALARM, VIBRATION_PATTERN_ALARM);
+            playAlarmSoundAndVibration(-1, SOUND_ALARM, VIBRATION_PATTERN_ALARM, onRide);
         } else if (reminderSoundId != 0 && reminderSoundId != SOUND_REMIND_VIA_NOTIFICATION) {
-            playAlarmSoundAndVibration(-1, reminderSoundId, VIBRATION_PATTERN_REMIND);
+            playAlarmSoundAndVibration(-1, reminderSoundId, VIBRATION_PATTERN_REMIND, onRide);
         }
 
         lastNotified = newNotified;
         return anyChanges || reminderSoundId != 0;
     }
 
-    private void playAlarmSoundAndVibration(final int soundUsage, final int aSoundId, final long[] vibrationPattern) {
-        final int actualSoundId = getActualSound(aSoundId);
-        if (configuration.soundEnabled) {
-            final int usage = soundUsage >= 0 ? soundUsage : getAudioUsageForSound(actualSoundId);
-            final AudioAttributes audioAttributes = new AudioAttributes.Builder()
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .setUsage(usage)
-                    .build();
-            final Ringtone alarmTone = RingtoneManager.getRingtone(context, ResourceUri.fromResource(context, actualSoundId));
-            alarmTone.setAudioAttributes(audioAttributes);
-            final AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-            final AudioFocusRequest audioFocusRequest =
-                    new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
-                            .setAudioAttributes(audioAttributes)
-                            .setAcceptsDelayedFocusGain(false)
-                            .setWillPauseWhenDucked(false)
-                            .build();
-            audioManager.requestAudioFocus(audioFocusRequest);
-            alarmTone.play();
-            new Thread(() -> {
-                log.info("sound starts playing: {}", actualSoundId);
-                while (alarmTone.isPlaying()) {
-//                    log.info("sound is playing");
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        break;
-                    }
-                }
-                log.info("sound has stopped: {}", actualSoundId);
-                audioManager.abandonAudioFocusRequest(audioFocusRequest);
-            }).start();
-        }
-        if (vibrationPattern != null) {
-            ((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(vibrationPattern, -1);
-        }
+    private void playAlarmSoundAndVibration(
+            final int soundUsage,
+            final int aSoundId,
+            final long[] vibrationPattern,
+            boolean onRide) {
+        final int actualSoundId = configuration.soundEnabled ? getActualSound(aSoundId) : 0;
+        final int actualUsage = soundUsage >= 0 ? soundUsage : getAudioUsageForSound(aSoundId, onRide);
+        final NotificationSoundManager soundManager = NotificationSoundManager.getInstance();
+        soundManager.playAlarmSoundAndVibration(actualUsage, actualSoundId, vibrationPattern);
     }
 
-    private void playBeep(final int soundUsage, final int soundId) {
+    private void playBeep(
+            final int soundUsage,
+            final int soundId) {
         if (prefs.getBoolean(Constants.PREFS_KEY_NAVIGATION_REFRESH_BEEP, true))
-            playAlarmSoundAndVibration(soundUsage, soundId, null);
+            playAlarmSoundAndVibration(soundUsage, soundId, null, false);
     }
 
     public void remove() {

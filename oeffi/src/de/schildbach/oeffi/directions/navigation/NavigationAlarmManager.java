@@ -26,7 +26,6 @@ public class NavigationAlarmManager {
     private static final Logger log = LoggerFactory.getLogger(NavigationAlarmManager.class);
     public static final SimpleDateFormat LOG_TIME_FORMAT = new SimpleDateFormat("HH:mm:ss");
 
-
     public static NavigationAlarmManager getInstance() {
         if (instance == null) {
             instance = new NavigationAlarmManager();

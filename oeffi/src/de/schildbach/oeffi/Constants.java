@@ -58,7 +58,8 @@ public class Constants {
     public static final String PREFS_KEY_LAST_VERSION = "last_version";
     public static final String PREFS_KEY_SHOW_INFO = "show_hints";
     public static final String PREFS_KEY_LAST_INFO_AT = "last_hint_at";
-    public static final String PREFS_KEY_NAVIGATION_SOUND_CHANNEL = "navigation_sound_channel";
+    public static final String PREFS_KEY_NAVIGATION_SOUND_CHANNEL_RIDE = "navigation_sound_channel_ride";
+    public static final String PREFS_KEY_NAVIGATION_SOUND_CHANNEL_TRANSFER = "navigation_sound_channel_transfer";
     public static final String PREFS_KEY_NAVIGATION_REDUCED_SOUNDS = "navigation_reduced_sounds";
     public static final String PREFS_KEY_NAVIGATION_REFRESH_BEEP = "navigation_refresh_beep";
 

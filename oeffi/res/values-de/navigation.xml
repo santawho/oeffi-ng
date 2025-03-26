@@ -2,13 +2,15 @@
 <resources>
     <string name="navigation_preferences_title">Navigation</string>
 
-    <string name="navigation_preferences_sound_channel_summary">Audio Kanal, auf dem Navigations-Erinnerungen gespielt werden</string>
-    <string name="navigation_preferences_sound_channel_title">Audio Kanal</string>
+    <string name="navigation_preferences_sound_channel_ride_summary">Audio Kanal, auf dem Navigations-Erinnerungen während einer Fahrt (im Zug, Bus) gespielt werden. [%s]</string>
+    <string name="navigation_preferences_sound_channel_ride_title">Audio Kanal während Fahrt</string>
+    <string name="navigation_preferences_sound_channel_transfer_summary">Audio Kanal, auf dem Navigations-Erinnerungen während des Umsteigens (in lauten Bereichen) gespielt werden. [%s]</string>
+    <string name="navigation_preferences_sound_channel_transfer_title">Audio Kanal während Umsteigen</string>
     <string-array name="navigation_sound_channel">
         <item>Navigation</item>
         <item>Medien</item>
-        <item>Benachrichtigung</item>
-        <item>Alarm</item>
+        <item>Benachrichtigung (leiser)</item>
+        <item>Alarm (lauter)</item>
     </string-array>
 
     <string name="navigation_preferences_reduced_sounds_summary">Nutze reduzierte Töne (kürzer und geringer Lautstärke) als Navigations-Erinnerungen</string>

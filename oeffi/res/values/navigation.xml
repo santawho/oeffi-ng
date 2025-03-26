@@ -2,13 +2,15 @@
 <resources>
     <string name="navigation_preferences_title">Navigation</string>
 
-    <string name="navigation_preferences_sound_channel_summary">Audio channel to play navigation reminders</string>
-    <string name="navigation_preferences_sound_channel_title">Audio Channel</string>
+    <string name="navigation_preferences_sound_channel_ride_summary">Audio channel to play navigation reminders while being on a train, bus, etc. [%s]</string>
+    <string name="navigation_preferences_sound_channel_ride_title">Audio Channel on Ride</string>
+    <string name="navigation_preferences_sound_channel_transfer_summary">Audio channel to play navigation reminders while changing rides. [%s]</string>
+    <string name="navigation_preferences_sound_channel_transfer_title">Audio Channel during Transfer</string>
     <string-array name="navigation_sound_channel">
         <item>Navigation</item>
         <item>Media</item>
-        <item>Notification</item>
-        <item>Alarm</item>
+        <item>Notification (quieter)</item>
+        <item>Alarm (louder)</item>
     </string-array>
     <string-array name="navigation_sound_channel_values">
         <item>USAGE_ASSISTANCE_NAVIGATION_GUIDANCE</item>
