@@ -18,18 +18,32 @@
 package de.schildbach.oeffi.preference;
 
 import android.app.Activity;
+import android.app.ComponentCaller;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.view.MenuItem;
 import android.view.View;
+
+import androidx.annotation.NonNull;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
 
 import java.util.List;
 
 public class PreferenceActivity extends android.preference.PreferenceActivity {
+    public interface ActionHandler {
+        boolean handleAction(final Context context, final String prefkey);
+    }
+
+    public static final String EXTRA_PREFKEY = "prefkey";
+    public static final String EXTRA_HANDLER = "handler";
+
     public static void start(final Activity activity) {
         activity.startActivity(new Intent(activity, PreferenceActivity.class));
     }
@@ -38,6 +52,12 @@ public class PreferenceActivity extends android.preference.PreferenceActivity {
         final Intent intent = new Intent(activity, PreferenceActivity.class);
         intent.putExtra(EXTRA_SHOW_FRAGMENT, fragmentName);
         activity.startActivity(intent);
+    }
+
+    public static void setActionIntent(final Preference preference, final Class<? extends ActionHandler> actionHandlerClass) {
+        preference.setIntent(new Intent(Application.getInstance(), PreferenceActivity.class)
+                .putExtra(EXTRA_PREFKEY, preference.getKey())
+                .putExtra(EXTRA_HANDLER, actionHandlerClass.getName()));
     }
 
     @Override
@@ -49,6 +69,30 @@ public class PreferenceActivity extends android.preference.PreferenceActivity {
             v.setPadding(v.getPaddingLeft(), insets.top, v.getPaddingRight(), v.getPaddingBottom());
             return windowInsets;
         });
+        if (handleIntent(getIntent()))
+            finish();
+    }
+
+    @Override
+    public void onNewIntent(@NonNull final Intent intent, @NonNull final ComponentCaller caller) {
+        super.onNewIntent(intent, caller);
+        if (handleIntent(intent))
+            finish();
+    }
+
+    private boolean handleIntent(final Intent intent) {
+        final String prefkey = intent.getStringExtra(EXTRA_PREFKEY);
+        if (prefkey == null)
+            return false;
+        final String handlerClassName = intent.getStringExtra(EXTRA_HANDLER);
+        try {
+            final Class handlerClass = Class.forName(handlerClassName);
+            final ActionHandler actionHandler = (ActionHandler) handlerClass.newInstance();
+            actionHandler.handleAction(this, prefkey);
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+            throw new RuntimeException(e);
+        }
+        return false;
     }
 
     @Override
@@ -74,6 +118,7 @@ public class PreferenceActivity extends android.preference.PreferenceActivity {
         return CommonFragment.class.getName().equals(fragmentName)
                 || DirectionsFragment.class.getName().equals(fragmentName)
                 || NavigationFragment.class.getName().equals(fragmentName)
+                || ShortcutsFragment.class.getName().equals(fragmentName)
                 || AboutFragment.class.getName().equals(fragmentName)
                 || DonateFragment.class.getName().equals(fragmentName);
     }

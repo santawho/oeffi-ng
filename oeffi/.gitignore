@@ -3,4 +3,4 @@
 /.settings/
 /bin/
 /gen/
-/res/mipmap-*/
+/res/mipmap-*/*.png

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <Preference
+        android:key="shortcuts_directions"
+        android:title="@string/directions_activity_title">
+    </Preference>
+    <Preference
+        android:key="shortcuts_stations"
+        android:title="@string/stations_activity_title">
+    </Preference>
+    <Preference
+        android:key="shortcuts_plans"
+        android:title="@string/plans_activity_title">
+    </Preference>
+
+</PreferenceScreen>

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="stations_icon_label">Offi Stations</string>
-    <string name="directions_icon_label">Offi Directions</string>
-    <string name="plans_icon_label">Offi Plans</string>
+    <string name="stations_icon_label">Öffi Stations</string>
+    <string name="directions_icon_label">Öffi Directions</string>
+    <string name="plans_icon_label">Öffi Plans</string>
     <string name="disclaimer_network">data provided by\n%s</string>
     <string name="disclaimer_responsibility">errors and omissions excepted</string>
     <string name="disclaimer_responsibility_2line">errors and omis-\nsions excepted</string>
-    <string name="navigation_drawer_message">I\'m developing Offi with love in my spare time. It\'s free to use and there are no ads. If you would like show your support, can you rate the app 5 stars and recommend it to your friends?</string>
+    <string name="navigation_drawer_message">I\'m developing Öffi with love in my spare time. It\'s free to use and there are no ads. If you would like show your support, can you rate the app 5 stars and recommend it to your friends?</string>
 
     <!-- action bar -->
     <string name="action_bar_navigator_description">Navigator</string>
@@ -33,7 +33,7 @@
     <string name="global_options_show_log_title">Show log</string>
     <string name="global_options_report_bug_title">Report bug</string>
     <string name="global_options_preferences_title">Settings</string>
-    <string name="global_options_about_title">About Offi</string>
+    <string name="global_options_about_title">About Öffi</string>
     <string name="global_options_share_app_title">Share Öffi-NG</string>
     <string name="global_options_share_app_text">This is the link to download and install the Öffi-NG app.\n\n%1$s</string>
 
@@ -48,8 +48,12 @@
     <string name="global_preferences_battery_optimizations_title">Battery optimizations</string>
     <string name="global_preferences_battery_optimizations_summary">If the app-widget cannot fetch departure times while your device is in standby, you should disable battery optimizations for Öffi.</string>
 
+    <!-- preferences shortcuts -->
+    <string name="shortcuts_preferences_title">Homescreen Shortcuts</string>
+    <string name="shortcuts_preferences_summary">Create shortcuts on homescreen</string>
+
     <!-- preferences about -->
-    <string name="about_title">About Offi</string>
+    <string name="about_title">About Öffi</string>
     <string name="about_copyright_title">Copyright</string>
     <string name="about_copyright_summary">© 2010-2025, the Öffi developers</string>
     <string name="about_license_title">License</string>
@@ -63,7 +67,7 @@
     <string name="about_update_title">Update</string>
     <string name="about_update_summary">Download latest APK</string>
     <string name="about_participate_title">Participate</string>
-    <string name="about_market_app_title">Rate or Review Offi</string>
+    <string name="about_market_app_title">Rate or Review Öffi</string>
     <string name="about_donate_title">Donations</string>
     <string name="about_donate_bitcoin_title">Donate Bitcoins</string>
     <string name="about_donate_bitcoin_summary">Bitcoin is an Internet currency.</string>
@@ -71,7 +75,7 @@
     <string name="about_donate_euro_summary">https://oeffi.schildbach.de/donate.html</string>
 
     <!-- network picker -->
-    <string name="network_picker_firsttime_message">Because you are using Offi for the first time, you need to pick a region that suits you well. You
+    <string name="network_picker_firsttime_message">Because you are using Öffi for the first time, you need to pick a region that suits you well. You
 		can change this later.</string>
     <string name="network_picker_entry_usage">%.1f MB\ninstalled</string>
     <string name="network_picker_entry_license">License:\n%s</string>
@@ -235,7 +239,7 @@
 
     <!-- query history -->
     <string name="directions_query_history_empty">No saved queries yet</string>
-    <string name="directions_query_history_invalid_blob">Cannot display this trip, as it was created by a previous Offi version.</string>
+    <string name="directions_query_history_invalid_blob">Cannot display this trip, as it was created by a previous Öffi version.</string>
     <string name="directions_query_history_clear_confirm_message">Are you sure you want to remove all of your saved queries?</string>
     <string name="directions_query_history_clear_confirm_button_clear">Clear</string>
     <string name="directions_query_history_clear_confirm_button_dismiss">Dismiss</string>
@@ -400,7 +404,7 @@
     <string name="alert_message_button_dismiss">Dismiss</string>
     <string name="alert_message_button_update">Update app</string>
     <string name="alert_crash_report_title">Previous crash detected</string>
-    <string name="alert_crash_report_new_version">There is a new Offi version %s available. You should update, as your problem might already have been fixed.</string>
+    <string name="alert_crash_report_new_version">There is a new Öffi version %s available. You should update, as your problem might already have been fixed.</string>
     <string name="alert_crash_report_message">Would you like to send a crash report, helping to fix this issue in the future?</string>
     <string name="alert_crash_report_positive">Send</string>
     <string name="alert_crash_report_download">Download</string>

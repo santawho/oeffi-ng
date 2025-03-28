@@ -99,7 +99,7 @@
             android:taskAffinity="${applicationId}.stations">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
@@ -178,9 +178,10 @@
             android:exported="true"
             android:configChanges="keyboard|keyboardHidden"
             android:icon="@mipmap/ic_oeffi_ng_directions_color_48dp"
-            android:label="@string/directions_icon_label"
+            android:label="@string/app_name"
             android:taskAffinity="${applicationId}.directions"
             android:windowSoftInputMode="stateHidden">
+<!--            android:label="@string/directions_icon_label"-->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -260,7 +261,7 @@
             android:taskAffinity="${applicationId}.plans">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />

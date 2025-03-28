@@ -17,10 +17,17 @@
 
 package de.schildbach.oeffi;
 
+import android.content.ComponentName;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.preference.PreferenceManager;
+
+import androidx.core.content.pm.ShortcutInfoCompat;
+import androidx.core.content.pm.ShortcutManagerCompat;
+import androidx.core.graphics.drawable.IconCompat;
+
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.android.LogcatAppender;
@@ -29,8 +36,12 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
 import com.google.common.base.Stopwatch;
+
+import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.directions.QueryHistoryProvider;
+import de.schildbach.oeffi.plans.PlansPickerActivity;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
+import de.schildbach.oeffi.stations.StationsActivity;
 import de.schildbach.oeffi.util.ErrorReporter;
 import de.schildbach.pte.NetworkId;
 import okhttp3.OkHttpClient;
@@ -84,6 +95,8 @@ public class Application extends android.app.Application {
         }
 
         log.info("=== Starting app version {} ({})", packageInfo.versionName, packageInfo.versionCode);
+
+        createShortcuts();
 
         final OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.followRedirects(false);
@@ -251,5 +264,54 @@ public class Application extends android.app.Application {
 
     public static final int versionCode(final Application application) {
         return application.packageInfo().versionCode;
+    }
+
+    private void createShortcuts() {
+        ShortcutManagerCompat.removeAllDynamicShortcuts(this);
+        createLauncherShortcut("idDS",
+                DirectionsActivity.class,
+                StationsActivity.class,
+                R.string.stations_activity_title,
+                R.drawable.ic_oeffi_stations_grey600_36dp);
+        createLauncherShortcut("idDP",
+                DirectionsActivity.class,
+                PlansPickerActivity.class,
+                R.string.plans_activity_title,
+                R.drawable.ic_oeffi_plans_grey600_36dp);
+//        createLauncherShortcut("idSD",
+//                StationsActivity.class,
+//                DirectionsActivity.class,
+//                R.string.directions_activity_title,
+//                R.drawable.ic_oeffi_directions_grey600_36dp);
+//        createLauncherShortcut("idSP",
+//                StationsActivity.class,
+//                PlansPickerActivity.class,
+//                R.string.plans_activity_title,
+//                R.drawable.ic_oeffi_plans_grey600_36dp);
+//        createLauncherShortcut("idPD",
+//                PlansPickerActivity.class,
+//                DirectionsActivity.class,
+//                R.string.directions_activity_title,
+//                R.drawable.ic_oeffi_directions_grey600_36dp);
+//        createLauncherShortcut("idPS",
+//                PlansPickerActivity.class,
+//                StationsActivity.class,
+//                R.string.stations_activity_title,
+//                R.drawable.ic_oeffi_stations_grey600_36dp);
+    }
+
+    private void createLauncherShortcut(
+            final String shortcutId,
+            final Class<?> sourceActivityClass,
+            final Class<?> targetActivityClass,
+            final int titleId,
+            final int iconId) {
+        ShortcutManagerCompat.pushDynamicShortcut(this, new ShortcutInfoCompat
+                .Builder(this, shortcutId)
+                .setActivity(new ComponentName(this, sourceActivityClass))
+                .setShortLabel(getString(titleId))
+                .setIcon(IconCompat.createWithResource(this, iconId))
+                .setIntent(new Intent(this, targetActivityClass).setAction(Intent.ACTION_MAIN))
+                .build());
     }
 }
