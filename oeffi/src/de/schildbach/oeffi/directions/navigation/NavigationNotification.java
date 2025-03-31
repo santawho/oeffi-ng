@@ -744,6 +744,8 @@ public class NavigationNotification {
         if (tripRenderer.nextEventArrivalPosName != null) {
             remoteViews.setViewVisibility(R.id.navigation_notification_next_event_position_from, View.VISIBLE);
             remoteViews.setTextViewText(R.id.navigation_notification_next_event_position_from, tripRenderer.nextEventArrivalPosName);
+            remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_position_from,
+                    context.getColor(tripRenderer.nextEventArrivalPosChanged ? R.color.bg_position_changed : R.color.bg_position));
         } else {
             remoteViews.setViewVisibility(R.id.navigation_notification_next_event_position_from, View.GONE);
         }

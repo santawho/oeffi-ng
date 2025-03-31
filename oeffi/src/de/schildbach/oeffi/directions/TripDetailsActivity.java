@@ -1245,6 +1245,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         if (tripRenderer.nextEventArrivalPosName != null) {
             from.setVisibility(View.VISIBLE);
             from.setText(tripRenderer.nextEventArrivalPosName);
+            from.setBackgroundColor(tripRenderer.nextEventArrivalPosChanged ? colorPositionBackgroundChanged : colorPositionBackground);
         } else {
             from.setVisibility(View.GONE);
         }
