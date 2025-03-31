@@ -380,7 +380,7 @@ public class NearestFavoriteStationWidgetService extends JobService {
                 if (stationDepartures.location.name != null)
                     views.setTextViewText(R.id.station_widget_header, stationDepartures.location.name);
 
-                final List<Departure> departures = stationDepartures.departures;
+                final List<Departure> departures = stationDepartures.getNonCancelledDepartures();
 
                 if (!departures.isEmpty())
                     setDeparturesList(departures, appWidgetId);

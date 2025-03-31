@@ -1083,11 +1083,11 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                                             for (final StationDepartures stationDepartures : result.stationDepartures) {
                                                 final String stationId = stationDepartures.location.id;
                                                 final Station resultStation = stationsMap.get(stationId);
+                                                final List<Departure> departures = stationDepartures.getNonCancelledDepartures();
                                                 if (resultStation != null && (requestedStationId.equals(stationId)
                                                         || (resultStation.requestedAt == null
-                                                                && !stationDepartures.departures.isEmpty()))) {
+                                                                && !departures.isEmpty()))) {
                                                     // Trim departures
-                                                    final List<Departure> departures = stationDepartures.departures;
                                                     while (departures.size() > maxDepartures)
                                                         departures.remove(departures.size() - 1);
 

@@ -286,27 +286,29 @@ public class PlanActivity extends ComponentActivity {
                 @Override
                 protected void onResult(final QueryDeparturesResult result) {
                     log.info("Got {}", result.toShortString());
-                    if (result.status == QueryDeparturesResult.Status.OK) {
-                        final StationDepartures stationDeparture = result.findStationDepartures(selection.location.id);
-                        if (stationDeparture != null) {
-                            bubbleLinesView.setVisibility(View.GONE);
+                    if (result.status != QueryDeparturesResult.Status.OK)
+                        return;
+                    final StationDepartures stationDepartures = result.findStationDepartures(selection.location.id);
+                    if (stationDepartures == null)
+                        return;
+                    bubbleLinesView.setVisibility(View.GONE);
 
-                            // collect lines, remove duplicates, sort
-                            final Set<Line> lines = new TreeSet<>();
-                            final List<LineDestination> lineDestinations = stationDeparture.lines;
-                            if (lineDestinations != null)
-                                for (final LineDestination lineDestination : lineDestinations)
-                                    lines.add(lineDestination.line);
-                            if (stationDeparture.departures != null)
-                                for (final Departure departure : stationDeparture.departures)
-                                    lines.add(departure.line);
-
-                            // add lines to bubble
-                            bubbleLinesView.setVisibility(View.VISIBLE);
-                            bubbleLinesView.setLines(lines);
-                            updateBubble();
+                    // collect lines, remove duplicates, sort
+                    final Set<Line> lines = new TreeSet<>();
+                    final List<LineDestination> lineDestinations = stationDepartures.lines;
+                    if (lineDestinations != null)
+                        for (final LineDestination lineDestination : lineDestinations)
+                            lines.add(lineDestination.line);
+                    if (stationDepartures.departures != null)
+                        for (final Departure departure : stationDepartures.departures) {
+                            if (!departure.cancelled)
+                                lines.add(departure.line);
                         }
-                    }
+
+                    // add lines to bubble
+                    bubbleLinesView.setVisibility(View.VISIBLE);
+                    bubbleLinesView.setLines(lines);
+                    updateBubble();
                 }
 
                 @Override
