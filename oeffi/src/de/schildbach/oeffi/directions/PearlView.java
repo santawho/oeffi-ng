@@ -42,7 +42,7 @@ public class PearlView extends View {
     private final Paint paint = new Paint();
 
     public enum Type {
-        DEPARTURE, ARRIVAL, INTERMEDIATE, PASSING
+        DEPARTURE, ARRIVAL, INTERMEDIATE_ARRIVAL, INTERMEDIATE_DEPARTURE, PASSING
     }
 
     public PearlView(final Context context) {
@@ -136,7 +136,9 @@ public class PearlView extends View {
             canvas.drawCircle(x, y, intermediateSize / 2, paint);
         } else if (type == Type.PASSING) {
             drawLine(canvas, x, 0, height);
-        } else if (type == Type.INTERMEDIATE) {
+        } else if (type == Type.INTERMEDIATE_DEPARTURE) {
+            drawLine(canvas, x, 0, height);
+        } else if (type == Type.INTERMEDIATE_ARRIVAL) {
             drawLine(canvas, x, 0, height);
 
             paint.setStyle(Paint.Style.FILL);
