@@ -10,7 +10,40 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingLeft="@dimen/text_padding_horizontal_lax">
+        android:paddingStart="@dimen/text_padding_horizontal_lax">
+
+        <LinearLayout
+            android:id="@+id/directions_trip_details_individual_entry_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginTop="@dimen/text_padding_vertical_lax"
+            android:layout_marginBottom="@dimen/text_padding_vertical_lax"
+            android:paddingEnd="@dimen/text_padding_horizontal_lax"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/directions_trip_details_individual_entry_time_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:textStyle="bold"
+                android:textSize="@dimen/font_size_xlarge" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:textSize="@dimen/font_size_tiny"
+                android:text="min"/>
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/directions_trip_details_individual_entry_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginTop="@dimen/text_padding_vertical_lax"
+            android:layout_marginBottom="@dimen/text_padding_vertical_lax"
+            android:paddingEnd="@dimen/text_padding_horizontal_lax"/>
 
         <TextView
             android:id="@+id/directions_trip_details_individual_entry_text"
@@ -19,7 +52,6 @@
             android:layout_marginTop="@dimen/text_padding_vertical_lax"
             android:layout_marginBottom="@dimen/text_padding_vertical_lax"
             android:layout_weight="1"
-            android:drawablePadding="@dimen/text_padding_horizontal_cram"
             android:textSize="@dimen/font_size_large" />
 
         <ImageButton

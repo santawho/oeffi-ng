@@ -269,10 +269,10 @@
     <string name="directions_trip_details_finished">Finished</string>
     <string name="directions_trip_details_duration">Duration %s</string>
     <string name="directions_trip_details_num_changes">%d ch.</string>
-    <string name="directions_trip_details_walk">walk of &lt;b>%1$d minutes&lt;/b> %2$sto&lt;br/>%3$s</string>
-    <string name="directions_trip_details_bike">bike ride of &lt;b>%1$d minutes&lt;/b> %2$sto&lt;br/>%3$s</string>
-    <string name="directions_trip_details_car">car ride of &lt;b>%1$d minutes&lt;/b> %2$sto&lt;br/>%3$s</string>
-    <string name="directions_trip_details_transfer">&lt;b>%1$d minutes&lt;/b> %2$stransfer to&lt;br/>%3$s</string>
+    <string name="directions_trip_details_walk">walk of &lt;b>%1$d minutes&lt;/b> %2$sto %3$s</string>
+    <string name="directions_trip_details_bike">bike ride of &lt;b>%1$d minutes&lt;/b> %2$sto %3$s</string>
+    <string name="directions_trip_details_car">car ride of &lt;b>%1$d minutes&lt;/b> %2$sto %3$s</string>
+    <string name="directions_trip_details_transfer">&lt;b>%1$d minutes&lt;/b> %2$stransfer to %3$s</string>
     <string name="directions_trip_details_realtime">Times printed in &lt;i>italics&lt;/i> are real-time.</string>
     <string name="directions_trip_details_public_entry_accessibility">Section is barrier free.</string>
     <string name="directions_trip_details_public_entry_bicycle_carriage">Bikes may be carried.</string>

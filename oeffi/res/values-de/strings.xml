@@ -268,10 +268,10 @@
     <string name="directions_trip_details_finished">Beendet</string>
     <string name="directions_trip_details_duration">Dauer %s</string>
     <string name="directions_trip_details_num_changes">%d Umst.</string>
-    <string name="directions_trip_details_walk">&lt;b>%1$d Minuten&lt;/b> %2$sFußweg nach&lt;br/>%3$s</string>
-    <string name="directions_trip_details_bike">&lt;b>%1$d Minuten&lt;/b> %2$sFahrt mit dem Fahrrad nach&lt;br/>%3$s</string>
-    <string name="directions_trip_details_car">&lt;b>%1$d Minuten&lt;/b> %2$sFahrt mit dem Auto nach&lt;br/>%3$s</string>
-    <string name="directions_trip_details_transfer">&lt;b>%1$d Minuten&lt;/b> %2$sTransfer nach&lt;br/>%3$s</string>
+    <string name="directions_trip_details_walk">&lt;b>%1$d Minuten&lt;/b> %2$sFußweg nach %3$s</string>
+    <string name="directions_trip_details_bike">&lt;b>%1$d Minuten&lt;/b> %2$sFahrt mit dem Fahrrad nach %3$s</string>
+    <string name="directions_trip_details_car">&lt;b>%1$d Minuten&lt;/b> %2$sFahrt mit dem Auto nach %3$s</string>
+    <string name="directions_trip_details_transfer">&lt;b>%1$d Minuten&lt;/b> %2$sTransfer nach %3$s</string>
     <string name="directions_trip_details_realtime">&lt;i>Kursiv&lt;/i> gedruckte Uhrzeiten sind Echtzeit.</string>
     <string name="directions_trip_details_public_entry_accessibility">Der Abschnitt ist barrierefrei.</string>
     <string name="directions_trip_details_public_entry_bicycle_carriage">Die Fahrradmitnahme ist möglich.</string>

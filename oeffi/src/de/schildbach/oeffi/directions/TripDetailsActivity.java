@@ -1034,7 +1034,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     private boolean updateIndividualLeg(final View row, final TripRenderer.LegContainer legC, final Date now) {
         final Trip.Individual leg = legC.individualLeg;
-        final TextView textView = row.findViewById(R.id.directions_trip_details_individual_entry_text);
         String legText = null;
         final int iconResId;
         int requiredSecs = 0;
@@ -1067,14 +1066,17 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 mapView.setOnClickListener(new MapClickListener(leg.arrival));
             }
         } else if (legC.transferFrom != null) {
-            // walk after some public transport
-            iconResId = R.drawable.ic_directions_walk_grey600_24dp;
+            // no time walk after some public transport
+//            iconResId = R.drawable.ic_directions_walk_grey600_24dp;
+            iconResId = 0;
         } else {
             // walk before anything
             iconResId = 0;
         }
 
         String transferText = null;
+        String timeText = null;
+        boolean timeIsCritical = false;
         final Stop transferFrom = legC.transferFrom != null ? legC.transferFrom.publicLeg.arrivalStop : null;
         final Stop transferTo = legC.transferTo != null ? legC.transferTo.publicLeg.departureStop : null;
         if (transferFrom == null) {
@@ -1090,21 +1092,27 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             long diffMaxSecs = (depMaxTime.getTime() - arrMaxTime.getTime()) / 1000 - 60;
             long leftMinSecs = diffMinSecs - requiredSecs;
             long leftMaxSecs = diffMaxSecs - requiredSecs;
+            timeText = Long.toString((diffMaxSecs + 30) / 60);
             if (diffMaxSecs < 0) {
+                timeIsCritical = true;
                 transferText = getString(R.string.directions_trip_conneval_missed, (-diffMaxSecs - 60) / 60);
+                timeText = Long.toString(-((-diffMaxSecs - 30) / 60));
             } else if (leftMaxSecs < 0) {
+                timeIsCritical = true;
                 if (diffMinSecs < 0) {
                     transferText = getString(R.string.directions_trip_conneval_difficult_possibly_missed, diffMaxSecs / 60);
                 } else {
                     transferText = getString(R.string.directions_trip_conneval_difficult, diffMaxSecs / 60);
                 }
             } else if (leftMaxSecs < 180) {
+                timeIsCritical = true;
                 if (leftMinSecs < 0) {
                     transferText = getString(R.string.directions_trip_conneval_endangered_possibly_difficult, diffMaxSecs / 60);
                 } else {
                     transferText = getString(R.string.directions_trip_conneval_endangered, diffMaxSecs / 60);
                 }
             } else if (leftMinSecs < 0) {
+                timeIsCritical = true;
                 transferText = getString(R.string.directions_trip_conneval_possibly_difficult, diffMaxSecs / 60);
             } else if (leftMinSecs < 180) {
                 transferText = getString(R.string.directions_trip_conneval_possibly_endangered, diffMaxSecs / 60);
@@ -1120,12 +1128,30 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 : legText == null ? transferText
                 : getString(R.string.directions_trip_conneval_with_transfer, transferText, legText);
 
-        if (text == null && iconResId == 0) {
+        final TextView textView = row.findViewById(R.id.directions_trip_details_individual_entry_text);
+        if (text == null) {
             textView.setVisibility(View.GONE);
         } else {
             textView.setVisibility(View.VISIBLE);
             textView.setText(Html.fromHtml(text != null ? text : ""));
-            textView.setCompoundDrawablesWithIntrinsicBounds(iconResId, 0, 0, 0);
+        }
+
+        final ImageView iconView = row.findViewById(R.id.directions_trip_details_individual_entry_icon);
+        if (iconResId == 0) {
+            iconView.setVisibility(View.GONE);
+        } else {
+            iconView.setVisibility(View.VISIBLE);
+            iconView.setImageDrawable(getDrawable(iconResId));
+        }
+
+        final View timeView = row.findViewById(R.id.directions_trip_details_individual_entry_time);
+        if (timeText == null) {
+            timeView.setVisibility(View.GONE);
+        } else {
+            timeView.setVisibility(View.VISIBLE);
+            final TextView timeTextView = row.findViewById(R.id.directions_trip_details_individual_entry_time_text);
+            timeTextView.setText(timeText);
+            timeTextView.setTextColor(getColor(timeIsCritical ? R.color.fg_trip_next_event_important : R.color.fg_significant));
         }
 
         final TextView progress = row.findViewById(R.id.directions_trip_details_individual_entry_progress);
