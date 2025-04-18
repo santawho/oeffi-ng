@@ -378,7 +378,7 @@ public class NavigationNotification {
         boolean onRide = tripRenderer.nextEventTypeIsPublic;
         final long nextEventTimeLeftMs = tripRenderer.nextEventTimeLeftMs;
         final long nextEventTimeLeftTo10MinsBoundaryMs = nowTime
-                + nextEventTimeLeftMs - (nextEventTimeLeftMs / 600000) * 600000;
+                + nextEventTimeLeftMs - (nextEventTimeLeftMs / 600000) * 600000 + 2000;
         if (nextEventTimeLeftTo10MinsBoundaryMs < nextRefreshTimeMs)
             nextRefreshTimeMs = nextEventTimeLeftTo10MinsBoundaryMs;
         if (lastNotified == null || newNotified.currentLegIndex != lastNotified.currentLegIndex) {
