@@ -545,10 +545,10 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                         startYabs = (int) timeToCoord(publicDepartureTime.getTime(), height);
                         departurePosition = publicDepartureStop.getDeparturePosition();
                         if (departurePosition != null && !startCancelled) {
-//                            final long minutesFromNow = (startTime.getTime() - now) / 60000;
-//                            if (minutesFromNow > -10 && minutesFromNow < 30) {
-                            final long minutesFromRequestedTime = (startTime.getTime() - baseTime) / 60000;
-                            if (minutesFromRequestedTime > -10 && minutesFromRequestedTime < 30) {
+//                            final long minutesFromRequestedTime = (startTime.getTime() - baseTime) / 60000;
+//                            if (minutesFromRequestedTime > -10 && minutesFromRequestedTime < 30) {
+                            final long minutesFromNow = (startTime.getTime() - now) / 60000;
+                            if (minutesFromNow > -10 && minutesFromNow < 30) {
                                 startYabs = drawPosition(canvas, centerX, startYabs, height, -1, departurePosition.name);
                             }
                         }
@@ -721,16 +721,22 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                         }
 
                         if (referenceTime.depArr == TimeSpec.DepArr.DEPART) {
-                            final long millisFromRequestedTime = tDeparture - baseTime;
-                            final long minutesFromRequestedTime = millisFromRequestedTime / 60000;
-                            if (!departureCancelled && (minutesFromRequestedTime > -10 && minutesFromRequestedTime < 30)
-                            ) {
+                            if (!departureCancelled) {
                                 startYabs = (int) legBox.top;
                                 departurePosition = departureStop.getDeparturePosition();
-                                if (departurePosition != null)
-                                    startYabs = drawPosition(canvas, centerX, startYabs, height, -1, departurePosition.name);
-                                if (publicLeg != firstPublicLeg)
-                                    startYabs = drawRemaining(canvas, centerX, startYabs, height, true, publicTimeDiffPaint, false, millisFromRequestedTime);
+                                if (departurePosition != null) {
+                                    final long minutesFromNow = (tDeparture - now) / 60000;
+                                    if (minutesFromNow > -10 && minutesFromNow < 30) {
+                                        startYabs = drawPosition(canvas, centerX, startYabs, height, -1, departurePosition.name);
+                                    }
+                                }
+                                if (publicLeg != firstPublicLeg) {
+                                    final long millisFromRequestedTime = tDeparture - baseTime;
+                                    final long minutesFromRequestedTime = millisFromRequestedTime / 60000;
+                                    if (minutesFromRequestedTime > -10 && minutesFromRequestedTime < 30) {
+                                        startYabs = drawRemaining(canvas, centerX, startYabs, height, true, publicTimeDiffPaint, false, millisFromRequestedTime);
+                                    }
+                                }
                             }
                         }
                     }
