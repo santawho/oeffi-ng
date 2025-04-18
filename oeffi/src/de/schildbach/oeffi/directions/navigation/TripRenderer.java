@@ -266,6 +266,7 @@ public class TripRenderer {
                                 ? R.string.directions_trip_details_next_event_action_arrival_now
                                 : R.string.directions_trip_details_next_event_action_arrival),
                         walkLegC == null ? 0
+                            : nextLegC == null ? R.string.directions_trip_details_next_event_action_next_final_transfer
                             : depChanged ? R.string.directions_trip_details_next_event_action_next_transfer
                             : R.string.directions_trip_details_next_event_action_next_interchange
             );

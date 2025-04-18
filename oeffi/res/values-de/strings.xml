@@ -292,6 +292,7 @@
     <string name="directions_trip_details_next_event_action_interchange_now">einsteigen in</string>
     <string name="directions_trip_details_next_event_action_next_transfer">dort Übergang nach</string>
     <string name="directions_trip_details_next_event_action_next_interchange">dort umsteigen</string>
+    <string name="directions_trip_details_next_event_action_next_final_transfer">dort zu Fuß</string>
 
     <!-- directions trip connection evaluation -->
     <string name="directions_trip_conneval_with_transfer">%1$s mit %2$s</string>
