@@ -387,8 +387,7 @@ public class DirectionsActivity extends OeffiMainActivity
         viewFromLocation.setListener(locationChangeListener);
         viewFromLocation.setContextMenuItemClickListener(new LocationContextMenuItemClickListener(viewFromLocation,
                 requestLocationPermissionFromLauncher, pickContactFromLauncher, pickStationFromLauncher));
-        if (renderConfig.isAlternativeConnectionSearch)
-            viewFromLocation.setEnabled(false);
+        viewFromLocation.setEnabled(!renderConfig.isAlternativeConnectionSearch);
 
         viewViaLocation = findViewById(R.id.directions_via);
         viewViaLocation.setAdapter(autoCompleteAdapter);
