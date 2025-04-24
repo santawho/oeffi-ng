@@ -25,6 +25,7 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -58,6 +59,7 @@ import android.widget.TextView;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
@@ -90,6 +92,7 @@ import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.DividerItemDecoration;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GeocoderThread;
+import de.schildbach.oeffi.util.GoogleMapsUtils;
 import de.schildbach.oeffi.util.LocationUriParser;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.Toast;
@@ -422,7 +425,6 @@ public class DirectionsActivity extends OeffiMainActivity
         viewProductToggles.add(findViewById(R.id.directions_products_p));
         viewProductToggles.add(findViewById(R.id.directions_products_f));
         viewProductToggles.add(findViewById(R.id.directions_products_c));
-        boolean haveNonDefaultProducts = initProductToggles();
 
         final OnLongClickListener productLongClickListener = v -> {
             final DialogBuilder builder = DialogBuilder.get(DirectionsActivity.this);
@@ -602,24 +604,72 @@ public class DirectionsActivity extends OeffiMainActivity
         };
         registerReceiver(connectivityReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 
-        // populate
-        final Uri intentData = intent.getData();
-        if (intentData != null) {
-            log.info("Got intent: {}, data={}", intent, intentData);
+        handleIntent(intent);
 
-            final Location[] locations = LocationUriParser.parseLocations(intentData.toString());
+        // initial focus
+        if (!viewToLocation.isInTouchMode()) {
+            requestFocusFirst();
+        }
+    }
 
-            if (locations.length == 1) {
-                viewFromLocation.acquireLocation();
-                if (locations[0] != null)
-                    viewToLocation.setLocation(locations[0]);
-            } else {
-                if (locations[0] != null)
-                    viewFromLocation.setLocation(locations[0]);
-                if (locations[1] != null)
-                    viewToLocation.setLocation(locations[1]);
-                if (locations.length >= 3 && locations[2] != null)
-                    viewViaLocation.setLocation(locations[2]);
+    @Override
+    public void onNewIntent(@NonNull final Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleIntent(intent);
+    }
+
+    private void handleIntent(final Intent intent) {
+        final ComponentName intentComponentName = intent.getComponent();
+        final String intentClassName = intentComponentName.getClassName();
+        final boolean isSharingTo = intentClassName.endsWith(".TO");
+        final boolean isSharingFrom = intentClassName.endsWith(".FROM");
+        final boolean isSharing = isSharingTo || isSharingFrom;
+        if (isSharing) {
+            final String intentAction = intent.getAction();
+            final Uri intentData = intent.getData();
+            final String intentExtraText = intent.getStringExtra(Intent.EXTRA_TEXT);
+            if (Intent.ACTION_SEND.equals(intentAction) && intentExtraText != null
+                    && intentExtraText.startsWith(GoogleMapsUtils.GMAPS_SHORT_LOCATION_URL_PREFIX)) {
+                // location shared from Google Maps app
+                if (isSharingTo) {
+                    viewFromLocation.acquireLocation();
+                }
+                backgroundHandler.post(() -> {
+                    final Location location = GoogleMapsUtils.resolveLocationUrl(intentExtraText);
+                    if (location != null) {
+                        runOnUiThread(() -> {
+                            if (isSharingTo) {
+                                viewToLocation.setLocation(location);
+                            } else {
+                                viewFromLocation.setLocation(location);
+                            }
+                        });
+                    }
+                });
+            } else if (intentData != null) {
+                log.info("Got intent: {}, data={}", intent, intentData);
+
+                final Location[] locations = LocationUriParser.parseLocations(intentData.toString());
+
+                if (locations.length == 1) {
+                    final Location location = locations[0];
+                    if (location != null) {
+                        if (isSharingTo) {
+                            viewToLocation.setLocation(location);
+                            viewFromLocation.acquireLocation();
+                        } else {
+                            viewFromLocation.setLocation(location);
+                        }
+                    }
+                } else {
+                    if (locations[0] != null)
+                        viewFromLocation.setLocation(locations[0]);
+                    if (locations[1] != null)
+                        viewToLocation.setLocation(locations[1]);
+                    if (locations.length >= 3 && locations[2] != null)
+                        viewViaLocation.setLocation(locations[2]);
+                }
             }
         } else {
             if (intent.hasExtra(INTENT_EXTRA_FROM_LOCATION))
@@ -632,12 +682,8 @@ public class DirectionsActivity extends OeffiMainActivity
                 time = (TimeSpec) intent.getSerializableExtra(INTENT_EXTRA_TIME_SPEC);
         }
 
+        boolean haveNonDefaultProducts = initProductToggles();
         expandForm(haveNonDefaultProducts || viewViaLocation.getLocation() != null);
-
-        // initial focus
-        if (!viewToLocation.isInTouchMode()) {
-            requestFocusFirst();
-        }
     }
 
     @Override

@@ -96,7 +96,7 @@
             android:configChanges="keyboard|keyboardHidden"
             android:icon="@mipmap/ic_oeffi_ng_stations_color_48dp"
             android:label="@string/stations_icon_label"
-            android:launchMode="singleTop"
+            android:launchMode="singleInstancePerTask"
             android:taskAffinity="${applicationId}.stations">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -105,11 +105,6 @@
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
-            <!-- thrown by google now gesture -->
-            <intent-filter android:label="@string/stations_intentfilter_title">
-                <action android:name="android.intent.action.ASSIST" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
             <meta-data
                 android:name="android.app.default_searchable"
                 android:value=".stations.StationsActivity" />
@@ -117,6 +112,28 @@
                 android:name="android.app.searchable"
                 android:resource="@xml/stations_searchable" />
         </activity>
+        <activity-alias
+            android:name=".stations.StationsActivity.NEARBY"
+            android:targetActivity=".stations.StationsActivity"
+            android:exported="true"
+            android:label="@string/stations_intentfilter_nearby_title">
+            <!-- thrown by google now gesture -->
+            <intent-filter>
+                <action android:name="android.intent.action.ASSIST" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="geo" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity-alias>
 
         <activity
             android:name=".stations.StationDetailsActivity"
@@ -180,6 +197,7 @@
             android:configChanges="keyboard|keyboardHidden"
             android:icon="@mipmap/ic_oeffi_ng_directions_color_48dp"
             android:label="@string/app_name"
+            android:launchMode="singleInstancePerTask"
             android:taskAffinity="${applicationId}.directions"
             android:windowSoftInputMode="stateHidden">
 <!--            android:label="@string/directions_icon_label"-->
@@ -188,14 +206,43 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity-alias
+            android:name=".directions.DirectionsActivity.TO"
+            android:targetActivity=".directions.DirectionsActivity"
+            android:exported="true"
+            android:label="@string/directions_intentfilter_to_title">
             <!-- thrown by google calendar for contacts, and qype radar -->
-            <intent-filter android:label="@string/directions_intentfilter_title">
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="geo" />
             </intent-filter>
-        </activity>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".directions.DirectionsActivity.FROM"
+            android:targetActivity=".directions.DirectionsActivity"
+            android:exported="true"
+            android:label="@string/directions_intentfilter_from_title">
+            <!-- thrown by google calendar for contacts, and qype radar -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="geo" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity-alias>
 
         <activity
             android:name=".directions.TripsOverviewActivity"

@@ -91,7 +91,7 @@
     <string name="toast_add_favorite">%s\nzu Favoriten hinzugefügt</string>
 
     <!-- stations -->
-    <string name="stations_intentfilter_title">Nahegelegene Haltestellen der öffentlichen Verkehrsmittel</string>
+    <string name="stations_intentfilter_nearby_title">Nahegelegene Haltestellen der öffentlichen Verkehrsmittel</string>
 
     <!-- station list -->
     <string name="stations_list_entry_no_departures">(Keine Abfahrten)</string>
@@ -186,7 +186,8 @@
     <string name="nearest_favorite_station_widget_error_exception">Aua!\n\n%s\n\nTapp um es nochmal zu probieren.</string>
 
     <!-- directions -->
-    <string name="directions_intentfilter_title">Hinfahrt mit öffentlichen Verkehrsmitteln</string>
+    <string name="directions_intentfilter_to_title">Reise hierher mit öffentlichen Verkehrsmitteln</string>
+    <string name="directions_intentfilter_from_title">Reise von hier mit öffentlichen Verkehrsmitteln</string>
 
     <!-- directions options -->
     <string name="directions_options_clear_history_title">Alle gespeicherten Anfragen löschen</string>

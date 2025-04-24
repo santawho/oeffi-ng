@@ -100,7 +100,7 @@ public final class LocationHelper {
                 }
             };
 
-            manager.requestLocationUpdates(provider, 0, 0, listener);
+            manager.requestLocationUpdates(provider, 100, 0, listener);
 
             if (timeout > 0) {
                 handler.postDelayed(() -> {

@@ -584,7 +584,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
     @Override
     public void onNewIntent(final Intent intent) {
-        onNewIntent(intent);
+        super.onNewIntent(intent);
         setIntent(intent);
         handleIntent(intent);
     }

@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 
 public class LocationUriParser {
     public static final Location[] parseLocations(final String encodedUriString) {
-        URI uri = null;
+        URI uri;
         try {
             uri = new URI(encodedUriString);
         } catch (final URISyntaxException x) {
@@ -79,14 +79,16 @@ public class LocationUriParser {
             coord = null;
         }
 
-        if (coord != null && q != null)
+        if (coord != null) {
+            if (q == null)
+                return Location.coord(coord);
             return new Location(LocationType.ADDRESS, null, coord, null, q);
-        else if (coord != null)
-            return Location.coord(coord);
-        else if (q != null)
-            return new Location(LocationType.ANY, null, null, q);
-        else
-            throw new IllegalArgumentException("cannot parse: '" + query + "'");
+        }
+
+        if (q != null)
+            return parseAddrParam(q, null);
+
+        throw new IllegalArgumentException("cannot parse: '" + query + "'");
     }
 
     private static String getQueryParameter(final String query, final String name) {
@@ -120,22 +122,22 @@ public class LocationUriParser {
     private static final Pattern P_URI_LOCATION = Pattern
             .compile("(?:([^@]*)@)?(-?\\d*\\.\\d+),(-?\\d*\\.\\d+)(?:\\(([^\\)]*)\\))?", Pattern.DOTALL);
 
-    private static final Location parseAddrParam(final String param, final String title) throws NumberFormatException {
+    private static Location parseAddrParam(final String param, final String title) throws NumberFormatException {
         final Matcher m = P_URI_LOCATION.matcher(param);
 
         if (!m.matches())
             return null;
 
-        final Point p = Point.fromDouble(Double.parseDouble(m.group(2)), Double.parseDouble(m.group(3)));
+        final Point point = Point.fromDouble(Double.parseDouble(m.group(2)), Double.parseDouble(m.group(3)));
 
         if (title != null)
-            return new Location(LocationType.ADDRESS, null, p, null, title);
+            return new Location(LocationType.ADDRESS, null, point, null, title);
         else if (m.group(1) != null)
-            return new Location(LocationType.ADDRESS, null, p, null, m.group(1).length() > 0 ? m.group(1) : null);
+            return new Location(LocationType.ADDRESS, null, point, null, m.group(1).length() > 0 ? m.group(1) : null);
         else if (m.group(4) != null)
-            return new Location(LocationType.ADDRESS, null, p, null, m.group(4));
+            return new Location(LocationType.ADDRESS, null, point, null, m.group(4));
         else
-            return Location.coord(p);
+            return Location.coord(point);
     }
 
     private static String normalizeDecodeParam(final String raw) {
