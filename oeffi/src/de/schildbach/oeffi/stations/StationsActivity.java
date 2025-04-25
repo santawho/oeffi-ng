@@ -139,6 +139,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private String selectedStationId;
     private Point deviceLocation;
     private Location fixedLocation;
+    private boolean fixedLocationResolving;
     private Float deviceBearing = null;
     private String searchQuery;
     private boolean anyProviderEnabled = false;
@@ -608,9 +609,13 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                 && intentExtraText.startsWith(GoogleMapsUtils.GMAPS_SHORT_LOCATION_URL_PREFIX)) {
             // location shared from Google Maps app
             startBackgroundHandler();
+            fixedLocationResolving = true;
             backgroundHandler.post(() -> {
                 final Location location = GoogleMapsUtils.resolveLocationUrl(intentExtraText);
-                runOnUiThread(() -> setFixedLocation(location));
+                runOnUiThread(() -> {
+                    setFixedLocation(location);
+                    updateGUI();
+                });
             });
         } else if (intentUri != null) {
             final Location[] locations = LocationUriParser.parseLocations(intentUri.toString());
@@ -620,6 +625,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
     private void setFixedLocation(final Location location) {
         fixedLocation = location;
+        fixedLocationResolving = false;
 
         if (fixedLocation != null && fixedLocation.hasCoord())
             mapView.animateToLocation(fixedLocation.getLatAsDouble(), fixedLocation.getLonAsDouble());
@@ -725,10 +731,11 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
         // location box
         findViewById(R.id.stations_location_box).setVisibility(fixedLocation != null ? View.VISIBLE : View.GONE);
-        if (fixedLocation != null)
+        if (fixedLocation != null) {
             ((TextView) findViewById(R.id.stations_location_text))
                     .setText(fixedLocation.name != null ? fixedLocation.name : String.format(Locale.ENGLISH,
                             "%.6f, %.6f", fixedLocation.getLatAsDouble(), fixedLocation.getLonAsDouble()));
+        }
 
         // search box
         findViewById(R.id.stations_search_box).setVisibility(searchQuery != null ? View.VISIBLE : View.GONE);
@@ -1277,16 +1284,19 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     }
 
     public final Location getReferenceLocation() {
+        if (fixedLocationResolving)
+            return null;
         if (fixedLocation != null)
             return fixedLocation;
-        else if (deviceLocation != null)
+        if (deviceLocation != null)
             return Location.coord(deviceLocation);
-        else
-            return null;
+        return null;
     }
 
     public final Float getDeviceBearing() {
-        return fixedLocation == null ? deviceBearing : null;
+        if (fixedLocationResolving || fixedLocation != null)
+            return null;
+        return deviceBearing;
     }
 
     private void startLocationProvider() {
