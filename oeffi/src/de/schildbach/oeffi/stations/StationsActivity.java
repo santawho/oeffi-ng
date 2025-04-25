@@ -82,6 +82,7 @@ import de.schildbach.oeffi.stations.list.StationsAdapter;
 import de.schildbach.oeffi.util.ConnectivityBroadcastReceiver;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.DividerItemDecoration;
+import de.schildbach.oeffi.util.GoogleMapsUtils;
 import de.schildbach.oeffi.util.LocationUriParser;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.ZoomControls;
@@ -471,14 +472,18 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         updateGUI();
     }
 
+    private void startBackgroundHandler() {
+        if (backgroundThread == null) {
+            backgroundThread = new HandlerThread("queryDeparturesThread", Process.THREAD_PRIORITY_BACKGROUND);
+            backgroundThread.start();
+            backgroundHandler = new Handler(backgroundThread.getLooper());
+        }
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
-
-        // background thread
-        backgroundThread = new HandlerThread("queryDeparturesThread", Process.THREAD_PRIORITY_BACKGROUND);
-        backgroundThread.start();
-        backgroundHandler = new Handler(backgroundThread.getLooper());
+        startBackgroundHandler();
 
         if (network != null && NetworkProviderFactory.provider(network).hasCapabilities(Capability.DEPARTURES)) {
             startLocationProvider();
@@ -563,7 +568,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         sensorManager.unregisterListener(orientationListener);
 
         // cancel background thread
-        backgroundThread.getLooper().quit();
+        if (backgroundThread != null)
+            backgroundThread.getLooper().quit();
 
         super.onStop();
     }
@@ -590,53 +596,65 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     }
 
     private void handleIntent(final Intent intent) {
+        final String query = intent.getStringExtra(SearchManager.QUERY);
+        if (query != null)
+            setListFilter(query.trim());
+
+        final String intentAction = intent.getAction();
         final Uri intentUri = intent.getData();
+        final String intentExtraText = intent.getStringExtra(Intent.EXTRA_TEXT);
 
-        if (intentUri != null) {
-            final Location[] locations = LocationUriParser.parseLocations(intentUri.toString());
-            fixedLocation = locations != null && locations.length >= 1 ? locations[0] : null;
-
-            if (fixedLocation != null && fixedLocation.hasCoord())
-                mapView.animateToLocation(fixedLocation.getLatAsDouble(), fixedLocation.getLonAsDouble());
-
-            findViewById(R.id.stations_location_clear).setOnClickListener(v -> {
-                fixedLocation = null;
-
-                if (deviceLocation != null) {
-                    mapView.animateToLocation(deviceLocation.getLatAsDouble(), deviceLocation.getLonAsDouble());
-
-                    final float[] distanceBetweenResults = new float[2];
-
-                    // remove non-favorites and re-calculate distances
-                    for (final Iterator<Station> i = stations.iterator(); i.hasNext();) {
-                        final Station station = i.next();
-
-                        final Integer favState = favorites.get(station.location.id);
-                        if (favState == null || favState != FavoriteStationsProvider.TYPE_FAVORITE) {
-                            i.remove();
-                            stationsMap.remove(station.location.id);
-                        } else if (station.location.hasCoord()) {
-                            android.location.Location.distanceBetween(deviceLocation.getLatAsDouble(),
-                                    deviceLocation.getLonAsDouble(), station.location.getLatAsDouble(),
-                                    station.location.getLonAsDouble(), distanceBetweenResults);
-                            station.setDistanceAndBearing(distanceBetweenResults[0], distanceBetweenResults[1]);
-                        }
-                    }
-                    stationListAdapter.notifyDataSetChanged();
-                }
-
-                handler.post(initStationsRunnable);
-                updateGUI();
+        if (Intent.ACTION_SEND.equals(intentAction) && intentExtraText != null
+                && intentExtraText.startsWith(GoogleMapsUtils.GMAPS_SHORT_LOCATION_URL_PREFIX)) {
+            // location shared from Google Maps app
+            startBackgroundHandler();
+            backgroundHandler.post(() -> {
+                final Location location = GoogleMapsUtils.resolveLocationUrl(intentExtraText);
+                runOnUiThread(() -> setFixedLocation(location));
             });
+        } else if (intentUri != null) {
+            final Location[] locations = LocationUriParser.parseLocations(intentUri.toString());
+            setFixedLocation(locations != null && locations.length >= 1 ? locations[0] : null);
+        }
+    }
+
+    private void setFixedLocation(final Location location) {
+        fixedLocation = location;
+
+        if (fixedLocation != null && fixedLocation.hasCoord())
+            mapView.animateToLocation(fixedLocation.getLatAsDouble(), fixedLocation.getLonAsDouble());
+
+        findViewById(R.id.stations_location_clear).setOnClickListener(v -> {
+            fixedLocation = null;
+
+            if (deviceLocation != null) {
+                mapView.animateToLocation(deviceLocation.getLatAsDouble(), deviceLocation.getLonAsDouble());
+
+                final float[] distanceBetweenResults = new float[2];
+
+                // remove non-favorites and re-calculate distances
+                for (final Iterator<Station> i = stations.iterator(); i.hasNext();) {
+                    final Station station = i.next();
+
+                    final Integer favState = favorites.get(station.location.id);
+                    if (favState == null || favState != FavoriteStationsProvider.TYPE_FAVORITE) {
+                        i.remove();
+                        stationsMap.remove(station.location.id);
+                    } else if (station.location.hasCoord()) {
+                        android.location.Location.distanceBetween(deviceLocation.getLatAsDouble(),
+                                deviceLocation.getLonAsDouble(), station.location.getLatAsDouble(),
+                                station.location.getLonAsDouble(), distanceBetweenResults);
+                        station.setDistanceAndBearing(distanceBetweenResults[0], distanceBetweenResults[1]);
+                    }
+                }
+                stationListAdapter.notifyDataSetChanged();
+            }
 
             handler.post(initStationsRunnable);
-        }
+            updateGUI();
+        });
 
-        final String query = intent.getStringExtra(SearchManager.QUERY);
-
-        if (query != null) {
-            setListFilter(query.trim());
-        }
+        handler.post(initStationsRunnable);
     }
 
     @Override

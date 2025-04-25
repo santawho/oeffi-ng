@@ -627,7 +627,7 @@ public class DirectionsActivity extends OeffiMainActivity
         final boolean isSharing = isSharingTo || isSharingFrom;
         if (isSharing) {
             final String intentAction = intent.getAction();
-            final Uri intentData = intent.getData();
+            final Uri intentUri = intent.getData();
             final String intentExtraText = intent.getStringExtra(Intent.EXTRA_TEXT);
             if (Intent.ACTION_SEND.equals(intentAction) && intentExtraText != null
                     && intentExtraText.startsWith(GoogleMapsUtils.GMAPS_SHORT_LOCATION_URL_PREFIX)) {
@@ -647,10 +647,10 @@ public class DirectionsActivity extends OeffiMainActivity
                         });
                     }
                 });
-            } else if (intentData != null) {
-                log.info("Got intent: {}, data={}", intent, intentData);
+            } else if (intentUri != null) {
+                log.info("Got intent: {}, data/uri={}", intent, intentUri);
 
-                final Location[] locations = LocationUriParser.parseLocations(intentData.toString());
+                final Location[] locations = LocationUriParser.parseLocations(intentUri.toString());
 
                 if (locations.length == 1) {
                     final Location location = locations[0];
