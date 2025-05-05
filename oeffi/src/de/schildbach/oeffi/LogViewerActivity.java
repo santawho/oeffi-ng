@@ -28,6 +28,7 @@ public class LogViewerActivity extends OeffiActivity {
     }
 
     private MyActionBar actionBar;
+    private boolean firstLoad;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -35,11 +36,12 @@ public class LogViewerActivity extends OeffiActivity {
 
         setContentView(R.layout.logviewer_content);
 
+        firstLoad = true;
         actionBar = findViewById(R.id.action_bar);
         actionBar.setBack(null);
         actionBar.setBackgroundColor(getResources().getColor(R.color.bg_action_bar_logviewer));
         actionBar.setPrimaryTitle(R.string.global_options_show_log_title);
-        actionBar.addProgressButton().setOnClickListener(view -> refresh());
+        actionBar.addProgressButton().setOnClickListener(view -> refresh(true));
 
         final View contentView = findViewById(android.R.id.content);
         ViewCompat.setOnApplyWindowInsetsListener(contentView, (v, windowInsets) -> {
@@ -52,10 +54,11 @@ public class LogViewerActivity extends OeffiActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        refresh();
+        refresh(firstLoad);
+        firstLoad = false;
     }
 
-    private void refresh() {
+    private void refresh(final boolean scrollToEnd) {
         final File logFile = Application.getInstance().getLogFile();
         StringBuilder sb = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new FileReader(logFile))) {
@@ -73,10 +76,12 @@ public class LogViewerActivity extends OeffiActivity {
         }
         final TextView textView = findViewById(R.id.logviewer_list);
         textView.setText(sb.toString());
-        final ScrollView scrollView = findViewById(R.id.logviewer_scroll);
-        scrollView.getChildAt(0).post(() -> {
-            final int height = textView.getHeight();
-            scrollView.scrollTo(0, height);
-        });
+        if (scrollToEnd) {
+            final ScrollView scrollView = findViewById(R.id.logviewer_scroll);
+            scrollView.getChildAt(0).post(() -> {
+                final int height = textView.getHeight();
+                scrollView.scrollTo(0, height);
+            });
+        }
     }
 }
