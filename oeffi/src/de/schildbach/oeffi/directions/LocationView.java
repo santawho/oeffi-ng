@@ -69,12 +69,15 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
 
     private AutoCompleteTextView textView;
     private View chooseView;
+    private View modeView;
     private MultiDrawable leftDrawable, rightDrawable;
     private TextWatcher textChangedListener;
     private int hintRes = 0;
     private String hint;
 
     private LocationType locationType = LocationType.ANY;
+    private boolean stationAsAddress;
+    private boolean stationAsAddressEnabled;
     private String id = null;
     private Point coord;
     private String place;
@@ -98,11 +101,16 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
         ta.recycle();
     }
 
+    public void setStationAsAddressEnabled(final boolean stationAsAddressEnabled) {
+        this.stationAsAddressEnabled = stationAsAddressEnabled;
+    }
+
     @Override
     protected Parcelable onSaveInstanceState() {
         final Bundle state = new Bundle();
         state.putParcelable("super_state", super.onSaveInstanceState());
         state.putSerializable("location_type", locationType);
+        state.putBoolean("station_as_address", stationAsAddress);
         state.putString("location_id", id);
         state.putSerializable("location_coord", coord);
         state.putString("location_place", place);
@@ -118,6 +126,7 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
             final Bundle bundle = (Bundle) state;
             super.onRestoreInstanceState(bundle.getParcelable("super_state"));
             locationType = ((LocationType) bundle.getSerializable("location_type"));
+            stationAsAddress = bundle.getBoolean("station_as_address");
             id = bundle.getString("location_id");
             coord = (Point) bundle.getSerializable("location_coord");
             place = bundle.getString("location_place");
@@ -215,10 +224,31 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
         chooseView.setContentDescription(context.getString(R.string.directions_location_view_more_description));
         chooseView.setBackgroundDrawable(selectableItemBackground);
 
+        modeView = new View(context) {
+            @Override
+            protected void onMeasure(final int wMeasureSpec, final int hMeasureSpec) {
+                final int width = textView.getCompoundPaddingLeft() + textView.getCompoundDrawablePadding();
+                final int minHeight = res.getDimensionPixelOffset(R.dimen.directions_form_location_min_height);
+                final int height = Math.max(textView.getMeasuredHeight(), minHeight);
+                setMeasuredDimension(width, height);
+            }
+        };
+        modeView.setContentDescription(context.getString(R.string.directions_location_view_mode_description));
+        modeView.setBackgroundDrawable(selectableItemBackground);
+
         addView(textView, new LocationView.LayoutParams(LocationView.LayoutParams.MATCH_PARENT,
                 LocationView.LayoutParams.WRAP_CONTENT, Gravity.CENTER_VERTICAL));
         addView(chooseView, new LocationView.LayoutParams(LocationView.LayoutParams.WRAP_CONTENT,
                 LocationView.LayoutParams.MATCH_PARENT, Gravity.RIGHT | Gravity.CENTER_VERTICAL));
+        addView(modeView, new LocationView.LayoutParams(LocationView.LayoutParams.WRAP_CONTENT,
+                LocationView.LayoutParams.MATCH_PARENT, Gravity.LEFT | Gravity.CENTER_VERTICAL));
+
+        modeView.setOnClickListener(v -> {
+            if (locationType == LocationType.STATION && stationAsAddressEnabled) {
+                stationAsAddress = !stationAsAddress;
+                updateAppearance();
+            }
+        });
 
         setEnabled(isEnabled());
         updateAppearance();
@@ -314,6 +344,7 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
 
     public void reset() {
         locationType = LocationType.ANY;
+        stationAsAddress = false;
         id = null;
         coord = null;
         place = null;
@@ -331,6 +362,7 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
             return;
         }
         locationType = location.type;
+        stationAsAddress = false;
         id = location.id;
         coord = location.coord;
         place = location.place;
@@ -369,6 +401,8 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
             return null;
         else if (locationType == LocationType.ANY && Strings.isNullOrEmpty(name))
             return null;
+        else if (locationType == LocationType.STATION && stationAsAddress)
+            return new Location(LocationType.ADDRESS, id, coord, name != null ? place : null, name);
         else
             return new Location(locationType, id, coord, name != null ? place : null, name);
     }
@@ -393,6 +427,8 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
     private void updateAppearance() {
         if (locationType == LocationType.COORD && coord == null)
             leftDrawable.selectDrawableByResId(R.drawable.ic_location_searching_grey600_24dp);
+        else if (locationType == LocationType.STATION && stationAsAddress)
+            leftDrawable.selectDrawableByResId(LocationView.locationTypeIconRes(LocationType.ADDRESS));
         else
             leftDrawable.selectDrawableByResId(LocationView.locationTypeIconRes(locationType));
 
@@ -427,6 +463,7 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
 
     public void exchangeWith(final LocationView other) {
         final LocationType tempLocationType = other.locationType;
+        final boolean tempStationAsAddress = other.stationAsAddress;
         final String tempId = other.id;
         final Point tempCoord = other.coord;
         final String tempPlace = other.place;
@@ -434,6 +471,7 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
         final String tempHint = other.hint;
 
         other.locationType = this.locationType;
+        other.stationAsAddress = this.stationAsAddress;
         other.id = this.id;
         other.coord = this.coord;
         other.place = this.place;
@@ -441,6 +479,7 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
         other.hint = this.hint;
 
         this.locationType = tempLocationType;
+        this.stationAsAddress = tempStationAsAddress;
         this.id = tempId;
         this.coord = tempCoord;
         this.place = tempPlace;

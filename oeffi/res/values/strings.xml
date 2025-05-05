@@ -196,6 +196,7 @@
     <!-- directions query -->
     <string name="directions_location_view_coordinate">Coordinate</string>
     <string name="directions_location_view_more_description">more</string>
+    <string name="directions_location_view_mode_description">toggle type</string>
     <string name="directions_from">Start of trip</string>
     <string name="directions_via">Via</string>
     <string name="directions_to">End</string>

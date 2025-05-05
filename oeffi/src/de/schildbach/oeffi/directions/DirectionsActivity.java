@@ -401,6 +401,7 @@ public class DirectionsActivity extends OeffiMainActivity
         viewFromLocation.setContextMenuItemClickListener(new LocationContextMenuItemClickListener(viewFromLocation,
                 requestLocationPermissionFromLauncher, pickContactFromLauncher, pickStationFromLauncher));
         viewFromLocation.setEnabled(!renderConfig.isAlternativeConnectionSearch);
+        viewFromLocation.setStationAsAddressEnabled(true);
 
         viewViaLocation = findViewById(R.id.directions_via);
         viewViaLocation.setAdapter(autoCompleteAdapter);
@@ -424,6 +425,7 @@ public class DirectionsActivity extends OeffiMainActivity
         });
         viewToLocation.setContextMenuItemClickListener(new LocationContextMenuItemClickListener(viewToLocation,
                 requestLocationPermissionToLauncher, pickContactToLauncher, pickStationToLauncher));
+        viewToLocation.setStationAsAddressEnabled(true);
 
         viewProducts = findViewById(R.id.directions_products);
         viewProductToggles.add(findViewById(R.id.directions_products_i));

@@ -195,6 +195,7 @@
     <!-- directions query -->
     <string name="directions_location_view_coordinate">Koordinate</string>
     <string name="directions_location_view_more_description">mehr</string>
+    <string name="directions_location_view_mode_description">Typ wechseln</string>
     <string name="directions_from">Start der Verbindung</string>
     <string name="directions_via">Zwischenhalt</string>
     <string name="directions_to">Endpunkt</string>
