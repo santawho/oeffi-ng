@@ -70,7 +70,7 @@ public class AppLinkActivity extends OeffiActivity {
             startFallbackActivity();
         }
 
-        finish();
+        finishAndRemoveTask();
     }
 
     private void startFallbackActivity() {
