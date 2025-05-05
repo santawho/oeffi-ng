@@ -44,6 +44,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.Process;
 import android.provider.Settings;
 import android.text.format.DateUtils;
@@ -568,10 +569,6 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         // cancel update on orientation change
         sensorManager.unregisterListener(orientationListener);
 
-        // cancel background thread
-        if (backgroundThread != null)
-            backgroundThread.getLooper().quit();
-
         super.onStop();
     }
 
@@ -585,6 +582,13 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         stationList.clearOnScrollListeners();
 
         handler.removeCallbacksAndMessages(null);
+
+        // cancel background thread
+        if (backgroundThread != null) {
+            final Looper looper = backgroundThread.getLooper();
+            if (looper != null)
+                looper.quit();
+        }
 
         super.onDestroy();
     }

@@ -205,6 +205,11 @@ public class TripsOverviewActivity extends OeffiActivity {
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // background thread
+        backgroundThread = new HandlerThread("backgroundThread", Process.THREAD_PRIORITY_BACKGROUND);
+        backgroundThread.start();
+        backgroundHandler = new Handler(backgroundThread.getLooper());
+
         final Intent intent = getIntent();
         renderConfig = (RenderConfig) intent.getSerializableExtra(INTENT_EXTRA_RENDERCONFIG);
         network = (NetworkId) intent.getSerializableExtra(INTENT_EXTRA_NETWORK);
@@ -299,11 +304,6 @@ public class TripsOverviewActivity extends OeffiActivity {
     protected void onStart() {
         super.onStart();
 
-        // background thread
-        backgroundThread = new HandlerThread("backgroundThread", Process.THREAD_PRIORITY_BACKGROUND);
-        backgroundThread.start();
-        backgroundHandler = new Handler(backgroundThread.getLooper());
-
         // regular refresh
         registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
 
@@ -317,13 +317,19 @@ public class TripsOverviewActivity extends OeffiActivity {
     protected void onStop() {
         unregisterReceiver(tickReceiver);
 
+        queryMoreTripsRunning = false;
+
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
         // cancel background thread
         backgroundHandler = null;
         handler.removeCallbacks(checkMoreRunnable);
         backgroundThread.getLooper().quit();
-        queryMoreTripsRunning = false;
 
-        super.onStop();
+        super.onDestroy();
     }
 
     private final Runnable checkMoreRunnable = new Runnable() {
