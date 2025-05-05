@@ -258,7 +258,7 @@ public class TripsOverviewActivity extends OeffiActivity {
                     TripDetailsActivity.RenderConfig config = new TripDetailsActivity.RenderConfig();
                     config.isAlternativeConnectionSearch = renderConfig.isAlternativeConnectionSearch;
                     config.queryTripsRequestData = reloadRequestData;
-                    if (renderConfig.isAlternativeConnectionSearch) {
+                    if (config.isAlternativeConnectionSearch) {
                         TripDetailsActivity.startForResult(TripsOverviewActivity.this, DETAILS_NEW_NAVIGATION, network, trip, config);
                     } else {
                         TripDetailsActivity.start(TripsOverviewActivity.this, network, trip, config);

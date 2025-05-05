@@ -233,6 +233,7 @@
     <string name="directions_alert_ssl_exception_title">SSL-Problem</string>
     <string name="directions_alert_ssl_exception_message">Die Sicherheits-Konfiguration des Servers ist fehlerhaft: %s</string>
     <string name="directions_alert_ssl_exception_button_dismiss">Schließen</string>
+    <string name="directions_action_restart_planning_title">Neue Planung beginnen</string>
     <string name="directions_action_return_trip_title">Rückfahrt</string>
     <string name="directions_action_expand_title">Erweiterte Optionen</string>
     <string name="directions_alert_bad_link_title">Schlechter Link</string>

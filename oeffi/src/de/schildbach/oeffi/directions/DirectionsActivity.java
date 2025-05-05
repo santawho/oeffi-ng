@@ -357,8 +357,18 @@ public class DirectionsActivity extends OeffiMainActivity
             expandForm(isChecked);
             updateMap();
         });
-        actionBar.addButton(R.drawable.ic_shuffle_white_24dp, R.string.directions_action_return_trip_title)
-                .setOnClickListener(v -> viewToLocation.exchangeWith(viewFromLocation));
+        if (renderConfig.isAlternativeConnectionSearch) {
+            actionBar.addButton(R.drawable.ic_clear_white_24dp, R.string.directions_action_restart_planning_title)
+                    .setOnClickListener(v -> {
+                        finish();
+                        final Intent newIntent = new Intent(this, DirectionsActivity.class);
+                        newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(newIntent);
+                    });
+        } else {
+            actionBar.addButton(R.drawable.ic_shuffle_white_24dp, R.string.directions_action_return_trip_title)
+                    .setOnClickListener(v -> viewToLocation.exchangeWith(viewFromLocation));
+        }
         actionBar.overflow(R.menu.directions_options, item -> {
             if (item.getItemId() == R.id.directions_options_clear_history) {
                 if (network != null)

@@ -128,6 +128,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         public boolean isJourney;
         public boolean isNavigation;
         public boolean isAlternativeConnectionSearch;
+        public int actionBarColor;
         public QueryTripsRunnable.TripRequestData queryTripsRequestData;
     }
 
@@ -508,9 +509,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     protected void setupActionBar() {
-        setPrimaryColor(renderConfig.isAlternativeConnectionSearch
-                        ? R.color.bg_action_alternative_directions
-                        : R.color.bg_action_bar_directions);
+        setPrimaryColor(renderConfig.actionBarColor > 0 ? renderConfig.actionBarColor : R.color.bg_action_bar_directions);
         actionBar.setPrimaryTitle(getString(renderConfig.isJourney
                         ? R.string.journey_details_title
                         : R.string.trip_details_title));

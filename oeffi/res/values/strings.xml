@@ -234,6 +234,7 @@
     <string name="directions_alert_ssl_exception_title">SSL Problem</string>
     <string name="directions_alert_ssl_exception_message">The security configuration of the server is faulty: %s</string>
     <string name="directions_alert_ssl_exception_button_dismiss">Dismiss</string>
+    <string name="directions_action_restart_planning_title">Start new planning</string>
     <string name="directions_action_return_trip_title">Return trip</string>
     <string name="directions_action_expand_title">Expand</string>
     <string name="directions_alert_bad_link_title">Bad Link</string>
