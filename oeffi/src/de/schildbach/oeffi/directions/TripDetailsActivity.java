@@ -445,6 +445,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         if (isTaskRoot())
             initNavigation();
+        else
+            hideNavigation();
 
         if (!tripRenderer.isFeasible())
             findViewById(R.id.directions_trip_details_not_feasible).setVisibility(View.VISIBLE);

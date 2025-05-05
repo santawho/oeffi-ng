@@ -142,7 +142,12 @@ public abstract class OeffiActivity extends ComponentActivity {
         savedProducts = loadProductFilter();
         super.onPause();
     }
-    
+
+    protected void hideNavigation() {
+        final DrawerLayout drawerLayout = findViewById(R.id.navigation_drawer_layout);
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+    }
+
     protected void initNavigation() {
         navigationDrawerMenuProvider = new MenuProvider() {
             @Override
