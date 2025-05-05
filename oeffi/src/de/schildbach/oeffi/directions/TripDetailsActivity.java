@@ -965,10 +965,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                             collapseColumns);
                     stopsView.addView(stopRow);
 
-                    final Date minArrivalTime = stop.getArrivalTime(true);
-                    final Date maxDepartureTime = stop.getDepartureTime(false);
-                    if (minArrivalTime != null && maxDepartureTime != null
-                            && (maxDepartureTime.getTime() - minArrivalTime.getTime()) >= 300000) {
+                    if (isLongStay(stop.plannedArrivalTime, stop.plannedDepartureTime)
+                        || isLongStay(stop.predictedArrivalTime, stop.predictedDepartureTime)) {
                         // more than 5 minutes stay, then show departure row
                         final View depRow = stopRow(PearlView.Type.INTERMEDIATE_DEPARTURE,
                                 stop, leg, highlightedTime, stop.location.equals(highlightedLocation), now,
@@ -1030,6 +1028,15 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             return true;
         }
         return false;
+    }
+
+    private boolean isLongStay(final Date arrivalTime, final Date departureDate) {
+        if (arrivalTime == null)
+            return false;
+        if (departureDate == null)
+            return false;
+        final long stayMillis = departureDate.getTime() - arrivalTime.getTime();
+        return stayMillis >= 300000; // 5 minutes
     }
 
     private boolean updateIndividualLeg(final View row, final TripRenderer.LegContainer legC, final Date now) {
@@ -1450,9 +1457,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final TextView stopNameView = row.findViewById(R.id.directions_trip_details_public_entry_stop_name);
         final String uniqueShortName = location.uniqueShortName();
         stopNameView.setText(Formats.makeBreakableStationName(
-                pearlType != PearlView.Type.INTERMEDIATE_DEPARTURE ? uniqueShortName
-                        : getString(R.string.directions_trip_details_departure_row_name_format, uniqueShortName)
-        ));
+                pearlType == PearlView.Type.INTERMEDIATE_DEPARTURE
+                        ? getString(R.string.directions_trip_details_departure_row_name_format, uniqueShortName)
+                        : uniqueShortName));
         setStrikeThru(stopNameView, isCancelled);
         if (highlightLocation) {
             stopNameView.setTextColor(colorHighlighted);
