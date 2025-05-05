@@ -256,7 +256,7 @@ public class TripRenderer {
                     arrivalStop, arrPos, arrPos != null && !arrPos.equals(arrivalStop.plannedArrivalPosition),
                     nextDepartureStop, depPos, depPos != null && !depPos.equals(plannedDepPos));
             setNextEventTransport(nextPublicLeg);
-            setNextEventTransferTimes(walkLegC, false);
+            setNextEventTransferTimes(walkLegC, false, now);
             setNextEventActions(
                     nextLegC != null
                             ? (eventIsNow
@@ -314,7 +314,7 @@ public class TripRenderer {
                     transferFrom, arrPos, arrPos != null && !arrPos.equals(plannedArrPos),
                     transferTo, depPos, depPos != null && !depPos.equals(plannedDepPos));
             setNextEventTransport(legC.transferTo != null ? legC.transferTo.publicLeg : null);
-            setNextEventTransferTimes(legC, true);
+            setNextEventTransferTimes(legC, true, now);
             setNextEventActions(transferTo == null ? 0
                             : transferFrom == null ? (eventIsNow
                                         ? R.string.directions_trip_details_next_event_action_departure_now
@@ -521,13 +521,14 @@ public class TripRenderer {
     public boolean nextEventChangeOverAvailable;
     public boolean nextEventTransferAvailable;
     public String nextEventTransferLeftTimeValue;
+    public String nextEventTransferLeftTimeFromNowValue;
     public boolean nextEventTransferLeftTimeCritical;
     public String nextEventTransferExplain;
     public boolean nextEventTransferWalkAvailable;
     public String nextEventTransferWalkTimeValue;
     public int nextEventTransferIconId;
 
-    private void setNextEventTransferTimes(final LegContainer walkLegC, final boolean forWalkLeg) {
+    private void setNextEventTransferTimes(final LegContainer walkLegC, final boolean forWalkLeg, final Date now) {
         if (walkLegC == null) {
             nextEventChangeOverAvailable = false;
             return;
@@ -544,9 +545,13 @@ public class TripRenderer {
             final Stop departureStop = walkLegC.transferTo.publicLeg.departureStop;
             final Date arrTime = arrivalStop.getArrivalTime();
             final Date depTime = departureStop.getDepartureTime();
-            long leftMins = (depTime.getTime() - arrTime.getTime()) / 60000 - 1;
+            final long leftMins = (depTime.getTime() - arrTime.getTime()) / 60000 - 1;
             nextEventTransferLeftTimeValue = Long.toString(leftMins);
             nextEventTransferLeftTimeCritical = leftMins - walkMins < TRANSFER_CRITICAL_MINUTES;
+
+            final long leftMinsFromNow = (depTime.getTime() - now.getTime()) / 60000;
+            if (leftMinsFromNow <= 15)
+                nextEventTransferLeftTimeFromNowValue = Long.toString(leftMinsFromNow);
 
             final long arrDelay = (arrTime.getTime() - arrivalStop.plannedArrivalTime.getTime()) / 60000;
             final long depDelay = (depTime.getTime() - departureStop.plannedDepartureTime.getTime()) / 60000;

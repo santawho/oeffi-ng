@@ -1338,11 +1338,23 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             if (tripRenderer.nextEventTransferAvailable) {
                 findViewById(R.id.directions_trip_details_next_event_transfer)
                         .setVisibility(View.VISIBLE);
+
                 TextView transferValueView = findViewById(R.id.directions_trip_details_next_event_transfer_value);
                 transferValueView.setText(tripRenderer.nextEventTransferLeftTimeValue);
                 transferValueView.setTextColor(getColor(tripRenderer.nextEventTransferLeftTimeCritical
                         ? R.color.fg_trip_next_event_important
                         : R.color.fg_trip_next_event_normal));
+
+                if (tripRenderer.nextEventTransferLeftTimeFromNowValue != null) {
+                    findViewById(R.id.directions_trip_details_next_event_transfer_time)
+                            .setVisibility(View.VISIBLE);
+
+                    TextView transferTimeValueView = findViewById(R.id.directions_trip_details_next_event_transfer_time_value);
+                    transferTimeValueView.setText(tripRenderer.nextEventTransferLeftTimeFromNowValue);
+                } else {
+                    findViewById(R.id.directions_trip_details_next_event_transfer_time)
+                            .setVisibility(View.GONE);
+                }
 
                 TextView transferExplainView = findViewById(R.id.directions_trip_details_next_event_transfer_explain);
                 if (tripRenderer.nextEventTransferExplain != null) {

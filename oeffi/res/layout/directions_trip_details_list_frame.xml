@@ -383,6 +383,26 @@
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
+                        <LinearLayout
+                            android:id="@+id/directions_trip_details_next_event_transfer_time"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="10dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+                            <ImageView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:tint="@color/fg_trip_next_event_normal"
+                                android:src="@drawable/ic_stopwatch_black_24"/>
+                            <TextView
+                                android:id="@+id/directions_trip_details_next_event_transfer_time_value"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/fg_trip_next_event_normal"
+                                android:textStyle="bold"
+                                android:textSize="@dimen/directions_trip_details_next_event_transfer_fontsize"/>
+                        </LinearLayout>
                         <ImageView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"

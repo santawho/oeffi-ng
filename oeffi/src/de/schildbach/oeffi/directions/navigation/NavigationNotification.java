@@ -797,6 +797,13 @@ public class NavigationNotification {
                                 ? R.color.fg_trip_next_event_important
                                 : R.color.fg_trip_next_event_normal));
 
+                if (tripRenderer.nextEventTransferLeftTimeFromNowValue != null) {
+                    remoteViews.setViewVisibility(R.id.navigation_notification_next_event_transfer_time, View.VISIBLE);
+                    remoteViews.setTextViewText(R.id.navigation_notification_next_event_transfer_time_value, tripRenderer.nextEventTransferLeftTimeFromNowValue);
+                } else {
+                    remoteViews.setViewVisibility(R.id.navigation_notification_next_event_transfer_time, View.GONE);
+                }
+
                 if (tripRenderer.nextEventTransferExplain != null) {
                     remoteViews.setViewVisibility(R.id.navigation_notification_next_event_transfer_explain, View.VISIBLE);
                     remoteViews.setTextViewText(R.id.navigation_notification_next_event_transfer_explain, tripRenderer.nextEventTransferExplain);
