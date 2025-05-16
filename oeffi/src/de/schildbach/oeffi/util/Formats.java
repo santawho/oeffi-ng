@@ -99,7 +99,7 @@ public final class Formats {
                 return context.getString(R.string.time_ago, -rel);
         } else {
             if (rel >= 0)
-                return context.getString(R.string.time_later, rel);
+                return context.getString(R.string.time_after, rel);
             else
                 return context.getString(R.string.time_before, -rel);
         }

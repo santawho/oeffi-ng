@@ -440,7 +440,7 @@
     <string name="time_in">%d&#x200a;min</string>
     <string name="time_ago">%d&#x200a;min&#x2009;ago</string>
     <string name="time_hours">%1$dh&#x2009;%2$02d&#x200a;min</string>
-    <string name="time_later">%d&#x200a;min&#x2009;later</string>
+    <string name="time_after">%d&#x200a;min&#x2009;after</string>
     <string name="time_before">%d&#x200a;min&#x2009;before</string>
 
     <!-- position -->
