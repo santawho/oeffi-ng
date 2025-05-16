@@ -75,19 +75,34 @@ public final class Formats {
     }
 
     public static String formatTimeDiff(final Context context, final long from, final long to) {
-        return formatTimeDiff(context, to - from);
+        return formatTimeDiff(context, from, to, true);
+    }
+
+    public static String formatTimeDiff(final Context context, final long from, final long to, final boolean refIsNow) {
+        return formatTimeDiff(context, to - from, refIsNow);
     }
 
     public static String formatTimeDiff(final Context context, final long diff) {
+        return formatTimeDiff(context, diff, true);
+    }
+
+    public static String formatTimeDiff(final Context context, final long diff, final boolean refIsNow) {
         final long rel = Math.round(((float) diff) / DateUtils.MINUTE_IN_MILLIS);
-        if (rel >= 60)
-            return context.getString(R.string.time_hours, rel / 60, rel % 60);
-        else if (rel > 0)
-            return context.getString(R.string.time_in, rel);
-        else if (rel == 0)
-            return context.getString(R.string.time_now);
-        else
-            return context.getString(R.string.time_ago, -rel);
+        if (refIsNow) {
+            if (rel >= 60)
+                return context.getString(R.string.time_hours, rel / 60, rel % 60);
+            else if (rel > 0)
+                return context.getString(R.string.time_in, rel);
+            else if (rel == 0)
+                return context.getString(R.string.time_now);
+            else
+                return context.getString(R.string.time_ago, -rel);
+        } else {
+            if (rel >= 0)
+                return context.getString(R.string.time_later, rel);
+            else
+                return context.getString(R.string.time_before, -rel);
+        }
     }
 
     private static final String METER_SUFFIX = Constants.CHAR_HAIR_SPACE + "m";

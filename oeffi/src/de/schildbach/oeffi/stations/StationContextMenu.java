@@ -114,7 +114,7 @@ public class StationContextMenu extends PopupMenu {
                         shortcutIntent = StationDetailsActivity.fillIntent(
                                 new Intent(Intent.ACTION_MAIN, null, context, StationDetailsActivity.class)
                                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK),
-                                networkId, location);
+                                networkId, location, null);
                         iconId = R.mipmap.ic_oeffi_stations_color_48dp;
                         defaultNameId = R.string.departures_shortcut_default_name;
                         activityClass = StationDetailsActivity.class;

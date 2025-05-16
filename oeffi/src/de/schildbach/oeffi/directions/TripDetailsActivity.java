@@ -910,7 +910,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         if (destination != null) {
             destinationView.setVisibility(View.VISIBLE);
             destinationView.setText(Constants.DESTINATION_ARROW_PREFIX + Formats.makeBreakableStationName(destinationName));
-            destinationView.setOnClickListener(destination.hasId() ? new LocationClickListener(destination) : null);
+            destinationView.setOnClickListener(destination.hasId() ? new LocationClickListener(destination, leg.getArrivalTime()) : null);
         } else {
             destinationView.setVisibility(View.GONE);
         }
@@ -1625,9 +1625,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     private class LocationClickListener implements android.view.View.OnClickListener {
         private final Location location;
+        private final Date time;
 
-        public LocationClickListener(final Location location) {
+        public LocationClickListener(final Location location, final Date time) {
             this.location = location;
+            this.time = time;
         }
 
         public void onClick(final View v) {
@@ -1637,7 +1639,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     false);
             contextMenu.setOnMenuItemClickListener(item -> {
                 if (item.getItemId() == R.id.station_context_show_departures) {
-                    StationDetailsActivity.start(TripDetailsActivity.this, network, location);
+                    StationDetailsActivity.start(TripDetailsActivity.this, network, location, time);
                     return true;
                 } else {
                     return false;
@@ -1689,7 +1691,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             contextMenu.setOnMenuItemClickListener(item -> {
                 int menuItemId = item.getItemId();
                 if (menuItemId == R.id.station_context_show_departures) {
-                    StationDetailsActivity.start(TripDetailsActivity.this, network, stop.location);
+                    Date time = stop.getArrivalTime();
+                    if (time == null)
+                        time = stop.getDepartureTime(true);
+                    StationDetailsActivity.start(TripDetailsActivity.this, network, stop.location, time);
                     return true;
                 } else if (menuItemId == R.id.station_context_navigate_to) {
                     startNavigationForJourneyToExit(stop);

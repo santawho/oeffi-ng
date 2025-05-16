@@ -96,28 +96,49 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class StationDetailsActivity extends OeffiActivity implements StationsAware {
     private static final String INTENT_EXTRA_NETWORK = StationDetailsActivity.class.getName() + ".network";
     private static final String INTENT_EXTRA_STATION = StationDetailsActivity.class.getName() + ".station";
+    private static final String INTENT_EXTRA_PRESETTIME = StationDetailsActivity.class.getName() + ".presettime";
     private static final String INTENT_EXTRA_DEPARTURES = StationDetailsActivity.class.getName() + ".departures";
 
-    public static void start(final Context context, final NetworkId networkId, final Location station) {
-        start(context, networkId, station, null);
-    }
-
-    public static void start(final Context context, final NetworkId networkId, final Location station,
-            @Nullable final List<Departure> departures) {
-        checkArgument(station.type == LocationType.STATION);
+    public static void start(
+            final Context context, final NetworkId networkId,
+            final Location station, final Date presetTime) {
         final Intent intent = StationDetailsActivity.fillIntent(
                 new Intent(context, StationDetailsActivity.class),
-                networkId, station);
+                networkId, station, presetTime);
+        context.startActivity(intent);
+    }
+
+    public static void start(
+            final Context context, final NetworkId networkId,
+            final Location station) {
+        final Intent intent = StationDetailsActivity.fillIntent(
+                new Intent(context, StationDetailsActivity.class),
+                networkId, station, null);
+        context.startActivity(intent);
+    }
+
+    public static void start(
+            final Context context, final NetworkId networkId,
+            final Location station, final List<Departure> departures) {
+        final Intent intent = StationDetailsActivity.fillIntent(
+                new Intent(context, StationDetailsActivity.class),
+                networkId, station, null);
         if (departures != null)
             intent.putExtra(StationDetailsActivity.INTENT_EXTRA_DEPARTURES, (Serializable) departures);
         context.startActivity(intent);
     }
 
-    public static Intent fillIntent(Intent intent, final NetworkId networkId, final Location station) {
+    public static Intent fillIntent(
+            Intent intent,
+            final NetworkId networkId,
+            final Location station,
+            final Date presetTime) {
         checkArgument(station.type == LocationType.STATION);
         checkNotNull(networkId);
         intent.putExtra(StationDetailsActivity.INTENT_EXTRA_NETWORK, networkId.name());
         intent.putExtra(StationDetailsActivity.INTENT_EXTRA_STATION, Objects.serializeToString(station));
+        if (presetTime != null)
+            intent.putExtra(StationDetailsActivity.INTENT_EXTRA_PRESETTIME, presetTime);
         return intent;
     }
 
@@ -150,6 +171,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
     private BroadcastReceiver tickReceiver;
     private boolean autoRefreshDisabled = false;
     private Date nextLaterTime, nextEarlierTime;
+    private Date presetTime;
 
     private QueryJourneyRunnable queryJourneyRunnable;
     private final Handler handler = new Handler();
@@ -248,6 +270,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         final Intent intent = getIntent();
         String networkName = intent.getStringExtra(INTENT_EXTRA_NETWORK);
         final NetworkId network = NetworkId.valueOf(checkNotNull(networkName));
+        this.presetTime = (Date) intent.getSerializableExtra(INTENT_EXTRA_PRESETTIME);
         final String stationSerialized = intent.getStringExtra(INTENT_EXTRA_STATION);
         final Station station = new Station(network, (Location) Objects.deserializeFromString(stationSerialized));
         if (intent.hasExtra(INTENT_EXTRA_DEPARTURES)) {
@@ -369,7 +392,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             fromTime = time;
         } else {
             modeAppend = false;
-            fromTime = new Date();
+            fromTime = presetTime != null ? presetTime : new Date();
             nextLaterTime = null;
             nextEarlierTime = new Date(fromTime.getTime() - 30 * 60 * 1000);
         }
@@ -691,7 +714,8 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         }
 
         public void bind(final NetworkId network, final Location station, final Departure departure) {
-            final long currentTime = System.currentTimeMillis();
+            final boolean refIsNow = context.presetTime == null;
+            final long referenceTime = (refIsNow ? new Date() : context.presetTime).getTime();
 
             final Date predictedTime = departure.predictedTime;
             final Date plannedTime = departure.plannedTime;
@@ -706,13 +730,17 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             else
                 throw new IllegalStateException();
 
+            final boolean isPast = time < referenceTime;
+
+            itemView.setBackgroundColor(context.getColor(isPast ? R.color.bg_station_before : R.color.bg_level0));
+
             // time rel
-            timeRelView.setText(Formats.formatTimeDiff(context, currentTime, time));
+            timeRelView.setText(Formats.formatTimeDiff(context, referenceTime, time, refIsNow));
             timeRelView.setTypeface(Typeface.DEFAULT, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
             setStrikeThru(timeRelView, cancelled);
 
             // time abs
-            final StringBuilder timeAbs = new StringBuilder(Formats.formatDate(context, currentTime, time, false, ""));
+            final StringBuilder timeAbs = new StringBuilder(Formats.formatDate(context, referenceTime, time, false, ""));
             if (timeAbs.length() > 0)
                 timeAbs.append(',').append(Constants.CHAR_HAIR_SPACE);
             timeAbs.append(timeFormat.format(time));

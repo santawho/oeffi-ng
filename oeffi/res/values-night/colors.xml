@@ -27,6 +27,7 @@
     <color name="bg_current_time">#ffff00</color>
     <color name="bg_position">#bbbbbb</color>
     <color name="bg_position_changed">#FF8888</color>
+    <color name="bg_station_before">#3a3a2e</color>
     <color name="bg_trip_details_public_past">#3a3a2e</color>
     <color name="bg_trip_details_individual_past">#313d3d</color>
     <color name="bg_trip_details_public_now">#403822</color>
