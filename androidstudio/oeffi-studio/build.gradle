@@ -15,6 +15,8 @@ timeFmt = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US)
 timeFmt.setTimeZone(TimeZone.getTimeZone('UTC'))
 def timeModifiedStr = timeFmt.format(new Date(now.getTime() + 60000 * 5))
 def githubTag = "v${timeStr}"
+def gitBranch = getCurrentGitBranch()
+println "gitBranch = ${gitBranch}"
 
 def CREDENTIALS = [:]
 ext {
@@ -33,6 +35,7 @@ if (!oeffi_ng_password) {
     }
 }
 
+CREDENTIALS.applicationId = "de.santawho.oeffi_ng${gitBranch != null && gitBranch !== 'main' && gitBranch != 'master' && gitBranch != 'nextgen' ? ".${gitBranch}" : ''}"
 CREDENTIALS.report_email = "oeffi.report@santawho.de"
 CREDENTIALS.github_url = "https://github.com/${CREDENTIALS.github_user}/${CREDENTIALS.github_repo}"
 CREDENTIALS.github_release_url = "${CREDENTIALS.github_url}/releases/latest/download"
@@ -41,6 +44,7 @@ CREDENTIALS.asset_name_manifest = "manifest.json"
 
 project.oeffi.CREDENTIALS = CREDENTIALS
 
+println "applicationId = ${CREDENTIALS.applicationId}"
 
 android {
     namespace 'de.schildbach.oeffi'
@@ -72,7 +76,7 @@ android {
     productFlavors {
         ng {
             dimension 'flavor'
-            applicationId "de.santawho.oeffi_ng"
+            applicationId "${CREDENTIALS.applicationId}"
             // applicationIdSuffix '.ng'
             versionNameSuffix '-ng'
             resValue "string", "app_name", "Öffi NG"
@@ -84,8 +88,8 @@ android {
             resValue "string", "error_reporter_mail_address", "${CREDENTIALS.report_email}"
             resValue "string", "app_url_host", "santawho.de"
             resValue "string", "app_url_path_prefix", "/@apps/oeffi-ng/"
-            resValue "string", "about_faq_summary", "https://github.com/santawho/oeffi-ng/wiki/faq"
-            resValue "string", "about_privacy_policy_url", "https://github.com/santawho/oeffi-ng/wiki/privacy-policy"
+            resValue "string", "about_faq_summary", "${CREDENTIALS.github_url}/wiki/faq"
+            resValue "string", "about_privacy_policy_url", "${CREDENTIALS.github_url}/wiki/privacy-policy"
             resValue "bool", "flags_show_donate", "false"
             resValue "bool", "flags_show_twitter", "false"
             resValue "bool", "flags_show_navigation_drawer_footer", "false"
@@ -180,7 +184,7 @@ tasks.register('svgToPng', fr.avianey.androidsvgdrawable.gradle.SvgDrawableTask)
 
 afterEvaluate {
     assembleNgRelease.doLast {
-        // runs always afetr the NG release build. Why the following ??
+        // runs always after the NG release build. Why the following ??
 //        android.applicationVariants.all { variant ->
 //            println "variant.buildType.name = ${variant.buildType.name}"
 //            if (variant.buildType.name == 'release') {
@@ -221,10 +225,10 @@ def uploadToGithub(String releaseId, String assetName, byte[] uploadBytes) {
     conn.setRequestProperty('Authorization', "Bearer ${project.oeffi.CREDENTIALS.github_token}")
     conn.setRequestProperty('X-GitHub-Api-Version', '2022-11-28')
     conn.doOutput = true
-    conn.outputStream.write(uploadBytes);
-    def respCode = conn.getResponseCode();
+    conn.outputStream.write(uploadBytes)
+    def respCode = conn.getResponseCode()
     def respBody = conn.getInputStream().getText()
-    println("upload ${assetName}: ${respCode}: ${respBody}");
+    println("upload ${assetName}: ${respCode}: ${respBody}")
     if (!respCode.equals(201))
         throw respBody
 }
@@ -240,7 +244,21 @@ def createRelease(String tagName, File apkFile) {
 
     def manifestJson = "{\"tag\": \"${tagName}\"}"
 
-    def releaseId = githubCreateRelease(tagName);
+    def releaseId = githubCreateRelease(tagName)
     uploadToGithub(releaseId, project.oeffi.CREDENTIALS.asset_name_apk_file, apkFile.readBytes())
     uploadToGithub(releaseId, project.oeffi.CREDENTIALS.asset_name_manifest, manifestJson.getBytes("UTF-8"))
+}
+
+def getCurrentGitBranch() {
+    def gitBranch = null
+    try {
+        def workingDir = new File("${project.projectDir}")
+        def result = 'git rev-parse --abbrev-ref HEAD'.execute(null, workingDir)
+        result.waitFor()
+        if (result.exitValue() == 0) {
+            gitBranch = result.text.trim()
+        }
+    } catch (e) {
+    }
+    return gitBranch
 }
