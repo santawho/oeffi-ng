@@ -885,7 +885,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final Date now) {
         Trip.Public leg = legC.publicLeg;
         final Location destination = leg.destination;
-        final String destinationName = destination != null ? destination.uniqueShortName() : null;
+        final String destinationName = destination == null ? null
+                : destination.place == null || destination.name == null
+                ? destination.uniqueShortName()
+                : destination.place + ", " + destination.name;
         final boolean showDestination = destinationName != null;
         final boolean showAccessibility = leg.line.hasAttr(Line.Attr.WHEEL_CHAIR_ACCESS);
         final boolean showBicycleCarriage = leg.line.hasAttr(Line.Attr.BICYCLE_CARRIAGE);
@@ -952,9 +955,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final CollapseColumns collapseColumns = new CollapseColumns();
         collapseColumns.dateChanged(now);
 
-        final View departureRow = stopRow(PearlView.Type.DEPARTURE, leg.departureStop, leg, highlightedTime,
-                leg.departureStop.location.equals(highlightedLocation), now, collapseColumns);
+        final Stop departureStop = leg.departureStop;
+        final View departureRow = stopRow(PearlView.Type.DEPARTURE, departureStop, "-", leg, highlightedTime,
+                departureStop.location.equals(highlightedLocation), now, collapseColumns);
         stopsView.addView(departureRow);
+
+        String previousPlace = departureStop.location.place;
 
         if (intermediateStops != null) {
             if (expandButton.isChecked()) {
@@ -962,7 +968,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     final boolean hasStopTime = stop.getArrivalTime() != null || stop.getDepartureTime() != null;
 
                     final View stopRow = stopRow(hasStopTime ? PearlView.Type.INTERMEDIATE_ARRIVAL : PearlView.Type.PASSING,
-                            stop, leg, highlightedTime, stop.location.equals(highlightedLocation), now,
+                            stop, previousPlace, leg, highlightedTime, stop.location.equals(highlightedLocation), now,
                             collapseColumns);
                     stopsView.addView(stopRow);
 
@@ -970,10 +976,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                         || isLongStay(stop.predictedArrivalTime, stop.predictedDepartureTime)) {
                         // more than 5 minutes stay, then show departure row
                         final View depRow = stopRow(PearlView.Type.INTERMEDIATE_DEPARTURE,
-                                stop, leg, highlightedTime, stop.location.equals(highlightedLocation), now,
+                                stop, null, leg, highlightedTime, stop.location.equals(highlightedLocation), now,
                                 collapseColumns);
                         stopsView.addView(depRow);
                     }
+
+                    previousPlace = stop.location.place;
                 }
             } else {
                 int numIntermediateStops = 0;
@@ -992,7 +1000,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
         }
 
-        final View arrivalRow = stopRow(PearlView.Type.ARRIVAL, leg.arrivalStop, leg, highlightedTime,
+        final View arrivalRow = stopRow(PearlView.Type.ARRIVAL, leg.arrivalStop, previousPlace, leg, highlightedTime,
                 leg.arrivalStop.location.equals(highlightedLocation), now, collapseColumns);
         stopsView.addView(arrivalRow);
 
@@ -1011,7 +1019,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         final TextView progress = row.findViewById(R.id.directions_trip_details_public_entry_progress);
         progress.setVisibility(View.GONE);
-        Date beginTime = leg.departureStop.getDepartureTime();
+        Date beginTime = departureStop.getDepartureTime();
         Date endTime = leg.arrivalStop.getArrivalTime();
         if (now.before(beginTime)) {
             // leg is in the future
@@ -1422,7 +1430,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
     }
 
-    private View stopRow(final PearlView.Type pearlType, final Stop stop, final Trip.Public leg, final Date highlightedTime,
+    private View stopRow(
+            final PearlView.Type pearlType,
+            final Stop stop, final String previousPlace, final Trip.Public leg, final Date highlightedTime,
             final boolean highlightLocation, final Date now, final CollapseColumns collapseColumns) {
         final View row = inflater.inflate(R.layout.directions_trip_details_public_entry_stop, null);
 
@@ -1468,11 +1478,21 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         // name
         final TextView stopNameView = row.findViewById(R.id.directions_trip_details_public_entry_stop_name);
-        final String uniqueShortName = location.uniqueShortName();
-        stopNameView.setText(Formats.makeBreakableStationName(
+        final String name = location.name;
+        final String place = location.place;
+        final String uniqueShortName;
+        if (place != null && name != null) {
+            if (place.equals(previousPlace))
+                uniqueShortName = name;
+            else
+                uniqueShortName = "<i><u>" + place + "</u></i><br>" + name;
+        } else {
+            uniqueShortName = location.uniqueShortName();
+        }
+        stopNameView.setText(Html.fromHtml(Formats.makeBreakableStationName(
                 pearlType == PearlView.Type.INTERMEDIATE_DEPARTURE
                         ? getString(R.string.directions_trip_details_departure_row_name_format, uniqueShortName)
-                        : uniqueShortName));
+                        : uniqueShortName)));
         setStrikeThru(stopNameView, isCancelled);
         if (highlightLocation) {
             stopNameView.setTextColor(colorHighlighted);
