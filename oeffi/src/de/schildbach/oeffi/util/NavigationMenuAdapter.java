@@ -112,7 +112,10 @@ public class NavigationMenuAdapter extends RecyclerView.Adapter<NavigationMenuAd
             itemView.setActivated(item.isChecked());
             itemView.setFocusable(item.isEnabled());
             if (item.isEnabled()) {
-                itemView.setOnClickListener(v -> menuClickListener.onMenuItemClick(item));
+                itemView.setOnClickListener(v -> {
+                    item.setActionView(v);
+                    menuClickListener.onMenuItemClick(item);
+                });
             }
 
             final boolean primaryItem = item.getTitleCondensed() != null;
@@ -270,6 +273,7 @@ public class NavigationMenuAdapter extends RecyclerView.Adapter<NavigationMenuAd
         private final int groupId;
         private final int itemId;
         private final int order;
+        private View actionView;
 
         private CharSequence title = null;
         private CharSequence titleCondensed = null;
@@ -461,7 +465,7 @@ public class NavigationMenuAdapter extends RecyclerView.Adapter<NavigationMenuAd
         }
 
         public View getActionView() {
-            throw new UnsupportedOperationException();
+            return actionView;
         }
 
         public boolean isActionViewExpanded() {
@@ -473,7 +477,11 @@ public class NavigationMenuAdapter extends RecyclerView.Adapter<NavigationMenuAd
         }
 
         public MenuItem setActionView(final View view) {
-            throw new UnsupportedOperationException();
+            this.actionView = view;
+
+            notifyDataSetChanged();
+
+            return this;
         }
 
         public MenuItem setActionView(final int resId) {

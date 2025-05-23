@@ -197,6 +197,18 @@ public class NavigationNotification {
         return minRefreshAt;
     }
 
+    public static void removeAll(final Context context) {
+        final NotificationManager notificationManager = getNotificationManager(context);
+        final StatusBarNotification[] activeNotifications = notificationManager.getActiveNotifications();
+        for (StatusBarNotification statusBarNotification : activeNotifications) {
+            if (!statusBarNotification.getTag().startsWith(TAG_PREFIX))
+                continue;
+            final int id = statusBarNotification.getId();
+            final String tag = statusBarNotification.getTag();
+            notificationManager.cancel(tag, id);
+        }
+    }
+
     public static void remove(final Context context, final Intent intent) {
         NavigationAlarmManager.runOnHandlerThread(() -> {
             new NavigationNotification(context, intent).remove();

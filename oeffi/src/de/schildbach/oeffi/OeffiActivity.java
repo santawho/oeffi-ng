@@ -27,6 +27,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -42,6 +43,7 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import androidx.activity.ComponentActivity;
 import androidx.activity.EdgeToEdge;
@@ -55,6 +57,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import de.schildbach.oeffi.directions.DirectionsActivity;
+import de.schildbach.oeffi.directions.navigation.NavigationNotification;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.network.NetworkResources;
 import de.schildbach.oeffi.plans.PlansPickerActivity;
@@ -243,7 +246,28 @@ public abstract class OeffiActivity extends ComponentActivity {
                     return true;
                 }
 
-                return false;
+                if (itemId == R.id.global_options_extras) {
+                    final View actionView = item.getActionView();
+                    final PopupMenu popupMenu = new PopupMenu(OeffiActivity.this, actionView);
+                    popupMenu.setGravity(Gravity.RIGHT);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        popupMenu.setForceShowIcon(true);
+                    }
+                    popupMenu.inflate(R.menu.global_extras);
+                    popupMenu.setOnMenuItemClickListener(subItem -> {
+                        navigationDrawerLayout.closeDrawers();
+                        final int subItemId = subItem.getItemId();
+                        if (subItemId == R.id.global_options_clear_navigation) {
+                            NavigationNotification.removeAll(OeffiActivity.this);
+                            return true;
+                        }
+                        return false;
+                    });
+                    popupMenu.show();
+                    return false;
+                }
+
+                return true;
             }
         };
 
@@ -258,8 +282,9 @@ public abstract class OeffiActivity extends ComponentActivity {
 
         final NavigationMenuAdapter menuAdapter = new NavigationMenuAdapter(this,
                 item -> {
-                    navigationDrawerMenuProvider.onMenuItemSelected(item);
-                    navigationDrawerLayout.closeDrawers();
+                    if (navigationDrawerMenuProvider.onMenuItemSelected(item)) {
+                        navigationDrawerLayout.closeDrawers();
+                    }
                     return false;
                 });
         final Menu menu = menuAdapter.getMenu();

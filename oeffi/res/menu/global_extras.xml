@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/global_options_clear_navigation"
+        android:icon="@drawable/ic_clear_grey600_24dp"
+        android:orderInCategory="999"
+        android:title="@string/global_options_clear_navigation_title" />
+</menu>

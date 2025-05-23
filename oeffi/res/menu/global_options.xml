@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
         android:id="@+id/global_options_stations_favorites"
@@ -43,6 +43,12 @@
         android:icon="@drawable/ic_settings_grey600_24dp"
         android:orderInCategory="999"
         android:title="@string/global_options_preferences_title" />
+    <item
+        android:id="@+id/global_options_extras"
+        android:icon="@drawable/ic_star_grey600_24dp"
+        android:orderInCategory="999"
+        android:title="@string/global_options_extras_title">
+    </item>
     <item
         android:id="@+id/global_options_about"
         android:icon="@drawable/ic_info_outline_grey600_24dp"
