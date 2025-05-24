@@ -86,6 +86,7 @@ import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.stations.LineView;
 import de.schildbach.oeffi.stations.StationContextMenu;
 import de.schildbach.oeffi.stations.StationDetailsActivity;
+import de.schildbach.oeffi.stations.StationsActivity;
 import de.schildbach.oeffi.util.ClockUtils;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.LocationHelper;
@@ -1654,12 +1655,18 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         public void onClick(final View v) {
             final PopupMenu contextMenu = new StationContextMenu(TripDetailsActivity.this, v, network, location, null,
-                    false, false, true, true, false, false, false,
+                    false, false, true,
+                    true, true,
+                    false, false, false,
                     renderConfig.isJourney && ((Trip.Public) tripRenderer.trip.legs.get(0)).exitLocation == null,
                     false);
             contextMenu.setOnMenuItemClickListener(item -> {
-                if (item.getItemId() == R.id.station_context_show_departures) {
+                final int itemId = item.getItemId();
+                if (itemId == R.id.station_context_show_departures) {
                     StationDetailsActivity.start(TripDetailsActivity.this, network, location, time);
+                    return true;
+                } else if (itemId == R.id.station_context_nearby_departures) {
+                    StationsActivity.start(TripDetailsActivity.this, network, location, time);
                     return true;
                 } else {
                     return false;
@@ -1705,16 +1712,21 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final boolean isLastPublicStop = stop.location.equals(getLastPublicLocation());
             final PopupMenu contextMenu = new StationContextMenu(
                     TripDetailsActivity.this, v, network, stop.location,
-                    null, false, false, true, true, true, true,
+                    null, false, false, true,
+                    true, true,
+                    true, true,
                     renderConfig.isNavigation && !isLastPublicStop,
                     showNavigateTo, false);
             contextMenu.setOnMenuItemClickListener(item -> {
                 int menuItemId = item.getItemId();
+                Date time = stop.getArrivalTime();
+                if (time == null)
+                    time = stop.getDepartureTime(true);
                 if (menuItemId == R.id.station_context_show_departures) {
-                    Date time = stop.getArrivalTime();
-                    if (time == null)
-                        time = stop.getDepartureTime(true);
                     StationDetailsActivity.start(TripDetailsActivity.this, network, stop.location, time);
+                    return true;
+                } else if (menuItemId == R.id.station_context_nearby_departures) {
+                    StationsActivity.start(TripDetailsActivity.this, network, stop.location, time);
                     return true;
                 } else if (menuItemId == R.id.station_context_navigate_to) {
                     startNavigationForJourneyToExit(stop);

@@ -120,10 +120,13 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
         this.listEntryVerticalPadding = res.getDimensionPixelOffset(R.dimen.text_padding_vertical);
     }
 
-    public void bind(final Station station, final Set<Product> productsFilter, final boolean forceShowPlace,
+    public void bind(
+            final Station station, final Date aBaseTime,
+            final Set<Product> productsFilter, final boolean forceShowPlace,
             final Integer favState, final android.location.Location deviceLocation,
             final CompassNeedleView.Callback compassCallback) {
-        final long currentTime = System.currentTimeMillis();
+        final boolean baseIsNow = aBaseTime == null;
+        final Date baseTime = baseIsNow ? new Date() : aBaseTime;
 
         final boolean queryNotOk = station.departureQueryStatus != null
                 && station.departureQueryStatus != QueryDeparturesResult.Status.OK;
@@ -190,7 +193,8 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
         contextButtonSpace.setVisibility(itemView.isActivated() ? View.VISIBLE : View.GONE);
         contextButton.setOnClickListener(itemView.isActivated() ? v -> {
             final PopupMenu contextMenu = new StationContextMenu(context, v, station.network, station.location,
-                    favState, true, true, true, true, true, false,
+                    favState, true, true, true,
+                    true, false, true, false,
                     false, false, true);
             contextMenu.setOnMenuItemClickListener(item -> {
                 final int position = getAdapterPosition();
@@ -338,7 +342,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
 
                             // time
                             final TextView timeView = departureViewHolder.time;
-                            timeView.setText(Formats.formatTimeDiff(context, currentTime, time));
+                            timeView.setText(Formats.formatTimeDiff(context, baseTime.getTime(), time, baseIsNow));
                             timeView.setTypeface(Typeface.DEFAULT, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
                             final Date updatedAt = station.updatedAt;
                             final boolean isStale = updatedAt != null

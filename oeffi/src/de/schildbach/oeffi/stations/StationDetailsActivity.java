@@ -268,7 +268,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         resultStatusView = findViewById(R.id.stations_station_details_result_status);
 
         final Intent intent = getIntent();
-        String networkName = intent.getStringExtra(INTENT_EXTRA_NETWORK);
+        final String networkName = intent.getStringExtra(INTENT_EXTRA_NETWORK);
         final NetworkId network = NetworkId.valueOf(checkNotNull(networkName));
         this.presetTime = (Date) intent.getSerializableExtra(INTENT_EXTRA_PRESETTIME);
         final String stationSerialized = intent.getStringExtra(INTENT_EXTRA_STATION);

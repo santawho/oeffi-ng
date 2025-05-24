@@ -27,6 +27,7 @@ import de.schildbach.oeffi.stations.CompassNeedleView;
 import de.schildbach.oeffi.stations.Station;
 import de.schildbach.pte.dto.Product;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -39,6 +40,7 @@ public class StationsAdapter extends RecyclerView.Adapter<StationViewHolder> imp
     private final StationContextMenuItemListener contextMenuItemListener;
     private final JourneyClickListener journeyClickListener;
     private final StationsAware stationsAware;
+    private Date baseTime;
 
     private android.location.Location deviceLocation = null;
     private Float deviceBearing = null;
@@ -61,6 +63,10 @@ public class StationsAdapter extends RecyclerView.Adapter<StationViewHolder> imp
         this.stationsAware = stationsAware;
 
         setHasStableIds(true);
+    }
+
+    public void setBaseTime(final Date baseTime) {
+        this.baseTime = baseTime;
     }
 
     public void setDeviceLocation(final android.location.Location deviceLocation) {
@@ -114,7 +120,7 @@ public class StationsAdapter extends RecyclerView.Adapter<StationViewHolder> imp
 
         // populate view
         final Integer favState = stationsAware.getFavoriteState(station.location.id);
-        holder.bind(station, productsFilter, showPlaces, favState, deviceLocation, this);
+        holder.bind(station, baseTime, productsFilter, showPlaces, favState, deviceLocation, this);
     }
 
     public Float getDeviceBearing() {

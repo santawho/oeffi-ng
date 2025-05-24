@@ -83,6 +83,7 @@ import de.schildbach.oeffi.stations.list.StationsAdapter;
 import de.schildbach.oeffi.util.ConnectivityBroadcastReceiver;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.DividerItemDecoration;
+import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GoogleMapsUtils;
 import de.schildbach.oeffi.util.LocationUriParser;
 import de.schildbach.oeffi.util.Toast;
@@ -127,6 +128,9 @@ import java.util.Set;
 public class StationsActivity extends OeffiMainActivity implements StationsAware, LocationAware,
         StationContextMenuItemListener, JourneyClickListener {
     public static final String INTENT_EXTRA_OPEN_FAVORITES = StationsActivity.class.getName() + ".open_favorites";
+    public static final String INTENT_EXTRA_NETWORK = StationsActivity.class.getName() + ".network";
+    public static final String INTENT_EXTRA_LOCATION = StationsActivity.class.getName() + ".location";
+    public static final String INTENT_EXTRA_TIME = StationsActivity.class.getName() + ".time";
     private ConnectivityManager connectivityManager;
     private LocationManager locationManager;
     private SensorManager sensorManager;
@@ -134,6 +138,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private Sensor sensorMagnetometer;
     private Resources res;
 
+    private Date presetTime;
     private final List<Station> stations = new ArrayList<>();
     private final Map<String, Station> stationsMap = new HashMap<>();
     private final Map<String, Integer> favorites = new HashMap<>();
@@ -180,6 +185,25 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     @Override
     protected String taskName() {
         return "stations";
+    }
+
+    public static void start(final Context context, final boolean openFavorites) {
+        final Intent intent = new Intent(context, StationsActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(StationsActivity.INTENT_EXTRA_OPEN_FAVORITES, openFavorites);
+        context.startActivity(intent);
+    }
+
+    public static void start(final Context context, final NetworkId networkId, final Location location, final Date time) {
+        final Intent intent = new Intent(context, StationsActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        if (networkId != null)
+            intent.putExtra(StationsActivity.INTENT_EXTRA_NETWORK, networkId.name());
+        if (location != null)
+            intent.putExtra(StationsActivity.INTENT_EXTRA_LOCATION, location);
+        if (time != null)
+            intent.putExtra(StationsActivity.INTENT_EXTRA_TIME, time);
+        context.startActivity(intent);
     }
 
     @Override
@@ -431,7 +455,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         stationListLayoutManager = new LinearLayoutManager(this);
         stationList.setLayoutManager(stationListLayoutManager);
         stationList.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
-        stationListAdapter = new StationsAdapter(this, maxDeparturesPerStation, products, this, this, this);
+        stationListAdapter = new StationsAdapter(this, maxDeparturesPerStation, products,
+                this, this, this);
         stationList.setAdapter(stationListAdapter);
         ViewCompat.setOnApplyWindowInsetsListener(stationList, (v, windowInsets) -> {
             final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -608,6 +633,17 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         final String intentAction = intent.getAction();
         final Uri intentUri = intent.getData();
         final String intentExtraText = intent.getStringExtra(Intent.EXTRA_TEXT);
+        final Location presetLocation = (Location) intent.getSerializableExtra(INTENT_EXTRA_LOCATION);
+        presetTime = (Date) intent.getSerializableExtra(INTENT_EXTRA_TIME);
+        stationListAdapter.setBaseTime(presetTime);
+
+        final String networkName = intent.getStringExtra(INTENT_EXTRA_NETWORK);
+        if (networkName != null)
+            this.network = NetworkId.valueOf(networkName);
+
+        if (presetLocation != null) {
+            setFixedLocation(presetLocation);
+        }
 
         if (Intent.ACTION_SEND.equals(intentAction) && intentExtraText != null
                 && intentExtraText.startsWith(GoogleMapsUtils.GMAPS_SHORT_LOCATION_URL_PREFIX)) {
@@ -636,6 +672,9 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
         findViewById(R.id.stations_location_clear).setOnClickListener(v -> {
             fixedLocation = null;
+            final boolean hadPresetTime = presetTime != null;
+            presetTime = null;
+            stationListAdapter.setBaseTime(presetTime);
 
             if (deviceLocation != null) {
                 mapView.animateToLocation(deviceLocation.getLatAsDouble(), deviceLocation.getLonAsDouble());
@@ -650,16 +689,22 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                     if (favState == null || favState != FavoriteStationsProvider.TYPE_FAVORITE) {
                         i.remove();
                         stationsMap.remove(station.location.id);
-                    } else if (station.location.hasCoord()) {
-                        android.location.Location.distanceBetween(deviceLocation.getLatAsDouble(),
-                                deviceLocation.getLonAsDouble(), station.location.getLatAsDouble(),
-                                station.location.getLonAsDouble(), distanceBetweenResults);
-                        station.setDistanceAndBearing(distanceBetweenResults[0], distanceBetweenResults[1]);
+                    } else {
+                        if (hadPresetTime) {
+                            station.departures.clear();
+                        }
+
+                        if (station.location.hasCoord()) {
+                            android.location.Location.distanceBetween(deviceLocation.getLatAsDouble(),
+                                    deviceLocation.getLonAsDouble(), station.location.getLatAsDouble(),
+                                    station.location.getLonAsDouble(), distanceBetweenResults);
+                            station.setDistanceAndBearing(distanceBetweenResults[0], distanceBetweenResults[1]);
+                        }
                     }
                 }
-                stationListAdapter.notifyDataSetChanged();
             }
 
+            stationListAdapter.notifyDataSetChanged();
             handler.post(initStationsRunnable);
             updateGUI();
         });
@@ -736,9 +781,11 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         // location box
         findViewById(R.id.stations_location_box).setVisibility(fixedLocation != null ? View.VISIBLE : View.GONE);
         if (fixedLocation != null) {
-            ((TextView) findViewById(R.id.stations_location_text))
-                    .setText(fixedLocation.name != null ? fixedLocation.name : String.format(Locale.ENGLISH,
-                            "%.6f, %.6f", fixedLocation.getLatAsDouble(), fixedLocation.getLonAsDouble()));
+            final String locationName = fixedLocation.name != null ? fixedLocation.uniqueShortName()
+                    : String.format(Locale.ENGLISH, "%.6f, %.6f", fixedLocation.getLatAsDouble(), fixedLocation.getLonAsDouble());
+            final String text = presetTime == null ? locationName
+                    : String.format("%s @ %s", locationName, Formats.formatTime(this, presetTime.getTime()));
+            ((TextView) findViewById(R.id.stations_location_text)).setText(text);
         }
 
         // search box
@@ -1090,7 +1137,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                     final int maxDepartures = maxDeparturesPerStation * 2;
 
                     backgroundHandler.post(
-                            new QueryDeparturesRunnable(handler, networkProvider, requestedStationId, null, maxDepartures) {
+                            new QueryDeparturesRunnable(handler, networkProvider, requestedStationId, presetTime, maxDepartures) {
                                 @Override
                                 protected void onPreExecute() {
                                     actionBar.startProgress();

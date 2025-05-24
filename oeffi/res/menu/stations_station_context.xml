@@ -24,6 +24,9 @@
         android:id="@+id/station_context_show_departures"
         android:title="@string/station_context_details_title" />
     <item
+        android:id="@+id/station_context_nearby_departures"
+        android:title="@string/station_context_nearby_departures_title" />
+    <item
         android:id="@+id/station_context_infopage"
         android:title="@string/station_context_infopage_title" />
     <item

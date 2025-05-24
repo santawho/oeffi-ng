@@ -175,10 +175,7 @@ public abstract class OeffiActivity extends ComponentActivity {
                     if (OeffiActivity.this instanceof StationsActivity) {
                         FavoriteStationsActivity.start(OeffiActivity.this);
                     } else {
-                        final Intent intent = new Intent(OeffiActivity.this, StationsActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        intent.putExtra(StationsActivity.INTENT_EXTRA_OPEN_FAVORITES, true);
-                        startActivity(intent);
+                        StationsActivity.start(OeffiActivity.this, true);
                         finish();
                         overridePendingTransition(R.anim.enter_from_left, R.anim.exit_to_right);
                     }
@@ -188,9 +185,7 @@ public abstract class OeffiActivity extends ComponentActivity {
                 if (itemId == R.id.global_options_stations_nearby) {
                     if (OeffiActivity.this instanceof StationsActivity)
                         return true;
-                    final Intent intent = new Intent(OeffiActivity.this, StationsActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
+                    StationsActivity.start(OeffiActivity.this, false);
                     finish();
                     overridePendingTransition(R.anim.enter_from_left, R.anim.exit_to_right);
                     return true;
