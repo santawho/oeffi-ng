@@ -154,6 +154,7 @@ dependencies {
     implementation 'androidx.drawerlayout:drawerlayout:1.2.0'
     implementation 'androidx.core:core:1.15.0'
     implementation 'androidx.activity:activity:1.9.3'
+    implementation 'androidx.core:core-splashscreen:1.0.1'
     //noinspection GradleDependency
     implementation 'com.squareup.okhttp3:okhttp:3.12.13'
     //noinspection GradleDependency

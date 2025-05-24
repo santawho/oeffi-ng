@@ -3,6 +3,12 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <style name="My.Theme.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/splashscreen_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_oeffi_ng_directions_color_48dp</item>
+        <item name="postSplashScreenTheme">@style/My.Theme</item>
+    </style>
+
     <style name="My.Theme" parent="@android:style/Theme.Material.Light.NoActionBar">
         <item name="android:windowBackground">@color/bg_level0</item>
         <item name="android:textViewStyle">@style/My.Widget.TextView</item>

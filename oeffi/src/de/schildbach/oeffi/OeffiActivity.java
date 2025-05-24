@@ -41,6 +41,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
@@ -49,6 +50,7 @@ import androidx.activity.ComponentActivity;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.core.graphics.Insets;
+import androidx.core.splashscreen.SplashScreen;
 import androidx.core.view.MenuProvider;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -78,7 +80,6 @@ import de.schildbach.pte.dto.TripOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -107,6 +108,9 @@ public abstract class OeffiActivity extends ComponentActivity {
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
+        this.application = (Application) getApplication();
+        SplashScreen.installSplashScreen(this);
+
         this.prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         final Intent intent = getIntent();
@@ -129,7 +133,6 @@ public abstract class OeffiActivity extends ComponentActivity {
 
         EdgeToEdge.enable(this, Constants.STATUS_BAR_STYLE);
         super.onCreate(savedInstanceState);
-        this.application = (Application) getApplication();
 
         ErrorReporter.getInstance().check(this, applicationVersionCode(), application.okHttpClient());
     }

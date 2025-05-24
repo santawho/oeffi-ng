@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="splashscreen_background">#c0c0c0</color>
 
     <!-- foreground -->
     <color name="fg_significant">#000000</color>
