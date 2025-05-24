@@ -691,7 +691,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                         stationsMap.remove(station.location.id);
                     } else {
                         if (hadPresetTime) {
-                            station.departures.clear();
+                            station.departures = null;
                         }
 
                         if (station.location.hasCoord()) {
