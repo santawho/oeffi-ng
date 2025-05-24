@@ -140,9 +140,9 @@ public abstract class OeffiMainActivity extends OeffiActivity {
                             new AlertDialog.Builder(this)
                                     .setTitle(R.string.alert_update_available_title)
                                     .setMessage(R.string.alert_update_available_message)
-                                    .setPositiveButton(android.R.string.ok, (d, i) ->
+                                    .setPositiveButton(R.string.alert_update_available_button_yes, (d, i) ->
                                             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(updateUrl))))
-                                    .setNegativeButton(android.R.string.cancel, null)
+                                    .setNegativeButton(R.string.alert_update_available_button_no, null)
                                     .create().show();
                         });
                     }

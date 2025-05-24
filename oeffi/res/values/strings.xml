@@ -420,6 +420,8 @@
     <string name="alert_crash_report_negative">Dismiss</string>
     <string name="alert_update_available_title">Update available</string>
     <string name="alert_update_available_message">An update of this application is available. Do you want to download now?</string>
+    <string name="alert_update_available_button_yes">Download now</string>
+    <string name="alert_update_available_button_no">Maybe later</string>
 
     <!-- products -->
     <string name="product_i">Highspeed</string>
