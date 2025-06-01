@@ -176,7 +176,7 @@ public class FavoriteStationsActivity extends OeffiActivity
             intent.setData(uri);
             setResult(RESULT_OK, intent);
             finish();
-        } if (station.type == LocationType.ADDRESS) {
+        } else if (station.type == LocationType.ADDRESS) {
             new Toast(this).longToast(R.string.stations_no_departures_for_address);
         } else {
             StationDetailsActivity.start(FavoriteStationsActivity.this, stationNetwork, station);
