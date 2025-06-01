@@ -242,11 +242,11 @@ public class TripRenderer {
             // leg is now
             setNextEventType(true);
             final boolean eventIsNow = setNextEventTimeLeft(now, endTime, plannedEndTime, 0);
-            String targetName = arrivalStop.location.uniqueShortName();
+            String targetName = Formats.fullLocationName(arrivalStop.location);
             setNextEventTarget(targetName);
             final Trip.Public nextPublicLeg = (nextLegC != null) ? nextLegC.publicLeg : null;
             final Stop nextDepartureStop = (nextPublicLeg != null) ? nextPublicLeg.departureStop : null;
-            String depName = (nextDepartureStop != null) ? nextDepartureStop.location.uniqueShortName() : null;
+            String depName = (nextDepartureStop != null) ? Formats.fullLocationName(nextDepartureStop.location) : null;
             boolean depChanged = depName != null && !depName.equals(targetName);
             setNextEventDeparture(depChanged ? depName : null);
             final Position arrPos = arrivalStop.getArrivalPosition();
@@ -301,9 +301,9 @@ public class TripRenderer {
             // leg is now
             setNextEventType(false);
             final boolean eventIsNow = setNextEventTimeLeft(now, endTime, transferTo != null ? plannedEndTime : null, leg != null ? leg.min : 0);
-            final String targetName = (transferTo != null) ? transferTo.location.uniqueShortName() : null;
+            final String targetName = (transferTo != null) ? Formats.fullLocationName(transferTo.location) : null;
             setNextEventTarget(targetName);
-            final String arrName = (transferFrom != null) ? transferFrom.location.uniqueShortName() : null;
+            final String arrName = (transferFrom != null) ? Formats.fullLocationName(transferFrom.location) : null;
             final boolean depChanged = arrName != null && !arrName.equals(targetName);
             setNextEventDeparture(null);
             final Position arrPos = transferFrom != null ? transferFrom.getArrivalPosition() : null;
@@ -514,7 +514,8 @@ public class TripRenderer {
         } else {
             nextEventTransportLine = leg.line;
             final Location dest = leg.destination;
-            nextEventTransportDestinationName = dest != null ? Formats.makeBreakableStationName(dest.uniqueShortName()) : null;
+            nextEventTransportDestinationName = dest == null ? null :
+                    Formats.makeBreakableStationName(Formats.fullLocationName(dest));
         }
     }
 

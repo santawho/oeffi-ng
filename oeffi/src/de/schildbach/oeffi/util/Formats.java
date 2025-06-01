@@ -23,6 +23,7 @@ import android.text.format.DateUtils;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.pte.dto.Line;
+import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.Position;
 
 import java.util.Calendar;
@@ -124,6 +125,13 @@ public final class Formats {
         return originalName
                 .replaceAll("([-,.)])", "$1\u200B")
                 .replaceAll("([(])", "\u200B$1");
+    }
+
+    public static String fullLocationName(final Location location) {
+        return location == null ? null
+                : location.place == null || location.name == null
+                ? location.uniqueShortName()
+                : location.place + ", " + location.name;
     }
 
     public static String formatPosition(final Context context, final Position position, final Line line) {

@@ -886,10 +886,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final Date now) {
         Trip.Public leg = legC.publicLeg;
         final Location destination = leg.destination;
-        final String destinationName = destination == null ? null
-                : destination.place == null || destination.name == null
-                ? destination.uniqueShortName()
-                : destination.place + ", " + destination.name;
+        final String destinationName = Formats.fullLocationName(destination);
         final boolean showDestination = destinationName != null;
         final boolean showAccessibility = leg.line.hasAttr(Line.Attr.WHEEL_CHAIR_ACCESS);
         final boolean showBicycleCarriage = leg.line.hasAttr(Line.Attr.BICYCLE_CARRIAGE);

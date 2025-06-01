@@ -45,6 +45,7 @@ import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.QueryTripsRunnable.TripRequestData;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
+import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.pte.NetworkId;
@@ -108,10 +109,6 @@ public class TripsOverviewActivity extends OeffiActivity {
     private static final String INTENT_EXTRA_HISTORY_URI = TripsOverviewActivity.class.getName() + ".history";
     private static final String INTENT_EXTRA_RELOAD_REQUEST_DATA = TripsOverviewActivity.class.getName() + ".reqdata";
     private static final String INTENT_EXTRA_RENDERCONFIG = TripDetailsActivity.class.getName() + ".config";
-
-    private static String nameAndPlace(final Location location) {
-        return location.place != null ? (location.place + ", " + location.name) : location.name;
-    }
 
     public static void start(final Context context, final NetworkId network, final TimeSpec.DepArr depArr,
             final QueryTripsResult result, final Uri historyUri, final TripRequestData reloadRequestData) {
@@ -597,13 +594,13 @@ public class TripsOverviewActivity extends OeffiActivity {
         // update header
         if (result.from != null)
             ((TextView) findViewById(R.id.directions_trip_overview_custom_title_from))
-                    .setText(nameAndPlace(result.from));
+                    .setText(Formats.fullLocationName(result.from));
         findViewById(R.id.directions_trip_overview_custom_title_via_row)
                 .setVisibility(result.via != null ? View.VISIBLE : View.GONE);
         if (result.via != null)
-            ((TextView) findViewById(R.id.directions_trip_overview_custom_title_via)).setText(nameAndPlace(result.via));
+            ((TextView) findViewById(R.id.directions_trip_overview_custom_title_via)).setText(Formats.fullLocationName(result.via));
         if (result.to != null)
-            ((TextView) findViewById(R.id.directions_trip_overview_custom_title_to)).setText(nameAndPlace(result.to));
+            ((TextView) findViewById(R.id.directions_trip_overview_custom_title_to)).setText(Formats.fullLocationName(result.to));
 
         // update server product
         if (result.header != null) {
