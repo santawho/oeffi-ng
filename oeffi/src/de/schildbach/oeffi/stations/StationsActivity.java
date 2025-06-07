@@ -930,7 +930,11 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                 });
             }
 
-            // refresh favorites
+            // (do not, why?) refresh favorites
+            // addFavoriteStationsToResult();
+        }
+
+        private void addFavoriteStationsToResult() {
             final Map<Location, Integer> favoriteMap = FavoriteUtils.loadAll(getContentResolver(), network);
             final List<Station> freshStations = new ArrayList<>(favoriteMap.size());
 
