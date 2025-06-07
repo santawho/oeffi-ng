@@ -1010,12 +1010,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final TextView messageView = row.findViewById(R.id.directions_trip_details_public_entry_message);
         final String message = leg.message != null ? leg.message : leg.line.message;
         if (message != null) {
-            String htmlMessage = HtmlUtils.makeLinksClickableInHtml(message);
-            Spanned html = Html.fromHtml(htmlMessage, Html.FROM_HTML_MODE_COMPACT);
+            messageView.setVisibility(View.VISIBLE);
+            Spanned html = Html.fromHtml(HtmlUtils.makeLinksClickableInHtml(message), Html.FROM_HTML_MODE_COMPACT);
             messageView.setText(html);
             messageView.setMovementMethod(LinkMovementMethod.getInstance());
+        } else {
+            messageView.setVisibility(View.GONE);
         }
-        messageView.setVisibility(message != null ? View.VISIBLE : View.GONE);
 
         final TextView progress = row.findViewById(R.id.directions_trip_details_public_entry_progress);
         progress.setVisibility(View.GONE);

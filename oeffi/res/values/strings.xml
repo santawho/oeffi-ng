@@ -99,7 +99,7 @@
     <!-- station list -->
     <string name="stations_list_entry_no_departures">(No departures)</string>
     <string name="stations_list_entry_product_filtered">(None of the departures match the product filter)</string>
-    <string name="stations_list_entry_interval">(approx. %s min interval)</string>
+    <string name="stations_list_entry_interval">(approx. %d min interval)</string>
     <string name="stations_list_acquiring_location">Acquiring location…</string>
     <string name="stations_list_cannot_acquire_location">Cannot acquire device location.</string>
     <string name="stations_list_cannot_acquire_location_hint">Try enabling at least one location provider.</string>

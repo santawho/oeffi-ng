@@ -58,6 +58,7 @@ import de.schildbach.oeffi.directions.QueryJourneyRunnable;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.DividerItemDecoration;
 import de.schildbach.oeffi.util.Formats;
+import de.schildbach.oeffi.util.HtmlUtils;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.pte.NetworkId;
@@ -805,7 +806,8 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             // message
             if (departure.message != null || departure.line.message != null) {
                 msgView.setVisibility(View.VISIBLE);
-                Spanned html = Html.fromHtml(Joiner.on('\n').skipNulls().join(departure.message, departure.line.message));
+                final String message = Joiner.on('\n').skipNulls().join(departure.message, departure.line.message);
+                Spanned html = Html.fromHtml(HtmlUtils.makeLinksClickableInHtml(message), Html.FROM_HTML_MODE_COMPACT);
                 msgView.setText(html);
                 msgView.setMovementMethod(LinkMovementMethod.getInstance());
             } else {

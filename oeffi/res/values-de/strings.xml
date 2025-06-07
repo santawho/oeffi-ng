@@ -98,7 +98,7 @@
     <!-- station list -->
     <string name="stations_list_entry_no_departures">(Keine Abfahrten)</string>
     <string name="stations_list_entry_product_filtered">(Keine der Abfahrten passen auf den Produktfilter)</string>
-    <string name="stations_list_entry_interval">(ca. alle %s min)</string>
+    <string name="stations_list_entry_interval">(ca. alle %d min)</string>
     <string name="stations_list_acquiring_location">Ermittle Standort…</string>
     <string name="stations_list_cannot_acquire_location">Kann Standort nicht ermitteln.</string>
     <string name="stations_list_cannot_acquire_location_hint">Bitte versuch mindestens einen Standortdienst einzuschalten.</string>

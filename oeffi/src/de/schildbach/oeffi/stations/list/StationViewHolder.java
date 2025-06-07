@@ -21,6 +21,8 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.text.Html;
+import android.text.Spanned;
 import android.text.format.DateUtils;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -41,6 +43,7 @@ import de.schildbach.oeffi.stations.QueryDeparturesRunnable;
 import de.schildbach.oeffi.stations.Station;
 import de.schildbach.oeffi.stations.StationContextMenu;
 import de.schildbach.oeffi.util.Formats;
+import de.schildbach.oeffi.util.HtmlUtils;
 import de.schildbach.pte.Standard;
 import de.schildbach.pte.dto.Departure;
 import de.schildbach.pte.dto.Line;
@@ -393,7 +396,10 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
 
                 final TextView messageView = (TextView) inflater.inflate(R.layout.stations_station_entry_message,
                         messagesViewGroup, false);
-                messageView.setText(index + ". " + message);
+                Spanned html = Html.fromHtml(
+                        HtmlUtils.makeLinksClickableInHtml("<b>" + index + ".</b> " + message),
+                        Html.FROM_HTML_MODE_COMPACT);
+                messageView.setText(html);
                 messageView.setTextColor(colorSignificant);
                 messagesViewGroup.addView(messageView);
             }
