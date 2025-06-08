@@ -165,7 +165,7 @@ public class Navigator {
         return currentTrip;
     }
 
-    private Trip.Public buildUpdatedLeg(Trip.Public initialLeg, Trip.Public journeyLeg, final Date loadedAt) {
+    public static Trip.Public buildUpdatedLeg(Trip.Public initialLeg, Trip.Public journeyLeg, final Date loadedAt) {
         final List<Stop> journeyStops = new ArrayList<>();
         journeyStops.add(journeyLeg.departureStop);
         if (journeyLeg.intermediateStops != null)

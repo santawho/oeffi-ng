@@ -44,6 +44,7 @@ import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.QueryTripsRunnable.TripRequestData;
+import de.schildbach.oeffi.directions.navigation.Navigator;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
@@ -52,6 +53,7 @@ import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.Location;
+import de.schildbach.pte.dto.QueryJourneyResult;
 import de.schildbach.pte.dto.QueryTripsContext;
 import de.schildbach.pte.dto.QueryTripsResult;
 import de.schildbach.pte.dto.Stop;
@@ -339,24 +341,24 @@ public class TripsOverviewActivity extends OeffiActivity {
                 final int firstVisiblePosition = barView.getFirstVisiblePosition() - positionOffset;
 
                 Runnable queryTripsRunnable = null;
-                if (context != null && context.canQueryLater() && (lastVisiblePosition == AdapterView.INVALID_POSITION
-                        || lastVisiblePosition + 1 >= trips.size())) {
-                    queryTripsRunnable = new QueryMoreTripsRunnable(context, false, true, searchMoreContext);
-                } else if (context != null && context.canQueryEarlier()
-                        && (firstVisiblePosition == AdapterView.INVALID_POSITION || firstVisiblePosition <= 0)) {
-                    queryTripsRunnable = new QueryMoreTripsRunnable(context, true, false, searchMoreContext);
-                } else if (reloadRequested) {
+                if (reloadRequested) {
                     reloadRequested = false;
                     searchMoreContext.reset();
-                    queryTripsRunnable = new QueryMoreTripsRunnable(context, false, false, searchMoreContext);
+                    queryTripsRunnable = new QueryMoreTripsRunnable(context, false, false, true, searchMoreContext);
                 } else if (searchMoreRequested) {
                     searchMoreRequested = false;
                     final SearchMoreContext.NextRoundInfo nextRoundInfo = searchMoreContext.prepareNextRound(TripsOverviewActivity.this);
                     if (nextRoundInfo != null) {
-                        queryTripsRunnable = new QueryMoreTripsRunnable(context, false, false, searchMoreContext);
+                        queryTripsRunnable = new QueryMoreTripsRunnable(context, false, false, false, searchMoreContext);
                         if (nextRoundInfo.infoText != null)
                             runOnUiThread(() -> new Toast(TripsOverviewActivity.this).toast(nextRoundInfo.infoText));
                     }
+                } else if (context != null && context.canQueryLater() && (lastVisiblePosition == AdapterView.INVALID_POSITION
+                        || lastVisiblePosition + 1 >= trips.size())) {
+                    queryTripsRunnable = new QueryMoreTripsRunnable(context, false, true, false, searchMoreContext);
+                } else if (context != null && context.canQueryEarlier()
+                        && (firstVisiblePosition == AdapterView.INVALID_POSITION || firstVisiblePosition <= 0)) {
+                    queryTripsRunnable = new QueryMoreTripsRunnable(context, true, false, false, searchMoreContext);
                 } else if (searchMoreContext.searchMorePossible()) {
                     runOnUiThread(() -> setSearchMoreButtonEnabled(true));
                 }
@@ -372,16 +374,17 @@ public class TripsOverviewActivity extends OeffiActivity {
     private class QueryMoreTripsRunnable implements Runnable {
         final private MyActionBar actionBar = getMyActionBar();
         final private QueryTripsContext context;
-        final private boolean earlier, later;
+        final private boolean earlier, later, refreshPrepend;
         final private SearchMoreContext searchMoreContext;
 
         public QueryMoreTripsRunnable(
                 final QueryTripsContext context,
-                final boolean earlier, final boolean later,
+                final boolean earlier, final boolean later, final boolean refreshPrepend,
                 final SearchMoreContext searchMoreContext) {
             this.context = context;
             this.earlier = earlier;
             this.later = later;
+            this.refreshPrepend = refreshPrepend;
             this.searchMoreContext = searchMoreContext;
         }
 
@@ -389,6 +392,9 @@ public class TripsOverviewActivity extends OeffiActivity {
             runOnUiThread(() -> actionBar.startProgress());
 
             try {
+                if (refreshPrepend)
+                    setupPrepend(true);
+
                 doRequest();
             } finally {
                 queryMoreTripsRunning = false;
@@ -484,14 +490,34 @@ public class TripsOverviewActivity extends OeffiActivity {
     private List<Trip.Leg> prependLegs;
     private int prependNumChanges;
 
-    private void setupPrepend() {
+    private void setupPrepend(final boolean doRefresh) {
         prependLegs = new LinkedList<>();
         final JourneyRef prependToJourneyRef = renderConfig.prependToJourneyRef;
         Trip.Public foundLeg = null;
         prependNumChanges = -1;
+        final NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
+        final Date now = new Date();
         for (Trip.Leg leg : renderConfig.prependTrip.legs) {
             if (leg instanceof Trip.Public) {
-                final Trip.Public publicLeg = (Trip.Public) leg;
+                Trip.Public publicLeg = (Trip.Public) leg;
+                if (doRefresh) {
+                    try {
+                        final QueryJourneyResult result = networkProvider.queryJourney(publicLeg.journeyRef);
+                        if (result != null) {
+                            switch (result.status) {
+                                case OK:
+                                    if (result.journeyLeg != null)
+                                        publicLeg = Navigator.buildUpdatedLeg(publicLeg, result.journeyLeg, now);
+                                    break;
+                                case NO_JOURNEY:
+                                case SERVICE_DOWN:
+                                    break;
+                            }
+                        }
+                    } catch (IOException e) {
+                        log.error("unable to refresh leg", e);
+                    }
+                }
                 if (prependToJourneyRef.equals(publicLeg.journeyRef)) {
                     foundLeg = publicLeg;
                     break;
@@ -545,7 +571,7 @@ public class TripsOverviewActivity extends OeffiActivity {
 
     private QueryTripsResult prependTripToAllTrips(final QueryTripsResult in) {
         if (prependLegs == null)
-            setupPrepend();
+            setupPrepend(false);
         if (in.trips == null)
             return in;
         final List<Trip> newTrips = new LinkedList<>();
