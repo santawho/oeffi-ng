@@ -10,6 +10,8 @@
     <color name="fg_highlighted">#ff9966</color>
     <color name="fg_arrow">#ff6666</color>
     <color name="fg_position">#000000</color>
+    <color name="fg_trip_next_event_normal">#ffffff</color>
+    <color name="fg_trip_next_event_important">#ff6666</color>
 
     <!-- background -->
     <color name="bg_level0">#222222</color>
@@ -40,8 +42,9 @@
     <color name="bg_trip_overview_earlierorlater_trip">#383838</color>
     <color name="bg_trip_overview_additional_trip">#28283A</color>
     <color name="bg_trip_overview_additional_feeder">#283A28</color>
-    <color name="fg_trip_next_event_normal">#ffffff</color>
-    <color name="fg_trip_next_event_important">#ff6666</color>
+    <color name="bg_location_selector_unselected">#222222</color>
+    <color name="bg_location_selector_first">#228222</color>
+    <color name="bg_location_selector_second">#828222</color>
 
     <item name="alpha_bright_white" format="float" type="dimen">0.8</item>
 
