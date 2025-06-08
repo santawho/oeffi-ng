@@ -139,10 +139,14 @@ public class DirectionsActivity extends OeffiMainActivity
     public static final String LINK_IDENTIFIER_TRIP = "trip";
     public static final String LINK_IDENTIFIER_SHARE_TRIP = "share-trip";
 
+    private static final int LOCATION_SELECTOR_NUM_ROWS = 4;
+    private static final int LOCATION_SELECTOR_NUM_COLUMNS = 2;
+
     private ConnectivityManager connectivityManager;
     private LocationManager locationManager;
 
     private View quickReturnView;
+    private LocationSelector locationSelector;
     private ToggleImageButton buttonExpand;
     private LocationView viewFromLocation;
     private LocationView viewViaLocation;
@@ -523,6 +527,9 @@ public class DirectionsActivity extends OeffiMainActivity
             viewQueryMissingCapability.setPadding(viewQueryMissingCapability.getPaddingLeft(), height,
                     viewQueryMissingCapability.getPaddingRight(), viewQueryMissingCapability.getPaddingBottom());
         });
+
+        locationSelector = findViewById(R.id.directions_location_selector);
+        locationSelector.setup(LOCATION_SELECTOR_NUM_ROWS, LOCATION_SELECTOR_NUM_COLUMNS);
 
         mapView = findViewById(R.id.directions_map);
         if (ContextCompat.checkSelfPermission(DirectionsActivity.this,
