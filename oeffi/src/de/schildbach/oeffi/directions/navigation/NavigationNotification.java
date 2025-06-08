@@ -671,7 +671,7 @@ public class NavigationNotification {
             try {
                 log.info("refreshing trip");
                 final Navigator navigator = new Navigator(intentData.network, intentData.trip);
-                newTrip = navigator.refresh();
+                newTrip = navigator.refresh(false, new Date(now));
             } catch (IOException e) {
                 log.error("error while refreshing trip", e);
             }

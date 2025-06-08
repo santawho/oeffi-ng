@@ -158,7 +158,8 @@ public class TripNavigatorActivity extends TripDetailsActivity {
                         ? R.color.bg_action_alternative_directions
                         : R.color.bg_action_bar_navigation);
         actionBar.setPrimaryTitle(getString(R.string.navigation_details_title));
-        actionBar.addProgressButton().setOnClickListener(buttonView -> refreshNavigation(true));
+        actionBar.addProgressButton().setOnClickListener(buttonView ->
+                refreshNavigation(true, true));
     }
 
     @Override
@@ -270,11 +271,11 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         if (nextNavigationRefreshTime < 0) return false;
         long now = new Date().getTime();
         if (now < nextNavigationRefreshTime) return false;
-        refreshNavigation(doNotifcationUpdate);
+        refreshNavigation(doNotifcationUpdate, false);
         return true;
     }
 
-    private void refreshNavigation(final boolean doNotifcationUpdate) {
+    private void refreshNavigation(final boolean doNotificationUpdate, final boolean forceRefreshAll) {
         if (navigationRefreshRunnable != null)
             return;
 
@@ -283,11 +284,11 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
         navigationRefreshRunnable = () -> {
             try {
-                Trip updatedTrip = navigator.refresh();
+                Trip updatedTrip = navigator.refresh(forceRefreshAll, new Date());
                 if (updatedTrip == null) {
                     handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));
                 } else {
-                    if (doNotifcationUpdate)
+                    if (doNotificationUpdate)
                         updateNotification(updatedTrip);
                     runOnUiThread(() -> onTripUpdated(updatedTrip));
                 }

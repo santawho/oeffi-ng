@@ -537,7 +537,8 @@ public class TripsOverviewActivity extends OeffiActivity {
                     newIntermediateStops,
                     foundLeg.path,
                     foundLeg.message,
-                    foundLeg.journeyRef));
+                    foundLeg.journeyRef,
+                    foundLeg.loadedAt));
             prependNumChanges += 1;
         }
     }

@@ -1977,7 +1977,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final Trip.Public leg = new Trip.Public(
                 journeyLeg.line, exitLocation, entryStop, exitStop,
                 intermediateStops, journeyLeg.path,
-                journeyLeg.message, journeyLeg.journeyRef);
+                journeyLeg.message,
+                journeyLeg.journeyRef, journeyLeg.loadedAt);
         final Trip journeyTrip = new Trip(
                 tripRenderer.trip.loadedAt,
                 null,
