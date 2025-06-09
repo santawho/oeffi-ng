@@ -6,14 +6,15 @@
         android:key="network_provider"
         android:summary="@string/global_preferences_network_provider_summary"
         android:title="@string/global_preferences_network_provider_title">
+        <!-- none of the following variants works reliably. Now handled via ActionHandler -->
 <!--        <intent-->
 <!--            android:targetPackage="de.schildbach.oeffi"-->
 <!--            android:targetClass="de.schildbach.oeffi.network.NetworkPickerActivity" />-->
 <!--        <intent-->
 <!--            android:targetPackage="${applicationId}"-->
 <!--            android:targetClass="de.schildbach.oeffi.network.NetworkPickerActivity" />-->
-        <intent
-            android:targetClass="de.schildbach.oeffi.network.NetworkPickerActivity" />
+<!--        <intent-->
+<!--            android:targetClass="de.schildbach.oeffi.network.NetworkPickerActivity" />-->
     </Preference>
     <CheckBoxPreference
         android:defaultValue="true"
