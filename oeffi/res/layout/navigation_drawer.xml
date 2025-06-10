@@ -41,9 +41,11 @@
         <ImageView
             android:id="@+id/navigation_drawer_share_qrcode"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="@dimen/navigation_drawer_share_qrcode"
             android:layout_marginLeft="@dimen/text_padding_horizontal_verylax"
             android:layout_marginRight="@dimen/text_padding_horizontal_verylax"
+            android:scaleType="fitCenter"
+            android:adjustViewBounds="true"
             android:gravity="center"
             android:src="@drawable/qr_update"/>
     </LinearLayout>
