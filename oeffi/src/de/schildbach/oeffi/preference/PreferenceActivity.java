@@ -116,6 +116,7 @@ public class PreferenceActivity extends android.preference.PreferenceActivity {
     @Override
     protected boolean isValidFragment(final String fragmentName) {
         return CommonFragment.class.getName().equals(fragmentName)
+                || UserInterfaceFragment.class.getName().equals(fragmentName)
                 || DirectionsFragment.class.getName().equals(fragmentName)
                 || NavigationFragment.class.getName().equals(fragmentName)
                 || ShortcutsFragment.class.getName().equals(fragmentName)

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="user_interface_preferences_title">User Interface</string>
+
+    <string name="user_interface_location_selector_category_title">Quick Location Selector</string>
+
+    <string name="user_interface_location_selector_enabled_title">Enabled</string>
+    <string name="user_interface_location_selector_enabled_summary">Use quick location selector in directions dialog</string>
+    <string name="user_interface_location_selector_numrows_title">Number of entries</string>
+    <string name="user_interface_location_selector_numrows_summary">Set number of rows for the quick location selector</string>
+
+    <string-array name="user_interface_location_selector_numrows_values">
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+
+</resources>

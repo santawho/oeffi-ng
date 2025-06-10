@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="@string/user_interface_location_selector_category_title"/>
+
+    <CheckBoxPreference
+        android:key="user_interface_location_selector_enabled"
+        android:defaultValue="true"
+        android:title="@string/user_interface_location_selector_enabled_title"
+        android:summary="@string/user_interface_location_selector_enabled_summary" />
+    <ListPreference
+        android:key="user_interface_location_selector_numrows"
+        android:defaultValue="4"
+        android:entries="@array/user_interface_location_selector_numrows_values"
+        android:entryValues="@array/user_interface_location_selector_numrows_values"
+        android:title="@string/user_interface_location_selector_numrows_title"
+        android:summary="@string/user_interface_location_selector_numrows_summary" />
+
+</PreferenceScreen>

@@ -2,22 +2,18 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="wrap_content"
     android:layout_width="0dp"
-    android:layout_weight="1"
-    android:layout_margin="0dp"
-    android:paddingTop="0dp"
-    android:paddingBottom="0dp"
-    android:paddingLeft="10dp"
-    android:paddingRight="0dp">
+    android:layout_weight="1">
 
     <TextView
         android:id="@+id/location_selector_text"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="60dp"
         android:gravity="center"
         android:background="@drawable/location_selector_item_unselected_background"
         android:textColor="@color/fg_significant"
         android:textStyle="bold"
-        android:paddingVertical="5dp"
-        android:paddingHorizontal="10dp"
+        android:textSize="@dimen/font_size_normal"
+        android:paddingVertical="0dp"
+        android:paddingHorizontal="0dp"
         />
 </FrameLayout>

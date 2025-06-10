@@ -1493,7 +1493,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         stopNameView.setText(Html.fromHtml(Formats.makeBreakableStationName(
                 pearlType == PearlView.Type.INTERMEDIATE_DEPARTURE
                         ? getString(R.string.directions_trip_details_departure_row_name_format, uniqueShortName)
-                        : uniqueShortName)));
+                        : uniqueShortName), Html.FROM_HTML_MODE_COMPACT));
         setStrikeThru(stopNameView, isCancelled);
         if (highlightLocation) {
             stopNameView.setTextColor(colorHighlighted);
