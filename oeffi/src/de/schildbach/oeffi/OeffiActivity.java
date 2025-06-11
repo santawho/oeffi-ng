@@ -314,14 +314,17 @@ public abstract class OeffiActivity extends ComponentActivity {
             heartbeat.start();
         });
 
-        findViewById(R.id.navigation_drawer_share).setOnClickListener(v -> {
-            navigationDrawerLayout.closeDrawer(Gravity.LEFT);
-            shareApp();
-        });
-        findViewById(R.id.navigation_drawer_share_qrcode).setOnClickListener(v -> {
-            navigationDrawerLayout.closeDrawer(Gravity.LEFT);
-            showImageDialog(R.drawable.qr_update);
-        });
+        if (prefs.getBoolean(Constants.PREFS_KEY_USER_INTERFACE_MAINMENU_SHAREAPP_ENABLED, false)) {
+            findViewById(R.id.navigation_drawer_share).setVisibility(View.VISIBLE);
+            findViewById(R.id.navigation_drawer_share).setOnClickListener(v -> {
+                navigationDrawerLayout.closeDrawer(Gravity.LEFT);
+                shareApp();
+            });
+            findViewById(R.id.navigation_drawer_share_qrcode).setOnClickListener(v -> {
+                navigationDrawerLayout.closeDrawer(Gravity.LEFT);
+                showImageDialog(R.drawable.qr_update);
+            });
+        }
 
         getMyActionBar().setDrawer(v -> toggleNavigation());
 

@@ -3,7 +3,9 @@
 
     <string name="user_interface_preferences_title">User Interface</string>
 
-    <string name="user_interface_location_selector_category_title">Quick Location Selector</string>
+    <string name="user_interface_mainmenu_shareapp_enabled_title">Show \"Share App\" item in main menu</string>
+
+    <string name="user_interface_location_selector_category_title">Quick Location Selector (EXPERIMENTAL)</string>
 
     <string name="user_interface_location_selector_enabled_title">Enabled</string>
     <string name="user_interface_location_selector_enabled_summary">Use quick location selector in directions dialog</string>
