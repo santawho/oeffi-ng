@@ -492,6 +492,10 @@ public class TripsOverviewActivity extends OeffiActivity {
 
     private void setupPrepend(final boolean doRefresh) {
         prependLegs = new LinkedList<>();
+        if (renderConfig == null || renderConfig.prependTrip == null) {
+            prependNumChanges = 0;
+            return;
+        }
         final JourneyRef prependToJourneyRef = renderConfig.prependToJourneyRef;
         Trip.Public foundLeg = null;
         prependNumChanges = -1;
