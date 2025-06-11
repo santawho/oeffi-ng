@@ -75,7 +75,7 @@ public class LocationSelector extends LinearLayout {
                 item.frameLayout = frameLayout;
                 item.textView = textView;
                 items[iItem] = item;
-                setItemStationName(item, String.format("Niedernhausen, djfkslj jfkls jklsdf jklfs B-%d-%d", iRow, iCol));
+                setItemStationName(item, String.format("Buxtehude Nord, djfkslj jfkls jklsdf jklfs B-%d-%d", iRow, iCol));
                 setItemBackground(item, R.drawable.location_selector_item_unselected_background);
             }
             this.addView(rowLayout);
