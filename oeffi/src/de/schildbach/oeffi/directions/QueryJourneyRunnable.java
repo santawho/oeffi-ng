@@ -203,7 +203,8 @@ public class QueryJourneyRunnable implements Runnable {
     }
 
     protected void onPreExecute() {
-        clickedView.setClickable(false);
+        if (clickedView != null)
+            clickedView.setClickable(false);
     }
 
     private void postOnPostExecute() {
@@ -211,7 +212,9 @@ public class QueryJourneyRunnable implements Runnable {
     }
 
     protected void onPostExecute() {
-        clickedView.setClickable(true);
+        if (clickedView != null)
+            clickedView.setClickable(true);
+
         if (!parentActivity.isDestroyed())
             progressDialog.dismiss();
     }

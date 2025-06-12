@@ -95,10 +95,11 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class StationDetailsActivity extends OeffiActivity implements StationsAware {
-    private static final String INTENT_EXTRA_NETWORK = StationDetailsActivity.class.getName() + ".network";
-    private static final String INTENT_EXTRA_STATION = StationDetailsActivity.class.getName() + ".station";
-    private static final String INTENT_EXTRA_PRESETTIME = StationDetailsActivity.class.getName() + ".presettime";
-    private static final String INTENT_EXTRA_DEPARTURES = StationDetailsActivity.class.getName() + ".departures";
+    public static final String INTENT_EXTRA_NETWORK = StationDetailsActivity.class.getName() + ".network";
+    public static final String INTENT_EXTRA_STATION = StationDetailsActivity.class.getName() + ".station";
+    public static final String INTENT_EXTRA_PRESETTIME = StationDetailsActivity.class.getName() + ".presettime";
+    public static final String INTENT_EXTRA_DEPARTURES = StationDetailsActivity.class.getName() + ".departures";
+    public static final String INTENT_EXTRA_JOURNEYREF = StationDetailsActivity.class.getName() + ".journeyref";
 
     public static void start(
             final Context context, final NetworkId networkId,
@@ -173,6 +174,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
     private boolean autoRefreshDisabled = false;
     private Date nextLaterTime, nextEarlierTime;
     private Date presetTime;
+    private JourneyRef presetJourneyRef;
 
     private QueryJourneyRunnable queryJourneyRunnable;
     private final Handler handler = new Handler();
@@ -274,6 +276,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         this.presetTime = (Date) intent.getSerializableExtra(INTENT_EXTRA_PRESETTIME);
         final String stationSerialized = intent.getStringExtra(INTENT_EXTRA_STATION);
         final Station station = new Station(network, (Location) Objects.deserializeFromString(stationSerialized));
+        this.presetJourneyRef = (JourneyRef) Objects.deserializeFromString(intent.getStringExtra(INTENT_EXTRA_JOURNEYREF));
         if (intent.hasExtra(INTENT_EXTRA_DEPARTURES)) {
             station.departures = filterDeparturesByProducts(
                     (List<Departure>) intent.getSerializableExtra(INTENT_EXTRA_DEPARTURES),
@@ -318,6 +321,15 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
     protected void onResume() {
         super.onResume();
         mapView.onResume();
+
+        final JourneyRef journeyRef = presetJourneyRef;
+        presetJourneyRef = null;
+        if (journeyRef != null) {
+            queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
+                    this, null, queryJourneyRunnable,
+                    handler, backgroundHandler,
+                    network, journeyRef, selectedStation, null);
+        }
     }
 
     @Override

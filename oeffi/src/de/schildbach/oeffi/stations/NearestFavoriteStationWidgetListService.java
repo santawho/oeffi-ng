@@ -88,7 +88,8 @@ public class NearestFavoriteStationWidgetListService extends RemoteViewsService 
             final Departure departure = departures.get(position);
 
             final RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.station_widget_entry);
-            views.setOnClickFillInIntent(R.id.station_widget_entry, new Intent());
+            views.setOnClickFillInIntent(R.id.station_widget_entry, new Intent()
+                    .putExtra(StationDetailsActivity.INTENT_EXTRA_JOURNEYREF, Objects.serializeToString(departure.journeyRef)));
 
             // line
             final Line line = departure.line;

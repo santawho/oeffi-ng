@@ -274,9 +274,11 @@ public class NearestFavoriteStationWidgetService extends JobService {
             final int stationLonCol = favCursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_LON);
 
             while (favCursor.moveToNext()) {
+                final LocationType stationType = LocationType.valueOf(favCursor.getString(stationTypeCol));
+                if (stationType != LocationType.STATION)
+                    continue;
                 final String network = favCursor.getString(networkCol);
                 final String stationId = favCursor.getString(stationIdCol);
-                String stationType = favCursor.getString(stationTypeCol);
                 String stationPlace = favCursor.getString(stationPlaceCol);
                 String stationName = favCursor.getString(stationNameCol);
                 Point stationPoint = Point.from1E6(favCursor.getInt(stationLatCol), favCursor.getInt(stationLonCol));
@@ -290,8 +292,9 @@ public class NearestFavoriteStationWidgetService extends JobService {
                         android.location.Location.distanceBetween(here.getLatitude(), here.getLongitude(),
                                 stationPoint.getLatAsDouble(), stationPoint.getLonAsDouble(), distanceBetweenResults);
                         final float distance = distanceBetweenResults[0];
-                        final Favorite favorite = new Favorite(networkId, stationId, LocationType.valueOf(stationType), stationPlace, stationName,
-                                distance);
+                        final Favorite favorite = new Favorite(
+                                networkId, stationId, stationType, stationPlace, stationName,
+                                stationPoint, distance);
                         favorites.add(favorite);
                     }
                 } catch (final IllegalArgumentException x) {
@@ -325,33 +328,35 @@ public class NearestFavoriteStationWidgetService extends JobService {
                     setHeader(appWidgetId, getString(R.string.nearest_favorite_station_widget_loading));
                     appWidgetManager.updateAppWidget(appWidgetId, views);
 
-                    final NetworkProvider networkProvider = NetworkProviderFactory.provider(favorite.networkId);
-                    final String stationId = favorite.id;
+                    final NetworkId networkId = favorite.networkId;
+                    final NetworkProvider networkProvider = NetworkProviderFactory.provider(networkId);
+                    final String stationId = favorite.location.id;
+                    final String stationName = favorite.location.name;
 
                     try {
                         final QueryDeparturesResult result = networkProvider.queryDepartures(stationId, new Date(), 100,
                                 false);
-                        setResult(appWidgetId, result, favorite, timeFormat);
+                        setResult(appWidgetId, networkId, result, favorite, timeFormat);
                         appWidgetManager.updateAppWidget(appWidgetId, views);
                     } catch (final ConnectException x) {
-                        setHeader(appWidgetId, favorite.name);
+                        setHeader(appWidgetId, stationName);
                         setMessage(getString(R.string.nearest_favorite_station_widget_error_connect));
                         appWidgetManager.updateAppWidget(appWidgetId, views);
                         log.info("Could not query departures for station " + stationId, x);
                     } catch (final BlockedException x) {
-                        setHeader(appWidgetId, favorite.name);
+                        setHeader(appWidgetId, stationName);
                         setMessage(
                                 getString(R.string.nearest_favorite_station_widget_error_blocked, x.getUrl().host()));
                         appWidgetManager.updateAppWidget(appWidgetId, views);
                         log.info("Could not query departures for station " + stationId, x);
                     } catch (final SSLException x) {
-                        setHeader(appWidgetId, favorite.name);
+                        setHeader(appWidgetId, stationName);
                         setMessage(getString(R.string.nearest_favorite_station_widget_error_ssl,
                                 Throwables.getRootCause(x).getClass().getSimpleName()));
                         appWidgetManager.updateAppWidget(appWidgetId, views);
                         log.info("Could not query departures for station " + stationId, x);
                     } catch (final Exception x) {
-                        setHeader(appWidgetId, favorite.name);
+                        setHeader(appWidgetId, stationName);
                         setMessage(getString(R.string.nearest_favorite_station_widget_error_exception,
                                 Throwables.getRootCause(x).toString()));
                         appWidgetManager.updateAppWidget(appWidgetId, views);
@@ -366,16 +371,19 @@ public class NearestFavoriteStationWidgetService extends JobService {
         }
     }
 
-    private void setResult(final int appWidgetId, final QueryDeparturesResult result, final Favorite favorite,
+    private void setResult(
+            final int appWidgetId, final NetworkId networkId,
+            final QueryDeparturesResult result, final Favorite favorite,
             final java.text.DateFormat timeFormat) {
         views.setTextViewText(R.id.station_widget_lastupdated,
                 getString(R.string.nearest_favorite_station_widget_lastupdated, timeFormat.format(new Date())));
 
-        views.setTextViewText(R.id.station_widget_header, favorite.name);
+        final String stationId = favorite.location.id;
+        views.setTextViewText(R.id.station_widget_header, favorite.location.name);
 
         if (result.status == QueryDeparturesResult.Status.OK) {
             setMessage(getString(R.string.nearest_favorite_station_widget_no_departures));
-            final StationDepartures stationDepartures = result.findStationDepartures(favorite.id);
+            final StationDepartures stationDepartures = result.findStationDepartures(stationId);
             if (stationDepartures != null) {
                 if (stationDepartures.location.name != null)
                     views.setTextViewText(R.id.station_widget_header, stationDepartures.location.name);
@@ -383,18 +391,20 @@ public class NearestFavoriteStationWidgetService extends JobService {
                 final List<Departure> departures = stationDepartures.getNonCancelledDepartures();
 
                 if (!departures.isEmpty())
-                    setDeparturesList(departures, appWidgetId);
-                log.info("Got {} departures for favorite {}", departures.size(), favorite.id);
+                    setDeparturesList(departures, appWidgetId, networkId, favorite.location);
+                log.info("Got {} departures for favorite {}", departures.size(), stationId);
             } else {
-                log.info("Got no station departures for favorite {}", favorite.id);
+                log.info("Got no station departures for favorite {}", stationId);
             }
         } else {
-            log.info("Got {} for favorite {}", result.toShortString(), favorite.id);
+            log.info("Got {} for favorite {}", result.toShortString(), stationId);
             setMessage(getString(QueryDeparturesRunnable.statusMsgResId(result.status)));
         }
     }
 
-    private void setDeparturesList(final List<Departure> departures, final int appWidgetId) {
+    private void setDeparturesList(
+            final List<Departure> departures, final int appWidgetId,
+            final NetworkId networkId, final de.schildbach.pte.dto.Location location) {
         views.setViewVisibility(R.id.station_widget_message, View.GONE);
         views.setViewVisibility(R.id.station_widget_departures, View.VISIBLE);
 
@@ -407,9 +417,15 @@ public class NearestFavoriteStationWidgetService extends JobService {
         intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
         views.setRemoteAdapter(R.id.station_widget_departures, intent);
 
-        final PendingIntent clickIntent = clickIntent(appWidgetId);
-        views.setOnClickPendingIntent(R.id.station_widget_content, clickIntent);
-        views.setPendingIntentTemplate(R.id.station_widget_departures, clickIntent);
+        views.setOnClickPendingIntent(R.id.station_widget_content, clickIntent(appWidgetId));
+
+        views.setPendingIntentTemplate(R.id.station_widget_departures,
+                PendingIntent.getActivity(this, 0,
+                        StationDetailsActivity.fillIntent(
+                            new Intent(Intent.ACTION_MAIN, null, this, StationDetailsActivity.class)
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK),
+                            networkId, location, null),
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE));
     }
 
     private void setHeader(final int appWidgetId, final String message) {
@@ -429,26 +445,20 @@ public class NearestFavoriteStationWidgetService extends JobService {
         intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, new int[] { appWidgetId });
         intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
-        return PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        return PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
     }
 
     private static class Favorite implements Comparable<Favorite> {
         public final NetworkId networkId;
-        public final String id;
-        public final LocationType type;
-        public final String place;
-        public final String name;
+        public final de.schildbach.pte.dto.Location location;
         public final float distance;
 
         public Favorite(
                 final NetworkId networkId, final String id, final LocationType type,
                 final String place, final String name,
-                final float distance) {
+                final Point coord, final float distance) {
             this.networkId = networkId;
-            this.id = id;
-            this.type = type;
-            this.place = place;
-            this.name = name;
+            this.location = new de.schildbach.pte.dto.Location(type, id, coord, place, name);
             this.distance = distance;
         }
 
@@ -458,7 +468,7 @@ public class NearestFavoriteStationWidgetService extends JobService {
 
         @Override
         public String toString() {
-            return "Favorite[" + networkId + "," + id + ",'" + place + "','" + name + "'," + distance + "m]";
+            return "Favorite[" + networkId + "," + location.id + ",'" + location.place + "','" + location.name + "'," + distance + "m]";
         }
     }
 }
