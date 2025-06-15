@@ -9,7 +9,11 @@
 
     <string name="user_interface_location_selector_enabled_title">Aktiv</string>
     <string name="user_interface_location_selector_enabled_summary">Nutze schnelle Ortswahl im Verbindungsdialog</string>
+
     <string name="user_interface_location_selector_numrows_title">Anzahl Einträge</string>
     <string name="user_interface_location_selector_numrows_summary">Setze die Anzahl der Button-Zeilen der schnellen Ortswahl</string>
+
+    <string name="user_interface_location_selector_longholdtime_title">Lange Halte-Zeit (ms)</string>
+    <string name="user_interface_location_selector_longholdtime_summary">Anzahl Millisekunden bis langes Halten in der schnellen Ortswahl erkannt wird</string>
 
 </resources>

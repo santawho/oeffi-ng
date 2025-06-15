@@ -57,7 +57,7 @@ import java.util.Locale;
 
 public class LocationView extends FrameLayout implements LocationHelper.Callback {
     public interface Listener {
-        void changed();
+        void changed(LocationView view);
     }
 
     private final Resources res;
@@ -495,7 +495,7 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
 
     private void fireChanged() {
         if (listener != null)
-            listener.changed();
+            listener.changed(this);
     }
 
     public static int locationTypeIconRes(final @Nullable LocationType locationType) {

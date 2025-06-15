@@ -44,7 +44,8 @@
     <color name="bg_trip_overview_additional_feeder">#283A28</color>
     <color name="bg_location_selector_unselected">#222222</color>
     <color name="bg_location_selector_first">#228222</color>
-    <color name="bg_location_selector_second">#828222</color>
+    <color name="bg_location_selector_intermediate">#828222</color>
+    <color name="bg_location_selector_last">#822222</color>
 
     <item name="alpha_bright_white" format="float" type="dimen">0.8</item>
 

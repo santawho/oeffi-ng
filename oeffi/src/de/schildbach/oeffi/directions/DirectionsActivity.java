@@ -134,8 +134,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class DirectionsActivity extends OeffiMainActivity
-        implements QueryHistoryClickListener, QueryHistoryContextMenuItemListener {
+public class DirectionsActivity extends OeffiMainActivity implements
+        QueryHistoryClickListener,
+        QueryHistoryContextMenuItemListener,
+        LocationSelector.LocationSelectionListener {
     public static final String LINK_IDENTIFIER_TRIP = "trip";
     public static final String LINK_IDENTIFIER_SHARE_TRIP = "share-trip";
 
@@ -181,6 +183,45 @@ public class DirectionsActivity extends OeffiMainActivity
     private static final String INTENT_EXTRA_VIA_LOCATION = DirectionsActivity.class.getName() + ".via_location";
     private static final String INTENT_EXTRA_TIME_SPEC = DirectionsActivity.class.getName() + ".time_spec";
     private static final String INTENT_EXTRA_RENDERCONFIG = DirectionsActivity.class.getName() + ".config";
+
+    @Override
+    public void onLocationSequenceSelected(final List<Location> locations, final boolean longHold) {
+        if (longHold) {
+            // show menu
+
+        }
+
+        setupLocationsAndGo(locations);
+    }
+
+    private void setupLocationsAndGo(final List<Location> locations) {
+        final int numLocations = locations.size();
+        if (numLocations == 0) {
+            locationSelector.clearSelection();
+            return;
+        }
+        if (numLocations == 1) {
+            // single location clicked
+            if (viewFromLocation.getLocation() == null) {
+                viewFromLocation.setLocation(locations.get(0));
+                locationSelector.clearSelection();
+                return;
+            } else {
+                viewToLocation.setLocation(locations.get(0));
+            }
+        } else if (numLocations == 2) {
+            // 2 locations, from-to
+            viewFromLocation.setLocation(locations.get(0));
+            viewToLocation.setLocation(locations.get(1));
+        } else {
+            // >= 3, from-via-to
+            viewFromLocation.setLocation(locations.get(0));
+            viewViaLocation.setLocation(locations.get(1));
+            viewToLocation.setLocation(locations.get(numLocations - 1));
+        }
+
+        handleGo();
+    }
 
     private static class PickContact extends ActivityResultContract<Void, Uri> {
         @Override
@@ -390,7 +431,11 @@ public class DirectionsActivity extends OeffiMainActivity
 
         final AutoCompleteLocationAdapter autoCompleteAdapter = new AutoCompleteLocationAdapter(this, network);
 
-        final LocationView.Listener locationChangeListener = () -> {
+        final LocationView.Listener locationChangeListener = (view) -> {
+            final Location location = view.getLocation();
+            if (location != null)
+                locationSelector.addLocation(location, System.currentTimeMillis());
+
             updateMap();
             queryHistoryListAdapter.clearSelectedEntry();
             requestFocusFirst();
@@ -526,7 +571,9 @@ public class DirectionsActivity extends OeffiMainActivity
         });
 
         locationSelector = findViewById(R.id.directions_location_selector);
+        locationSelector.setLocationSelectionListener(this);
         locationSelector.setup(this, prefs);
+        locationSelector.setNetwork(network);
 
         mapView = findViewById(R.id.directions_map);
         if (ContextCompat.checkSelfPermission(DirectionsActivity.this,
@@ -800,6 +847,8 @@ public class DirectionsActivity extends OeffiMainActivity
         queryHistoryListAdapter.close();
         queryHistoryListAdapter = new QueryHistoryAdapter(this, network, this, this);
         viewQueryHistoryList.setAdapter(queryHistoryListAdapter);
+
+        locationSelector.setNetwork(network);
 
         updateGUI();
         setActionBarSecondaryTitleFromNetwork();
@@ -1183,6 +1232,9 @@ public class DirectionsActivity extends OeffiMainActivity
     }
 
     private void handleGo() {
+        locationSelector.persist();
+        locationSelector.clearSelection();
+
         final Location from = viewFromLocation.getLocation();
         if (!saneLocation(from, false)) {
             new Toast(this).longToast(R.string.directions_message_choose_from);

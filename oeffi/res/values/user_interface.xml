@@ -9,14 +9,17 @@
 
     <string name="user_interface_location_selector_enabled_title">Enabled</string>
     <string name="user_interface_location_selector_enabled_summary">Use quick location selector in directions dialog</string>
+
     <string name="user_interface_location_selector_numrows_title">Number of entries</string>
     <string name="user_interface_location_selector_numrows_summary">Set number of rows for the quick location selector</string>
-
     <string-array name="user_interface_location_selector_numrows_values">
         <item>2</item>
         <item>3</item>
         <item>4</item>
         <item>5</item>
     </string-array>
+
+    <string name="user_interface_location_selector_longholdtime_title">Long hold time (msec)</string>
+    <string name="user_interface_location_selector_longholdtime_summary">Number of milli-seconds to recognize long hold in the quick location selector</string>
 
 </resources>

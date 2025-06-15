@@ -63,7 +63,8 @@
     <color name="bg_action_bar_logviewer">#4444EE</color>
     <color name="bg_location_selector_unselected">#f7f7f7</color>
     <color name="bg_location_selector_first">#87f787</color>
-    <color name="bg_location_selector_second">#f7f787</color>
+    <color name="bg_location_selector_intermediate">#f7f787</color>
+    <color name="bg_location_selector_last">#f78787</color>
 
     <item name="alpha_bright_white" format="float" type="dimen">1</item>
 

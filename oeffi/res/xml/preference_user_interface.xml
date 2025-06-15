@@ -22,6 +22,13 @@
             android:entryValues="@array/user_interface_location_selector_numrows_values"
             android:title="@string/user_interface_location_selector_numrows_title"
             android:summary="@string/user_interface_location_selector_numrows_summary" />
+        <EditTextPreference
+            android:key="user_interface_location_selector_longholdtime"
+            android:singleLine="true"
+            android:inputType="number"
+            android:defaultValue="500"
+            android:title="@string/user_interface_location_selector_longholdtime_title"
+            android:summary="@string/user_interface_location_selector_longholdtime_summary" />
 
     </PreferenceCategory>
 
