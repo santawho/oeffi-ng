@@ -276,7 +276,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
                                 destinationView.setVisibility(View.VISIBLE);
                                 final Location destination = lineDestination.destination;
                                 if (destination != null) {
-                                    final String destinationName = destination.uniqueShortName();
+                                    final String destinationName = Formats.fullLocationNameIfDifferentPlace(destination, station.location);
                                     destinationView.setText(destinationName != null
                                             ? Constants.DESTINATION_ARROW_PREFIX + destinationName : null);
                                 } else {

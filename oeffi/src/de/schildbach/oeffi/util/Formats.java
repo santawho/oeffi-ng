@@ -127,6 +127,15 @@ public final class Formats {
                 .replaceAll("([(])", "\u200B$1");
     }
 
+    public static String fullLocationNameIfDifferentPlace(final Location location, final Location refLocation) {
+        return location == null ? null
+                : (refLocation == null || refLocation.place == null || location.place == null || location.name == null)
+                ? location.uniqueShortName()
+                : location.place.equals(refLocation.place)
+                ? location.name
+                : fullLocationName(location);
+    }
+
     public static String fullLocationName(final Location location) {
         return location == null ? null
                 : location.place == null || location.name == null

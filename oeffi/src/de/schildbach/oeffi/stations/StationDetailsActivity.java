@@ -776,7 +776,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             // destination
             final Location destination = departure.destination;
             if (destination != null) {
-                destinationView.setText(Constants.DESTINATION_ARROW_PREFIX + destination.uniqueShortName());
+                destinationView.setText(Constants.DESTINATION_ARROW_PREFIX + Formats.fullLocationNameIfDifferentPlace(destination, station));
                 itemView.setOnClickListener(destination.id != null ? v -> start(context, network, destination) : null);
                 setStrikeThru(destinationView, cancelled);
             } else {
