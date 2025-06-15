@@ -178,8 +178,8 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
 
             setLocation(location);
 
-            afterLocationViewInput(false);
             fireChanged();
+            afterLocationViewInput(false);
         });
 
         leftDrawable = new MultiDrawable(context);

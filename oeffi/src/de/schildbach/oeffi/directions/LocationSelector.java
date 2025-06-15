@@ -80,6 +80,7 @@ public class LocationSelector extends LinearLayout {
     private boolean invalidSelection;
     private Handler handler;
     private boolean timerRunning;
+    private boolean stateIsChanged;
 
     public LocationSelector(final Context context) {
         this(context, null);
@@ -173,6 +174,8 @@ public class LocationSelector extends LinearLayout {
             return;
         if (networkId == null)
             return;
+        if (!stateIsChanged)
+            return;
         final List<LocationAndTime> locationsAndTimes = new ArrayList<>();
         for (Item item : availableItems) {
             if (item.locationAndTime != null)
@@ -193,8 +196,11 @@ public class LocationSelector extends LinearLayout {
             final LocationAndTime itemLocationAndTime = item.locationAndTime;
             if (itemLocationAndTime != null) {
                 final Location itemLocation = itemLocationAndTime.location;
-                if (itemLocation.equals(location))
+                if (itemLocation.equals(location)) {
+                    itemLocationAndTime.addedAtTime = addedAtTime;
+                    stateIsChanged = true;
                     return; // was already added
+                }
                 if (oldestItem == null
                         || (oldestItem.locationAndTime != null
                             && oldestItem.locationAndTime.addedAtTime > itemLocationAndTime.addedAtTime)) {
@@ -211,6 +217,7 @@ public class LocationSelector extends LinearLayout {
         locationAndTime.addedAtTime = addedAtTime;
         oldestItem.locationAndTime = locationAndTime;
         setItemStationName(oldestItem, Formats.fullLocationName(location));
+        stateIsChanged = true;
     }
 
     public void clearSelection() {
