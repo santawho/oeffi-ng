@@ -266,9 +266,10 @@
         Then you can <b>tap and drag</b> to select origin and destination.
         The connection search starts automatically, unless you <b>hold your finger</b>
         on the destination station for a longer time (see settings).
-        Also try to tap a single station short (select) or long (menu).
         Long hold on an intermediate station when dragging over multiple stations,
         to select it as via location.
+        Tap a single station to select it as destination.
+        Tap a station <b>with 2 fingers</b> to open the context menu.
     </string>
 
     <!-- directions map -->

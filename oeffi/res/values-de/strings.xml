@@ -265,9 +265,10 @@
         Du kannst dann <b>tippen und ziehen</b> um Start und Ziel auszuwählen.
         Die Verbindungssuche startet automatisch, außer du <b>hältst den Finger</b>
         auf der Zielstation etwas länger (siehe Einstellungen).
-        Versuche auch eine einzelne Station kurz (Auswahl) oder lang (Menü) anzutippen.
         Halte eine Zwischenstation für längere Zeit, wenn du über mehrere Stationen streichst,
         um diese als Via auszuwählen.
+        Tippe auf eine einzelne Station um diese als Ziel zu wöhlen.
+        Tippe auf eine Station <b>mit 2 Fingern</b>, um das Kontextmenü zu öffnen.
     </string>
 
     <!-- directions map -->
