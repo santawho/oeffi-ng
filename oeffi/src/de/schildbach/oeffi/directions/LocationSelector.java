@@ -185,22 +185,21 @@ public class LocationSelector extends LinearLayout implements
     }
 
     private void setupContent() {
+        LocationAndTime[] locationsAndTimes = null;
         final PrefState prefState = (PrefState) Objects.deserializeFromString(preferences.getString(getPrefsStateKey(), null));
-        if (prefState != null) {
-            final LocationAndTime[] locationsAndTimes = prefState.locationsAndTimes;
-            if (locationsAndTimes != null) {
-                final int count = locationsAndTimes.length;
-                for (int n = 0; n < availableItems.length; n += 1) {
-                    final Item item = availableItems[n];
-                    if ((n < locationsAndTimes.length)) {
-                        final LocationAndTime locationAndTime = locationsAndTimes[n];
-                        item.locationAndTime = locationAndTime;
-                        setItemStationName(item, Formats.fullLocationName(locationAndTime.location));
-                    } else {
-                        item.locationAndTime = null;
-                        setItemStationName(item, null);
-                    }
-                }
+        if (prefState != null)
+            locationsAndTimes = prefState.locationsAndTimes;
+        if (locationsAndTimes == null)
+            locationsAndTimes = new LocationAndTime[0];
+        for (int n = 0; n < availableItems.length; n += 1) {
+            final Item item = availableItems[n];
+            if (n < locationsAndTimes.length) {
+                final LocationAndTime locationAndTime = locationsAndTimes[n];
+                item.locationAndTime = locationAndTime;
+                setItemStationName(item, Formats.fullLocationName(locationAndTime.location));
+            } else {
+                item.locationAndTime = null;
+                setItemStationName(item, null);
             }
         }
     }
