@@ -98,6 +98,7 @@ import de.schildbach.oeffi.util.GeocoderThread;
 import de.schildbach.oeffi.util.GoogleMapsUtils;
 import de.schildbach.oeffi.util.LocationUriParser;
 import de.schildbach.oeffi.util.Objects;
+import de.schildbach.oeffi.util.PatternProcessor;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.oeffi.util.ZoomControls;
@@ -1568,4 +1569,21 @@ public class DirectionsActivity extends OeffiMainActivity implements
         progressDialog.setCanceledOnTouchOutside(false);
         return progressDialog;
     }
+
+    public static final PatternProcessor[] speechProcessors = new PatternProcessor[] {
+            new PatternProcessor(new int[] {
+                    R.string.speechinput_directions_from_to_via,
+                    R.string.speechinput_directions_from_via_to,
+                    R.string.speechinput_directions_from_to
+            }) {
+                @Override
+                public boolean process() {
+                    final String from = getField("FROM");
+                    final String to = getField("TO");
+                    final String via = getField("VIA");
+                    log.info("speech control: directions from {} via {} to {}", from, via, to);
+                    return true;
+                }
+            },
+    };
 }

@@ -7,6 +7,11 @@
         android:defaultValue="false"
         android:title="@string/user_interface_mainmenu_shareapp_enabled_title" />
 
+    <CheckBoxPreference
+        android:key="user_interface_voice_control_enabled"
+        android:defaultValue="false"
+        android:title="@string/user_interface_voice_control_enabled_title" />
+
     <PreferenceCategory android:title="@string/user_interface_location_selector_category_title">
 
         <Preference android:summary="@string/directions_location_selector_help_text" />

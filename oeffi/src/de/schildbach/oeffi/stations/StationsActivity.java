@@ -86,6 +86,7 @@ import de.schildbach.oeffi.util.DividerItemDecoration;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GoogleMapsUtils;
 import de.schildbach.oeffi.util.LocationUriParser;
+import de.schildbach.oeffi.util.PatternProcessor;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.ZoomControls;
 import de.schildbach.pte.NetworkId;
@@ -1615,4 +1616,17 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
             return stations;
         }
     }
+
+    public static final PatternProcessor[] speechProcessors = new PatternProcessor[] {
+            new PatternProcessor(new int[] {
+                    R.string.speechinput_stations_departures_at
+            }) {
+                @Override
+                public boolean process() {
+                    final String loc = getField("LOC");
+                    log.info("speech control: departures at {}", loc);
+                    return true;
+                }
+            },
+    };
 }

@@ -43,6 +43,7 @@ import de.schildbach.oeffi.plans.PlansPickerActivity;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
 import de.schildbach.oeffi.stations.StationsActivity;
 import de.schildbach.oeffi.util.ErrorReporter;
+import de.schildbach.oeffi.util.SpeechInput;
 import de.schildbach.pte.NetworkId;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -71,6 +72,7 @@ public class Application extends android.app.Application {
     private PackageInfo packageInfo;
     private OkHttpClient okHttpClient;
     private File logFile;
+    private SpeechInput speechInput;
 
     public Application() {
         instance = this;
@@ -78,6 +80,10 @@ public class Application extends android.app.Application {
 
     public File getLogFile() {
         return logFile;
+    }
+
+    public SpeechInput getSpeechInput() {
+        return speechInput;
     }
 
     @Override
@@ -115,6 +121,10 @@ public class Application extends android.app.Application {
         okHttpClient = builder.build();
 
         initMaps();
+
+        speechInput = new SpeechInput(this);
+        speechInput.addResultListeners(DirectionsActivity.speechProcessors);
+        speechInput.addResultListeners(StationsActivity.speechProcessors);
 
         final Stopwatch watch = Stopwatch.createStarted();
 

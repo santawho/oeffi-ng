@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <string name="user_interface_voice_control_enabled_title">Verwende Sprachsteuerung</string>
+
+    <string name="speechinput_directions_from_to_via">von (?&lt;FROM&gt;.+) nach (?&lt;TO&gt;.+) über (?&lt;VIA&gt;.+)</string>
+    <string name="speechinput_directions_from_via_to">von (?&lt;FROM&gt;.+) über (?&lt;VIA&gt;.+) nach (?&lt;TO&gt;.+)</string>
+    <string name="speechinput_directions_from_to">von (?&lt;FROM&gt;.+) nach (?&lt;TO&gt;.+)</string>
+
+    <string name="speechinput_stations_departures_at">abfahrten( in)? (?&lt;LOC&gt;.+)</string>
+
+</resources>

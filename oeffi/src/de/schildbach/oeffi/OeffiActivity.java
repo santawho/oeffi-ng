@@ -41,7 +41,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
-import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
@@ -87,6 +86,8 @@ import java.util.stream.Collectors;
 public abstract class OeffiActivity extends ComponentActivity {
     protected static final String INTENT_EXTRA_LINK_ARGS = OeffiActivity.class.getName() + ".link_args";
     protected static final String INTENT_EXTRA_NETWORK_NAME = OeffiActivity.class.getName() + ".network";
+
+    protected static final String PREFS_KEY_VOICE_CONTROL = "user_interface_voice_control_enabled";
 
     protected Application application;
     private final Handler handler = new Handler();
@@ -297,9 +298,18 @@ public abstract class OeffiActivity extends ComponentActivity {
         navigationDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
             public void onDrawerOpened(final View drawerView) {
                 handler.postDelayed(() -> heartbeat.start(), 2000);
+
+                if (prefs.getBoolean(PREFS_KEY_VOICE_CONTROL, false)) {
+                    Application.getInstance().getSpeechInput()
+                            .startSpeechRecognition(OeffiActivity.this, success -> {
+                                if (success)
+                                    closeNavigation();
+                            });
+                }
             }
 
             public void onDrawerClosed(final View drawerView) {
+                Application.getInstance().getSpeechInput().stopSpeechRecognition();
             }
 
             public void onDrawerSlide(final View drawerView, final float slideOffset) {
@@ -317,11 +327,11 @@ public abstract class OeffiActivity extends ComponentActivity {
         if (prefs.getBoolean(Constants.PREFS_KEY_USER_INTERFACE_MAINMENU_SHAREAPP_ENABLED, false)) {
             findViewById(R.id.navigation_drawer_share).setVisibility(View.VISIBLE);
             findViewById(R.id.navigation_drawer_share).setOnClickListener(v -> {
-                navigationDrawerLayout.closeDrawer(Gravity.LEFT);
+                closeNavigation();
                 shareApp();
             });
             findViewById(R.id.navigation_drawer_share_qrcode).setOnClickListener(v -> {
-                navigationDrawerLayout.closeDrawer(Gravity.LEFT);
+                closeNavigation();
                 showImageDialog(R.drawable.qr_update);
             });
         }
@@ -355,10 +365,14 @@ public abstract class OeffiActivity extends ComponentActivity {
     }
 
     private void toggleNavigation() {
-        if (navigationDrawerLayout.isDrawerOpen(Gravity.LEFT))
-            navigationDrawerLayout.closeDrawer(Gravity.LEFT);
+        if (isNavigationOpen())
+            closeNavigation();
         else
-            navigationDrawerLayout.openDrawer(Gravity.LEFT);
+            openNavigation();
+    }
+
+    protected void openNavigation() {
+        navigationDrawerLayout.openDrawer(Gravity.LEFT);
     }
 
     protected void closeNavigation() {

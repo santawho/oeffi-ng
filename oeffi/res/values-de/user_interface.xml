@@ -3,7 +3,7 @@
 
     <string name="user_interface_preferences_title">User Interface</string>
 
-    <string name="user_interface_mainmenu_shareapp_enabled_title">Zeige "Teile App" Eintrag im Hauptmenü</string>
+    <string name="user_interface_mainmenu_shareapp_enabled_title">Zeige \"Teile App\" Eintrag im Hauptmenü</string>
 
     <string name="user_interface_location_selector_category_title">Schnelle Ortswahl</string>
 
