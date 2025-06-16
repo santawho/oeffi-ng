@@ -15,6 +15,23 @@
 
         <include layout="@layout/action_bar" />
 
+        <TextView
+            android:id="@+id/stations_station_details_time_text"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawablePadding="@dimen/text_padding_horizontal"
+            android:gravity="left|center_vertical"
+            android:paddingBottom="@dimen/text_padding_vertical"
+            android:paddingLeft="@dimen/text_padding_horizontal_lax"
+            android:paddingTop="@dimen/text_padding_vertical"
+            android:singleLine="true"
+            android:textSize="@dimen/font_size_large"
+            android:textStyle="bold"
+            android:background="@color/bg_action_bar_appendix"
+            android:textColor="@color/fg_significant"
+            />
+
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">

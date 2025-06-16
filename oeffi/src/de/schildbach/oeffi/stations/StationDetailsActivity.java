@@ -285,6 +285,16 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         selectStation(station);
         statusMessage(getString(R.string.stations_station_details_progress));
 
+        if (presetTime != null) {
+            final TextView timeView = findViewById(R.id.stations_station_details_time_text);
+            timeView.setVisibility(View.VISIBLE);
+            final long presetTimeMs = presetTime.getTime();
+            final String text = String.format("%s %s",
+                    Formats.formatDate(this, System.currentTimeMillis(), presetTimeMs),
+                    Formats.formatTime(this, presetTimeMs));
+            timeView.setText(text);
+        }
+
         favoriteButton
                 .setChecked(selectedFavState != null && selectedFavState == FavoriteStationsProvider.TYPE_FAVORITE);
 
