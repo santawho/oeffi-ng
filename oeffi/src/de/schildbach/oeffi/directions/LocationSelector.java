@@ -8,9 +8,12 @@ import android.text.Html;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,14 +23,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
 
-public class LocationSelector extends LinearLayout {
+public class LocationSelector extends LinearLayout implements
+        SharedPreferences.OnSharedPreferenceChangeListener {
     public interface LocationSelectionListener {
-        void onLocationSequenceSelected(List<Location> locations, boolean longHold);
+        void onLocationSequenceSelected(List<Location> locations, boolean longHold, View lastView);
+        void onSingleLocationSelected(Location location, boolean longHold, View selectedView);
     }
 
     private static final Logger log = LoggerFactory.getLogger(LocationSelector.class);
@@ -35,6 +41,7 @@ public class LocationSelector extends LinearLayout {
     private static final String PREFS_ENABLED = "user_interface_location_selector_enabled";
     private static final String PREFS_NUMROWS = "user_interface_location_selector_numrows";
     private static final String PREFS_LONGHOLDTIME = "user_interface_location_selector_longholdtime";
+    private static final String PREFS_LONGHOLDMENU = "user_interface_location_selector_longholdmenu";
     private static final String PREFS_STATE = "user_interface_location_selector_state_";
 
     private static final int BG_UNSELECTED = R.drawable.location_selector_item_unselected_background;
@@ -71,16 +78,18 @@ public class LocationSelector extends LinearLayout {
     private boolean isEnabled;
     private int numRows, numColumns;
     private long longHoldTime;
+    private boolean useLongHoldMenu;
     private NetworkId networkId;
     private LocationSelectionListener locationSelectionListener;
     private Item[] availableItems;
 
     private final List<Item> selectedItems = new ArrayList<>();
     private long timeEntered;
+    private boolean isContextOperation;
     private boolean invalidSelection;
-    private Handler handler;
     private boolean timerRunning;
     private boolean stateIsChanged;
+    private final Handler handler;
 
     public LocationSelector(final Context context) {
         this(context, null);
@@ -97,12 +106,16 @@ public class LocationSelector extends LinearLayout {
     }
 
     public void setup(final Context context, final SharedPreferences prefs) {
+        if (this.preferences != null)
+            this.preferences.unregisterOnSharedPreferenceChangeListener(this);
         this.preferences = prefs;
-        isEnabled = prefs.getBoolean(PREFS_ENABLED, false);
+        prefs.registerOnSharedPreferenceChangeListener(this);
+        isEnabled = prefs.getBoolean(PREFS_ENABLED, true);
         if (!isEnabled) {
             super.setVisibility(GONE);
             return;
         }
+        super.setVisibility(VISIBLE);
         numRows = Integer.parseInt(prefs.getString(PREFS_NUMROWS, Integer.toString(DEFAULT_NUM_ROWS)));
         numColumns = DEFAULT_NUM_COLUMNS;
         try {
@@ -110,7 +123,9 @@ public class LocationSelector extends LinearLayout {
         } catch (Exception e) {
             longHoldTime = DEFAULT_LONG_HOLD_TIME;
         }
+        useLongHoldMenu = prefs.getBoolean(PREFS_LONGHOLDMENU, false);
         availableItems = new Item[numRows * numColumns];
+        this.removeAllViews();
         for (int iRow = 0, iItem = -1; iRow < numRows; iRow += 1) {
             final LinearLayout rowLayout = new LinearLayout(context);
             rowLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
@@ -137,6 +152,21 @@ public class LocationSelector extends LinearLayout {
         clearSelection();
     }
 
+    @Override
+    public void onSharedPreferenceChanged(final SharedPreferences sharedPreferences, @Nullable final String key) {
+        if (!(PREFS_ENABLED.equals(key)
+                || PREFS_NUMROWS.equals(key)
+                || PREFS_LONGHOLDTIME.equals(key)
+                || PREFS_LONGHOLDMENU.equals(key)
+        )) {
+            return;
+        }
+
+        setup(getContext(), sharedPreferences);
+        setupContent();
+    }
+
+
     private String getPrefsStateKey() {
         if (networkId == null)
             return null;
@@ -148,7 +178,13 @@ public class LocationSelector extends LinearLayout {
             return;
         if (networkId.equals(this.networkId))
             return;
+
         this.networkId = networkId;
+
+        setupContent();
+    }
+
+    private void setupContent() {
         final PrefState prefState = (PrefState) Objects.deserializeFromString(preferences.getString(getPrefsStateKey(), null));
         if (prefState != null) {
             final LocationAndTime[] locationsAndTimes = prefState.locationsAndTimes;
@@ -220,21 +256,42 @@ public class LocationSelector extends LinearLayout {
         stateIsChanged = true;
     }
 
+    public void removeLocation(final Location location) {
+        if (!isEnabled)
+            return;
+        for (Item item : availableItems) {
+            final LocationAndTime itemLocationAndTime = item.locationAndTime;
+            if (itemLocationAndTime != null) {
+                final Location itemLocation = itemLocationAndTime.location;
+                if (itemLocation.equals(location)) {
+                    item.locationAndTime = null;
+                    setItemStationName(item, null);
+                    stateIsChanged = true;
+                    break;
+                }
+            }
+        }
+    }
+
     public void clearSelection() {
         if (!isEnabled)
             return;
+
         for (Item item : selectedItems) {
             setItemBackground(item, BG_UNSELECTED);
         }
+
         selectedItems.clear();
         timeEntered = 0;
         invalidSelection = false;
+        isContextOperation = false;
     }
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(final MotionEvent event) {
-        final int action = event.getAction();
+        log.debug(event.toString());
+        final int action = event.getActionMasked();
         final float touchX = event.getX();
         final float touchY = event.getY();
         final Item currItem = findItemAtXY(Math.round(touchX), Math.round(touchY));
@@ -244,32 +301,61 @@ public class LocationSelector extends LinearLayout {
         final long now = System.currentTimeMillis();
         final long holdTime = now - timeEntered;
         final boolean isLongHold = holdTime >= longHoldTime;
+
+        if (action == MotionEvent.ACTION_POINTER_DOWN) {
+            // second finger down
+            isContextOperation = true;
+            return true;
+        }
+
         if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
             timerRunning = false;
+
+            if (invalidSelection) {
+                clearSelection();
+                DialogBuilder.get(getContext())
+                        .setTitle(R.string.directions_location_selector_help_title)
+                        .setMessage(R.string.directions_location_selector_help_text)
+                        .setPositiveButton(android.R.string.ok, null)
+                        .create().show();
+                return true;
+            }
 
             final int size = selectedItems.size();
             if (size >= 2)
                 setItemBackground(selectedItems.get(size - 1), BG_LAST);
+            else if (size == 1)
+                setItemBackground(selectedItems.get(0), BG_FIRST);
 
             if (selectedItems.isEmpty())
                 return true;
 
-            if ((currItem == null || currItem.itemIndex == selectedItems.get(0).itemIndex)
-                    && selectedItems.size() > 1) {
+            if ((currItem == null || currItem.itemIndex == selectedItems.get(0).itemIndex) && size > 1) {
                 // cancel when returning to first item
                 clearSelection();
                 return true;
             }
 
+            if (useLongHoldMenu && isLongHold && size == 1)
+                isContextOperation = true;
+
             // data event
             if (locationSelectionListener != null) {
-                final List<Location> locations = new ArrayList<>();
-                for (Item item : selectedItems) {
-                    final Location location = item.locationAndTime.location;
-                    if (location != null)
-                        locations.add(location);
+                if (isContextOperation) {
+                    if (size == 1) {
+                        final Item item = selectedItems.get(0);
+                        final Location location = item.locationAndTime.location;
+                        locationSelectionListener.onSingleLocationSelected(location, isLongHold, item.textView);
+                    }
+                } else {
+                    final List<Location> locations = new ArrayList<>();
+                    for (Item item : selectedItems) {
+                        final Location location = item.locationAndTime.location;
+                        if (location != null)
+                            locations.add(location);
+                    }
+                    locationSelectionListener.onLocationSequenceSelected(locations, isLongHold, selectedItems.get(size - 1).textView);
                 }
-                locationSelectionListener.onLocationSequenceSelected(locations, isLongHold);
             }
 
             return true;
@@ -280,12 +366,11 @@ public class LocationSelector extends LinearLayout {
 
             if (currItem.locationAndTime == null) {
                 invalidSelection = true;
-                return true;
+            } else {
+                selectedItems.add(currItem);
+                timeEntered = now;
+                setItemBackground(currItem, BG_FIRST);
             }
-
-            selectedItems.add(currItem);
-            timeEntered = now;
-            setItemBackground(currItem, BG_FIRST);
 
             timerRunning = true;
             handler.postDelayed(this::onTimer, 50);
@@ -315,9 +400,7 @@ public class LocationSelector extends LinearLayout {
 
                 if (isLongHold) {
                     if (isSameItem) {
-                        if (!isStillFirst) {
-                            setItemBackground(currItem, BG_INTERMEDIATE);
-                        }
+                        setItemBackground(currItem, BG_INTERMEDIATE);
                         return true;
                     }
                 } else {
@@ -325,9 +408,13 @@ public class LocationSelector extends LinearLayout {
                         return true;
 
                     // leaving intermediate fast, remove it
-                    if (!isStillFirst && prevItem != null) {
-                        setItemBackground(prevItem, BG_UNSELECTED);
-                        selectedItems.remove(selectedItems.size() - 1);
+                    if (prevItem != null) {
+                        if (isStillFirst) {
+                            setItemBackground(prevItem, BG_FIRST);
+                        } else {
+                            setItemBackground(prevItem, BG_UNSELECTED);
+                            selectedItems.remove(selectedItems.size() - 1);
+                        }
                     }
                 }
 
@@ -350,8 +437,12 @@ public class LocationSelector extends LinearLayout {
         final boolean isStillFirst = selectedItems.size() <= 1;
         final Item prevItem = selectedItems.isEmpty() ? null : selectedItems.get(selectedItems.size() - 1);
 
-        if (isLongHold && prevItem != null && !isStillFirst) {
-            setItemBackground(prevItem, BG_INTERMEDIATE);
+        if (isLongHold && prevItem != null) {
+            if (isStillFirst) {
+                setItemBackground(prevItem, BG_INTERMEDIATE);
+            } else {
+                setItemBackground(prevItem, BG_INTERMEDIATE);
+            }
         }
 
         handler.postDelayed(this::onTimer, 50);

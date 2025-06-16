@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/directions_location_selector_context_show_departures"
+        android:title="@string/station_context_details_title" />
+    <item
+        android:id="@+id/directions_location_selector_context_nearby_departures"
+        android:title="@string/station_context_nearby_departures_title" />
+    <item
+        android:id="@+id/directions_location_selector_context_delete"
+        android:title="@string/directions_location_selector_context_delete_title" />
+
+</menu>

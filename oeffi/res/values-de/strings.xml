@@ -257,6 +257,19 @@
     <string name="directions_query_history_context_add_favorite">Anfrage als Favorit markieren</string>
     <string name="directions_query_history_context_remove_favorite">Favorit entfernen</string>
 
+    <!-- location selector -->
+    <string name="directions_location_selector_context_delete_title">Löschen</string>
+    <string name="directions_location_selector_help_title">Schnelle Ortswahl</string>
+    <string name="directions_location_selector_help_text">
+        Die schnelle Ortswahl zeigt die zuletzt verwendeten Orte.
+        Du kannst dann <b>tippen und ziehen</b> um Start und Ziel auszuwählen.
+        Die Verbindungssuche startet automatisch, außer du <b>hältst den Finger</b>
+        auf der Zielstation etwas länger (siehe Einstellungen).
+        Versuche auch eine einzelne Station kurz (Auswahl) oder lang (Menü) anzutippen.
+        Halte eine Zwischenstation für längere Zeit, wenn du über mehrere Stationen streichst,
+        um diese als Via auszuwählen.
+    </string>
+
     <!-- directions map -->
     <string name="directions_map_pin_button_from">Hier starten</string>
     <string name="directions_map_pin_button_to">Hier enden</string>

@@ -44,6 +44,8 @@ import android.os.Process;
 import android.provider.ContactsContract.CommonDataKinds;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -86,6 +88,7 @@ import de.schildbach.oeffi.stations.FavoriteStationsProvider;
 import de.schildbach.oeffi.stations.FavoriteUtils;
 import de.schildbach.oeffi.stations.StationContextMenu;
 import de.schildbach.oeffi.stations.StationDetailsActivity;
+import de.schildbach.oeffi.stations.StationsActivity;
 import de.schildbach.oeffi.util.AutoCompleteLocationAdapter;
 import de.schildbach.oeffi.util.ConnectivityBroadcastReceiver;
 import de.schildbach.oeffi.util.DialogBuilder;
@@ -128,6 +131,7 @@ import javax.net.ssl.SSLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
@@ -185,27 +189,25 @@ public class DirectionsActivity extends OeffiMainActivity implements
     private static final String INTENT_EXTRA_RENDERCONFIG = DirectionsActivity.class.getName() + ".config";
 
     @Override
-    public void onLocationSequenceSelected(final List<Location> locations, final boolean longHold) {
-        if (longHold) {
-            // show menu
-
-        }
-
-        setupLocationsAndGo(locations);
-    }
-
-    private void setupLocationsAndGo(final List<Location> locations) {
+    public void onLocationSequenceSelected(final List<Location> locations, final boolean longHold, View lastView) {
+        boolean doGo = !longHold;
         final int numLocations = locations.size();
         if (numLocations == 0) {
             locationSelector.clearSelection();
-            return;
+            doGo = false;
         }
         if (numLocations == 1) {
+            // .. used for testing in emulator only ... preferred way is via preference setting
+            // if (longHold) {
+            //     onSingleLocationSelected(locations.get(0), false, lastView);
+            //     return;
+            // }
+
             // single location clicked
             if (viewFromLocation.getLocation() == null) {
                 viewFromLocation.setLocation(locations.get(0));
                 locationSelector.clearSelection();
-                return;
+                doGo = false;
             } else {
                 viewToLocation.setLocation(locations.get(0));
             }
@@ -220,12 +222,49 @@ public class DirectionsActivity extends OeffiMainActivity implements
             viewToLocation.setLocation(locations.get(numLocations - 1));
         }
 
-        handleGo();
+        if (doGo)
+            handleGo();
+        else
+            locationSelector.clearSelection();
+    }
+
+    @Override
+    public void onSingleLocationSelected(final Location location, final boolean longHold, View selectedView) {
+        final PopupMenu contextMenu = new PopupMenu(this, selectedView);
+        final MenuInflater inflater = contextMenu.getMenuInflater();
+        final Menu menu = contextMenu.getMenu();
+        inflater.inflate(R.menu.directions_location_selector_context, menu);
+        contextMenu.setOnDismissListener((popupMenu) -> {
+            locationSelector.clearSelection();
+        });
+        contextMenu.setOnMenuItemClickListener((menuItem) -> {
+            locationSelector.clearSelection();
+            final int itemId = menuItem.getItemId();
+            if (itemId == R.id.directions_location_selector_context_delete) {
+                locationSelector.removeLocation(location);
+                locationSelector.persist();
+                return true;
+            }
+
+            final Date departureDate =
+                    (time == null || (time instanceof TimeSpec.Relative && ((TimeSpec.Relative) time).diffMs == 0))
+                            ? null
+                            : new Date(time.timeInMillis());
+
+            if (itemId == R.id.directions_location_selector_context_show_departures) {
+                StationDetailsActivity.start(this, network, location, departureDate);
+            } else if (itemId == R.id.directions_location_selector_context_nearby_departures) {
+                StationsActivity.start(this, network, location, departureDate);
+            }
+            return true;
+        });
+        contextMenu.show();
     }
 
     private static class PickContact extends ActivityResultContract<Void, Uri> {
+        @NonNull
         @Override
-        public Intent createIntent(final Context context, Void unused) {
+        public Intent createIntent(@NonNull final Context context, Void unused) {
             return new Intent(Intent.ACTION_PICK, CommonDataKinds.StructuredPostal.CONTENT_URI);
         }
 

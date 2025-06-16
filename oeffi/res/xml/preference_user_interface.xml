@@ -7,18 +7,19 @@
         android:defaultValue="false"
         android:title="@string/user_interface_mainmenu_shareapp_enabled_title" />
 
-    <PreferenceCategory
-        android:title="@string/user_interface_location_selector_category_title">
+    <PreferenceCategory android:title="@string/user_interface_location_selector_category_title">
+
+        <Preference android:summary="@string/directions_location_selector_help_text" />
 
         <CheckBoxPreference
             android:key="user_interface_location_selector_enabled"
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:title="@string/user_interface_location_selector_enabled_title"
             android:summary="@string/user_interface_location_selector_enabled_summary" />
         <ListPreference
             android:key="user_interface_location_selector_numrows"
             android:defaultValue="4"
-            android:entries="@array/user_interface_location_selector_numrows_values"
+            android:entries="@array/user_interface_location_selector_numrows_titles"
             android:entryValues="@array/user_interface_location_selector_numrows_values"
             android:title="@string/user_interface_location_selector_numrows_title"
             android:summary="@string/user_interface_location_selector_numrows_summary" />
@@ -29,6 +30,11 @@
             android:defaultValue="500"
             android:title="@string/user_interface_location_selector_longholdtime_title"
             android:summary="@string/user_interface_location_selector_longholdtime_summary" />
+        <CheckBoxPreference
+            android:key="user_interface_location_selector_longholdmenu"
+            android:defaultValue="false"
+            android:title="@string/user_interface_location_selector_longholdmenu_title"
+            android:summary="@string/user_interface_location_selector_longholdmenu_summary" />
 
     </PreferenceCategory>
 

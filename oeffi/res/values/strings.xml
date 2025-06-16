@@ -258,6 +258,19 @@
     <string name="directions_query_history_context_add_favorite">Mark query as favorite</string>
     <string name="directions_query_history_context_remove_favorite">Remove favorite</string>
 
+    <!-- location selector -->
+    <string name="directions_location_selector_context_delete_title">Delete</string>
+    <string name="directions_location_selector_help_title">Quick Location Selector</string>
+    <string name="directions_location_selector_help_text">The quick location selector
+        will show the recently used locations.
+        Then you can <b>tap and drag</b> to select origin and destination.
+        The connection search starts automatically, unless you <b>hold your finger</b>
+        on the destination station for a longer time (see settings).
+        Also try to tap a single station short (select) or long (menu).
+        Long hold on an intermediate station when dragging over multiple stations,
+        to select it as via location.
+    </string>
+
     <!-- directions map -->
     <string name="directions_map_pin_button_from">Start here</string>
     <string name="directions_map_pin_button_to">End here</string>

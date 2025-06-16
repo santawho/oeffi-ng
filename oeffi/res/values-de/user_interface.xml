@@ -5,15 +5,24 @@
 
     <string name="user_interface_mainmenu_shareapp_enabled_title">Zeige "Teile App" Eintrag im Hauptmenü</string>
 
-    <string name="user_interface_location_selector_category_title">Schnelle Ortswahl (EXPERIMENTELL)</string>
+    <string name="user_interface_location_selector_category_title">Schnelle Ortswahl</string>
 
     <string name="user_interface_location_selector_enabled_title">Aktiv</string>
     <string name="user_interface_location_selector_enabled_summary">Nutze schnelle Ortswahl im Verbindungsdialog</string>
 
     <string name="user_interface_location_selector_numrows_title">Anzahl Einträge</string>
     <string name="user_interface_location_selector_numrows_summary">Setze die Anzahl der Button-Zeilen der schnellen Ortswahl</string>
+    <string-array name="user_interface_location_selector_numrows_titles">
+        <item>2 Zeilen (4 Einträge)</item>
+        <item>3 Zeilen (6 Einträge)</item>
+        <item>4 Zeilen (4 Einträge)</item>
+        <item>5 Zeilen (5 Einträge)</item>
+    </string-array>
 
     <string name="user_interface_location_selector_longholdtime_title">Lange Halte-Zeit (ms)</string>
     <string name="user_interface_location_selector_longholdtime_summary">Anzahl Millisekunden bis langes Halten in der schnellen Ortswahl erkannt wird</string>
+
+    <string name="user_interface_location_selector_longholdmenu_title">Menü beim lange Halten</string>
+    <string name="user_interface_location_selector_longholdmenu_summary">Langes Halten in der schnellen Ortswahl öffnet Kontextmenü.\nHinweis: du kannst jederzeit mit 2 Fingern tippen.</string>
 
 </resources>

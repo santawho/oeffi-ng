@@ -5,13 +5,19 @@
 
     <string name="user_interface_mainmenu_shareapp_enabled_title">Show \"Share App\" item in main menu</string>
 
-    <string name="user_interface_location_selector_category_title">Quick Location Selector (EXPERIMENTAL)</string>
+    <string name="user_interface_location_selector_category_title">Quick Location Selector</string>
 
     <string name="user_interface_location_selector_enabled_title">Enabled</string>
     <string name="user_interface_location_selector_enabled_summary">Use quick location selector in directions dialog</string>
 
     <string name="user_interface_location_selector_numrows_title">Number of entries</string>
     <string name="user_interface_location_selector_numrows_summary">Set number of rows for the quick location selector</string>
+    <string-array name="user_interface_location_selector_numrows_titles">
+        <item>2 rows (4 items)</item>
+        <item>3 rows (6 items)</item>
+        <item>4 rows (4 items)</item>
+        <item>5 rows (5 items)</item>
+    </string-array>
     <string-array name="user_interface_location_selector_numrows_values">
         <item>2</item>
         <item>3</item>
@@ -21,5 +27,8 @@
 
     <string name="user_interface_location_selector_longholdtime_title">Long hold time (msec)</string>
     <string name="user_interface_location_selector_longholdtime_summary">Number of milli-seconds to recognize long hold in the quick location selector</string>
+
+    <string name="user_interface_location_selector_longholdmenu_title">Menu at long tap</string>
+    <string name="user_interface_location_selector_longholdmenu_summary">Long tap opens context menu from quick location selector.\nNote: you can always use 2 fingers tap.</string>
 
 </resources>
