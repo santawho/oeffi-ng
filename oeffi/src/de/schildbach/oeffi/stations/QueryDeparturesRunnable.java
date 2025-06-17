@@ -77,9 +77,8 @@ public abstract class QueryDeparturesRunnable implements Runnable {
             tries++;
 
             try {
-                // FIXME equivs should be true
                 final QueryDeparturesResult result = networkProvider.queryDepartures(
-                        stationId, fromTime, maxDepartures, false);
+                        stationId, fromTime, maxDepartures, true);
 
                 postOnResult(result);
                 break;

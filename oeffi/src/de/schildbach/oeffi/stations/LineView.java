@@ -55,6 +55,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 public class LineView extends TextView {
+    private final boolean hideIfEmpty;
     private Collection<Line> lines = null;
     private boolean ghosted = false;
     private int condenseThreshold = 0;
@@ -74,6 +75,7 @@ public class LineView extends TextView {
 
     public LineView(final Context context, final AttributeSet attrs, final int defStyle) {
         super(context, attrs, defStyle);
+        this.hideIfEmpty = attrs.getAttributeBooleanValue(null, "hideIfEmpty", false);
 
         setSingleLine();
         setTypeface(Typeface.DEFAULT_BOLD);
@@ -105,6 +107,8 @@ public class LineView extends TextView {
 
     private void update() {
         if (lines != null && !lines.isEmpty()) {
+            if (hideIfEmpty)
+                setVisibility(VISIBLE);
             if (condenseThreshold > 0 && lines.size() > condenseThreshold) {
                 // count products
                 final Map<Product, Integer> productCounts = new HashMap<>();
@@ -187,6 +191,8 @@ public class LineView extends TextView {
                     setTooltipText(null);
             }
         } else {
+            if (hideIfEmpty)
+                setVisibility(GONE);
             setText(null);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                 setTooltipText(null);

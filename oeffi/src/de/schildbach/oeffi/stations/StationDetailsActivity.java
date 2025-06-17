@@ -36,10 +36,13 @@ import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.ViewAnimator;
 import androidx.core.graphics.Insets;
@@ -82,8 +85,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -437,9 +440,10 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
                     @Override
                     protected void onResult(final QueryDeparturesResult result) {
-                        if (result.header != null)
+                        if (result.header != null) {
                             updateDisclaimerSource(disclaimerSourceView, selectedNetwork.name(),
                                     product(result.header));
+                        }
 
                         Set<Product> productFilter = loadProductFilter();
                         if (result.status == QueryDeparturesResult.Status.OK) {
@@ -454,24 +458,37 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                                     }
 
                                     List<Departure> departures = filterDeparturesByProducts(stationDepartures.departures, productFilter);
-                                    station.departures = departures;
-                                    station.setLines(stationDepartures.lines);
+
+                                    if (modeAppend && station.departures != null) {
+                                        Set<JourneyRef> oldJourneyRefs = station.departures.stream().map(
+                                                departure -> departure.journeyRef).collect(Collectors.toSet());
+                                        for (Departure departure : departures) {
+                                            if (!oldJourneyRefs.contains(departure.journeyRef))
+                                                station.departures.add(departure);
+                                        }
+                                    } else {
+                                        station.departures = departures;
+                                    }
+                                    station.departures.sort((d1, d2) ->
+                                            Math.toIntExact(d1.getTime().getTime() - d2.getTime().getTime()));
+
+                                    final List<LineDestination> stationLines = station.getLines();
+                                    final List<LineDestination> lines = stationDepartures.lines;
+                                    if (modeAppend && stationLines != null && lines != null) {
+                                        Set<LineDestination> oldLineDestinations = new HashSet<>(stationLines);
+                                        for (LineDestination lineDestination : lines) {
+                                            if (!oldLineDestinations.contains(lineDestination))
+                                                stationLines.add(lineDestination);
+                                        }
+                                        station.setLines(stationLines);
+                                    } else {
+                                        station.setLines(lines);
+                                    }
 
                                     if (location.equals(selectedStation)) {
                                         somethingAdded = true;
-                                        if (modeAppend && selectedAllDepartures != null) {
-                                            Set<JourneyRef> oldJourneyRefs = selectedAllDepartures.stream().map(
-                                                    departure -> departure.journeyRef).collect(Collectors.toSet());
-                                            for (Departure departure : departures) {
-                                                if (!oldJourneyRefs.contains(departure.journeyRef))
-                                                    selectedAllDepartures.add(departure);
-                                            }
-                                        } else {
-                                            selectedAllDepartures = departures;
-                                        }
-                                        Collections.sort(selectedAllDepartures, (d1, d2) ->
-                                                Math.toIntExact(d1.getTime().getTime() - d2.getTime().getTime()));
-                                        selectedLines = groupDestinationsByLine(stationDepartures.lines);
+                                        selectedAllDepartures = station.departures;
+                                        selectedLines = groupDestinationsByLine(station.getLines());
                                         selectedFilteredDepartures = null;
                                     }
                                 }
@@ -633,7 +650,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         @Override
         public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
             if (holder instanceof HeaderViewHolder) {
-                ((HeaderViewHolder) holder).bind(selectedStation, selectedLines, null);
+                ((HeaderViewHolder) holder).bind(selectedStation, selectedLines, null, StationDetailsActivity.this);
             } else {
                 final Departure departure = getItem(position);
                 ((DepartureViewHolder) holder).bind(selectedNetwork, selectedStation, departure);
@@ -642,9 +659,11 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
     }
 
     private static class HeaderViewHolder extends RecyclerView.ViewHolder {
+        private final TextView nameView;
         private final TextView idView;
         private final LinearLayout linesGroup;
         private final LineView additionalLinesView;
+        private final ImageView multiStationsView;
 
         private final LayoutInflater inflater;
 
@@ -654,10 +673,13 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         public HeaderViewHolder(final Context context, final View itemView) {
             super(itemView);
 
+            nameView = itemView.findViewById(R.id.stations_station_details_header_name);
             idView = itemView.findViewById(R.id.stations_station_details_header_id);
             linesGroup = itemView.findViewById(R.id.stations_station_details_header_lines);
             additionalLinesView = itemView
                     .findViewById(R.id.stations_station_details_header_additional_lines);
+            multiStationsView = itemView.findViewById(R.id.stations_station_details_header_multistations);
+            multiStationsView.setVisibility(View.GONE);
 
             inflater = LayoutInflater.from(context);
             final Resources res = context.getResources();
@@ -666,9 +688,30 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         }
 
         public void bind(final Location station, @Nullable final LinkedHashMap<Line, List<Location>> lines,
-                @Nullable final List<Line> additionalLines) {
-            // id
+                         @Nullable final List<Line> additionalLines,
+                         final StationDetailsActivity activity) {
+            final List<Station> stations = activity.stations;
+            // name and id
+            nameView.setText(station.uniqueShortName());
             idView.setText(station.hasId() ? station.id : "");
+            if (stations.size() > 1) {
+                multiStationsView.setVisibility(View.VISIBLE);
+                itemView.setOnClickListener(v -> {
+                    final PopupMenu popupMenu = new PopupMenu(v.getContext(), v);
+                    final Menu menu = popupMenu.getMenu();
+                    for (int i = 0; i < stations.size(); i++)
+                        menu.add(Menu.NONE, i, Menu.NONE, stations.get(i).location.uniqueShortName());
+                    popupMenu.setOnMenuItemClickListener(item -> {
+                        final Station newStation = stations.get(item.getItemId());
+                        activity.selectStation(newStation);
+                        return true;
+                    });
+                    popupMenu.show();
+                });
+            } else {
+                multiStationsView.setVisibility(View.GONE);
+                itemView.setOnClickListener(null);
+            }
 
             // lines
             linesGroup.removeAllViews();

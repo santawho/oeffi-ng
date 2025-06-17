@@ -24,12 +24,19 @@
         android:baselineAligned="true"
         android:orientation="horizontal">
 
-        <de.schildbach.oeffi.stations.LineView
-            android:id="@+id/stations_station_details_header_additional_lines"
-            android:layout_width="0px"
+        <ImageView
+            android:id="@+id/stations_station_details_header_multistations"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_expand_more_black_24dp" />
+
+        <TextView
+            android:id="@+id/stations_station_details_header_name"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textSize="@dimen/font_size_small" />
+            android:paddingLeft="@dimen/text_padding_horizontal"
+            android:textColor="@color/fg_significant" />
 
         <TextView
             android:id="@+id/stations_station_details_header_id"
@@ -37,6 +44,21 @@
             android:layout_height="wrap_content"
             android:paddingLeft="@dimen/text_padding_horizontal"
             android:textColor="@color/fg_less_significant" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:baselineAligned="true"
+        android:orientation="horizontal">
+
+        <de.schildbach.oeffi.stations.LineView
+            android:id="@+id/stations_station_details_header_additional_lines"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            hideIfEmpty="true"
+            android:textSize="@dimen/font_size_small" />
     </LinearLayout>
 
 </LinearLayout>
