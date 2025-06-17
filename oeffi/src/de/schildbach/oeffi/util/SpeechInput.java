@@ -18,8 +18,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SpeechInput {
     public interface ResultListener {
@@ -30,34 +34,107 @@ public class SpeechInput {
         void onSpeechInputTermination(boolean success);
     }
 
-    private static final Logger log = LoggerFactory.getLogger(SpeechInput.class);
+    public interface CommandProcessor {
+        boolean onVoiceCommandDetected(final Map<String, String> fields);
+    }
 
+    protected final Logger log = LoggerFactory.getLogger(this.getClass());
+
+    public class CommandDefinition implements ResultListener {
+        final String name;
+        protected List<String> fieldNames = new ArrayList<>();
+        protected Map<String, List<Pattern>> languageToPatterns = new HashMap<>();
+        protected CommandProcessor commandProcessor;
+        protected String currentLanguage;
+
+        protected CommandDefinition(final String commandName) {
+            name = commandName;
+            currentLanguage = "";
+            languageToPatterns.put(currentLanguage, new ArrayList<>());
+        }
+
+        public CommandDefinition field(final String fieldName) {
+            fieldNames.add(fieldName);
+            return this;
+        }
+
+        public CommandDefinition language(final String lang) {
+            currentLanguage = lang;
+            languageToPatterns.put(currentLanguage, new ArrayList<>());
+            return this;
+        }
+
+        public CommandDefinition pattern(final String patternString) {
+            languageToPatterns.get(currentLanguage).add(Pattern.compile(patternString));
+            return this;
+        }
+
+        public CommandDefinition action(final CommandProcessor processor) {
+            commandProcessor = processor;
+            return this;
+        }
+
+        @Override
+        public boolean onSpeechInputResult(final String spokenSentence) {
+            final String activeLanguage = getActiveLanguage();
+            List<Pattern> patterns = languageToPatterns.get(activeLanguage);
+            if (patterns == null)
+                patterns = languageToPatterns.get("");
+            if (patterns == null)
+                return false;
+            for (Pattern pattern : patterns) {
+                final Matcher matcher = pattern.matcher(spokenSentence);
+                if (matcher.find()) {
+                    final Map<String, String> fields = new HashMap<>();
+                    for (String fieldName : fieldNames) {
+                        try {
+                            final String value = matcher.group(fieldName);
+                            fields.put(fieldName, value);
+                        } catch (IllegalArgumentException e) {
+                            // do not populate that field
+                        }
+                    }
+                    if (commandProcessor != null) {
+                        if (commandProcessor.onVoiceCommandDetected(fields)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+    }
+
+    public CommandDefinition command(final String commandName) {
+        final CommandDefinition commandDefinition = new CommandDefinition(commandName);
+        addResultListener(commandDefinition);
+        return commandDefinition;
+    }
+
+    public SpeechInput(final Context context) {
+        this.context = context;
+    }
+
+    protected final Context context;
     private final List<ResultListener> resultListeners = new ArrayList<>();
     private boolean isSpeechRecognitionRunning;
     private SpeechRecognizer speechRecognizer;
 
-    public SpeechInput(final Context context) {
+    protected Locale getActiveLocale() {
+        return context.getResources().getConfiguration().getLocales().get(0);
+    }
+
+    protected String getActiveLanguage() {
+        return getActiveLocale().getLanguage();
     }
 
     public void addResultListener(final ResultListener listener) {
         resultListeners.add(listener);
     }
 
-    public void addResultListeners(final ResultListener[] listeners) {
-        for (ResultListener listener : listeners)
-            resultListeners.add(listener);
-    }
-
     public void startSpeechRecognition(final Activity activity, final SpeechInputTerminationListener terminationListener) {
         if (isSpeechRecognitionRunning)
             return;
-
-//        final String result =
-////        "von Hamburg nach Hofheim über Limburg";
-////        "von Hamburg über Limburg nach Hofheim";
-//        "von Hamburg nach Hofheim";
-////        "Abfahrten in Hofheim";
-//        dispatchSpokenSentence(result.toLowerCase(activity.getResources().getConfiguration().getLocales().get(0)));
 
         if (speechRecognizer == null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && SpeechRecognizer.isOnDeviceRecognitionAvailable(activity)) {
@@ -75,6 +152,8 @@ public class SpeechInput {
                     speechRecognizer.setRecognitionListener(new RecognitionListener() {
                         @Override
                         public void onReadyForSpeech(final Bundle params) {
+                            if (!isSpeechRecognitionRunning)
+                                stopSpeechRecognition();
                         }
 
                         @Override
@@ -91,7 +170,6 @@ public class SpeechInput {
 
                         @Override
                         public void onEndOfSpeech() {
-                            isSpeechRecognitionRunning = false;
                         }
 
                         @Override
@@ -116,12 +194,8 @@ public class SpeechInput {
                             isSpeechRecognitionRunning = false;
                             final ArrayList<String> results = bundle.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
                             if (results != null && !results.isEmpty()) {
-                                final Locale locale = activity.getResources().getConfiguration().getLocales().get(0);
-                                final String spokenSentence = results.get(0).toLowerCase(locale);
-                                final boolean success = dispatchSpokenSentence(spokenSentence);
-                                if (terminationListener != null) {
-                                    terminationListener.onSpeechInputTermination(success);
-                                }
+                                final String spokenSentence = results.get(0).toLowerCase(getActiveLocale());
+                                dispatchSpokenSentence(spokenSentence, terminationListener);
                             }
                         }
                     });
@@ -147,11 +221,23 @@ public class SpeechInput {
         isSpeechRecognitionRunning = false;
     }
 
+    protected boolean dispatchSpokenSentence(
+            final String spokenSentence,
+            final SpeechInputTerminationListener terminationListener) {
+        stopSpeechRecognition();
+        final boolean success = dispatchSpokenSentence(spokenSentence);
+        if (terminationListener != null) {
+            terminationListener.onSpeechInputTermination(success);
+        }
+        return success;
+    }
+
     public boolean dispatchSpokenSentence(final String spokenSentence) {
         log.debug("speech input: {}", spokenSentence);
         for (ResultListener resultListener : resultListeners) {
-            if (resultListener.onSpeechInputResult(spokenSentence))
+            if (resultListener.onSpeechInputResult(spokenSentence)) {
                 return true;
+            }
         }
         return false;
     }

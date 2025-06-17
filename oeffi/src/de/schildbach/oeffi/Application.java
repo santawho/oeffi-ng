@@ -122,9 +122,7 @@ public class Application extends android.app.Application {
 
         initMaps();
 
-        speechInput = new SpeechInput(this);
-        speechInput.addResultListeners(DirectionsActivity.speechProcessors);
-        speechInput.addResultListeners(StationsActivity.speechProcessors);
+        speechInput = new OeffiSpeechInput(this);
 
         final Stopwatch watch = Stopwatch.createStarted();
 
