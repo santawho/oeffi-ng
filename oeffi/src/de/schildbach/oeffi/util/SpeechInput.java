@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 
 public class SpeechInput {
     public interface ResultListener {
-        boolean onSpeechInputResult(final String spokenSentence);
+        boolean onSpeechInputResult(final Context activityContext, final String spokenSentence);
     }
 
     public interface SpeechInputTerminationListener {
@@ -35,7 +35,7 @@ public class SpeechInput {
     }
 
     public interface CommandProcessor {
-        boolean onVoiceCommandDetected(final Map<String, String> fields);
+        boolean onVoiceCommandDetected(final Context activityContext, final Map<String, String> fields);
     }
 
     protected final Logger log = LoggerFactory.getLogger(this.getClass());
@@ -75,7 +75,7 @@ public class SpeechInput {
         }
 
         @Override
-        public boolean onSpeechInputResult(final String spokenSentence) {
+        public boolean onSpeechInputResult(final Context activityContext, final String spokenSentence) {
             final String activeLanguage = getActiveLanguage();
             List<Pattern> patterns = languageToPatterns.get(activeLanguage);
             if (patterns == null)
@@ -95,7 +95,7 @@ public class SpeechInput {
                         }
                     }
                     if (commandProcessor != null) {
-                        if (commandProcessor.onVoiceCommandDetected(fields)) {
+                        if (commandProcessor.onVoiceCommandDetected(activityContext, fields)) {
                             return true;
                         }
                     }
@@ -119,6 +119,7 @@ public class SpeechInput {
     private final List<ResultListener> resultListeners = new ArrayList<>();
     private boolean isSpeechRecognitionRunning;
     private SpeechRecognizer speechRecognizer;
+    private Activity activityContext;
 
     protected Locale getActiveLocale() {
         return context.getResources().getConfiguration().getLocales().get(0);
@@ -132,22 +133,22 @@ public class SpeechInput {
         resultListeners.add(listener);
     }
 
-    public void startSpeechRecognition(final Activity activity, final SpeechInputTerminationListener terminationListener) {
+    public void startSpeechRecognition(final Activity activityContext, final SpeechInputTerminationListener terminationListener) {
         if (isSpeechRecognitionRunning)
             return;
 
         if (speechRecognizer == null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && SpeechRecognizer.isOnDeviceRecognitionAvailable(activity)) {
-                speechRecognizer = SpeechRecognizer.createOnDeviceSpeechRecognizer(activity);
-            } else if (SpeechRecognizer.isRecognitionAvailable(activity)) {
-                speechRecognizer = SpeechRecognizer.createSpeechRecognizer(activity);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && SpeechRecognizer.isOnDeviceRecognitionAvailable(activityContext)) {
+                speechRecognizer = SpeechRecognizer.createOnDeviceSpeechRecognizer(activityContext);
+            } else if (SpeechRecognizer.isRecognitionAvailable(activityContext)) {
+                speechRecognizer = SpeechRecognizer.createSpeechRecognizer(activityContext);
             } else {
                 // not available
             }
 
             if (speechRecognizer != null) {
-                if (ContextCompat.checkSelfPermission(activity, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.RECORD_AUDIO}, 1);
+                if (ContextCompat.checkSelfPermission(activityContext, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(activityContext, new String[]{Manifest.permission.RECORD_AUDIO}, 1);
                 } else {
                     speechRecognizer.setRecognitionListener(new RecognitionListener() {
                         @Override
@@ -205,6 +206,7 @@ public class SpeechInput {
 
         if (speechRecognizer != null) {
             isSpeechRecognitionRunning = true;
+            this.activityContext = activityContext;
             speechRecognizer.startListening(new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
                     .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM));
         }
@@ -235,7 +237,7 @@ public class SpeechInput {
     public boolean dispatchSpokenSentence(final String spokenSentence) {
         log.debug("speech input: {}", spokenSentence);
         for (ResultListener resultListener : resultListeners) {
-            if (resultListener.onSpeechInputResult(spokenSentence)) {
+            if (resultListener.onSpeechInputResult(activityContext, spokenSentence)) {
                 return true;
             }
         }

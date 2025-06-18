@@ -46,6 +46,7 @@ import android.widget.Adapter;
 import android.widget.BaseAdapter;
 import com.google.common.base.Preconditions;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Position;
 import de.schildbach.pte.dto.Stop;

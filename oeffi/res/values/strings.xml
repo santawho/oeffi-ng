@@ -272,6 +272,9 @@
         Tap a station <b>with 2 fingers</b> to open the context menu.
     </string>
 
+    <!-- location resolver -->
+    <string name="locations_query_progress">Getting locations…</string>
+
     <!-- directions map -->
     <string name="directions_map_pin_button_from">Start here</string>
     <string name="directions_map_pin_button_to">End here</string>

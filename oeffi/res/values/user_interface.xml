@@ -32,4 +32,7 @@
     <string name="user_interface_location_selector_longholdmenu_title">Menu at long tap</string>
     <string name="user_interface_location_selector_longholdmenu_summary">Long tap opens context menu from quick location selector.\nNote: you can always use 2 fingers tap.</string>
 
+    <string name="user_interface_voice_control_is_enabled">Listening for your command…</string>
+    <string name="user_interface_voice_control_not_enabled">Voice control is disabled!</string>
+
 </resources>

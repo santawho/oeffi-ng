@@ -15,11 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package de.schildbach.oeffi.directions;
+package de.schildbach.oeffi.util;
 
 import android.text.format.DateUtils;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Locale;
 
 public abstract class TimeSpec implements Serializable {
@@ -34,6 +35,10 @@ public abstract class TimeSpec implements Serializable {
     }
 
     public abstract long timeInMillis();
+
+    public Date date() {
+        return new Date(timeInMillis());
+    }
 
     @Override
     public String toString() {

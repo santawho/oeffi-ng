@@ -75,11 +75,14 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.StationsAware;
 import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.directions.QueryJourneyRunnable;
+import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.network.NetworkPickerActivity;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.stations.list.JourneyClickListener;
 import de.schildbach.oeffi.stations.list.StationContextMenuItemListener;
 import de.schildbach.oeffi.stations.list.StationsAdapter;
+import de.schildbach.oeffi.util.AutoCompleteLocationAdapter;
+import de.schildbach.oeffi.util.AutoCompleteLocationsHandler;
 import de.schildbach.oeffi.util.ConnectivityBroadcastReceiver;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.DividerItemDecoration;
@@ -110,6 +113,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -131,6 +135,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     public static final String INTENT_EXTRA_NETWORK = StationsActivity.class.getName() + ".network";
     public static final String INTENT_EXTRA_LOCATION = StationsActivity.class.getName() + ".location";
     public static final String INTENT_EXTRA_TIME = StationsActivity.class.getName() + ".time";
+    private static final String INTENT_EXTRA_COMMAND = StationsActivity.class.getName() + ".command";
     private ConnectivityManager connectivityManager;
     private LocationManager locationManager;
     private SensorManager sensorManager;
@@ -203,6 +208,21 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
             intent.putExtra(StationsActivity.INTENT_EXTRA_LOCATION, location);
         if (time != null)
             intent.putExtra(StationsActivity.INTENT_EXTRA_TIME, time);
+        context.startActivity(intent);
+    }
+
+    public static class Command implements Serializable {
+        private static final long serialVersionUID = 4782653146464112314L;
+        public String atText;
+        public TimeSpec time;
+    }
+
+    public static void start(
+            final Context context,
+            final StationsActivity.Command command,
+            final int intentFlags) {
+        final Intent intent = new Intent(context, StationsActivity.class).addFlags(intentFlags);
+        intent.putExtra(StationsActivity.INTENT_EXTRA_COMMAND, command);
         context.startActivity(intent);
     }
 
@@ -630,6 +650,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         if (query != null)
             setListFilter(query.trim());
 
+        Command command = null;
         final String intentAction = intent.getAction();
         final Uri intentUri = intent.getData();
         final String intentExtraText = intent.getStringExtra(Intent.EXTRA_TEXT);
@@ -660,6 +681,22 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         } else if (intentUri != null) {
             final Location[] locations = LocationUriParser.parseLocations(intentUri.toString());
             setFixedLocation(locations != null && locations.length >= 1 ? locations[0] : null);
+        } else {
+            command = (Command) intent.getSerializableExtra(INTENT_EXTRA_COMMAND);
+        }
+
+        if (command != null) {
+            startBackgroundHandler();
+            final AutoCompleteLocationAdapter autoCompleteLocationAdapter = new AutoCompleteLocationAdapter(this, network);
+            final AutoCompleteLocationsHandler autoCompleteLocationsHandler = new AutoCompleteLocationsHandler(
+                    autoCompleteLocationAdapter, backgroundHandler,
+                    autoCompleteLocationAdapter.getProvider().defaultProducts());
+            autoCompleteLocationsHandler.addJob(command.atText, null);
+            final Date time = command.time.date();
+            autoCompleteLocationsHandler.start(result -> {
+                if (!result.success) return;
+                StationDetailsActivity.start(this, network, result.location, time);
+            });
         }
     }
 

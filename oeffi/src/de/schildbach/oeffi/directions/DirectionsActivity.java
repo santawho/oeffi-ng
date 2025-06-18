@@ -77,7 +77,8 @@ import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiMainActivity;
 import de.schildbach.oeffi.OeffiMapView;
 import de.schildbach.oeffi.R;
-import de.schildbach.oeffi.directions.TimeSpec.DepArr;
+import de.schildbach.oeffi.util.TimeSpec;
+import de.schildbach.oeffi.util.TimeSpec.DepArr;
 import de.schildbach.oeffi.directions.list.QueryHistoryAdapter;
 import de.schildbach.oeffi.directions.list.QueryHistoryClickListener;
 import de.schildbach.oeffi.directions.list.QueryHistoryContextMenuItemListener;
@@ -90,6 +91,7 @@ import de.schildbach.oeffi.stations.StationContextMenu;
 import de.schildbach.oeffi.stations.StationDetailsActivity;
 import de.schildbach.oeffi.stations.StationsActivity;
 import de.schildbach.oeffi.util.AutoCompleteLocationAdapter;
+import de.schildbach.oeffi.util.AutoCompleteLocationsHandler;
 import de.schildbach.oeffi.util.ConnectivityBroadcastReceiver;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.DividerItemDecoration;
@@ -128,6 +130,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import javax.net.ssl.SSLException;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -177,6 +180,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
     private final Handler handler = new Handler();
     private BroadcastReceiver connectivityReceiver;
     private BroadcastReceiver tickReceiver;
+    private AutoCompleteLocationAdapter autoCompleteLocationAdapter;
 
     private static final int DIALOG_CLEAR_HISTORY = 1;
 
@@ -186,80 +190,8 @@ public class DirectionsActivity extends OeffiMainActivity implements
     private static final String INTENT_EXTRA_TO_LOCATION = DirectionsActivity.class.getName() + ".to_location";
     private static final String INTENT_EXTRA_VIA_LOCATION = DirectionsActivity.class.getName() + ".via_location";
     private static final String INTENT_EXTRA_TIME_SPEC = DirectionsActivity.class.getName() + ".time_spec";
+    private static final String INTENT_EXTRA_COMMAND = DirectionsActivity.class.getName() + ".command";
     private static final String INTENT_EXTRA_RENDERCONFIG = DirectionsActivity.class.getName() + ".config";
-
-    @Override
-    public void onLocationSequenceSelected(final List<Location> locations, final boolean longHold, View lastView) {
-        boolean doGo = !longHold;
-        final int numLocations = locations.size();
-        if (numLocations == 0) {
-            locationSelector.clearSelection();
-            doGo = false;
-        }
-        if (numLocations == 1) {
-            // .. used for testing in emulator only ... preferred way is via preference setting
-            // if (longHold) {
-            //     onSingleLocationSelected(locations.get(0), false, lastView);
-            //     return;
-            // }
-
-            // single location clicked
-            if (viewFromLocation.getLocation() == null) {
-                viewFromLocation.setLocation(locations.get(0));
-                locationSelector.clearSelection();
-                doGo = false;
-            } else {
-                viewToLocation.setLocation(locations.get(0));
-            }
-        } else if (numLocations == 2) {
-            // 2 locations, from-to
-            viewFromLocation.setLocation(locations.get(0));
-            viewToLocation.setLocation(locations.get(1));
-        } else {
-            // >= 3, from-via-to
-            viewFromLocation.setLocation(locations.get(0));
-            viewViaLocation.setLocation(locations.get(1));
-            viewToLocation.setLocation(locations.get(numLocations - 1));
-        }
-
-        if (doGo)
-            handleGo();
-        else
-            locationSelector.clearSelection();
-    }
-
-    @Override
-    public void onSingleLocationSelected(final Location location, final boolean longHold, View selectedView) {
-        final PopupMenu contextMenu = new PopupMenu(this, selectedView);
-        final MenuInflater inflater = contextMenu.getMenuInflater();
-        final Menu menu = contextMenu.getMenu();
-        inflater.inflate(R.menu.directions_location_selector_context, menu);
-        contextMenu.setOnDismissListener((popupMenu) -> {
-            locationSelector.clearSelection();
-        });
-        contextMenu.setOnMenuItemClickListener((menuItem) -> {
-            locationSelector.clearSelection();
-            final int itemId = menuItem.getItemId();
-            if (itemId == R.id.directions_location_selector_context_delete) {
-                locationSelector.removeLocation(location);
-                locationSelector.persist();
-                return true;
-            }
-
-            final Date departureDate =
-                    (time == null || (time instanceof TimeSpec.Relative && ((TimeSpec.Relative) time).diffMs == 0))
-                            ? null
-                            : new Date(time.timeInMillis());
-
-            if (itemId == R.id.directions_location_selector_context_show_departures) {
-                StationDetailsActivity.start(this, network, location, departureDate);
-            } else if (itemId == R.id.directions_location_selector_context_nearby_departures) {
-                StationsActivity.start(this, network, location, departureDate);
-            }
-            return true;
-        });
-        contextMenu.show();
-    }
 
     private static class PickContact extends ActivityResultContract<Void, Uri> {
         @NonNull
@@ -342,6 +274,23 @@ public class DirectionsActivity extends OeffiMainActivity implements
             intent.putExtra(DirectionsActivity.INTENT_EXTRA_TIME_SPEC, timeSpec);
         if (renderConfig != null)
             intent.putExtra(INTENT_EXTRA_RENDERCONFIG, renderConfig);
+        context.startActivity(intent);
+    }
+
+    public static class Command implements Serializable {
+        private static final long serialVersionUID = 4782653146464112314L;
+        public String fromText;
+        public String toText;
+        public String viaText;
+        public TimeSpec time;
+    }
+
+    public static void start(
+            final Context context,
+            final Command command,
+            final int intentFlags) {
+        final Intent intent = new Intent(context, DirectionsActivity.class).addFlags(intentFlags);
+        intent.putExtra(DirectionsActivity.INTENT_EXTRA_COMMAND, command);
         context.startActivity(intent);
     }
 
@@ -468,7 +417,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
         initLayoutTransitions();
 
-        final AutoCompleteLocationAdapter autoCompleteAdapter = new AutoCompleteLocationAdapter(this, network);
+        autoCompleteLocationAdapter = new AutoCompleteLocationAdapter(this, network);
 
         final LocationView.Listener locationChangeListener = (view) -> {
             final Location location = view.getLocation();
@@ -481,7 +430,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         };
 
         viewFromLocation = findViewById(R.id.directions_from);
-        viewFromLocation.setAdapter(autoCompleteAdapter);
+        viewFromLocation.setAdapter(autoCompleteLocationAdapter);
         viewFromLocation.setListener(locationChangeListener);
         viewFromLocation.setContextMenuItemClickListener(new LocationContextMenuItemClickListener(viewFromLocation,
                 requestLocationPermissionFromLauncher, pickContactFromLauncher, pickStationFromLauncher));
@@ -489,13 +438,13 @@ public class DirectionsActivity extends OeffiMainActivity implements
         viewFromLocation.setStationAsAddressEnabled(true);
 
         viewViaLocation = findViewById(R.id.directions_via);
-        viewViaLocation.setAdapter(autoCompleteAdapter);
+        viewViaLocation.setAdapter(autoCompleteLocationAdapter);
         viewViaLocation.setListener(locationChangeListener);
         viewViaLocation.setContextMenuItemClickListener(new LocationContextMenuItemClickListener(viewViaLocation,
                 requestLocationPermissionViaLauncher, pickContactViaLauncher, pickStationViaLauncher));
 
         viewToLocation = findViewById(R.id.directions_to);
-        viewToLocation.setAdapter(autoCompleteAdapter);
+        viewToLocation.setAdapter(autoCompleteLocationAdapter);
         viewToLocation.setListener(locationChangeListener);
         viewToLocation.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_GO) {
@@ -727,6 +676,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         final boolean isSharingTo = intentClassName.endsWith(".TO");
         final boolean isSharingFrom = intentClassName.endsWith(".FROM");
         final boolean isSharing = isSharingTo || isSharingFrom;
+        Command command = null;
         if (isSharing) {
             final String intentAction = intent.getAction();
             final Uri intentUri = intent.getData();
@@ -782,10 +732,26 @@ public class DirectionsActivity extends OeffiMainActivity implements
                 viewViaLocation.setLocation((Location) intent.getSerializableExtra(INTENT_EXTRA_VIA_LOCATION));
             if (intent.hasExtra(INTENT_EXTRA_TIME_SPEC))
                 time = (TimeSpec) intent.getSerializableExtra(INTENT_EXTRA_TIME_SPEC);
+
+            command = (Command) intent.getSerializableExtra(INTENT_EXTRA_COMMAND);
         }
 
         boolean haveNonDefaultProducts = initProductToggles();
-        expandForm(haveNonDefaultProducts || viewViaLocation.getLocation() != null);
+        expandForm(haveNonDefaultProducts || viewViaLocation.getText() != null);
+
+        if (command != null) {
+            final AutoCompleteLocationsHandler autoCompleteLocationsHandler = new AutoCompleteLocationsHandler(
+                    autoCompleteLocationAdapter, backgroundHandler,
+                    getProductToggles());
+            autoCompleteLocationsHandler.addJob(command.fromText, viewFromLocation);
+            autoCompleteLocationsHandler.addJob(command.toText, viewToLocation);
+            autoCompleteLocationsHandler.addJob(command.viaText, viewViaLocation);
+            time = command.time;
+            autoCompleteLocationsHandler.start(result -> {
+                if (result.success)
+                    handleGo();
+            });
+        }
     }
 
     @Override
@@ -869,13 +835,13 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
     @Override
     protected void onChangeNetwork(final NetworkId network) {
-        final AutoCompleteLocationAdapter autoCompleteAdapter = new AutoCompleteLocationAdapter(this, network);
+        autoCompleteLocationAdapter = new AutoCompleteLocationAdapter(this, network);
 
-        viewFromLocation.setAdapter(autoCompleteAdapter);
+        viewFromLocation.setAdapter(autoCompleteLocationAdapter);
         viewFromLocation.reset();
-        viewViaLocation.setAdapter(autoCompleteAdapter);
+        viewViaLocation.setAdapter(autoCompleteLocationAdapter);
         viewViaLocation.reset();
-        viewToLocation.setAdapter(autoCompleteAdapter);
+        viewToLocation.setAdapter(autoCompleteLocationAdapter);
         viewToLocation.reset();
 
         viewBike.setChecked(false);
@@ -1064,6 +1030,73 @@ public class DirectionsActivity extends OeffiMainActivity implements
             updateGUI();
         });
         builder.show();
+    }
+
+    @Override
+    public void onLocationSequenceSelected(final List<Location> locations, final boolean longHold, View lastView) {
+        boolean doGo = !longHold;
+        final int numLocations = locations.size();
+        if (numLocations == 0) {
+            locationSelector.clearSelection();
+            doGo = false;
+        }
+        if (numLocations == 1) {
+            // single location clicked
+            if (viewFromLocation.getLocation() == null) {
+                viewFromLocation.setLocation(locations.get(0));
+                locationSelector.clearSelection();
+                doGo = false;
+            } else {
+                viewToLocation.setLocation(locations.get(0));
+            }
+        } else if (numLocations == 2) {
+            // 2 locations, from-to
+            viewFromLocation.setLocation(locations.get(0));
+            viewToLocation.setLocation(locations.get(1));
+        } else {
+            // >= 3, from-via-to
+            viewFromLocation.setLocation(locations.get(0));
+            viewViaLocation.setLocation(locations.get(1));
+            viewToLocation.setLocation(locations.get(numLocations - 1));
+        }
+
+        if (doGo)
+            handleGo();
+        else
+            locationSelector.clearSelection();
+    }
+
+    @Override
+    public void onSingleLocationSelected(final Location location, final boolean longHold, View selectedView) {
+        final PopupMenu contextMenu = new PopupMenu(this, selectedView);
+        final MenuInflater inflater = contextMenu.getMenuInflater();
+        final Menu menu = contextMenu.getMenu();
+        inflater.inflate(R.menu.directions_location_selector_context, menu);
+        contextMenu.setOnDismissListener((popupMenu) -> {
+            locationSelector.clearSelection();
+        });
+        contextMenu.setOnMenuItemClickListener((menuItem) -> {
+            locationSelector.clearSelection();
+            final int itemId = menuItem.getItemId();
+            if (itemId == R.id.directions_location_selector_context_delete) {
+                locationSelector.removeLocation(location);
+                locationSelector.persist();
+                return true;
+            }
+
+            final Date departureDate =
+                    (time == null || (time instanceof TimeSpec.Relative && ((TimeSpec.Relative) time).diffMs == 0))
+                            ? null
+                            : new Date(time.timeInMillis());
+
+            if (itemId == R.id.directions_location_selector_context_show_departures) {
+                StationDetailsActivity.start(this, network, location, departureDate);
+            } else if (itemId == R.id.directions_location_selector_context_nearby_departures) {
+                StationsActivity.start(this, network, location, departureDate);
+            }
+            return true;
+        });
+        contextMenu.show();
     }
 
     private void updateMap() {

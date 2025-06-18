@@ -36,7 +36,7 @@ import android.widget.Gallery;
 import com.google.common.math.LongMath;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.Formats;
-import de.schildbach.pte.dto.JourneyRef;
+import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.pte.dto.Trip;
 
 import java.util.Calendar;

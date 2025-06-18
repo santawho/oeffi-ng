@@ -271,6 +271,9 @@
         Tippe auf eine Station <b>mit 2 Fingern</b>, um das Kontextmenü zu öffnen.
     </string>
 
+    <!-- location resolver -->
+    <string name="locations_query_progress">Stationen werden gesucht…</string>
+
     <!-- directions map -->
     <string name="directions_map_pin_button_from">Hier starten</string>
     <string name="directions_map_pin_button_to">Hier enden</string>

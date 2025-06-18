@@ -48,6 +48,7 @@ import de.schildbach.oeffi.directions.navigation.Navigator;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
+import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
@@ -68,9 +69,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.net.ssl.SSLException;
-import java.io.ByteArrayOutputStream;
+
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;

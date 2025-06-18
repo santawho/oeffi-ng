@@ -234,7 +234,7 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
             }
         };
         modeView.setContentDescription(context.getString(R.string.directions_location_view_mode_description));
-        modeView.setBackgroundDrawable(selectableItemBackground);
+        modeView.setBackground(selectableItemBackground);
 
         addView(textView, new LocationView.LayoutParams(LocationView.LayoutParams.MATCH_PARENT,
                 LocationView.LayoutParams.WRAP_CONTENT, Gravity.CENTER_VERTICAL));
@@ -265,7 +265,7 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
             chooseView.setEnabled(enabled);
     }
 
-    private void setText(final CharSequence text) {
+    public void setText(final CharSequence text) {
         final int threshold = textView.getThreshold();
         textView.setThreshold(Integer.MAX_VALUE);
         textView.removeTextChangedListener(textChangedListener);
@@ -274,12 +274,9 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
         textView.setThreshold(threshold);
     }
 
-    private String getText() {
+    public String getText() {
         final String text = textView.getText().toString().trim();
-        if (text.length() > 0)
-            return text;
-        else
-            return null;
+        return text.isEmpty() ? null : text;
     }
 
     public void setHint(final int hintRes) {

@@ -70,6 +70,7 @@ import de.schildbach.oeffi.stations.StationsActivity;
 import de.schildbach.oeffi.util.DividerItemDecoration;
 import de.schildbach.oeffi.util.ErrorReporter;
 import de.schildbach.oeffi.util.NavigationMenuAdapter;
+import de.schildbach.oeffi.util.Toast;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.Product;
@@ -305,6 +306,9 @@ public abstract class OeffiActivity extends ComponentActivity {
                                 if (success)
                                     closeNavigation();
                             });
+                    new Toast(OeffiActivity.this).toast(R.string.user_interface_voice_control_is_enabled);
+                } else {
+                    new Toast(OeffiActivity.this).toast(R.string.user_interface_voice_control_not_enabled);
                 }
             }
 

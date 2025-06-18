@@ -42,7 +42,7 @@ import javax.net.ssl.SSLException;
 
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.QueryTripsRunnable;
-import de.schildbach.oeffi.directions.TimeSpec;
+import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
 import de.schildbach.oeffi.directions.TripsOverviewActivity;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
