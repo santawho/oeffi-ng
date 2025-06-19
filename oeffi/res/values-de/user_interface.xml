@@ -28,5 +28,6 @@
 
     <string name="user_interface_voice_control_is_enabled">Sag mir ein Kommando…</string>
     <string name="user_interface_voice_control_not_enabled">Sprachsteuerung is ausgeschaltet!</string>
+    <string name="user_interface_voice_control_error">Sprachsteuerung, Fehler. (%s)</string>
 
 </resources>

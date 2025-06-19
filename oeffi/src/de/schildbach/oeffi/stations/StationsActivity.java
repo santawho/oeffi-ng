@@ -692,7 +692,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                     autoCompleteLocationAdapter, backgroundHandler,
                     autoCompleteLocationAdapter.getProvider().defaultProducts());
             autoCompleteLocationsHandler.addJob(command.atText, null);
-            final Date time = command.time.date();
+            final Date time = command.time == null ? null : command.time.date();
             autoCompleteLocationsHandler.start(result -> {
                 if (!result.success) return;
                 StationDetailsActivity.start(this, network, result.location, time);

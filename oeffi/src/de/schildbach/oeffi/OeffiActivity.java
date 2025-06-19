@@ -70,6 +70,7 @@ import de.schildbach.oeffi.stations.StationsActivity;
 import de.schildbach.oeffi.util.DividerItemDecoration;
 import de.schildbach.oeffi.util.ErrorReporter;
 import de.schildbach.oeffi.util.NavigationMenuAdapter;
+import de.schildbach.oeffi.util.SpeechInput;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
@@ -302,9 +303,17 @@ public abstract class OeffiActivity extends ComponentActivity {
 
                 if (prefs.getBoolean(PREFS_KEY_VOICE_CONTROL, false)) {
                     Application.getInstance().getSpeechInput()
-                            .startSpeechRecognition(OeffiActivity.this, success -> {
-                                if (success)
-                                    closeNavigation();
+                            .startSpeechRecognition(OeffiActivity.this, new SpeechInput.SpeechInputTerminationListener() {
+                                @Override
+                                public void onSpeechInputTermination(final boolean success) {
+                                    if (success)
+                                        closeNavigation();
+                                }
+
+                                @Override
+                                public void onSpeechInputError(final String hint) {
+                                    new Toast(OeffiActivity.this).toast(R.string.user_interface_voice_control_is_enabled, hint);
+                                }
                             });
                     new Toast(OeffiActivity.this).toast(R.string.user_interface_voice_control_is_enabled);
                 } else {

@@ -34,5 +34,6 @@
 
     <string name="user_interface_voice_control_is_enabled">Listening for your command…</string>
     <string name="user_interface_voice_control_not_enabled">Voice control is disabled!</string>
+    <string name="user_interface_voice_control_error">Voice control error. (%s)</string>
 
 </resources>

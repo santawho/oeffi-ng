@@ -32,54 +32,77 @@ public class SpeechInput {
 
     public interface SpeechInputTerminationListener {
         void onSpeechInputTermination(boolean success);
+        void onSpeechInputError(final String hint);
     }
 
-    public interface CommandProcessor {
-        boolean onVoiceCommandDetected(final Context activityContext, final Map<String, String> fields);
+    public interface CommandProcessor<CmdDef extends CommandDefinition> {
+        boolean onVoiceCommandDetected(
+                final Context activityContext,
+                final CmdDef commandDefinition,
+                final Map<String, String> fields,
+                final String language);
     }
 
     protected final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    public class CommandDefinition implements ResultListener {
+    public class CommandDefinition<CmdDef extends CommandDefinition<?>> implements ResultListener {
         final String name;
         protected List<String> fieldNames = new ArrayList<>();
         protected Map<String, List<Pattern>> languageToPatterns = new HashMap<>();
         protected CommandProcessor commandProcessor;
         protected String currentLanguage;
+        protected List<Pattern> currentPatterns;
+        protected String currentNumberPattern;
 
         protected CommandDefinition(final String commandName) {
             name = commandName;
-            currentLanguage = "";
-            languageToPatterns.put(currentLanguage, new ArrayList<>());
         }
 
-        public CommandDefinition field(final String fieldName) {
+        public CommandDefinition<CmdDef> field(final String fieldName) {
             fieldNames.add(fieldName);
             return this;
         }
 
-        public CommandDefinition language(final String lang) {
+        public CommandDefinition<CmdDef> language(final String lang) {
             currentLanguage = lang;
-            languageToPatterns.put(currentLanguage, new ArrayList<>());
+            currentPatterns = new ArrayList<>();
+            languageToPatterns.put(currentLanguage, currentPatterns);
+            currentNumberPattern = buildNumberPattern(lang);
             return this;
         }
 
-        public CommandDefinition pattern(final String patternString) {
-            languageToPatterns.get(currentLanguage).add(Pattern.compile(patternString));
+        private String buildNumberPattern(final String lang) {
+            String[] numberWords = getNumberWords(lang);
+            if (numberWords == null)
+                numberWords = getNumberWords(getFallbackLanguage());
+            final StringBuilder builder = new StringBuilder();
+            builder.append("(([0-9]+)");
+            for (String numberWord : numberWords)
+                builder.append(String.format("|(%s)", numberWord));
+            builder.append(")");
+            return builder.toString();
+        }
+
+        public CommandDefinition<CmdDef> pattern(final String aPatternString) {
+            final String patternString = String.format("^%s$", aPatternString
+                    .replaceAll("~N", currentNumberPattern));
+            currentPatterns.add(Pattern.compile(patternString));
             return this;
         }
 
-        public CommandDefinition action(final CommandProcessor processor) {
+        public CommandDefinition<CmdDef> action(final CommandProcessor<CmdDef> processor) {
             commandProcessor = processor;
             return this;
         }
 
         @Override
         public boolean onSpeechInputResult(final Context activityContext, final String spokenSentence) {
-            final String activeLanguage = getActiveLanguage();
+            String activeLanguage = getActiveLanguage();
             List<Pattern> patterns = languageToPatterns.get(activeLanguage);
-            if (patterns == null)
-                patterns = languageToPatterns.get("");
+            if (patterns == null) {
+                activeLanguage = getFallbackLanguage();
+                patterns = languageToPatterns.get(activeLanguage);
+            }
             if (patterns == null)
                 return false;
             for (Pattern pattern : patterns) {
@@ -95,7 +118,7 @@ public class SpeechInput {
                         }
                     }
                     if (commandProcessor != null) {
-                        if (commandProcessor.onVoiceCommandDetected(activityContext, fields)) {
+                        if (commandProcessor.onVoiceCommandDetected(activityContext, this, fields, activeLanguage)) {
                             return true;
                         }
                     }
@@ -105,8 +128,11 @@ public class SpeechInput {
         }
     }
 
-    public CommandDefinition command(final String commandName) {
-        final CommandDefinition commandDefinition = new CommandDefinition(commandName);
+    public CommandDefinition<?> command(final String commandName) {
+        return addCommand(new CommandDefinition(commandName));
+    }
+
+    public <CmdDef extends CommandDefinition<?>> CmdDef addCommand(final CmdDef commandDefinition) {
         addResultListener(commandDefinition);
         return commandDefinition;
     }
@@ -127,6 +153,45 @@ public class SpeechInput {
 
     protected String getActiveLanguage() {
         return getActiveLocale().getLanguage();
+    }
+
+    protected String getFallbackLanguage() {
+        return "en";
+    }
+
+    protected String[] getNumberWords(final String language) {
+        if ("en".equals(language))
+            return new String[] {
+                    "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"
+            };
+
+        if ("de".equals(language))
+            return new String[] {
+                    "null", "eins", "zwei", "drei", "vier", "fünf", "sechs", "sieben", "acht", "neun"
+            };
+
+        return null;
+    }
+
+    protected Integer getNumberFromWord(final String numberWord, String language) {
+        if (numberWord == null || numberWord.isEmpty())
+            return null;
+        if (Character.isDigit(numberWord.charAt(0))) {
+            try {
+                return Integer.parseInt(numberWord);
+            } catch (NumberFormatException nfe) {
+                return null;
+            }
+        }
+        String[] numberWords = getNumberWords(language);
+        if (numberWords == null)
+            numberWords = getNumberWords(getFallbackLanguage());
+        for (int i = 0; i < numberWords.length; i++) {
+            final String word = numberWords[i];
+            if (numberWord.equals(word))
+                return i;
+        }
+        return null;
     }
 
     public void addResultListener(final ResultListener listener) {
@@ -178,7 +243,12 @@ public class SpeechInput {
                             log.info("speech recognition error {}", error);
                             isSpeechRecognitionRunning = false;
                             if (terminationListener != null) {
-                                terminationListener.onSpeechInputTermination(false);
+                                if (error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT
+                                        || error == SpeechRecognizer.ERROR_NO_MATCH) {
+                                    terminationListener.onSpeechInputTermination(false);
+                                } else {
+                                    terminationListener.onSpeechInputError(String.format("code=%d", error));
+                                }
                             }
                         }
 
