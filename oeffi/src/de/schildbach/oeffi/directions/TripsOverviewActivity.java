@@ -460,7 +460,15 @@ public class TripsOverviewActivity extends OeffiActivity {
                             runOnUiThread(() -> new Toast(TripsOverviewActivity.this).toast(R.string.toast_internal_error,
                                     ((InternalErrorException) x).getUrl().host()));
                         } else {
-                            throw new RuntimeException(message, x);
+                            // DO NOT throw an exception here, because we are trying to query MORE trips.
+                            // This might fail, if the query-next-context has timed out.
+                            // Actually, there is a SessionExpiredException, but almost all network providers in PTE
+                            // do not throw this, as they do not detect the cause of the situation
+
+                            // throw new RuntimeException(message, x);
+
+                            // Instead, show a warning, so the user can reload completely.
+                            runOnUiThread(() -> new Toast(TripsOverviewActivity.this).longToast(R.string.toast_session_expired));
                         }
 
                         break;
