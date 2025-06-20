@@ -759,86 +759,90 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             return;
 
         for (final TripRenderer.LegContainer legC : tripRenderer.legs) {
-            if (legC.publicLeg != null) {
-                final Trip.Public publicLeg = legC.publicLeg;
-                final Date departureTime = publicLeg.getDepartureTime();
-                final Date arrivalTime = publicLeg.getArrivalTime();
+            if (legC.publicLeg == null)
+                continue;
 
-                if (departureTime.after(now)) {
-                    highlightedTime = departureTime;
-                    return;
-                }
+            final Trip.Public publicLeg = legC.publicLeg;
+            Date arrivalTime, departureTime;
 
-                final List<Stop> intermediateStops = publicLeg.intermediateStops;
-                if (intermediateStops != null) {
-                    for (final Stop stop : intermediateStops) {
-                        Date stopTime = stop.getArrivalTime();
-                        if (stopTime == null)
-                            stopTime = stop.getDepartureTime();
+            departureTime = publicLeg.getDepartureTime();
+            if (departureTime.after(now)) {
+                highlightedTime = departureTime;
+                return;
+            }
 
-                        if (stopTime != null && stopTime.after(now)) {
-                            highlightedTime = stopTime;
-                            return;
-                        }
+            final List<Stop> intermediateStops = publicLeg.intermediateStops;
+            if (intermediateStops != null) {
+                for (final Stop stop : intermediateStops) {
+                    arrivalTime = stop.getArrivalTime();
+
+                    if (arrivalTime != null && arrivalTime.after(now)) {
+                        highlightedTime = arrivalTime;
+                        return;
+                    }
+
+                    departureTime = stop.getDepartureTime();
+                    if (departureTime != null && departureTime.after(now)) {
+                        highlightedTime = departureTime;
+                        return;
                     }
                 }
+            }
 
-                if (arrivalTime.after(now)) {
-                    highlightedTime = arrivalTime;
-                    return;
-                }
+            arrivalTime = publicLeg.getArrivalTime();
+            if (arrivalTime.after(now)) {
+                highlightedTime = arrivalTime;
+                return;
             }
         }
     }
 
     private void updateHighlightedLocation() {
         highlightedLocation = null;
+        if (location == null)
+            return;
 
-        if (location != null) {
-            float minDistance = Float.MAX_VALUE;
+        float minDistance = Float.MAX_VALUE;
+        final float[] distanceBetweenResults = new float[1];
+        for (final TripRenderer.LegContainer legC : tripRenderer.legs) {
+            if (legC.publicLeg != null) {
+                final Trip.Public publicLeg = legC.publicLeg;
 
-            final float[] distanceBetweenResults = new float[1];
-
-            for (final TripRenderer.LegContainer legC : tripRenderer.legs) {
-                if (legC.publicLeg != null) {
-                    final Trip.Public publicLeg = legC.publicLeg;
-
-                    if (publicLeg.departure.hasCoord()) {
-                        android.location.Location.distanceBetween(publicLeg.departure.getLatAsDouble(),
-                                publicLeg.departure.getLonAsDouble(), location.getLatAsDouble(),
-                                location.getLonAsDouble(), distanceBetweenResults);
-                        final float distance = distanceBetweenResults[0];
-                        if (distance < minDistance) {
-                            minDistance = distance;
-                            highlightedLocation = publicLeg.departure;
-                        }
+                if (publicLeg.departure.hasCoord()) {
+                    android.location.Location.distanceBetween(publicLeg.departure.getLatAsDouble(),
+                            publicLeg.departure.getLonAsDouble(), location.getLatAsDouble(),
+                            location.getLonAsDouble(), distanceBetweenResults);
+                    final float distance = distanceBetweenResults[0];
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        highlightedLocation = publicLeg.departure;
                     }
+                }
 
-                    final List<Stop> intermediateStops = publicLeg.intermediateStops;
-                    if (intermediateStops != null) {
-                        for (final Stop stop : intermediateStops) {
-                            if (stop.location.hasCoord()) {
-                                android.location.Location.distanceBetween(stop.location.getLatAsDouble(),
-                                        stop.location.getLonAsDouble(), location.getLatAsDouble(),
-                                        location.getLonAsDouble(), distanceBetweenResults);
-                                final float distance = distanceBetweenResults[0];
-                                if (distance < minDistance) {
-                                    minDistance = distance;
-                                    highlightedLocation = stop.location;
-                                }
+                final List<Stop> intermediateStops = publicLeg.intermediateStops;
+                if (intermediateStops != null) {
+                    for (final Stop stop : intermediateStops) {
+                        if (stop.location.hasCoord()) {
+                            android.location.Location.distanceBetween(stop.location.getLatAsDouble(),
+                                    stop.location.getLonAsDouble(), location.getLatAsDouble(),
+                                    location.getLonAsDouble(), distanceBetweenResults);
+                            final float distance = distanceBetweenResults[0];
+                            if (distance < minDistance) {
+                                minDistance = distance;
+                                highlightedLocation = stop.location;
                             }
                         }
                     }
+                }
 
-                    if (publicLeg.arrival.hasCoord()) {
-                        android.location.Location.distanceBetween(publicLeg.arrival.getLatAsDouble(),
-                                publicLeg.arrival.getLonAsDouble(), location.getLatAsDouble(),
-                                location.getLonAsDouble(), distanceBetweenResults);
-                        final float distance = distanceBetweenResults[0];
-                        if (distance < minDistance) {
-                            minDistance = distance;
-                            highlightedLocation = publicLeg.arrival;
-                        }
+                if (publicLeg.arrival.hasCoord()) {
+                    android.location.Location.distanceBetween(publicLeg.arrival.getLatAsDouble(),
+                            publicLeg.arrival.getLonAsDouble(), location.getLatAsDouble(),
+                            location.getLonAsDouble(), distanceBetweenResults);
+                    final float distance = distanceBetweenResults[0];
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        highlightedLocation = publicLeg.arrival;
                     }
                 }
             }
@@ -1471,11 +1475,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 (leg.entryLocation != null && location.id.equals(leg.entryLocation.id))
              || (leg.exitLocation != null && location.id.equals(leg.exitLocation.id));
 
+        final Date arrivalTime = stop.getArrivalTime();
+        final Date departureTime = stop.getDepartureTime();
         if (pearlType == PearlView.Type.DEPARTURE || pearlType == PearlView.Type.INTERMEDIATE_DEPARTURE
                 || ((pearlType == PearlView.Type.INTERMEDIATE_ARRIVAL || pearlType == PearlView.Type.PASSING)
                         && stop.plannedArrivalTime == null)) {
             isTimePredicted = stop.isDepartureTimePredicted();
-            time = stop.getDepartureTime();
+            time = departureTime;
             delay = stop.getDepartureDelay();
             isCancelled = stop.departureCancelled;
 
@@ -1486,7 +1492,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 || ((pearlType == PearlView.Type.INTERMEDIATE_ARRIVAL || pearlType == PearlView.Type.PASSING)
                         && stop.plannedArrivalTime != null)) {
             isTimePredicted = stop.isArrivalTimePredicted();
-            time = stop.getArrivalTime();
+            time = arrivalTime;
             delay = stop.getArrivalDelay();
             isCancelled = stop.arrivalCancelled;
 
@@ -1496,6 +1502,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         } else {
             throw new IllegalStateException("cannot handle: " + pearlType);
         }
+
+        final boolean highlightTime =
+                   (arrivalTime != null && arrivalTime.equals(highlightedTime))
+                || (departureTime != null && departureTime.equals(highlightedTime));
 
         // name
         final TextView stopNameView = row.findViewById(R.id.directions_trip_details_public_entry_stop_name);
@@ -1581,7 +1591,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final TextView stopTimeView = row.findViewById(R.id.directions_trip_details_public_entry_stop_time);
         stopDateView.setText(null);
         stopTimeView.setText(null);
-        boolean highlightTime = false;
         if (time != null) {
             if (collapseColumns.dateChanged(time)) {
                 stopDateView.setText(Formats.formatDate(TripDetailsActivity.this, now.getTime(), time.getTime(), true,
@@ -1590,7 +1599,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
             stopTimeView.setText(Formats.formatTime(TripDetailsActivity.this, time.getTime()));
             setStrikeThru(stopTimeView, isCancelled);
-            highlightTime = time.equals(highlightedTime);
         }
         final int stopTimeColor = highlightTime ? colorHighlighted : colorSignificant;
         stopDateView.setTextColor(stopTimeColor);
