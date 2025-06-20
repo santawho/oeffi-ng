@@ -148,7 +148,8 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
     @Override
     protected void setupFromTrip(final Trip trip) {
-        navigator = new Navigator(network, trip);
+        final Trip tripFromPresentNotification = new NavigationNotification(this, getIntent()).getTrip();
+        navigator = new Navigator(network, tripFromPresentNotification);
         super.setupFromTrip(navigator.getCurrentTrip());
     }
 

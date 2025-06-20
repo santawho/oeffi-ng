@@ -252,11 +252,11 @@ public class NavigationNotification {
 
     private NavigationNotification(
             final Context context,
-            final TripDetailsActivity.IntentData intentData,
+            final TripDetailsActivity.IntentData aIntentData,
             final Configuration configuration,
             final TripRenderer.NotificationData lastNotified) {
         this.context = context;
-        final Trip trip = intentData.trip;
+        final Trip trip = aIntentData.trip;
         final String uniqueId = trip.getUniqueId();
         final StringBuilder b = new StringBuilder();
         for (Trip.Leg leg : trip.legs) {
@@ -280,7 +280,7 @@ public class NavigationNotification {
         notificationTag = TAG_PREFIX + uniqueId;
         final Bundle extras = getActiveNotificationExtras();
         if (extras == null) {
-            this.intentData = intentData;
+            this.intentData = aIntentData;
             this.configuration = configuration != null ? configuration : new Configuration();
             this.lastNotified = lastNotified;
         } else {
@@ -292,6 +292,10 @@ public class NavigationNotification {
         }
         if (NavigationNotification.prefs == null)
             NavigationNotification.prefs = PreferenceManager.getDefaultSharedPreferences(context);
+    }
+
+    public Trip getTrip() {
+        return intentData == null ? null : intentData.trip;
     }
 
     public static void updateFromForeground(
