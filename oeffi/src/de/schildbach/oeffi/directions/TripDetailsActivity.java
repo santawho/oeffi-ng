@@ -774,16 +774,15 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final List<Stop> intermediateStops = publicLeg.intermediateStops;
             if (intermediateStops != null) {
                 for (final Stop stop : intermediateStops) {
-                    arrivalTime = stop.getArrivalTime();
-
-                    if (arrivalTime != null && arrivalTime.after(now)) {
-                        highlightedTime = arrivalTime;
-                        return;
-                    }
-
                     departureTime = stop.getDepartureTime();
                     if (departureTime != null && departureTime.after(now)) {
                         highlightedTime = departureTime;
+                        return;
+                    }
+
+                    arrivalTime = stop.getArrivalTime();
+                    if (arrivalTime != null && arrivalTime.after(now)) {
+                        highlightedTime = arrivalTime;
                         return;
                     }
                 }
@@ -970,7 +969,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         collapseColumns.dateChanged(now);
 
         final Stop departureStop = leg.departureStop;
-        final View departureRow = stopRow(PearlView.Type.DEPARTURE, departureStop, "-", leg, highlightedTime,
+        final View departureRow = stopRow(PearlView.Type.DEPARTURE, departureStop, "-", leg,
+                leg.getDepartureTime().equals(highlightedTime),
                 departureStop.location.equals(highlightedLocation), now, collapseColumns);
         stopsView.addView(departureRow);
 
@@ -979,19 +979,27 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         if (intermediateStops != null) {
             if (expandButton.isChecked()) {
                 for (final Stop stop : intermediateStops) {
-                    final boolean hasStopTime = stop.getArrivalTime() != null || stop.getDepartureTime() != null;
+                    final Date arrivalTime = stop.getArrivalTime();
+                    final Date departureTime = stop.getDepartureTime();
+                    final boolean hasStopTime = arrivalTime != null || departureTime != null;
+                    final boolean isArrivalTimeHighlighted = arrivalTime != null && arrivalTime.equals(highlightedTime);
+                    final boolean isDepartureTimeHighlighted = departureTime != null && departureTime.equals(highlightedTime);
+
+                    // more than 5 minutes stay, then show departure row
+                    final boolean isLongStay = isLongStay(stop.plannedArrivalTime, stop.plannedDepartureTime)
+                            || isLongStay(stop.predictedArrivalTime, stop.predictedDepartureTime);
 
                     final View stopRow = stopRow(hasStopTime ? PearlView.Type.INTERMEDIATE_ARRIVAL : PearlView.Type.PASSING,
-                            stop, previousPlace, leg, highlightedTime, stop.location.equals(highlightedLocation), now,
-                            collapseColumns);
+                            stop, previousPlace, leg,
+                            isArrivalTimeHighlighted || (!isLongStay && isDepartureTimeHighlighted),
+                            stop.location.equals(highlightedLocation), now, collapseColumns);
                     stopsView.addView(stopRow);
 
-                    if (isLongStay(stop.plannedArrivalTime, stop.plannedDepartureTime)
-                        || isLongStay(stop.predictedArrivalTime, stop.predictedDepartureTime)) {
-                        // more than 5 minutes stay, then show departure row
+                    if (isLongStay) {
                         final View depRow = stopRow(PearlView.Type.INTERMEDIATE_DEPARTURE,
-                                stop, null, leg, highlightedTime, stop.location.equals(highlightedLocation), now,
-                                collapseColumns);
+                                stop, null, leg,
+                                isDepartureTimeHighlighted,
+                                stop.location.equals(highlightedLocation), now, collapseColumns);
                         stopsView.addView(depRow);
                     }
 
@@ -1014,7 +1022,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
         }
 
-        final View arrivalRow = stopRow(PearlView.Type.ARRIVAL, leg.arrivalStop, previousPlace, leg, highlightedTime,
+        final View arrivalRow = stopRow(PearlView.Type.ARRIVAL, leg.arrivalStop, previousPlace, leg,
+                leg.getArrivalTime().equals(highlightedTime),
                 leg.arrivalStop.location.equals(highlightedLocation), now, collapseColumns);
         stopsView.addView(arrivalRow);
 
@@ -1457,7 +1466,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     private View stopRow(
             final PearlView.Type pearlType,
-            final Stop stop, final String previousPlace, final Trip.Public leg, final Date highlightedTime,
+            final Stop stop, final String previousPlace, final Trip.Public leg, final boolean highlightTime,
             final boolean highlightLocation, final Date now, final CollapseColumns collapseColumns) {
         final View row = inflater.inflate(R.layout.directions_trip_details_public_entry_stop, null);
 
@@ -1502,10 +1511,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         } else {
             throw new IllegalStateException("cannot handle: " + pearlType);
         }
-
-        final boolean highlightTime =
-                   (arrivalTime != null && arrivalTime.equals(highlightedTime))
-                || (departureTime != null && departureTime.equals(highlightedTime));
 
         // name
         final TextView stopNameView = row.findViewById(R.id.directions_trip_details_public_entry_stop_name);
