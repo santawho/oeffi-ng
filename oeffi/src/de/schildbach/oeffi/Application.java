@@ -86,6 +86,14 @@ public class Application extends android.app.Application {
         return speechInput;
     }
 
+    public SharedPreferences getSharedPreferences() {
+        return PreferenceManager.getDefaultSharedPreferences(this);
+    }
+
+    public boolean isDeveloperElementsEnabled() {
+        return getSharedPreferences().getBoolean(Constants.PREFS_KEY_USER_INTERFACE_DEVELOPER_OPTIONS_SHOW_EXTRA_INFOS_ENABLED, false);
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -252,7 +260,7 @@ public class Application extends android.app.Application {
     }
 
     private void migrateSelectedNetwork(final String fromName, final NetworkId to) {
-        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        final SharedPreferences prefs = getSharedPreferences();
 
         if (fromName.equals(prefs.getString(Constants.PREFS_KEY_NETWORK_PROVIDER, null)))
             prefs.edit().putString(Constants.PREFS_KEY_NETWORK_PROVIDER, to.name()).commit();

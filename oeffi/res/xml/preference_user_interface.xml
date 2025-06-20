@@ -43,4 +43,13 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/user_interface_developer_options_category_title">
+
+        <CheckBoxPreference
+            android:key="user_interface_developer_options_show_extra_infos_enabled"
+            android:defaultValue="false"
+            android:title="@string/user_interface_developer_options_show_extra_infos_enabled_title" />
+
+    </PreferenceCategory>
+
 </PreferenceScreen>

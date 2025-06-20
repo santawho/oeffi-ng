@@ -247,12 +247,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private boolean mapEnabled = false;
     protected boolean isPaused = false;
 
+    private int LEGSGROUP_INSERT_INDEX;
+
     private QueryJourneyRunnable queryJourneyRunnable;
     private HandlerThread backgroundThread;
     protected Handler backgroundHandler;
     protected final Handler handler = new Handler();
-
-    private static final int LEGSGROUP_INSERT_INDEX = 3;
 
     private static final Logger log = LoggerFactory.getLogger(TripDetailsActivity.class);
 
@@ -451,13 +451,23 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         else
             hideNavigation();
 
-        if (!tripRenderer.isFeasible())
-            findViewById(R.id.directions_trip_details_not_feasible).setVisibility(View.VISIBLE);
+        findViewById(R.id.directions_trip_details_not_feasible).setVisibility(tripRenderer.isFeasible() ? View.GONE : View.VISIBLE);
+
+        final TextView devinfoView = findViewById(R.id.directions_trip_details_devinfo);
+        if (isDeveloperElementsEnabled()) {
+            devinfoView.setVisibility(View.VISIBLE);
+            final long loadedAt = tripRenderer.trip.loadedAt.getTime();
+            devinfoView.setText(String.format("loaded at %s", Formats.formatTime(this, loadedAt)));
+        } else {
+            devinfoView.setVisibility(View.GONE);
+        }
 
         legsGroup = findViewById(R.id.directions_trip_details_legs_group);
 
         updateLocations();
         updateFares(tripRenderer.trip.fares);
+
+        LEGSGROUP_INSERT_INDEX = legsGroup.indexOfChild(findViewById(R.id.directions_trip_details_legs_start_here)) + 1;
         int i = LEGSGROUP_INSERT_INDEX;
         for (final TripRenderer.LegContainer legC : tripRenderer.legs) {
             final View row;
@@ -1019,6 +1029,15 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             messageView.setVisibility(View.GONE);
         }
 
+        final TextView devinfoView = row.findViewById(R.id.directions_trip_details_public_entry_devinfo);
+        if (isDeveloperElementsEnabled()) {
+            devinfoView.setVisibility(View.VISIBLE);
+            final long loadedAt = leg.loadedAt.getTime();
+            devinfoView.setText(String.format("loaded at %s", Formats.formatTime(this, loadedAt)));
+        } else {
+            devinfoView.setVisibility(View.GONE);
+        }
+
         final TextView progress = row.findViewById(R.id.directions_trip_details_public_entry_progress);
         progress.setVisibility(View.GONE);
         Date beginTime = departureStop.getDepartureTime();
@@ -1151,7 +1170,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             textView.setVisibility(View.GONE);
         } else {
             textView.setVisibility(View.VISIBLE);
-            textView.setText(Html.fromHtml(text != null ? text : ""));
+            textView.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_COMPACT));
         }
 
         final ImageView iconView = row.findViewById(R.id.directions_trip_details_individual_entry_icon);

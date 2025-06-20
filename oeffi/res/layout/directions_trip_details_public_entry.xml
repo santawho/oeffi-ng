@@ -90,8 +90,8 @@
         android:id="@+id/directions_trip_details_public_entry_progress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/text_padding_horizontal_lax"
-        android:layout_marginRight="@dimen/text_padding_horizontal_lax"
+        android:layout_marginLeft="@dimen/text_padding_horizontal_verylax"
+        android:layout_marginRight="@dimen/text_padding_horizontal_verylax"
         android:layout_marginTop="@dimen/text_padding_vertical_lax"
         android:paddingTop="@dimen/text_padding_vertical"
         android:paddingBottom="@dimen/text_padding_vertical"
@@ -107,6 +107,17 @@
         android:layout_marginLeft="@dimen/text_padding_horizontal_lax"
         android:layout_marginRight="@dimen/text_padding_horizontal_lax"
         android:layout_marginTop="@dimen/text_padding_vertical_lax"
+        android:textSize="@dimen/font_size_tiny"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/directions_trip_details_public_entry_devinfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/text_padding_horizontal_lax"
+        android:layout_marginRight="@dimen/text_padding_horizontal_lax"
+        android:layout_marginTop="@dimen/text_padding_vertical_lax"
+        android:gravity="end"
         android:textSize="@dimen/font_size_tiny"
         android:visibility="gone" />
 

@@ -638,4 +638,8 @@ public abstract class OeffiActivity extends ComponentActivity {
         dialog.setContentView(imageView);
         dialog.show();
     }
+
+    protected boolean isDeveloperElementsEnabled() {
+        return application.isDeveloperElementsEnabled();
+    }
 }

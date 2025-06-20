@@ -2,15 +2,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:paddingBottom="8dp">
+    android:orientation="vertical" >
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingStart="@dimen/text_padding_horizontal_lax">
+        android:orientation="horizontal" >
 
         <LinearLayout
             android:id="@+id/directions_trip_details_individual_entry_time"
@@ -19,6 +17,7 @@
             android:layout_gravity="center_vertical"
             android:layout_marginTop="@dimen/text_padding_vertical_lax"
             android:layout_marginBottom="@dimen/text_padding_vertical_lax"
+            android:paddingStart="@dimen/text_padding_horizontal_lax"
             android:paddingEnd="@dimen/text_padding_horizontal_lax"
             android:orientation="vertical">
             <TextView
@@ -68,9 +67,10 @@
         android:id="@+id/directions_trip_details_individual_entry_progress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/text_padding_horizontal_lax"
-        android:layout_marginRight="@dimen/text_padding_horizontal_lax"
-        android:layout_marginTop="@dimen/text_padding_vertical_lax"
+        android:layout_marginLeft="@dimen/text_padding_horizontal_verylax"
+        android:layout_marginRight="@dimen/text_padding_horizontal_verylax"
+        android:layout_marginTop="@dimen/text_padding_vertical_verylax"
+        android:layout_marginBottom="@dimen/text_padding_vertical_verylax"
         android:paddingTop="@dimen/text_padding_vertical"
         android:paddingBottom="@dimen/text_padding_vertical"
         android:gravity="center"
