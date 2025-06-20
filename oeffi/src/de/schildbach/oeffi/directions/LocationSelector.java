@@ -289,7 +289,7 @@ public class LocationSelector extends LinearLayout implements
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(final MotionEvent event) {
-        log.debug(event.toString());
+//        log.debug(event.toString());
         final int action = event.getActionMasked();
         final float touchX = event.getX();
         final float touchY = event.getY();
