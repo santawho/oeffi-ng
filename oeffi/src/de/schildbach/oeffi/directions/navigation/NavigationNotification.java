@@ -554,7 +554,9 @@ public class NavigationNotification {
                 .setSubText(context.getString(R.string.navigation_notification_subtext,
                         trip.getLastPublicLeg().arrivalStop.location.uniqueShortName()))
                 .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
-                .setCustomContentView(notificationLayout)
+                .setCategory(NotificationCompat.CATEGORY_NAVIGATION)
+                .setContent(notificationLayout)
+                // .setCustomContentView(notificationLayout)
                 // .setCustomBigContentView(notificationLayoutExpanded)
                 // .setContentIntent(getPendingActivityIntent(false, true))
                 .setContentIntent(getPendingActionIntent(ACTION_REFRESH, trip))
