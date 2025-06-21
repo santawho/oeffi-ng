@@ -176,7 +176,7 @@ public class LocationSelector extends LinearLayout implements
     public void setNetwork(final NetworkId networkId) {
         if (!isEnabled)
             return;
-        if (networkId.equals(this.networkId))
+        if (networkId != null && networkId.equals(this.networkId))
             return;
 
         this.networkId = networkId;
