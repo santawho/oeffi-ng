@@ -104,7 +104,7 @@ android {
             assets.srcDirs = ['../../oeffi/assets']
         }
         test {
-            java.srcDirs = ['../../oeffi/test']
+            java.srcDirs = ['../../oeffi/test', '../../public-transport-enabler/test']
         }
         ng {
             res.srcDirs = ['./res']
