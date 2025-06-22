@@ -32,6 +32,7 @@ BSVAG|de-DE|Braunschweig;Wolfsburg
 VBN|de-DE|Niedersachsen;Hamburg;Bremen;Bremerhaven;Oldenburg (Oldenburg);Osnabrück;Göttingen;Rostock
 VVO|de-DE|Sachsen;Dresden;Mittelsachsen;Chemnitz
 NASA|de-DE|Sachsen;Leipzig;Sachsen-Anhalt;Magdeburg;Halle
+RMV|de-DE|Rhein-Main;Frankfurt;Wiesbaden;Darmstadt;Fulda
 VMT|de-DE|Thüringen;Mittelthüringen;Erfurt;Jena;Gera;Weimar;Gotha
 VRR|de-DE|Nordrhein-Westfalen;Essen;Dortmund;Düsseldorf;Münster;Paderborn;Höxter;Bielefeld
 VRS|de-DE|Köln;Bonn

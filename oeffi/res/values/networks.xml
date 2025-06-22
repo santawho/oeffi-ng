@@ -58,6 +58,8 @@
     <string name="network_vbn_comment">local and regional</string>
     <string name="network_nasa_label">Leipzig, Halle &amp; Saxony-Anhalt</string>
     <string name="network_nasa_comment">local and regional</string>
+    <string name="network_rmv_label">Rhein-Main (Frankfurt, …)</string>
+    <string name="network_rmv_comment">local and regional</string>
     <string name="network_vmt_label">Erfurt, Jena &amp; Central Thuringia</string>
     <string name="network_vmt_comment">local and regional</string>
     <string name="network_vvo_label">Saxony</string>

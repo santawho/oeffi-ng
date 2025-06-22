@@ -59,6 +59,8 @@
     <string name="network_vbn_comment">Lokal- und Regionalverkehr</string>
     <string name="network_nasa_label">Leipzig, Halle &amp; Sachsen-Anhalt</string>
     <string name="network_nasa_comment">Lokal- und Regionalverkehr</string>
+    <string name="network_rmv_label">Rhein-Main (Frankfurt, …)</string>
+    <string name="network_rmv_comment">Lokal- und Regionalverkehr</string>
     <string name="network_vmt_label">Erfurt, Jena &amp; Mittelthüringen</string>
     <string name="network_vmt_comment">Lokal- und Regionalverkehr</string>
     <string name="network_vvo_label">Sachsen</string>

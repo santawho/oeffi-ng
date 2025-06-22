@@ -48,6 +48,7 @@ import de.schildbach.pte.NsProvider;
 import de.schildbach.pte.NvbwProvider;
 import de.schildbach.pte.NvvProvider;
 import de.schildbach.pte.OebbProvider;
+import de.schildbach.pte.RmvProvider;
 import de.schildbach.pte.RtProvider;
 import de.schildbach.pte.RtaChicagoProvider;
 import de.schildbach.pte.SeProvider;
@@ -156,6 +157,8 @@ public final class NetworkProviderFactory {
                     "SP31mBufSyCLmNxp".getBytes(Charsets.UTF_8));
         else if (networkId.equals(NetworkId.NASA))
             return new NasaProvider("{\"type\":\"AID\",\"aid\":\"nasa-apps\"}");
+        else if (networkId.equals(NetworkId.RMV))
+            return new RmvProvider("{\"type\":\"AID\",\"aid\":\"ikfr894fkfddXxA0U\"}");
         else if (networkId.equals(NetworkId.VMT))
             return new VmtProvider("{\"aid\":\"vj5d7i3g9m5d7e3\",\"type\":\"AID\"}");
         else if (networkId.equals(NetworkId.VVO))
