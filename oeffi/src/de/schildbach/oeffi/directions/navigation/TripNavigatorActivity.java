@@ -108,6 +108,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     private BroadcastReceiver updateTriggerReceiver;
     private boolean permissionRequestRunning;
     private boolean soundEnabled = true;
+    private boolean isStartupComplete = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -197,7 +198,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         if (!navigationNotificationBeingDeleted) {
             if (!permissionRequestRunning) {
                 if (NavigationNotification.requestPermissions(this, 1)) {
-                    updateNotification(null);
+                    refreshNavigation(true, false);
                 } else {
                     permissionRequestRunning = true;
                 }
@@ -264,6 +265,8 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
     @Override
     protected boolean checkAutoRefresh() {
+        if (!isStartupComplete)
+            return false;
         return doCheckAutoRefresh(true);
     }
 
@@ -289,8 +292,10 @@ public class TripNavigatorActivity extends TripDetailsActivity {
                 if (updatedTrip == null) {
                     handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));
                 } else {
-                    if (doNotificationUpdate)
+                    if (doNotificationUpdate) {
+                        isStartupComplete = true;
                         updateNotification(updatedTrip);
+                    }
                     runOnUiThread(() -> onTripUpdated(updatedTrip));
                 }
             } catch (IOException e) {
@@ -402,6 +407,9 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     }
 
     private void updateNotification(final Trip aTrip) {
+        if (!isStartupComplete)
+            return;
+
         final Trip trip = aTrip != null ? aTrip : tripRenderer.trip;
         NavigationNotification.Configuration configuration = new NavigationNotification.Configuration();
         configuration.soundEnabled = soundEnabled;
