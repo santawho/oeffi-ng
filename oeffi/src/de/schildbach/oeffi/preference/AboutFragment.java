@@ -71,7 +71,7 @@ public class AboutFragment extends PreferenceFragment {
         }
 
         String updateUrl = activity.getString(R.string.about_update_apk_url);
-        if (updateUrl.isEmpty())
+        if (updateUrl == null || updateUrl.isEmpty())
             removeOrDisablePreference(findPreference(KEY_ABOUT_UPDATE));
     }
 

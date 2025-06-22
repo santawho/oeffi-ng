@@ -119,8 +119,10 @@ public abstract class OeffiMainActivity extends OeffiActivity {
     }
 
     private void checkForUpdate() {
-        final String manifestUrl = getString(R.string.about_update_manifest_url);
         final String updateUrl = getString(R.string.about_update_apk_url);
+        if (updateUrl == null || updateUrl.isEmpty())
+            return;
+        final String manifestUrl = getString(R.string.about_update_manifest_url);
         final String modifiedStr = getString(R.string.about_update_modified);
         new Thread(() -> {
             try (Response response = new OkHttpClient().newCall(

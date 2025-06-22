@@ -617,6 +617,8 @@ public abstract class OeffiActivity extends ComponentActivity {
 
     protected void shareApp() {
         final String updateUrl = getString(R.string.about_update_apk_url);
+        if (updateUrl == null || updateUrl.isEmpty())
+            return;
         final String shareTitle = getString(R.string.global_options_share_app_title);
         final String shareText = getString(R.string.global_options_share_app_text, updateUrl);
         final Intent intent = new Intent(Intent.ACTION_SEND);
