@@ -1034,30 +1034,38 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
     @Override
     public void onLocationSequenceSelected(final List<Location> locations, final boolean longHold, View lastView) {
-        boolean doGo = !longHold;
+        final boolean doGo;
         final int numLocations = locations.size();
         if (numLocations == 0) {
-            locationSelector.clearSelection();
             doGo = false;
-        }
-        if (numLocations == 1) {
+        } else if (numLocations == 1) {
             // single location clicked
+            final Location location = locations.get(0);
             if (viewFromLocation.getLocation() == null) {
-                viewFromLocation.setLocation(locations.get(0));
-                locationSelector.clearSelection();
+                viewFromLocation.setLocation(location);
+                doGo = false;
+            } else if (viewViaLocation.getLocation() == null && viewViaLocation.getVisibility() == View.VISIBLE) {
+                viewViaLocation.setLocation(location);
+                viewViaLocation.setVisibility(View.VISIBLE);
                 doGo = false;
             } else {
-                viewToLocation.setLocation(locations.get(0));
+                viewToLocation.setLocation(location);
+                doGo = true;
             }
         } else if (numLocations == 2) {
             // 2 locations, from-to
             viewFromLocation.setLocation(locations.get(0));
+            viewViaLocation.setLocation(null);
+            viewViaLocation.setVisibility(View.GONE);
             viewToLocation.setLocation(locations.get(1));
+            doGo = !longHold;
         } else {
             // >= 3, from-via-to
             viewFromLocation.setLocation(locations.get(0));
             viewViaLocation.setLocation(locations.get(1));
+            viewViaLocation.setVisibility(View.VISIBLE);
             viewToLocation.setLocation(locations.get(numLocations - 1));
+            doGo = !longHold;
         }
 
         if (doGo)
@@ -1314,12 +1322,9 @@ public class DirectionsActivity extends OeffiMainActivity implements
             return;
         }
 
-        Location via = null;
-        if (viewViaLocation.getVisibility() == View.VISIBLE) {
-            via = viewViaLocation.getLocation();
-            if (!saneLocation(via, false))
-                via = null;
-        }
+        Location via = viewViaLocation.getLocation();
+        if (!saneLocation(via, false))
+            via = null;
 
         final Location to = viewToLocation.getLocation();
         if (!saneLocation(to, false)) {
