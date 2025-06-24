@@ -57,112 +57,120 @@ public class Navigator {
     }
 
     public Trip refresh(final boolean forceRefreshAll, final Date now) throws IOException {
-        NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
         final List<Trip.Leg> newLegs = new ArrayList<>();
-        for (Trip.Leg leg : baseTrip.legs) {
+        final Trip latestTrip = getCurrentTrip();
+        for (Trip.Leg leg : latestTrip.legs) {
             Trip.Leg newLeg = leg;
             if (leg instanceof Trip.Public) {
-                Trip.Public publicLeg = (Trip.Public) leg;
-                JourneyRef journeyRef = publicLeg.journeyRef;
-                if (journeyRef != null) {
-                    final long nowTime = now.getTime();
-                    final long legLoadedAt = publicLeg.loadedAt.getTime();
-                    final long legBeginMinTime = publicLeg.departureStop.getDepartureTime(true).getTime();
-                    final long legBeginMaxTime = publicLeg.departureStop.getDepartureTime(false).getTime();
-                    final long legEndMinTime = publicLeg.arrivalStop.getArrivalTime(true).getTime();
-                    final long legEndMaxTime = publicLeg.arrivalStop.getArrivalTime(false).getTime();
-
-                    boolean doRefresh = forceRefreshAll;
-                    if (!doRefresh) {
-                        final long nextEventTime;
-                        long nextRefreshTimeA = Long.MAX_VALUE;
-                        if (nowTime < legBeginMinTime) {
-                            // leg yet to begin
-                            nextEventTime = legBeginMinTime;
-                        } else if (nowTime < legEndMaxTime) {
-                            // leg active
-                            if (nowTime < legBeginMaxTime + 300000) {
-                                // still within 5 minutes after begin
-                                nextRefreshTimeA = legLoadedAt + 60000;
-                            }
-                            nextEventTime = legEndMinTime;
-                        } else {
-                            // leg over
-                            if (nowTime < legEndMaxTime + 300000) {
-                                // still within 5 minutes after end
-                                nextRefreshTimeA = legLoadedAt + 60000;
-                            }
-                            nextEventTime = 0;
-                        }
-
-                        long nextRefreshTime = Long.MAX_VALUE;
-                        if (nextEventTime > 0) {
-                            final long timeLeft = nextEventTime - nowTime;
-                            if (timeLeft < 240000) {
-                                // last 4 minutes and after, 30 secs refresh interval
-                                nextRefreshTime = legLoadedAt + 30000;
-                            } else if (timeLeft < 600000) {
-                                // last 10 minutes and after, 60 secs refresh interval
-                                nextRefreshTime = legLoadedAt + 60000;
-                            } else {
-                                // approaching, refresh after 25% of the remaining time
-                                nextRefreshTime = nowTime + timeLeft / 4;
-                            }
-                        }
-                        if (nextRefreshTimeA < nextRefreshTime)
-                            nextRefreshTime = nextRefreshTimeA;
-
-                        if (nextRefreshTime <= nowTime)
-                            doRefresh = true;
-
-                        if (doRefresh) {
-                            log.info("updating leg loaded {} secs ago, required since {} secs ago, begin at {}/{}, end at {}/{}",
-                                    (nowTime - legLoadedAt) / 1000, (nowTime - nextRefreshTime) / 1000,
-                                    LOG_TIME_FORMAT.format(new Date(legBeginMinTime)), LOG_TIME_FORMAT.format(new Date(legBeginMaxTime)),
-                                    LOG_TIME_FORMAT.format(new Date(legEndMinTime)), LOG_TIME_FORMAT.format(new Date(legEndMaxTime)));
-                        } else {
-                            log.info("not updating leg loaded {} secs ago, required in {} secs, begin at {}/{}, end at {}/{}",
-                                    (nowTime - legLoadedAt) / 1000, (nextRefreshTime - nowTime) / 1000,
-                                    LOG_TIME_FORMAT.format(new Date(legBeginMinTime)), LOG_TIME_FORMAT.format(new Date(legBeginMaxTime)),
-                                    LOG_TIME_FORMAT.format(new Date(legEndMinTime)), LOG_TIME_FORMAT.format(new Date(legEndMaxTime)));
-                        }
-                    } else {
-                        log.info("force updating leg, begin at {}/{}, end at {}/{}",
-                                LOG_TIME_FORMAT.format(new Date(legBeginMinTime)), LOG_TIME_FORMAT.format(new Date(legBeginMaxTime)),
-                                LOG_TIME_FORMAT.format(new Date(legEndMinTime)), LOG_TIME_FORMAT.format(new Date(legEndMaxTime)));
-                    }
-                    if (doRefresh) {
-                        final QueryJourneyResult result = networkProvider.queryJourney(journeyRef);
-                        if (result != null) {
-                            switch (result.status) {
-                                case OK:
-                                    if (result.journeyLeg != null)
-                                        newLeg = buildUpdatedLeg(publicLeg, result.journeyLeg, now);
-                                    break;
-                                case NO_JOURNEY:
-                                    break;
-                                case SERVICE_DOWN:
-                                    return null;
-                            }
-                        }
-                    }
-                }
+                newLeg = updatePublicLeg((Trip.Public) leg, forceRefreshAll, now);
             }
             newLegs.add(newLeg);
         }
 
         currentTrip = new Trip(
-                new Date(),
-                baseTrip.getUniqueId(),
-                baseTrip.tripRef,
-                baseTrip.from,
-                baseTrip.to,
+                latestTrip.loadedAt,
+                latestTrip.getUniqueId(),
+                latestTrip.tripRef,
+                latestTrip.from,
+                latestTrip.to,
                 newLegs,
-                baseTrip.fares,
-                baseTrip.capacity,
-                baseTrip.numChanges);
+                latestTrip.fares,
+                latestTrip.capacity,
+                latestTrip.numChanges);
+        currentTrip.updatedAt = now;
 
         return currentTrip;
+    }
+
+    private Trip.Public updatePublicLeg(final Trip.Public oldLeg, final boolean forceRefresh, final Date now) throws IOException {
+        final NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
+        Trip.Public newLeg = oldLeg;
+        final JourneyRef journeyRef = oldLeg.journeyRef;
+        if (journeyRef != null) {
+            final long nowTime = now.getTime();
+            final long legLoadedAt = oldLeg.loadedAt.getTime();
+            final long legBeginMinTime = oldLeg.departureStop.getDepartureTime(true).getTime();
+            final long legBeginMaxTime = oldLeg.departureStop.getDepartureTime(false).getTime();
+            final long legEndMinTime = oldLeg.arrivalStop.getArrivalTime(true).getTime();
+            final long legEndMaxTime = oldLeg.arrivalStop.getArrivalTime(false).getTime();
+
+            boolean doRefresh = forceRefresh;
+            if (!doRefresh) {
+                final long nextEventTime;
+                long nextRefreshTimeA = Long.MAX_VALUE;
+                if (nowTime < legBeginMinTime) {
+                    // leg yet to begin
+                    nextEventTime = legBeginMinTime;
+                } else if (nowTime < legEndMaxTime) {
+                    // leg active
+                    if (nowTime < legBeginMaxTime + 300000) {
+                        // still within 5 minutes after begin
+                        nextRefreshTimeA = legLoadedAt + 60000;
+                    }
+                    nextEventTime = legEndMinTime;
+                } else {
+                    // leg over
+                    if (nowTime < legEndMaxTime + 300000) {
+                        // still within 5 minutes after end
+                        nextRefreshTimeA = legLoadedAt + 60000;
+                    }
+                    nextEventTime = 0;
+                }
+
+                long nextRefreshTime = Long.MAX_VALUE;
+                if (nextEventTime > 0) {
+                    final long timeLeft = nextEventTime - nowTime;
+                    if (timeLeft < 240000) {
+                        // last 4 minutes and after, 30 secs refresh interval
+                        nextRefreshTime = legLoadedAt + 30000;
+                    } else if (timeLeft < 600000) {
+                        // last 10 minutes and after, 60 secs refresh interval
+                        nextRefreshTime = legLoadedAt + 60000;
+                    } else {
+                        // approaching, refresh after 25% of the remaining time
+                        nextRefreshTime = nowTime + timeLeft / 4;
+                    }
+                }
+                if (nextRefreshTimeA < nextRefreshTime)
+                    nextRefreshTime = nextRefreshTimeA;
+
+                if (nextRefreshTime <= nowTime)
+                    doRefresh = true;
+
+                if (doRefresh) {
+                    log.info("updating leg loaded {} secs ago, required since {} secs ago, begin at {}/{}, end at {}/{}",
+                            (nowTime - legLoadedAt) / 1000, (nowTime - nextRefreshTime) / 1000,
+                            LOG_TIME_FORMAT.format(new Date(legBeginMinTime)), LOG_TIME_FORMAT.format(new Date(legBeginMaxTime)),
+                            LOG_TIME_FORMAT.format(new Date(legEndMinTime)), LOG_TIME_FORMAT.format(new Date(legEndMaxTime)));
+                } else {
+                    oldLeg.updateDelayedUntil = new Date(nextRefreshTime);
+                    log.info("not updating leg loaded {} secs ago, required in {} secs, begin at {}/{}, end at {}/{}",
+                            (nowTime - legLoadedAt) / 1000, (nextRefreshTime - nowTime) / 1000,
+                            LOG_TIME_FORMAT.format(new Date(legBeginMinTime)), LOG_TIME_FORMAT.format(new Date(legBeginMaxTime)),
+                            LOG_TIME_FORMAT.format(new Date(legEndMinTime)), LOG_TIME_FORMAT.format(new Date(legEndMaxTime)));
+                }
+            } else {
+                log.info("force updating leg, begin at {}/{}, end at {}/{}",
+                        LOG_TIME_FORMAT.format(new Date(legBeginMinTime)), LOG_TIME_FORMAT.format(new Date(legBeginMaxTime)),
+                        LOG_TIME_FORMAT.format(new Date(legEndMinTime)), LOG_TIME_FORMAT.format(new Date(legEndMaxTime)));
+            }
+            if (doRefresh) {
+                final QueryJourneyResult result = networkProvider.queryJourney(journeyRef);
+                if (result != null) {
+                    switch (result.status) {
+                        case OK:
+                            if (result.journeyLeg != null)
+                                newLeg = buildUpdatedLeg(oldLeg, result.journeyLeg, now);
+                            break;
+                        case NO_JOURNEY:
+                            break;
+                        case SERVICE_DOWN:
+                            return null;
+                    }
+                }
+            }
+        }
+        return newLeg;
     }
 
     public static Trip.Public buildUpdatedLeg(Trip.Public initialLeg, Trip.Public journeyLeg, final Date loadedAt) {

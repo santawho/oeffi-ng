@@ -61,6 +61,7 @@ import de.schildbach.oeffi.util.ClockUtils;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.ResourceUri;
 import de.schildbach.pte.DbWebProvider;
+import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Trip;
 
@@ -262,21 +263,28 @@ public class NavigationNotification {
         for (Trip.Leg leg : trip.legs) {
             if (leg instanceof Trip.Public) {
                 final Trip.Public publeg = (Trip.Public) leg;
-                final DbWebProvider.DbWebJourneyRef journeyRef = (DbWebProvider.DbWebJourneyRef) publeg.journeyRef;
-                b.append(",j=");
-                b.append(journeyRef.journeyId);
-                final Line line = journeyRef.line;
-                b.append(",n=");
-                b.append(line.network);
-                b.append(",p=");
-                b.append(line.product);
-                b.append(",l=");
-                b.append(line.label);
-                b.append(",d=");
-                b.append(publeg.departureStop.location.id);
+                final JourneyRef journeyRef = publeg.journeyRef;
+                if (journeyRef == null) {
+                    b.append("null");
+                } else if (journeyRef instanceof DbWebProvider.DbWebJourneyRef) {
+                    final DbWebProvider.DbWebJourneyRef dbWebJourneyRef = (DbWebProvider.DbWebJourneyRef) journeyRef;
+                    b.append(",j=");
+                    b.append(dbWebJourneyRef.journeyId);
+                    final Line line = dbWebJourneyRef.line;
+                    b.append(",n=");
+                    b.append(line.network);
+                    b.append(",p=");
+                    b.append(line.product);
+                    b.append(",l=");
+                    b.append(line.label);
+                    b.append(",d=");
+                    b.append(publeg.departureStop.location.id);
+                } else {
+                    b.append(journeyRef);
+                }
             }
         }
-        log.info("NOTIFICATION for TRIP: {}", b.toString());
+        log.info("NOTIFICATION for TRIP: {}", b);
         notificationTag = TAG_PREFIX + uniqueId;
         final Bundle extras = getActiveNotificationExtras();
         if (extras == null) {
@@ -668,16 +676,17 @@ public class NavigationNotification {
 
     private long refresh() {
         log.info("refreshing notification");
-        final long now = new Date().getTime();
+        final Date now = new Date();
+        final long nowTime = now.getTime();
         final long refreshRequiredAt = lastNotified.refreshNotificationRequiredAt;
-        if (now < refreshRequiredAt)
+        if (nowTime < refreshRequiredAt)
             return refreshRequiredAt; // ignore multiple alarms in short time
         Trip newTrip = null;
-        if (lastNotified.refreshTripRequiredAt > 0 && now >= lastNotified.refreshTripRequiredAt) {
+        if (lastNotified.refreshTripRequiredAt > 0 && nowTime >= lastNotified.refreshTripRequiredAt) {
             try {
                 log.info("refreshing trip");
                 final Navigator navigator = new Navigator(intentData.network, intentData.trip);
-                newTrip = navigator.refresh(false, new Date(now));
+                newTrip = navigator.refresh(false, now);
             } catch (IOException e) {
                 log.error("error while refreshing trip", e);
             }

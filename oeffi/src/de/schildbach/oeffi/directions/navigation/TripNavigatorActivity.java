@@ -111,7 +111,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     private boolean isStartupComplete = false;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         final Intent intent = getIntent();
         handleDeleteNotification(intent);
@@ -198,7 +198,9 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         if (!navigationNotificationBeingDeleted) {
             if (!permissionRequestRunning) {
                 if (NavigationNotification.requestPermissions(this, 1)) {
-                    refreshNavigation(true, false);
+                    final boolean doNotificationUpdate = !isStartupComplete;
+                    final boolean forceRefreshAll = !isStartupComplete;
+                    refreshNavigation(doNotificationUpdate, forceRefreshAll);
                 } else {
                     permissionRequestRunning = true;
                 }

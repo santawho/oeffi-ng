@@ -453,17 +453,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         findViewById(R.id.directions_trip_details_not_feasible).setVisibility(tripRenderer.isFeasible() ? View.GONE : View.VISIBLE);
 
-        final TextView devinfoView = findViewById(R.id.directions_trip_details_devinfo);
-        if (isDeveloperElementsEnabled()) {
-            devinfoView.setVisibility(View.VISIBLE);
-            final long loadedAt = tripRenderer.trip.loadedAt.getTime();
-            devinfoView.setText(String.format("loaded at %s", Formats.formatTime(this, loadedAt)));
-        } else {
-            devinfoView.setVisibility(View.GONE);
-        }
-
         legsGroup = findViewById(R.id.directions_trip_details_legs_group);
 
+        updateDevInfo();
         updateLocations();
         updateFares(tripRenderer.trip.fares);
 
@@ -521,6 +513,20 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         View nextEvent = findViewById(R.id.directions_trip_details_next_event_container);
         nextEvent.setOnClickListener(view -> setShowNextEvent(false));
+    }
+
+    private void updateDevInfo() {
+        final TextView devinfoView = findViewById(R.id.directions_trip_details_devinfo);
+        if (isDeveloperElementsEnabled()) {
+            devinfoView.setVisibility(View.VISIBLE);
+            final long loadedAt = tripRenderer.trip.loadedAt.getTime();
+            final long updatedAt = tripRenderer.trip.updatedAt.getTime();
+            devinfoView.setText(String.format("loaded at %s, updated at %s",
+                    Formats.formatTime(this, loadedAt),
+                    Formats.formatTime(this, updatedAt)));
+        } else {
+            devinfoView.setVisibility(View.GONE);
+        }
     }
 
     protected void setupActionBar() {
@@ -702,6 +708,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final Date now = new Date();
         updateHighlightedTime(now);
         updateHighlightedLocation();
+        updateDevInfo();
 
         TripRenderer.LegContainer currentLeg = null;
         int i = LEGSGROUP_INSERT_INDEX;
@@ -1045,8 +1052,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final TextView devinfoView = row.findViewById(R.id.directions_trip_details_public_entry_devinfo);
         if (isDeveloperElementsEnabled()) {
             devinfoView.setVisibility(View.VISIBLE);
-            final long loadedAt = leg.loadedAt.getTime();
-            devinfoView.setText(String.format("loaded at %s", Formats.formatTime(this, loadedAt)));
+            final Date updateDelayedUntil = leg.updateDelayedUntil;
+            devinfoView.setText(String.format("loaded at %s, %s",
+                    Formats.formatTime(this, leg.loadedAt.getTime()),
+                    updateDelayedUntil == null ? "is fresh"
+                            : String.format("next update at %s", Formats.formatTime(this, updateDelayedUntil.getTime()))));
         } else {
             devinfoView.setVisibility(View.GONE);
         }
