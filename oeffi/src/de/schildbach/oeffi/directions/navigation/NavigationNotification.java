@@ -166,7 +166,7 @@ public class NavigationNotification {
         return usage;
     }
 
-    private static final String[] REQUIRED_PERMISSION = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU ? new String[] {
+    private static final String[] REQUIRED_PERMISSIONS = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU ? new String[] {
             Manifest.permission.POST_NOTIFICATIONS,
 //            Manifest.permission.SCHEDULE_EXACT_ALARM,
 //            Manifest.permission.USE_EXACT_ALARM,
@@ -174,13 +174,13 @@ public class NavigationNotification {
 
     public static boolean requestPermissions(final Activity activity, final int requestCode) {
         boolean all = true;
-        for (String permission : REQUIRED_PERMISSION) {
+        for (String permission : REQUIRED_PERMISSIONS) {
             if (ContextCompat.checkSelfPermission(activity, permission) != PackageManager.PERMISSION_GRANTED)
                 all = false;
         }
         if (all)
             return true;
-        ActivityCompat.requestPermissions(activity, REQUIRED_PERMISSION, requestCode);
+        ActivityCompat.requestPermissions(activity, REQUIRED_PERMISSIONS, requestCode);
         return false;
     }
 
