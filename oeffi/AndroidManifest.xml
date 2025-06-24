@@ -205,7 +205,7 @@
             android:configChanges="keyboard|keyboardHidden"
             android:icon="@mipmap/ic_oeffi_ng_directions_color_48dp"
             android:label="@string/app_name"
-            android:launchMode="singleInstancePerTask"
+            android:launchMode="singleInstance"
             android:taskAffinity="${applicationId}.directions"
             android:windowSoftInputMode="stateHidden"
             android:theme="@style/My.Theme.Splash">
