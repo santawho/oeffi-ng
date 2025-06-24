@@ -137,33 +137,39 @@ public class MyActionBar extends LinearLayout {
         titlesGroup.addView(view, 0);
     }
 
-    public ImageButton addButton(final int drawableRes, final int descriptionRes) {
-        final LinearLayout.LayoutParams buttonParams = new LinearLayout.LayoutParams(
-                res.getDimensionPixelSize(R.dimen.action_bar_button_width), LayoutParams.MATCH_PARENT, 0f);
-        buttonParams.gravity = Gravity.CENTER_VERTICAL;
+    private LinearLayout.LayoutParams getButtonLayoutParams() {
+        final LayoutParams layoutParams = new LayoutParams(
+                LayoutParams.WRAP_CONTENT, // res.getDimensionPixelSize(R.dimen.action_bar_button_width),
+                LayoutParams.MATCH_PARENT,
+                0f);
+        layoutParams.gravity = Gravity.CENTER_VERTICAL;
+        final int paddingHorizontal = res.getDimensionPixelSize(R.dimen.action_bar_padding_horizontal);
+        final int paddingVertical = res.getDimensionPixelSize(R.dimen.action_bar_padding_vertical);
+        layoutParams.setMargins(paddingHorizontal, paddingVertical, paddingHorizontal, paddingVertical);
+        return layoutParams;
+    }
 
+    private void addButton(final View button) {
+        addView(button, BUTTON_INSERT_INDEX, getButtonLayoutParams());
+    }
+
+    public ImageButton addButton(final int drawableRes, final int descriptionRes) {
         final ImageButton button = new ImageButton(context);
         button.setImageResource(drawableRes);
         button.setScaleType(ScaleType.CENTER);
         button.setMinimumHeight(res.getDimensionPixelSize(R.dimen.action_bar_height));
-        final int padding = res.getDimensionPixelSize(R.dimen.action_bar_padding);
-        button.setPadding(padding, padding, padding, padding);
         if (descriptionRes != 0) {
             final String description = context.getString(descriptionRes);
             button.setContentDescription(description);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                 button.setTooltipText(description);
         }
-        addView(button, BUTTON_INSERT_INDEX, buttonParams);
+        addButton(button);
 
         return button;
     }
 
     public ToggleImageButton addToggleButton(final int drawableRes, final int descriptionRes) {
-        final LinearLayout.LayoutParams buttonParams = new LinearLayout.LayoutParams(
-                res.getDimensionPixelSize(R.dimen.action_bar_button_width), LayoutParams.MATCH_PARENT, 0f);
-        buttonParams.gravity = Gravity.CENTER_VERTICAL;
-
         final ToggleImageButton button = new ToggleImageButton(context);
         button.setImageResource(drawableRes);
         button.setScaleType(ScaleType.CENTER);
@@ -174,7 +180,7 @@ public class MyActionBar extends LinearLayout {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                 button.setTooltipText(description);
         }
-        addView(button, BUTTON_INSERT_INDEX, buttonParams);
+        addButton(button);
 
         return button;
     }

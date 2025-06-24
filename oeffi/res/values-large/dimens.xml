@@ -9,7 +9,8 @@
     <dimen name="font_size_action_bar">15dp</dimen>
     <dimen name="action_bar_height">55dp</dimen>
     <dimen name="action_bar_button_width">55dp</dimen>
-    <dimen name="action_bar_padding">6dp</dimen>
+    <dimen name="action_bar_padding_vertical">6dp</dimen>
+    <dimen name="action_bar_padding_horizontal">12dp</dimen>
     <dimen name="text_padding_vertical_cram">2dp</dimen>
     <dimen name="text_padding_vertical">5dp</dimen>
     <dimen name="text_padding_vertical_lax">6dp</dimen>

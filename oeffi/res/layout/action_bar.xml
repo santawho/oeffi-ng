@@ -69,22 +69,26 @@
             android:visibility="gone" />
     </LinearLayout>
 
+<!--    android:layout_width="@dimen/action_bar_button_width"-->
     <FrameLayout
         android:id="@+id/action_bar_progress"
-        android:layout_width="@dimen/action_bar_button_width"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:minHeight="@dimen/action_bar_height"
+        android:layout_marginVertical="@dimen/action_bar_padding_vertical"
+        android:layout_marginEnd="@dimen/action_bar_padding_horizontal"
+        android:layout_marginStart="@dimen/action_bar_padding_horizontal"
         android:visibility="gone">
 
         <ImageButton
             android:id="@+id/action_bar_progress_button"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:contentDescription="@string/action_bar_progress_description" />
 
         <ImageButton
             android:id="@+id/action_bar_progress_image"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:background="@null"
             android:clickable="false"
@@ -92,10 +96,15 @@
             android:src="@drawable/ic_refresh_white_24dp" />
     </FrameLayout>
 
+<!--    android:layout_width="@dimen/action_bar_button_width"-->
     <ImageButton
         android:id="@+id/action_bar_overflow_button"
-        android:layout_width="@dimen/action_bar_button_width"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:layout_marginVertical="@dimen/action_bar_padding_vertical"
+        android:layout_marginEnd="@dimen/action_bar_padding_horizontal"
+        android:layout_marginStart="@dimen/action_bar_padding_horizontal"
+        android:minHeight="@dimen/action_bar_height"
         android:contentDescription="@string/action_bar_overflow_description"
         android:src="@drawable/ic_more_vert_white_24dp"
         android:visibility="gone" />
