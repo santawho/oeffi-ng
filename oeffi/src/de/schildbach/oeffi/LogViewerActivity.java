@@ -20,6 +20,7 @@ package de.schildbach.oeffi;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Html;
 import android.view.View;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -35,9 +36,19 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
+
+import de.schildbach.oeffi.util.ColorHash;
 
 public class LogViewerActivity extends OeffiActivity {
     private static final Logger log = LoggerFactory.getLogger(LogViewerActivity.class);
+
+    private static final ColorHash colorHash = new ColorHash(
+            Arrays.asList(0.20, 0.30, 0.40), // available lightness values
+            Arrays.asList(0.50, 0.70, 0.90), // available saturation values
+            0, 360,                  // hue range
+            ColorHash::javaHash              // try ColorHash::javaHash  or  ColorHash::bkdrHash
+    );
 
     public static void start(final Context context) {
         final Intent intent = new Intent(context, LogViewerActivity.class);
@@ -81,9 +92,12 @@ public class LogViewerActivity extends OeffiActivity {
         try (BufferedReader reader = new BufferedReader(new FileReader(logFile))) {
             actionBar.startProgress();
             String line;
+            boolean first = true;
             while ((line = reader.readLine()) != null) {
-                sb.append(line);
-                sb.append("\n");
+                if (!first) sb.append("<br>");
+                final String htmlLine = makeHtmlLine(line);
+                sb.append(htmlLine);
+                first = false;
             }
         } catch (IOException e) {
             log.error("reading {}", logFile, e);
@@ -92,7 +106,7 @@ public class LogViewerActivity extends OeffiActivity {
             actionBar.stopProgress();
         }
         final TextView textView = findViewById(R.id.logviewer_list);
-        textView.setText(sb.toString());
+        textView.setText(Html.fromHtml(sb.toString(), Html.FROM_HTML_MODE_COMPACT));
         if (scrollToEnd) {
             final ScrollView scrollView = findViewById(R.id.logviewer_scroll);
             scrollView.getChildAt(0).post(() -> {
@@ -100,5 +114,16 @@ public class LogViewerActivity extends OeffiActivity {
                 scrollView.scrollTo(0, height);
             });
         }
+    }
+
+    private String makeHtmlLine(final String line) {
+        final int loggerNameStart = line.indexOf('[');
+        final int loggerNameEnd = line.indexOf(']');
+        if (loggerNameStart >= 0 && loggerNameEnd > loggerNameStart) {
+            final String loggerName = line.substring(loggerNameStart + 1, loggerNameEnd);
+            final String color = colorHash.toHexString(loggerName);
+            return "<font color=\"" + color + "\">" + Html.escapeHtml(line) + "</font>";
+        }
+        return line;
     }
 }
