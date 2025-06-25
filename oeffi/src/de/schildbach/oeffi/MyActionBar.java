@@ -48,7 +48,7 @@ public class MyActionBar extends LinearLayout {
     private TextView secondaryTitleView;
     private View progressView;
     private ImageButton progressButton;
-    private ImageView progressImage;
+//    private ImageView progressImage;
 
     private boolean progressAlwaysVisible = false;
     private int progressCount = 0;
@@ -85,7 +85,7 @@ public class MyActionBar extends LinearLayout {
         secondaryTitleView = findViewById(R.id.action_bar_secondary_title);
         progressView = findViewById(R.id.action_bar_progress);
         progressButton = findViewById(R.id.action_bar_progress_button);
-        progressImage = findViewById(R.id.action_bar_progress_image);
+//        progressImage = findViewById(R.id.action_bar_progress_image);
     }
 
     public void setDrawer(final OnClickListener onClickListener) {
@@ -204,7 +204,8 @@ public class MyActionBar extends LinearLayout {
                 progressView.setVisibility(View.VISIBLE);
                 if (progressAnimation == null) {
                     progressAnimation = AnimationUtils.loadAnimation(context, R.anim.rotate);
-                    progressImage.startAnimation(progressAnimation);
+//                    progressImage.startAnimation(progressAnimation);
+                    progressButton.startAnimation(progressAnimation);
                 }
             });
         }
@@ -214,7 +215,8 @@ public class MyActionBar extends LinearLayout {
         if (--progressCount <= 0) {
             handler.postDelayed(() -> {
                 if (progressAnimation != null) {
-                    progressImage.clearAnimation();
+//                    progressImage.clearAnimation();
+                    progressButton.clearAnimation();
                     progressAnimation = null;
                 }
                 if (!progressAlwaysVisible)
