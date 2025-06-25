@@ -9,6 +9,7 @@
     <string-array name="directions_products">
         <item>nur dieses</item>
         <item>alle bis auf dieses</item>
+        <item>zurücksetzen auf Standardprodukte</item>
         <item>alle Verkehrsmittel</item>
         <item>nur Nahverkehr</item>
     </string-array>

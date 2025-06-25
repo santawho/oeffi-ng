@@ -482,17 +482,19 @@ public abstract class OeffiActivity extends ComponentActivity {
     }
 
     protected Set<Product> loadProductFilter() {
-        Set<Product> networkDefaultProducts = getNetworkDefaultProducts();
-        Set<Product> keepProducts;
-        Set<Product> products = new HashSet<>(Product.values().length);
-        String networkSpecificKey = Constants.PREFS_KEY_PRODUCT_FILTER + "_" + network;
+        final Set<Product> networkDefaultProducts = getNetworkDefaultProducts();
+        final Set<Product> keepProducts;
+        final String networkSpecificKey = Constants.PREFS_KEY_PRODUCT_FILTER + "_" + network;
         String value = prefs.getString(networkSpecificKey, null);
         if (value != null) {
             keepProducts = Product.ALL;
         } else {
-            value = prefs.getString(Constants.PREFS_KEY_PRODUCT_FILTER, null);
+            // do not load the default preference, instead let value be null to take the network defaults
+            // value = prefs.getString(Constants.PREFS_KEY_PRODUCT_FILTER, null);
             keepProducts = networkDefaultProducts;
         }
+
+        Set<Product> products = new HashSet<>(Product.values().length);
         if (value != null) {
             for (final char c : value.toCharArray())
                 products.add(Product.fromCode(c));

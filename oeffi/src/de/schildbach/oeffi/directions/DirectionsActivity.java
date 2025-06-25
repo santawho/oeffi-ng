@@ -140,6 +140,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class DirectionsActivity extends OeffiMainActivity implements
         QueryHistoryClickListener,
@@ -472,19 +473,35 @@ public class DirectionsActivity extends OeffiMainActivity implements
         viewProductToggles.add(findViewById(R.id.directions_products_f));
         viewProductToggles.add(findViewById(R.id.directions_products_c));
 
-        final OnLongClickListener productLongClickListener = v -> {
+        final OnLongClickListener productLongClickListener = clickedView -> {
             final DialogBuilder builder = DialogBuilder.get(DirectionsActivity.this);
             builder.setTitle(R.string.directions_products_prompt);
             builder.setItems(R.array.directions_products, (dialog, which) -> {
+                final Set<Product> networkDefaultProducts = getNetworkDefaultProducts();
+                final Function<View, Boolean> checkedStateFunction;
+                switch (which) {
+                    case 0:
+                        checkedStateFunction = (view) -> view.equals(clickedView); // only this
+                        break;
+                    case 1:
+                        checkedStateFunction = (view) -> !view.equals(clickedView); // all except this
+                        break;
+                    case 2:
+                        checkedStateFunction = (view) -> networkDefaultProducts.contains(
+                                Product.fromCode(((String) view.getTag()).charAt(0))); // network defaults
+                        break;
+                    case 3:
+                        checkedStateFunction = (view) -> true; // all true
+                        break;
+                    case 4:
+                        checkedStateFunction = (view) -> Product.LOCAL_PRODUCTS.contains(
+                                Product.fromCode(((String) view.getTag()).charAt(0))); // only local products
+                        break;
+                    default:
+                        return;
+                }
                 for (final ToggleImageButton view : viewProductToggles) {
-                    if (which == 0)
-                        view.setChecked(view.equals(v));
-                    if (which == 1)
-                        view.setChecked(!view.equals(v));
-                    if (which == 2)
-                        view.setChecked(true);
-                    if (which == 3)
-                        view.setChecked("SUTBP".contains((String) view.getTag()));
+                    view.setChecked(checkedStateFunction.apply(view));
                 }
             });
             builder.show();

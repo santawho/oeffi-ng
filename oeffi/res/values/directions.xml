@@ -10,6 +10,7 @@
     <string-array name="directions_products">
         <item>only this</item>
         <item>all except this</item>
+        <item>reset to network defaults</item>
         <item>all means of transport</item>
         <item>local transport authority only</item>
     </string-array>
