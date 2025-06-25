@@ -314,7 +314,7 @@ public class NavigationNotification {
         });
     }
 
-    public void updateFromForeground(final Trip newTrip, final Configuration configuration) {
+    private void updateFromForeground(final Trip newTrip, final Configuration configuration) {
         if (configuration != null)
             this.configuration = configuration;
         update(newTrip);
@@ -359,8 +359,9 @@ public class NavigationNotification {
     @SuppressLint("ScheduleExactAlarm")
     private boolean update(final Trip aTrip) {
         final Trip trip = aTrip != null ? aTrip : intentData.trip;
-        log.info("updating with {} trip loaded at {}", aTrip != null ? "new" : "old", NavigationAlarmManager.LOG_TIME_FORMAT.format(trip.loadedAt));
-        final long tripLoadedAt = trip.loadedAt.getTime();
+        final Date tripUpdatedAtDate = trip.updatedAt;
+        log.info("updating with {} trip updated at {}", aTrip != null ? "new" : "old", NavigationAlarmManager.LOG_TIME_FORMAT.format(tripUpdatedAtDate));
+        final long tripUpdatedAt = tripUpdatedAtDate.getTime();
         createNotificationChannel(context);
         final Date now = new Date();
         final long nowTime = now.getTime();
@@ -372,11 +373,11 @@ public class NavigationNotification {
             if (timeLeft < 240000) {
                 // last 4 minutes and after, 30 secs refresh interval
                 nextRefreshTimeMs = nowTime + 30000;
-                nextTripReloadTimeMs = tripLoadedAt + 60000;
+                nextTripReloadTimeMs = tripUpdatedAt + 60000;
             } else if (timeLeft < 600000) {
                 // last 10 minutes and after, 60 secs refresh interval
                 nextRefreshTimeMs = nowTime + 60000;
-                nextTripReloadTimeMs = tripLoadedAt + 120000;
+                nextTripReloadTimeMs = tripUpdatedAt + 120000;
             } else {
                 // approaching, refresh after 25% of the remaining time
                 nextRefreshTimeMs = nowTime + timeLeft / 4;
