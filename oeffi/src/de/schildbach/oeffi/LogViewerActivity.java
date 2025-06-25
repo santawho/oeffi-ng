@@ -37,6 +37,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import de.schildbach.oeffi.util.ColorHash;
 
@@ -44,10 +46,10 @@ public class LogViewerActivity extends OeffiActivity {
     private static final Logger log = LoggerFactory.getLogger(LogViewerActivity.class);
 
     private static final ColorHash colorHash = new ColorHash(
-            Arrays.asList(0.20, 0.30, 0.40), // available lightness values
-            Arrays.asList(0.50, 0.70, 0.90), // available saturation values
+            Arrays.asList(0.25, 0.27, 0.35, 0.40, 0.45), // available lightness values
+            Arrays.asList(0.50, 0.60, 0.70, 0.80, 0.90), // available saturation values
             0, 360,                  // hue range
-            ColorHash::javaHash              // try ColorHash::javaHash  or  ColorHash::bkdrHash
+            ColorHash::md5Hash              // try ColorHash::javaHash  or  ColorHash::bkdrHash
     );
 
     public static void start(final Context context) {
@@ -57,6 +59,7 @@ public class LogViewerActivity extends OeffiActivity {
 
     private MyActionBar actionBar;
     private boolean firstLoad;
+    private final Map<String, String> colorMap = new HashMap<>();
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -89,15 +92,24 @@ public class LogViewerActivity extends OeffiActivity {
     private void refresh(final boolean scrollToEnd) {
         final File logFile = Application.getInstance().getLogFile();
         StringBuilder sb = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new FileReader(logFile))) {
+        try (
+                FileReader fileReader = new FileReader(logFile);
+                BufferedReader reader = new BufferedReader(fileReader)
+        ) {
+            final long USE_CHARACTERS_FROM_END = 200000;
+            final long skip = logFile.length() - USE_CHARACTERS_FROM_END;
+            if (skip > 0)
+                reader.skip(skip);
             actionBar.startProgress();
             String line;
-            boolean first = true;
+            int numLines = -1;
             while ((line = reader.readLine()) != null) {
-                if (!first) sb.append("<br>");
-                final String htmlLine = makeHtmlLine(line);
-                sb.append(htmlLine);
-                first = false;
+                if (numLines >= 0) {
+                    if (numLines > 0) sb.append("<br>");
+                    final String htmlLine = makeHtmlLine(line);
+                    sb.append(htmlLine);
+                }
+                numLines += 1;
             }
         } catch (IOException e) {
             log.error("reading {}", logFile, e);
@@ -121,7 +133,11 @@ public class LogViewerActivity extends OeffiActivity {
         final int loggerNameEnd = line.indexOf(']');
         if (loggerNameStart >= 0 && loggerNameEnd > loggerNameStart) {
             final String loggerName = line.substring(loggerNameStart + 1, loggerNameEnd);
-            final String color = colorHash.toHexString(loggerName);
+            String color = colorMap.get(loggerName);
+            if (color == null) {
+                color = colorHash.toHexString(loggerName);
+                colorMap.put(loggerName, color);
+            }
             return "<font color=\"" + color + "\">" + Html.escapeHtml(line) + "</font>";
         }
         return line;

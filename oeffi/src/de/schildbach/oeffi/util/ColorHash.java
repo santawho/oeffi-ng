@@ -19,6 +19,11 @@ package de.schildbach.oeffi.util;
 
 import android.graphics.Color;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,6 +41,8 @@ import java.util.List;
 //   ); // returns Android Color class
 
 public class ColorHash {
+    private static final Logger log = LoggerFactory.getLogger(ColorHash.class);
+
     public interface StringHasher {
         long stringToHash(String string);
     }
@@ -70,7 +77,11 @@ public class ColorHash {
         }
 
         public Color toColor() {
-            return Color.valueOf(red, green, blue);
+            return Color.valueOf(red / 256f, green / 256f, blue / 256f);
+        }
+
+        public int toARGB() {
+            return 0xFF000000 | (red << 16) | (green << 8) | blue;
         }
     }
 
@@ -86,20 +97,20 @@ public class ColorHash {
         }
 
         public RGB toRGB() {
-            double h = hue / 360.0;
+            final double h = hue / 360.0;
 
-            double q;
+            final double q;
             if (lightness < 0.5) {
                 q = lightness * (1.0 + saturation);
             } else {
                 q = lightness + saturation - lightness * saturation;
             }
 
-            double p = 2.0 * lightness - q;
+            final double p = 2.0 * lightness - q;
 
-            List<Double> rgb = new ArrayList<>();
+            final List<Double> rgbs = new ArrayList<>();
             for (double color : new double[]{h + 1.0 / 3.0, h, h - 1.0 / 3.0}) {
-                double co;
+                final double co;
                 if (color < 0) {
                     co = color + 1;
                 } else if (color > 1) {
@@ -108,7 +119,7 @@ public class ColorHash {
                     co = color;
                 }
 
-                double c;
+                final double c;
                 if (co < 1.0 / 6.0) {
                     c = p + (q - p) * 6.0 * co;
                 } else if (co < 0.5) {
@@ -118,10 +129,12 @@ public class ColorHash {
                 } else {
                     c = p;
                 }
-                rgb.add(Math.max(0.0, Math.round(c * 255)));
+                rgbs.add(Math.max(0.0, Math.round(c * 255)));
             }
 
-            return new RGB(rgb.get(0).intValue(), rgb.get(1).intValue(), rgb.get(2).intValue());
+            final RGB rgb = new RGB(rgbs.get(0).intValue(), rgbs.get(1).intValue(), rgbs.get(2).intValue());
+//            log.debug("H={} S={} L={}  -->  R={} G={} B={}", hue, saturation, lightness, rgb.red, rgb.green, rgb.blue);
+            return rgb;
         }
 
         public int toColor() {
@@ -173,15 +186,19 @@ public class ColorHash {
     public HSL toHSL(final String string) {
         long hash = stringHasher.stringToHash(string) & Long.MAX_VALUE;
 
-        double hue = (((hash % 1000) / 1000.0) * (maxHue - minHue) + minHue) % 360.0;
-        hash = hash / 1000;
+        final long hueVal = hash % 997;
+        double hue = (((double) hueVal / 997.0) * (double)(maxHue - minHue) + (double)minHue) % 360.0;
+        hash = hash / 997;
 
         double sat = saturation.get((int) (hash % saturation.size()));
+//        sat = 0.95;
 
         hash = hash / saturation.size();
 
         double light = lightness.get((int) (hash % lightness.size()));
+//        light = 0.9;
 
+//        log.debug("\"{}\": H={} S={} L={}", string, hue, sat, light);
         return new HSL(hue, sat, light);
     }
 
@@ -189,19 +206,26 @@ public class ColorHash {
         return toHSL(string).toRGB();
     }
 
+    public int toARGB(final String string) {
+        return toRGB(string).toARGB();
+//        return toHSL(string).toColor();
+    }
+
     public String toHexString(final String string) {
         return toRGB(string).toHex();
     }
 
     public Color toColor(final String string) {
-        return toRGB(string).toColor();
+        final Color color = toRGB(string).toColor();
+//        log.debug("\"{}\": R={} G={} B={}, A={}", string, color.red(), color.green(), color.blue(), color.alpha());
+        return color;
     }
 
-    public static long javaHash(String string) {
+    public static long javaHash(final String string) {
         return string.hashCode();
     }
 
-    public static long bkdrHash(String string) {
+    public static long bkdrHash(final String string) {
         long acc = 0L;
         for (char value : (string + 'x').toCharArray()) {
             if (acc > MAX_SAFE_LONG) {
@@ -210,6 +234,31 @@ public class ColorHash {
             acc = acc * SEED + (long) value;
         }
         return acc;
+    }
+
+    private static final MessageDigest md5;
+    static {
+        try {
+            md5 = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static long md5Hash(final String string) {
+        md5.reset();
+        md5.update(string.getBytes());
+        final byte[] bytes = md5.digest();
+        long hash =
+                ((bytes[1] & 0xFFL) << 56) |
+                ((bytes[2] & 0xFFL) << 48) |
+                ((bytes[4] & 0xFFL) << 40) |
+                ((bytes[6] & 0xFFL) << 32) |
+                ((bytes[7] & 0xFFL) << 24) |
+                ((bytes[9] & 0xFFL) << 16) |
+                ((bytes[11] & 0xFFL) << 8) |
+                ((bytes[13] & 0xFFL) << 0) ;
+        return hash;
     }
 }
 
