@@ -21,6 +21,11 @@
             android:defaultValue="true"
             android:title="@string/user_interface_location_selector_enabled_title"
             android:summary="@string/user_interface_location_selector_enabled_summary" />
+        <CheckBoxPreference
+            android:key="user_interface_location_selector_colorized"
+            android:defaultValue="true"
+            android:title="@string/user_interface_location_selector_colorized_title"
+            android:summary="@string/user_interface_location_selector_colorized_summary" />
         <ListPreference
             android:key="user_interface_location_selector_numrows"
             android:defaultValue="4"

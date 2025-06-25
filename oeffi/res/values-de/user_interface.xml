@@ -11,6 +11,9 @@
     <string name="user_interface_location_selector_enabled_title">Aktiv</string>
     <string name="user_interface_location_selector_enabled_summary">Nutze schnelle Ortswahl im Verbindungsdialog</string>
 
+    <string name="user_interface_location_selector_colorized_title">Farbig</string>
+    <string name="user_interface_location_selector_colorized_summary">Nutze verschiedene Farben pro Station in der schnellen Ortswahl</string>
+
     <string name="user_interface_location_selector_numrows_title">Anzahl Einträge</string>
     <string name="user_interface_location_selector_numrows_summary">Setze die Anzahl der Button-Zeilen der schnellen Ortswahl</string>
     <string-array name="user_interface_location_selector_numrows_titles">

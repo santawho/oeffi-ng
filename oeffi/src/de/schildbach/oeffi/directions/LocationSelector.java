@@ -37,9 +37,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.util.ColorHash;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
@@ -55,7 +57,16 @@ public class LocationSelector extends LinearLayout implements
 
     private static final Logger log = LoggerFactory.getLogger(LocationSelector.class);
 
+    private static final ColorHash colorHash = new ColorHash(
+            Arrays.asList(0.25, 0.32, 0.39, 0.45, 0.49), // available lightness values
+            Arrays.asList(0.50, 0.60, 0.70, 0.80, 0.90), // available saturation values
+//            Arrays.asList(0.30, 0.45, 0.60, 0.75, 0.90), // available saturation values
+            0, 360,                  // hue range
+            ColorHash::md5Hash              // try ColorHash::javaHash  or  ColorHash::bkdrHash
+    );
+
     private static final String PREFS_ENABLED = "user_interface_location_selector_enabled";
+    private static final String PREFS_COLORIZED = "user_interface_location_selector_colorized";
     private static final String PREFS_NUMROWS = "user_interface_location_selector_numrows";
     private static final String PREFS_LONGHOLDTIME = "user_interface_location_selector_longholdtime";
     private static final String PREFS_LONGHOLDMENU = "user_interface_location_selector_longholdmenu";
@@ -93,6 +104,7 @@ public class LocationSelector extends LinearLayout implements
 
     private SharedPreferences preferences;
     private boolean isEnabled;
+    private boolean isColorized;
     private int numRows, numColumns;
     private long longHoldTime;
     private boolean useLongHoldMenu;
@@ -133,6 +145,7 @@ public class LocationSelector extends LinearLayout implements
             return;
         }
         super.setVisibility(VISIBLE);
+        isColorized = prefs.getBoolean(PREFS_COLORIZED, true);
         numRows = Integer.parseInt(prefs.getString(PREFS_NUMROWS, Integer.toString(DEFAULT_NUM_ROWS)));
         numColumns = DEFAULT_NUM_COLUMNS;
         try {
@@ -172,6 +185,7 @@ public class LocationSelector extends LinearLayout implements
     @Override
     public void onSharedPreferenceChanged(final SharedPreferences sharedPreferences, @Nullable final String key) {
         if (!(PREFS_ENABLED.equals(key)
+                || PREFS_COLORIZED.equals(key)
                 || PREFS_NUMROWS.equals(key)
                 || PREFS_LONGHOLDTIME.equals(key)
                 || PREFS_LONGHOLDMENU.equals(key)
@@ -182,7 +196,6 @@ public class LocationSelector extends LinearLayout implements
         setup(getContext(), sharedPreferences);
         setupContent();
     }
-
 
     private String getPrefsStateKey() {
         if (networkId == null)
@@ -497,9 +510,13 @@ public class LocationSelector extends LinearLayout implements
         final TextView textView = item.textView;
         if (stationName != null) {
             textView.setText(Html.fromHtml(Formats.makeBreakableStationName(stationName), Html.FROM_HTML_MODE_COMPACT));
+            final int color = isColorized ? colorHash.toARGB(stationName) : getResources().getColor(R.color.fg_significant);
+//            log.debug("\"{}\"  -->  #{}", stationName, String.format("%08x", color));
+            textView.setTextColor(color);
             textView.setEnabled(true);
         } else {
             textView.setText("...");
+            textView.setTextColor(getResources().getColor(R.color.fg_insignificant));
             textView.setEnabled(false);
         }
     }
