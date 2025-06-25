@@ -99,6 +99,7 @@ public class NavigationNotification {
     private static final String EXTRA_INTENTDATA = NavigationNotification.class.getName() + ".intentdata";
     private static final String EXTRA_LASTNOTIFIED = NavigationNotification.class.getName() + ".lastnotified";
     private static final String EXTRA_CONFIGURATION = NavigationNotification.class.getName() + ".config";
+    private static final String EXTRA_DATA = NavigationNotification.class.getName() + ".data";
     public static final String ACTION_UPDATE_TRIGGER = NavigationNotification.class.getName() + ".updatetrigger";
     private static final long[] VIBRATION_PATTERN_REMIND = { 0, 1000, 500, 1500 };
     private static final long[] VIBRATION_PATTERN_ALARM = { 0, 1000, 500, 1500, 1000, 1000, 500, 1500 };
@@ -206,9 +207,11 @@ public class NavigationNotification {
                     (TripRenderer.NotificationData) Objects.deserialize(extras.getByteArray(EXTRA_LASTNOTIFIED));
             final Configuration configuration =
                     (Configuration) Objects.deserialize(extras.getByteArray(EXTRA_CONFIGURATION));
+            final ExtraData extraData =
+                    (ExtraData) Objects.deserialize(extras.getByteArray(EXTRA_DATA));
             final NavigationNotification navigationNotification = new NavigationNotification(
                     context, intentData, configuration, notificationData);
-            final long refreshAt = navigationNotification.refresh();
+            final long refreshAt = navigationNotification.refresh(extraData.refreshAllLegs);
             if (refreshAt > 0 && refreshAt < minRefreshAt)
                 minRefreshAt = refreshAt;
         }
@@ -239,11 +242,18 @@ public class NavigationNotification {
         boolean soundEnabled;
     }
 
+    public static final class ExtraData implements Serializable {
+        private static final long serialVersionUID = -2218877489048279370L;
+
+        boolean refreshAllLegs;
+    }
+
     private final Context context;
     private final String notificationTag;
     private final TripDetailsActivity.IntentData intentData;
     private TripRenderer.NotificationData lastNotified;
     private Configuration configuration;
+    private ExtraData extraData;
 
     public NavigationNotification(
             final Context context,
@@ -290,11 +300,13 @@ public class NavigationNotification {
         if (extras == null) {
             this.intentData = aIntentData;
             this.configuration = configuration != null ? configuration : new Configuration();
+            this.extraData = new ExtraData();
             this.lastNotified = lastNotified;
         } else {
             this.intentData = (TripDetailsActivity.IntentData) Objects.deserialize(extras.getByteArray(EXTRA_INTENTDATA));
             this.configuration = configuration != null ? configuration :
                     (Configuration) Objects.deserialize(extras.getByteArray(EXTRA_CONFIGURATION));
+            this.extraData = (ExtraData) Objects.deserialize(extras.getByteArray(EXTRA_DATA));
             this.lastNotified = lastNotified != null ? lastNotified :
                     (TripRenderer.NotificationData) Objects.deserialize(extras.getByteArray(EXTRA_LASTNOTIFIED));
         }
@@ -366,6 +378,7 @@ public class NavigationNotification {
         final Date now = new Date();
         final long nowTime = now.getTime();
         final TripRenderer tripRenderer = new TripRenderer(null, trip, false, now);
+        boolean refreshAllLegs = false;
         long nextRefreshTimeMs;
         long nextTripReloadTimeMs;
         if (tripRenderer.nextEventEarliestTime != null) {
@@ -507,6 +520,9 @@ public class NavigationNotification {
                     log.info("reminding 6 mins = {}", nextReminderTimeMs);
                     reminderSoundId = SOUND_REMIND_NORMAL;
                     newNotified.leftTimeReminded = REMINDER_FIRST_MS;
+
+                    // this is a good time to update the whole trip during the next minute
+                    refreshAllLegs = true;
                 }
             } else if (nextEventTimeLeftMs < REMINDER_FIRST_MS + 120000) {
                 log.info("next event {} > 6 mins but < 6+2 : already reminded {}", nextEventTimeLeftMs, lastNotified.leftTimeReminded);
@@ -550,6 +566,9 @@ public class NavigationNotification {
                 new TripDetailsActivity.IntentData(intentData.network, trip, intentData.renderConfig)));
         extras.putByteArray(EXTRA_LASTNOTIFIED, Objects.serialize(newNotified));
         extras.putByteArray(EXTRA_CONFIGURATION, Objects.serialize(configuration));
+        final ExtraData newExtraData = new ExtraData();
+        newExtraData.refreshAllLegs = refreshAllLegs;
+        extras.putByteArray(EXTRA_DATA, Objects.serialize(newExtraData));
 
         final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setPriority(NotificationCompat.PRIORITY_MAX)
@@ -675,7 +694,7 @@ public class NavigationNotification {
         return PendingIntent.getBroadcast(context, action, intent, PendingIntent.FLAG_IMMUTABLE);
     }
 
-    private long refresh() {
+    private long refresh(final boolean refreshAllLegs) {
         log.info("refreshing notification");
         final Date now = new Date();
         final long nowTime = now.getTime();
@@ -687,7 +706,7 @@ public class NavigationNotification {
             try {
                 log.info("refreshing trip");
                 final Navigator navigator = new Navigator(intentData.network, intentData.trip);
-                newTrip = navigator.refresh(false, now);
+                newTrip = navigator.refresh(refreshAllLegs, now);
             } catch (IOException e) {
                 log.error("error while refreshing trip", e);
             }
