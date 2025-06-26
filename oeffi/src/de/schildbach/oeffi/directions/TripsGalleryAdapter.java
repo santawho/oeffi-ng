@@ -47,6 +47,7 @@ import android.widget.BaseAdapter;
 import com.google.common.base.Preconditions;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.TimeSpec;
+import de.schildbach.pte.dto.Fare;
 import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Position;
 import de.schildbach.pte.dto.Stop;
@@ -61,6 +62,7 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -92,6 +94,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
     private final Paint positionPaintBackground = new Paint();
     private final Paint feederStrokePaint = new Paint();
     private final Paint connectionStrokePaint = new Paint();
+    private final Paint farePaint = new Paint();
     private final Paint cannotScrollPaint = new Paint();
     private final int colorSignificantInverse;
     private final int colorDelayed;
@@ -184,6 +187,12 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         connectionStrokePaint.setColor(res.getColor(R.color.fg_trip_leg_frame_connection));
         connectionStrokePaint.setStrokeWidth(strokeWidth * 2);
         connectionStrokePaint.setAntiAlias(true);
+
+        farePaint.setColor(colorSignificant);
+        farePaint.setTypeface(Typeface.DEFAULT);
+        farePaint.setTextSize(res.getDimension(R.dimen.font_size_small));
+        farePaint.setAntiAlias(true);
+        farePaint.setTextAlign(Align.CENTER);
 
         cannotScrollPaint.setStyle(Paint.Style.FILL);
 
@@ -419,6 +428,11 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         protected void onDraw(final Canvas canvas) {
             super.onDraw(canvas);
 
+            final Trip trip = tripInfo.trip;
+            final List<Leg> legs = trip.legs;
+            if (legs == null)
+                return;
+
             final long now = System.currentTimeMillis();
 
             final long baseTime;
@@ -433,310 +447,328 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             final int width = getWidth();
             final int centerX = width / 2;
             final int height = getHeight();
+            final int paddingVertical = (int) (4 * density);
+            int posFromTop = 0;
 
-            final Trip trip = tripInfo.trip;
-            final List<Leg> legs = trip.legs;
+            final boolean isTravelable = trip.isTravelable();
 
-            if (legs != null) {
-                if (!trip.isTravelable()) {
-                    final int warningWidth = warningIcon.getIntrinsicWidth();
-                    final int warningLeft = centerX - warningWidth / 2;
-                    final int warningPaddingTop = (int) (4 * density);
-                    warningIcon.setBounds(warningLeft, warningPaddingTop, warningLeft + warningWidth,
-                            warningPaddingTop + warningIcon.getIntrinsicHeight());
-                    warningIcon.draw(canvas);
-                }
+            final List<Fare> fares = trip.fares;
+            if (fares != null && !fares.isEmpty()) {
+                // minimum fare
+                final Fare fare = fares.stream().min((a, b) -> (int) ((a.fare - b.fare) * 1000)).get();
+                final String fareText = String.format(Locale.US, "%s\u2009%.2f", fare.currency.getSymbol(), fare.fare);
 
-                // iterate delayed public legs first and draw ghosts of planned times
-                for (final Leg leg : legs) {
-                    if (leg instanceof Public) {
-                        final Public publicLeg = (Public) leg;
-                        publicFillPaint.setShader(null);
-                        publicFillPaint.setColor(colorDelayed);
-                        final Line line = publicLeg.line;
-                        final Style style = line.style;
-                        final float radius;
-                        if (style != null) {
-                            if (style.shape == Shape.RECT)
-                                radius = 0;
-                            else if (style.shape == Shape.CIRCLE)
-                                radius = CIRCLE_CORNER_RADIUS;
-                            else
-                                radius = ROUNDED_CORNER_RADIUS;
-                        } else {
-                            radius = ROUNDED_CORNER_RADIUS;
-                        }
+                posFromTop += paddingVertical;
+                final FontMetrics metrics = farePaint.getFontMetrics();
+                posFromTop += (int) -metrics.ascent;
+                canvas.drawText(fareText, centerX, posFromTop, farePaint);
+                posFromTop += (int) metrics.descent;
+            }
 
-                        final Long departureDelay = publicLeg.departureStop.getDepartureDelay();
-                        final Long arrivalDelay = publicLeg.arrivalStop.getArrivalDelay();
-                        final boolean isDelayed = (departureDelay != null
-                                && departureDelay / DateUtils.MINUTE_IN_MILLIS != 0)
-                                || (arrivalDelay != null && arrivalDelay / DateUtils.MINUTE_IN_MILLIS != 0);
+            if (!isTravelable) {
+                // warning icon
+                final int warningWidth = warningIcon.getIntrinsicWidth();
+                final int warningHeight = warningIcon.getIntrinsicHeight();
+                final int warningLeft = centerX - warningWidth / 2;
+                posFromTop += paddingVertical;
+                warningIcon.setBounds(
+                        warningLeft,
+                        posFromTop,
+                        warningLeft + warningWidth,
+                        posFromTop + warningHeight);
+                warningIcon.draw(canvas);
+                posFromTop += warningHeight;
+            }
 
-                        final Date plannedDepartureTime = publicLeg.departureStop.plannedDepartureTime;
-                        final Date plannedArrivalTime = publicLeg.arrivalStop.plannedArrivalTime;
-
-                        if (isDelayed && plannedDepartureTime != null && plannedArrivalTime != null) {
-                            final long tPlannedDeparture = plannedDepartureTime.getTime();
-                            final float yPlannedDeparture = timeToCoord(tPlannedDeparture, height);
-                            final long tPlannedArrival = plannedArrivalTime.getTime();
-                            final float yPlannedArrival = timeToCoord(tPlannedArrival, height);
-
-                            // line box
-                            legBox.set(0, yPlannedDeparture, width * publicBoxFraction, yPlannedArrival);
-                            canvas.drawRoundRect(legBox, radius, radius, publicFillPaint);
-                        }
-                    }
-                }
-
-                // then iterate all individual legs
-                final int nLegs = legs.size();
-                for (int iLeg = 0; iLeg < nLegs; iLeg++) {
-                    final Leg leg = legs.get(iLeg);
-                    if (leg instanceof Individual) {
-                        final Individual individualLeg = (Individual) leg;
-                        final long tDeparture = individualLeg.departureTime.getTime();
-                        final float yDeparture = timeToCoord(tDeparture, height);
-                        final long tArrival = individualLeg.arrivalTime.getTime();
-                        final float yArrival = timeToCoord(tArrival, height);
-
-                        // box
-                        final float left = width * (1f - individualBoxFraction) / 2f;
-                        legBox.set(left, yDeparture, left + width * individualBoxFraction, yArrival);
-                        canvas.drawRect(legBox, individualFillPaint);
-
-                        // symbol
-                        final Drawable symbol;
-                        if (individualLeg.type == Individual.Type.WALK)
-                            symbol = walkIcon;
-                        else if (individualLeg.type == Individual.Type.BIKE)
-                            symbol = bikeIcon;
-                        else if (individualLeg.type == Individual.Type.CAR
-                                || individualLeg.type == Individual.Type.TRANSFER)
-                            symbol = carIcon;
+            // iterate delayed public legs first and draw ghosts of planned times
+            for (final Leg leg : legs) {
+                if (leg instanceof Public) {
+                    final Public publicLeg = (Public) leg;
+                    publicFillPaint.setShader(null);
+                    publicFillPaint.setColor(colorDelayed);
+                    final Line line = publicLeg.line;
+                    final Style style = line.style;
+                    final float radius;
+                    if (style != null) {
+                        if (style.shape == Shape.RECT)
+                            radius = 0;
+                        else if (style.shape == Shape.CIRCLE)
+                            radius = CIRCLE_CORNER_RADIUS;
                         else
-                            throw new IllegalStateException("unknown type: " + individualLeg.type);
-                        final int symbolWidth = symbol.getIntrinsicWidth();
-                        final int symbolHeight = symbol.getIntrinsicHeight();
-                        if (legBox.height() >= symbolHeight) {
-                            final int symbolLeft = (int) (legBox.centerX() - (float) symbolWidth / 2);
-                            final int symbolTop = (int) (legBox.centerY() - (float) symbolHeight / 2);
-                            symbol.setBounds(symbolLeft, symbolTop, symbolLeft + symbolWidth, symbolTop + symbolHeight);
-                            symbol.draw(canvas);
-                        }
-                    }
-                }
-
-                // then draw arr/dep times
-                Date startTime = null;
-                boolean startCancelled = false;
-                Paint startPaint = null;
-                int startYabs = 0;
-                Position departurePosition;
-                final Public firstPublicLeg = trip.getFirstPublicLeg();
-                final Date publicDepartureTime;
-                if (firstPublicLeg != null) {
-                    final Stop publicDepartureStop = firstPublicLeg.departureStop;
-                    final boolean publicDepartureCancelled = publicDepartureStop.departureCancelled;
-                    publicDepartureTime = publicDepartureStop.getDepartureTime();
-                    if (publicDepartureTime != null) {
-                        startTime = publicDepartureTime;
-                        startCancelled = publicDepartureCancelled;
-                        startPaint = publicTimeDiffPaint;
-                        startYabs = (int) timeToCoord(publicDepartureTime.getTime(), height);
-                        departurePosition = publicDepartureStop.getDeparturePosition();
-                        if (departurePosition != null && !startCancelled) {
-//                            final long minutesFromRequestedTime = (startTime.getTime() - baseTime) / 60000;
-//                            if (minutesFromRequestedTime > -10 && minutesFromRequestedTime < 30) {
-                            final long minutesFromNow = (startTime.getTime() - now) / 60000;
-                            if (minutesFromNow > -10 && minutesFromNow < 30) {
-                                startYabs = drawPosition(canvas, centerX, startYabs, height, -1, departurePosition.name);
-                            }
-                        }
-                        startYabs = drawTime(canvas, centerX, startYabs, height, true, publicTimePaint, publicDepartureCancelled,
-                                publicDepartureTime, null);
-                    }
-                } else {
-                    publicDepartureTime = null;
-                }
-
-                final Date individualDepartureTime = trip.getFirstDepartureTime();
-                if (individualDepartureTime != null) {
-                    final int individualYabs = drawTime(canvas, centerX, startYabs, height,
-                            true, individualTimePaint, false, individualDepartureTime,
-                            publicDepartureTime);
-                    if (individualYabs != Integer.MIN_VALUE) {
-                        startTime = individualDepartureTime;
-                        startPaint = individualTimeDiffPaint;
-                        startYabs = individualYabs;
-                    }
-                }
-
-                if (startTime != null) {
-                    long diff = startTime.getTime() - baseTime;
-                    startYabs = drawRemaining(canvas, centerX, startYabs, height, true, startPaint, startCancelled, diff);
-                }
-
-                Date endTime = null;
-                boolean endCancelled = false;
-                Paint endPaint = null;
-                int endYabs = 0;
-                final Public lastPublicLeg = trip.getLastPublicLeg();
-                final Date publicArrivalTime;
-                if (lastPublicLeg != null) {
-                    final Stop publicArrivalStop = lastPublicLeg.arrivalStop;
-                    final boolean publicArrivalCancelled = publicArrivalStop.arrivalCancelled;
-                    publicArrivalTime = trip.getLastPublicLegArrivalTime();
-                    if (publicArrivalTime != null) {
-                        endTime = publicArrivalTime;
-                        endCancelled = publicArrivalCancelled;
-                        endPaint = publicTimeDiffPaint;
-                        endYabs = (int) timeToCoord(publicArrivalTime.getTime(), height);
-                        endYabs = drawTime(canvas, centerX, endYabs, height, false, publicTimePaint, publicArrivalCancelled,
-                                publicArrivalTime, null);
-                    }
-                } else {
-                    publicArrivalTime = null;
-                }
-
-                final Date individualArrivalTime = trip.getLastArrivalTime();
-                if (individualArrivalTime != null) {
-                    final int individualYabs = drawTime(canvas, centerX, endYabs, height,
-                            false, individualTimePaint, false, individualArrivalTime,
-                            publicArrivalTime);
-                    if (individualYabs != Integer.MIN_VALUE) {
-                        endTime = individualArrivalTime;
-                        endPaint = individualTimeDiffPaint;
-                        endYabs = individualYabs;
-                    }
-                }
-
-                if (endTime != null && referenceTime != null && referenceTime.depArr == TimeSpec.DepArr.ARRIVE) {
-                    long refTime = referenceTime.timeInMillis();
-                    long diff = refTime - endTime.getTime();
-                    drawRemaining(canvas, centerX, endYabs, height, false, endPaint, endCancelled, diff);
-                }
-
-                // last, iterate all public legs
-                for (final Leg leg : legs) {
-                    if (leg instanceof Public) {
-                        final Public publicLeg = (Public) leg;
-                        final boolean isFeeder = renderConfig.feederJourneyRef != null && renderConfig.feederJourneyRef.equals(publicLeg.journeyRef);
-                        final boolean isConnection = renderConfig.connectionJourneyRef != null && renderConfig.connectionJourneyRef.equals(publicLeg.journeyRef);
-                        final Line line = publicLeg.line;
-                        final Style style = line.style;
-                        final float radius;
-                        final int fillColor, fillColor2;
-                        final int labelColor;
-                        if (style != null) {
-                            if (style.shape == Shape.RECT)
-                                radius = 0;
-                            else if (style.shape == Shape.CIRCLE)
-                                radius = CIRCLE_CORNER_RADIUS;
-                            else
-                                radius = ROUNDED_CORNER_RADIUS;
-                            fillColor = style.backgroundColor;
-                            fillColor2 = style.backgroundColor2;
-                            labelColor = style.foregroundColor;
-                        } else {
                             radius = ROUNDED_CORNER_RADIUS;
-                            fillColor = Color.GRAY;
-                            fillColor2 = 0;
-                            labelColor = Color.WHITE;
-                        }
+                    } else {
+                        radius = ROUNDED_CORNER_RADIUS;
+                    }
 
-                        final Stop departureStop = publicLeg.departureStop;
-                        final boolean departureCancelled = departureStop.departureCancelled;
-                        final long tDeparture = departureStop.getDepartureTime().getTime();
-                        final float yDeparture = timeToCoord(tDeparture, height);
-                        final Stop arrivalStop = publicLeg.arrivalStop;
-                        final boolean arrivalCancelled = arrivalStop.arrivalCancelled;
-                        final long tArrival = arrivalStop.getArrivalTime().getTime();
-                        final float yArrival = timeToCoord(tArrival, height);
+                    final Long departureDelay = publicLeg.departureStop.getDepartureDelay();
+                    final Long arrivalDelay = publicLeg.arrivalStop.getArrivalDelay();
+                    final boolean isDelayed = (departureDelay != null
+                            && departureDelay / DateUtils.MINUTE_IN_MILLIS != 0)
+                            || (arrivalDelay != null && arrivalDelay / DateUtils.MINUTE_IN_MILLIS != 0);
+
+                    final Date plannedDepartureTime = publicLeg.departureStop.plannedDepartureTime;
+                    final Date plannedArrivalTime = publicLeg.arrivalStop.plannedArrivalTime;
+
+                    if (isDelayed && plannedDepartureTime != null && plannedArrivalTime != null) {
+                        final long tPlannedDeparture = plannedDepartureTime.getTime();
+                        final float yPlannedDeparture = timeToCoord(tPlannedDeparture, height);
+                        final long tPlannedArrival = plannedArrivalTime.getTime();
+                        final float yPlannedArrival = timeToCoord(tPlannedArrival, height);
 
                         // line box
-                        final float margin = width * (1f - publicBoxFraction) / 2f;
-                        legBox.set(margin, yDeparture, margin + width * publicBoxFraction, yArrival);
-                        if (fillColor2 == 0) {
-                            publicFillPaint.setColor(fillColor);
-                            publicFillPaint.setShader(null);
-                        } else {
-                            matrix.reset();
-                            matrix.postRotate(90, legBox.centerX(), legBox.centerY());
-                            matrix.mapRect(legBoxRotated, legBox);
-                            gradientColors[0] = fillColor;
-                            gradientColors[1] = fillColor2;
-                            publicFillPaint.setShader(new LinearGradient(legBoxRotated.left, legBoxRotated.top,
-                                    legBoxRotated.right, legBoxRotated.bottom, gradientColors, GRADIENT_POSITIONS,
-                                    Shader.TileMode.CLAMP));
-                        }
+                        legBox.set(0, yPlannedDeparture, width * publicBoxFraction, yPlannedArrival);
                         canvas.drawRoundRect(legBox, radius, radius, publicFillPaint);
-                        if (isFeeder) {
-                            canvas.drawRoundRect(legBox, radius, radius, feederStrokePaint);
-                        } else if (isConnection) {
-                            canvas.drawRoundRect(legBox, radius, radius, connectionStrokePaint);
-                        } else if (style != null && style.hasBorder()) {
-                            publicStrokePaint.setColor(style.borderColor);
-                            canvas.drawRoundRect(legBox, radius, radius, publicStrokePaint);
-                        } else if (darkMode && Style.perceivedBrightness(fillColor) < 0.15f ||
-                                !darkMode && Style.perceivedBrightness(fillColor) > 0.85f) {
-                            publicStrokePaint.setColor(colorSignificantInverse);
-                            canvas.drawRoundRect(legBox, radius, radius, publicStrokePaint);
+                    }
+                }
+            }
+
+            // then iterate all individual legs
+            final int nLegs = legs.size();
+            for (int iLeg = 0; iLeg < nLegs; iLeg++) {
+                final Leg leg = legs.get(iLeg);
+                if (leg instanceof Individual) {
+                    final Individual individualLeg = (Individual) leg;
+                    final long tDeparture = individualLeg.departureTime.getTime();
+                    final float yDeparture = timeToCoord(tDeparture, height);
+                    final long tArrival = individualLeg.arrivalTime.getTime();
+                    final float yArrival = timeToCoord(tArrival, height);
+
+                    // box
+                    final float left = width * (1f - individualBoxFraction) / 2f;
+                    legBox.set(left, yDeparture, left + width * individualBoxFraction, yArrival);
+                    canvas.drawRect(legBox, individualFillPaint);
+
+                    // symbol
+                    final Drawable symbol;
+                    if (individualLeg.type == Individual.Type.WALK)
+                        symbol = walkIcon;
+                    else if (individualLeg.type == Individual.Type.BIKE)
+                        symbol = bikeIcon;
+                    else if (individualLeg.type == Individual.Type.CAR
+                            || individualLeg.type == Individual.Type.TRANSFER)
+                        symbol = carIcon;
+                    else
+                        throw new IllegalStateException("unknown type: " + individualLeg.type);
+                    final int symbolWidth = symbol.getIntrinsicWidth();
+                    final int symbolHeight = symbol.getIntrinsicHeight();
+                    if (legBox.height() >= symbolHeight) {
+                        final int symbolLeft = (int) (legBox.centerX() - (float) symbolWidth / 2);
+                        final int symbolTop = (int) (legBox.centerY() - (float) symbolHeight / 2);
+                        symbol.setBounds(symbolLeft, symbolTop, symbolLeft + symbolWidth, symbolTop + symbolHeight);
+                        symbol.draw(canvas);
+                    }
+                }
+            }
+
+            // then draw arr/dep times
+            Date startTime = null;
+            boolean startCancelled = false;
+            Paint startPaint = null;
+            int startYabs = 0;
+            Position departurePosition;
+            final Public firstPublicLeg = trip.getFirstPublicLeg();
+            final Date publicDepartureTime;
+            if (firstPublicLeg != null) {
+                final Stop publicDepartureStop = firstPublicLeg.departureStop;
+                final boolean publicDepartureCancelled = publicDepartureStop.departureCancelled;
+                publicDepartureTime = publicDepartureStop.getDepartureTime();
+                if (publicDepartureTime != null) {
+                    startTime = publicDepartureTime;
+                    startCancelled = publicDepartureCancelled;
+                    startPaint = publicTimeDiffPaint;
+                    startYabs = (int) timeToCoord(publicDepartureTime.getTime(), height);
+                    departurePosition = publicDepartureStop.getDeparturePosition();
+                    if (departurePosition != null && !startCancelled) {
+//                            final long minutesFromRequestedTime = (startTime.getTime() - baseTime) / 60000;
+//                            if (minutesFromRequestedTime > -10 && minutesFromRequestedTime < 30) {
+                        final long minutesFromNow = (startTime.getTime() - now) / 60000;
+                        if (minutesFromNow > -10 && minutesFromNow < 30) {
+                            startYabs = drawPosition(canvas, centerX, startYabs, height, -1, departurePosition.name);
                         }
+                    }
+                    startYabs = drawTime(canvas, centerX, startYabs, height, true, publicTimePaint, publicDepartureCancelled,
+                            publicDepartureTime, null);
+                }
+            } else {
+                publicDepartureTime = null;
+            }
 
-                        // line label
-                        final String[] lineLabels = splitLineLabel(line.label != null ? line.label : "?");
-                        publicLabelPaint.setColor(labelColor);
-                        publicLabelPaint.setShadowLayer(
-                                publicLabelPaint.getColor() != Color.BLACK && publicLabelPaint.getColor() != Color.RED
-                                        ? 2f : 0f,
-                                0, 0, publicLabelPaint.getColor() != Color.BLACK ? Color.BLACK : Color.WHITE);
-                        publicLabelPaint.setTextSize(24f * density);
-                        final FontMetrics mLine = publicLabelPaint.getFontMetrics();
-                        final float hLine = mLine.descent + (-mLine.ascent);
-                        float scale = hLine / legBox.height();
-                        final float lineSpacing = scale < 0.6f ? 4 * density : 1;
-                        if (scale < 1f)
-                            scale = 1f;
-                        publicLabelPaint.setTextSize(24f / scale * density);
-                        publicLabelPaint.setTextScaleX(scale);
+            final Date individualDepartureTime = trip.getFirstDepartureTime();
+            if (individualDepartureTime != null) {
+                final int individualYabs = drawTime(canvas, centerX, startYabs, height,
+                        true, individualTimePaint, false, individualDepartureTime,
+                        publicDepartureTime);
+                if (individualYabs != Integer.MIN_VALUE) {
+                    startTime = individualDepartureTime;
+                    startPaint = individualTimeDiffPaint;
+                    startYabs = individualYabs;
+                }
+            }
 
-                        if (departureCancelled || arrivalCancelled)
-                            publicLabelPaint.setFlags(publicLabelPaint.getFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            if (startTime != null) {
+                long diff = startTime.getTime() - baseTime;
+                startYabs = drawRemaining(canvas, centerX, startYabs, height, true, startPaint, startCancelled, diff);
+            }
+
+            Date endTime = null;
+            boolean endCancelled = false;
+            Paint endPaint = null;
+            int endYabs = 0;
+            final Public lastPublicLeg = trip.getLastPublicLeg();
+            final Date publicArrivalTime;
+            if (lastPublicLeg != null) {
+                final Stop publicArrivalStop = lastPublicLeg.arrivalStop;
+                final boolean publicArrivalCancelled = publicArrivalStop.arrivalCancelled;
+                publicArrivalTime = trip.getLastPublicLegArrivalTime();
+                if (publicArrivalTime != null) {
+                    endTime = publicArrivalTime;
+                    endCancelled = publicArrivalCancelled;
+                    endPaint = publicTimeDiffPaint;
+                    endYabs = (int) timeToCoord(publicArrivalTime.getTime(), height);
+                    endYabs = drawTime(canvas, centerX, endYabs, height, false, publicTimePaint, publicArrivalCancelled,
+                            publicArrivalTime, null);
+                }
+            } else {
+                publicArrivalTime = null;
+            }
+
+            final Date individualArrivalTime = trip.getLastArrivalTime();
+            if (individualArrivalTime != null) {
+                final int individualYabs = drawTime(canvas, centerX, endYabs, height,
+                        false, individualTimePaint, false, individualArrivalTime,
+                        publicArrivalTime);
+                if (individualYabs != Integer.MIN_VALUE) {
+                    endTime = individualArrivalTime;
+                    endPaint = individualTimeDiffPaint;
+                    endYabs = individualYabs;
+                }
+            }
+
+            if (endTime != null && referenceTime != null && referenceTime.depArr == TimeSpec.DepArr.ARRIVE) {
+                long refTime = referenceTime.timeInMillis();
+                long diff = refTime - endTime.getTime();
+                drawRemaining(canvas, centerX, endYabs, height, false, endPaint, endCancelled, diff);
+            }
+
+            // last, iterate all public legs
+            for (final Leg leg : legs) {
+                if (leg instanceof Public) {
+                    final Public publicLeg = (Public) leg;
+                    final boolean isFeeder = renderConfig.feederJourneyRef != null && renderConfig.feederJourneyRef.equals(publicLeg.journeyRef);
+                    final boolean isConnection = renderConfig.connectionJourneyRef != null && renderConfig.connectionJourneyRef.equals(publicLeg.journeyRef);
+                    final Line line = publicLeg.line;
+                    final Style style = line.style;
+                    final float radius;
+                    final int fillColor, fillColor2;
+                    final int labelColor;
+                    if (style != null) {
+                        if (style.shape == Shape.RECT)
+                            radius = 0;
+                        else if (style.shape == Shape.CIRCLE)
+                            radius = CIRCLE_CORNER_RADIUS;
                         else
-                            publicLabelPaint.setFlags(publicLabelPaint.getFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
+                            radius = ROUNDED_CORNER_RADIUS;
+                        fillColor = style.backgroundColor;
+                        fillColor2 = style.backgroundColor2;
+                        labelColor = style.foregroundColor;
+                    } else {
+                        radius = ROUNDED_CORNER_RADIUS;
+                        fillColor = Color.GRAY;
+                        fillColor2 = 0;
+                        labelColor = Color.WHITE;
+                    }
 
-                        // draw really centered on line box
-                        if (scale < 4f) {
-                            publicLabelPaint.getTextBounds(lineLabels[0], 0, lineLabels[0].length(), bounds);
-                            if (lineLabels.length == 1) {
-                                final int halfHeight = -bounds.centerY();
-                                canvas.drawText(lineLabels[0], legBox.centerX(), legBox.centerY() + halfHeight,
-                                        publicLabelPaint);
-                            } else {
-                                canvas.drawText(lineLabels[0], legBox.centerX(), legBox.centerY() - lineSpacing / 2,
-                                        publicLabelPaint);
-                                canvas.drawText(lineLabels[1], legBox.centerX(),
-                                        legBox.centerY() + bounds.height() + lineSpacing / 2, publicLabelPaint);
-                            }
+                    final Stop departureStop = publicLeg.departureStop;
+                    final boolean departureCancelled = departureStop.departureCancelled;
+                    final long tDeparture = departureStop.getDepartureTime().getTime();
+                    final float yDeparture = timeToCoord(tDeparture, height);
+                    final Stop arrivalStop = publicLeg.arrivalStop;
+                    final boolean arrivalCancelled = arrivalStop.arrivalCancelled;
+                    final long tArrival = arrivalStop.getArrivalTime().getTime();
+                    final float yArrival = timeToCoord(tArrival, height);
+
+                    // line box
+                    final float margin = width * (1f - publicBoxFraction) / 2f;
+                    legBox.set(margin, yDeparture, margin + width * publicBoxFraction, yArrival);
+                    if (fillColor2 == 0) {
+                        publicFillPaint.setColor(fillColor);
+                        publicFillPaint.setShader(null);
+                    } else {
+                        matrix.reset();
+                        matrix.postRotate(90, legBox.centerX(), legBox.centerY());
+                        matrix.mapRect(legBoxRotated, legBox);
+                        gradientColors[0] = fillColor;
+                        gradientColors[1] = fillColor2;
+                        publicFillPaint.setShader(new LinearGradient(legBoxRotated.left, legBoxRotated.top,
+                                legBoxRotated.right, legBoxRotated.bottom, gradientColors, GRADIENT_POSITIONS,
+                                Shader.TileMode.CLAMP));
+                    }
+                    canvas.drawRoundRect(legBox, radius, radius, publicFillPaint);
+                    if (isFeeder) {
+                        canvas.drawRoundRect(legBox, radius, radius, feederStrokePaint);
+                    } else if (isConnection) {
+                        canvas.drawRoundRect(legBox, radius, radius, connectionStrokePaint);
+                    } else if (style != null && style.hasBorder()) {
+                        publicStrokePaint.setColor(style.borderColor);
+                        canvas.drawRoundRect(legBox, radius, radius, publicStrokePaint);
+                    } else if (darkMode && Style.perceivedBrightness(fillColor) < 0.15f ||
+                            !darkMode && Style.perceivedBrightness(fillColor) > 0.85f) {
+                        publicStrokePaint.setColor(colorSignificantInverse);
+                        canvas.drawRoundRect(legBox, radius, radius, publicStrokePaint);
+                    }
+
+                    // line label
+                    final String[] lineLabels = splitLineLabel(line.label != null ? line.label : "?");
+                    publicLabelPaint.setColor(labelColor);
+                    publicLabelPaint.setShadowLayer(
+                            publicLabelPaint.getColor() != Color.BLACK && publicLabelPaint.getColor() != Color.RED
+                                    ? 2f : 0f,
+                            0, 0, publicLabelPaint.getColor() != Color.BLACK ? Color.BLACK : Color.WHITE);
+                    publicLabelPaint.setTextSize(24f * density);
+                    final FontMetrics mLine = publicLabelPaint.getFontMetrics();
+                    final float hLine = mLine.descent + (-mLine.ascent);
+                    float scale = hLine / legBox.height();
+                    final float lineSpacing = scale < 0.6f ? 4 * density : 1;
+                    if (scale < 1f)
+                        scale = 1f;
+                    publicLabelPaint.setTextSize(24f / scale * density);
+                    publicLabelPaint.setTextScaleX(scale);
+
+                    if (departureCancelled || arrivalCancelled)
+                        publicLabelPaint.setFlags(publicLabelPaint.getFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                    else
+                        publicLabelPaint.setFlags(publicLabelPaint.getFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
+
+                    // draw really centered on line box
+                    if (scale < 4f) {
+                        publicLabelPaint.getTextBounds(lineLabels[0], 0, lineLabels[0].length(), bounds);
+                        if (lineLabels.length == 1) {
+                            final int halfHeight = -bounds.centerY();
+                            canvas.drawText(lineLabels[0], legBox.centerX(), legBox.centerY() + halfHeight,
+                                    publicLabelPaint);
+                        } else {
+                            canvas.drawText(lineLabels[0], legBox.centerX(), legBox.centerY() - lineSpacing / 2,
+                                    publicLabelPaint);
+                            canvas.drawText(lineLabels[1], legBox.centerX(),
+                                    legBox.centerY() + bounds.height() + lineSpacing / 2, publicLabelPaint);
                         }
+                    }
 
-                        if (referenceTime.depArr == TimeSpec.DepArr.DEPART) {
-                            if (!departureCancelled) {
-                                startYabs = (int) legBox.top;
-                                departurePosition = departureStop.getDeparturePosition();
-                                if (departurePosition != null) {
-                                    final long minutesFromNow = (tDeparture - now) / 60000;
-                                    if (minutesFromNow > -10 && minutesFromNow < 30) {
-                                        startYabs = drawPosition(canvas, centerX, startYabs, height, -1, departurePosition.name);
-                                    }
+                    if (referenceTime.depArr == TimeSpec.DepArr.DEPART) {
+                        if (!departureCancelled) {
+                            startYabs = (int) legBox.top;
+                            departurePosition = departureStop.getDeparturePosition();
+                            if (departurePosition != null) {
+                                final long minutesFromNow = (tDeparture - now) / 60000;
+                                if (minutesFromNow > -10 && minutesFromNow < 30) {
+                                    startYabs = drawPosition(canvas, centerX, startYabs, height, -1, departurePosition.name);
                                 }
-                                if (publicLeg != firstPublicLeg) {
-                                    final long millisFromRequestedTime = tDeparture - baseTime;
-                                    final long minutesFromRequestedTime = millisFromRequestedTime / 60000;
-                                    if (minutesFromRequestedTime > -10 && minutesFromRequestedTime < 30) {
-                                        startYabs = drawRemaining(canvas, centerX, startYabs, height, true, publicTimeDiffPaint, false, millisFromRequestedTime);
-                                    }
+                            }
+                            if (publicLeg != firstPublicLeg) {
+                                final long millisFromRequestedTime = tDeparture - baseTime;
+                                final long minutesFromRequestedTime = millisFromRequestedTime / 60000;
+                                if (minutesFromRequestedTime > -10 && minutesFromRequestedTime < 30) {
+                                    startYabs = drawRemaining(canvas, centerX, startYabs, height, true, publicTimeDiffPaint, false, millisFromRequestedTime);
                                 }
                             }
                         }
