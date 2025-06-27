@@ -1059,16 +1059,26 @@ public class DirectionsActivity extends OeffiMainActivity implements
         } else if (numLocations == 1) {
             // single location clicked
             final Location location = locations.get(0);
-            if (viewFromLocation.getLocation() == null) {
-                viewFromLocation.setLocation(location);
-                doGo = false;
-            } else if (viewViaLocation.getLocation() == null && viewViaLocation.getVisibility() == View.VISIBLE) {
-                viewViaLocation.setLocation(location);
-                viewViaLocation.setVisibility(View.VISIBLE);
-                doGo = false;
+            if (longHold) {
+                if (viewViaLocation.getVisibility() == View.VISIBLE
+                        && viewViaLocation.getLocation() == null
+                        && viewFromLocation.getLocation() != null) {
+                    expandForm(true);
+                    viewViaLocation.setLocation(location);
+                    viewViaLocation.setVisibility(View.VISIBLE);
+                    doGo = false;
+                } else {
+                    viewFromLocation.setLocation(location);
+                    doGo = false;
+                }
             } else {
-                viewToLocation.setLocation(location);
-                doGo = true;
+                if (viewFromLocation.getLocation() == null) {
+                    viewFromLocation.setLocation(location);
+                    doGo = false;
+                } else {
+                    viewToLocation.setLocation(location);
+                    doGo = true;
+                }
             }
         } else if (numLocations == 2) {
             // 2 locations, from-to
