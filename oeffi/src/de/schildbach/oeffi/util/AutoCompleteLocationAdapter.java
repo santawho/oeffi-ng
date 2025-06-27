@@ -28,6 +28,7 @@ import android.widget.Filterable;
 import androidx.annotation.NonNull;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -172,13 +173,35 @@ public class AutoCompleteLocationAdapter extends BaseAdapter implements Filterab
             if (constraint.length() >= 3) {
                 final NetworkProvider networkProvider = getProvider();
                 final EnumSet<LocationType> suggestedLocationTypes = EnumSet
-                        .of(LocationType.STATION, LocationType.POI, LocationType.ADDRESS);
+//                        .of(LocationType.STATION, LocationType.POI, LocationType.ADDRESS);
+                        .of(LocationType.STATION, LocationType.ADDRESS);
                 final SuggestLocationsResult suggestLocationsResult = networkProvider
-                        .suggestLocations(constraint, suggestedLocationTypes, 0);
-                if (suggestLocationsResult.status == SuggestLocationsResult.Status.OK)
-                    for (final Location location : suggestLocationsResult.getLocations())
-                        if (!results.contains(location))
-                            results.add(location);
+                        .suggestLocations(constraint, suggestedLocationTypes, 15);
+                if (suggestLocationsResult.status == SuggestLocationsResult.Status.OK) {
+                    final List<Location> foundLocations = suggestLocationsResult.getLocations();
+                    final List<Location> stations = new ArrayList<>();
+                    final List<Location> addresses = new ArrayList<>();
+                    final List<Location> others = new ArrayList<>();
+                    for (Location location : foundLocations) {
+                        if (results.contains(location))
+                            continue;
+                        results.add(location);
+                        switch (location.type) {
+                            case STATION:
+                                stations.add(location);
+                                break;
+                            case ADDRESS:
+                                addresses.add(location);
+                                break;
+                            default:
+                                others.add(location);
+                                break;
+                        }
+                    }
+//                    results.addAll(stations);
+//                    results.addAll(addresses);
+//                    results.addAll(others);
+                }
             }
 
             return results;

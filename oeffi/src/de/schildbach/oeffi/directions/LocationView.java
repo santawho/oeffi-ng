@@ -20,7 +20,7 @@ package de.schildbach.oeffi.directions;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.drawable.Drawable;
+import android.graphics.Canvas;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.LocationManager;
@@ -42,6 +42,10 @@ import android.widget.ListAdapter;
 import android.widget.PopupMenu;
 import android.widget.TextView.OnEditorActionListener;
 import com.google.common.base.Strings;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.GeocoderThread;
@@ -56,19 +60,21 @@ import javax.annotation.Nullable;
 import java.util.Locale;
 
 public class LocationView extends FrameLayout implements LocationHelper.Callback {
+    private static final Logger log = LoggerFactory.getLogger(LocationView.class);
+
     public interface Listener {
         void changed(LocationView view);
     }
 
     private final Resources res;
     private final LocationHelper locationHelper;
-    private final Drawable selectableItemBackground;
 
     private PopupMenu.OnMenuItemClickListener contextMenuItemClickListener;
     private Listener listener;
 
     private AutoCompleteTextView textView;
-    private View chooseView;
+    private View menuView;
+    private View actionView;
     private View modeView;
     private MultiDrawable leftDrawable, rightDrawable;
     private TextWatcher textChangedListener;
@@ -96,9 +102,9 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
         res = context.getResources();
         locationHelper = new LocationHelper((LocationManager) context.getSystemService(Context.LOCATION_SERVICE), this);
 
-        final TypedArray ta = context.obtainStyledAttributes(new int[] { android.R.attr.selectableItemBackground });
-        selectableItemBackground = ta.getDrawable(0);
-        ta.recycle();
+//        final TypedArray ta = context.obtainStyledAttributes(new int[] { android.R.attr.selectableItemBackground });
+//        selectableItemBackground = ta.getDrawable(0);
+//        ta.recycle();
     }
 
     public void setStationAsAddressEnabled(final boolean stationAsAddressEnabled) {
@@ -149,9 +155,17 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
 
             @Override
             protected void onSizeChanged(final int w, final int h, final int oldw, final int oldh) {
-                handler.post(() -> chooseView.requestLayout());
-
+                handler.post(() -> {
+                    menuView.requestLayout();
+                    actionView.requestLayout();
+                });
                 super.onSizeChanged(w, h, oldw, oldh);
+            }
+
+            @Override
+            protected void onDraw(final Canvas canvas) {
+                super.onDraw(canvas);
+                log.debug("isPopupShowing = {}", isPopupShowing());
             }
         };
         textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, res.getDimension(R.dimen.font_size_large));
@@ -165,6 +179,7 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
         final int paddingCram = res.getDimensionPixelSize(R.dimen.text_padding_horizontal_cram);
         final int paddingLax = res.getDimensionPixelSize(R.dimen.text_padding_horizontal_verylax);
         textView.setPadding(paddingLax, paddingCram, paddingLax, paddingCram);
+        textView.setDropDownVerticalOffset(res.getDimensionPixelSize(R.dimen.text_padding_vertical_verylax));
         textView.setOnItemClickListener((parent, view, position, id) -> {
             // workaround for NPE
             if (parent == null)
@@ -190,8 +205,8 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
         leftDrawable.add(R.drawable.ic_location_searching_grey600_24dp);
         leftDrawable.add(R.drawable.ic_gps_fixed_grey600_24dp);
         rightDrawable = new MultiDrawable(context);
-        rightDrawable.add(R.drawable.ic_more_vert_grey600_24dp);
-        rightDrawable.add(R.drawable.ic_clear_grey600_24dp);
+        rightDrawable.add(R.drawable.location_view_menu);
+        rightDrawable.add(R.drawable.location_view_actions);
         textView.setCompoundDrawablesWithIntrinsicBounds(leftDrawable, null, rightDrawable, null);
 
         textChangedListener = new TextWatcher() {
@@ -212,43 +227,82 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
         };
         textView.addTextChangedListener(textChangedListener);
 
-        chooseView = new View(context) {
+        final TypedArray ta = context.obtainStyledAttributes(new int[] { android.R.attr.selectableItemBackground });
+
+        menuView = new View(context) {
             @Override
             protected void onMeasure(final int wMeasureSpec, final int hMeasureSpec) {
-                final int width = textView.getCompoundPaddingRight() + textView.getCompoundDrawablePadding();
+                final int paddingRight = textView.getPaddingRight();
+                final int compoundPaddingRight = textView.getCompoundPaddingRight();
+                final int compoundDrawablePadding = textView.getCompoundDrawablePadding();
+                final int iconWidth = (compoundPaddingRight - compoundDrawablePadding - paddingRight) / 4;
+                final int width = iconWidth + compoundDrawablePadding + paddingRight;
                 final int minHeight = res.getDimensionPixelOffset(R.dimen.directions_form_location_min_height);
                 final int height = Math.max(textView.getMeasuredHeight(), minHeight);
                 setMeasuredDimension(width, height);
             }
         };
-        chooseView.setContentDescription(context.getString(R.string.directions_location_view_more_description));
-        chooseView.setBackgroundDrawable(selectableItemBackground);
+        menuView.setContentDescription(context.getString(R.string.directions_location_view_menu_description));
+        menuView.setBackground(ta.getDrawable(0));
+        menuView.setOnClickListener((view) -> {
+            final PopupMenu popupMenu = new PopupMenu(getContext(), view);
+            popupMenu.inflate(R.menu.directions_location_context);
+            PopupHelper.setForceShowIcon(popupMenu);
+            popupMenu.setOnMenuItemClickListener(contextMenuItemClickListener);
+            popupMenu.show();
+        });
+
+        actionView = new View(context) {
+            @Override
+            protected void onMeasure(final int wMeasureSpec, final int hMeasureSpec) {
+                final int paddingRight = textView.getPaddingRight();
+                final int compoundPaddingRight = textView.getCompoundPaddingRight();
+                final int compoundDrawablePadding = textView.getCompoundDrawablePadding();
+                final int width = compoundPaddingRight;
+                final int minHeight = res.getDimensionPixelOffset(R.dimen.directions_form_location_min_height);
+                final int height = Math.max(textView.getMeasuredHeight(), minHeight);
+                setMeasuredDimension(width, height);
+            }
+        };
+        actionView.setContentDescription(context.getString(R.string.directions_location_view_action_description));
+        actionView.setBackground(ta.getDrawable(0));
+        actionView.setOnClickListener((view) -> {
+            reset();
+            textView.requestFocus();
+        });
 
         modeView = new View(context) {
             @Override
             protected void onMeasure(final int wMeasureSpec, final int hMeasureSpec) {
-                final int width = textView.getCompoundPaddingLeft() + textView.getCompoundDrawablePadding();
+                final int paddingLeft = textView.getPaddingLeft();
+                final int totalPaddingLeft = textView.getTotalPaddingLeft();
+                final int compoundPaddingLeft = textView.getCompoundPaddingLeft();
+                final int compoundDrawablePadding = textView.getCompoundDrawablePadding();
+                final int width = compoundPaddingLeft;
                 final int minHeight = res.getDimensionPixelOffset(R.dimen.directions_form_location_min_height);
                 final int height = Math.max(textView.getMeasuredHeight(), minHeight);
                 setMeasuredDimension(width, height);
             }
         };
         modeView.setContentDescription(context.getString(R.string.directions_location_view_mode_description));
-        modeView.setBackground(selectableItemBackground);
-
-        addView(textView, new LocationView.LayoutParams(LocationView.LayoutParams.MATCH_PARENT,
-                LocationView.LayoutParams.WRAP_CONTENT, Gravity.CENTER_VERTICAL));
-        addView(chooseView, new LocationView.LayoutParams(LocationView.LayoutParams.WRAP_CONTENT,
-                LocationView.LayoutParams.MATCH_PARENT, Gravity.RIGHT | Gravity.CENTER_VERTICAL));
-        addView(modeView, new LocationView.LayoutParams(LocationView.LayoutParams.WRAP_CONTENT,
-                LocationView.LayoutParams.MATCH_PARENT, Gravity.LEFT | Gravity.CENTER_VERTICAL));
-
-        modeView.setOnClickListener(v -> {
+        modeView.setBackground(ta.getDrawable(0));
+        modeView.setOnClickListener((view) -> {
             if (locationType == LocationType.STATION && stationAsAddressEnabled) {
                 stationAsAddress = !stationAsAddress;
                 updateAppearance();
             }
         });
+
+        ta.recycle();
+
+        addView(textView, new LocationView.LayoutParams(LocationView.LayoutParams.MATCH_PARENT,
+                LocationView.LayoutParams.WRAP_CONTENT, Gravity.CENTER_VERTICAL));
+        addView(menuView, new LocationView.LayoutParams(LocationView.LayoutParams.WRAP_CONTENT,
+                LocationView.LayoutParams.MATCH_PARENT, Gravity.RIGHT | Gravity.CENTER_VERTICAL));
+        addView(actionView, new LocationView.LayoutParams(LocationView.LayoutParams.WRAP_CONTENT,
+                LocationView.LayoutParams.MATCH_PARENT, Gravity.RIGHT | Gravity.CENTER_VERTICAL));
+        addView(modeView, new LocationView.LayoutParams(LocationView.LayoutParams.WRAP_CONTENT,
+                LocationView.LayoutParams.MATCH_PARENT, Gravity.LEFT | Gravity.CENTER_VERTICAL));
 
         setEnabled(isEnabled());
         updateAppearance();
@@ -261,8 +315,10 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
             textView.setEnabled(enabled);
             textView.setTextColor(getResources().getColor(enabled ? R.color.fg_significant : R.color.fg_insignificant));
         }
-        if (chooseView != null)
-            chooseView.setEnabled(enabled);
+        if (menuView != null)
+            menuView.setEnabled(enabled);
+        if (actionView != null)
+            actionView.setEnabled(enabled);
     }
 
     public void setText(final CharSequence text) {
@@ -404,21 +460,17 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
             return new Location(locationType, id, coord, name != null ? place : null, name);
     }
 
-    private final OnClickListener contextButtonClickListener = new OnClickListener() {
-        public void onClick(final View v) {
-            final PopupMenu popupMenu = new PopupMenu(getContext(), v);
-            popupMenu.inflate(R.menu.directions_location_context);
-            PopupHelper.setForceShowIcon(popupMenu);
-            popupMenu.setOnMenuItemClickListener(contextMenuItemClickListener);
-            popupMenu.show();
-        }
+    private final OnClickListener contextButtonClickListener = (view) -> {
+        final PopupMenu popupMenu = new PopupMenu(getContext(), view);
+        popupMenu.inflate(R.menu.directions_location_context);
+        PopupHelper.setForceShowIcon(popupMenu);
+        popupMenu.setOnMenuItemClickListener(contextMenuItemClickListener);
+        popupMenu.show();
     };
 
-    private final OnClickListener clearButtonClickListener = new OnClickListener() {
-        public void onClick(final View v) {
-            reset();
-            textView.requestFocus();
-        }
+    private final OnClickListener clearButtonClickListener = (view) -> {
+        reset();
+        textView.requestFocus();
     };
 
     private void updateAppearance() {
@@ -431,15 +483,21 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
 
         if (getText() == null) {
             if (contextMenuItemClickListener == null) {
-                rightDrawable.selectDrawableByResId(R.drawable.ic_clear_grey600_24dp);
-                chooseView.setOnClickListener(null);
+                rightDrawable.selectDrawableByResId(R.drawable.location_view_actions);
+                menuView.setVisibility(View.GONE);
+                actionView.setVisibility(View.GONE);
+//                chooseView.setOnClickListener(null);
             } else {
-                rightDrawable.selectDrawableByResId(R.drawable.ic_more_vert_grey600_24dp);
-                chooseView.setOnClickListener(contextButtonClickListener);
+                rightDrawable.selectDrawableByResId(R.drawable.location_view_menu);
+                menuView.setVisibility(View.VISIBLE);
+                actionView.setVisibility(View.GONE);
+//                chooseView.setOnClickListener(contextButtonClickListener);
             }
         } else {
-            rightDrawable.selectDrawableByResId(R.drawable.ic_clear_grey600_24dp);
-            chooseView.setOnClickListener(clearButtonClickListener);
+            rightDrawable.selectDrawableByResId(R.drawable.location_view_actions);
+            menuView.setVisibility(View.GONE);
+            actionView.setVisibility(View.VISIBLE);
+//            chooseView.setOnClickListener(clearButtonClickListener);
         }
 
         if (hint != null)

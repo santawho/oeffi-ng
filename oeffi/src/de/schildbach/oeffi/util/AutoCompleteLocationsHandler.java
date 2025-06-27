@@ -39,7 +39,7 @@ public class AutoCompleteLocationsHandler {
     }
     private final AutoCompleteLocationAdapter autoCompleteLocationAdapter;
     private final Handler handler;
-    private Set<Product> preferredProducts;
+    private final Set<Product> preferredProducts;
     private final AtomicInteger numAwaitedLocations = new AtomicInteger();
     private final AtomicInteger numBadLocations = new AtomicInteger();
     private final List<Runnable> jobs = new ArrayList<>();
