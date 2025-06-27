@@ -392,9 +392,17 @@ public class NavigationNotification {
                 nextRefreshTimeMs = nowTime + 60000;
                 nextTripReloadTimeMs = tripUpdatedAt + 120000;
             } else {
-                // approaching, refresh after 25% of the remaining time
-                nextRefreshTimeMs = nowTime + timeLeft / 4;
-                nextTripReloadTimeMs = nextRefreshTimeMs;
+                final Date prevEventLatestTime = tripRenderer.prevEventLatestTime;
+                final long timeOver = nowTime - (prevEventLatestTime != null ? prevEventLatestTime.getTime() : 0);
+                if (timeOver < 300000) {
+                    // max 5 minutes after the beginning of the current action, 60 secs refresh interval
+                    nextRefreshTimeMs = nowTime + 60000;
+                    nextTripReloadTimeMs = nextRefreshTimeMs;
+                } else {
+                    // approaching, refresh after 25% of the remaining time
+                    nextRefreshTimeMs = nowTime + ((timeLeft * 25) / 100);
+                    nextTripReloadTimeMs = nextRefreshTimeMs;
+                }
             }
         } else {
             final long timeOver = nowTime - trip.getLastArrivalTime().getTime();

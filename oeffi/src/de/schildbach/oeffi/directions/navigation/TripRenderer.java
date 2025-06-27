@@ -245,12 +245,13 @@ public class TripRenderer {
             final TripRenderer.LegContainer walkLegC,
             final TripRenderer.LegContainer nextLegC,
             final Date now) {
-        Trip.Public leg = legC.publicLeg;
+        final Trip.Public leg = legC.publicLeg;
         final Stop departureStop = leg.departureStop;
         final Stop arrivalStop = leg.arrivalStop;
-        Date beginTime = departureStop.getDepartureTime();
-        Date endTime = arrivalStop.getArrivalTime();
-        Date plannedEndTime = arrivalStop.plannedArrivalTime;
+        final Date beginTime = departureStop.getDepartureTime();
+        final Date plannedBeginTime = departureStop.plannedDepartureTime;
+        final Date endTime = arrivalStop.getArrivalTime();
+        final Date plannedEndTime = arrivalStop.plannedArrivalTime;
         if (now.before(beginTime)) {
             // leg is in the future
         } else if (now.after(endTime)) {
@@ -258,6 +259,7 @@ public class TripRenderer {
         } else {
             // leg is now
             setNextEventType(true);
+            setPrevEventLatestTime(beginTime, plannedBeginTime);
             final boolean eventIsNow = setNextEventTimeLeft(now, endTime, plannedEndTime, 0);
             String targetName = Formats.fullLocationName(arrivalStop.location);
             setNextEventTarget(targetName);
@@ -307,9 +309,10 @@ public class TripRenderer {
         final Trip.Individual leg = legC.individualLeg;
         final Stop transferFrom = legC.transferFrom != null ? legC.transferFrom.publicLeg.arrivalStop : null;
         final Stop transferTo = legC.transferTo != null ? legC.transferTo.publicLeg.departureStop : null;
-        Date beginTime = transferFrom != null ? transferFrom.getArrivalTime() : leg == null ? null : leg.departureTime;
-        Date endTime = transferTo != null ? transferTo.getDepartureTime() : leg == null ? null : leg.arrivalTime;
-        Date plannedEndTime = transferTo != null ? transferTo.plannedDepartureTime : leg == null ? null : leg.arrivalTime;
+        final Date beginTime = transferFrom != null ? transferFrom.getArrivalTime() : leg == null ? null : leg.departureTime;
+        final Date plannedBeginTime = transferFrom != null ? transferFrom.plannedArrivalTime : leg == null ? null : leg.departureTime;
+        final Date endTime = transferTo != null ? transferTo.getDepartureTime() : leg == null ? null : leg.arrivalTime;
+        final Date plannedEndTime = transferTo != null ? transferTo.plannedDepartureTime : leg == null ? null : leg.arrivalTime;
         if (transferFrom != null && beginTime != null && now.before(beginTime)) {
             // leg is in the future
         } else if (endTime != null && now.after(endTime)) {
@@ -317,6 +320,7 @@ public class TripRenderer {
         } else {
             // leg is now
             setNextEventType(false);
+            setPrevEventLatestTime(beginTime, plannedBeginTime);
             final boolean eventIsNow = setNextEventTimeLeft(now, endTime, transferTo != null ? plannedEndTime : null, leg != null ? leg.min : 0);
             final String targetName = (transferTo != null) ? Formats.fullLocationName(transferTo.location) : null;
             setNextEventTarget(targetName);
@@ -415,6 +419,7 @@ public class TripRenderer {
         nextEventNextStringId = nextId;
     }
 
+    public Date prevEventLatestTime;
     public Date nextEventEarliestTime;
     public Date nextEventEstimatedTime;
     public long nextEventTimeLeftMs;
@@ -424,6 +429,12 @@ public class TripRenderer {
     public boolean nextEventTimeLeftCritical;
     public boolean nextEventTimeHourglassVisible;
     public String nextEventTimeLeftExplainStr;
+
+    private void setPrevEventLatestTime(final Date beginTime, final Date plannedBeginTime) {
+        prevEventLatestTime = beginTime;
+        if (plannedBeginTime != null && plannedBeginTime.after(beginTime))
+            prevEventLatestTime = plannedBeginTime;
+    }
 
     @SuppressLint("DefaultLocale")
     private boolean setNextEventTimeLeft(final Date now, final Date endTime, final Date plannedEndTime, final int walkMins) {
