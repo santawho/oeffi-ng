@@ -145,9 +145,12 @@ public class AutoCompleteLocationAdapter extends BaseAdapter implements Filterab
             filterStations = false;
             filterAddresses = false;
             filterPois = false;
-            filterStationButton.setBackgroundColor(0);
-            filterAddressButton.setBackgroundColor(0);
-            filterPoiButton.setBackgroundColor(0);
+            if (filterStationButton != null)
+                filterStationButton.setBackgroundColor(0);
+            if (filterAddressButton != null)
+                filterAddressButton.setBackgroundColor(0);
+            if (filterPoiButton != null)
+                filterPoiButton.setBackgroundColor(0);
         }
 
         @Override
