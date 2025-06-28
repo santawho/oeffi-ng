@@ -15,21 +15,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package de.schildbach.oeffi.util;
+package de.schildbach.oeffi.util.locationview;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.Handler;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import de.schildbach.oeffi.R;
-import de.schildbach.oeffi.directions.LocationView;
+import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
+import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.Product;
 
 public class AutoCompleteLocationsHandler {
@@ -37,7 +39,8 @@ public class AutoCompleteLocationsHandler {
         public boolean success;
         public Location location;
     }
-    private final AutoCompleteLocationAdapter autoCompleteLocationAdapter;
+    private final Activity activity;
+    private final NetworkId network;
     private final Handler handler;
     private final Set<Product> preferredProducts;
     private final AtomicInteger numAwaitedLocations = new AtomicInteger();
@@ -47,10 +50,12 @@ public class AutoCompleteLocationsHandler {
     private ProgressDialog progressDialog;
 
     public AutoCompleteLocationsHandler(
-            final AutoCompleteLocationAdapter autoCompleteLocationAdapter,
+            final Activity activity,
+            final NetworkId network,
             final Handler handler,
             final Set<Product> preferredProducts) {
-        this.autoCompleteLocationAdapter = autoCompleteLocationAdapter;
+        this.activity = activity;
+        this.network = network;
         this.handler = handler;
         this.preferredProducts = preferredProducts;
     }
@@ -64,10 +69,13 @@ public class AutoCompleteLocationsHandler {
             locationView.setText(constraint);
 
         jobs.add(() -> {
-            final List<Location> locations = autoCompleteLocationAdapter.collectSuggestions(constraint);
+            final List<Location> locations = LocationSuggestionsCollector.collectSuggestions(
+                    constraint,
+                    EnumSet.of(LocationType.STATION, LocationType.ADDRESS, LocationType.POI),
+                    network);
             final Location location = getMatchingLocation(locations);
             if (location != null) {
-                getActivity().runOnUiThread(() -> {
+                activity.runOnUiThread(() -> {
                     if (locationView != null)
                         locationView.setLocation(location);
                     jobFinished(location);
@@ -115,8 +123,8 @@ public class AutoCompleteLocationsHandler {
         numAwaitedLocations.set(numJobs);
         numBadLocations.set(numJobs);
 
-        progressDialog = ProgressDialog.show(getActivity(), null,
-                getActivity().getString(R.string.locations_query_progress),
+        progressDialog = ProgressDialog.show(activity, null,
+                activity.getString(R.string.locations_query_progress),
                 true, true, dialog -> {
                     // cancelled
                     numAwaitedLocations.set(-1); // set so that it never will decrement to zero
@@ -140,9 +148,5 @@ public class AutoCompleteLocationsHandler {
                 readyListener.accept(result);
             }
         }
-    }
-
-    private Activity getActivity() {
-        return autoCompleteLocationAdapter.getActivity();
     }
 }

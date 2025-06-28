@@ -90,8 +90,8 @@ import de.schildbach.oeffi.stations.FavoriteUtils;
 import de.schildbach.oeffi.stations.StationContextMenu;
 import de.schildbach.oeffi.stations.StationDetailsActivity;
 import de.schildbach.oeffi.stations.StationsActivity;
-import de.schildbach.oeffi.util.AutoCompleteLocationAdapter;
-import de.schildbach.oeffi.util.AutoCompleteLocationsHandler;
+import de.schildbach.oeffi.util.locationview.AutoCompleteLocationAdapter;
+import de.schildbach.oeffi.util.locationview.AutoCompleteLocationsHandler;
 import de.schildbach.oeffi.util.ConnectivityBroadcastReceiver;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.DividerItemDecoration;
@@ -103,6 +103,8 @@ import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.oeffi.util.ZoomControls;
+import de.schildbach.oeffi.util.locationview.LocationTextView;
+import de.schildbach.oeffi.util.locationview.LocationView;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.NetworkProvider.Capability;
@@ -181,7 +183,6 @@ public class DirectionsActivity extends OeffiMainActivity implements
     private final Handler handler = new Handler();
     private BroadcastReceiver connectivityReceiver;
     private BroadcastReceiver tickReceiver;
-    private AutoCompleteLocationAdapter autoCompleteLocationAdapter;
 
     private static final int DIALOG_CLEAR_HISTORY = 1;
 
@@ -418,8 +419,6 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
         initLayoutTransitions();
 
-        autoCompleteLocationAdapter = new AutoCompleteLocationAdapter(this, network);
-
         final LocationView.Listener locationChangeListener = (view) -> {
             final Location location = view.getLocation();
             if (location != null)
@@ -431,7 +430,6 @@ public class DirectionsActivity extends OeffiMainActivity implements
         };
 
         viewFromLocation = findViewById(R.id.directions_from);
-        viewFromLocation.setAdapter(autoCompleteLocationAdapter);
         viewFromLocation.setListener(locationChangeListener);
         viewFromLocation.setContextMenuItemClickListener(new LocationContextMenuItemClickListener(viewFromLocation,
                 requestLocationPermissionFromLauncher, pickContactFromLauncher, pickStationFromLauncher));
@@ -439,13 +437,11 @@ public class DirectionsActivity extends OeffiMainActivity implements
         viewFromLocation.setStationAsAddressEnabled(true);
 
         viewViaLocation = findViewById(R.id.directions_via);
-        viewViaLocation.setAdapter(autoCompleteLocationAdapter);
         viewViaLocation.setListener(locationChangeListener);
         viewViaLocation.setContextMenuItemClickListener(new LocationContextMenuItemClickListener(viewViaLocation,
                 requestLocationPermissionViaLauncher, pickContactViaLauncher, pickStationViaLauncher));
 
         viewToLocation = findViewById(R.id.directions_to);
-        viewToLocation.setAdapter(autoCompleteLocationAdapter);
         viewToLocation.setListener(locationChangeListener);
         viewToLocation.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_GO) {
@@ -461,6 +457,8 @@ public class DirectionsActivity extends OeffiMainActivity implements
         viewToLocation.setContextMenuItemClickListener(new LocationContextMenuItemClickListener(viewToLocation,
                 requestLocationPermissionToLauncher, pickContactToLauncher, pickStationToLauncher));
         viewToLocation.setStationAsAddressEnabled(true);
+
+        setupAutoCompleteLocationAdapters();
 
         viewProducts = findViewById(R.id.directions_products);
         viewProductToggles.add(findViewById(R.id.directions_products_i));
@@ -759,7 +757,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
         if (command != null) {
             final AutoCompleteLocationsHandler autoCompleteLocationsHandler = new AutoCompleteLocationsHandler(
-                    autoCompleteLocationAdapter, backgroundHandler,
+                    this, network, backgroundHandler,
                     getProductToggles());
             autoCompleteLocationsHandler.addJob(command.fromText, viewFromLocation);
             autoCompleteLocationsHandler.addJob(command.toText, viewToLocation);
@@ -853,13 +851,9 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
     @Override
     protected void onChangeNetwork(final NetworkId network) {
-        autoCompleteLocationAdapter = new AutoCompleteLocationAdapter(this, network);
-
-        viewFromLocation.setAdapter(autoCompleteLocationAdapter);
+        setupAutoCompleteLocationAdapters();
         viewFromLocation.reset();
-        viewViaLocation.setAdapter(autoCompleteLocationAdapter);
         viewViaLocation.reset();
-        viewToLocation.setAdapter(autoCompleteLocationAdapter);
         viewToLocation.reset();
 
         viewBike.setChecked(false);
@@ -875,6 +869,12 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
         updateGUI();
         setActionBarSecondaryTitleFromNetwork();
+    }
+
+    private void setupAutoCompleteLocationAdapters() {
+        viewFromLocation.setAdapter(new AutoCompleteLocationAdapter(viewFromLocation, network));
+        viewViaLocation.setAdapter(new AutoCompleteLocationAdapter(viewViaLocation, network));
+        viewToLocation.setAdapter(new AutoCompleteLocationAdapter(viewToLocation, network));
     }
 
     private boolean initProductToggles() {
@@ -1452,7 +1452,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
     private class AmbiguousLocationAdapter extends ArrayAdapter<Location> {
         public AmbiguousLocationAdapter(final Context context, final List<Location> autocompletes) {
-            super(context, R.layout.directions_location_dropdown_entry, autocompletes);
+            super(context, R.layout.location_dropdown_entry, autocompletes);
         }
 
         @Override

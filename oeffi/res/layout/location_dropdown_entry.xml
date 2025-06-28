@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:descendantFocusability="blocksDescendants"
+    style="?android:attr/dropDownItemStyle"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingVertical="@dimen/text_padding_vertical_cram"
+    android:background="@color/bg_level0"
+    >
+
+    <de.schildbach.oeffi.util.locationview.LocationTextView
+        android:id="@+id/location_dropdown_entry_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center_vertical|start"
+        android:drawablePadding="@dimen/text_padding_horizontal_lax"
+        android:drawableTint="@color/fg_less_significant"
+        android:minHeight="52dp"
+        android:paddingHorizontal="@dimen/text_padding_horizontal_lax"
+        android:paddingVertical="@dimen/text_padding_vertical_lax"
+        android:textSize="@dimen/font_size_large" />
+
+    <ImageButton
+        android:id="@+id/location_view_filter_station"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:paddingHorizontal="@dimen/text_padding_horizontal_cram"
+        android:paddingVertical="@dimen/text_padding_vertical_lax"
+        android:src="@drawable/ic_station_grey600_24dp"/>
+
+    <ImageButton
+        android:id="@+id/location_view_filter_address"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:paddingHorizontal="@dimen/text_padding_horizontal_cram"
+        android:paddingVertical="@dimen/text_padding_vertical_lax"
+        android:src="@drawable/ic_place_grey600_24dp"/>
+
+    <ImageButton
+        android:id="@+id/location_view_filter_poi"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:paddingHorizontal="@dimen/text_padding_horizontal_cram"
+        android:paddingVertical="@dimen/text_padding_vertical_lax"
+        android:src="@drawable/ic_flag_grey600_24dp"/>
+
+</LinearLayout>

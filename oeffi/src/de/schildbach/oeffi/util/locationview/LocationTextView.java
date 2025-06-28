@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package de.schildbach.oeffi.directions;
+package de.schildbach.oeffi.util.locationview;
 
 import android.content.Context;
 import android.text.Html;

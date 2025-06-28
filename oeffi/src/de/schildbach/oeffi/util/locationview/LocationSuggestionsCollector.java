@@ -1,41 +1,14 @@
-/*
- * Copyright the original author or authors.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
+package de.schildbach.oeffi.util.locationview;
 
-package de.schildbach.oeffi.util;
-
-import android.app.Activity;
 import android.database.Cursor;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.Filter;
-import android.widget.Filterable;
-
-import androidx.annotation.NonNull;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.EnumSet;
+import java.util.AbstractSet;
 import java.util.LinkedList;
 import java.util.List;
 
+import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
-import de.schildbach.oeffi.R;
-import de.schildbach.oeffi.directions.LocationTextView;
 import de.schildbach.oeffi.directions.QueryHistoryProvider;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.pte.NetworkId;
@@ -45,76 +18,29 @@ import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.Point;
 import de.schildbach.pte.dto.SuggestLocationsResult;
 
-public class AutoCompleteLocationAdapter extends BaseAdapter implements Filterable {
-    private final Activity activity;
-    private final NetworkId network;
-    private List<Location> locations = new LinkedList<>();
-
-    public AutoCompleteLocationAdapter(final Activity context, final NetworkId network) {
-        this.activity = context;
-        this.network = network;
-    }
-
-    public Activity getActivity() {
-        return activity;
-    }
-
-    public int getCount() {
-        return locations.size();
-    }
-
-    public Object getItem(final int position) {
-        return locations.get(position);
-    }
-
-    public long getItemId(final int position) {
-        return position;
-    }
-
-    public View getView(final int position, View row, final ViewGroup parent) {
-        if (row == null)
-            row = activity.getLayoutInflater().inflate(R.layout.directions_location_dropdown_entry, null);
-
-        final Location location = locations.get(position);
-        ((LocationTextView) row).setLocation(location);
-
-        return row;
-    }
-
-    public Filter getFilter() {
-        return new Filter() {
-            @Override
-            protected FilterResults performFiltering(final CharSequence constraint) {
-                final FilterResults filterResults = new FilterResults();
-                final List<Location> results = collectSuggestions(constraint);
-                if (results != null) {
-                    filterResults.values = results;
-                    filterResults.count = results.size();
-                }
-                return filterResults;
-            }
-
-            @Override
-            protected void publishResults(final CharSequence constraint, final FilterResults filterResults) {
-                if (filterResults.values != null) {
-                    locations = (List<Location>) filterResults.values;
-                    notifyDataSetChanged();
-                }
-            }
-        };
-    }
-
-    public List<Location> collectSuggestions(final CharSequence constraint) {
+public class LocationSuggestionsCollector {
+    public static List<Location> collectSuggestions(
+            final CharSequence constraint,
+            final AbstractSet<LocationType> suggestedLocationTypes,
+            final NetworkId network) {
         if (constraint == null)
             return null;
         final String constraintStr = constraint.toString().trim();
         if (constraintStr.isEmpty())
             return null;
+        if (suggestedLocationTypes.isEmpty()) {
+            suggestedLocationTypes.add(LocationType.STATION);
+            suggestedLocationTypes.add(LocationType.ADDRESS);
+            suggestedLocationTypes.add(LocationType.POI);
+        }
+        final boolean selectStations = suggestedLocationTypes.contains(LocationType.STATION);
+        final boolean selectAddresses = suggestedLocationTypes.contains(LocationType.ADDRESS);
+        final boolean selectPOIs = suggestedLocationTypes.contains(LocationType.POI);
         try {
             final List<Location> results = new LinkedList<>();
 
             // local autocomplete
-            final Cursor cursor = activity.getContentResolver().query(
+            final Cursor cursor = Application.getInstance().getContentResolver().query(
                     QueryHistoryProvider.CONTENT_URI().buildUpon().appendPath(network.name())
                             .appendQueryParameter(QueryHistoryProvider.QUERY_PARAM_Q, constraintStr)
                             .build(),
@@ -171,36 +97,23 @@ public class AutoCompleteLocationAdapter extends BaseAdapter implements Filterab
 
             // remote autocomplete
             if (constraint.length() >= 3) {
-                final NetworkProvider networkProvider = getProvider();
-                final EnumSet<LocationType> suggestedLocationTypes = EnumSet
-//                        .of(LocationType.STATION, LocationType.POI, LocationType.ADDRESS);
-                        .of(LocationType.STATION, LocationType.ADDRESS);
+                final NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
                 final SuggestLocationsResult suggestLocationsResult = networkProvider
                         .suggestLocations(constraint, suggestedLocationTypes, 15);
                 if (suggestLocationsResult.status == SuggestLocationsResult.Status.OK) {
                     final List<Location> foundLocations = suggestLocationsResult.getLocations();
-                    final List<Location> stations = new ArrayList<>();
-                    final List<Location> addresses = new ArrayList<>();
-                    final List<Location> others = new ArrayList<>();
                     for (Location location : foundLocations) {
                         if (results.contains(location))
                             continue;
-                        results.add(location);
+                        boolean use = false;
                         switch (location.type) {
-                            case STATION:
-                                stations.add(location);
-                                break;
-                            case ADDRESS:
-                                addresses.add(location);
-                                break;
-                            default:
-                                others.add(location);
-                                break;
+                            case STATION: use = selectStations; break;
+                            case ADDRESS: use = selectAddresses; break;
+                            case POI: use = selectPOIs; break;
                         }
+                        if (use)
+                            results.add(location);
                     }
-//                    results.addAll(stations);
-//                    results.addAll(addresses);
-//                    results.addAll(others);
                 }
             }
 
@@ -210,10 +123,4 @@ public class AutoCompleteLocationAdapter extends BaseAdapter implements Filterab
             return null;
         }
     }
-
-    @NonNull
-    public NetworkProvider getProvider() {
-        return NetworkProviderFactory.provider(network);
-    }
 }
-

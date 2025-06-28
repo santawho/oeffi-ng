@@ -81,8 +81,7 @@ import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.stations.list.JourneyClickListener;
 import de.schildbach.oeffi.stations.list.StationContextMenuItemListener;
 import de.schildbach.oeffi.stations.list.StationsAdapter;
-import de.schildbach.oeffi.util.AutoCompleteLocationAdapter;
-import de.schildbach.oeffi.util.AutoCompleteLocationsHandler;
+import de.schildbach.oeffi.util.locationview.AutoCompleteLocationsHandler;
 import de.schildbach.oeffi.util.ConnectivityBroadcastReceiver;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.DividerItemDecoration;
@@ -687,10 +686,9 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
         if (command != null) {
             startBackgroundHandler();
-            final AutoCompleteLocationAdapter autoCompleteLocationAdapter = new AutoCompleteLocationAdapter(this, network);
             final AutoCompleteLocationsHandler autoCompleteLocationsHandler = new AutoCompleteLocationsHandler(
-                    autoCompleteLocationAdapter, backgroundHandler,
-                    autoCompleteLocationAdapter.getProvider().defaultProducts());
+                    this, network, backgroundHandler,
+                    NetworkProviderFactory.provider(network).defaultProducts());
             autoCompleteLocationsHandler.addJob(command.atText, null);
             final Date time = command.time == null ? null : command.time.date();
             autoCompleteLocationsHandler.start(result -> {

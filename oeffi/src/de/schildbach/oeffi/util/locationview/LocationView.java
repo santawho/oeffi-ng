@@ -15,30 +15,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package de.schildbach.oeffi.directions;
+package de.schildbach.oeffi.util.locationview;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
-import android.graphics.Canvas;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Parcelable;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
-import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
-import android.widget.Filterable;
-import android.widget.FrameLayout;
-import android.widget.ListAdapter;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView.OnEditorActionListener;
 import com.google.common.base.Strings;
@@ -59,7 +53,7 @@ import de.schildbach.pte.dto.Point;
 import javax.annotation.Nullable;
 import java.util.Locale;
 
-public class LocationView extends FrameLayout implements LocationHelper.Callback {
+public class LocationView extends LinearLayout implements LocationHelper.Callback {
     private static final Logger log = LoggerFactory.getLogger(LocationView.class);
 
     public interface Listener {
@@ -73,10 +67,11 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
     private Listener listener;
 
     private AutoCompleteTextView textView;
-    private View menuView;
-    private View actionView;
-    private View modeView;
-    private MultiDrawable leftDrawable, rightDrawable;
+    private ImageButton menuButton;
+    private ImageButton clearButton;
+    private ImageButton modeButton;
+    private AutoCompleteLocationAdapter autoCompleteLocationAdapter;
+    private MultiDrawable leftDrawable;
     private TextWatcher textChangedListener;
     private int hintRes = 0;
     private String hint;
@@ -98,13 +93,12 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
 
     public LocationView(final Context context, final AttributeSet attrs, final int defStyle) {
         super(context, attrs, defStyle);
+        setOrientation(HORIZONTAL);
 
         res = context.getResources();
         locationHelper = new LocationHelper((LocationManager) context.getSystemService(Context.LOCATION_SERVICE), this);
 
-//        final TypedArray ta = context.obtainStyledAttributes(new int[] { android.R.attr.selectableItemBackground });
-//        selectableItemBackground = ta.getDrawable(0);
-//        ta.recycle();
+        setup(context);
     }
 
     public void setStationAsAddressEnabled(final boolean stationAsAddressEnabled) {
@@ -145,41 +139,17 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
     }
 
     @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
+    protected void onLayout(final boolean changed, final int l, final int t, final int r, final int b) {
+        super.onLayout(changed, l, t, r, b);
 
-        final Context context = getContext();
+        textView.setDropDownHorizontalOffset(-textView.getLeft());
+        textView.setDropDownWidth(this.getWidth());
+        textView.setDropDownVerticalOffset((int) res.getDimension(R.dimen.text_padding_vertical_verylax));
+    }
 
-        textView = new AutoCompleteTextView(context) {
-            final Handler handler = new Handler();
-
-            @Override
-            protected void onSizeChanged(final int w, final int h, final int oldw, final int oldh) {
-                handler.post(() -> {
-                    menuView.requestLayout();
-                    actionView.requestLayout();
-                });
-                super.onSizeChanged(w, h, oldw, oldh);
-            }
-
-            @Override
-            protected void onDraw(final Canvas canvas) {
-                super.onDraw(canvas);
-                log.debug("isPopupShowing = {}", isPopupShowing());
-            }
-        };
-        textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, res.getDimension(R.dimen.font_size_large));
-        textView.setSingleLine();
-        textView.setMaxLines(3);
-        textView.setHorizontallyScrolling(false);
-        textView.setSelectAllOnFocus(true);
-        textView.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-        textView.setThreshold(0);
-        textView.setCompoundDrawablePadding(res.getDimensionPixelSize(R.dimen.text_padding_horizontal_lax));
-        final int paddingCram = res.getDimensionPixelSize(R.dimen.text_padding_horizontal_cram);
-        final int paddingLax = res.getDimensionPixelSize(R.dimen.text_padding_horizontal_verylax);
-        textView.setPadding(paddingLax, paddingCram, paddingLax, paddingCram);
-        textView.setDropDownVerticalOffset(res.getDimensionPixelSize(R.dimen.text_padding_vertical_verylax));
+    private void setup(final Context context) {
+        inflate(context, R.layout.location_view, this);
+        textView = findViewById(R.id.location_view_text);
         textView.setOnItemClickListener((parent, view, position, id) -> {
             // workaround for NPE
             if (parent == null)
@@ -196,18 +166,6 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
             fireChanged();
             afterLocationViewInput(false);
         });
-
-        leftDrawable = new MultiDrawable(context);
-        leftDrawable.add(R.drawable.space_24dp);
-        leftDrawable.add(R.drawable.ic_station_grey600_24dp);
-        leftDrawable.add(R.drawable.ic_flag_grey600_24dp);
-        leftDrawable.add(R.drawable.ic_place_grey600_24dp);
-        leftDrawable.add(R.drawable.ic_location_searching_grey600_24dp);
-        leftDrawable.add(R.drawable.ic_gps_fixed_grey600_24dp);
-        rightDrawable = new MultiDrawable(context);
-        rightDrawable.add(R.drawable.location_view_menu);
-        rightDrawable.add(R.drawable.location_view_actions);
-        textView.setCompoundDrawablesWithIntrinsicBounds(leftDrawable, null, rightDrawable, null);
 
         textChangedListener = new TextWatcher() {
             public void afterTextChanged(final Editable s) {
@@ -227,24 +185,15 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
         };
         textView.addTextChangedListener(textChangedListener);
 
-        final TypedArray ta = context.obtainStyledAttributes(new int[] { android.R.attr.selectableItemBackground });
-
-        menuView = new View(context) {
-            @Override
-            protected void onMeasure(final int wMeasureSpec, final int hMeasureSpec) {
-                final int paddingRight = textView.getPaddingRight();
-                final int compoundPaddingRight = textView.getCompoundPaddingRight();
-                final int compoundDrawablePadding = textView.getCompoundDrawablePadding();
-                final int iconWidth = (compoundPaddingRight - compoundDrawablePadding - paddingRight) / 4;
-                final int width = iconWidth + compoundDrawablePadding + paddingRight;
-                final int minHeight = res.getDimensionPixelOffset(R.dimen.directions_form_location_min_height);
-                final int height = Math.max(textView.getMeasuredHeight(), minHeight);
-                setMeasuredDimension(width, height);
-            }
-        };
-        menuView.setContentDescription(context.getString(R.string.directions_location_view_menu_description));
-        menuView.setBackground(ta.getDrawable(0));
-        menuView.setOnClickListener((view) -> {
+        leftDrawable = new MultiDrawable(context);
+        leftDrawable.add(R.drawable.space_24dp);
+        leftDrawable.add(R.drawable.ic_station_grey600_24dp);
+        leftDrawable.add(R.drawable.ic_flag_grey600_24dp);
+        leftDrawable.add(R.drawable.ic_place_grey600_24dp);
+        leftDrawable.add(R.drawable.ic_location_searching_grey600_24dp);
+        leftDrawable.add(R.drawable.ic_gps_fixed_grey600_24dp);
+        menuButton = findViewById(R.id.location_view_menu_button);
+        menuButton.setOnClickListener((view) -> {
             final PopupMenu popupMenu = new PopupMenu(getContext(), view);
             popupMenu.inflate(R.menu.directions_location_context);
             PopupHelper.setForceShowIcon(popupMenu);
@@ -252,60 +201,23 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
             popupMenu.show();
         });
 
-        actionView = new View(context) {
-            @Override
-            protected void onMeasure(final int wMeasureSpec, final int hMeasureSpec) {
-                final int paddingRight = textView.getPaddingRight();
-                final int compoundPaddingRight = textView.getCompoundPaddingRight();
-                final int compoundDrawablePadding = textView.getCompoundDrawablePadding();
-                final int width = compoundPaddingRight;
-                final int minHeight = res.getDimensionPixelOffset(R.dimen.directions_form_location_min_height);
-                final int height = Math.max(textView.getMeasuredHeight(), minHeight);
-                setMeasuredDimension(width, height);
-            }
-        };
-        actionView.setContentDescription(context.getString(R.string.directions_location_view_action_description));
-        actionView.setBackground(ta.getDrawable(0));
-        actionView.setOnClickListener((view) -> {
+        clearButton = findViewById(R.id.location_view_clear_button);
+        clearButton.setOnClickListener((view) -> {
             reset();
             textView.requestFocus();
         });
 
-        modeView = new View(context) {
-            @Override
-            protected void onMeasure(final int wMeasureSpec, final int hMeasureSpec) {
-                final int paddingLeft = textView.getPaddingLeft();
-                final int totalPaddingLeft = textView.getTotalPaddingLeft();
-                final int compoundPaddingLeft = textView.getCompoundPaddingLeft();
-                final int compoundDrawablePadding = textView.getCompoundDrawablePadding();
-                final int width = compoundPaddingLeft;
-                final int minHeight = res.getDimensionPixelOffset(R.dimen.directions_form_location_min_height);
-                final int height = Math.max(textView.getMeasuredHeight(), minHeight);
-                setMeasuredDimension(width, height);
-            }
-        };
-        modeView.setContentDescription(context.getString(R.string.directions_location_view_mode_description));
-        modeView.setBackground(ta.getDrawable(0));
-        modeView.setOnClickListener((view) -> {
+        modeButton = findViewById(R.id.location_view_mode_button);
+        modeButton.setImageDrawable(leftDrawable);
+        modeButton.setOnClickListener((view) -> {
             if (locationType == LocationType.STATION && stationAsAddressEnabled) {
                 stationAsAddress = !stationAsAddress;
                 updateAppearance();
             }
         });
 
-        ta.recycle();
-
-        addView(textView, new LocationView.LayoutParams(LocationView.LayoutParams.MATCH_PARENT,
-                LocationView.LayoutParams.WRAP_CONTENT, Gravity.CENTER_VERTICAL));
-        addView(menuView, new LocationView.LayoutParams(LocationView.LayoutParams.WRAP_CONTENT,
-                LocationView.LayoutParams.MATCH_PARENT, Gravity.RIGHT | Gravity.CENTER_VERTICAL));
-        addView(actionView, new LocationView.LayoutParams(LocationView.LayoutParams.WRAP_CONTENT,
-                LocationView.LayoutParams.MATCH_PARENT, Gravity.RIGHT | Gravity.CENTER_VERTICAL));
-        addView(modeView, new LocationView.LayoutParams(LocationView.LayoutParams.WRAP_CONTENT,
-                LocationView.LayoutParams.MATCH_PARENT, Gravity.LEFT | Gravity.CENTER_VERTICAL));
-
-        setEnabled(isEnabled());
         updateAppearance();
+        setEnabled(isEnabled());
     }
 
     @Override
@@ -315,10 +227,10 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
             textView.setEnabled(enabled);
             textView.setTextColor(getResources().getColor(enabled ? R.color.fg_significant : R.color.fg_insignificant));
         }
-        if (menuView != null)
-            menuView.setEnabled(enabled);
-        if (actionView != null)
-            actionView.setEnabled(enabled);
+        if (menuButton != null)
+            menuButton.setEnabled(enabled);
+        if (clearButton != null)
+            clearButton.setEnabled(enabled);
     }
 
     public void setText(final CharSequence text) {
@@ -340,8 +252,13 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
         updateAppearance();
     }
 
-    public <T extends ListAdapter & Filterable> void setAdapter(final T autoCompleteAdapter) {
+    public void setAdapter(final AutoCompleteLocationAdapter autoCompleteAdapter) {
+        this.autoCompleteLocationAdapter = autoCompleteAdapter;
         textView.setAdapter(autoCompleteAdapter);
+    }
+
+    public AutoCompleteLocationAdapter getAutoCompleteLocationAdapter() {
+        return autoCompleteLocationAdapter;
     }
 
     public void setImeOptions(final int imeOptions) {
@@ -460,19 +377,6 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
             return new Location(locationType, id, coord, name != null ? place : null, name);
     }
 
-    private final OnClickListener contextButtonClickListener = (view) -> {
-        final PopupMenu popupMenu = new PopupMenu(getContext(), view);
-        popupMenu.inflate(R.menu.directions_location_context);
-        PopupHelper.setForceShowIcon(popupMenu);
-        popupMenu.setOnMenuItemClickListener(contextMenuItemClickListener);
-        popupMenu.show();
-    };
-
-    private final OnClickListener clearButtonClickListener = (view) -> {
-        reset();
-        textView.requestFocus();
-    };
-
     private void updateAppearance() {
         if (locationType == LocationType.COORD && coord == null)
             leftDrawable.selectDrawableByResId(R.drawable.ic_location_searching_grey600_24dp);
@@ -483,21 +387,15 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
 
         if (getText() == null) {
             if (contextMenuItemClickListener == null) {
-                rightDrawable.selectDrawableByResId(R.drawable.location_view_actions);
-                menuView.setVisibility(View.GONE);
-                actionView.setVisibility(View.GONE);
-//                chooseView.setOnClickListener(null);
+                menuButton.setVisibility(View.GONE);
             } else {
-                rightDrawable.selectDrawableByResId(R.drawable.location_view_menu);
-                menuView.setVisibility(View.VISIBLE);
-                actionView.setVisibility(View.GONE);
-//                chooseView.setOnClickListener(contextButtonClickListener);
+                menuButton.setVisibility(View.VISIBLE);
             }
+            clearButton.setVisibility(View.GONE);
         } else {
-            rightDrawable.selectDrawableByResId(R.drawable.location_view_actions);
-            menuView.setVisibility(View.GONE);
-            actionView.setVisibility(View.VISIBLE);
-//            chooseView.setOnClickListener(clearButtonClickListener);
+            menuButton.setVisibility(View.GONE);
+            clearButton.setVisibility(View.VISIBLE);
+            clearButton.setVisibility(View.VISIBLE);
         }
 
         if (hint != null)
@@ -506,6 +404,11 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
             textView.setHint(hintRes);
         else
             textView.setHint(null);
+    }
+
+    public void refreshAutoCompleteResults() {
+        // only from API 29 ... textView.refreshAutoCompleteResults();
+        textView.setText(textView.getText());
     }
 
     private void afterLocationViewInput(final boolean blockActionGo) {
@@ -566,5 +469,9 @@ public class LocationView extends FrameLayout implements LocationHelper.Callback
             return R.drawable.ic_gps_fixed_grey600_24dp;
         else
             throw new IllegalStateException("cannot handle: " + locationType);
+    }
+
+    public Activity getActivity() {
+        return (Activity) getContext();
     }
 }

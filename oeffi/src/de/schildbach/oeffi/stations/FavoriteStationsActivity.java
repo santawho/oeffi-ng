@@ -35,11 +35,11 @@ import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.DirectionsActivity;
-import de.schildbach.oeffi.directions.LocationView;
+import de.schildbach.oeffi.util.locationview.LocationView;
 import de.schildbach.oeffi.stations.list.FavoriteStationsAdapter;
 import de.schildbach.oeffi.stations.list.StationClickListener;
 import de.schildbach.oeffi.stations.list.StationContextMenuItemListener;
-import de.schildbach.oeffi.util.AutoCompleteLocationAdapter;
+import de.schildbach.oeffi.util.locationview.AutoCompleteLocationAdapter;
 import de.schildbach.oeffi.util.DividerItemDecoration;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.pte.NetworkId;
@@ -127,7 +127,7 @@ public class FavoriteStationsActivity extends OeffiActivity
         viewNewLocation = findViewById(R.id.favorites_new);
         viewNewLocation.setVisibility(View.GONE);
         viewNewLocation.setHint(R.string.stations_favorite_stations_add_location_hint);
-        viewNewLocation.setAdapter(new AutoCompleteLocationAdapter(this, network));
+        viewNewLocation.setAdapter(new AutoCompleteLocationAdapter(viewNewLocation, network));
         viewNewLocation.setOnEditorActionListener((v, actionId, event) -> {
             final Location location = viewNewLocation.getLocation();
             viewNewLocation.setVisibility(View.GONE);

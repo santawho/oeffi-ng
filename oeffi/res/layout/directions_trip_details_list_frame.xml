@@ -58,13 +58,13 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal">
-                            <de.schildbach.oeffi.directions.LocationTextView
+                            <de.schildbach.oeffi.util.locationview.LocationTextView
                                 android:id="@+id/directions_trip_details_location_from"
                                 android:layout_width="0px"
                                 android:layout_height="match_parent"
                                 android:layout_weight="50"
                                 android:drawablePadding="@dimen/text_padding_horizontal_lax" />
-                            <de.schildbach.oeffi.directions.LocationTextView
+                            <de.schildbach.oeffi.util.locationview.LocationTextView
                                 android:id="@+id/directions_trip_details_location_to"
                                 android:layout_width="0px"
                                 android:layout_height="match_parent"

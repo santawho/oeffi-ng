@@ -32,7 +32,7 @@ import com.daimajia.swipe.SimpleSwipeListener;
 import com.daimajia.swipe.SwipeLayout;
 
 import de.schildbach.oeffi.R;
-import de.schildbach.oeffi.directions.LocationTextView;
+import de.schildbach.oeffi.util.locationview.LocationTextView;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
 import de.schildbach.oeffi.stations.StationContextMenu;
 import de.schildbach.oeffi.util.Formats;

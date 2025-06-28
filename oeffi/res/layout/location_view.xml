@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageButton
+        android:id="@+id/location_view_mode_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:paddingHorizontal="@dimen/text_padding_horizontal_lax"
+        android:paddingVertical="@dimen/text_padding_vertical_verylax"
+        android:contentDescription="@string/directions_location_view_mode_description"/>
+
+    <AutoCompleteTextView
+        android:id="@+id/location_view_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:singleLine="true"
+        android:maxLines="3"
+        android:scrollHorizontally="false"
+        android:selectAllOnFocus="true"
+        android:inputType="text|textNoSuggestions"
+        android:completionThreshold="0"
+        android:textSize="@dimen/font_size_large"
+        android:paddingHorizontal="@dimen/text_padding_horizontal_lax"
+        android:paddingVertical="@dimen/text_padding_vertical_verylax"
+        />
+
+    <ImageButton
+        android:id="@+id/location_view_menu_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:paddingHorizontal="@dimen/text_padding_horizontal_lax"
+        android:paddingVertical="@dimen/text_padding_vertical_verylax"
+        android:contentDescription="@string/directions_location_view_menu_description"
+        android:src="@drawable/ic_more_vert_grey600_24dp"/>
+
+    <ImageButton
+        android:id="@+id/location_view_clear_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:paddingHorizontal="@dimen/text_padding_horizontal_lax"
+        android:paddingVertical="@dimen/text_padding_vertical_verylax"
+        android:contentDescription="@string/directions_location_view_clear_description"
+        android:src="@drawable/ic_clear_grey600_24dp"/>
+
+</LinearLayout>

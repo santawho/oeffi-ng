@@ -95,6 +95,7 @@ import de.schildbach.oeffi.util.LocationHelper;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.ToggleImageButton;
+import de.schildbach.oeffi.util.locationview.LocationTextView;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.Fare;

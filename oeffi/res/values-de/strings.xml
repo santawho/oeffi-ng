@@ -198,7 +198,7 @@
     <!-- directions query -->
     <string name="directions_location_view_coordinate">Koordinate</string>
     <string name="directions_location_view_menu_description">mehr</string>
-    <string name="directions_location_view_action_description">filtern oder löschen</string>
+    <string name="directions_location_view_clear_description">löschen</string>
     <string name="directions_location_view_mode_description">Typ wechseln</string>
     <string name="directions_from">Start der Verbindung</string>
     <string name="directions_via">Zwischenhalt</string>

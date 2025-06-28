@@ -45,7 +45,7 @@
                 android:layout_weight="3"
                 android:orientation="vertical">
 
-                <de.schildbach.oeffi.directions.LocationTextView
+                <de.schildbach.oeffi.util.locationview.LocationTextView
                     android:id="@+id/directions_query_history_entry_from"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -56,7 +56,7 @@
                     android:paddingRight="@dimen/text_padding_horizontal_cram"
                     android:paddingTop="@dimen/text_padding_vertical_verylax" />
 
-                <de.schildbach.oeffi.directions.LocationTextView
+                <de.schildbach.oeffi.util.locationview.LocationTextView
                     android:id="@+id/directions_query_history_entry_to"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
