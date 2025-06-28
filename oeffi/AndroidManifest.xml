@@ -199,13 +199,25 @@
             android:exported="false"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
 
+        <!-- NOTE on launchMode:
+            it was singleInstancePerTask,
+            but with sharing locations from GMaps it would always open a new task.
+            So it was changed to singleInstance.
+            But then, when
+            - from Directions go to Trip Overview
+            - put task to the background
+            - get task back to foreground
+            - go back from Trip Overview, should go to previous Directions
+            - BUT: closes the stack ???
+            Next attempt: singleTask
+            -->
         <activity
             android:name=".directions.DirectionsActivity"
             android:exported="true"
             android:configChanges="keyboard|keyboardHidden"
             android:icon="@mipmap/ic_oeffi_ng_directions_color_48dp"
             android:label="@string/app_name"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTask"
             android:taskAffinity="${applicationId}.directions"
             android:windowSoftInputMode="stateHidden"
             android:theme="@style/My.Theme.Splash">
