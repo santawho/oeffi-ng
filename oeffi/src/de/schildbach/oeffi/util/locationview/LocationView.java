@@ -414,7 +414,10 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
 
     public void refreshAutoCompleteResults() {
         // only from API 29 ... textView.refreshAutoCompleteResults();
+        final int selectionStart = textView.getSelectionStart();
+        final int selectionEnd = textView.getSelectionEnd();
         textView.setText(textView.getText());
+        textView.setSelection(selectionStart, selectionEnd);
     }
 
     private void afterLocationViewInput(final boolean blockActionGo) {
