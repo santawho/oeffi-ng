@@ -19,7 +19,6 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:singleLine="true"
-        android:maxLines="3"
         android:scrollHorizontally="false"
         android:selectAllOnFocus="true"
         android:inputType="text|textNoSuggestions"

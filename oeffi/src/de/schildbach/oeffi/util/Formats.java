@@ -128,18 +128,28 @@ public final class Formats {
     }
 
     public static String fullLocationNameIfDifferentPlace(final Location location, final Location refLocation) {
+        return fullLocationNameIfDifferentPlace(location, refLocation, false);
+    }
+
+    public static String fullLocationNameIfDifferentPlace(final Location location, final Location refLocation, boolean placeLast) {
         return location == null ? null
                 : (refLocation == null || refLocation.place == null || location.place == null || location.name == null)
                 ? location.uniqueShortName()
                 : location.place.equals(refLocation.place)
                 ? location.name
-                : fullLocationName(location);
+                : fullLocationName(location, placeLast);
     }
 
     public static String fullLocationName(final Location location) {
+        return fullLocationName(location, false);
+    }
+
+    public static String fullLocationName(final Location location, boolean placeLast) {
         return location == null ? null
                 : location.place == null || location.name == null
                 ? location.uniqueShortName()
+                : placeLast
+                ? location.name + ", " + location.place
                 : location.place + ", " + location.name;
     }
 

@@ -4,6 +4,7 @@ import android.database.Cursor;
 
 import java.io.IOException;
 import java.util.AbstractSet;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -96,26 +97,35 @@ public class LocationSuggestionsCollector {
             cursor.close();
 
             // remote autocomplete
-            if (constraint.length() >= 3) {
+            final int constraintLength = constraint.length();
+            if (constraintLength >= 3) {
+                final int maxLocations = constraintLength >= 8 ? 15 : constraintLength * 2;
                 final NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
                 final SuggestLocationsResult suggestLocationsResult = networkProvider
-                        .suggestLocations(constraint, suggestedLocationTypes, 15);
+                        .suggestLocations(constraint, suggestedLocationTypes, maxLocations);
                 if (suggestLocationsResult.status == SuggestLocationsResult.Status.OK) {
                     final List<Location> foundLocations = suggestLocationsResult.getLocations();
                     for (Location location : foundLocations) {
-                        if (results.contains(location))
-                            continue;
-                        boolean use = false;
-                        switch (location.type) {
-                            case STATION: use = selectStations; break;
-                            case ADDRESS: use = selectAddresses; break;
-                            case POI: use = selectPOIs; break;
-                        }
-                        if (use)
+                        if (!results.contains(location))
                             results.add(location);
                     }
                 }
             }
+
+            final List<Location> filteredResults = new ArrayList<>();
+            for (Location location : results) {
+                boolean use = false;
+                switch (location.type) {
+                    case STATION: use = selectStations; break;
+                    case ADDRESS: use = selectAddresses; break;
+                    case POI: use = selectPOIs; break;
+                }
+                if (use)
+                    filteredResults.add(location);
+            }
+
+            if (!filteredResults.isEmpty())
+                return filteredResults;
 
             return results;
         } catch (final IOException x) {

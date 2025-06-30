@@ -42,9 +42,9 @@ import org.slf4j.LoggerFactory;
 
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GeocoderThread;
 import de.schildbach.oeffi.util.LocationHelper;
-import de.schildbach.oeffi.util.MultiDrawable;
 import de.schildbach.oeffi.util.PopupHelper;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
@@ -71,11 +71,11 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
     private ImageButton clearButton;
     private ImageButton modeButton;
     private AutoCompleteLocationAdapter autoCompleteLocationAdapter;
-    private MultiDrawable leftDrawable;
     private TextWatcher textChangedListener;
     private int hintRes = 0;
     private String hint;
 
+    private Location location;
     private LocationType locationType = LocationType.ANY;
     private boolean stationAsAddress;
     private boolean stationAsAddressEnabled;
@@ -111,12 +111,14 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         state.putParcelable("super_state", super.onSaveInstanceState());
         state.putSerializable("location_type", locationType);
         state.putBoolean("station_as_address", stationAsAddress);
+        state.putBoolean("station_as_address_enabled", stationAsAddressEnabled);
         state.putString("location_id", id);
         state.putSerializable("location_coord", coord);
         state.putString("location_place", place);
         state.putString("text", getText());
         state.putString("hint", hint);
         state.putInt("hint_res", hintRes);
+        state.putSerializable("location", location);
         return state;
     }
 
@@ -127,12 +129,14 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
             super.onRestoreInstanceState(bundle.getParcelable("super_state"));
             locationType = ((LocationType) bundle.getSerializable("location_type"));
             stationAsAddress = bundle.getBoolean("station_as_address");
+            stationAsAddressEnabled = bundle.getBoolean("station_as_address_enabled");
             id = bundle.getString("location_id");
             coord = (Point) bundle.getSerializable("location_coord");
             place = bundle.getString("location_place");
             setText(bundle.getString("text"));
             hint = bundle.getString("hint");
             hintRes = bundle.getInt("hint_res");
+            location = (Location) bundle.getSerializable("location");
         } else {
             super.onRestoreInstanceState(state);
         }
@@ -185,13 +189,6 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         };
         textView.addTextChangedListener(textChangedListener);
 
-        leftDrawable = new MultiDrawable(context);
-        leftDrawable.add(R.drawable.space_24dp);
-        leftDrawable.add(R.drawable.ic_station_grey600_24dp);
-        leftDrawable.add(R.drawable.ic_flag_grey600_24dp);
-        leftDrawable.add(R.drawable.ic_place_grey600_24dp);
-        leftDrawable.add(R.drawable.ic_location_searching_grey600_24dp);
-        leftDrawable.add(R.drawable.ic_gps_fixed_grey600_24dp);
         menuButton = findViewById(R.id.location_view_menu_button);
         menuButton.setOnClickListener((view) -> {
             final PopupMenu popupMenu = new PopupMenu(getContext(), view);
@@ -208,7 +205,6 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         });
 
         modeButton = findViewById(R.id.location_view_mode_button);
-        modeButton.setImageDrawable(leftDrawable);
         modeButton.setOnClickListener((view) -> {
             if (locationType == LocationType.STATION && stationAsAddressEnabled) {
                 stationAsAddress = !stationAsAddress;
@@ -327,6 +323,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
     }
 
     public void setLocation(final Location location) {
+        this.location = location;
         if (location == null) {
             reset();
             return;
@@ -336,7 +333,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         id = location.id;
         coord = location.coord;
         place = location.place;
-        setText(location.uniqueShortName());
+        setText(Formats.makeBreakableStationName(Formats.fullLocationName(location, true)));
         updateAppearance();
 
         if (locationType == LocationType.COORD && coord != null) {
@@ -365,6 +362,13 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
     }
 
     public @Nullable Location getLocation() {
+        if (location != null) {
+            if (locationType == LocationType.STATION && stationAsAddress)
+                return new Location(LocationType.ADDRESS, location.id, location.coord, location.place, location.name);
+            else
+                return location;
+        }
+
         final String name = getText();
 
         if (locationType == LocationType.COORD && coord == null)
@@ -378,12 +382,14 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
     }
 
     private void updateAppearance() {
+        final int drawableId;
         if (locationType == LocationType.COORD && coord == null)
-            leftDrawable.selectDrawableByResId(R.drawable.ic_location_searching_grey600_24dp);
+            drawableId = R.drawable.ic_location_searching_grey600_24dp;
         else if (locationType == LocationType.STATION && stationAsAddress)
-            leftDrawable.selectDrawableByResId(LocationView.locationTypeIconRes(LocationType.ADDRESS));
+            drawableId = locationTypeIconRes(LocationType.ADDRESS);
         else
-            leftDrawable.selectDrawableByResId(LocationView.locationTypeIconRes(locationType));
+            drawableId = locationTypeIconRes(locationType);
+        modeButton.setImageDrawable(res.getDrawable(drawableId));
 
         if (getText() == null) {
             if (contextMenuItemClickListener == null) {
