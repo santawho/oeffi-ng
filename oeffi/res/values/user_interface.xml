@@ -19,8 +19,8 @@
     <string-array name="user_interface_location_selector_numrows_titles">
         <item>2 rows (4 items)</item>
         <item>3 rows (6 items)</item>
-        <item>4 rows (4 items)</item>
-        <item>5 rows (5 items)</item>
+        <item>4 rows (8 items)</item>
+        <item>5 rows (10 items)</item>
     </string-array>
     <string-array name="user_interface_location_selector_numrows_values">
         <item>2</item>

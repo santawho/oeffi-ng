@@ -19,8 +19,8 @@
     <string-array name="user_interface_location_selector_numrows_titles">
         <item>2 Zeilen (4 Einträge)</item>
         <item>3 Zeilen (6 Einträge)</item>
-        <item>4 Zeilen (4 Einträge)</item>
-        <item>5 Zeilen (5 Einträge)</item>
+        <item>4 Zeilen (8 Einträge)</item>
+        <item>5 Zeilen (10 Einträge)</item>
     </string-array>
 
     <string name="user_interface_location_selector_longholdtime_title">Lange Halte-Zeit (ms)</string>
