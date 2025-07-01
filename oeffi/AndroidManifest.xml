@@ -268,8 +268,8 @@
         <activity
             android:name=".directions.TripsOverviewActivity"
             android:configChanges="keyboard|keyboardHidden"
-            android:taskAffinity="${applicationId}.directions"
-            android:theme="@style/My.Theme.DarkDefault" />
+            android:taskAffinity="${applicationId}.directions" />
+<!--            android:theme="@style/My.Theme.DarkDefault" />-->
 
         <activity
             android:name=".directions.TripDetailsActivity"
@@ -369,8 +369,7 @@
 
         <activity
             android:name=".LogViewerActivity"
-            android:launchMode="singleInstance"
-            android:theme="@style/My.Theme.DarkDefault">
+            android:launchMode="singleInstance">
         </activity>
     </application>
 </manifest>

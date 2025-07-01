@@ -3,6 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <style name="My.Theme.DarkDefault" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:name">DarkDefault</item>
         <item name="android:windowBackground">@color/bg_level0_darkdefault</item>
         <item name="android:textViewStyle">@style/My.Widget.TextView.DarkDefault</item>
         <item name="android:imageButtonStyle">@style/My.Widget.ImageButton</item>

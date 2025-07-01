@@ -38,6 +38,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
@@ -113,12 +114,30 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         final Resources res = context.getResources();
         this.darkMode = Application.getInstance().isDarkMode();
 
+        final boolean darkDefault;
+        final TypedValue typedValue = new TypedValue();
+        if (context.getTheme().resolveAttribute(android.R.attr.name, typedValue, false)) {
+            // this will not be true, because the DarkDefault theme has been uncommented in the AndroidManifest.xml
+            darkDefault = "DarkDefault".equals(typedValue.string);
+        } else {
+            darkDefault = false;
+        }
+
         final float strokeWidth = res.getDimension(R.dimen.trips_overview_entry_box_stroke_width);
-        final int colorSignificant = res.getColor(R.color.fg_significant_darkdefault);
-        final int colorLessSignificant = res.getColor(R.color.fg_less_significant_darkdefault);
-        final int colorIndividual = res.getColor(R.color.bg_individual_darkdefault);
-        colorSignificantInverse = res.getColor(R.color.fg_significant_inverse_darkdefault);
-        colorDelayed = res.getColor(R.color.bg_delayed_darkdefault);
+        final int colorSignificant, colorLessSignificant, colorIndividual;
+        if (darkDefault) {
+            colorSignificant = res.getColor(R.color.fg_significant_darkdefault);
+            colorLessSignificant = res.getColor(R.color.fg_less_significant_darkdefault);
+            colorIndividual = res.getColor(R.color.bg_individual_darkdefault);
+            colorSignificantInverse = res.getColor(R.color.fg_significant_inverse_darkdefault);
+            colorDelayed = res.getColor(R.color.bg_delayed_darkdefault);
+        } else {
+            colorSignificant = res.getColor(R.color.fg_significant);
+            colorLessSignificant = res.getColor(R.color.fg_less_significant);
+            colorIndividual = res.getColor(R.color.bg_individual);
+            colorSignificantInverse = res.getColor(R.color.fg_significant_inverse);
+            colorDelayed = res.getColor(R.color.bg_delayed);
+        }
         positionPaddingHorizontal = res.getDimensionPixelSize(R.dimen.text_padding_horizontal);
         positionPaddingVertical = res.getDimensionPixelSize(R.dimen.text_padding_vertical);
 

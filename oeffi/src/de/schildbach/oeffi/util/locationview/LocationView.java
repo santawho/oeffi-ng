@@ -28,6 +28,7 @@ import android.os.Parcelable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
@@ -89,6 +90,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
 
     public LocationView(final Context context, final AttributeSet attrs) {
         this(context, attrs, 0);
+        setSaveEnabled(true);
     }
 
     public LocationView(final Context context, final AttributeSet attrs, final int defStyle) {
@@ -115,7 +117,8 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         state.putString("location_id", id);
         state.putSerializable("location_coord", coord);
         state.putString("location_place", place);
-        state.putString("text", getText());
+        final String text = getText();
+        state.putString("text", text);
         state.putString("hint", hint);
         state.putInt("hint_res", hintRes);
         state.putSerializable("location", location);
@@ -137,9 +140,25 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
             hint = bundle.getString("hint");
             hintRes = bundle.getInt("hint_res");
             location = (Location) bundle.getSerializable("location");
+            if (location != null)
+                setLocation(location);
         } else {
             super.onRestoreInstanceState(state);
         }
+    }
+
+    @Override
+    protected void dispatchSaveInstanceState(final SparseArray<Parcelable> container) {
+        // do not save the sub-elements
+        // super.dispatchSaveInstanceState(container);
+        dispatchFreezeSelfOnly(container);
+    }
+
+    @Override
+    protected void dispatchRestoreInstanceState(final SparseArray<Parcelable> container) {
+        // do not restore the sub-elements
+        // super.dispatchRestoreInstanceState(container);
+        dispatchThawSelfOnly(container);
     }
 
     @Override
