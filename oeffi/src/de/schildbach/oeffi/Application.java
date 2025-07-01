@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.Color;
 import android.preference.PreferenceManager;
 
 import androidx.core.content.pm.ShortcutInfoCompat;
@@ -73,6 +74,7 @@ public class Application extends android.app.Application {
     private OkHttpClient okHttpClient;
     private File logFile;
     private SpeechInput speechInput;
+    private SharedPreferences prefs;
 
     public Application() {
         instance = this;
@@ -87,11 +89,11 @@ public class Application extends android.app.Application {
     }
 
     public SharedPreferences getSharedPreferences() {
-        return PreferenceManager.getDefaultSharedPreferences(this);
+        return prefs;
     }
 
     public boolean isDeveloperElementsEnabled() {
-        return getSharedPreferences().getBoolean(Constants.PREFS_KEY_USER_INTERFACE_DEVELOPER_OPTIONS_SHOW_EXTRA_INFOS_ENABLED, false);
+        return prefs.getBoolean(Constants.PREFS_KEY_USER_INTERFACE_DEVELOPER_OPTIONS_SHOW_EXTRA_INFOS_ENABLED, false);
     }
 
     @Override
@@ -109,6 +111,7 @@ public class Application extends android.app.Application {
         }
 
         log.info("=== Starting app version {} ({})", packageInfo.versionName, packageInfo.versionCode);
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         createShortcuts();
 
@@ -260,8 +263,6 @@ public class Application extends android.app.Application {
     }
 
     private void migrateSelectedNetwork(final String fromName, final NetworkId to) {
-        final SharedPreferences prefs = getSharedPreferences();
-
         if (fromName.equals(prefs.getString(Constants.PREFS_KEY_NETWORK_PROVIDER, null)))
             prefs.edit().putString(Constants.PREFS_KEY_NETWORK_PROVIDER, to.name()).commit();
     }
@@ -274,11 +275,11 @@ public class Application extends android.app.Application {
         return okHttpClient;
     }
 
-    public static final String versionName(final Application application) {
+    public static String versionName(final Application application) {
         return application.packageInfo().versionName;
     }
 
-    public static final int versionCode(final Application application) {
+    public static int versionCode(final Application application) {
         return application.packageInfo().versionCode;
     }
 
@@ -329,5 +330,20 @@ public class Application extends android.app.Application {
                 .setIcon(IconCompat.createWithResource(this, iconId))
                 .setIntent(new Intent(this, targetActivityClass).setAction(Intent.ACTION_MAIN))
                 .build());
+    }
+
+    public boolean isDarkMode() {
+        final String setting = prefs.getString("user_interface_darkmode_switch", "system");
+        if ("system".equals(setting)) {
+            // if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            //     return (getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK)
+            //             == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+            // }
+            final int bgColor = getResources().getColor(R.color.bg_level1);
+            final float luminance = Color.valueOf(bgColor).luminance();
+            return luminance < 0.5;
+        }
+
+        return "on".equals(setting);
     }
 }

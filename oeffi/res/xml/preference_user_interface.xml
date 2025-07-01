@@ -2,6 +2,15 @@
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <ListPreference
+        android:enabled="false"
+        android:key="user_interface_darkmode_switch"
+        android:defaultValue="system"
+        android:entries="@array/user_interface_darkmode_switch_titles"
+        android:entryValues="@array/user_interface_darkmode_switch_values"
+        android:title="@string/user_interface_darkmode_switch_title"
+        android:summary="@string/user_interface_darkmode_switch_summary" />
+
     <CheckBoxPreference
         android:key="user_interface_mainmenu_shareapp_enabled"
         android:defaultValue="false"

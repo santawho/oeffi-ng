@@ -30,7 +30,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.text.format.DateUtils;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
@@ -114,7 +113,7 @@ public abstract class OeffiActivity extends ComponentActivity {
         this.application = (Application) getApplication();
         SplashScreen.installSplashScreen(this);
 
-        this.prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        this.prefs = Application.getInstance().getSharedPreferences();
 
         final Intent intent = getIntent();
         linkArgs = intent.getStringArrayExtra(INTENT_EXTRA_LINK_ARGS);
@@ -645,5 +644,9 @@ public abstract class OeffiActivity extends ComponentActivity {
 
     protected boolean isDeveloperElementsEnabled() {
         return application.isDeveloperElementsEnabled();
+    }
+
+    public boolean isDarkMode() {
+        return Application.getInstance().isDarkMode();
     }
 }

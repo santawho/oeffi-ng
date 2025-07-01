@@ -25,7 +25,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.LocationManager;
@@ -33,7 +32,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
-import android.preference.PreferenceManager;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -48,6 +46,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.AreaAware;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.LocationAware;
@@ -117,7 +117,7 @@ public class NetworkPickerActivity extends ComponentActivity implements Location
         EdgeToEdge.enable(this, Constants.STATUS_BAR_STYLE);
         super.onCreate(savedInstanceState);
 
-        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs = Application.getInstance().getSharedPreferences();
 
         locationHelper = new LocationHelper((LocationManager) getSystemService(Context.LOCATION_SERVICE), this);
 

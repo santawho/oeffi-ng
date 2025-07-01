@@ -3,6 +3,19 @@
 
     <string name="user_interface_preferences_title">User Interface</string>
 
+    <string name="user_interface_darkmode_switch_title">Dark mode</string>
+    <string name="user_interface_darkmode_switch_summary">Use dark (or light) background.  [%s]</string>
+    <string-array name="user_interface_darkmode_switch_titles">
+        <item>Follow system</item>
+        <item>Light mode</item>
+        <item>Dark mode</item>
+    </string-array>
+    <string-array name="user_interface_darkmode_switch_values">
+        <item>system</item>
+        <item>off</item>
+        <item>on</item>
+    </string-array>
+
     <string name="user_interface_mainmenu_shareapp_enabled_title">Show \"Share App\" item in main menu</string>
     <string name="user_interface_voice_control_enabled_title">Use voice control</string>
 

@@ -3,6 +3,14 @@
 
     <string name="user_interface_preferences_title">User Interface</string>
 
+    <string name="user_interface_darkmode_switch_title">Dunkler Modus</string>
+    <string name="user_interface_darkmode_switch_summary">Benutze dunkle (oder helle) Hintergrundfarben. [%s]</string>
+    <string-array name="user_interface_darkmode_switch_titles">
+        <item>Folge dem System</item>
+        <item>Heller Modus</item>
+        <item>Dunkler Modus</item>
+    </string-array>
+
     <string name="user_interface_mainmenu_shareapp_enabled_title">Zeige \"Teile App\" Eintrag im Hauptmenü</string>
     <string name="user_interface_voice_control_enabled_title">Verwende Sprachsteuerung</string>
 

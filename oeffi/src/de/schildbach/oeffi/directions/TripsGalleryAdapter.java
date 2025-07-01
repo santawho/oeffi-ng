@@ -19,7 +19,6 @@ package de.schildbach.oeffi.directions;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -37,7 +36,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
-import android.os.Build;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.view.View;
@@ -45,6 +43,8 @@ import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.BaseAdapter;
 import com.google.common.base.Preconditions;
+
+import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.pte.dto.Fare;
@@ -111,11 +111,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
     public TripsGalleryAdapter(final Context context) {
         this.context = context;
         final Resources res = context.getResources();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-            this.darkMode =
-                    (res.getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
-        else
-            this.darkMode = true;
+        this.darkMode = Application.getInstance().isDarkMode();
 
         final float strokeWidth = res.getDimension(R.dimen.trips_overview_entry_box_stroke_width);
         final int colorSignificant = res.getColor(R.color.fg_significant_darkdefault);
