@@ -450,6 +450,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
     }
 
     public void exchangeWith(final LocationView other) {
+        final Location tempLocation = other.location;
         final LocationType tempLocationType = other.locationType;
         final boolean tempStationAsAddress = other.stationAsAddress;
         final String tempId = other.id;
@@ -458,6 +459,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         final String tempText = other.getText();
         final String tempHint = other.hint;
 
+        other.location = this.location;
         other.locationType = this.locationType;
         other.stationAsAddress = this.stationAsAddress;
         other.id = this.id;
@@ -466,6 +468,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         other.setText(this.getText());
         other.hint = this.hint;
 
+        this.location = tempLocation;
         this.locationType = tempLocationType;
         this.stationAsAddress = tempStationAsAddress;
         this.id = tempId;
