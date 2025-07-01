@@ -65,8 +65,10 @@ public class AutoCompleteLocationsHandler {
             locationView.reset();
         if (constraint == null)
             return;
-        if (locationView != null)
+        if (locationView != null) {
+            locationView.setLocation(null);
             locationView.setText(constraint);
+        }
 
         jobs.add(() -> {
             final List<Location> locations = LocationSuggestionsCollector.collectSuggestions(

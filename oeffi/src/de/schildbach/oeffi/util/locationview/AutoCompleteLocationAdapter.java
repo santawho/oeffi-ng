@@ -141,18 +141,6 @@ public class AutoCompleteLocationAdapter extends BaseAdapter implements Filterab
             return filterResults;
         }
 
-        private void resetFilters() {
-            filterStations = false;
-            filterAddresses = false;
-            filterPois = false;
-            if (filterStationButton != null)
-                filterStationButton.setBackgroundColor(0);
-            if (filterAddressButton != null)
-                filterAddressButton.setBackgroundColor(0);
-            if (filterPoiButton != null)
-                filterPoiButton.setBackgroundColor(0);
-        }
-
         @Override
         protected void publishResults(final CharSequence constraint, final FilterResults filterResults) {
             if (filterResults.values != null) {
@@ -160,6 +148,18 @@ public class AutoCompleteLocationAdapter extends BaseAdapter implements Filterab
                 notifyDataSetChanged();
             }
         }
+    }
+
+    public void resetFilters() {
+        filterStations = false;
+        filterAddresses = false;
+        filterPois = false;
+        if (filterStationButton != null)
+            filterStationButton.setBackgroundColor(0);
+        if (filterAddressButton != null)
+            filterAddressButton.setBackgroundColor(0);
+        if (filterPoiButton != null)
+            filterPoiButton.setBackgroundColor(0);
     }
 
     private LocationFilter currentFilter;

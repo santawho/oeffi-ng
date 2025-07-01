@@ -309,6 +309,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
     }
 
     public void reset() {
+        location = null;
         locationType = LocationType.ANY;
         stationAsAddress = false;
         id = null;
@@ -316,6 +317,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         place = null;
         setText(null);
         hint = null;
+        autoCompleteLocationAdapter.resetFilters();
         updateAppearance();
         fireChanged();
 
