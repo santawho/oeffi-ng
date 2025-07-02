@@ -260,6 +260,11 @@
     <string name="directions_query_history_context_remove_favorite">Remove favorite</string>
 
     <!-- location selector -->
+    <string name="directions_location_selector_context_pin_title">Set pinned</string>
+    <string name="directions_location_selector_context_unpin_title">Remove pinning</string>
+    <string name="directions_location_selector_context_set_from_title">Use as origin</string>
+    <string name="directions_location_selector_context_set_to_title">Use as destination</string>
+    <string name="directions_location_selector_context_set_via_title">Use as via</string>
     <string name="directions_location_selector_context_delete_title">Delete</string>
     <string name="directions_location_selector_help_title">Quick Location Selector</string>
     <string name="directions_location_selector_help_text">The quick location selector

@@ -7,7 +7,7 @@
     <TextView
         android:id="@+id/location_selector_text"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="@dimen/location_selector_height"
         android:gravity="center"
         android:background="@drawable/location_selector_item_unselected_background"
         android:textColor="@color/fg_significant"
@@ -16,4 +16,16 @@
         android:paddingVertical="0dp"
         android:paddingHorizontal="0dp"
         />
+
+    <ImageView
+        android:id="@+id/location_selector_pinned"
+        android:layout_width="@dimen/location_selector_pinned_size"
+        android:layout_height="@dimen/location_selector_pinned_size"
+        android:layout_marginVertical="@dimen/location_selector_pinned_margin_vertical"
+        android:layout_marginHorizontal="@dimen/location_selector_pinned_margin_horizontal"
+        android:layout_gravity="right|top"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_star_grey600_24dp"
+        />
+
 </FrameLayout>

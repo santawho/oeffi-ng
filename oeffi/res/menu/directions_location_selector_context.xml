@@ -3,13 +3,36 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/directions_location_selector_context_set_from"
+        android:title="@string/directions_location_selector_context_set_from_title"
+        android:icon="@drawable/ic_place_grey600_24dp" />
+    <item
+        android:id="@+id/directions_location_selector_context_set_to"
+        android:title="@string/directions_location_selector_context_set_to_title"
+        android:icon="@drawable/ic_place_grey600_24dp" />
+    <item
+        android:id="@+id/directions_location_selector_context_set_via"
+        android:title="@string/directions_location_selector_context_set_via_title"
+        android:icon="@drawable/ic_place_grey600_24dp" />
+    <item
         android:id="@+id/directions_location_selector_context_show_departures"
-        android:title="@string/station_context_details_title" />
+        android:title="@string/station_context_details_title"
+        android:icon="@drawable/ic_station_grey600_24dp" />
     <item
         android:id="@+id/directions_location_selector_context_nearby_departures"
-        android:title="@string/station_context_nearby_departures_title" />
+        android:title="@string/station_context_nearby_departures_title"
+        android:icon="@drawable/ic_station_grey600_24dp" />
+    <item
+        android:id="@+id/directions_location_selector_context_pin"
+        android:title="@string/directions_location_selector_context_pin_title"
+        android:icon="@drawable/ic_star_grey600_24dp" />
+    <item
+        android:id="@+id/directions_location_selector_context_unpin"
+        android:title="@string/directions_location_selector_context_unpin_title"
+        android:icon="@drawable/ic_star_grey600_24dp" />
     <item
         android:id="@+id/directions_location_selector_context_delete"
-        android:title="@string/directions_location_selector_context_delete_title" />
+        android:title="@string/directions_location_selector_context_delete_title"
+        android:icon="@drawable/ic_clear_grey600_24dp" />
 
 </menu>

@@ -28,6 +28,10 @@
     <dimen name="station_widget_divider_width">0px</dimen>
     <dimen name="directions_form_location_min_height">48dp</dimen>
     <dimen name="directions_form_location_divider_padding">32dp</dimen>
+    <dimen name="location_selector_height">60dp</dimen>
+    <dimen name="location_selector_pinned_size">18dp</dimen>
+    <dimen name="location_selector_pinned_margin_vertical">6dp</dimen>
+    <dimen name="location_selector_pinned_margin_horizontal">6dp</dimen>
     <dimen name="trips_overview_stroke_width">2dp</dimen>
     <dimen name="trips_overview_stroke_width_darkdefault">1dp</dimen>
     <dimen name="trips_overview_entry_width">72dp</dimen>

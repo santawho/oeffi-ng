@@ -27,6 +27,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -90,24 +91,26 @@ public class LocationSelector extends LinearLayout implements
 
     private static final long DEFAULT_LONG_HOLD_TIME = 500;
 
-    public static class LocationAndTime implements Serializable {
+    public static class ItemData implements Serializable {
         private static final long serialVersionUID = -9091619330471177490L;
         Location location;
         long addedAtTime;
+        boolean isPinned;
     }
 
     public static class PrefState implements Serializable {
         private static final long serialVersionUID = -8329992953750044467L;
-        LocationAndTime[] locationsAndTimes;
+        ItemData[] items;
     }
 
     private static class Item {
         public LinearLayout rowLayout;
         public FrameLayout frameLayout;
         public TextView textView;
+        public ImageView pinnedView;
         int itemIndex;
         int rowIndex, columnIndex;
-        LocationAndTime locationAndTime;
+        ItemData itemData;
     }
 
     private SharedPreferences preferences;
@@ -175,6 +178,7 @@ public class LocationSelector extends LinearLayout implements
                 final FrameLayout frameLayout = (FrameLayout) LayoutInflater.from(context).inflate(R.layout.location_selector_item, null);
                 frameLayout.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
                 final TextView textView = frameLayout.findViewById(R.id.location_selector_text);
+                final ImageView pinnedView = frameLayout.findViewById(R.id.location_selector_pinned);
                 rowLayout.addView(frameLayout);
                 final Item item = new Item();
                 iItem += 1;
@@ -184,8 +188,10 @@ public class LocationSelector extends LinearLayout implements
                 item.rowLayout = rowLayout;
                 item.frameLayout = frameLayout;
                 item.textView = textView;
+                item.pinnedView = pinnedView;
                 availableItems[iItem] = item;
                 setItemStationName(item, null);
+                setItemPinning(item, false);
                 setItemBackground(item, R.drawable.location_selector_item_unselected_background);
             }
             this.addView(rowLayout);
@@ -226,21 +232,31 @@ public class LocationSelector extends LinearLayout implements
     }
 
     private void setupContent() {
-        LocationAndTime[] locationsAndTimes = null;
-        final PrefState prefState = (PrefState) Objects.deserializeFromString(preferences.getString(getPrefsStateKey(), null));
+        ItemData[] items = null;
+        final PrefState prefState = (PrefState) Objects.deserializeFromString(
+                preferences.getString(getPrefsStateKey(), null));
         if (prefState != null)
-            locationsAndTimes = prefState.locationsAndTimes;
-        if (locationsAndTimes == null)
-            locationsAndTimes = new LocationAndTime[0];
+            items = prefState.items;
+        if (items == null)
+            items = new ItemData[0];
+        Arrays.sort(items, (a, b) -> {
+            final boolean aIsPinned = a.isPinned;
+            final boolean bIsPinned = b.isPinned;
+            if (aIsPinned && !bIsPinned) return -1;
+            if (!aIsPinned && bIsPinned) return 1;
+            return (int) (b.addedAtTime - a.addedAtTime);
+        });
         for (int n = 0; n < availableItems.length; n += 1) {
             final Item item = availableItems[n];
-            if (n < locationsAndTimes.length) {
-                final LocationAndTime locationAndTime = locationsAndTimes[n];
-                item.locationAndTime = locationAndTime;
-                setItemStationName(item, Formats.fullLocationName(locationAndTime.location));
+            if (n < items.length) {
+                final ItemData itemData = items[n];
+                item.itemData = itemData;
+                setItemStationName(item, Formats.fullLocationName(itemData.location));
+                setItemPinning(item, itemData.isPinned);
             } else {
-                item.locationAndTime = null;
+                item.itemData = null;
                 setItemStationName(item, null);
+                setItemPinning(item, false);
             }
         }
     }
@@ -252,47 +268,89 @@ public class LocationSelector extends LinearLayout implements
             return;
         if (!stateIsChanged)
             return;
-        final List<LocationAndTime> locationsAndTimes = new ArrayList<>();
+        final List<ItemData> itemDatas = new ArrayList<>();
         for (Item item : availableItems) {
-            if (item.locationAndTime != null)
-                locationsAndTimes.add(item.locationAndTime);
+            if (item.itemData != null)
+                itemDatas.add(item.itemData);
         }
         final PrefState prefState = new PrefState();
-        prefState.locationsAndTimes = locationsAndTimes.toArray(new LocationAndTime[]{});
+        prefState.items = itemDatas.toArray(new ItemData[]{});
         final SharedPreferences.Editor editor = preferences.edit();
         editor.putString(getPrefsStateKey(), Objects.serializeToString(prefState));
         editor.apply();
     }
 
+    private Item getItemByLocation(final Location location) {
+        if (location == null)
+            return null;
+        for (Item item : availableItems) {
+            final ItemData itemData = item.itemData;
+            if (itemData != null) {
+                final Location itemLocation = itemData.location;
+                if (location.equals(itemLocation))
+                    return item;
+            }
+        }
+        return null;
+    }
+
+    public boolean isPinned(final Location location) {
+        final Item item = getItemByLocation(location);
+        if (item == null)
+            return false;
+        final ItemData itemData = item.itemData;
+        if (itemData == null)
+            return false;
+        return itemData.isPinned;
+    }
+
+    public void setPinned(final Location location, final boolean isPinned) {
+        final Item item = getItemByLocation(location);
+        if (item == null)
+            return;
+        final ItemData itemData = item.itemData;
+        if (itemData == null)
+            return;
+        if (itemData.isPinned == isPinned)
+            return;
+
+        itemData.isPinned = isPinned;
+        setItemPinning(item, isPinned);
+        stateIsChanged = true;
+    }
+
     public void addLocation(final Location location, final long addedAtTime) {
-        if (!isEnabled)
+        if (!isEnabled || location == null)
             return;
         Item oldestItem = null;
         for (Item item : availableItems) {
-            final LocationAndTime itemLocationAndTime = item.locationAndTime;
-            if (itemLocationAndTime != null) {
-                final Location itemLocation = itemLocationAndTime.location;
+            final ItemData itemData = item.itemData;
+            if (itemData != null) {
+                final Location itemLocation = itemData.location;
                 if (itemLocation.equals(location)) {
-                    itemLocationAndTime.addedAtTime = addedAtTime;
+                    itemData.addedAtTime = addedAtTime;
                     stateIsChanged = true;
                     return; // was already added
                 }
-                if (oldestItem == null
-                        || (oldestItem.locationAndTime != null
-                            && oldestItem.locationAndTime.addedAtTime > itemLocationAndTime.addedAtTime)) {
+                if (!itemData.isPinned
+                        && (oldestItem == null
+                        || (oldestItem.itemData != null
+                            && oldestItem.itemData.addedAtTime > itemData.addedAtTime))) {
                     oldestItem = item;
                 }
-            } else if (oldestItem == null || oldestItem.locationAndTime != null) {
+            } else if (oldestItem == null || oldestItem.itemData != null) {
                 oldestItem = item;
             }
         }
         if (oldestItem == null)
-            oldestItem = availableItems[0];
-        final LocationAndTime locationAndTime = new LocationAndTime();
-        locationAndTime.location = location;
-        locationAndTime.addedAtTime = addedAtTime;
-        oldestItem.locationAndTime = locationAndTime;
+            return;
+
+        final ItemData itemData = new ItemData();
+        itemData.location = location;
+        itemData.addedAtTime = addedAtTime;
+        oldestItem.itemData = itemData;
         setItemStationName(oldestItem, Formats.fullLocationName(location));
+        setItemPinning(oldestItem, false);
         stateIsChanged = true;
     }
 
@@ -300,12 +358,13 @@ public class LocationSelector extends LinearLayout implements
         if (!isEnabled)
             return;
         for (Item item : availableItems) {
-            final LocationAndTime itemLocationAndTime = item.locationAndTime;
-            if (itemLocationAndTime != null) {
-                final Location itemLocation = itemLocationAndTime.location;
+            final ItemData itemData = item.itemData;
+            if (itemData != null) {
+                final Location itemLocation = itemData.location;
                 if (itemLocation.equals(location)) {
-                    item.locationAndTime = null;
+                    item.itemData = null;
                     setItemStationName(item, null);
+                    setItemPinning(item, false);
                     stateIsChanged = true;
                     break;
                 }
@@ -384,13 +443,13 @@ public class LocationSelector extends LinearLayout implements
                 if (isContextOperation) {
                     if (size == 1) {
                         final Item item = selectedItems.get(0);
-                        final Location location = item.locationAndTime.location;
+                        final Location location = item.itemData.location;
                         locationSelectionListener.onSingleLocationSelected(location, isLongHold, item.textView);
                     }
                 } else {
                     final List<Location> locations = new ArrayList<>();
                     for (Item item : selectedItems) {
-                        final Location location = item.locationAndTime.location;
+                        final Location location = item.itemData.location;
                         if (location != null)
                             locations.add(location);
                     }
@@ -404,7 +463,7 @@ public class LocationSelector extends LinearLayout implements
         if (action == MotionEvent.ACTION_DOWN && currItem != null) {
             clearSelection();
 
-            if (currItem.locationAndTime == null) {
+            if (currItem.itemData == null) {
                 invalidSelection = true;
             } else {
                 selectedItems.add(currItem);
@@ -421,7 +480,7 @@ public class LocationSelector extends LinearLayout implements
         if (action == MotionEvent.ACTION_MOVE) {
             if (invalidSelection)
                 return true;
-            if (currItem == null || currItem.locationAndTime == null) {
+            if (currItem == null || currItem.itemData == null) {
                 // leaving all items
                 if (!isLongHold && !isStillFirst && prevItem != null) {
                     // leaving intermediate fast, remove it
@@ -510,6 +569,7 @@ public class LocationSelector extends LinearLayout implements
         final LinearLayout row = (LinearLayout) this.getChildAt(item.rowIndex);
         item.frameLayout = (FrameLayout) row.getChildAt(item.columnIndex);
         item.textView = item.frameLayout.findViewById(R.id.location_selector_text);
+        item.pinnedView = item.frameLayout.findViewById(R.id.location_selector_pinned);
         return item;
     }
 
@@ -531,5 +591,9 @@ public class LocationSelector extends LinearLayout implements
             textView.setTextColor(getResources().getColor(R.color.fg_insignificant));
             textView.setEnabled(false);
         }
+    }
+
+    private void setItemPinning(final Item item, final boolean isPinned) {
+        item.pinnedView.setVisibility(isPinned ? View.VISIBLE : View.GONE);
     }
 }

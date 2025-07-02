@@ -37,6 +37,7 @@ import android.location.Address;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -44,6 +45,7 @@ import android.os.Process;
 import android.provider.ContactsContract.CommonDataKinds;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -420,10 +422,6 @@ public class DirectionsActivity extends OeffiMainActivity implements
         initLayoutTransitions();
 
         final LocationView.Listener locationChangeListener = (view) -> {
-            final Location location = view.getLocation();
-            if (location != null)
-                locationSelector.addLocation(location, System.currentTimeMillis());
-
             updateMap();
             queryHistoryListAdapter.clearSelectedEntry();
             requestFocusFirst();
@@ -1105,9 +1103,16 @@ public class DirectionsActivity extends OeffiMainActivity implements
     @Override
     public void onSingleLocationSelected(final Location location, final boolean longHold, View selectedView) {
         final PopupMenu contextMenu = new PopupMenu(this, selectedView);
+        contextMenu.setGravity(Gravity.RIGHT);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+            contextMenu.setForceShowIcon(true);
         final MenuInflater inflater = contextMenu.getMenuInflater();
         final Menu menu = contextMenu.getMenu();
         inflater.inflate(R.menu.directions_location_selector_context, menu);
+        if (locationSelector.isPinned(location))
+            menu.findItem(R.id.directions_location_selector_context_pin).setVisible(false);
+        else
+            menu.findItem(R.id.directions_location_selector_context_unpin).setVisible(false);
         contextMenu.setOnDismissListener((popupMenu) -> {
             locationSelector.clearSelection();
         });
@@ -1117,6 +1122,30 @@ public class DirectionsActivity extends OeffiMainActivity implements
             if (itemId == R.id.directions_location_selector_context_delete) {
                 locationSelector.removeLocation(location);
                 locationSelector.persist();
+                return true;
+            }
+            if (itemId == R.id.directions_location_selector_context_pin) {
+                locationSelector.setPinned(location, true);
+                locationSelector.persist();
+                return true;
+            }
+            if (itemId == R.id.directions_location_selector_context_unpin) {
+                locationSelector.setPinned(location, false);
+                locationSelector.persist();
+                return true;
+            }
+
+            if (itemId == R.id.directions_location_selector_context_set_from) {
+                viewFromLocation.setLocation(location);
+                return true;
+            }
+            if (itemId == R.id.directions_location_selector_context_set_to) {
+                viewToLocation.setLocation(location);
+                return true;
+            }
+            if (itemId == R.id.directions_location_selector_context_set_via) {
+                viewViaLocation.setLocation(location);
+                expandForm(true);
                 return true;
             }
 
@@ -1340,11 +1369,9 @@ public class DirectionsActivity extends OeffiMainActivity implements
     }
 
     private void handleGo() {
-        locationSelector.persist();
-        locationSelector.clearSelection();
-
         final Location from = viewFromLocation.getLocation();
         if (!saneLocation(from, false)) {
+            locationSelector.clearSelection();
             new Toast(this).longToast(R.string.directions_message_choose_from);
             viewFromLocation.requestFocus();
             return;
@@ -1356,10 +1383,18 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
         final Location to = viewToLocation.getLocation();
         if (!saneLocation(to, false)) {
+            locationSelector.clearSelection();
             new Toast(this).longToast(R.string.directions_message_choose_to);
             viewToLocation.requestFocus();
             return;
         }
+
+        final long now = System.currentTimeMillis();
+        locationSelector.addLocation(from, now);
+        locationSelector.addLocation(via, now);
+        locationSelector.addLocation(to, now);
+        locationSelector.persist();
+        locationSelector.clearSelection();
 
         final Set<Product> products = getProductToggles();
 

@@ -259,6 +259,11 @@
     <string name="directions_query_history_context_remove_favorite">Favorit entfernen</string>
 
     <!-- location selector -->
+    <string name="directions_location_selector_context_pin_title">Anheften</string>
+    <string name="directions_location_selector_context_unpin_title">Anheftung entfernen</string>
+    <string name="directions_location_selector_context_set_from_title">Als Abgang</string>
+    <string name="directions_location_selector_context_set_to_title">Als Ziel</string>
+    <string name="directions_location_selector_context_set_via_title">Als Via</string>
     <string name="directions_location_selector_context_delete_title">Löschen</string>
     <string name="directions_location_selector_help_title">Schnelle Ortswahl</string>
     <string name="directions_location_selector_help_text">Die schnelle Ortswahl
