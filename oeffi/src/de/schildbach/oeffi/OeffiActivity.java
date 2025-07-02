@@ -250,15 +250,18 @@ public abstract class OeffiActivity extends ComponentActivity {
                     final View actionView = item.getActionView();
                     final PopupMenu popupMenu = new PopupMenu(OeffiActivity.this, actionView);
                     popupMenu.setGravity(Gravity.RIGHT);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
                         popupMenu.setForceShowIcon(true);
-                    }
                     popupMenu.inflate(R.menu.global_extras);
                     popupMenu.setOnMenuItemClickListener(subItem -> {
                         navigationDrawerLayout.closeDrawers();
                         final int subItemId = subItem.getItemId();
                         if (subItemId == R.id.global_options_clear_navigation) {
                             NavigationNotification.removeAll(OeffiActivity.this);
+                            return true;
+                        }
+                        if (subItemId == R.id.global_options_show_log) {
+                            LogViewerActivity.start(OeffiActivity.this);
                             return true;
                         }
                         return false;
