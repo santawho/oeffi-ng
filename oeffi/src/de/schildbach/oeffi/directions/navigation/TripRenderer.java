@@ -174,8 +174,8 @@ public class TripRenderer {
     private void setupFromTrip(final Trip trip) {
         LegContainer prevC = null;
         for (int iLeg = 0; iLeg < trip.legs.size(); ++iLeg) {
+            final Trip.Leg leg = trip.legs.get(iLeg);
             final Trip.Leg prevLeg = (iLeg > 0) ? trip.legs.get(iLeg - 1) : null;
-            Trip.Leg leg = trip.legs.get(iLeg);
             final int iNext = iLeg + 1;
             final Trip.Leg nextLeg = (iNext < trip.legs.size()) ? trip.legs.get(iNext) : null;
 

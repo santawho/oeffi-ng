@@ -64,6 +64,10 @@ public class Navigator {
             if (leg instanceof Trip.Public) {
                 newLeg = updatePublicLeg((Trip.Public) leg, forceRefreshAll, now);
             }
+            if (newLeg == null) {
+                // any error, then full trip is error
+                return null;
+            }
             newLegs.add(newLeg);
         }
 
@@ -156,17 +160,13 @@ public class Navigator {
             }
             if (doRefresh) {
                 final QueryJourneyResult result = networkProvider.queryJourney(journeyRef);
-                if (result != null) {
-                    switch (result.status) {
-                        case OK:
-                            if (result.journeyLeg != null)
-                                newLeg = buildUpdatedLeg(oldLeg, result.journeyLeg, now);
-                            break;
-                        case NO_JOURNEY:
-                            break;
-                        case SERVICE_DOWN:
-                            return null;
-                    }
+                if (result != null
+                        && result.status == QueryJourneyResult.Status.OK
+                        && result.journeyLeg != null) {
+                    newLeg = buildUpdatedLeg(oldLeg, result.journeyLeg, now);
+                } else {
+                    // signal error
+                    newLeg = null;
                 }
             }
         }
