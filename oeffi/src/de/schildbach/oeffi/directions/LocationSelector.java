@@ -127,6 +127,7 @@ public class LocationSelector extends LinearLayout implements
     private final List<Item> selectedItems = new ArrayList<>();
     private long timeEntered;
     private boolean isContextOperation;
+    private boolean isOperationCompleted;
     private boolean invalidSelection;
     private boolean timerRunning;
     private boolean stateIsChanged;
@@ -384,6 +385,7 @@ public class LocationSelector extends LinearLayout implements
         timeEntered = 0;
         invalidSelection = false;
         isContextOperation = false;
+        isOperationCompleted = false;
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -400,6 +402,7 @@ public class LocationSelector extends LinearLayout implements
         final long now = System.currentTimeMillis();
         final long holdTime = now - timeEntered;
         final boolean isLongHold = holdTime >= longHoldTime;
+        final boolean isVeryLongHold = holdTime >= 2 * longHoldTime;
 
         if (action == MotionEvent.ACTION_POINTER_DOWN) {
             // second finger down
@@ -408,7 +411,12 @@ public class LocationSelector extends LinearLayout implements
         }
 
         if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+            final boolean wasOperationCompleted = isOperationCompleted;
             timerRunning = false;
+            isOperationCompleted = false;
+
+            if (wasOperationCompleted)
+                return true;
 
             if (invalidSelection) {
                 clearSelection();
@@ -478,7 +486,7 @@ public class LocationSelector extends LinearLayout implements
         }
 
         if (action == MotionEvent.ACTION_MOVE) {
-            if (invalidSelection)
+            if (invalidSelection || isOperationCompleted)
                 return true;
             if (currItem == null || currItem.itemData == null) {
                 // leaving all items
@@ -495,6 +503,13 @@ public class LocationSelector extends LinearLayout implements
                         if (item.itemIndex == currItem.itemIndex)
                             return true;
                     }
+                }
+
+                if (isVeryLongHold && isStillFirst && useLongHoldMenu && locationSelectionListener != null) {
+                    isOperationCompleted = true;
+                    final Item item = selectedItems.get(0);
+                    final Location location = item.itemData.location;
+                    locationSelectionListener.onSingleLocationSelected(location, true, item.textView);
                 }
 
                 if (isLongHold) {
@@ -533,18 +548,28 @@ public class LocationSelector extends LinearLayout implements
         final long now = System.currentTimeMillis();
         final long holdTime = now - timeEntered;
         final boolean isLongHold = holdTime >= longHoldTime;
+        final boolean isVeryLongHold = holdTime >= 2 * longHoldTime;
         final boolean isStillFirst = selectedItems.size() <= 1;
         final Item prevItem = selectedItems.isEmpty() ? null : selectedItems.get(selectedItems.size() - 1);
 
         if (isLongHold && prevItem != null) {
-            if (isStillFirst) {
-                setItemBackground(prevItem, BG_INTERMEDIATE);
+            if (isVeryLongHold && isStillFirst) {
+                if (useLongHoldMenu && locationSelectionListener != null) {
+                    isContextOperation = true;
+                    isOperationCompleted = true;
+                    final Item item = selectedItems.get(0);
+                    final Location location = item.itemData.location;
+                    locationSelectionListener.onSingleLocationSelected(location, true, item.textView);
+
+                    timerRunning = false;
+                }
             } else {
                 setItemBackground(prevItem, BG_INTERMEDIATE);
             }
         }
 
-        handler.postDelayed(this::onTimer, 50);
+        if (timerRunning)
+            handler.postDelayed(this::onTimer, 50);
     }
 
     private Item findItemAtXY(final int x, final int y) {
