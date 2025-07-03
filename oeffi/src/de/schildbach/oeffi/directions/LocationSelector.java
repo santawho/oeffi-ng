@@ -53,8 +53,9 @@ import de.schildbach.pte.dto.Location;
 public class LocationSelector extends LinearLayout implements
         SharedPreferences.OnSharedPreferenceChangeListener {
     public interface LocationSelectionListener {
-        void onLocationSequenceSelected(List<Location> locations, boolean longHold, View lastView);
-        void onSingleLocationSelected(Location location, boolean longHold, View selectedView);
+        boolean isFirstLocationClickedDestination();
+        void onLocationSequenceSelected(List<Location> locations, boolean isLongHold, final boolean isTwoFingersTap, View lastView);
+        void onSingleLocationContextOperation(Location location, boolean isLongHold, View selectedView);
     }
 
     private static final Logger log = LoggerFactory.getLogger(LocationSelector.class);
@@ -127,6 +128,7 @@ public class LocationSelector extends LinearLayout implements
     private final List<Item> selectedItems = new ArrayList<>();
     private long timeEntered;
     private boolean isContextOperation;
+    private boolean isTwoFingersTap;
     private boolean isOperationCompleted;
     private boolean invalidSelection;
     private boolean timerRunning;
@@ -168,7 +170,7 @@ public class LocationSelector extends LinearLayout implements
         } catch (Exception e) {
             longHoldTime = DEFAULT_LONG_HOLD_TIME;
         }
-        useLongHoldMenu = prefs.getBoolean(PREFS_LONGHOLDMENU, false);
+        useLongHoldMenu = prefs.getBoolean(PREFS_LONGHOLDMENU, true);
         availableItems = new Item[numRows * numColumns];
         this.removeAllViews();
         for (int iRow = 0, iItem = -1; iRow < numRows; iRow += 1) {
@@ -385,7 +387,12 @@ public class LocationSelector extends LinearLayout implements
         timeEntered = 0;
         invalidSelection = false;
         isContextOperation = false;
+        isTwoFingersTap = false;
         isOperationCompleted = false;
+    }
+
+    private int getSingleClickBackgroundColor() {
+        return locationSelectionListener != null && locationSelectionListener.isFirstLocationClickedDestination() ?  BG_LAST : BG_FIRST;
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -406,7 +413,8 @@ public class LocationSelector extends LinearLayout implements
 
         if (action == MotionEvent.ACTION_POINTER_DOWN) {
             // second finger down
-            isContextOperation = true;
+            isTwoFingersTap = true;
+            isContextOperation = !useLongHoldMenu;
             return true;
         }
 
@@ -432,7 +440,7 @@ public class LocationSelector extends LinearLayout implements
             if (size >= 2)
                 setItemBackground(selectedItems.get(size - 1), BG_LAST);
             else if (size == 1)
-                setItemBackground(selectedItems.get(0), BG_FIRST);
+                setItemBackground(selectedItems.get(0), getSingleClickBackgroundColor());
 
             if (selectedItems.isEmpty())
                 return true;
@@ -452,7 +460,7 @@ public class LocationSelector extends LinearLayout implements
                     if (size == 1) {
                         final Item item = selectedItems.get(0);
                         final Location location = item.itemData.location;
-                        locationSelectionListener.onSingleLocationSelected(location, isLongHold, item.textView);
+                        locationSelectionListener.onSingleLocationContextOperation(location, isLongHold, item.textView);
                     }
                 } else {
                     final List<Location> locations = new ArrayList<>();
@@ -461,7 +469,7 @@ public class LocationSelector extends LinearLayout implements
                         if (location != null)
                             locations.add(location);
                     }
-                    locationSelectionListener.onLocationSequenceSelected(locations, isLongHold, selectedItems.get(size - 1).textView);
+                    locationSelectionListener.onLocationSequenceSelected(locations, isLongHold, isTwoFingersTap, selectedItems.get(size - 1).textView);
                 }
             }
 
@@ -476,7 +484,7 @@ public class LocationSelector extends LinearLayout implements
             } else {
                 selectedItems.add(currItem);
                 timeEntered = now;
-                setItemBackground(currItem, BG_FIRST);
+                setItemBackground(currItem, getSingleClickBackgroundColor());
             }
 
             timerRunning = true;
@@ -505,11 +513,11 @@ public class LocationSelector extends LinearLayout implements
                     }
                 }
 
-                if (isVeryLongHold && isStillFirst && useLongHoldMenu && locationSelectionListener != null) {
+                if (isVeryLongHold && isStillFirst && locationSelectionListener != null) {
                     isOperationCompleted = true;
                     final Item item = selectedItems.get(0);
                     final Location location = item.itemData.location;
-                    locationSelectionListener.onSingleLocationSelected(location, true, item.textView);
+                    locationSelectionListener.onSingleLocationContextOperation(location, true, item.textView);
                 }
 
                 if (isLongHold) {
@@ -524,7 +532,7 @@ public class LocationSelector extends LinearLayout implements
                     // leaving intermediate fast, remove it
                     if (prevItem != null) {
                         if (isStillFirst) {
-                            setItemBackground(prevItem, BG_FIRST);
+                            setItemBackground(prevItem, getSingleClickBackgroundColor());
                         } else {
                             setItemBackground(prevItem, BG_UNSELECTED);
                             selectedItems.remove(selectedItems.size() - 1);
@@ -534,6 +542,7 @@ public class LocationSelector extends LinearLayout implements
 
                 selectedItems.add(currItem);
                 setItemBackground(currItem, BG_LAST);
+                setItemBackground(selectedItems.get(0), BG_FIRST);
             }
             return true;
         }
@@ -554,12 +563,12 @@ public class LocationSelector extends LinearLayout implements
 
         if (isLongHold && prevItem != null) {
             if (isVeryLongHold && isStillFirst) {
-                if (useLongHoldMenu && locationSelectionListener != null) {
+                if (locationSelectionListener != null) {
                     isContextOperation = true;
                     isOperationCompleted = true;
                     final Item item = selectedItems.get(0);
                     final Location location = item.itemData.location;
-                    locationSelectionListener.onSingleLocationSelected(location, true, item.textView);
+                    locationSelectionListener.onSingleLocationContextOperation(location, true, item.textView);
 
                     timerRunning = false;
                 }

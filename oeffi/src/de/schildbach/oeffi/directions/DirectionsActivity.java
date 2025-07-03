@@ -1049,7 +1049,16 @@ public class DirectionsActivity extends OeffiMainActivity implements
     }
 
     @Override
-    public void onLocationSequenceSelected(final List<Location> locations, final boolean longHold, View lastView) {
+    public boolean isFirstLocationClickedDestination() {
+        return viewFromLocation.getLocation() != null;
+    }
+
+    @Override
+    public void onLocationSequenceSelected(
+            final List<Location> locations,
+            final boolean isLongHold,
+            final boolean isTwoFingersTap,
+            View lastView) {
         final boolean doGo;
         final int numLocations = locations.size();
         if (numLocations == 0) {
@@ -1057,18 +1066,24 @@ public class DirectionsActivity extends OeffiMainActivity implements
         } else if (numLocations == 1) {
             // single location clicked
             final Location location = locations.get(0);
-            if (longHold) {
+            if (isTwoFingersTap) {
+                if (viewFromLocation.getLocation() != null) {
+                    expandForm(true);
+                    viewViaLocation.setLocation(location);
+                } else {
+                    viewFromLocation.setLocation(location);
+                }
+                doGo = false;
+            } else if (isLongHold) {
                 if (viewViaLocation.getVisibility() == View.VISIBLE
                         && viewViaLocation.getLocation() == null
                         && viewFromLocation.getLocation() != null) {
                     expandForm(true);
                     viewViaLocation.setLocation(location);
-                    viewViaLocation.setVisibility(View.VISIBLE);
-                    doGo = false;
                 } else {
                     viewFromLocation.setLocation(location);
-                    doGo = false;
                 }
+                doGo = false;
             } else {
                 if (viewFromLocation.getLocation() == null) {
                     viewFromLocation.setLocation(location);
@@ -1084,14 +1099,14 @@ public class DirectionsActivity extends OeffiMainActivity implements
             viewViaLocation.setLocation(null);
             viewViaLocation.setVisibility(View.GONE);
             viewToLocation.setLocation(locations.get(1));
-            doGo = !longHold;
+            doGo = !isLongHold;
         } else {
             // >= 3, from-via-to
             viewFromLocation.setLocation(locations.get(0));
             viewViaLocation.setLocation(locations.get(1));
             viewViaLocation.setVisibility(View.VISIBLE);
             viewToLocation.setLocation(locations.get(numLocations - 1));
-            doGo = !longHold;
+            doGo = !isLongHold;
         }
 
         if (doGo)
@@ -1101,7 +1116,10 @@ public class DirectionsActivity extends OeffiMainActivity implements
     }
 
     @Override
-    public void onSingleLocationSelected(final Location location, final boolean longHold, View selectedView) {
+    public void onSingleLocationContextOperation(
+            final Location location,
+            final boolean isLongHold,
+            View selectedView) {
         final PopupMenu contextMenu = new PopupMenu(this, selectedView);
         contextMenu.setGravity(Gravity.RIGHT);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)

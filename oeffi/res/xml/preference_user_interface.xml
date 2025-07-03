@@ -51,7 +51,7 @@
             android:summary="@string/user_interface_location_selector_longholdtime_summary" />
         <CheckBoxPreference
             android:key="user_interface_location_selector_longholdmenu"
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:title="@string/user_interface_location_selector_longholdmenu_title"
             android:summary="@string/user_interface_location_selector_longholdmenu_summary" />
 
