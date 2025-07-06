@@ -171,6 +171,9 @@ public abstract class OeffiActivity extends ComponentActivity {
                 directionsItem.setChecked(OeffiActivity.this instanceof DirectionsActivity);
                 final MenuItem plansItem = menu.findItem(R.id.global_options_plans);
                 plansItem.setChecked(OeffiActivity.this instanceof PlansPickerActivity);
+
+                final MenuItem aboutItem = menu.findItem(R.id.global_options_about);
+                aboutItem.setTitle(getString(R.string.global_options_about_title, Application.getInstance().getAppName()));
             }
 
             @Override
@@ -340,8 +343,10 @@ public abstract class OeffiActivity extends ComponentActivity {
         });
 
         if (prefs.getBoolean(Constants.PREFS_KEY_USER_INTERFACE_MAINMENU_SHAREAPP_ENABLED, false)) {
-            findViewById(R.id.navigation_drawer_share).setVisibility(View.VISIBLE);
-            findViewById(R.id.navigation_drawer_share).setOnClickListener(v -> {
+            final View drawerView = findViewById(R.id.navigation_drawer_share);
+            drawerView.setVisibility(View.VISIBLE);
+            ((TextView) findViewById(R.id.navigation_drawer_share_title)).setText(getShareTitle());
+            drawerView.setOnClickListener(v -> {
                 closeNavigation();
                 shareApp();
             });
@@ -623,14 +628,19 @@ public abstract class OeffiActivity extends ComponentActivity {
         final String updateUrl = getString(R.string.about_update_apk_url);
         if (updateUrl == null || updateUrl.isEmpty())
             return;
-        final String shareTitle = getString(R.string.global_options_share_app_title);
-        final String shareText = getString(R.string.global_options_share_app_text, updateUrl);
+        final String shareTitle = getShareTitle();
+        final String shareText = getString(R.string.global_options_share_app_text, Application.getInstance().getAppName(), updateUrl);
         final Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
         intent.putExtra(Intent.EXTRA_SUBJECT, shareTitle);
         intent.putExtra(Intent.EXTRA_TEXT, shareText);
         startActivity(Intent.createChooser(intent, shareTitle));
+    }
+
+    @NonNull
+    private String getShareTitle() {
+        return getString(R.string.global_options_share_app_title, Application.getInstance().getAppName());
     }
 
     protected void showImageDialog(final int imageResId) {

@@ -35,9 +35,9 @@
     <string name="global_options_preferences_title">Einstellungen</string>
     <string name="global_options_extras_title">Extras</string>
     <string name="global_options_clear_navigation_title">Alle Navigationen löschen</string>
-    <string name="global_options_about_title">Über Öffi</string>
-    <string name="global_options_share_app_title">Teile Öffi-NG</string>
-    <string name="global_options_share_app_text">Dies ist der Link, um die Öffi-NG App zu installieren.\n\n%1$s</string>
+    <string name="global_options_about_title">Über %1$s</string>
+    <string name="global_options_share_app_title">Teile %1$s</string>
+    <string name="global_options_share_app_text">Dies ist der Link, um die %1$s App zu installieren.\n\n%2$s</string>
 
     <!-- preferences -->
     <string name="global_preferences_title">Allgemein</string>

@@ -75,6 +75,7 @@ public class Application extends android.app.Application {
     private File logFile;
     private SpeechInput speechInput;
     private SharedPreferences prefs;
+    private String appName;
 
     public Application() {
         instance = this;
@@ -110,6 +111,7 @@ public class Application extends android.app.Application {
             throw new RuntimeException(x);
         }
 
+        this.appName = getString(R.string.app_name);
         log.info("=== Starting app version {} ({})", packageInfo.versionName, packageInfo.versionCode);
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -207,6 +209,11 @@ public class Application extends android.app.Application {
         QueryHistoryProvider.deleteQueryHistory(this, NICARAGUA);
 
         log.info("Migrations took {}", watch);
+    }
+
+    public String getAppName() {
+//        return "Öffi";
+        return appName;
     }
 
     private void initLogging() {

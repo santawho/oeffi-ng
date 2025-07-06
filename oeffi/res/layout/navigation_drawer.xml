@@ -14,8 +14,8 @@
         android:layout_weight="1" />
 
     <LinearLayout
-        android:visibility="gone"
         android:id="@+id/navigation_drawer_share"
+        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -28,10 +28,13 @@
             android:gravity="center"
             android:src="@drawable/ic_share_grey600_24dp"/>
         <TextView
+            android:id="@+id/navigation_drawer_share_title"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:lines="2"
             android:layout_marginLeft="@dimen/text_padding_horizontal_verylax"
-            android:layout_marginRight="@dimen/text_padding_horizontal_verylax"
+            android:layout_marginRight="@dimen/text_padding_horizontal_lax"
             android:gravity="center"
             android:textSize="@dimen/font_size_large"
             android:text="@string/global_options_share_app_title"/>
@@ -41,8 +44,9 @@
             android:layout_weight="1"/>
         <ImageView
             android:id="@+id/navigation_drawer_share_qrcode"
-            android:layout_width="wrap_content"
             android:layout_height="@dimen/navigation_drawer_share_qrcode"
+            android:layout_width="@dimen/navigation_drawer_share_qrcode"
+            android:layout_gravity="right"
             android:layout_marginLeft="@dimen/text_padding_horizontal_verylax"
             android:layout_marginRight="@dimen/text_padding_horizontal_verylax"
             android:scaleType="fitCenter"
