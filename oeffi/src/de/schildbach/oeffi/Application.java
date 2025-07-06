@@ -55,6 +55,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class Application extends android.app.Application {
@@ -91,6 +92,26 @@ public class Application extends android.app.Application {
 
     public SharedPreferences getSharedPreferences() {
         return prefs;
+    }
+
+    public String getTranslatedString(final int resId) {
+        final String mappedString = getString(resId);
+        final String translatedString = getTranslatedString(mappedString, Locale.getDefault().getLanguage());
+        if (translatedString != null)
+            return translatedString;
+        return getTranslatedString(mappedString, "en");
+    }
+
+    public static String getTranslatedString(final String mappedString, final String language) {
+        final String[] languageValues = mappedString.split("~~");
+        for (String languageValue : languageValues) {
+            final String[] languageAndValue = languageValue.split("~");
+            final String lang = languageAndValue[0];
+            final String value = languageAndValue[1];
+            if (lang.equals(language))
+                return value;
+        }
+        return null;
     }
 
     public boolean isDeveloperElementsEnabled() {

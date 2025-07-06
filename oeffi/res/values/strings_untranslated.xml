@@ -9,6 +9,9 @@
     <string name="about_update_manifest_url" />
     <string name="about_update_modified" />
 
+    <string name="about_privacy_policy_url">en~https://oeffi.schildbach.de/privacy_policy.txt~~de~https://oeffi.schildbach.de/privacy_policy_de.txt</string>
+    <string name="about_faq_url">en~https://oeffi.schildbach.de/faq.html~~de~https://oeffi.schildbach.de/faq.html</string>
+
     <string name="error_reporter_mail_address">oeffi.app@gmail.com</string>
 
     <string name="app_url_host">oeffi.schildbach.de</string>

@@ -60,12 +60,10 @@
     <string name="about_copyright_summary">© 2010-2025, die Öffi-Entwickler</string>
     <string name="about_license_title">Lizenz</string>
     <string name="about_privacy_policy_title">Datenschutz-Bestimmungen</string>
-    <string name="about_privacy_policy_url">https://oeffi.schildbach.de/privacy_policy_de.txt</string>
     <string name="about_source_title">Quellcode</string>
     <string name="about_changelog_title">Änderungshistorie anzeigen</string>
     <string name="about_changelog_summary">https://oeffi.schildbach.de/changelog_de.html</string>
     <string name="about_faq_title">FAQ - häufig gestellte Fragen</string>
-    <string name="about_faq_summary">https://oeffi.schildbach.de/faq.html</string>
     <string name="about_update_title">Update</string>
     <string name="about_update_summary">Download der aktuellen APK</string>
     <string name="about_participate_title">Mitmachen</string>

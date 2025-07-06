@@ -31,8 +31,8 @@ import de.schildbach.oeffi.util.Installer;
 
 import javax.annotation.Nullable;
 
+/** @noinspection deprecation*/
 public class AboutFragment extends PreferenceFragment {
-    /** @noinspection deprecation*/
     public static PreferenceActivity.Header getHeader() {
         final PreferenceActivity.Header aboutHeader = new PreferenceActivity.Header();
         aboutHeader.fragment = AboutFragment.class.getName();
@@ -44,44 +44,59 @@ public class AboutFragment extends PreferenceFragment {
     private static final String KEY_ABOUT_MARKET_APP = "about_market_app";
     private static final String KEY_ABOUT_CHANGELOG = "about_changelog";
     private static final String KEY_ABOUT_UPDATE = "about_update";
+    private static final String KEY_ABOUT_POLICY = "about_policy";
+    private static final String KEY_ABOUT_FAQ = "about_faq";
 
-    private Activity activity;
     private Application application;
 
     @Override
     public void onAttach(final Activity activity) {
         super.onAttach(activity);
-        this.activity = activity;
         this.application = (Application) activity.getApplication();
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         addPreferencesFromResource(R.xml.preference_about);
+
         findPreference(KEY_ABOUT_VERSION).setSummary(application.packageInfo().versionName);
+
         final Installer installer = Installer.from(application);
+        final Preference prefMarketApp = findPreference(KEY_ABOUT_MARKET_APP);
         if (installer != null) {
             final Uri marketUri = installer.appMarketUriFor(application);
-            findPreference(KEY_ABOUT_MARKET_APP).setSummary(marketUri.toString());
-            findPreference(KEY_ABOUT_MARKET_APP).setIntent(new Intent(Intent.ACTION_VIEW, marketUri));
+            prefMarketApp.setSummary(marketUri.toString());
+            prefMarketApp.setIntent(new Intent(Intent.ACTION_VIEW, marketUri));
         } else {
-            removeOrDisablePreference(findPreference(KEY_ABOUT_MARKET_APP));
+            removeOrDisablePreference(prefMarketApp);
         }
 
         if (!getResources().getBoolean(R.bool.flags_show_twitter))
             removeOrDisablePreference(findPreference("about_twitter"));
 
-        String changeLogUrl = activity.getString(R.string.about_changelog_url);
+        final Application application = Application.getInstance();
+
+        final String changeLogUrl = application.getString(R.string.about_changelog_url);
         if (!changeLogUrl.isEmpty()) {
-            findPreference(KEY_ABOUT_CHANGELOG).setSummary(changeLogUrl);
-            findPreference(KEY_ABOUT_CHANGELOG).setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(changeLogUrl)));
+            final Preference prefChangeLog = findPreference(KEY_ABOUT_CHANGELOG);
+            prefChangeLog.setSummary(changeLogUrl);
+            prefChangeLog.setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(changeLogUrl)));
         }
 
-        String updateUrl = activity.getString(R.string.about_update_apk_url);
+        final String updateUrl = application.getString(R.string.about_update_apk_url);
         if (updateUrl == null || updateUrl.isEmpty())
             removeOrDisablePreference(findPreference(KEY_ABOUT_UPDATE));
+
+        final String policyUrl = application.getTranslatedString(R.string.about_privacy_policy_url);
+        final Preference prefPolicy = findPreference(KEY_ABOUT_POLICY);
+        prefPolicy.setSummary(policyUrl);
+        prefPolicy.setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(policyUrl)));
+
+        final String faqUrl = application.getTranslatedString(R.string.about_faq_url);
+        final Preference prefFaq = findPreference(KEY_ABOUT_FAQ);
+        prefFaq.setSummary(faqUrl);
+        prefFaq.setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(faqUrl)));
     }
 
     private void removeOrDisablePreference(final Preference preference) {
