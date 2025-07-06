@@ -23,6 +23,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.Preference;
+import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
@@ -31,6 +32,14 @@ import de.schildbach.oeffi.util.Installer;
 import javax.annotation.Nullable;
 
 public class AboutFragment extends PreferenceFragment {
+    /** @noinspection deprecation*/
+    public static PreferenceActivity.Header getHeader() {
+        final PreferenceActivity.Header aboutHeader = new PreferenceActivity.Header();
+        aboutHeader.fragment = AboutFragment.class.getName();
+        aboutHeader.title = Application.getInstance().getString(R.string.about_title, Application.getInstance().getAppName());
+        return aboutHeader;
+    }
+
     private static final String KEY_ABOUT_VERSION = "about_version";
     private static final String KEY_ABOUT_MARKET_APP = "about_market_app";
     private static final String KEY_ABOUT_CHANGELOG = "about_changelog";

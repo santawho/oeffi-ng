@@ -55,7 +55,7 @@
     <string name="shortcuts_preferences_summary">Create shortcuts on homescreen</string>
 
     <!-- preferences about -->
-    <string name="about_title">About Öffi</string>
+    <string name="about_title">About %1$s</string>
     <string name="about_copyright_title">Copyright</string>
     <string name="about_copyright_summary">© 2010-2025, the Öffi developers</string>
     <string name="about_license_title">License</string>

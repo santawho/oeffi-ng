@@ -55,7 +55,7 @@
     <string name="shortcuts_preferences_summary">Erstelle Verknüpfungen auf dem Startbildschirm</string>
 
     <!-- preferences about -->
-    <string name="about_title">Über Öffi</string>
+    <string name="about_title">Über %1$s</string>
     <string name="about_copyright_title">Urheberrecht</string>
     <string name="about_copyright_summary">© 2010-2025, die Öffi-Entwickler</string>
     <string name="about_license_title">Lizenz</string>
