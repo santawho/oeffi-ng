@@ -20,7 +20,6 @@ package de.schildbach.oeffi.preference;
 import android.content.ActivityNotFoundException;
 import android.os.Bundle;
 import android.preference.Preference;
-import android.preference.PreferenceFragment;
 import de.schildbach.oeffi.R;
 
 import javax.annotation.Nullable;

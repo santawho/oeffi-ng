@@ -22,8 +22,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.preference.Preference;
-import android.preference.PreferenceFragment;
 
 import androidx.core.content.pm.ShortcutInfoCompat;
 import androidx.core.content.pm.ShortcutManagerCompat;
@@ -47,63 +45,65 @@ public class ShortcutsFragment extends PreferenceFragment {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preference_shortcuts);
 
-        setupActionPreference(KEY_SHORTCUTS_DIRECTIONS);
-        setupActionPreference(KEY_SHORTCUTS_STATIONS);
-        setupActionPreference(KEY_SHORTCUTS_PLANS);
+        setupActionPreference(KEY_SHORTCUTS_DIRECTIONS, DirectionsShortcutActionHandler.class);
+        setupActionPreference(KEY_SHORTCUTS_STATIONS, StationsShortcutActionHandler.class);
+        setupActionPreference(KEY_SHORTCUTS_PLANS, PlansShortcutActionHandler.class);
     }
 
-    private void setupActionPreference(final String prefkey) {
-        final Preference preference = findPreference(prefkey);
-        PreferenceActivity.setActionIntent(preference, ActionHandler.class);
-    }
-
-    public static class ActionHandler implements PreferenceActivity.ActionHandler {
+    public static class DirectionsShortcutActionHandler extends ActionHandler {
         @Override
-        public boolean handleAction(final Context context, final String prefkey) {
-            if (KEY_SHORTCUTS_DIRECTIONS.equals(prefkey)) {
-                createShortcut(context,
-                        DirectionsActivity.class,
-                        R.string.directions_icon_label,
-                        R.mipmap.ic_oeffi_ng_directions_color_48dp);
-                return true;
-            } else if (KEY_SHORTCUTS_STATIONS.equals(prefkey)) {
-                createShortcut(context,
-                        StationsActivity.class,
-                        R.string.stations_icon_label,
-                        R.mipmap.ic_oeffi_ng_stations_color_48dp);
-                return true;
-            } else if (KEY_SHORTCUTS_PLANS.equals(prefkey)) {
-                createShortcut(context,
-                        PlansPickerActivity.class,
-                        R.string.plans_icon_label,
-                        R.mipmap.ic_oeffi_ng_plans_color_48dp);
-                return true;
-            }
-            return false;
+        public boolean handleAction(final PreferenceActivity context, final String prefkey) {
+            createShortcut(context,
+                    DirectionsActivity.class,
+                    R.string.directions_icon_label,
+                    R.mipmap.ic_oeffi_ng_directions_color_48dp);
+            return true;
         }
+    }
 
-        private void createShortcut(
-                final Context context,
-                Class<? extends Activity> activityClass,
-                final int labelId,
-                final int iconId) {
-            final Intent shortcutIntent = new Intent(context, activityClass)
-                    .setAction(Intent.ACTION_MAIN)
-                    .addCategory(Intent.CATEGORY_DEFAULT);
-            final String id = "ShortcutsFragment:" + System.currentTimeMillis();
-            ShortcutManagerCompat.requestPinShortcut(context,
-                    new ShortcutInfoCompat.Builder(context, id)
-                            .setActivity(new ComponentName(context, DirectionsActivity.class))
-                            .setShortLabel(context.getString(labelId))
-                            .setIcon(IconCompat.createWithResource(context, iconId))
-                            .setIntent(shortcutIntent)
-                            .build(), null);
+    public static class StationsShortcutActionHandler extends ActionHandler {
+        @Override
+        public boolean handleAction(final PreferenceActivity context, final String prefkey) {
+            createShortcut(context,
+                    StationsActivity.class,
+                    R.string.stations_icon_label,
+                    R.mipmap.ic_oeffi_ng_stations_color_48dp);
+            return true;
+        }
+    }
+
+    public static class PlansShortcutActionHandler extends ActionHandler {
+        @Override
+        public boolean handleAction(final PreferenceActivity context, final String prefkey) {
+            createShortcut(context,
+                    PlansPickerActivity.class,
+                    R.string.plans_icon_label,
+                    R.mipmap.ic_oeffi_ng_plans_color_48dp);
+            return true;
+        }
+    }
+
+    private static void createShortcut(
+            final Context context,
+            Class<? extends Activity> activityClass,
+            final int labelId,
+            final int iconId) {
+        final Intent shortcutIntent = new Intent(context, activityClass)
+                .setAction(Intent.ACTION_MAIN)
+                .addCategory(Intent.CATEGORY_DEFAULT);
+        final String id = "ShortcutsFragment:" + System.currentTimeMillis();
+        ShortcutManagerCompat.requestPinShortcut(context,
+                new ShortcutInfoCompat.Builder(context, id)
+                        .setActivity(new ComponentName(context, DirectionsActivity.class))
+                        .setShortLabel(context.getString(labelId))
+                        .setIcon(IconCompat.createWithResource(context, iconId))
+                        .setIntent(shortcutIntent)
+                        .build(), null);
 //            context.sendBroadcast(new Intent()
 //                    .putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent)
 //                    .putExtra(Intent.EXTRA_SHORTCUT_NAME, context.getString(labelId))
 //                    .putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, Intent.ShortcutIconResource.fromContext(context, iconId))
 //                    .putExtra("duplicate", true)
 //                    .setAction("com.android.launcher.action.INSTALL_SHORTCUT"));
-        }
     }
 }

@@ -20,18 +20,14 @@ package de.schildbach.oeffi;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorSet;
 import android.app.ActivityManager.TaskDescription;
-import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.format.DateUtils;
-import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -40,7 +36,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -225,7 +220,7 @@ public abstract class OeffiActivity extends ComponentActivity {
                 }
 
                 if (itemId == R.id.global_options_donate) {
-                    PreferenceActivity.start(OeffiActivity.this, DonateFragment.class.getName());
+                    PreferenceActivity.start(OeffiActivity.this, DonateFragment.class);
                     return true;
                 }
 
@@ -245,7 +240,7 @@ public abstract class OeffiActivity extends ComponentActivity {
                 }
 
                 if (itemId == R.id.global_options_about) {
-                    PreferenceActivity.start(OeffiActivity.this, AboutFragment.class.getName());
+                    PreferenceActivity.start(OeffiActivity.this, AboutFragment.class);
                     return true;
                 }
 
@@ -345,14 +340,14 @@ public abstract class OeffiActivity extends ComponentActivity {
         if (prefs.getBoolean(Constants.PREFS_KEY_USER_INTERFACE_MAINMENU_SHAREAPP_ENABLED, false)) {
             final View drawerView = findViewById(R.id.navigation_drawer_share);
             drawerView.setVisibility(View.VISIBLE);
-            ((TextView) findViewById(R.id.navigation_drawer_share_title)).setText(getShareTitle());
+            ((TextView) findViewById(R.id.navigation_drawer_share_title)).setText(application.getShareTitle());
             drawerView.setOnClickListener(v -> {
                 closeNavigation();
-                shareApp();
+                application.shareApp(this);
             });
             findViewById(R.id.navigation_drawer_share_qrcode).setOnClickListener(v -> {
                 closeNavigation();
-                showImageDialog(R.drawable.qr_update);
+                application.showImageDialog(this, R.drawable.qr_update, null);
             });
         }
 
@@ -622,37 +617,6 @@ public abstract class OeffiActivity extends ComponentActivity {
         }
 
         return str;
-    }
-
-    protected void shareApp() {
-        final String updateUrl = getString(R.string.about_update_apk_url);
-        if (updateUrl == null || updateUrl.isEmpty())
-            return;
-        final String shareTitle = getShareTitle();
-        final String shareText = getString(R.string.global_options_share_app_text, Application.getInstance().getAppName(), updateUrl);
-        final Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
-        intent.putExtra(Intent.EXTRA_SUBJECT, shareTitle);
-        intent.putExtra(Intent.EXTRA_TEXT, shareText);
-        startActivity(Intent.createChooser(intent, shareTitle));
-    }
-
-    @NonNull
-    private String getShareTitle() {
-        return getString(R.string.global_options_share_app_title, Application.getInstance().getAppName());
-    }
-
-    protected void showImageDialog(final int imageResId) {
-        final DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
-        final int sizePixels = (Math.min(displayMetrics.widthPixels, displayMetrics.heightPixels) * 3) / 4;
-        final ImageView imageView = new ImageView(this);
-        imageView.setImageBitmap(Bitmap.createScaledBitmap(
-                ((BitmapDrawable) getDrawable(imageResId)).getBitmap(),
-                sizePixels, sizePixels, false));
-        final Dialog dialog = new Dialog(this);
-        dialog.setContentView(imageView);
-        dialog.show();
     }
 
     protected boolean isDeveloperElementsEnabled() {

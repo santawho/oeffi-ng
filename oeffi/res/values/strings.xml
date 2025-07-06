@@ -64,8 +64,13 @@
     <string name="about_changelog_title">View Changelog</string>
     <string name="about_changelog_summary">https://oeffi.schildbach.de/changelog.html</string>
     <string name="about_faq_title">FAQ</string>
+    <string name="about_update_and_share_title">Update and Share</string>
     <string name="about_update_title">Update</string>
     <string name="about_update_summary">Download latest APK</string>
+    <string name="about_share_title">Share</string>
+    <string name="about_share_summary">Send link to share the app with remote friends</string>
+    <string name="about_show_qr_title">Show QR</string>
+    <string name="about_show_qr_summary">Show QR code to share the app with a local friend</string>
     <string name="about_participate_title">Participate</string>
     <string name="about_market_app_title">Rate or Review Öffi</string>
     <string name="about_donate_title">Donations</string>

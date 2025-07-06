@@ -17,10 +17,7 @@
 
 package de.schildbach.oeffi.preference;
 
-import android.content.Context;
 import android.os.Bundle;
-import android.preference.Preference;
-import android.preference.PreferenceFragment;
 
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.network.NetworkPickerActivity;
@@ -35,22 +32,14 @@ public class CommonFragment extends PreferenceFragment {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preference_common);
 
-        setupActionPreference(KEY_COMMON_NETWORK_PROVIDER);
+        setupActionPreference(KEY_COMMON_NETWORK_PROVIDER, NetworkProviderActionHandler.class);
     }
 
-    private void setupActionPreference(final String prefkey) {
-        final Preference preference = findPreference(prefkey);
-        PreferenceActivity.setActionIntent(preference, ActionHandler.class);
-    }
-
-    public static class ActionHandler implements PreferenceActivity.ActionHandler {
+    public static class NetworkProviderActionHandler extends ActionHandler {
         @Override
-        public boolean handleAction(final Context context, final String prefkey) {
-            if (KEY_COMMON_NETWORK_PROVIDER.equals(prefkey)) {
-                NetworkPickerActivity.start(context);
-                return true;
-            }
-            return false;
+        public boolean handleAction(final PreferenceActivity context, final String prefkey) {
+            NetworkPickerActivity.start(context);
+            return true;
         }
     }
 }

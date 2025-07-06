@@ -64,8 +64,13 @@
     <string name="about_changelog_title">Änderungshistorie anzeigen</string>
     <string name="about_changelog_summary">https://oeffi.schildbach.de/changelog_de.html</string>
     <string name="about_faq_title">FAQ - häufig gestellte Fragen</string>
+    <string name="about_update_and_share_title">Update und Teilen</string>
     <string name="about_update_title">Update</string>
     <string name="about_update_summary">Download der aktuellen APK</string>
+    <string name="about_share_title">Teilen</string>
+    <string name="about_share_summary">Sende einen Link zum Teilen der App an entfernte Freunde</string>
+    <string name="about_show_qr_title">Zeige QR</string>
+    <string name="about_show_qr_summary">Zeige einen QR Code zum Teilen der App mit einem Freund vor Ort</string>
     <string name="about_participate_title">Mitmachen</string>
     <string name="about_market_app_title">Öffi bewerten oder rezensieren</string>
     <string name="about_donate_title">Spenden</string>

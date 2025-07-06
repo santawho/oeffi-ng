@@ -17,14 +17,10 @@
 
 package de.schildbach.oeffi.preference;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.Preference;
-import android.preference.PreferenceActivity;
-import android.preference.PreferenceFragment;
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.Installer;
@@ -43,22 +39,18 @@ public class AboutFragment extends PreferenceFragment {
     private static final String KEY_ABOUT_VERSION = "about_version";
     private static final String KEY_ABOUT_MARKET_APP = "about_market_app";
     private static final String KEY_ABOUT_CHANGELOG = "about_changelog";
-    private static final String KEY_ABOUT_UPDATE = "about_update";
     private static final String KEY_ABOUT_POLICY = "about_policy";
     private static final String KEY_ABOUT_FAQ = "about_faq";
-
-    private Application application;
-
-    @Override
-    public void onAttach(final Activity activity) {
-        super.onAttach(activity);
-        this.application = (Application) activity.getApplication();
-    }
+    private static final String KEY_ABOUT_UPDATE = "about_update";
+    private static final String KEY_ABOUT_SHARE = "about_share";
+    private static final String KEY_ABOUT_SHOW_QR = "about_show_qr";
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preference_about);
+
+        final Application application = Application.getInstance();
 
         findPreference(KEY_ABOUT_VERSION).setSummary(application.packageInfo().versionName);
 
@@ -74,8 +66,6 @@ public class AboutFragment extends PreferenceFragment {
 
         if (!getResources().getBoolean(R.bool.flags_show_twitter))
             removeOrDisablePreference(findPreference("about_twitter"));
-
-        final Application application = Application.getInstance();
 
         final String changeLogUrl = application.getString(R.string.about_changelog_url);
         if (!changeLogUrl.isEmpty()) {
@@ -97,12 +87,25 @@ public class AboutFragment extends PreferenceFragment {
         final Preference prefFaq = findPreference(KEY_ABOUT_FAQ);
         prefFaq.setSummary(faqUrl);
         prefFaq.setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(faqUrl)));
+
+        setupActionPreference(KEY_ABOUT_SHARE, ShareActionHandler.class);
+        setupActionPreference(KEY_ABOUT_SHOW_QR, AboutFragment.class, ShowQrActionHandler.class);
     }
 
-    private void removeOrDisablePreference(final Preference preference) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            preference.getParent().removePreference(preference);
-        else
-            preference.setEnabled(false);
+    public static class ShareActionHandler extends ActionHandler {
+        @Override
+        public boolean handleAction(final PreferenceActivity context, final String prefkey) {
+            Application.getInstance().shareApp(context);
+            return true;
+        }
+    }
+
+    public static class ShowQrActionHandler extends ActionHandler {
+        @Override
+        public boolean handleAction(final PreferenceActivity context, final String prefkey) {
+            Application.getInstance().showImageDialog(context, R.drawable.qr_update,
+                    dialog -> dismissParentingActivity(context));
+            return false;
+        }
     }
 }

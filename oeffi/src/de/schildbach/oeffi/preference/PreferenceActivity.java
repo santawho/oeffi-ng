@@ -19,7 +19,6 @@ package de.schildbach.oeffi.preference;
 
 import android.app.Activity;
 import android.app.ComponentCaller;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -37,10 +36,6 @@ import de.schildbach.oeffi.R;
 import java.util.List;
 
 public class PreferenceActivity extends android.preference.PreferenceActivity {
-    public interface ActionHandler {
-        boolean handleAction(final Context context, final String prefkey);
-    }
-
     public static final String EXTRA_PREFKEY = "prefkey";
     public static final String EXTRA_HANDLER = "handler";
 
@@ -48,15 +43,30 @@ public class PreferenceActivity extends android.preference.PreferenceActivity {
         activity.startActivity(new Intent(activity, PreferenceActivity.class));
     }
 
-    public static void start(final Activity activity, final String fragmentName) {
+    public static void start(
+            final Activity activity,
+            final Class<? extends PreferenceFragment> fragmentClass) {
         final Intent intent = new Intent(activity, PreferenceActivity.class);
-        intent.putExtra(EXTRA_SHOW_FRAGMENT, fragmentName);
+        intent.putExtra(EXTRA_SHOW_FRAGMENT, fragmentClass.getName());
         activity.startActivity(intent);
     }
 
-    public static void setActionIntent(final Preference preference, final Class<? extends ActionHandler> actionHandlerClass) {
+    public static void setActionIntent(
+            final Preference preference,
+            final Class<? extends PreferenceFragment.ActionHandler> actionHandlerClass) {
         preference.setIntent(new Intent(Application.getInstance(), PreferenceActivity.class)
                 .putExtra(EXTRA_PREFKEY, preference.getKey())
+                .putExtra(EXTRA_HANDLER, actionHandlerClass.getName()));
+    }
+
+    public static void setActionIntent(
+            final Preference preference,
+            final PreferenceActivity activity,
+            final Class<? extends PreferenceFragment> fragmentClass,
+            final Class<? extends PreferenceFragment.ActionHandler> actionHandlerClass) {
+        preference.setIntent(new Intent(activity, PreferenceActivity.class)
+                .putExtra(EXTRA_PREFKEY, preference.getKey())
+                .putExtra(EXTRA_SHOW_FRAGMENT, fragmentClass.getName())
                 .putExtra(EXTRA_HANDLER, actionHandlerClass.getName()));
     }
 
@@ -85,14 +95,15 @@ public class PreferenceActivity extends android.preference.PreferenceActivity {
         if (prefkey == null)
             return false;
         final String handlerClassName = intent.getStringExtra(EXTRA_HANDLER);
+        if (handlerClassName == null)
+            return false;
         try {
-            final Class handlerClass = Class.forName(handlerClassName);
-            final ActionHandler actionHandler = (ActionHandler) handlerClass.newInstance();
-            actionHandler.handleAction(this, prefkey);
+            final Class<?> handlerClass = Class.forName(handlerClassName);
+            final PreferenceFragment.ActionHandler actionHandler = (PreferenceFragment.ActionHandler) handlerClass.newInstance();
+            return actionHandler.handleAction(this, prefkey);
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
             throw new RuntimeException(e);
         }
-        return false;
     }
 
     @Override

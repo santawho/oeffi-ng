@@ -39,14 +39,27 @@
             android:action="android.intent.action.VIEW"
             android:data="@string/about_faq_url" />
     </Preference>
-    <Preference
-        android:key="about_update"
-        android:summary="@string/about_update_summary"
-        android:title="@string/about_update_title">
-        <intent
-            android:action="android.intent.action.VIEW"
-            android:data="@string/about_update_apk_url" />
-    </Preference>
+
+    <PreferenceCategory android:title="@string/about_update_and_share_title">
+        <Preference
+            android:key="about_update"
+            android:summary="@string/about_update_summary"
+            android:title="@string/about_update_title">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="@string/about_update_apk_url" />
+        </Preference>
+        <Preference
+            android:key="about_share"
+            android:summary="@string/about_share_summary"
+            android:title="@string/about_share_title" >
+        </Preference>
+        <Preference
+            android:key="about_show_qr"
+            android:summary="@string/about_show_qr_summary"
+            android:title="@string/about_show_qr_title">
+        </Preference>
+    </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/about_participate_title">
         <Preference

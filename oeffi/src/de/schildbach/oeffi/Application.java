@@ -17,14 +17,24 @@
 
 package de.schildbach.oeffi;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.preference.PreferenceManager;
+import android.util.DisplayMetrics;
+import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.pm.ShortcutInfoCompat;
 import androidx.core.content.pm.ShortcutManagerCompat;
 import androidx.core.graphics.drawable.IconCompat;
@@ -373,5 +383,47 @@ public class Application extends android.app.Application {
         }
 
         return "on".equals(setting);
+    }
+
+    public void shareApp(final Activity contextActivity) {
+        final String updateUrl = getString(R.string.about_update_apk_url);
+        if (updateUrl == null || updateUrl.isEmpty())
+            return;
+        final String shareTitle = getShareTitle();
+        final String shareText = getString(R.string.global_options_share_app_text, Application.getInstance().getAppName(), updateUrl);
+        final Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+        intent.putExtra(Intent.EXTRA_SUBJECT, shareTitle);
+        intent.putExtra(Intent.EXTRA_TEXT, shareText);
+        contextActivity.startActivity(Intent.createChooser(intent, shareTitle));
+    }
+
+    @NonNull
+    public String getShareTitle() {
+        return getString(R.string.global_options_share_app_title, Application.getInstance().getAppName());
+    }
+
+    public void showImageDialog(
+            final Activity contextActivity,
+            final int imageResId,
+            final DialogInterface.OnDismissListener onDismissListener) {
+        final DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
+        final int sizePixels = (Math.min(displayMetrics.widthPixels, displayMetrics.heightPixels) * 3) / 4;
+        final int margin = sizePixels / 15;
+        final ImageView imageView = new ImageView(this);
+        imageView.setImageBitmap(Bitmap.createScaledBitmap(
+                ((BitmapDrawable) getDrawable(imageResId)).getBitmap(),
+                sizePixels, sizePixels, false));
+        imageView.setPadding(margin, margin, margin, margin);
+        // ... user AlertDialog, because it uses a nicer theme
+        //        final Dialog dialog = new Dialog(contextActivity);
+        //        dialog.setContentView(imageView);
+        //        dialog.setOnDismissListener(onDismissListener);
+        //        dialog.show();
+        new AlertDialog.Builder(contextActivity)
+                .setView(imageView)
+                .setOnDismissListener(onDismissListener)
+                .create().show();
     }
 }
