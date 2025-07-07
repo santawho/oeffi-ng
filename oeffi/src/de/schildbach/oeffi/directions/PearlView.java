@@ -42,7 +42,13 @@ public class PearlView extends View {
     private final Paint paint = new Paint();
 
     public enum Type {
-        DEPARTURE, ARRIVAL, INTERMEDIATE_ARRIVAL, INTERMEDIATE_DEPARTURE, PASSING
+        DEPARTURE,
+        ARRIVAL,
+        INTERMEDIATE_ARRIVAL,
+        DEPARTURE_FOR_INTERMEDIATE_ARRIVAL,
+        INTERMEDIATE_DEPARTURE,
+        ARRIVAL_FOR_INTERMEDIATE_DEPARTURE,
+        PASSING
     }
 
     public PearlView(final Context context) {
@@ -104,46 +110,50 @@ public class PearlView extends View {
         final float circleRadius = -fontMetrics.ascent / 2 * 0.9f;
         final float y = -fontMetrics.top - circleRadius + 2;
 
-        if (type == Type.DEPARTURE) {
-            drawLine(canvas, x, y, height);
+        switch (type) {
+            case DEPARTURE:
+                drawLine(canvas, x, y, height);
 
-            paint.setStyle(Paint.Style.FILL);
-            paint.setColor(style.backgroundColor);
-            canvas.drawCircle(x, y, circleRadius, paint);
+                paint.setStyle(Paint.Style.FILL);
+                paint.setColor(style.backgroundColor);
+                canvas.drawCircle(x, y, circleRadius, paint);
 
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(stopStrokeWidth);
-            paint.setColor(style.hasBorder() ? style.borderColor : colorBackground);
-            canvas.drawCircle(x, y, circleRadius, paint);
+                paint.setStyle(Paint.Style.STROKE);
+                paint.setStrokeWidth(stopStrokeWidth);
+                paint.setColor(style.hasBorder() ? style.borderColor : colorBackground);
+                canvas.drawCircle(x, y, circleRadius, paint);
 
-            paint.setStyle(Paint.Style.FILL);
-            paint.setColor(style.foregroundColor);
-            canvas.drawCircle(x, y, intermediateSize / 2, paint);
-        } else if (type == Type.ARRIVAL) {
-            drawLine(canvas, x, 0, y);
+                paint.setStyle(Paint.Style.FILL);
+                paint.setColor(style.foregroundColor);
+                canvas.drawCircle(x, y, intermediateSize / 2, paint);
+                break;
+            case ARRIVAL:
+                drawLine(canvas, x, 0, y);
 
-            paint.setStyle(Paint.Style.FILL);
-            paint.setColor(style.backgroundColor);
-            canvas.drawCircle(x, y, circleRadius, paint);
+                paint.setStyle(Paint.Style.FILL);
+                paint.setColor(style.backgroundColor);
+                canvas.drawCircle(x, y, circleRadius, paint);
 
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(stopStrokeWidth);
-            paint.setColor(style.hasBorder() ? style.borderColor : colorBackground);
-            canvas.drawCircle(x, y, circleRadius, paint);
+                paint.setStyle(Paint.Style.STROKE);
+                paint.setStrokeWidth(stopStrokeWidth);
+                paint.setColor(style.hasBorder() ? style.borderColor : colorBackground);
+                canvas.drawCircle(x, y, circleRadius, paint);
 
-            paint.setStyle(Paint.Style.FILL);
-            paint.setColor(style.foregroundColor);
-            canvas.drawCircle(x, y, intermediateSize / 2, paint);
-        } else if (type == Type.PASSING) {
-            drawLine(canvas, x, 0, height);
-        } else if (type == Type.INTERMEDIATE_DEPARTURE) {
-            drawLine(canvas, x, 0, height);
-        } else if (type == Type.INTERMEDIATE_ARRIVAL) {
-            drawLine(canvas, x, 0, height);
+                paint.setStyle(Paint.Style.FILL);
+                paint.setColor(style.foregroundColor);
+                canvas.drawCircle(x, y, intermediateSize / 2, paint);
+                break;
+            case INTERMEDIATE_DEPARTURE:
+            case INTERMEDIATE_ARRIVAL:
+                drawLine(canvas, x, 0, height);
 
-            paint.setStyle(Paint.Style.FILL);
-            paint.setColor(style.foregroundColor);
-            canvas.drawCircle(x, y, intermediateSize / 2, paint);
+                paint.setStyle(Paint.Style.FILL);
+                paint.setColor(style.foregroundColor);
+                canvas.drawCircle(x, y, intermediateSize / 2, paint);
+                break;
+            default:
+                drawLine(canvas, x, 0, height);
+                break;
         }
     }
 

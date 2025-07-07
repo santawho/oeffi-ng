@@ -327,6 +327,7 @@
     <string name="directions_trip_details_next_event_action_next_interchange">then interchange</string>
     <string name="directions_trip_details_next_event_action_next_final_transfer">then walk</string>
     <string name="directions_trip_details_departure_row_name_format">(Departure) %1$s</string>
+    <string name="directions_trip_details_arrival_row_name_format">(Arrival) %1$s</string>
 
     <!-- directions trip connection evaluation -->
     <string name="directions_trip_conneval_with_transfer">%1$s with %2$s</string>

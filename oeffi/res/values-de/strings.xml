@@ -326,6 +326,7 @@
     <string name="directions_trip_details_next_event_action_next_interchange">dort umsteigen</string>
     <string name="directions_trip_details_next_event_action_next_final_transfer">dort zu Fuß</string>
     <string name="directions_trip_details_departure_row_name_format">(Weiterfahrt) %1$s</string>
+    <string name="directions_trip_details_arrival_row_name_format">(Abfahrt) %1$s</string>
 
     <!-- directions trip connection evaluation -->
     <string name="directions_trip_conneval_with_transfer">%1$s mit %2$s</string>
