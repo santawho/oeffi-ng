@@ -355,23 +355,40 @@ public class DirectionsActivity extends OeffiMainActivity implements
         super.onCreate(savedInstanceState);
 
         final Intent intent = getIntent();
-        if (intent.hasExtra(INTENT_EXTRA_RENDERCONFIG))
-            renderConfig = (TripsOverviewActivity.RenderConfig) intent.getSerializableExtra(INTENT_EXTRA_RENDERCONFIG);
-        else
-            renderConfig = new TripsOverviewActivity.RenderConfig();
 
         connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-        if (savedInstanceState != null) {
+        if (savedInstanceState != null)
             restoreInstanceState(savedInstanceState);
-        } else {
-            time = new TimeSpec.Relative(0);
-        }
 
         backgroundThread = new HandlerThread("Directions.queryTripsThread", Process.THREAD_PRIORITY_BACKGROUND);
         backgroundThread.start();
         backgroundHandler = new Handler(backgroundThread.getLooper());
+
+        handleIntent(intent, false);
+    }
+
+    @Override
+    public void onNewIntent(@NonNull final Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleIntent(intent, true);
+    }
+
+    private void handleIntent(final Intent intent, final boolean isNewIntent) {
+        if (connectivityReceiver != null) {
+            unregisterReceiver(connectivityReceiver);
+            connectivityReceiver = null;
+        }
+
+        if (isNewIntent || time == null)
+            time = new TimeSpec.Relative(0);
+
+        if (intent.hasExtra(INTENT_EXTRA_RENDERCONFIG))
+            renderConfig = (TripsOverviewActivity.RenderConfig) intent.getSerializableExtra(INTENT_EXTRA_RENDERCONFIG);
+        else
+            renderConfig = new TripsOverviewActivity.RenderConfig();
 
         setContentView(R.layout.directions_content);
         final View contentView = findViewById(android.R.id.content);
@@ -655,35 +672,6 @@ public class DirectionsActivity extends OeffiMainActivity implements
         });
         mapView.setZoomControls(zoom);
 
-        connectivityReceiver = new ConnectivityBroadcastReceiver(connectivityManager) {
-            @Override
-            protected void onConnected() {
-                connectivityWarningView.setVisibility(View.GONE);
-            }
-
-            @Override
-            protected void onDisconnected() {
-                connectivityWarningView.setVisibility(View.VISIBLE);
-            }
-        };
-        registerReceiver(connectivityReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-
-        handleIntent(intent);
-
-        // initial focus
-        if (!viewToLocation.isInTouchMode()) {
-            requestFocusFirst();
-        }
-    }
-
-    @Override
-    public void onNewIntent(@NonNull final Intent intent) {
-        super.onNewIntent(intent);
-        setIntent(intent);
-        handleIntent(intent);
-    }
-
-    private void handleIntent(final Intent intent) {
         final ComponentName intentComponentName = intent.getComponent();
         final String intentClassName = intentComponentName.getClassName();
         final boolean isSharingTo = intentClassName.endsWith(".TO");
@@ -765,6 +753,24 @@ public class DirectionsActivity extends OeffiMainActivity implements
                 if (result.success)
                     handleGo();
             });
+        }
+
+        connectivityReceiver = new ConnectivityBroadcastReceiver(connectivityManager) {
+            @Override
+            protected void onConnected() {
+                connectivityWarningView.setVisibility(View.GONE);
+            }
+
+            @Override
+            protected void onDisconnected() {
+                connectivityWarningView.setVisibility(View.VISIBLE);
+            }
+        };
+        registerReceiver(connectivityReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+
+        // initial focus
+        if (!viewToLocation.isInTouchMode()) {
+            requestFocusFirst();
         }
     }
 
