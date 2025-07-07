@@ -25,9 +25,11 @@ import okhttp3.HttpUrl;
 import java.util.Locale;
 
 public class Constants {
-    public static final HttpUrl OEFFI_BASE_URL = HttpUrl.parse("https://oeffi.schildbach.de/");
-    public static final HttpUrl PLANS_BASE_URL = OEFFI_BASE_URL.newBuilder().addPathSegment("plans").build();
-    public static final HttpUrl MESSAGES_BASE_URL = OEFFI_BASE_URL.newBuilder().addPathSegment("messages").build();
+    public static final HttpUrl OEFFI_BASE_DEFAULT_URL = HttpUrl.parse("https://oeffi.schildbach.de/");
+    public static final String PLANS_PATH = "plans";
+    public static final HttpUrl PLANS_BASE_URL = OEFFI_BASE_DEFAULT_URL.newBuilder().addPathSegment(PLANS_PATH).build();
+    public static final String MESSAGES_PATH = "messages";
+    public static final HttpUrl MESSAGES_BASE_URL = OEFFI_BASE_DEFAULT_URL.newBuilder().addPathSegment(MESSAGES_PATH).build();
     public static final String PLANS_DIR = "plans";
     public static final String PLAN_INDEX_FILENAME = "plans-index.txt";
     public static final String PLAN_STATIONS_FILENAME = "plans-stations.txt";

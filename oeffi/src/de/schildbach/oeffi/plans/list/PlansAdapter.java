@@ -29,6 +29,7 @@ import android.view.ViewGroup;
 import androidx.recyclerview.widget.RecyclerView;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.URLs;
 import de.schildbach.oeffi.plans.PlanContentProvider;
 import okhttp3.Cache;
 import okhttp3.Call;
@@ -139,7 +140,7 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
         final int position = holder.getAdapterPosition();
         final Plan plan = getPlan(position);
         if (holder.getCall() == null) {
-            final HttpUrl thumbUrl = Constants.PLANS_BASE_URL.newBuilder()
+            final HttpUrl thumbUrl = URLs.getPlansBaseUrl().newBuilder()
                     .addEncodedPathSegment(plan.planId + "_thumb.png").build();
             final Request request = new Request.Builder().url(thumbUrl).build();
             final Call call = cachingOkHttpClient.newCall(request);

@@ -14,6 +14,9 @@
 
     <string name="error_reporter_mail_address">oeffi.app@gmail.com</string>
 
+    <string name="oeffi_base_default_url">https://oeffi.schildbach.de/</string>
+    <string name="plans_base_default_url">https://oeffi.schildbach.de/plans</string>
+    <string name="messages_base_default_url">https://oeffi.schildbach.de/messages</string>
     <string name="app_url_host">oeffi.schildbach.de</string>
     <string name="app_url_path_prefix">app/</string>
 </resources>

@@ -36,8 +36,9 @@ import androidx.core.app.ActivityManagerCompat;
 import androidx.core.content.FileProvider;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
-import de.schildbach.oeffi.Constants;
+
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.URLs;
 import de.schildbach.pte.NetworkId;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -378,7 +379,7 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
             builder.setPositiveButton(R.string.alert_crash_report_download, (dialog, which) -> {
                 stackTraceFile.delete();
                 context.startActivity(
-                        new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.OEFFI_BASE_URL + "download.html")));
+                        new Intent(Intent.ACTION_VIEW, Uri.parse(URLs.getOeffiBaseUrl() + "download.html")));
             });
         } else {
             builder.setPositiveButton(R.string.alert_crash_report_positive, (dialog, which) -> {

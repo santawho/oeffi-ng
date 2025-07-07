@@ -45,6 +45,7 @@ import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.StationsAware;
+import de.schildbach.oeffi.URLs;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.stations.LineView;
 import de.schildbach.oeffi.stations.QueryDeparturesRunnable;
@@ -218,7 +219,7 @@ public class PlanActivity extends ComponentActivity {
 
         final Downloader downloader = new Downloader(getCacheDir());
         final HttpUrl remoteUrl = planUrlStr != null ? HttpUrl.parse(planUrlStr)
-                : Constants.PLANS_BASE_URL.newBuilder().addEncodedPathSegment(planFilename).build();
+                : URLs.getPlansBaseUrl().newBuilder().addEncodedPathSegment(planFilename).build();
         final ListenableFuture<Integer> download = downloader.download(application.okHttpClient(), remoteUrl, planFile);
         Futures.addCallback(download, new FutureCallback<Integer>() {
             public void onSuccess(final @Nullable Integer status) {

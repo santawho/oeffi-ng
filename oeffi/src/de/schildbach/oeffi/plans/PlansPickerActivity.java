@@ -51,6 +51,7 @@ import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiMainActivity;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.URLs;
 import de.schildbach.oeffi.plans.list.PlanClickListener;
 import de.schildbach.oeffi.plans.list.PlanContextMenuItemListener;
 import de.schildbach.oeffi.plans.list.PlansAdapter;
@@ -305,7 +306,7 @@ public class PlansPickerActivity extends OeffiMainActivity implements LocationHe
         } else {
             final Downloader downloader = new Downloader(getCacheDir());
             final HttpUrl remoteUrl = plan.url != null ? plan.url
-                    : Constants.PLANS_BASE_URL.newBuilder().addEncodedPathSegment(planFilename).build();
+                    : URLs.getPlansBaseUrl().newBuilder().addEncodedPathSegment(planFilename).build();
             final ListenableFuture<Integer> download = downloader.download(application.okHttpClient(), remoteUrl,
                     planFile, false, (contentRead, contentLength) -> runOnUiThread(() -> {
                         final RecyclerView.ViewHolder holder = listView.findViewHolderForItemId(plan.rowId);

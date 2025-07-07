@@ -28,7 +28,6 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.format.DateUtils;
 
 import com.google.common.base.Charsets;
@@ -174,7 +173,7 @@ public abstract class OeffiMainActivity extends OeffiActivity {
     }
 
     private void downloadAndProcessMessages(final String network) {
-        final HttpUrl.Builder remoteUrl = Constants.MESSAGES_BASE_URL.newBuilder();
+        final HttpUrl.Builder remoteUrl = URLs.getMessagesBaseUrl().newBuilder();
         remoteUrl.addPathSegment("messages.txt");
         final String installerPackageName = Installer.installerPackageName(this);
         if (installerPackageName != null)
@@ -333,7 +332,7 @@ public abstract class OeffiMainActivity extends OeffiActivity {
 
         // fetch and show message
         if ("info".equals(action) || "warning".equals(action)) {
-            final HttpUrl.Builder url = Constants.MESSAGES_BASE_URL.newBuilder()
+            final HttpUrl.Builder url = URLs.getMessagesBaseUrl().newBuilder()
                     .addEncodedPathSegment(id + (Locale.getDefault().getLanguage().equals("de") ? "-de" : "") + ".txt");
             final Request.Builder request = new Request.Builder();
             request.url(url.build());

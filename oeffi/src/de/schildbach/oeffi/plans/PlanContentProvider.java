@@ -34,6 +34,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
+import de.schildbach.oeffi.URLs;
 import de.schildbach.oeffi.util.Downloader;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Point;
@@ -127,13 +128,13 @@ public class PlanContentProvider extends ContentProvider {
         };
 
         final File indexFile = new File(getContext().getFilesDir(), Constants.PLAN_INDEX_FILENAME);
-        final HttpUrl remoteIndexUrl = Constants.PLANS_BASE_URL.newBuilder()
+        final HttpUrl remoteIndexUrl = URLs.getPlansBaseUrl().newBuilder()
                 .addPathSegment(Constants.PLAN_INDEX_FILENAME).build();
         final ListenableFuture<Integer> download = downloader.download(application.okHttpClient(), remoteIndexUrl, indexFile);
         Futures.addCallback(download, notifyChangeCallback, MoreExecutors.directExecutor());
 
         final File stationsFile = new File(getContext().getFilesDir(), Constants.PLAN_STATIONS_FILENAME);
-        final HttpUrl remoteStationsUrl = Constants.PLANS_BASE_URL.newBuilder()
+        final HttpUrl remoteStationsUrl = URLs.getPlansBaseUrl().newBuilder()
                 .addPathSegment(Constants.PLAN_STATIONS_FILENAME + ".bz2").build();
         final ListenableFuture<Integer> stationsDownload = downloader.download(application.okHttpClient(), remoteStationsUrl, stationsFile, true);
         Futures.addCallback(stationsDownload, notifyChangeCallback, MoreExecutors.directExecutor());
