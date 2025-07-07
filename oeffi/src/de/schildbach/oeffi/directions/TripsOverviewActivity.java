@@ -183,11 +183,12 @@ public class TripsOverviewActivity extends OeffiActivity {
                     .result();
     });
 
+    private boolean queryMoreTripsEnabled = false;
     private boolean queryMoreTripsRunning = false;
     private boolean reloadRequested = false;
     private boolean searchMoreRequested = false;
 
-    private final Handler handler = new Handler();
+    private final Handler foregroundHandler = new Handler();
     private HandlerThread backgroundThread;
     private Handler backgroundHandler;
 
@@ -238,13 +239,13 @@ public class TripsOverviewActivity extends OeffiActivity {
             searchMoreButton.setOnClickListener(view -> {
                 setSearchMoreButtonEnabled(false);
                 searchMoreRequested = true;
-                handler.post(checkMoreRunnable);
+                foregroundHandler.post(checkMoreRunnable);
             });
         }
         actionBar.addProgressButton().setOnClickListener(v -> {
             setSearchMoreButtonEnabled(false);
             reloadRequested = true;
-            handler.post(checkMoreRunnable);
+            foregroundHandler.post(checkMoreRunnable);
         });
 
         barView = findViewById(R.id.trips_bar_view);
@@ -277,7 +278,10 @@ public class TripsOverviewActivity extends OeffiActivity {
                 }
             }
         });
-        barView.setOnScrollListener(() -> handler.post(checkMoreRunnable));
+        barView.setOnScrollListener(() -> {
+            log.info("barView.onScrollListener -> foregroundHandler.post(checkMoreRunnable)");
+            foregroundHandler.post(checkMoreRunnable);
+        });
 
         final View disclaimerView = findViewById(R.id.directions_trip_overview_disclaimer_group);
         ViewCompat.setOnApplyWindowInsetsListener(disclaimerView, (v, windowInsets) -> {
@@ -306,18 +310,19 @@ public class TripsOverviewActivity extends OeffiActivity {
         // regular refresh
         registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
 
+        queryMoreTripsEnabled = true;
         barView.invalidate();
 
         // delay because GUI is not initialized immediately
-        handler.postDelayed(checkMoreRunnable, 50);
+        log.info("onStart -> foregroundHandler.postDelayed(checkMoreRunnable, 50)");
+        foregroundHandler.postDelayed(checkMoreRunnable, 50);
     }
 
     @Override
     protected void onStop() {
         unregisterReceiver(tickReceiver);
 
-        queryMoreTripsRunning = false;
-
+        queryMoreTripsEnabled = false;
         super.onStop();
     }
 
@@ -325,7 +330,7 @@ public class TripsOverviewActivity extends OeffiActivity {
     protected void onDestroy() {
         // cancel background thread
         backgroundHandler = null;
-        handler.removeCallbacks(checkMoreRunnable);
+        foregroundHandler.removeCallbacks(checkMoreRunnable);
         backgroundThread.getLooper().quit();
 
         super.onDestroy();
@@ -333,40 +338,41 @@ public class TripsOverviewActivity extends OeffiActivity {
 
     private final Runnable checkMoreRunnable = new Runnable() {
         public void run() {
-            if (!queryMoreTripsRunning && backgroundHandler != null) {
-                final QueryTripsContext context = TripsOverviewActivity.this.context;
+            if (!queryMoreTripsEnabled || queryMoreTripsRunning || backgroundHandler == null)
+                return;
+            final QueryTripsContext context = TripsOverviewActivity.this.context;
 
-                final int positionOffset = context != null && context.canQueryEarlier() ? 0 : 1;
-                final int lastVisiblePosition = barView.getLastVisiblePosition() - positionOffset;
-                final int firstVisiblePosition = barView.getFirstVisiblePosition() - positionOffset;
+            final int positionOffset = context != null && context.canQueryEarlier() ? 0 : 1;
+            final int lastVisiblePosition = barView.getLastVisiblePosition() - positionOffset;
+            final int firstVisiblePosition = barView.getFirstVisiblePosition() - positionOffset;
 
-                Runnable queryTripsRunnable = null;
-                if (reloadRequested) {
-                    reloadRequested = false;
-                    searchMoreContext.reset();
-                    queryTripsRunnable = new QueryMoreTripsRunnable(context, false, false, true, searchMoreContext);
-                } else if (searchMoreRequested) {
-                    searchMoreRequested = false;
-                    final SearchMoreContext.NextRoundInfo nextRoundInfo = searchMoreContext.prepareNextRound(TripsOverviewActivity.this);
-                    if (nextRoundInfo != null) {
-                        queryTripsRunnable = new QueryMoreTripsRunnable(context, false, false, false, searchMoreContext);
-                        if (nextRoundInfo.infoText != null)
-                            runOnUiThread(() -> new Toast(TripsOverviewActivity.this).toast(nextRoundInfo.infoText));
-                    }
-                } else if (context != null && context.canQueryLater() && (lastVisiblePosition == AdapterView.INVALID_POSITION
-                        || lastVisiblePosition + 1 >= trips.size())) {
-                    queryTripsRunnable = new QueryMoreTripsRunnable(context, false, true, false, searchMoreContext);
-                } else if (context != null && context.canQueryEarlier()
-                        && (firstVisiblePosition == AdapterView.INVALID_POSITION || firstVisiblePosition <= 0)) {
-                    queryTripsRunnable = new QueryMoreTripsRunnable(context, true, false, false, searchMoreContext);
-                } else if (searchMoreContext.searchMorePossible()) {
-                    runOnUiThread(() -> setSearchMoreButtonEnabled(true));
+            Runnable queryTripsRunnable = null;
+            if (reloadRequested) {
+                reloadRequested = false;
+                searchMoreContext.reset();
+                queryTripsRunnable = new QueryMoreTripsRunnable(context, false, false, true, searchMoreContext);
+            } else if (searchMoreRequested) {
+                searchMoreRequested = false;
+                final SearchMoreContext.NextRoundInfo nextRoundInfo = searchMoreContext.prepareNextRound(TripsOverviewActivity.this);
+                if (nextRoundInfo != null) {
+                    queryTripsRunnable = new QueryMoreTripsRunnable(context, false, false, false, searchMoreContext);
+                    if (nextRoundInfo.infoText != null)
+                        runOnUiThread(() -> new Toast(TripsOverviewActivity.this).toast(nextRoundInfo.infoText));
                 }
+            } else if (context != null && context.canQueryLater() && (lastVisiblePosition == AdapterView.INVALID_POSITION
+                    || lastVisiblePosition + 1 >= trips.size())) {
+                queryTripsRunnable = new QueryMoreTripsRunnable(context, false, true, false, searchMoreContext);
+            } else if (context != null && context.canQueryEarlier()
+                    && (firstVisiblePosition == AdapterView.INVALID_POSITION || firstVisiblePosition <= 0)) {
+                queryTripsRunnable = new QueryMoreTripsRunnable(context, true, false, false, searchMoreContext);
+            } else if (searchMoreContext.searchMorePossible()) {
+                runOnUiThread(() -> setSearchMoreButtonEnabled(true));
+            }
 
-                if (queryTripsRunnable != null && backgroundHandler != null) {
-                    queryMoreTripsRunning = true;
-                    backgroundHandler.post(queryTripsRunnable);
-                }
+            if (queryTripsRunnable != null && backgroundHandler != null) {
+                queryMoreTripsRunning = true;
+                log.info("backgroundHandler.post(queryTripsRunnable)");
+                backgroundHandler.post(queryTripsRunnable);
             }
         }
     };
@@ -436,7 +442,8 @@ public class TripsOverviewActivity extends OeffiActivity {
                             processResult(result, earlier, later, searchMoreContext);
 
                             // fetch more
-                            handler.postDelayed(checkMoreRunnable, 50);
+                            log.info("fetch more -> foregroundHandler.postDelayed(checkMoreRunnable, 50)");
+                            foregroundHandler.postDelayed(checkMoreRunnable, 50);
                         } else if (result.status == QueryTripsResult.Status.NO_TRIPS) {
                             // ignore
                         } else {
