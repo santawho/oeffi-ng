@@ -54,6 +54,7 @@ import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.Location;
+import de.schildbach.pte.dto.Point;
 import de.schildbach.pte.dto.QueryJourneyResult;
 import de.schildbach.pte.dto.QueryTripsContext;
 import de.schildbach.pte.dto.QueryTripsResult;
@@ -595,31 +596,9 @@ public class TripsOverviewActivity extends OeffiActivity {
             return in;
         final List<Trip> newTrips = new LinkedList<>();
         for (Trip inTrip : in.trips) {
-            final Trip.Public firstPublicLeg = inTrip.getFirstPublicLeg();
-            if (firstPublicLeg == null)
-                continue;
-            final Date departureTime = firstPublicLeg.getDepartureTime();
-            if (departureTime == null || departureTime.before(renderConfig.prependToStopIsLegDeparture
-                    ? renderConfig.prependToStop.plannedDepartureTime
-                    : renderConfig.prependToStop.plannedArrivalTime))
-                continue;
-            final List<Trip.Leg> newLegs = new LinkedList<>();
-            newLegs.addAll(prependLegs);
-            newLegs.addAll(inTrip.legs);
-            int newNumChanges = prependNumChanges + inTrip.numChanges;
-            if (!renderConfig.prependToJourneyRef.equals(firstPublicLeg.journeyRef))
-                newNumChanges += 1;
-            final Trip newTrip = new Trip(
-                    inTrip.loadedAt,
-                    inTrip.getId(),
-                    inTrip.tripRef,
-                    inTrip.from,
-                    inTrip.to,
-                    newLegs,
-                    inTrip.fares,
-                    inTrip.capacity,
-                    newNumChanges);
-            newTrips.add(newTrip);
+            final Trip newTrip = prependToTrip(inTrip);
+            if (newTrip != null)
+                newTrips.add(newTrip);
         }
         if (newTrips.isEmpty()) {
             return new QueryTripsResult(in.header, QueryTripsResult.Status.NO_TRIPS);
@@ -632,6 +611,85 @@ public class TripsOverviewActivity extends OeffiActivity {
                 in.to,
                 in.context,
                 newTrips);
+    }
+
+    private Trip prependToTrip(final Trip trip) {
+        final Trip.Public firstPublicLeg = trip.getFirstPublicLeg();
+        if (firstPublicLeg == null)
+            return null;
+        final Date departureTime = firstPublicLeg.getDepartureTime();
+        if (departureTime == null || departureTime.before(renderConfig.prependToStopIsLegDeparture
+                ? renderConfig.prependToStop.plannedDepartureTime
+                : renderConfig.prependToStop.plannedArrivalTime))
+            return null;
+
+        final List<Trip.Leg> newLegs = new LinkedList<>();
+
+        final int prependLegsLastIndex = prependLegs.size() - 1;
+        for (int i = 0; i < prependLegsLastIndex; i += 1)
+            newLegs.add(prependLegs.get(i));
+        final Trip.Leg lastPrependLeg = prependLegsLastIndex < 0 ? null : prependLegs.get(prependLegsLastIndex);
+
+        final List<Trip.Leg> tripLegs = trip.legs;
+        final Trip.Leg firstContinuationLeg = tripLegs.get(0);
+
+        int newNumChanges = prependNumChanges + trip.numChanges;
+        if (firstPublicLeg.journeyRef.equals(renderConfig.feederJourneyRef)
+                && firstContinuationLeg instanceof Trip.Public
+                && lastPrependLeg instanceof Trip.Public) {
+            // continue with same journey, then combine both legs into one
+            final Trip.Public feedLeg = (Trip.Public) lastPrependLeg;
+            final Trip.Public contLeg = (Trip.Public) firstContinuationLeg;
+            final Stop feedStop = feedLeg.arrivalStop;
+            final Stop contStop = contLeg.departureStop;
+            final List<Stop> intermediateStops = new ArrayList<>();
+            if (feedLeg.intermediateStops != null)
+                intermediateStops.addAll(feedLeg.intermediateStops);
+            intermediateStops.add(new Stop(
+                    contStop.location,
+                    feedStop.plannedArrivalTime, feedStop.predictedArrivalTime,
+                    feedStop.plannedArrivalPosition, feedStop.predictedArrivalPosition,
+                    feedStop.arrivalCancelled,
+                    contStop.plannedDepartureTime, contStop.predictedDepartureTime,
+                    contStop.plannedDeparturePosition, contStop.predictedDeparturePosition,
+                    contStop.departureCancelled));
+            if (contLeg.intermediateStops != null)
+                intermediateStops.addAll(contLeg.intermediateStops);
+            final List<Point> path = new ArrayList<>();
+            if (feedLeg.path != null)
+                path.addAll(feedLeg.path);
+            if (contLeg.path != null)
+                path.addAll(contLeg.path);
+            newLegs.add(new Trip.Public(
+                    feedLeg.line,
+                    contLeg.destination,
+                    feedLeg.departureStop,
+                    contLeg.arrivalStop,
+                    intermediateStops,
+                    path.isEmpty() ? null : path,
+                    contLeg.message,
+                    contLeg.journeyRef,
+                    contLeg.loadedAt));
+        } else {
+            newLegs.add(lastPrependLeg);
+            newLegs.add(firstContinuationLeg);
+            newNumChanges += 1;
+        }
+
+        for (int i = 1; i < tripLegs.size(); i += 1)
+            newLegs.add(tripLegs.get(i));
+
+        final Trip newTrip = new Trip(
+                trip.loadedAt,
+                trip.getId(),
+                trip.tripRef,
+                trip.from,
+                trip.to,
+                newLegs,
+                trip.fares,
+                trip.capacity,
+                newNumChanges);
+        return newTrip;
     }
 
     private void processInitialResult(
