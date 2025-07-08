@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 
 import androidx.core.content.FileProvider;
@@ -96,10 +97,17 @@ public class AppInstaller {
     }
 
     private void installApk(final File apkFile) {
-        log.info("installing APK file {}", apkFile);
         final Application application = Application.getInstance();
+
+        final PackageManager packageManager = application.getPackageManager();
+        final String installerPackageName = packageManager.getInstallerPackageName(application.getPackageName());
+            // "com.android.packageinstaller"
+            // "com.google.android.packageinstaller"
+        log.info("installing APK file {} using installer {}", apkFile, installerPackageName);
+
         final Uri contentUri = FileProvider.getUriForFile(application, application.getPackageName(), apkFile);
         context.startActivity(new Intent(Intent.ACTION_VIEW)
+                .setPackage(installerPackageName)
                 .setDataAndType(contentUri, "application/vnd.android.package-archive")
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION));
         done(true);

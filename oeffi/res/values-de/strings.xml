@@ -66,7 +66,9 @@
     <string name="about_faq_title">FAQ - häufig gestellte Fragen</string>
     <string name="about_update_and_share_title">Update und Teilen</string>
     <string name="about_update_title">Update</string>
-    <string name="about_update_summary">Download und Installation der aktuellen APK</string>
+    <string name="about_update_summary">Herunterladen und installieren der aktuellen Version</string>
+    <string name="about_download_apk_title">APK herunterladen</string>
+    <string name="about_download_apk_summary">Download der aktuellen APK Datei</string>
     <string name="about_share_title">Teilen</string>
     <string name="about_share_summary">Sende einen Link zum Teilen der App an entfernte Freunde</string>
     <string name="about_show_qr_title">Zeige QR</string>

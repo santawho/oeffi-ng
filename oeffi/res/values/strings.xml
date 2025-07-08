@@ -66,7 +66,9 @@
     <string name="about_faq_title">FAQ</string>
     <string name="about_update_and_share_title">Update and Share</string>
     <string name="about_update_title">Update</string>
-    <string name="about_update_summary">Download and install latest APK</string>
+    <string name="about_update_summary">Download and install latest version</string>
+    <string name="about_download_apk_title">Download APK</string>
+    <string name="about_download_apk_summary">Download latest APK file</string>
     <string name="about_share_title">Share</string>
     <string name="about_share_summary">Send link to share the app with remote friends</string>
     <string name="about_show_qr_title">Show QR</string>
