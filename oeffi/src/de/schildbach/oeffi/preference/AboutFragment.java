@@ -24,6 +24,7 @@ import android.preference.Preference;
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.Installer;
+import de.schildbach.oeffi.util.AppInstaller;
 
 import javax.annotation.Nullable;
 
@@ -75,8 +76,11 @@ public class AboutFragment extends PreferenceFragment {
         }
 
         final String updateUrl = application.getString(R.string.about_update_apk_url);
-        if (updateUrl == null || updateUrl.isEmpty())
+        if (updateUrl == null || updateUrl.isEmpty()) {
             removeOrDisablePreference(findPreference(KEY_ABOUT_UPDATE));
+        } else {
+            setupActionPreference(KEY_ABOUT_UPDATE, InstallHandler.class);
+        }
 
         final String policyUrl = application.getTranslatedString(R.string.about_privacy_policy_url);
         final Preference prefPolicy = findPreference(KEY_ABOUT_POLICY);
@@ -105,6 +109,16 @@ public class AboutFragment extends PreferenceFragment {
         public boolean handleAction(final PreferenceActivity context, final String prefkey) {
             Application.getInstance().showImageDialog(context, R.drawable.qr_update,
                     dialog -> dismissParentingActivity(context));
+            return false;
+        }
+    }
+
+    public static class InstallHandler extends ActionHandler {
+        @Override
+        boolean handleAction(final PreferenceActivity context, final String prefkey) {
+            final String updateUrl = Application.getInstance().getString(R.string.about_update_apk_url);
+            new AppInstaller(context, aBoolean -> dismissParentingActivity(context))
+                    .downloadAndInstallApk(updateUrl);
             return false;
         }
     }

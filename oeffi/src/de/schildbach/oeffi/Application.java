@@ -149,8 +149,8 @@ public class Application extends android.app.Application {
         createShortcuts();
 
         final OkHttpClient.Builder builder = new OkHttpClient.Builder();
-        builder.followRedirects(false);
-        builder.followSslRedirects(true);
+        builder.followRedirects(true);
+        builder.followSslRedirects(false);
         builder.connectTimeout(5, TimeUnit.SECONDS);
         builder.writeTimeout(5, TimeUnit.SECONDS);
         builder.readTimeout(15, TimeUnit.SECONDS);

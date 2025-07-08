@@ -131,6 +131,8 @@ public class Downloader {
                             saveMeta(targetFile, response.headers());
                         } else {
                             log.info("Download '{}' failed: {} {}", call.request().url(), status, response.message());
+                            future.setException(new IOException(String.format(
+                                    "download %s failed, status %d", call.request().url(), status)));
                         }
                         future.set(status);
                         semaphore.release();

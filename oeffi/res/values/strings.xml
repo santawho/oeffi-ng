@@ -66,7 +66,7 @@
     <string name="about_faq_title">FAQ</string>
     <string name="about_update_and_share_title">Update and Share</string>
     <string name="about_update_title">Update</string>
-    <string name="about_update_summary">Download latest APK</string>
+    <string name="about_update_summary">Download and install latest APK</string>
     <string name="about_share_title">Share</string>
     <string name="about_share_summary">Send link to share the app with remote friends</string>
     <string name="about_show_qr_title">Show QR</string>
@@ -478,5 +478,10 @@
     <!-- position -->
     <string name="position_platform_train">platform %s</string>
     <string name="position_platform">platform %s</string>
+
+    <!-- install app -->
+    <string name="app_installer_download_progress_message">Downloading package …</string>
+    <string name="app_installer_download_failed_title">Download failed</string>
+    <string name="app_installer_download_failed_message">Cannot download APK file. Try again later.</string>
 
 </resources>

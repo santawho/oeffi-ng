@@ -39,6 +39,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 import de.schildbach.oeffi.network.NetworkPickerActivity;
 import de.schildbach.oeffi.network.NetworkResources;
+import de.schildbach.oeffi.util.AppInstaller;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.Downloader;
 import de.schildbach.oeffi.util.Installer;
@@ -136,13 +137,15 @@ public abstract class OeffiMainActivity extends OeffiActivity {
                     final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
                     final Date thisModified = dateFormat.parse(modifiedStr);
                     final Date lastModified = dateFormat.parse(lastModifiedStr);
-                    if (lastModified != null && lastModified.after(thisModified)) {
+                    if (true || lastModified != null && lastModified.after(thisModified)) {
                         runOnUiThread(() -> {
                             new AlertDialog.Builder(this)
                                     .setTitle(R.string.alert_update_available_title)
                                     .setMessage(R.string.alert_update_available_message)
-                                    .setPositiveButton(R.string.alert_update_available_button_yes, (d, i) ->
-                                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(updateUrl))))
+                                    .setPositiveButton(R.string.alert_update_available_button_yes, (d, i) -> {
+                                        // startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(updateUrl)));
+                                        new AppInstaller(this, null).downloadAndInstallApk(updateUrl);
+                                    })
                                     .setNegativeButton(R.string.alert_update_available_button_no, null)
                                     .create().show();
                         });

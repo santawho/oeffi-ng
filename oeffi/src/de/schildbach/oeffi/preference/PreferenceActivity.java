@@ -79,31 +79,33 @@ public class PreferenceActivity extends android.preference.PreferenceActivity {
             v.setPadding(v.getPaddingLeft(), insets.top, v.getPaddingRight(), v.getPaddingBottom());
             return windowInsets;
         });
-        if (handleIntent(getIntent()))
-            finish();
+        handleIntent(getIntent());
     }
 
     @Override
     public void onNewIntent(@NonNull final Intent intent, @NonNull final ComponentCaller caller) {
         super.onNewIntent(intent, caller);
-        if (handleIntent(intent))
-            finish();
+        handleIntent(intent);
     }
 
-    private boolean handleIntent(final Intent intent) {
+    private void handleIntent(final Intent intent) {
         final String prefkey = intent.getStringExtra(EXTRA_PREFKEY);
-        if (prefkey == null)
-            return false;
         final String handlerClassName = intent.getStringExtra(EXTRA_HANDLER);
-        if (handlerClassName == null)
-            return false;
-        try {
-            final Class<?> handlerClass = Class.forName(handlerClassName);
-            final PreferenceFragment.ActionHandler actionHandler = (PreferenceFragment.ActionHandler) handlerClass.newInstance();
-            return actionHandler.handleAction(this, prefkey);
-        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
-            throw new RuntimeException(e);
+        final boolean finishActivity;
+        if (prefkey != null && handlerClassName != null) {
+            try {
+                final Class<?> handlerClass = Class.forName(handlerClassName);
+                final PreferenceFragment.ActionHandler actionHandler = (PreferenceFragment.ActionHandler) handlerClass.newInstance();
+                finishActivity = actionHandler.handleAction(this, prefkey);
+            } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+                finish();
+                throw new RuntimeException(e);
+            }
+        } else {
+            finishActivity = false;
         }
+        if (finishActivity)
+            finish();
     }
 
     @Override
