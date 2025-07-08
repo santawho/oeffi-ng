@@ -137,7 +137,7 @@ public abstract class OeffiMainActivity extends OeffiActivity {
                     final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
                     final Date thisModified = dateFormat.parse(modifiedStr);
                     final Date lastModified = dateFormat.parse(lastModifiedStr);
-                    if (true || lastModified != null && lastModified.after(thisModified)) {
+                    if (lastModified != null && lastModified.after(thisModified)) {
                         runOnUiThread(() -> {
                             new AlertDialog.Builder(this)
                                     .setTitle(R.string.alert_update_available_title)
