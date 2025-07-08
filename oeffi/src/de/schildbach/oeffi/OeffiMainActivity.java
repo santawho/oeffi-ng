@@ -114,47 +114,8 @@ public abstract class OeffiMainActivity extends OeffiActivity {
         super.onResume();
         if (stillCheckForUpdate) {
             stillCheckForUpdate = false;
-            checkForUpdate();
+            new AppInstaller(this, null).checkForUpdate();
         }
-    }
-
-    private void checkForUpdate() {
-        final String updateUrl = getString(R.string.about_update_apk_url);
-        if (updateUrl == null || updateUrl.isEmpty())
-            return;
-        final String manifestUrl = getString(R.string.about_update_manifest_url);
-        final String modifiedStr = getString(R.string.about_update_modified);
-        new Thread(() -> {
-            try (Response response = new OkHttpClient().newCall(
-                    new Request.Builder().url(manifestUrl).head().build()).execute()) {
-                final int code = response.code();
-                if (code != 200) {
-                    log.error("cannot HEAD {}: code {}", manifestUrl, code);
-                    return;
-                }
-                final String lastModifiedStr = response.header("Last-Modified");
-                if (lastModifiedStr != null) {
-                    final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
-                    final Date thisModified = dateFormat.parse(modifiedStr);
-                    final Date lastModified = dateFormat.parse(lastModifiedStr);
-                    if (lastModified != null && lastModified.after(thisModified)) {
-                        runOnUiThread(() -> {
-                            new AlertDialog.Builder(this)
-                                    .setTitle(R.string.alert_update_available_title)
-                                    .setMessage(R.string.alert_update_available_message)
-                                    .setPositiveButton(R.string.alert_update_available_button_yes, (d, i) -> {
-                                        // startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(updateUrl)));
-                                        new AppInstaller(this, null).downloadAndInstallApk(updateUrl);
-                                    })
-                                    .setNegativeButton(R.string.alert_update_available_button_no, null)
-                                    .create().show();
-                        });
-                    }
-                }
-            } catch (IOException | ParseException e) {
-                log.error("cannot HEAD {}: {}", manifestUrl, e.getMessage());
-            }
-        }).start();
     }
 
     protected abstract String taskName();

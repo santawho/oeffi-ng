@@ -20,6 +20,10 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
@@ -27,6 +31,9 @@ import javax.annotation.Nullable;
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
 import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class AppInstaller {
     private static final Logger log = LoggerFactory.getLogger(AppInstaller.class);
@@ -106,10 +113,52 @@ public class AppInstaller {
         log.info("installing APK file {} using installer {}", apkFile, installerPackageName);
 
         final Uri contentUri = FileProvider.getUriForFile(application, application.getPackageName(), apkFile);
-        context.startActivity(new Intent(Intent.ACTION_VIEW)
+        context.startActivity(new Intent(Intent.ACTION_INSTALL_PACKAGE)
                 .setPackage(installerPackageName)
                 .setDataAndType(contentUri, "application/vnd.android.package-archive")
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION));
         done(true);
+    }
+
+    public void checkForUpdate() {
+        final Application application = Application.getInstance();
+
+        final String updateUrl = application.getString(R.string.about_update_apk_url);
+        if (updateUrl == null || updateUrl.isEmpty())
+            return;
+        final String manifestUrl = application.getString(R.string.about_update_manifest_url);
+        final String modifiedStr = application.getString(R.string.about_update_modified);
+        new Thread(() -> {
+            try (Response response = new OkHttpClient().newCall(
+                    new Request.Builder().url(manifestUrl).head().build()).execute()) {
+                final int code = response.code();
+                if (code != 200) {
+                    log.error("cannot HEAD {}: code {}", manifestUrl, code);
+                    return;
+                }
+                final String lastModifiedStr = response.header("Last-Modified");
+                if (lastModifiedStr != null) {
+                    final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+                    final Date thisModified = dateFormat.parse(modifiedStr);
+                    final Date lastModified = dateFormat.parse(lastModifiedStr);
+                    final boolean isNewVersionAvailable = lastModified != null && lastModified.after(thisModified);
+                    if (isNewVersionAvailable) {
+                        context.runOnUiThread(() -> {
+                            new AlertDialog.Builder(context)
+                                    .setTitle(R.string.alert_update_available_title)
+                                    .setMessage(R.string.alert_update_available_message)
+                                    .setPositiveButton(R.string.alert_update_available_button_yes, (d, i) -> {
+                                        // startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(updateUrl)));
+                                        downloadAndInstallApk(updateUrl);
+                                    })
+                                    .setNegativeButton(R.string.alert_update_available_button_no, null)
+                                    .create().show();
+                        });
+                    }
+                }
+            } catch (IOException | ParseException e) {
+                log.error("cannot HEAD {}: {}", manifestUrl, e.getMessage());
+            }
+        }).start();
     }
 }
