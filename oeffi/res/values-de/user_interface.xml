@@ -13,6 +13,23 @@
 
     <string name="user_interface_mainmenu_shareapp_enabled_title">Zeige \"Teile App\" Eintrag im Hauptmenü</string>
     <string name="user_interface_voice_control_enabled_title">Verwende Sprachsteuerung</string>
+    <string name="user_interface_voice_control_enabled_summary">Beim <b>Öffnen des Hauptmenüs</b>
+        hört die App auf deine Stimme.
+        <b>Um Verbindungen zu suchen sage</b>
+        \"<i>(ZEIT) von Hamburg nach Berlin Spandau</i>\"
+        oder \"<i>(ZEIT) von Hamburg über Hannover nach Berlin Spandau</i>\"
+        oder \"<i>(ZEIT) von Hamburg nach Berlin Spandau über Hannover</i>\".
+        <b>Für Abfahrten sage</b>
+        \"<i>(ZEIT) Abfahrten in Köln Hauptbahnhof</i>\".
+        Wobei \"(ZEIT)\" optional ist und
+        \"<i>um 12 Uhr</i>\",
+        \"<i>um 12 Uhr 13</i>\",
+        \"<i>in einer Stunde</i>\",
+        \"<i>in 2 Stunden</i>\",
+        \"<i>in 1 Minute</i>\",
+        \"<i>in 30 Minuten</i>\"
+        sein könnte.
+    </string>
 
     <string name="user_interface_location_selector_category_title">Schnelle Ortswahl</string>
 

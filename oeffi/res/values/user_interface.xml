@@ -18,6 +18,22 @@
 
     <string name="user_interface_mainmenu_shareapp_enabled_title">Show \"Share App\" item in main menu</string>
     <string name="user_interface_voice_control_enabled_title">Use voice control</string>
+    <string name="user_interface_voice_control_enabled_summary">When <b>opening the main menu</b>,
+        the app will listen for your voice input.
+        <b>Get directions by saying</b>
+        \"<i>(TIME) from Hamburg to Berlin Spandau</i>\"
+        or \"<i>(TIME) from Hamburg via Hannover to Berlin Spandau</i>\"
+        or \"<i>(TIME) von Hamburg to Berlin Spandau via Hannover</i>\".
+        <b>Get departures by saying</b>:
+        \"<i>(TIME) departures at Köln Hauptbahnhof</i>\".
+        Where \"(TIME)\" is optional and could be
+        \"<i>at 12 o\'clock</i>\",
+        \"<i>at twelve thirteen</i>\",
+        \"<i>in one minute</i>\",
+        \"<i>in ten minutes</i>\",
+        \"<i>in one hour</i>\",
+        \"<i>in two hours</i>\".
+    </string>
 
     <string name="user_interface_location_selector_category_title">Quick Location Selector</string>
 
