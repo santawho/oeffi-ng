@@ -271,7 +271,12 @@
     <string name="directions_location_selector_context_set_via_title">Als Via</string>
     <string name="directions_location_selector_context_delete_title">Löschen</string>
     <string name="directions_location_selector_help_title">Schnelle Ortswahl</string>
-    <string name="directions_location_selector_help_text">Die schnelle Ortswahl
+    <string name="directions_location_selector_help_short_text">Die schnelle Ortswahl
+        zeigt die zuletzt verwendeten Orte.
+        Du kannst dann <b>tippen und ziehen</b> um Start und Ziel auszuwählen.
+        <u>Tippe hier um mehr anzuzeigen …</u>
+    </string>
+    <string name="directions_location_selector_help_long_text">Die schnelle Ortswahl
         zeigt die zuletzt verwendeten Orte.
         Du kannst dann <b>tippen und ziehen</b> um Start und Ziel auszuwählen.
         Die Verbindungssuche startet automatisch, außer du <b>hältst den Finger</b>

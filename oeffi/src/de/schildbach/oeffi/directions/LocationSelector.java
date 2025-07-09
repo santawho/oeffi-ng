@@ -18,6 +18,7 @@
 package de.schildbach.oeffi.directions;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Handler;
@@ -428,9 +429,9 @@ public class LocationSelector extends LinearLayout implements
 
             if (invalidSelection) {
                 clearSelection();
-                DialogBuilder.get(getContext())
+                new AlertDialog.Builder(getContext())
                         .setTitle(R.string.directions_location_selector_help_title)
-                        .setMessage(R.string.directions_location_selector_help_text)
+                        .setMessage(R.string.directions_location_selector_help_long_text)
                         .setPositiveButton(android.R.string.ok, null)
                         .create().show();
                 return true;

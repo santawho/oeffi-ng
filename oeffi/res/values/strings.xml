@@ -272,7 +272,12 @@
     <string name="directions_location_selector_context_set_via_title">Use as via</string>
     <string name="directions_location_selector_context_delete_title">Delete</string>
     <string name="directions_location_selector_help_title">Quick Location Selector</string>
-    <string name="directions_location_selector_help_text">The quick location selector
+    <string name="directions_location_selector_help_short_text">The quick location selector
+        will show the recently used locations.
+        Then you can <b>tap and drag</b> to select origin and destination.
+        <u>Tap here to show more …</u>
+    </string>
+    <string name="directions_location_selector_help_long_text">The quick location selector
         will show the recently used locations.
         Then you can <b>tap and drag</b> to select origin and destination.
         The connection search starts automatically, unless you <b>hold your finger</b>
@@ -284,7 +289,7 @@
     </string>
 
     <!-- location resolver -->
-    <string name="locations_query_progress">Getting locations…</string>
+    <string name="locations_query_progress">Getting locations …</string>
 
     <!-- directions map -->
     <string name="directions_map_pin_button_from">Start here</string>

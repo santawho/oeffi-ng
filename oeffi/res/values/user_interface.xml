@@ -17,8 +17,14 @@
     </string-array>
 
     <string name="user_interface_mainmenu_shareapp_enabled_title">Show \"Share App\" item in main menu</string>
+
+    <string name="user_interface_voice_control_category_title">Voice Control</string>
     <string name="user_interface_voice_control_enabled_title">Use voice control</string>
-    <string name="user_interface_voice_control_enabled_summary">When <b>opening the main menu</b>,
+    <string name="user_interface_voice_control_help_short_text">When <b>opening the main menu</b>,
+        the app will listen for your voice input.
+        <u>Tap here to show more …</u>
+    </string>
+    <string name="user_interface_voice_control_help_long_text">When <b>opening the main menu</b>,
         the app will listen for your voice input.
         <b>Get directions by saying</b>
         \"<i>(TIME) from Hamburg to Berlin Spandau</i>\"

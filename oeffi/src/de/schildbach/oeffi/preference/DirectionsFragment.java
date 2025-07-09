@@ -18,7 +18,6 @@
 package de.schildbach.oeffi.preference;
 
 import android.os.Bundle;
-import android.preference.PreferenceFragment;
 import de.schildbach.oeffi.R;
 
 import javax.annotation.Nullable;

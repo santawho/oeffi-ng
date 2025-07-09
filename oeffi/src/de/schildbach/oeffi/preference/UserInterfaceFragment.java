@@ -18,7 +18,6 @@
 package de.schildbach.oeffi.preference;
 
 import android.os.Bundle;
-import android.preference.PreferenceFragment;
 
 import javax.annotation.Nullable;
 
@@ -29,5 +28,22 @@ public class UserInterfaceFragment extends PreferenceFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preference_user_interface);
+
+        setupActionPreference("user_interface_location_selector_help", UserInterfaceFragment.class, SelectorHelp.class);
+        setupActionPreference("user_interface_voice_control_help", UserInterfaceFragment.class, VoiceControlHelp.class);
+    }
+
+    public static class SelectorHelp extends ShowHelpHandler {
+        @Override
+        protected int getHelpTextResourceId() {
+            return R.string.directions_location_selector_help_long_text;
+        }
+    }
+
+    public static class VoiceControlHelp extends ShowHelpHandler {
+        @Override
+        protected int getHelpTextResourceId() {
+            return R.string.user_interface_voice_control_help_long_text;
+        }
     }
 }

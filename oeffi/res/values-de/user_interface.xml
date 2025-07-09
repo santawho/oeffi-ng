@@ -12,8 +12,14 @@
     </string-array>
 
     <string name="user_interface_mainmenu_shareapp_enabled_title">Zeige \"Teile App\" Eintrag im Hauptmenü</string>
+
+    <string name="user_interface_voice_control_category_title">Sprachsteuerung</string>
     <string name="user_interface_voice_control_enabled_title">Verwende Sprachsteuerung</string>
-    <string name="user_interface_voice_control_enabled_summary">Beim <b>Öffnen des Hauptmenüs</b>
+    <string name="user_interface_voice_control_help_short_text">Beim <b>Öffnen des Hauptmenüs</b>
+        hört die App auf deine Stimme.
+        <u>Tippe hier um mehr anzuzeigen …</u>
+    </string>
+    <string name="user_interface_voice_control_help_long_text">Beim <b>Öffnen des Hauptmenüs</b>
         hört die App auf deine Stimme.
         <b>Um Verbindungen zu suchen sage</b>
         \"<i>(ZEIT) von Hamburg nach Berlin Spandau</i>\"
