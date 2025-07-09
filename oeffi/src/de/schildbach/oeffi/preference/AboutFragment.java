@@ -42,6 +42,8 @@ public class AboutFragment extends PreferenceFragment {
     private static final String KEY_ABOUT_CHANGELOG = "about_changelog";
     private static final String KEY_ABOUT_POLICY = "about_policy";
     private static final String KEY_ABOUT_FAQ = "about_faq";
+    private static final String KEY_ABOUT_APP_UPDATE_CATEGORY = "about_update_category";
+    private static final String KEY_ABOUT_DOWNLOAD_APK = "about_download_apk";
     private static final String KEY_ABOUT_UPDATE = "about_update";
     private static final String KEY_ABOUT_SHARE = "about_share";
     private static final String KEY_ABOUT_SHOW_QR = "about_show_qr";
@@ -66,7 +68,7 @@ public class AboutFragment extends PreferenceFragment {
         }
 
         if (!getResources().getBoolean(R.bool.flags_show_twitter))
-            removeOrDisablePreference(findPreference("about_twitter"));
+            removeOrDisablePreference("about_twitter");
 
         final String changeLogUrl = application.getString(R.string.about_changelog_url);
         if (!changeLogUrl.isEmpty()) {
@@ -75,11 +77,18 @@ public class AboutFragment extends PreferenceFragment {
             prefChangeLog.setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(changeLogUrl)));
         }
 
-        final String updateUrl = application.getString(R.string.about_update_apk_url);
-        if (updateUrl == null || updateUrl.isEmpty()) {
-            removeOrDisablePreference(findPreference(KEY_ABOUT_UPDATE));
+        if (AppInstaller.isApkUrlAvailable()) {
+            setupActionPreference(KEY_ABOUT_UPDATE, AboutFragment.class, InstallHandler.class);
+            setupActionPreference(KEY_ABOUT_DOWNLOAD_APK, AboutFragment.class, DownloadApkHandler.class);
+            setupActionPreference(KEY_ABOUT_SHARE, AboutFragment.class, ShareActionHandler.class);
+            setupActionPreference(KEY_ABOUT_SHOW_QR, AboutFragment.class, ShowQrActionHandler.class);
         } else {
-            setupActionPreference(KEY_ABOUT_UPDATE, InstallHandler.class);
+            removeOrDisablePreference(KEY_ABOUT_UPDATE);
+            removeOrDisablePreference(KEY_ABOUT_DOWNLOAD_APK);
+            removeOrDisablePreference(KEY_ABOUT_SHARE);
+            removeOrDisablePreference(KEY_ABOUT_SHOW_QR);
+            removeOrDisablePreference(KEY_ABOUT_SHOW_QR);
+            removeOrDisablePreference(KEY_ABOUT_APP_UPDATE_CATEGORY);
         }
 
         final String policyUrl = application.getTranslatedString(R.string.about_privacy_policy_url);
@@ -91,9 +100,6 @@ public class AboutFragment extends PreferenceFragment {
         final Preference prefFaq = findPreference(KEY_ABOUT_FAQ);
         prefFaq.setSummary(faqUrl);
         prefFaq.setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(faqUrl)));
-
-        setupActionPreference(KEY_ABOUT_SHARE, ShareActionHandler.class);
-        setupActionPreference(KEY_ABOUT_SHOW_QR, AboutFragment.class, ShowQrActionHandler.class);
     }
 
     public static class ShareActionHandler extends ActionHandler {
@@ -116,10 +122,18 @@ public class AboutFragment extends PreferenceFragment {
     public static class InstallHandler extends ActionHandler {
         @Override
         boolean handleAction(final PreferenceActivity context, final String prefkey) {
-            final String updateUrl = Application.getInstance().getString(R.string.about_update_apk_url);
             new AppInstaller(context, aBoolean -> dismissParentingActivity(context))
-                    .downloadAndInstallApk(updateUrl);
+                    .downloadAndInstallApk();
             return false;
+        }
+    }
+
+    public static class DownloadApkHandler extends ActionHandler {
+        @Override
+        boolean handleAction(final PreferenceActivity context, final String prefkey) {
+            new AppInstaller(context, aBoolean -> dismissParentingActivity(context))
+                    .showExternalDownloader();
+            return true;
         }
     }
 }

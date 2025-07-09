@@ -447,8 +447,9 @@
     <string name="alert_crash_report_download">Herunterladen</string>
     <string name="alert_crash_report_negative">Schließen</string>
     <string name="alert_update_available_title">Update verfügbar</string>
-    <string name="alert_update_available_message">Ein Update dieser Anwendung ist verfügbar. Möchtest Du es jetzt herunterladen?</string>
-    <string name="alert_update_available_button_yes">Jetzt herunterladen</string>
+    <string name="alert_update_available_message">Ein Update dieser Anwendung ist verfügbar. Möchtest Du es jetzt herunterladen und installieren?</string>
+    <string name="alert_update_available_button_yes">Jetzt herunterladen und installieren</string>
+    <string name="alert_update_available_button_download_only">Herunterladen zur händischen Installation</string>
     <string name="alert_update_available_button_no">Vielleicht später</string>
 
     <!-- products -->

@@ -40,15 +40,30 @@ public class AppInstaller {
     private final Activity context;
     final Consumer<Boolean> doneListener;
 
+    public static boolean isApkUrlAvailable() {
+        final String apkUrl = getApkUrl();
+        return apkUrl != null && !apkUrl.isEmpty();
+    }
+
+    public static String getApkUrl() {
+        return Application.getInstance().getString(R.string.about_update_apk_url);
+    }
+
     public AppInstaller(final Activity context, final Consumer<Boolean> doneListener) {
         this.context = context;
         this.doneListener = doneListener;
     }
 
-    public void downloadAndInstallApk(final String apkUrl) {
+    public void downloadAndInstallApk() {
+        if (!isApkUrlAvailable()) {
+            done(false);
+            return;
+        }
+
         try {
-            log.info("downloading APK file for install from {}", apkUrl);
             final Application application = Application.getInstance();
+            final String apkUrl = getApkUrl();
+            log.info("downloading APK file for install from {}", apkUrl);
             final ProgressDialog progressDialog = new ProgressDialog(context);
             final HttpUrl remoteUrl = HttpUrl.parse(apkUrl);
             final File localFile = new File(getShareDir(application), "install.apk");
@@ -105,7 +120,6 @@ public class AppInstaller {
 
     private void installApk(final File apkFile) {
         final Application application = Application.getInstance();
-
         final PackageManager packageManager = application.getPackageManager();
         final String installerPackageName = packageManager.getInstallerPackageName(application.getPackageName());
             // "com.android.packageinstaller"
@@ -121,11 +135,10 @@ public class AppInstaller {
     }
 
     public void checkForUpdate() {
-        final Application application = Application.getInstance();
-
-        final String updateUrl = application.getString(R.string.about_update_apk_url);
-        if (updateUrl == null || updateUrl.isEmpty())
+        if (!isApkUrlAvailable())
             return;
+
+        final Application application = Application.getInstance();
         final String manifestUrl = application.getString(R.string.about_update_manifest_url);
         final String modifiedStr = application.getString(R.string.about_update_modified);
         new Thread(() -> {
@@ -148,8 +161,10 @@ public class AppInstaller {
                                     .setTitle(R.string.alert_update_available_title)
                                     .setMessage(R.string.alert_update_available_message)
                                     .setPositiveButton(R.string.alert_update_available_button_yes, (d, i) -> {
-                                        // startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(updateUrl)));
-                                        downloadAndInstallApk(updateUrl);
+                                        downloadAndInstallApk();
+                                    })
+                                    .setNeutralButton(R.string.alert_update_available_button_download_only, (dialog, which) -> {
+                                        showExternalDownloader();
                                     })
                                     .setNegativeButton(R.string.alert_update_available_button_no, null)
                                     .create().show();
@@ -160,5 +175,12 @@ public class AppInstaller {
                 log.error("cannot HEAD {}: {}", manifestUrl, e.getMessage());
             }
         }).start();
+    }
+
+    public void showExternalDownloader() {
+        if (!isApkUrlAvailable())
+            return;
+
+        context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getApkUrl())));
     }
 }

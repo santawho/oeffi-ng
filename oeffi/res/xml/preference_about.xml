@@ -40,7 +40,9 @@
             android:data="@string/about_faq_url" />
     </Preference>
 
-    <PreferenceCategory android:title="@string/about_update_and_share_title">
+    <PreferenceCategory
+        android:key="about_update_category"
+        android:title="@string/about_update_and_share_title">
         <Preference
             android:key="about_update"
             android:summary="@string/about_update_summary"
@@ -50,9 +52,6 @@
             android:key="about_download_apk"
             android:summary="@string/about_download_apk_summary"
             android:title="@string/about_download_apk_title">
-            <intent
-                android:action="android.intent.action.VIEW"
-                android:data="@string/about_update_apk_url" />
         </Preference>
         <Preference
             android:key="about_share"

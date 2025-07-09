@@ -53,6 +53,7 @@ import de.schildbach.oeffi.directions.QueryHistoryProvider;
 import de.schildbach.oeffi.plans.PlansPickerActivity;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
 import de.schildbach.oeffi.stations.StationsActivity;
+import de.schildbach.oeffi.util.AppInstaller;
 import de.schildbach.oeffi.util.ErrorReporter;
 import de.schildbach.oeffi.util.SpeechInput;
 import de.schildbach.pte.NetworkId;
@@ -386,11 +387,11 @@ public class Application extends android.app.Application {
     }
 
     public void shareApp(final Activity contextActivity) {
-        final String updateUrl = getString(R.string.about_update_apk_url);
-        if (updateUrl == null || updateUrl.isEmpty())
+        if (!AppInstaller.isApkUrlAvailable())
             return;
         final String shareTitle = getShareTitle();
-        final String shareText = getString(R.string.global_options_share_app_text, Application.getInstance().getAppName(), updateUrl);
+        final String shareText = getString(R.string.global_options_share_app_text,
+                Application.getInstance().getAppName(), AppInstaller.getApkUrl());
         final Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);

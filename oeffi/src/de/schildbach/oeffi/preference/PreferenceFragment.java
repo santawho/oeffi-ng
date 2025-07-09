@@ -23,7 +23,14 @@ public class PreferenceFragment extends android.preference.PreferenceFragment {
         preferenceActivity = (PreferenceActivity) context;
     }
 
+    protected void removeOrDisablePreference(final String preferenceName) {
+        removeOrDisablePreference(findPreference(preferenceName));
+    }
+
     protected void removeOrDisablePreference(final Preference preference) {
+        if (preference == null)
+            return;
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             preference.getParent().removePreference(preference);
         else
