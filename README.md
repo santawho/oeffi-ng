@@ -23,6 +23,8 @@ unexpected results and behaviour, and frequent updates.
 
 ### Updating
 
-1. Start the app. If a new version is available, you will be asked to download the updated APK file.
-2. Click "Ok" to proceed with the download.
-3. Open the downloaded file in order to run the update. Follow the prompts and accept the risk.
+1. Start the app. If a new version is available, you will be asked to download and install the updated APK file.
+2. The app can update itself, but requires permission to do so. 
+   If you accept this, click "download and install" to proceed. Follow the prompts and accept the risk.
+3. If you don't trust the app, click "download for manual installation" to proceed with the download by your web browser.
+   Then open the downloaded file in order to run the update. Follow the prompts and accept the risk.
