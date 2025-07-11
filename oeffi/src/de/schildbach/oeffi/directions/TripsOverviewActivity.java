@@ -280,7 +280,7 @@ public class TripsOverviewActivity extends OeffiActivity {
             }
         });
         barView.setOnScrollListener(() -> {
-            log.info("barView.onScrollListener -> foregroundHandler.post(checkMoreRunnable)");
+//            log.info("barView.onScrollListener -> foregroundHandler.post(checkMoreRunnable)");
             foregroundHandler.post(checkMoreRunnable);
         });
 
@@ -315,7 +315,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         barView.invalidate();
 
         // delay because GUI is not initialized immediately
-        log.info("onStart -> foregroundHandler.postDelayed(checkMoreRunnable, 50)");
+//        log.info("onStart -> foregroundHandler.postDelayed(checkMoreRunnable, 50)");
         foregroundHandler.postDelayed(checkMoreRunnable, 50);
     }
 
@@ -372,7 +372,7 @@ public class TripsOverviewActivity extends OeffiActivity {
 
             if (queryTripsRunnable != null && backgroundHandler != null) {
                 queryMoreTripsRunning = true;
-                log.info("backgroundHandler.post(queryTripsRunnable)");
+//                log.info("backgroundHandler.post(queryTripsRunnable)");
                 backgroundHandler.post(queryTripsRunnable);
             }
         }
@@ -443,7 +443,7 @@ public class TripsOverviewActivity extends OeffiActivity {
                             processResult(result, earlier, later, searchMoreContext);
 
                             // fetch more
-                            log.info("fetch more -> foregroundHandler.postDelayed(checkMoreRunnable, 50)");
+//                            log.info("fetch more -> foregroundHandler.postDelayed(checkMoreRunnable, 50)");
                             foregroundHandler.postDelayed(checkMoreRunnable, 50);
                         } else if (result.status == QueryTripsResult.Status.NO_TRIPS) {
                             // ignore
