@@ -209,7 +209,7 @@
     <string name="directions_from">Start of trip</string>
     <string name="directions_via">Via</string>
     <string name="directions_to">End</string>
-    <string name="directions_option_bike">bicycle carriage (beta)</string>
+    <string name="directions_option_bike">bicycle carriage</string>
     <string name="directions_time_arr_dep_description">depart at/arrive by</string>
     <string name="directions_time_dep">Dep ↦</string>
     <string name="directions_time_arr">⇥ Arr</string>

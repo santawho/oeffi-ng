@@ -208,7 +208,7 @@
     <string name="directions_from">Start der Verbindung</string>
     <string name="directions_via">Zwischenhalt</string>
     <string name="directions_to">Endpunkt</string>
-    <string name="directions_option_bike">Fahrradmitnahme (beta)</string>
+    <string name="directions_option_bike">Fahrradmitnahme</string>
     <string name="directions_time_arr_dep_description">Abfahrt/Ankunft</string>
     <string name="directions_time_dep">ab ↦</string>
     <string name="directions_time_arr">⇥ an</string>

@@ -382,10 +382,21 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         fireChanged();
     }
 
+    public void convertToGeoLocation(final boolean force, final boolean removeIdWhenConverting) {
+        final Location convertedLocation = getLocation(force || stationAsAddressEnabled, removeIdWhenConverting);
+        setLocation(convertedLocation);
+    }
+
     public @Nullable Location getLocation() {
+        return getLocation(stationAsAddress, false);
+    }
+
+    public @Nullable Location getLocation(final boolean convertStationToAddress, final boolean removeIdWhenConverting) {
         if (location != null) {
-            if (locationType == LocationType.STATION && stationAsAddress)
-                return new Location(LocationType.ADDRESS, location.id, location.coord, location.place, location.name);
+            if (locationType == LocationType.STATION && convertStationToAddress)
+                return new Location(LocationType.ADDRESS,
+                        removeIdWhenConverting ? null : location.id,
+                        location.coord, location.place, location.name);
             else
                 return location;
         }
@@ -396,8 +407,10 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
             return null;
         else if (locationType == LocationType.ANY && Strings.isNullOrEmpty(name))
             return null;
-        else if (locationType == LocationType.STATION && stationAsAddress)
-            return new Location(LocationType.ADDRESS, id, coord, name != null ? place : null, name);
+        else if (locationType == LocationType.STATION && convertStationToAddress)
+            return new Location(LocationType.ADDRESS,
+                    removeIdWhenConverting ? null : id,
+                    coord, name != null ? place : null, name);
         else
             return new Location(locationType, id, coord, name != null ? place : null, name);
     }

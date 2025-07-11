@@ -856,11 +856,15 @@ public class DirectionsActivity extends OeffiMainActivity implements
     @Override
     protected void onChangeNetwork(final NetworkId network) {
         setupAutoCompleteLocationAdapters();
-        viewFromLocation.reset();
-        viewViaLocation.reset();
-        viewToLocation.reset();
 
-        viewBike.setChecked(false);
+        // viewFromLocation.reset();
+        // viewViaLocation.reset();
+        // viewToLocation.reset();
+        viewFromLocation.convertToGeoLocation(true, true);
+        viewViaLocation.convertToGeoLocation(true, true);
+        viewToLocation.convertToGeoLocation(true, true);
+
+        //??? viewBike.setChecked(false);
 
         boolean haveNonDefaultProducts = initProductToggles();
         expandForm(haveNonDefaultProducts);
@@ -1226,8 +1230,8 @@ public class DirectionsActivity extends OeffiMainActivity implements
             viewViaLocation.setVisibility(networkProvider != null && networkProvider.hasCapabilities(NetworkProvider.Capability.TRIPS_VIA) ?
                     View.VISIBLE : View.GONE);
             viewProducts.setVisibility(View.VISIBLE);
-            if (networkProvider != null && networkProvider.hasCapabilities(Capability.BIKE_OPTION))
-                viewBike.setVisibility(View.VISIBLE);
+            viewBike.setVisibility(networkProvider != null && networkProvider.hasCapabilities(Capability.BIKE_OPTION) ?
+                    View.VISIBLE: View.GONE);
         } else {
             buttonExpand.setChecked(false);
             initLayoutTransitions(false);
@@ -1394,6 +1398,8 @@ public class DirectionsActivity extends OeffiMainActivity implements
     }
 
     private void handleGo() {
+        final NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
+
         final Location from = viewFromLocation.getLocation();
         if (!saneLocation(from, false)) {
             locationSelector.clearSelection();
@@ -1422,18 +1428,13 @@ public class DirectionsActivity extends OeffiMainActivity implements
         locationSelector.clearSelection();
 
         final Set<Product> products = getProductToggles();
+        final Set<TripFlag> flags = new HashSet<>();
 
-        final Set<TripFlag> flags;
-        if (viewBike.isChecked()) {
-            flags = new HashSet<>();
+        if (viewBike.isChecked() && networkProvider.hasCapabilities(Capability.BIKE_OPTION))
             flags.add(TripFlag.BIKE);
-        } else {
-            flags = null;
-        }
 
-        final NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
         final TripOptions options = new TripOptions(products, prefsGetOptimizeTrip(), prefsGetWalkSpeed(),
-                prefsGetMinTranfserTime(), prefsGetAccessibility(), flags);
+                prefsGetMinTranfserTime(), prefsGetAccessibility(), flags.isEmpty() ? null : flags);
         queryTripsRunnable = new MyQueryTripsRunnable(networkProvider, from, via, to, time, options) {
             @Override
             protected void onPreExecute() {
