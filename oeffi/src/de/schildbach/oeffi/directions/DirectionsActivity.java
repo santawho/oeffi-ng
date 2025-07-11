@@ -476,6 +476,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         setupAutoCompleteLocationAdapters();
 
         viewProducts = findViewById(R.id.directions_products);
+        viewProductToggles.clear();
         viewProductToggles.add(findViewById(R.id.directions_products_i));
         viewProductToggles.add(findViewById(R.id.directions_products_r));
         viewProductToggles.add(findViewById(R.id.directions_products_s));
@@ -493,29 +494,28 @@ public class DirectionsActivity extends OeffiMainActivity implements
                 final Set<Product> networkDefaultProducts = getNetworkDefaultProducts();
                 final Function<View, Boolean> checkedStateFunction;
                 switch (which) {
-                    case 0:
-                        checkedStateFunction = (view) -> view.equals(clickedView); // only this
+                    case 0: // only this
+                        checkedStateFunction = (view) -> view.equals(clickedView);
                         break;
-                    case 1:
-                        checkedStateFunction = (view) -> !view.equals(clickedView); // all except this
+                    case 1: // all except this
+                        checkedStateFunction = (view) -> !view.equals(clickedView);
                         break;
-                    case 2:
+                    case 2: // network defaults
                         checkedStateFunction = (view) -> networkDefaultProducts.contains(
-                                Product.fromCode(((String) view.getTag()).charAt(0))); // network defaults
+                                Product.fromCode(((String) view.getTag()).charAt(0)));
                         break;
-                    case 3:
-                        checkedStateFunction = (view) -> true; // all true
+                    case 3: // all true
+                        checkedStateFunction = (view) -> true;
                         break;
-                    case 4:
+                    case 4: // only local products
                         checkedStateFunction = (view) -> Product.LOCAL_PRODUCTS.contains(
-                                Product.fromCode(((String) view.getTag()).charAt(0))); // only local products
+                                Product.fromCode(((String) view.getTag()).charAt(0)));
                         break;
                     default:
                         return;
                 }
-                for (final ToggleImageButton view : viewProductToggles) {
+                for (final ToggleImageButton view : viewProductToggles)
                     view.setChecked(checkedStateFunction.apply(view));
-                }
             });
             builder.show();
             return true;
@@ -893,9 +893,10 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
     private Set<Product> getProductToggles() {
         final Set<Product> products = new HashSet<>();
-        for (final ToggleImageButton view : viewProductToggles)
+        for (final ToggleImageButton view : viewProductToggles) {
             if (view.isChecked())
                 products.add(Product.fromCode(((String) view.getTag()).charAt(0)));
+        }
         return products;
     }
 
