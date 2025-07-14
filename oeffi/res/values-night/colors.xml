@@ -12,6 +12,7 @@
     <color name="fg_position">#000000</color>
     <color name="fg_trip_next_event_normal">#ffffff</color>
     <color name="fg_trip_next_event_important">#ff6666</color>
+    <color name="fg_trip_next_event_less_important">#cccccc</color>
 
     <!-- background -->
     <color name="bg_level0">#222222</color>

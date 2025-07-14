@@ -1460,6 +1460,17 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 findViewById(R.id.directions_trip_details_next_event_walk)
                         .setVisibility(View.GONE);
             }
+
+            if (tripRenderer.nextPublicLegDurationTimeValue != null) {
+                findViewById(R.id.directions_trip_details_next_event_upcoming_ride)
+                        .setVisibility(View.VISIBLE);
+
+                ((TextView) findViewById(R.id.directions_trip_details_next_event_upcoming_ride_value))
+                        .setText(tripRenderer.nextPublicLegDurationTimeValue);
+            } else {
+                findViewById(R.id.directions_trip_details_next_event_upcoming_ride)
+                        .setVisibility(View.GONE);
+            }
         }
 
         TextView depView = findViewById(R.id.directions_trip_details_next_event_departure);

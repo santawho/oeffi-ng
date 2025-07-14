@@ -290,6 +290,9 @@ public class TripRenderer {
                             : R.string.directions_trip_details_next_event_action_next_interchange
             );
 
+            // if (nextPublicLeg != null)
+            //     setNextPublicLegDuration(nextPublicLeg.getDepartureTime(), nextPublicLeg.getArrivalTime());
+
             notificationData.publicArrivalLegIndex = legC.legIndex;
             notificationData.publicDepartureLegIndex = nextPublicLeg != null ? nextLegC.legIndex: -1;
             notificationData.isArrival = true;
@@ -307,8 +310,9 @@ public class TripRenderer {
             final TripRenderer.LegContainer legC,
             final Date now) {
         final Trip.Individual leg = legC.individualLeg;
+        final Trip.Public nextPublicLeg = legC.transferTo != null ? legC.transferTo.publicLeg : null;
         final Stop transferFrom = legC.transferFrom != null ? legC.transferFrom.publicLeg.arrivalStop : null;
-        final Stop transferTo = legC.transferTo != null ? legC.transferTo.publicLeg.departureStop : null;
+        final Stop transferTo = nextPublicLeg != null ? nextPublicLeg.departureStop : null;
         final Date beginTime = transferFrom != null ? transferFrom.getArrivalTime() : leg == null ? null : leg.departureTime;
         final Date plannedBeginTime = transferFrom != null ? transferFrom.plannedArrivalTime : leg == null ? null : leg.departureTime;
         final Date endTime = transferTo != null ? transferTo.getDepartureTime() : leg == null ? null : leg.arrivalTime;
@@ -334,7 +338,7 @@ public class TripRenderer {
             setNextEventPositions(
                     transferFrom, arrPos, arrPos != null && !arrPos.equals(plannedArrPos),
                     transferTo, depPos, depPos != null && !depPos.equals(plannedDepPos));
-            setNextEventTransport(legC.transferTo != null ? legC.transferTo.publicLeg : null);
+            setNextEventTransport(nextPublicLeg);
             setNextEventTransferTimes(legC, true, now);
             setNextEventActions(transferTo == null ? 0
                             : transferFrom == null ? (eventIsNow
@@ -347,6 +351,9 @@ public class TripRenderer {
                                         ? R.string.directions_trip_details_next_event_action_interchange_now
                                         : R.string.directions_trip_details_next_event_action_interchange),
                     0);
+
+             if (nextPublicLeg != null)
+                 setNextPublicLegDuration(nextPublicLeg.getDepartureTime(), nextPublicLeg.getArrivalTime());
 
             notificationData.publicArrivalLegIndex = legC.transferFrom != null ? legC.transferFrom.legIndex : -1;
             notificationData.publicDepartureLegIndex = legC.transferTo != null ? legC.transferTo.legIndex : -1;
@@ -629,5 +636,11 @@ public class TripRenderer {
 
     private void setNextEventDeparture(String name) {
         nextEventDepartureName = Formats.makeBreakableStationName(name);
+    }
+
+    public String nextPublicLegDurationTimeValue;
+
+    public void setNextPublicLegDuration(final Date begin, final Date end) {
+        this.nextPublicLegDurationTimeValue = Long.toString((end.getTime() - begin.getTime()) / 60000);
     }
 }

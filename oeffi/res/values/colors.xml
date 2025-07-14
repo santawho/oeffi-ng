@@ -21,6 +21,7 @@
     <color name="fg_significant_on_light">#000000</color>
     <color name="fg_trip_next_event_normal">#000000</color>
     <color name="fg_trip_next_event_important">#aa0000</color>
+    <color name="fg_trip_next_event_less_important">#666666</color>
 
     <!-- background -->
     <color name="bg_level0">#f7f7f7</color>
