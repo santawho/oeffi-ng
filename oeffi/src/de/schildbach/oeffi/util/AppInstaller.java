@@ -49,13 +49,29 @@ public class AppInstaller {
         return Application.getInstance().getString(R.string.about_update_apk_url);
     }
 
+    public static String getInstallerPackageName() {
+        final Application application = Application.getInstance();
+        return application.getPackageManager().getInstallerPackageName(application.getPackageName());
+        // "com.android.packageinstaller"
+        // "com.google.android.packageinstaller"
+    }
+
+    public static boolean hasExternalInstaller() {
+        final String installerPackageName = getInstallerPackageName();
+        log.info("package installer = {}", installerPackageName);
+        return !(installerPackageName == null
+                || "com.android.packageinstaller".equals(installerPackageName)
+                || "com.google.android.packageinstaller".equals(installerPackageName)
+        );
+    }
+
     public AppInstaller(final Activity context, final Consumer<Boolean> doneListener) {
         this.context = context;
         this.doneListener = doneListener;
     }
 
     public void downloadAndInstallApk() {
-        if (!isApkUrlAvailable()) {
+        if (!isApkUrlAvailable() || hasExternalInstaller()) {
             done(false);
             return;
         }
@@ -120,10 +136,7 @@ public class AppInstaller {
 
     private void installApk(final File apkFile) {
         final Application application = Application.getInstance();
-        final PackageManager packageManager = application.getPackageManager();
-        final String installerPackageName = packageManager.getInstallerPackageName(application.getPackageName());
-            // "com.android.packageinstaller"
-            // "com.google.android.packageinstaller"
+        final String installerPackageName = getInstallerPackageName();
         log.info("installing APK file {} using installer {}", apkFile, installerPackageName);
 
         final Uri contentUri = FileProvider.getUriForFile(application, application.getPackageName(), apkFile);
@@ -137,6 +150,8 @@ public class AppInstaller {
     public void checkForUpdate() {
         if (!isApkUrlAvailable())
             return;
+
+        final boolean isExternalInstaller = hasExternalInstaller();
 
         final Application application = Application.getInstance();
         final String manifestUrl = application.getString(R.string.about_update_manifest_url);
