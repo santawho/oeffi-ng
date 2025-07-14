@@ -456,6 +456,7 @@
     <string name="alert_update_available_button_yes">Jetzt herunterladen und installieren</string>
     <string name="alert_update_available_button_download_only">Herunterladen zur händischen Installation</string>
     <string name="alert_update_available_button_no">Vielleicht später</string>
+    <string name="alert_update_available_message_external_installer">Eine neue Version dieser Anwendung ist verfügbar. Bitte aktualisiere mit dem App-Store.</string>
 
     <!-- products -->
     <string name="product_i">Fernverkehr</string>

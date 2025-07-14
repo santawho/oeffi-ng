@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 
 import androidx.core.content.FileProvider;
@@ -46,7 +45,9 @@ public class AppInstaller {
     }
 
     public static String getApkUrl() {
-        return Application.getInstance().getString(R.string.about_update_apk_url);
+        final String apkUrl = "https://github.com/santawho/oeffi-ng/releases/latest/download/oeffi-ng.apk";
+        log.info("apk url = {}", apkUrl);
+        return apkUrl;
     }
 
     public static String getInstallerPackageName() {
@@ -151,8 +152,6 @@ public class AppInstaller {
         if (!isApkUrlAvailable())
             return;
 
-        final boolean isExternalInstaller = hasExternalInstaller();
-
         final Application application = Application.getInstance();
         final String manifestUrl = application.getString(R.string.about_update_manifest_url);
         final String modifiedStr = application.getString(R.string.about_update_modified);
@@ -175,12 +174,8 @@ public class AppInstaller {
                             if (hasExternalInstaller()) {
                                 new AlertDialog.Builder(context)
                                         .setTitle(R.string.alert_update_available_title)
-                                        .setMessage(R.string.alert_update_available_message)
-                                        .setPositiveButton(R.string.alert_update_available_button_yes, (d, i) -> {
-                                            context.startActivity(application.getPackageManager()
-                                                .getLaunchIntentForPackage(getInstallerPackageName()));
-                                        })
-                                        .setNegativeButton(R.string.alert_update_available_button_no, null)
+                                        .setMessage(R.string.alert_update_available_message_external_installer)
+                                        .setPositiveButton(android.R.string.ok, (d, i) -> done(false))
                                         .create().show();
                             } else {
                                 new AlertDialog.Builder(context)

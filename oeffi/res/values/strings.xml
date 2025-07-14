@@ -457,6 +457,7 @@
     <string name="alert_update_available_button_yes">Download and install now</string>
     <string name="alert_update_available_button_download_only">Download for manual installation</string>
     <string name="alert_update_available_button_no">Maybe later</string>
+    <string name="alert_update_available_message_external_installer">A new version of this application is available. Please update using the app store.</string>
 
     <!-- products -->
     <string name="product_i">Highspeed</string>
