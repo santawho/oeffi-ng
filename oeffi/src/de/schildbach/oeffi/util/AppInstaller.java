@@ -172,17 +172,29 @@ public class AppInstaller {
                     final boolean isNewVersionAvailable = lastModified != null && lastModified.after(thisModified);
                     if (isNewVersionAvailable) {
                         context.runOnUiThread(() -> {
-                            new AlertDialog.Builder(context)
-                                    .setTitle(R.string.alert_update_available_title)
-                                    .setMessage(R.string.alert_update_available_message)
-                                    .setPositiveButton(R.string.alert_update_available_button_yes, (d, i) -> {
-                                        downloadAndInstallApk();
-                                    })
-                                    .setNeutralButton(R.string.alert_update_available_button_download_only, (dialog, which) -> {
-                                        showExternalDownloader();
-                                    })
-                                    .setNegativeButton(R.string.alert_update_available_button_no, null)
-                                    .create().show();
+                            if (hasExternalInstaller()) {
+                                new AlertDialog.Builder(context)
+                                        .setTitle(R.string.alert_update_available_title)
+                                        .setMessage(R.string.alert_update_available_message)
+                                        .setPositiveButton(R.string.alert_update_available_button_yes, (d, i) -> {
+                                            context.startActivity(application.getPackageManager()
+                                                .getLaunchIntentForPackage(getInstallerPackageName()));
+                                        })
+                                        .setNegativeButton(R.string.alert_update_available_button_no, null)
+                                        .create().show();
+                            } else {
+                                new AlertDialog.Builder(context)
+                                        .setTitle(R.string.alert_update_available_title)
+                                        .setMessage(R.string.alert_update_available_message)
+                                        .setPositiveButton(R.string.alert_update_available_button_yes, (d, i) -> {
+                                            downloadAndInstallApk();
+                                        })
+                                        .setNeutralButton(R.string.alert_update_available_button_download_only, (dialog, which) -> {
+                                            showExternalDownloader();
+                                        })
+                                        .setNegativeButton(R.string.alert_update_available_button_no, null)
+                                        .create().show();
+                            }
                         });
                     }
                 }
