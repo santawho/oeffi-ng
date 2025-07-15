@@ -144,11 +144,16 @@ public abstract class OeffiActivity extends ComponentActivity {
 
     @Override
     public void setContentView(final int layoutResID) {
+        setContentView(layoutResID, true);
+    }
+
+    public void setContentView(final int layoutResID, final boolean showNavigation) {
         // called in the final phase of onCreate by sub-classes
+        navigationDrawerLayout = null;
         super.setContentView(layoutResID);
 
         // chance to perform general setup
-        if (isTaskRoot())
+        if (showNavigation)
             initNavigation();
         else
             hideNavigation();

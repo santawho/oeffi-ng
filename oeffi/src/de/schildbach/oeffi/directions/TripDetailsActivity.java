@@ -294,7 +294,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final boolean isPortrait = res.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
         setContentView(isPortrait
                 ? R.layout.directions_trip_details_content_portrait
-                : R.layout.directions_trip_details_content_landscape);
+                : R.layout.directions_trip_details_content_landscape,
+                isTaskRoot());
         final View contentView = findViewById(android.R.id.content);
         ViewCompat.setOnApplyWindowInsetsListener(contentView, (v, windowInsets) -> {
             final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
