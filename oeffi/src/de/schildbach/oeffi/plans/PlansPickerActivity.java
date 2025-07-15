@@ -127,8 +127,6 @@ public class PlansPickerActivity extends OeffiMainActivity implements LocationHe
         actionBar.addButton(R.drawable.ic_search_white_24dp, R.string.plans_picker_action_search_title)
                 .setOnClickListener(v -> onSearchRequested());
 
-        initNavigation();
-
         cursor = getContentResolver().query(PlanContentProvider.CONTENT_URI(), null, null, null, null);
 
         listView = findViewById(android.R.id.list);

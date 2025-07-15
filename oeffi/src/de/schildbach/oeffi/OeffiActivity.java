@@ -38,6 +38,7 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
+import android.widget.Switch;
 import android.widget.TextView;
 import androidx.activity.ComponentActivity;
 import androidx.activity.EdgeToEdge;
@@ -66,6 +67,7 @@ import de.schildbach.oeffi.util.ErrorReporter;
 import de.schildbach.oeffi.util.NavigationMenuAdapter;
 import de.schildbach.oeffi.util.SpeechInput;
 import de.schildbach.oeffi.util.Toast;
+import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.Product;
@@ -83,7 +85,13 @@ public abstract class OeffiActivity extends ComponentActivity {
     protected static final String INTENT_EXTRA_LINK_ARGS = OeffiActivity.class.getName() + ".link_args";
     protected static final String INTENT_EXTRA_NETWORK_NAME = OeffiActivity.class.getName() + ".network";
 
-    protected static final String PREFS_KEY_VOICE_CONTROL = "user_interface_voice_control_enabled";
+    protected static final String PREFS_KEY_VOICE_CONTROL_MODE = "user_interface_voice_control_mode";
+    protected static final String PREFS_KEY_VOICE_TOGGLE_STATE = "user_interface_voice_control_toggle";
+    public static final String VOICE_CONTROL_OPTION_ALWAYS = "always";
+    public static final String VOICE_CONTROL_OPTION_TOGGLE = "toggle";
+    public static final String VOICE_CONTROL_OPTION_TRIGGER = "trigger";
+    public static final String VOICE_CONTROL_OPTION_HIDDEN = "hidden";
+    public static final String VOICE_CONTROL_OPTION_OFF = "off";
 
     protected Application application;
     private final Handler handler = new Handler();
@@ -135,8 +143,22 @@ public abstract class OeffiActivity extends ComponentActivity {
     }
 
     @Override
+    public void setContentView(final int layoutResID) {
+        // called in the final phase of onCreate by sub-classes
+        super.setContentView(layoutResID);
+
+        // chance to perform general setup
+        if (isTaskRoot())
+            initNavigation();
+        else
+            hideNavigation();
+    }
+
+    @Override
     protected void onResume() {
         checkChangeNetwork();
+        updateNavigation();
+
         super.onResume();
     }
 
@@ -146,12 +168,27 @@ public abstract class OeffiActivity extends ComponentActivity {
         super.onPause();
     }
 
-    protected void hideNavigation() {
+    private void hideNavigation() {
         final DrawerLayout drawerLayout = findViewById(R.id.navigation_drawer_layout);
-        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        if (drawerLayout != null)
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
     }
 
-    protected void initNavigation() {
+    private void initNavigation() {
+        if (navigationDrawerLayout != null)
+            return;
+
+        navigationDrawerLayout = findViewById(R.id.navigation_drawer_layout);
+        if (navigationDrawerLayout == null)
+            return;
+
+        final View statusBarOffsetView = navigationDrawerLayout.findViewById(R.id.navigation_drawer_status_bar_offset);
+        if (statusBarOffsetView != null) {
+            final Resources res = getResources();
+            final int statusHeight = res.getDimensionPixelSize(res.getIdentifier("status_bar_height", "dimen", "android"));
+            statusBarOffsetView.setPadding(0, statusHeight, 0, 0);
+        }
+
         navigationDrawerMenuProvider = new MenuProvider() {
             @Override
             public void onCreateMenu(final Menu menu, final MenuInflater inflater) {
@@ -272,8 +309,6 @@ public abstract class OeffiActivity extends ComponentActivity {
             }
         };
 
-        navigationDrawerLayout = findViewById(R.id.navigation_drawer_layout);
-        final RecyclerView navigationDrawerListView = findViewById(R.id.navigation_drawer_list);
         navigationDrawerFooterView = findViewById(R.id.navigation_drawer_footer);
         final View navigationDrawerFooterHeartView = findViewById(R.id.navigation_drawer_footer_heart);
 
@@ -292,33 +327,16 @@ public abstract class OeffiActivity extends ComponentActivity {
         navigationDrawerMenuProvider.onCreateMenu(menu, getMenuInflater());
         navigationDrawerMenuProvider.onPrepareMenu(menu);
 
+        final RecyclerView navigationDrawerListView = findViewById(R.id.navigation_drawer_list);
         navigationDrawerListView.setLayoutManager(new LinearLayoutManager(this));
-        navigationDrawerListView
-                .addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
+        navigationDrawerListView.addItemDecoration(
+                new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
         navigationDrawerListView.setAdapter(menuAdapter);
 
         navigationDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
             public void onDrawerOpened(final View drawerView) {
                 handler.postDelayed(() -> heartbeat.start(), 2000);
-
-                if (prefs.getBoolean(PREFS_KEY_VOICE_CONTROL, false)) {
-                    Application.getInstance().getSpeechInput()
-                            .startSpeechRecognition(OeffiActivity.this, new SpeechInput.SpeechInputTerminationListener() {
-                                @Override
-                                public void onSpeechInputTermination(final boolean success) {
-                                    if (success)
-                                        closeNavigation();
-                                }
-
-                                @Override
-                                public void onSpeechInputError(final String hint) {
-                                    new Toast(OeffiActivity.this).toast(R.string.user_interface_voice_control_is_enabled, hint);
-                                }
-                            });
-                    new Toast(OeffiActivity.this).toast(R.string.user_interface_voice_control_is_enabled);
-                } else {
-                    new Toast(OeffiActivity.this).toast(R.string.user_interface_voice_control_not_enabled);
-                }
+                openDrawerForVoiceControl();
             }
 
             public void onDrawerClosed(final View drawerView) {
@@ -337,20 +355,6 @@ public abstract class OeffiActivity extends ComponentActivity {
             heartbeat.start();
         });
 
-        if (prefs.getBoolean(Constants.PREFS_KEY_USER_INTERFACE_MAINMENU_SHAREAPP_ENABLED, false)) {
-            final View drawerView = findViewById(R.id.navigation_drawer_share);
-            drawerView.setVisibility(View.VISIBLE);
-            ((TextView) findViewById(R.id.navigation_drawer_share_title)).setText(application.getShareTitle());
-            drawerView.setOnClickListener(v -> {
-                closeNavigation();
-                application.shareApp(this);
-            });
-            findViewById(R.id.navigation_drawer_share_qrcode).setOnClickListener(v -> {
-                closeNavigation();
-                application.showImageDialog(this, R.drawable.qr_update, null);
-            });
-        }
-
         getMyActionBar().setDrawer(v -> toggleNavigation());
 
         final View bottomOffset = findViewById(R.id.navigation_drawer_bottom_offset);
@@ -365,7 +369,100 @@ public abstract class OeffiActivity extends ComponentActivity {
         updateNavigation();
     }
 
+    private void prepareDrawerForVoiceInput() {
+        if (navigationDrawerLayout == null)
+            return;
+
+        final Switch toggleSwitch = navigationDrawerLayout.findViewById(R.id.navigation_drawer_voice_control_toggle);
+        final TextView triggerView = navigationDrawerLayout.findViewById(R.id.navigation_drawer_voice_control_trigger);
+        boolean showTrigger = false;
+        boolean showToggle = false;
+        switch (getVoiceControlOption()) {
+            case VOICE_CONTROL_OPTION_ALWAYS:
+                break;
+            case VOICE_CONTROL_OPTION_TOGGLE:
+                showToggle = true;
+                final boolean toggleState = prefs.getBoolean(PREFS_KEY_VOICE_TOGGLE_STATE, true);
+                toggleSwitch.setChecked(toggleState);
+                toggleSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                    prefs.edit().putBoolean(PREFS_KEY_VOICE_TOGGLE_STATE, isChecked).apply();
+                    if (isChecked) {
+                        toggleSwitch.setText(R.string.user_interface_voice_control_toggle_on_title);
+                        startVoiceInput();
+                    } else {
+                        toggleSwitch.setText(R.string.user_interface_voice_control_toggle_off_title);
+                    }
+                });
+                break;
+            case VOICE_CONTROL_OPTION_TRIGGER:
+                showTrigger = true;
+                triggerView.setOnClickListener(v ->
+                        startVoiceInput());
+                break;
+            case VOICE_CONTROL_OPTION_HIDDEN:
+                // do not show anything
+                break;
+            case VOICE_CONTROL_OPTION_OFF:
+            default:
+                break;
+        }
+        ViewUtils.setVisibility(navigationDrawerLayout.findViewById(R.id.navigation_drawer_voice_control), showTrigger || showToggle);
+        ViewUtils.setVisibility(toggleSwitch, showToggle);
+        ViewUtils.setVisibility(triggerView, showTrigger);
+    }
+
+    private void openDrawerForVoiceControl() {
+        switch (getVoiceControlOption()) {
+            case VOICE_CONTROL_OPTION_ALWAYS:
+                startVoiceInput();
+                break;
+            case VOICE_CONTROL_OPTION_TOGGLE:
+                final boolean toggleState = prefs.getBoolean(PREFS_KEY_VOICE_TOGGLE_STATE, true);
+                final Switch toggleSwitch = navigationDrawerLayout.findViewById(R.id.navigation_drawer_voice_control_toggle);
+                toggleSwitch.setText(getString(toggleState
+                        ? R.string.user_interface_voice_control_toggle_on_title
+                        : R.string.user_interface_voice_control_toggle_off_title));
+                if (toggleState)
+                    startVoiceInput();
+                break;
+            case VOICE_CONTROL_OPTION_TRIGGER:
+                break;
+            case VOICE_CONTROL_OPTION_HIDDEN:
+                // do not show anything
+                break;
+            case VOICE_CONTROL_OPTION_OFF:
+            default:
+                new Toast(OeffiActivity.this).toast(R.string.user_interface_voice_control_not_enabled);
+                break;
+        }
+    }
+
+    @NonNull
+    private String getVoiceControlOption() {
+        return prefs.getString(PREFS_KEY_VOICE_CONTROL_MODE, "false");
+    }
+
+    private void startVoiceInput() {
+        Application.getInstance().getSpeechInput()
+                .startSpeechRecognition(OeffiActivity.this, new SpeechInput.SpeechInputTerminationListener() {
+                    @Override
+                    public void onSpeechInputTermination(final boolean success) {
+                        if (success)
+                            closeNavigation();
+                    }
+
+                    @Override
+                    public void onSpeechInputError(final String hint) {
+                        new Toast(OeffiActivity.this).toast(R.string.user_interface_voice_control_error, hint);
+                    }
+                });
+        new Toast(OeffiActivity.this).toast(R.string.user_interface_voice_control_is_enabled);
+    }
+
     protected void updateNavigation() {
+        if (navigationDrawerLayout == null)
+            return;
+
         if (navigationDrawerFooterView != null) {
             final Resources resources = getResources();
             final boolean showFooter =
@@ -373,10 +470,26 @@ public abstract class OeffiActivity extends ComponentActivity {
                     && resources.getBoolean(R.bool.layout_navigation_drawer_footer_show);
             navigationDrawerFooterView.setVisibility(showFooter ? View.VISIBLE : View.GONE);
         }
+
+        if (prefs.getBoolean(Constants.PREFS_KEY_USER_INTERFACE_MAINMENU_SHAREAPP_ENABLED, false)) {
+            final View drawerView = findViewById(R.id.navigation_drawer_share);
+            drawerView.setVisibility(View.VISIBLE);
+            ((TextView) findViewById(R.id.navigation_drawer_share_title)).setText(application.getShareTitle());
+            drawerView.setOnClickListener(v -> {
+                closeNavigation();
+                application.shareApp(this);
+            });
+            findViewById(R.id.navigation_drawer_share_qrcode).setOnClickListener(v -> {
+                closeNavigation();
+                application.showImageDialog(this, R.drawable.qr_update, null);
+            });
+        }
+
+        prepareDrawerForVoiceInput();
     }
 
     protected boolean isNavigationOpen() {
-        return navigationDrawerLayout.isDrawerOpen(Gravity.LEFT);
+        return navigationDrawerLayout != null && navigationDrawerLayout.isDrawerOpen(Gravity.LEFT);
     }
 
     private void toggleNavigation() {
@@ -387,11 +500,13 @@ public abstract class OeffiActivity extends ComponentActivity {
     }
 
     protected void openNavigation() {
-        navigationDrawerLayout.openDrawer(Gravity.LEFT);
+        if (navigationDrawerLayout != null)
+            navigationDrawerLayout.openDrawer(Gravity.LEFT);
     }
 
     protected void closeNavigation() {
-        navigationDrawerLayout.closeDrawer(Gravity.LEFT);
+        if (navigationDrawerLayout != null)
+            navigationDrawerLayout.closeDrawer(Gravity.LEFT);
     }
 
     @Override

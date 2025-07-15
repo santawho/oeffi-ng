@@ -301,8 +301,6 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         //            }
         //        });
 
-        initNavigation();
-
         locationProvidersView = findViewById(R.id.stations_list_location_providers);
 
         final Button locationPermissionRequestButton = findViewById(

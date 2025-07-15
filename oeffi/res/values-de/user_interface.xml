@@ -14,7 +14,17 @@
     <string name="user_interface_mainmenu_shareapp_enabled_title">Zeige \"Teile App\" Eintrag im Hauptmenü</string>
 
     <string name="user_interface_voice_control_category_title">Sprachsteuerung</string>
-    <string name="user_interface_voice_control_enabled_title">Verwende Sprachsteuerung</string>
+    <string name="user_interface_voice_control_mode_title">Wie die Sprachsteuerung gestartet wird …</string>
+    <string-array name="user_interface_voice_control_entries">
+        <item>nicht aktiv, Sprachsteuerung ist ausgeschaltet</item>
+        <item>höre auf Stimme sofort beim Öffnen des Hauptmenüs</item>
+        <item>zeige Schalter im Hauptmenü</item>
+        <item>zeige Start-Button im Hauptmenü</item>
+        <item>verstecke die Spracheingabe, Sprachsteuerung ist ausgeschaltet</item>
+    </string-array>
+    <string name="user_interface_voice_control_toggle_on_title">Höre auf Sprachbefehle</string>
+    <string name="user_interface_voice_control_toggle_off_title">Höre nicht auf Sprachbefehle</string>
+    <string name="user_interface_voice_control_trigger_title">Starte Spracheingabe</string>
     <string name="user_interface_voice_control_help_short_text">Beim <b>Öffnen des Hauptmenüs</b>
         hört die App auf deine Stimme.
         <u>Tippe hier um mehr anzuzeigen …</u>

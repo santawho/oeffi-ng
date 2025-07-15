@@ -354,8 +354,6 @@ public class DirectionsActivity extends OeffiMainActivity implements
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        final Intent intent = getIntent();
-
         connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
@@ -366,7 +364,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         backgroundThread.start();
         backgroundHandler = new Handler(backgroundThread.getLooper());
 
-        handleIntent(intent, false);
+        handleIntent(getIntent(), false);
     }
 
     @Override
@@ -429,8 +427,6 @@ public class DirectionsActivity extends OeffiMainActivity implements
                 return false;
             }
         });
-
-        initNavigation();
 
         findViewById(R.id.directions_network_missing_capability_button)
                 .setOnClickListener(v -> NetworkPickerActivity.start(DirectionsActivity.this));

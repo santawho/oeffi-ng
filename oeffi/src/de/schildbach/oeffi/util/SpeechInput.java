@@ -226,68 +226,72 @@ public class SpeechInput {
                 speechRecognizer = SpeechRecognizer.createSpeechRecognizer(activityContext);
             } else {
                 // not available
+                log.warn("no speech recognizer available");
             }
 
             if (speechRecognizer != null) {
                 if (ContextCompat.checkSelfPermission(activityContext, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                    speechRecognizer.destroy();
+                    speechRecognizer = null;
                     ActivityCompat.requestPermissions(activityContext, new String[]{Manifest.permission.RECORD_AUDIO}, 1);
-                } else {
-                    speechRecognizer.setRecognitionListener(new RecognitionListener() {
-                        @Override
-                        public void onReadyForSpeech(final Bundle params) {
-                            if (!isSpeechRecognitionRunning)
-                                stopSpeechRecognition();
-                        }
-
-                        @Override
-                        public void onBeginningOfSpeech() {
-                        }
-
-                        @Override
-                        public void onRmsChanged(final float rmsdB) {
-                        }
-
-                        @Override
-                        public void onBufferReceived(final byte[] buffer) {
-                        }
-
-                        @Override
-                        public void onEndOfSpeech() {
-                        }
-
-                        @Override
-                        public void onError(final int error) {
-                            log.info("speech recognition error {}", error);
-                            isSpeechRecognitionRunning = false;
-                            if (terminationListener != null) {
-                                if (error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT
-                                        || error == SpeechRecognizer.ERROR_NO_MATCH) {
-                                    terminationListener.onSpeechInputTermination(false);
-                                } else {
-                                    terminationListener.onSpeechInputError(String.format("code=%d", error));
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void onPartialResults(final Bundle partialResults) {
-                        }
-
-                        @Override
-                        public void onEvent(final int eventType, final Bundle params) {
-                        }
-
-                        @Override
-                        public void onResults(final Bundle bundle) {
-                            isSpeechRecognitionRunning = false;
-                            final ArrayList<String> results = bundle.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-                            if (results != null && !results.isEmpty()) {
-                                final String spokenSentence = results.get(0).toLowerCase(getActiveLocale());
-                                dispatchSpokenSentence(spokenSentence, terminationListener);
-                            }
-                        }
-                    });
+                    return;
                 }
+
+                speechRecognizer.setRecognitionListener(new RecognitionListener() {
+                    @Override
+                    public void onReadyForSpeech(final Bundle params) {
+                        if (!isSpeechRecognitionRunning)
+                            stopSpeechRecognition();
+                    }
+
+                    @Override
+                    public void onBeginningOfSpeech() {
+                    }
+
+                    @Override
+                    public void onRmsChanged(final float rmsdB) {
+                    }
+
+                    @Override
+                    public void onBufferReceived(final byte[] buffer) {
+                    }
+
+                    @Override
+                    public void onEndOfSpeech() {
+                    }
+
+                    @Override
+                    public void onError(final int error) {
+                        log.info("speech recognition error {}", error);
+                        isSpeechRecognitionRunning = false;
+                        if (terminationListener != null) {
+                            if (error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT
+                                    || error == SpeechRecognizer.ERROR_NO_MATCH) {
+                                terminationListener.onSpeechInputTermination(false);
+                            } else {
+                                terminationListener.onSpeechInputError(String.format("code=%d", error));
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onPartialResults(final Bundle partialResults) {
+                    }
+
+                    @Override
+                    public void onEvent(final int eventType, final Bundle params) {
+                    }
+
+                    @Override
+                    public void onResults(final Bundle bundle) {
+                        isSpeechRecognitionRunning = false;
+                        final ArrayList<String> results = bundle.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                        if (results != null && !results.isEmpty()) {
+                            final String spokenSentence = results.get(0).toLowerCase(getActiveLocale());
+                            dispatchSpokenSentence(spokenSentence, terminationListener);
+                        }
+                    }
+                });
             }
         }
 

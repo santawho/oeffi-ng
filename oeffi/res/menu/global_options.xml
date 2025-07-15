@@ -41,8 +41,7 @@
         android:id="@+id/global_options_extras"
         android:icon="@drawable/ic_star_grey600_24dp"
         android:orderInCategory="999"
-        android:title="@string/global_options_extras_title">
-    </item>
+        android:title="@string/global_options_extras_title" />
     <item
         android:id="@+id/global_options_about"
         android:icon="@drawable/ic_info_outline_grey600_24dp"

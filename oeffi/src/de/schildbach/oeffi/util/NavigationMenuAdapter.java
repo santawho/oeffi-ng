@@ -84,12 +84,13 @@ public class NavigationMenuAdapter extends RecyclerView.Adapter<NavigationMenuAd
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         holder.bind(visibleItems.get(position));
 
-        // Offset the first list item so that it isn't stuck under a transparent status bar.
-        if (position == 0) {
-            final int statusHeight = res
-                    .getDimensionPixelSize(res.getIdentifier("status_bar_height", "dimen", "android"));
-            holder.itemView.setPadding(0, statusHeight, 0, 0);
-        }
+        // there is an offset item now in the drawer layout, look for navigation_drawer_status_bar_offset
+//        // Offset the first list item so that it isn't stuck under a transparent status bar.
+//        if (position == 0) {
+//            final int statusHeight = res
+//                    .getDimensionPixelSize(res.getIdentifier("status_bar_height", "dimen", "android"));
+//            holder.itemView.setPadding(0, statusHeight, 0, 0);
+//        }
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

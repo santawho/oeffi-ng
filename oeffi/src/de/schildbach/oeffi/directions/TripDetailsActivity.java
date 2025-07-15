@@ -447,10 +447,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
         addActionBarButtons();
 
-        if (isTaskRoot())
-            initNavigation();
-        else
-            hideNavigation();
+//        if (isTaskRoot())
+//            initNavigation();
+//        else
+//            hideNavigation();
 
         findViewById(R.id.directions_trip_details_not_feasible).setVisibility(tripRenderer.isFeasible() ? View.GONE : View.VISIBLE);
 

@@ -19,7 +19,24 @@
     <string name="user_interface_mainmenu_shareapp_enabled_title">Show \"Share App\" item in main menu</string>
 
     <string name="user_interface_voice_control_category_title">Voice Control</string>
-    <string name="user_interface_voice_control_enabled_title">Use voice control</string>
+    <string name="user_interface_voice_control_mode_title">How to start voice control …</string>
+    <string-array name="user_interface_voice_control_values" translatable="false">
+        <item>off</item>
+        <item>always</item>
+        <item>toggle</item>
+        <item>trigger</item>
+        <item>hidden</item>
+    </string-array>
+    <string-array name="user_interface_voice_control_entries">
+        <item>do not listen, voice control is off</item>
+        <item>always listen immediately when opening the main menu</item>
+        <item>show toggle in main menu</item>
+        <item>show start button in main menu</item>
+        <item>hide voice input, voice control is off</item>
+    </string-array>
+    <string name="user_interface_voice_control_toggle_on_title">Listening for voice commands</string>
+    <string name="user_interface_voice_control_toggle_off_title">Not listening for voice commands</string>
+    <string name="user_interface_voice_control_trigger_title">Start voice input</string>
     <string name="user_interface_voice_control_help_short_text">When <b>opening the main menu</b>,
         the app will listen for your voice input.
         <u>Tap here to show more …</u>

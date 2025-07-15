@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <ListPreference
         android:enabled="false"
@@ -21,10 +21,13 @@
             android:key="user_interface_voice_control_help"
             android:summary="@string/user_interface_voice_control_help_short_text" />
 
-        <CheckBoxPreference
-            android:key="user_interface_voice_control_enabled"
-            android:defaultValue="false"
-            android:title="@string/user_interface_voice_control_enabled_title" />
+        <ListPreference
+            android:key="user_interface_voice_control_mode"
+            android:defaultValue="off"
+            android:title="@string/user_interface_voice_control_mode_title"
+            android:summary="%s"
+            android:entries="@array/user_interface_voice_control_entries"
+            android:entryValues="@array/user_interface_voice_control_values" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/user_interface_location_selector_category_title">
