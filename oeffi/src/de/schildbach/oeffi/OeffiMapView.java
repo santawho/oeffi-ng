@@ -55,6 +55,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class OeffiMapView extends MapView {
+    public static final String PREF_KEY_MAP_TILE_RESOLUTION = "user_interface_map_tile_resolution";
+
     private ZoomControls zoomControls = null;
     private FromViaToAware fromViaToAware = null;
     private TripAware tripAware = null;
@@ -105,7 +107,14 @@ public class OeffiMapView extends MapView {
 
         setBuiltInZoomControls(false);
         setMultiTouchControls(true);
+
+        final float scaleRange = 2.0f;
+        final int mapTileResolutionPref = Application.getInstance().getSharedPreferences().getInt(PREF_KEY_MAP_TILE_RESOLUTION, 100);
+        final float mapTileResolution = (float) (mapTileResolutionPref - 100) / 100f * scaleRange;
+        final float mapTileScaleFactor = mapTileResolution > 0 ? (1f / (1f + mapTileResolution)) : (1f - mapTileResolution);
+        setTilesScaleFactor(mapTileScaleFactor);
         setTilesScaledToDpi(true);
+
         getController().setZoom(Constants.INITIAL_MAP_ZOOM_LEVEL);
         setMinZoomLevel(Constants.MAP_MIN_ZOOM_LEVEL);
         setMaxZoomLevel(Constants.MAP_MAX_ZOOM_LEVEL);
