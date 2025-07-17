@@ -151,25 +151,28 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.annotation:annotation:1.9.1'
-    implementation 'androidx.recyclerview:recyclerview:1.3.2'
-    implementation 'androidx.coordinatorlayout:coordinatorlayout:1.2.0'
-    implementation 'androidx.drawerlayout:drawerlayout:1.2.0'
-    implementation 'androidx.core:core:1.15.0'
-    implementation 'androidx.activity:activity:1.9.3'
-    implementation 'androidx.core:core-splashscreen:1.0.1'
+    implementation libs.support.v13
+    implementation libs.preference.v7
+    implementation libs.jsr305
+    implementation libs.annotation
+    implementation libs.recyclerview
+    implementation libs.coordinatorlayout
+    implementation libs.drawerlayout
+    implementation libs.core
+    implementation libs.activity
+    implementation libs.core.splashscreen
     //noinspection GradleDependency
-    implementation 'com.squareup.okhttp3:okhttp:3.12.13'
+    implementation libs.okhttp
     //noinspection GradleDependency
-    implementation 'com.squareup.okhttp3:logging-interceptor:3.12.13'
-    implementation 'com.google.guava:guava:33.3.0-android'
-    implementation 'org.osmdroid:osmdroid-android:6.1.20'
+    implementation libs.okhttp3.logging.interceptor
+    implementation libs.guava
+    implementation libs.osmdroid.android
     //noinspection GradleDependency
-    implementation 'org.slf4j:slf4j-api:2.0.9'
-    implementation 'com.github.tony19:logback-android:3.0.0'
-    implementation 'org.msgpack:msgpack-core:0.9.9'
-    implementation 'com.daimajia.swipelayout:library:1.2.0'
-    testImplementation 'junit:junit:4.13.2'
+    implementation libs.slf4j.api
+    implementation libs.logback.android
+    implementation libs.msgpack.core
+    implementation libs.library
+    testImplementation libs.junit
 
 //    implementation libs.appcompat
 //    implementation libs.material
