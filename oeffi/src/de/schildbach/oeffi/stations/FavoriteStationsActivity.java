@@ -188,6 +188,9 @@ public class FavoriteStationsActivity extends OeffiActivity
         if (menuItemId == R.id.station_context_show_departures) {
             StationDetailsActivity.start(FavoriteStationsActivity.this, stationNetwork, station, departures);
             return true;
+        } else if (menuItemId == R.id.station_context_nearby_departures) {
+            StationsActivity.start(FavoriteStationsActivity.this, stationNetwork, station, null);
+            return true;
         } else if (menuItemId == R.id.station_context_remove_favorite) {
             adapter.removeEntry(adapterPosition);
             updateGUI();
