@@ -25,7 +25,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Typeface;
@@ -70,7 +69,6 @@ import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.LocationAware;
 import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiMainActivity;
-import de.schildbach.oeffi.OeffiMapView;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.StationsAware;
 import de.schildbach.oeffi.directions.DirectionsActivity;
@@ -89,7 +87,6 @@ import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GoogleMapsUtils;
 import de.schildbach.oeffi.util.LocationUriParser;
 import de.schildbach.oeffi.util.Toast;
-import de.schildbach.oeffi.util.ZoomControls;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.NetworkProvider.Capability;
@@ -159,7 +156,6 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private String accurateLocationProvider, lowPowerLocationProvider;
 
     private MyActionBar actionBar;
-    private OeffiMapView mapView;
     private RecyclerView stationList;
     private LinearLayoutManager stationListLayoutManager;
     private StationsAdapter stationListAdapter;
@@ -256,6 +252,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         });
         actionBar.addButton(R.drawable.ic_star_white_24dp, R.string.stations_options_favorites_title)
                 .setOnClickListener(view -> FavoriteStationsActivity.start(StationsActivity.this));
+        addShowMapButtonToActionBar();
         actionBar.addButton(R.drawable.ic_search_white_24dp, R.string.stations_action_search_title)
                 .setOnClickListener(v -> onSearchRequested());
         filterActionButton = actionBar.addButton(R.drawable.ic_filter_list_24dp, R.string.stations_filter_title);
@@ -285,7 +282,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                             }
 
                             stationListAdapter.notifyDataSetChanged();
-                            mapView.invalidate();
+                            getMapView().invalidate();
                         }
 
                         updateGUI();
@@ -316,9 +313,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         final Button missingCapabilityButton = findViewById(R.id.stations_network_missing_capability_button);
         missingCapabilityButton.setOnClickListener(selectNetworkListener);
 
-        mapView = setupMapView();
-        mapView.setStationsAware(this);
-        mapView.setLocationAware(this);
+        getMapView().setStationsAware(this);
+        getMapView().setLocationAware(this);
 
         connectivityWarningView = findViewById(R.id.stations_connectivity_warning_box);
         final View disclaimerView = findViewById(R.id.stations_disclaimer_group);
@@ -538,7 +534,6 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     @Override
     protected void onResume() {
         super.onResume();
-        mapView.onResume();
 
         postLoadNextVisible(0);
     }
@@ -553,7 +548,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         products.addAll(loadProductFilter());
 
         stationListAdapter.notifyDataSetChanged();
-        mapView.invalidate();
+        getMapView().invalidate();
         loading = true;
 
         updateDisclaimerSource(disclaimerSourceView, network.name(), null);
@@ -564,22 +559,14 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         handler.post(initStationsRunnable);
     }
 
-    @Override
-    public void onConfigurationChanged(final Configuration config) {
-        super.onConfigurationChanged(config);
-
-        updateFragments();
-    }
-
     protected void updateFragments() {
-        updateFragments(R.id.navigation_drawer_layout);
+        updateFragments(R.id.stations_content_layout);
     }
 
     @Override
     protected void onPause() {
         saveProductFilter(products);
 
-        mapView.onPause();
         super.onPause();
     }
 
@@ -686,7 +673,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         fixedLocationResolving = false;
 
         if (fixedLocation != null && fixedLocation.hasCoord())
-            mapView.animateToLocation(fixedLocation.getLatAsDouble(), fixedLocation.getLonAsDouble());
+            getMapView().animateToLocation(fixedLocation.getLatAsDouble(), fixedLocation.getLonAsDouble());
 
         findViewById(R.id.stations_location_clear).setOnClickListener(v -> {
             fixedLocation = null;
@@ -695,7 +682,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
             stationListAdapter.setBaseTime(presetTime);
 
             if (deviceLocation != null) {
-                mapView.animateToLocation(deviceLocation.getLatAsDouble(), deviceLocation.getLonAsDouble());
+                getMapView().animateToLocation(deviceLocation.getLatAsDouble(), deviceLocation.getLonAsDouble());
 
                 final float[] distanceBetweenResults = new float[2];
 
@@ -1066,11 +1053,11 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
         if (added || changed) {
             stationListAdapter.notifyDataSetChanged();
-            mapView.invalidate();
+            getMapView().invalidate();
         }
 
         if (added) {
-            handler.postDelayed(() -> mapView.zoomToStations(stations), 500);
+            handler.postDelayed(() -> getMapView().zoomToStations(stations), 500);
         }
 
         updateGUI();
@@ -1338,11 +1325,11 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
         // scroll map
         if (station != null && station.location.hasCoord())
-            mapView.zoomToStations(Arrays.asList(station));
+            getMapView().zoomToStations(Arrays.asList(station));
         else if (!stations.isEmpty())
-            mapView.zoomToStations(stations);
+            getMapView().zoomToStations(stations);
         else if (station == null && deviceLocation != null)
-            mapView.getController()
+            getMapView().getController()
                     .animateTo(new GeoPoint(deviceLocation.getLatAsDouble(), deviceLocation.getLonAsDouble()));
 
         postLoadNextVisible(0);

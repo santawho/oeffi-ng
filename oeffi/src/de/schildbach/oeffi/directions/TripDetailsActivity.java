@@ -76,7 +76,6 @@ import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.LocationAware;
 import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiActivity;
-import de.schildbach.oeffi.OeffiMapView;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.TripAware;
 import de.schildbach.oeffi.util.TimeSpec;
@@ -235,7 +234,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private boolean showNextEventWhenLocked = true;
 
     private ViewGroup legsGroup;
-    private OeffiMapView mapView;
     private ToggleImageButton trackButton;
 
     protected NetworkId network;
@@ -351,10 +349,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 locationManager.removeUpdates(TripDetailsActivity.this);
                 location = null;
 
-                mapView.setLocationAware(null);
+                getMapView().setLocationAware(null);
             }
 
-            mapView.zoomToAll();
+            getMapView().zoomToAll();
             updateGUI();
         });
 
@@ -436,11 +434,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
         addActionBarButtons();
 
-//        if (isTaskRoot())
-//            initNavigation();
-//        else
-//            hideNavigation();
-
         findViewById(R.id.directions_trip_details_not_feasible).setVisibility(tripRenderer.isFeasible() ? View.GONE : View.VISIBLE);
 
         legsGroup = findViewById(R.id.directions_trip_details_legs_group);
@@ -471,15 +464,14 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final TextView disclaimerSourceView = findViewById(R.id.directions_trip_details_disclaimer_source);
         updateDisclaimerSource(disclaimerSourceView, network.name(), null);
 
-        mapView = setupMapView();
-        mapView.setTripAware(new TripAware() {
+        getMapView().setTripAware(new TripAware() {
             public Trip getTrip() {
                 return tripRenderer.trip;
             }
 
             public void selectLeg(final int partIndex) {
                 selectedLegIndex = partIndex;
-                mapView.zoomToAll();
+                getMapView().zoomToAll();
             }
 
             public boolean hasSelection() {
@@ -559,14 +551,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         super.onResume();
         isPaused = false;
         checkAutoRefresh();
-        mapView.onResume();
         updateGUI();
     }
 
     @Override
     protected void onPause() {
         isPaused = true;
-        mapView.onPause();
         super.onPause();
     }
 
@@ -626,7 +616,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 location = LocationHelper.locationToPoint(lastKnownLocation);
             else
                 location = null;
-            mapView.setLocationAware(TripDetailsActivity.this);
+            getMapView().setLocationAware(TripDetailsActivity.this);
         }
     }
 
@@ -660,7 +650,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         final String newProvider = requestLocationUpdates();
         if (newProvider == null)
-            mapView.setLocationAware(null);
+            getMapView().setLocationAware(null);
     }
 
     public void onStatusChanged(final String provider, final int status, final Bundle extras) {

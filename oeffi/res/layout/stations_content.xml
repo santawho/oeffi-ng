@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.drawerlayout.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/navigation_drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:baselineAligned="false"
-    android:orientation="horizontal">
+    android:elevation="@dimen/elevation_content">
 
-    <androidx.drawerlayout.widget.DrawerLayout
-        android:id="@+id/navigation_drawer_layout"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:elevation="@dimen/elevation_content">
+        android:baselineAligned="false"
+        android:orientation="horizontal">
 
         <LinearLayout
+            android:id="@+id/stations_content_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
@@ -399,9 +400,8 @@
             </FrameLayout>
         </LinearLayout>
 
-        <include layout="@layout/navigation_drawer" />
-    </androidx.drawerlayout.widget.DrawerLayout>
+        <include layout="@layout/map_frame" />
+    </LinearLayout>
 
-    <include layout="@layout/map_frame" />
-
-</LinearLayout>
+    <include layout="@layout/navigation_drawer" />
+</androidx.drawerlayout.widget.DrawerLayout>

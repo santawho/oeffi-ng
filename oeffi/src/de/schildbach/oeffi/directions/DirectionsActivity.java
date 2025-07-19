@@ -171,7 +171,6 @@ public class DirectionsActivity extends OeffiMainActivity implements
     private View viewQueryHistoryEmpty;
     private View viewQueryMissingCapability;
     private TextView connectivityWarningView;
-    private OeffiMapView mapView;
 
     private TimeSpec time = null;
     private TripsOverviewActivity.RenderConfig renderConfig;
@@ -395,6 +394,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         final MyActionBar actionBar = getMyActionBar();
         setPrimaryColor(renderConfig.actionBarColor > 0 ? renderConfig.actionBarColor : R.color.bg_action_bar_directions);
         actionBar.setPrimaryTitle(R.string.directions_activity_title);
+        addShowMapButtonToActionBar();
         actionBar.setTitlesOnClickListener(v -> NetworkPickerActivity.start(DirectionsActivity.this));
         buttonExpand = actionBar.addToggleButton(R.drawable.ic_expand_white_24dp,
                 R.string.directions_action_expand_title);
@@ -585,8 +585,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         locationSelector.setup(this, prefs);
         locationSelector.setNetwork(network);
 
-        mapView = setupMapView();
-        mapView.getOverlays().add(new Overlay() {
+        getMapView().getOverlays().add(new Overlay() {
             private Location pinLocation;
             private View pinView;
 
@@ -790,7 +789,6 @@ public class DirectionsActivity extends OeffiMainActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        mapView.onResume();
 
         boolean haveNonDefaultProducts = initProductToggles();
 
@@ -889,7 +887,6 @@ public class DirectionsActivity extends OeffiMainActivity implements
             tickReceiver = null;
         }
 
-        mapView.onPause();
         super.onPause();
     }
 
@@ -915,13 +912,6 @@ public class DirectionsActivity extends OeffiMainActivity implements
     }
 
     @Override
-    public void onConfigurationChanged(final Configuration config) {
-        super.onConfigurationChanged(config);
-
-        updateFragments();
-    }
-
-    @Override
     public void onBackPressed() {
         if (isNavigationOpen())
             closeNavigation();
@@ -939,7 +929,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
     }
 
     protected void updateFragments() {
-        updateFragments(R.id.navigation_drawer_layout);
+        updateFragments(R.id.directions_content_layout);
     }
 
     private void updateGUI() {
@@ -1165,6 +1155,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
     }
 
     private void updateMap() {
+        final OeffiMapView mapView = getMapView();
         mapView.removeAllViews();
         mapView.setFromViaToAware(new FromViaToAware() {
             public Point getFrom() {

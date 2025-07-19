@@ -153,7 +153,6 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
     private DeparturesAdapter listAdapter;
     private TextView resultStatusView;
     private TextView disclaimerSourceView;
-    private OeffiMapView mapView;
     private boolean hideCancelledDepartures;
 
     private BroadcastReceiver tickReceiver;
@@ -193,6 +192,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             autoRefreshDisabled = false;
             load(null, false);
         });
+        addShowMapButtonToActionBar();
         favoriteButton = actionBar.addToggleButton(R.drawable.ic_star_24dp,
                 R.string.stations_station_details_action_favorite_title);
         favoriteButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -244,8 +244,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             return windowInsets;
         });
 
-        mapView = setupMapView();
-        mapView.setStationsAware(this);
+        getMapView().setStationsAware(this);
 
         resultStatusView = findViewById(R.id.stations_station_details_result_status);
 
@@ -309,7 +308,6 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
     @Override
     protected void onResume() {
         super.onResume();
-        mapView.onResume();
 
         final JourneyRef journeyRef = presetJourneyRef;
         presetJourneyRef = null;
@@ -319,12 +317,6 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                     handler, backgroundHandler,
                     network, journeyRef, selectedStation, null);
         }
-    }
-
-    @Override
-    protected void onPause() {
-        mapView.onPause();
-        super.onPause();
     }
 
     @Override
@@ -539,7 +531,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         selectedFavState = FavoriteStationsProvider.favState(getContentResolver(), selectedNetwork, selectedStation);
 
         if (selectedStation.hasCoord())
-            mapView.getController()
+            getMapView().getController()
                     .animateTo(new GeoPoint(selectedStation.getLatAsDouble(), selectedStation.getLonAsDouble()));
 
         updateGUI();

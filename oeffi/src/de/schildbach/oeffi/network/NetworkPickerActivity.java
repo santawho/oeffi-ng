@@ -87,7 +87,6 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
     private MyActionBar actionBar;
     private RecyclerView listView;
     private NetworksAdapter listAdapter;
-    private OeffiMapView mapView;
 
     private final List<NetworkId> lastNetworks = new LinkedList<>();
 
@@ -133,6 +132,7 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
         actionBar = findViewById(R.id.action_bar);
         setPrimaryColor(R.color.bg_action_bar);
         actionBar.setPrimaryTitle(getTitle());
+        addShowMapButtonToActionBar();
 
         listView = findViewById(android.R.id.list);
         listView.setLayoutManager(new LinearLayoutManager(this));
@@ -146,8 +146,6 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
             return windowInsets;
         });
 
-        mapView = setupMapView();
-
         if (network != null) {
             findViewById(R.id.network_picker_firsttime_message).setVisibility(View.GONE);
             actionBar.setBack(v -> finish());
@@ -157,14 +155,14 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
 
                     @Override
                     protected void onResult(final Point[] area) {
-                        mapView.setAreaAware(new AreaAware() {
+                        getMapView().setAreaAware(new AreaAware() {
                             final Point[] myArea = area != null && area.length > 1 ? area : null;
 
                             public Point[] getArea() {
                                 return myArea;
                             }
                         });
-                        mapView.setLocationAware(new LocationAware() {
+                        getMapView().setLocationAware(new LocationAware() {
                             final Location referenceLocation = area != null && area.length == 1
                                     ? Location.coord(area[0]) : null;
 
@@ -181,7 +179,7 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
                             }
                         });
 
-                        mapView.zoomToAll();
+                        getMapView().zoomToAll();
                     }
                 });
             }
@@ -203,18 +201,6 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
 
         updateFragments();
         maybeStartLocation();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mapView.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        mapView.onPause();
-        super.onPause();
     }
 
     @Override
@@ -263,7 +249,7 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
 
         deviceLocation = here;
 
-        mapView.animateToLocation(here.getLatAsDouble(), here.getLonAsDouble());
+        getMapView().animateToLocation(here.getLatAsDouble(), here.getLonAsDouble());
 
         parseIndex();
         updateGUI();
@@ -334,7 +320,7 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
 
     private void updateGUI() {
         listAdapter.notifyDataSetChanged();
-        mapView.invalidate();
+        getMapView().invalidate();
     }
 
     private void parseIndex() {

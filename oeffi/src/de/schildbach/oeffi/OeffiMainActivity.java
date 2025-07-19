@@ -103,13 +103,6 @@ public abstract class OeffiMainActivity extends OeffiActivity {
     }
 
     @Override
-    public void onConfigurationChanged(final Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-
-        updateNavigation();
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
         if (stillCheckForUpdate) {

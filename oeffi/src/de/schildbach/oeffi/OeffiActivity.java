@@ -110,6 +110,7 @@ public abstract class OeffiActivity extends ComponentActivity {
 
     protected boolean isPortrait;
     private boolean mapEnabled = false;
+    private OeffiMapView mapView;
     private DrawerLayout navigationDrawerLayout;
     private MenuProvider navigationDrawerMenuProvider;
     private View navigationDrawerFooterView;
@@ -167,11 +168,7 @@ public abstract class OeffiActivity extends ComponentActivity {
         super.setContentView(layoutResID);
 
         final View contentView = findViewById(android.R.id.content);
-        final View mapFrame = contentView.findViewById(R.id.map_frame);
-        if (mapFrame != null) {
-            final LinearLayout mapFrameContainer = (LinearLayout) mapFrame.getParent();
-            mapFrameContainer.setOrientation(isPortrait ? LinearLayout.VERTICAL : LinearLayout.HORIZONTAL);
-        }
+        setupMapView(contentView);
 
         // chance to perform general setup
         if (showNavigation)
@@ -183,16 +180,28 @@ public abstract class OeffiActivity extends ComponentActivity {
     }
 
     @Override
+    public void onConfigurationChanged(final Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        updateFragments();
+        updateNavigation();
+    }
+
+    @Override
     protected void onResume() {
         checkChangeNetwork();
         updateNavigation();
 
         super.onResume();
+        if (mapView != null)
+            mapView.onResume();
     }
 
     @Override
     protected void onPause() {
         savedProducts = loadProductFilter();
+        if (mapView != null)
+            mapView.onPause();
         super.onPause();
     }
 
@@ -554,37 +563,86 @@ public abstract class OeffiActivity extends ComponentActivity {
         updateFragments(listFrameResId, R.id.map_frame);
     }
 
+    protected OeffiMapView getMapView() {
+        if (mapView == null)
+            mapView = findViewById(R.id.map_view);
+
+        return mapView;
+    }
+
     protected void updateFragments(final int listFrameResId, final int mapFrameResId) {
         final Resources res = getResources();
 
         final View listFrame = findViewById(listFrameResId);
         final boolean listShow = res.getBoolean(R.bool.layout_list_show);
-        listFrame.setVisibility(isInMultiWindowMode() || listShow ? View.VISIBLE : View.GONE);
+        ViewUtils.setVisibility(listFrame, isInMultiWindowMode() || listShow);
 
+        final boolean mapShow;
         final View mapFrame = findViewById(mapFrameResId);
         if (mapFrame != null) {
-            boolean mapShow = !isInMultiWindowMode() && isMapEnabled(res);
-            mapFrame.setVisibility(mapShow ? View.VISIBLE : View.GONE);
+            mapShow = !isInMultiWindowMode() && isMapEnabled(res);
+            ViewUtils.setVisibility(mapFrame, mapShow);
+        } else {
+            mapShow = false;
+        }
 
-            ViewParent container = mapFrame.getParent();
-            final boolean isVertical = (container instanceof LinearLayout
-                    && ((LinearLayout) container).getOrientation() == LinearLayout.VERTICAL);
-
-            if (isVertical) {
-                listFrame.getLayoutParams().height = listShow && mapShow
-                        ? res.getDimensionPixelSize(R.dimen.layout_list_height)
-                        : LinearLayout.LayoutParams.MATCH_PARENT;
-            } else {
-                listFrame.getLayoutParams().width = listShow && mapShow
-                        ? res.getDimensionPixelSize(R.dimen.layout_list_width)
-                        : LinearLayout.LayoutParams.MATCH_PARENT;
-            }
+        if (isPortrait) {
+            listFrame.getLayoutParams().height = listShow && mapShow
+                    ? res.getDimensionPixelSize(R.dimen.layout_list_height)
+                    : LinearLayout.LayoutParams.MATCH_PARENT;
+        } else {
+            listFrame.getLayoutParams().width = listShow && mapShow
+                    ? res.getDimensionPixelSize(R.dimen.layout_list_width)
+                    : LinearLayout.LayoutParams.MATCH_PARENT;
         }
 
         final ViewGroup navigationDrawer = findViewById(R.id.navigation_drawer_layout);
         if (navigationDrawer != null) {
             final View child = navigationDrawer.getChildAt(1);
             child.getLayoutParams().width = res.getDimensionPixelSize(R.dimen.layout_navigation_drawer_width);
+        }
+    }
+
+    private void setupMapView(final View contentView) {
+        final View mapFrame = contentView.findViewById(R.id.map_frame);
+        if (mapFrame == null)
+            return;
+
+        mapView = findViewById(R.id.map_view);
+        final LinearLayout mapFrameContainer = (LinearLayout) mapFrame.getParent();
+        mapFrameContainer.setOrientation(isPortrait ? LinearLayout.VERTICAL : LinearLayout.HORIZONTAL);
+
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            android.location.Location location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+            if (location != null)
+                mapView.animateToLocation(location.getLatitude(), location.getLongitude());
+        }
+
+        final TextView mapDisclaimerView = findViewById(R.id.map_disclaimer);
+        mapDisclaimerView.setText(mapView.getTileProvider().getTileSource().getCopyrightNotice());
+        ViewCompat.setOnApplyWindowInsetsListener(mapDisclaimerView, (v, windowInsets) -> {
+            final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(0, 0, 0, insets.bottom);
+            return windowInsets;
+        });
+
+        final ZoomControls zoom = findViewById(R.id.map_zoom);
+        ViewCompat.setOnApplyWindowInsetsListener(zoom, (v, windowInsets) -> {
+            final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(0, 0, 0, insets.bottom);
+            return windowInsets;
+        });
+        mapView.setZoomControls(zoom);
+    }
+
+    protected void addShowMapButtonToActionBar() {
+        if (isPortrait && getResources().getBoolean(R.bool.layout_map_show_toggleable)) {
+            getMyActionBar().addButton(R.drawable.ic_map_white_24dp, R.string.directions_trip_details_action_showmap_title)
+                    .setOnClickListener(v -> {
+                        mapEnabled = !mapEnabled;
+                        updateFragments();
+                    });
         }
     }
 
@@ -777,44 +835,5 @@ public abstract class OeffiActivity extends ComponentActivity {
 
     public boolean isDarkMode() {
         return Application.getInstance().isDarkMode();
-    }
-
-    protected OeffiMapView setupMapView() {
-        final OeffiMapView mapView = findViewById(R.id.map_view);
-
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            android.location.Location location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
-            if (location != null)
-                mapView.animateToLocation(location.getLatitude(), location.getLongitude());
-        }
-
-        final TextView mapDisclaimerView = findViewById(R.id.map_disclaimer);
-        mapDisclaimerView.setText(mapView.getTileProvider().getTileSource().getCopyrightNotice());
-        ViewCompat.setOnApplyWindowInsetsListener(mapDisclaimerView, (v, windowInsets) -> {
-            final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(0, 0, 0, insets.bottom);
-            return windowInsets;
-        });
-
-        final ZoomControls zoom = findViewById(R.id.map_zoom);
-        ViewCompat.setOnApplyWindowInsetsListener(zoom, (v, windowInsets) -> {
-            final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(0, 0, 0, insets.bottom);
-            return windowInsets;
-        });
-        mapView.setZoomControls(zoom);
-
-        return mapView;
-    }
-
-    protected void addShowMapButtonToActionBar() {
-        if (isPortrait && getResources().getBoolean(R.bool.layout_map_show_toggleable)) {
-            getMyActionBar().addButton(R.drawable.ic_map_white_24dp, R.string.directions_trip_details_action_showmap_title)
-                    .setOnClickListener(v -> {
-                        mapEnabled = !mapEnabled;
-                        updateFragments();
-                    });
-        }
     }
 }
