@@ -75,7 +75,7 @@
     <string name="user_interface_location_selector_longholdmenu_summary">Langes Halten in der schnellen Ortswahl öffnet Kontextmenü.\nHinweis: du kannst jederzeit mit 2 Fingern tippen.</string>
 
     <string name="user_interface_voice_control_is_enabled">Sag mir ein Kommando…</string>
-    <string name="user_interface_voice_control_not_enabled">Sprachsteuerung is ausgeschaltet!</string>
+    <string name="user_interface_voice_control_not_enabled">Sprachsteuerung ist ausgeschaltet!</string>
     <string name="user_interface_voice_control_error">Sprachsteuerung, Fehler. (%s)</string>
 
     <string name="user_interface_developer_options_category_title">Entwickler-Optionen</string>
