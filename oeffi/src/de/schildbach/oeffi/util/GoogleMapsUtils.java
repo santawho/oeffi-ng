@@ -17,20 +17,34 @@
 
 package de.schildbach.oeffi.util;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.net.Uri;
+import android.webkit.MimeTypeMap;
 
 import com.google.common.base.Charsets;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
+import org.xmlpull.v1.XmlSerializer;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Locale;
 
+import de.schildbach.oeffi.Application;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.Point;
+import de.schildbach.pte.dto.Stop;
+import de.schildbach.pte.dto.Trip;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -98,5 +112,95 @@ public class GoogleMapsUtils {
         } catch (NumberFormatException nfe) {
             return null;
         }
+    }
+
+    public static Intent getOpenKmlIntent(final File kmlFile) {
+        final Uri contentUri = Application.getInstance().getSharedFileContentUri(kmlFile);
+        String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension("kml");
+        return new Intent(Intent.ACTION_VIEW)
+                .setDataAndType(contentUri, mimeType)
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+    }
+
+    public static File writeTripAsKml(final Trip trip, final File kmlFile) throws IOException, XmlPullParserException {
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        final XmlSerializer xs = XmlPullParserFactory.newInstance().newSerializer();
+        xs.setOutput(bos, StandardCharsets.UTF_8.name());
+        xs.startDocument(null, null);
+
+        xs.startTag(null, "kml");
+        xs.startTag(null, "Document");
+
+        xmlTextNode(xs, "name", "kmlFile");
+
+        xs.startTag(null, "Style");
+        xs.attribute(null, "id", "tripPoly");
+        xs.startTag(null, "LineStyle");
+        xmlTextNode(xs, "width", "10");
+        xmlTextNode(xs, "color", "7dff00ff");
+        xmlTextNode(xs, "colorMode", "random");
+        xs.endTag(null, "LineStyle");
+        xs.endTag(null, "Style");
+
+        xs.startTag(null, "Folder");
+        xmlTextNode(xs, "name", "tripName");
+        xmlTextNode(xs, "visibility", "1");
+        xmlTextNode(xs, "description", "trip description");
+
+        xs.startTag(null, "Placemark");
+        xmlTextNode(xs, "name", "place name");
+        xmlTextNode(xs, "visibility", "1");
+        xmlTextNode(xs, "styleUrl", "#tripPoly");
+
+        xs.startTag(null, "LineString");
+        xmlTextNode(xs, "extrude", "1");
+        xmlTextNode(xs, "altitudeMode", "relativeToGround");
+        xs.startTag(null, "coordinates");
+
+        for (Trip.Leg iLeg : trip.legs) {
+            if (!(iLeg instanceof Trip.Public))
+                continue;
+
+            final Trip.Public leg = (Trip.Public) iLeg;
+            xs.text(kmlLocationForStop(leg.departureStop));
+            final List<Stop> intermediateStops = leg.intermediateStops;
+            if (intermediateStops != null)
+                for (Stop stop : intermediateStops)
+                    xs.text(kmlLocationForStop(stop));
+            xs.text(kmlLocationForStop(leg.arrivalStop));
+        }
+
+        xs.endTag(null, "coordinates");
+        xs.endTag(null, "LineString");
+        xs.endTag(null, "Placemark");
+        xs.endTag(null, "Folder");
+
+        xs.endTag(null, "Document");
+        xs.endTag(null, "kml");
+
+        xs.endDocument();
+        xs.flush();
+        bos.close();
+
+        final String xmlString = bos.toString(StandardCharsets.UTF_8.name());
+
+        final FileOutputStream fos = new FileOutputStream(kmlFile);
+        fos.write(xmlString.getBytes(StandardCharsets.UTF_8));
+        fos.close();
+
+        return kmlFile;
+    }
+
+    private static void xmlTextNode(final XmlSerializer xs, final String name, final String value) throws IOException {
+        xs.startTag(null, name);
+        xs.text(value);
+        xs.endTag(null, name);
+    }
+
+    @SuppressLint("DefaultLocale")
+    private static String kmlLocationForStop(final Stop stop) {
+        final Location location = stop.location;
+        return String.format(Locale.US, "%f,%f,17\n", location.getLonAsDouble(), location.getLatAsDouble());
     }
 }

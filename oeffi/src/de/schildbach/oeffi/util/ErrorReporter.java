@@ -33,10 +33,11 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.StatFs;
 import androidx.core.app.ActivityManagerCompat;
-import androidx.core.content.FileProvider;
+
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 
+import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.URLs;
 import de.schildbach.pte.NetworkId;
@@ -204,27 +205,27 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
                 .append(System.getProperty("java.vm.version")).append("\n");
     }
 
-    private static void sendErrorMail(final Context context, final String errorContent) {
+    private static void sendErrorMail(final Application application, final String errorContent) {
         final Matcher m = Pattern.compile("Version: (.+?) ").matcher(errorContent);
         final String versionName = m.find() ? m.group(1) : "";
-        final String subject = buildSubject(context, R.string.error_reporter_crash_mail_subject, versionName);
-        send(context, subject, errorContent);
+        final String subject = buildSubject(application, R.string.error_reporter_crash_mail_subject, versionName);
+        send(application, subject, errorContent);
     }
 
-    public static void sendBugMail(final Context context, final PackageInfo packageInfo) {
-        final StringBuilder report = new StringBuilder(context.getString(R.string.error_reporter_questions));
+    public static void sendBugMail(final Application application, final PackageInfo packageInfo) {
+        final StringBuilder report = new StringBuilder(application.getString(R.string.error_reporter_questions));
         report.append("\n=== collected at reporting time ===\n\n");
-        appendReport(report, context);
+        appendReport(report, application);
 
         // append contents of directories
-        report.append("\nContents of FilesDir " + context.getFilesDir() + ":\n");
-        appendReport(report, context.getFilesDir(), 0);
+        report.append("\nContents of FilesDir " + application.getFilesDir() + ":\n");
+        appendReport(report, application.getFilesDir(), 0);
 
         report.append("\n\n");
-        report.append(context.getString(R.string.error_reporter_footer));
+        report.append(application.getString(R.string.error_reporter_footer));
 
-        final String subject = buildSubject(context, R.string.error_reporter_bug_mail_subject, packageInfo.versionName);
-        send(context, subject, report);
+        final String subject = buildSubject(application, R.string.error_reporter_bug_mail_subject, packageInfo.versionName);
+        send(application, subject, report);
     }
 
     private static String buildSubject(final Context context, final int prefixResId, final String versionName) {
@@ -242,14 +243,14 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
         return subject.toString();
     }
 
-    private static void send(final Context context, final String subject, final CharSequence report) {
-        final File logDir = new File(context.getFilesDir(), "log");
+    private static void send(final Application application, final String subject, final CharSequence report) {
+        final File logDir = new File(application.getFilesDir(), "log");
         final ArrayList<Uri> attachments = new ArrayList<>();
 
         if (logDir.exists())
             for (final File logFile : logDir.listFiles())
                 if (logFile.isFile() && logFile.length() > 0)
-                    attachments.add(FileProvider.getUriForFile(context, context.getPackageName(), logFile));
+                    attachments.add(application.getSharedFileContentUri(logFile));
 
         final Intent intent;
         if (attachments.size() == 0) {
@@ -261,15 +262,15 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
             intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, attachments);
         }
 
-        final String mailAddress = context.getString(R.string.error_reporter_mail_address);
+        final String mailAddress = application.getString(R.string.error_reporter_mail_address);
         intent.putExtra(Intent.EXTRA_EMAIL, new String[] {mailAddress});
         intent.putExtra(Intent.EXTRA_TEXT, report.toString());
         intent.putExtra(Intent.EXTRA_SUBJECT, subject);
 
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-        context.startActivity(
-                Intent.createChooser(intent, context.getString(R.string.error_reporter_mail_intent_chooser_title)));
+        application.startActivity(
+                Intent.createChooser(intent, application.getString(R.string.error_reporter_mail_intent_chooser_title)));
     }
 
     private void saveAsFile(final String errorContent) {
@@ -282,7 +283,7 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
         }
     }
 
-    private void sendError(final Context context) {
+    private void sendError(final Application application) {
         try {
             final StringBuilder errorText = new StringBuilder();
 
@@ -293,9 +294,9 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
             input.close();
 
             errorText.append("\n\n");
-            errorText.append(context.getString(R.string.error_reporter_footer));
+            errorText.append(application.getString(R.string.error_reporter_footer));
 
-            sendErrorMail(context, errorText.toString());
+            sendErrorMail(application, errorText.toString());
         } catch (Exception x) {
             x.printStackTrace();
         }
@@ -317,19 +318,19 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
 
     private final static Pattern PATTERN_VERSION = Pattern.compile("<dt id=\"(\\d+)\">([^<]*)</dt>");
 
-    public void check(final Context context, final int applicationVersionCode, final OkHttpClient okHttpClient) {
+    public void check(final Application application, final int applicationVersionCode, final OkHttpClient okHttpClient) {
         if (Debug.isDebuggerConnected())
             return;
         if (!stackTraceFile.exists())
             return;
 
-        String changeLogUrl = context.getString(R.string.about_changelog_url);
+        String changeLogUrl = application.getString(R.string.about_changelog_url);
         if (!changeLogUrl.isEmpty()) {
-            dialog(context, null);
+            dialog(application, null);
             return;
         }
 
-        final HttpUrl.Builder url = HttpUrl.parse(context.getString(R.string.about_changelog_summary)).newBuilder();
+        final HttpUrl.Builder url = HttpUrl.parse(application.getString(R.string.about_changelog_summary)).newBuilder();
         url.addQueryParameter("version", Integer.toString(applicationVersionCode));
         url.addQueryParameter("sdk", Integer.toString(Build.VERSION.SDK_INT));
         url.addQueryParameter("check", null);
@@ -358,32 +359,32 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
             }
 
             private void callback(final String newVersion) {
-                callbackHandler.post(() -> dialog(context, newVersion));
+                callbackHandler.post(() -> dialog(application, newVersion));
             }
         });
     }
 
-    private void dialog(final Context context, final String newVersion) {
-        final DialogBuilder builder = DialogBuilder.warn(context, R.string.alert_crash_report_title);
-        builder.setMessage(newVersion != null ? context.getString(R.string.alert_crash_report_new_version, newVersion)
-                : context.getString(R.string.alert_crash_report_message));
+    private void dialog(final Application application, final String newVersion) {
+        final DialogBuilder builder = DialogBuilder.warn(application, R.string.alert_crash_report_title);
+        builder.setMessage(newVersion != null ? application.getString(R.string.alert_crash_report_new_version, newVersion)
+                : application.getString(R.string.alert_crash_report_message));
         builder.setNegativeButton(R.string.alert_crash_report_negative, (dialog, which) -> stackTraceFile.delete());
         if (newVersion != null) {
-            final Installer installer = Installer.from(context);
+            final Installer installer = Installer.from(application);
             if (installer != null) {
                 builder.setNeutralButton(installer.displayName, (dialog, which) -> {
                     stackTraceFile.delete();
-                    context.startActivity(new Intent(Intent.ACTION_VIEW, installer.appMarketUriFor(context)));
+                    application.startActivity(new Intent(Intent.ACTION_VIEW, installer.appMarketUriFor(application)));
                 });
             }
             builder.setPositiveButton(R.string.alert_crash_report_download, (dialog, which) -> {
                 stackTraceFile.delete();
-                context.startActivity(
+                application.startActivity(
                         new Intent(Intent.ACTION_VIEW, Uri.parse(URLs.getOeffiBaseUrl() + "download.html")));
             });
         } else {
             builder.setPositiveButton(R.string.alert_crash_report_positive, (dialog, which) -> {
-                sendError(context);
+                sendError(application);
                 stackTraceFile.delete();
             });
         }

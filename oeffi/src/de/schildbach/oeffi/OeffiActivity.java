@@ -152,7 +152,7 @@ public abstract class OeffiActivity extends ComponentActivity {
         EdgeToEdge.enable(this, Constants.STATUS_BAR_STYLE);
         super.onCreate(savedInstanceState);
 
-        ErrorReporter.getInstance().check(this, applicationVersionCode(), application.okHttpClient());
+        ErrorReporter.getInstance().check(application, applicationVersionCode(), application.okHttpClient());
     }
 
     @Override
@@ -299,7 +299,7 @@ public abstract class OeffiActivity extends ComponentActivity {
                 }
 
                 if (itemId == R.id.global_options_report_bug) {
-                    ErrorReporter.sendBugMail(OeffiActivity.this, application.packageInfo());
+                    ErrorReporter.sendBugMail(application, application.packageInfo());
                     return true;
                 }
 

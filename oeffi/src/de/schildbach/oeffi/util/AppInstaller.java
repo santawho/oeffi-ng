@@ -7,8 +7,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 
-import androidx.core.content.FileProvider;
-
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -18,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -83,7 +80,7 @@ public class AppInstaller {
             log.info("downloading APK file for install from {}", apkUrl);
             final ProgressDialog progressDialog = new ProgressDialog(context);
             final HttpUrl remoteUrl = HttpUrl.parse(apkUrl);
-            final File localFile = new File(getShareDir(application), "install.apk");
+            final File localFile = new File(application.getShareDir(), "install.apk");
             if (localFile.exists())
                 localFile.delete();
             final Downloader downloader = new Downloader(application.getCacheDir());
@@ -126,21 +123,12 @@ public class AppInstaller {
             doneListener.accept(success);
     }
 
-    private File getShareDir(final Application application) throws IOException {
-        final File shareDir = new File(application.getFilesDir(), "share");
-
-        if (!shareDir.exists())
-            Files.createDirectory(shareDir.toPath());
-
-        return shareDir;
-    }
-
     private void installApk(final File apkFile) {
         final Application application = Application.getInstance();
         final String installerPackageName = getInstallerPackageName();
         log.info("installing APK file {} using installer {}", apkFile, installerPackageName);
 
-        final Uri contentUri = FileProvider.getUriForFile(application, application.getPackageName(), apkFile);
+        final Uri contentUri = application.getSharedFileContentUri(apkFile);
         context.startActivity(new Intent(Intent.ACTION_INSTALL_PACKAGE)
                 .setPackage(installerPackageName)
                 .setDataAndType(contentUri, "application/vnd.android.package-archive")

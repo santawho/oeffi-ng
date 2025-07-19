@@ -19,7 +19,6 @@ package de.schildbach.oeffi;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -30,11 +29,13 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.FileProvider;
 import androidx.core.content.pm.ShortcutInfoCompat;
 import androidx.core.content.pm.ShortcutManagerCompat;
 import androidx.core.graphics.drawable.IconCompat;
@@ -66,6 +67,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -123,6 +126,19 @@ public class Application extends android.app.Application {
                 return value;
         }
         return null;
+    }
+
+    public File getShareDir() throws IOException {
+        final File shareDir = new File(getFilesDir(), "share");
+
+        if (!shareDir.exists())
+            Files.createDirectory(shareDir.toPath());
+
+        return shareDir;
+    }
+
+    public Uri getSharedFileContentUri(final File file) {
+        return FileProvider.getUriForFile(this, getPackageName(), file);
     }
 
     public boolean isDeveloperElementsEnabled() {

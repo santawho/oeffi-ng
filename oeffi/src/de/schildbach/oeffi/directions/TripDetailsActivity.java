@@ -72,12 +72,14 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Supplier;
 
+import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.LocationAware;
 import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.TripAware;
+import de.schildbach.oeffi.util.GoogleMapsUtils;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.util.TimeSpec.DepArr;
 import de.schildbach.oeffi.directions.navigation.TripRenderer;
@@ -113,6 +115,7 @@ import org.msgpack.core.MessagePack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -405,6 +408,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                                 });
                             }
                             return true;
+                        } else if (itemId == R.id.directions_trip_details_action_open_external_maps_app) {
+                            intentSupplier = () -> showKmlInExternalMapsApp();
                         } else {
                             return false;
                         }
@@ -1887,6 +1892,18 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         intent.putExtra(CalendarContract.Events.ACCESS_LEVEL, CalendarContract.Events.ACCESS_DEFAULT);
         intent.putExtra(CalendarContract.Events.AVAILABILITY, CalendarContract.Events.AVAILABILITY_BUSY);
         return intent;
+    }
+
+    private Intent showKmlInExternalMapsApp() {
+        try {
+            final File kmlFile = new File(Application.getInstance().getShareDir(), "shareroute.kml");
+            GoogleMapsUtils.writeTripAsKml(tripRenderer.trip, kmlFile);
+            final Intent kmlIntent = GoogleMapsUtils.getOpenKmlIntent(kmlFile);
+            return Intent.createChooser(kmlIntent, "xxx");
+        } catch (Exception e) {
+            log.error("cannot create shared KML file", e);
+            return null;
+        }
     }
 
     private String tripToShortText(final Trip trip) {
