@@ -290,10 +290,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         setupFromTrip(baseTrip);
 
-        final View contentView = setContentView(
-                R.layout.directions_trip_details_content_portrait,
-                R.layout.directions_trip_details_content_landscape,
-                isTaskRoot());
+        final View contentView = setContentView(R.layout.directions_trip_details_content, isTaskRoot());
         ViewCompat.setOnApplyWindowInsetsListener(contentView, (v, windowInsets) -> {
             final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(insets.left, 0, insets.right, 0);

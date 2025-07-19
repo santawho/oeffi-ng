@@ -154,32 +154,32 @@ public abstract class OeffiActivity extends ComponentActivity {
         ErrorReporter.getInstance().check(this, applicationVersionCode(), application.okHttpClient());
     }
 
-    public void setContentView(final int portraitLayoutResID, final int landscapeLayoutResID) {
-        setContentView(portraitLayoutResID, landscapeLayoutResID, true);
-    }
-
-    public View setContentView(final int portraitLayoutResID, final int landscapeLayoutResID, final boolean showNavigation) {
-        isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
-        setContentView(isPortrait ? portraitLayoutResID : landscapeLayoutResID, showNavigation);
-        final View contentView = findViewById(android.R.id.content);
-        return contentView;
-    }
-
     @Override
     public void setContentView(final int layoutResID) {
         setContentView(layoutResID, true);
     }
 
-    public void setContentView(final int layoutResID, final boolean showNavigation) {
+    public View setContentView(final int layoutResID, final boolean showNavigation) {
+        isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+
         // called in the final phase of onCreate by sub-classes
         navigationDrawerLayout = null;
         super.setContentView(layoutResID);
+
+        final View contentView = findViewById(android.R.id.content);
+        final View mapFrame = contentView.findViewById(R.id.map_frame);
+        if (mapFrame != null) {
+            final LinearLayout mapFrameContainer = (LinearLayout) mapFrame.getParent();
+            mapFrameContainer.setOrientation(isPortrait ? LinearLayout.VERTICAL : LinearLayout.HORIZONTAL);
+        }
 
         // chance to perform general setup
         if (showNavigation)
             initNavigation();
         else
             hideNavigation();
+
+        return contentView;
     }
 
     @Override
