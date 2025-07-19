@@ -1763,7 +1763,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             contextMenu.setOnMenuItemClickListener(item -> {
                 final int itemId = item.getItemId();
                 if (itemId == R.id.station_context_show_departures) {
-                    StationDetailsActivity.start(TripDetailsActivity.this, network, location, time);
+                    StationDetailsActivity.start(TripDetailsActivity.this, network, location, time, null);
                     return true;
                 } else if (itemId == R.id.station_context_nearby_departures) {
                     StationsActivity.start(TripDetailsActivity.this, network, location, time);
@@ -1823,7 +1823,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 if (time == null)
                     time = stop.getDepartureTime(true);
                 if (menuItemId == R.id.station_context_show_departures) {
-                    StationDetailsActivity.start(TripDetailsActivity.this, network, stop.location, time);
+                    StationDetailsActivity.start(TripDetailsActivity.this, network, stop.location, time, null);
                     return true;
                 } else if (menuItemId == R.id.station_context_nearby_departures) {
                     StationsActivity.start(TripDetailsActivity.this, network, stop.location, time);

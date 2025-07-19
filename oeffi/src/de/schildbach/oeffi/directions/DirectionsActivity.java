@@ -1180,7 +1180,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
                             : new Date(time.timeInMillis());
 
             if (itemId == R.id.directions_location_selector_context_show_departures) {
-                StationDetailsActivity.start(this, network, location, departureDate);
+                StationDetailsActivity.start(this, network, location, departureDate, null);
             } else if (itemId == R.id.directions_location_selector_context_nearby_departures) {
                 StationsActivity.start(this, network, location, departureDate);
             }
@@ -1290,7 +1290,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             queryHistoryListAdapter.setIsFavorite(adapterPosition, false);
             return true;
         } else if (menuItemId == R.id.directions_query_history_location_context_details && menuItemLocation != null) {
-            StationDetailsActivity.start(this, network, menuItemLocation);
+            StationDetailsActivity.start(this, network, menuItemLocation, null, null);
             return true;
         } else if (menuItemId == R.id.directions_query_history_location_context_add_favorite
                 && menuItemLocation != null) {

@@ -159,7 +159,7 @@ public class PlanActivity extends ComponentActivity {
                     false, false, false);
             contextMenu.setOnMenuItemClickListener(item -> {
                 if (item.getItemId() == R.id.station_context_show_departures) {
-                    StationDetailsActivity.start(PlanActivity.this, selection.network, selection.location);
+                    StationDetailsActivity.start(PlanActivity.this, selection.network, selection.location, null, null);
                     return true;
                 } else {
                     return false;

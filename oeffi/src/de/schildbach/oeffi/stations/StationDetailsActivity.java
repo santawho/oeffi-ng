@@ -106,28 +106,11 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
     public static void start(
             final Context context, final NetworkId networkId,
-            final Location station, final Date presetTime) {
+            final Location station, final Date presetTime,
+            final List<Departure> departures) {
         final Intent intent = StationDetailsActivity.fillIntent(
                 new Intent(context, StationDetailsActivity.class),
                 networkId, station, presetTime);
-        context.startActivity(intent);
-    }
-
-    public static void start(
-            final Context context, final NetworkId networkId,
-            final Location station) {
-        final Intent intent = StationDetailsActivity.fillIntent(
-                new Intent(context, StationDetailsActivity.class),
-                networkId, station, null);
-        context.startActivity(intent);
-    }
-
-    public static void start(
-            final Context context, final NetworkId networkId,
-            final Location station, final List<Departure> departures) {
-        final Intent intent = StationDetailsActivity.fillIntent(
-                new Intent(context, StationDetailsActivity.class),
-                networkId, station, null);
         if (departures != null)
             intent.putExtra(StationDetailsActivity.INTENT_EXTRA_DEPARTURES, (Serializable) departures);
         context.startActivity(intent);
@@ -830,7 +813,8 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             final Location destination = departure.destination;
             if (destination != null) {
                 destinationView.setText(Constants.DESTINATION_ARROW_PREFIX + Formats.fullLocationNameIfDifferentPlace(destination, station));
-                itemView.setOnClickListener(destination.id != null ? v -> start(context, network, destination) : null);
+                itemView.setOnClickListener(destination.id == null ? null : v ->
+                        start(context, network, destination, null, null));
                 setStrikeThru(destinationView, cancelled);
             } else {
                 destinationView.setText(null);
