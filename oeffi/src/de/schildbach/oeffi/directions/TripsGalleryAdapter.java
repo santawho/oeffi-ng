@@ -598,7 +598,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
 //                            if (minutesFromRequestedTime > -10 && minutesFromRequestedTime < 30) {
                         final long minutesFromNow = (startTime.getTime() - now) / 60000;
                         if (minutesFromNow > -10 && minutesFromNow < 30) {
-                            startYabs = drawPosition(canvas, centerX, startYabs, height, -1, departurePosition.name);
+                            startYabs = drawPosition(canvas, centerX, startYabs, height, -1, departurePosition.toString());
                         }
                     }
                     startYabs = drawTime(canvas, centerX, startYabs, height, true, publicTimePaint, publicDepartureCancelled,
@@ -776,7 +776,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                             if (departurePosition != null) {
                                 final long minutesFromNow = (tDeparture - now) / 60000;
                                 if (minutesFromNow > -10 && minutesFromNow < 30) {
-                                    startYabs = drawPosition(canvas, centerX, startYabs, height, -1, departurePosition.name);
+                                    startYabs = drawPosition(canvas, centerX, startYabs, height, -1, departurePosition.toString());
                                 }
                             }
                             if (publicLeg != firstPublicLeg) {

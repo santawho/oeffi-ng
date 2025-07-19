@@ -533,9 +533,9 @@ public class TripRenderer {
         nextEventDepartureStop = depStop;
         nextEventStopChange = (arrStop != null && depStop != null) && !arrStop.location.id.equals(depStop.location.id);
         nextEventPositionsAvailable = arrPos != null || depPos != null;
-        nextEventArrivalPosName = arrPos != null ? Formats.makeBreakableStationName(arrPos.name) : null;
+        nextEventArrivalPosName = arrPos != null ? Formats.makeBreakableStationName(arrPos.toString()) : null;
         nextEventArrivalPosChanged = arrChanged;
-        nextEventDeparturePosName = depPos != null ? Formats.makeBreakableStationName(depPos.name) : null;
+        nextEventDeparturePosName = depPos != null ? Formats.makeBreakableStationName(depPos.toString()) : null;
         nextEventDeparturePosChanged = depChanged;
     }
 
