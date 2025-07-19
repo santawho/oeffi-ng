@@ -143,7 +143,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private final List<Station> stations = new ArrayList<>();
     private final Map<String, Station> stationsMap = new HashMap<>();
     private final Map<String, Integer> favorites = new HashMap<>();
-    private String selectedStationId;
+    private Station selectedStation;
     private Point deviceLocation;
     private Location fixedLocation;
     private boolean fixedLocationResolving;
@@ -1271,7 +1271,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
                 final Date requestedAt = station.requestedAt;
                 if ((requestedAt == null || now - requestedAt.getTime() > DateUtils.MINUTE_IN_MILLIS)) {
-                    if (selectedStationId != null && selectedStationId.equals(station.location.id))
+                    if (selectedStation != null && selectedStation.location.id.equals(station.location.id))
                         return station;
                 }
             }
@@ -1311,8 +1311,13 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         return favorites.get(stationId);
     }
 
+    @Override
+    protected void onMapSetVisible() {
+        selectStation(selectedStation);
+    }
+
     public final void selectStation(final Station station) {
-        selectedStationId = station != null ? station.location.id : null;
+        selectedStation = station;
         stationListAdapter.notifyDataSetChanged();
 
         // scroll list into view
@@ -1336,7 +1341,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     }
 
     public final boolean isSelectedStation(final String stationId) {
-        return selectedStationId != null && selectedStationId.equals(stationId);
+        return selectedStation != null && stationId != null && stationId.equals(selectedStation.location.id);
     }
 
     public final Point getDeviceLocation() {

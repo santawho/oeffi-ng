@@ -570,6 +570,9 @@ public abstract class OeffiActivity extends ComponentActivity {
         return mapView;
     }
 
+    protected void onMapSetVisible() {
+    }
+
     protected void updateFragments(final int listFrameResId, final int mapFrameResId) {
         final Resources res = getResources();
 
@@ -582,6 +585,7 @@ public abstract class OeffiActivity extends ComponentActivity {
         if (mapFrame != null) {
             mapShow = !isInMultiWindowMode() && isMapEnabled(res);
             ViewUtils.setVisibility(mapFrame, mapShow);
+            ViewUtils.setVisibility(mapView, mapShow);
         } else {
             mapShow = false;
         }
@@ -642,6 +646,8 @@ public abstract class OeffiActivity extends ComponentActivity {
                     .setOnClickListener(v -> {
                         mapEnabled = !mapEnabled;
                         updateFragments();
+                        if (mapEnabled)
+                            handler.post(this::onMapSetVisible);
                     });
         }
     }
@@ -736,7 +742,7 @@ public abstract class OeffiActivity extends ComponentActivity {
     }
 
     protected void checkChangeNetwork() {
-        boolean haveChanges = false;
+        final boolean haveChanges;
 
         final NetworkId newNetwork = prefsGetNetworkId();
         if (newNetwork != null && newNetwork != network) {

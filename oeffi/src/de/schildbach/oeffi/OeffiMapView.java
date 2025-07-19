@@ -35,6 +35,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 import de.schildbach.oeffi.stations.LineView;
 import de.schildbach.oeffi.stations.Station;
+import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.oeffi.util.ZoomControls;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.Point;
@@ -535,6 +536,9 @@ public class OeffiMapView extends MapView {
     }
 
     public void animateToLocation(final double lat, final double lon) {
+        if (!ViewUtils.isVisible(this))
+            return;
+
         if (lat == 0 && lon == 0)
             return;
 
@@ -549,6 +553,9 @@ public class OeffiMapView extends MapView {
     }
 
     public void zoomToAll() {
+        if (!ViewUtils.isVisible(this))
+            return;
+
         zoomLocked = true;
 
         final boolean hasLegSelection = tripAware != null && tripAware.hasSelection();
@@ -607,6 +614,9 @@ public class OeffiMapView extends MapView {
     }
 
     public void zoomToStations(final List<Station> stations) {
+        if (!ViewUtils.isVisible(this))
+            return;
+
         if (stations.isEmpty())
             return;
 
