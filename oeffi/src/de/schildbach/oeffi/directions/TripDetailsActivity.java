@@ -1261,10 +1261,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         // leg is now
         row.setBackgroundColor(colorLegIndividualNowBackground);
         progressView.setVisibility(View.VISIBLE);
+        progressView.setOnClickListener(view -> setShowNextEvent(true));
 
         final TextView progressText = row.findViewById(R.id.directions_trip_details_individual_entry_progress_text);
         progressText.setText(getLeftTimeFormatted(now, endTime));
-        progressText.setOnClickListener(view -> setShowNextEvent(true));
 
         return true;
     }
