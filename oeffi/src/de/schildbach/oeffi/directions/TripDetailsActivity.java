@@ -1122,7 +1122,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         return stayMillis >= 300000; // 5 minutes
     }
 
-    private boolean updateIndividualLeg(final View row, final TripRenderer.LegContainer legC, final Date now) {
+    protected boolean updateIndividualLeg(final View row, final TripRenderer.LegContainer legC, final Date now) {
         final Trip.Individual leg = legC.individualLeg;
         String legText = null;
         final int iconResId;
@@ -1244,26 +1244,29 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             timeTextView.setTextColor(getColor(timeIsCritical ? R.color.fg_trip_next_event_important : R.color.fg_significant));
         }
 
-        final TextView progress = row.findViewById(R.id.directions_trip_details_individual_entry_progress);
-        progress.setVisibility(View.GONE);
+        final View progressView = row.findViewById(R.id.directions_trip_details_individual_entry_progress);
+        progressView.setVisibility(View.GONE);
         Date beginTime = transferFrom != null ? transferFrom.getArrivalTime() : leg == null ? null : leg.departureTime;
         Date endTime = transferTo != null ? transferTo.getDepartureTime() : leg == null ? null : leg.arrivalTime;
         if (transferFrom != null && beginTime != null && now.before(beginTime)) {
             // leg is in the future
             row.setBackgroundColor(colorLegIndividualFutureBackground);
+            return false;
         } else if (endTime != null && now.after(endTime)) {
             // leg is in the past
             row.setBackgroundColor(colorLegIndividualPastBackground);
-        } else {
-            // leg is now
-            row.setBackgroundColor(colorLegIndividualNowBackground);
-            progress.setText(getLeftTimeFormatted(now, endTime));
-            progress.setVisibility(View.VISIBLE);
-            progress.setOnClickListener(view -> setShowNextEvent(true));
-
-            return true;
+            return false;
         }
-        return false;
+
+        // leg is now
+        row.setBackgroundColor(colorLegIndividualNowBackground);
+        progressView.setVisibility(View.VISIBLE);
+
+        final TextView progressText = row.findViewById(R.id.directions_trip_details_individual_entry_progress_text);
+        progressText.setText(getLeftTimeFormatted(now, endTime));
+        progressText.setOnClickListener(view -> setShowNextEvent(true));
+
+        return true;
     }
 
     protected void setShowNextEvent(final boolean showNextEvent) {

@@ -26,8 +26,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -430,5 +433,33 @@ public class TripNavigatorActivity extends TripDetailsActivity {
                 stop, isLegDeparture, currentJourneyRef, feederJourneyRef, connectionJourneyRef, time);
         overviewConfig.actionBarColor = R.color.bg_action_alternative_directions;
         return overviewConfig;
+    }
+
+    private boolean isStartAlarmActive = false;
+
+    @Override
+    protected boolean updateIndividualLeg(final View row, final TripRenderer.LegContainer legC, final Date now) {
+        final boolean isNow = super.updateIndividualLeg(row, legC, now);
+        if (!isNow)
+            return false;
+
+        final ImageButton progressBell = row.findViewById(R.id.directions_trip_details_individual_entry_progress_bell);
+        progressBell.setVisibility(View.VISIBLE);
+        progressBell.setOnClickListener(v -> {
+            isStartAlarmActive = !isStartAlarmActive;
+            setBellState(progressBell, isStartAlarmActive);
+        });
+        setBellState(progressBell, isStartAlarmActive);
+
+        return true;
+    }
+
+    private void setBellState(final ImageButton progressBell, final boolean isActive) {
+        final Drawable drawable = getDrawable(isActive
+                ? R.drawable.ic_bell_on_black_24dp
+                : R.drawable.ic_bell_off_black_24dp);
+        final int colorId = isActive ? R.color.fg_significant : R.color.fg_insignificant;
+        drawable.setTint(getColor(colorId));
+        progressBell.setImageDrawable(drawable);
     }
 }
