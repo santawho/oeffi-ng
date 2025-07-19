@@ -194,7 +194,7 @@ public class OeffiMapView extends MapView {
                             if (!tripAware.isSelectedLeg(leg)) {
                                 final Path path = pointsToPath(projection, leg.path);
 
-                                paint.setColor(leg instanceof Public ? Color.RED : Color.DKGRAY);
+                                paint.setColor(leg instanceof Public ? Color.MAGENTA : Color.DKGRAY);
                                 paint.setAlpha(92);
                                 paint.setStrokeWidth(tripStrokeWidth);
                                 canvas.drawPath(path, paint);
