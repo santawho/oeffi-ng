@@ -34,7 +34,6 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Canvas;
 import android.location.Address;
-import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
@@ -104,7 +103,6 @@ import de.schildbach.oeffi.util.LocationUriParser;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.ToggleImageButton;
-import de.schildbach.oeffi.util.ZoomControls;
 import de.schildbach.oeffi.util.locationview.LocationTextView;
 import de.schildbach.oeffi.util.locationview.LocationView;
 import de.schildbach.pte.NetworkId;
@@ -154,7 +152,6 @@ public class DirectionsActivity extends OeffiMainActivity implements
     public static final String LINK_IDENTIFIER_SHARE_TRIP = "share-trip";
 
     private ConnectivityManager connectivityManager;
-    private LocationManager locationManager;
 
     private View quickReturnView;
     private LocationSelector locationSelector;
@@ -355,7 +352,6 @@ public class DirectionsActivity extends OeffiMainActivity implements
         super.onCreate(savedInstanceState);
 
         connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         if (savedInstanceState != null)
             restoreInstanceState(savedInstanceState);
@@ -589,13 +585,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         locationSelector.setup(this, prefs);
         locationSelector.setNetwork(network);
 
-        mapView = findViewById(R.id.directions_map);
-        if (ContextCompat.checkSelfPermission(DirectionsActivity.this,
-                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            android.location.Location location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
-            if (location != null)
-                mapView.animateToLocation(location.getLatitude(), location.getLongitude());
-        }
+        mapView = setupMapView();
         mapView.getOverlays().add(new Overlay() {
             private Location pinLocation;
             private View pinView;
@@ -652,21 +642,6 @@ public class DirectionsActivity extends OeffiMainActivity implements
                 return false;
             }
         });
-        final TextView mapDisclaimerView = findViewById(R.id.directions_map_disclaimer);
-        mapDisclaimerView.setText(mapView.getTileProvider().getTileSource().getCopyrightNotice());
-        ViewCompat.setOnApplyWindowInsetsListener(mapDisclaimerView, (v, windowInsets) -> {
-            final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(0, 0, 0, insets.bottom);
-            return windowInsets;
-        });
-
-        final ZoomControls zoom = findViewById(R.id.directions_map_zoom);
-        ViewCompat.setOnApplyWindowInsetsListener(zoom, (v, windowInsets) -> {
-            final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(0, 0, 0, insets.bottom);
-            return windowInsets;
-        });
-        mapView.setZoomControls(zoom);
 
         final ComponentName intentComponentName = intent.getComponent();
         final String intentClassName = intentComponentName.getClassName();
@@ -963,8 +938,8 @@ public class DirectionsActivity extends OeffiMainActivity implements
             viewGo.requestFocus();
     }
 
-    private void updateFragments() {
-        updateFragments(R.id.navigation_drawer_layout, R.id.directions_map_fragment);
+    protected void updateFragments() {
+        updateFragments(R.id.navigation_drawer_layout);
     }
 
     private void updateGUI() {

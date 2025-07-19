@@ -18,13 +18,11 @@
 package de.schildbach.oeffi.network;
 
 import android.Manifest;
-import android.app.ActivityManager.TaskDescription;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.LocationManager;
@@ -34,9 +32,7 @@ import android.os.HandlerThread;
 import android.os.Process;
 import android.view.KeyEvent;
 import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import androidx.activity.ComponentActivity;
+
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -52,6 +48,7 @@ import de.schildbach.oeffi.AreaAware;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.LocationAware;
 import de.schildbach.oeffi.MyActionBar;
+import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.OeffiMapView;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.network.list.NetworkClickListener;
@@ -78,7 +75,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class NetworkPickerActivity extends ComponentActivity implements LocationHelper.Callback, NetworkClickListener,
+public class NetworkPickerActivity extends OeffiActivity implements LocationHelper.Callback, NetworkClickListener,
         NetworkContextMenuItemListener {
     public static void start(final Context context) {
         final Intent intent = new Intent(context, NetworkPickerActivity.class);
@@ -149,14 +146,7 @@ public class NetworkPickerActivity extends ComponentActivity implements Location
             return windowInsets;
         });
 
-        mapView = findViewById(R.id.network_picker_map);
-        final TextView mapDisclaimerView = findViewById(R.id.network_picker_map_disclaimer);
-        mapDisclaimerView.setText(mapView.getTileProvider().getTileSource().getCopyrightNotice());
-        ViewCompat.setOnApplyWindowInsetsListener(mapDisclaimerView, (v, windowInsets) -> {
-            final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(0, 0, 0, insets.bottom);
-            return windowInsets;
-        });
+        mapView = setupMapView();
 
         if (network != null) {
             findViewById(R.id.network_picker_firsttime_message).setVisibility(View.GONE);
@@ -338,42 +328,13 @@ public class NetworkPickerActivity extends ComponentActivity implements Location
         }
     }
 
-    private void updateFragments() {
-        final Resources res = getResources();
-
-        final View listFrame = findViewById(R.id.network_picker_list_frame);
-        final boolean listShow = res.getBoolean(R.bool.layout_list_show);
-        listFrame.setVisibility(isInMultiWindowMode() || listShow ? View.VISIBLE : View.GONE);
-
-        final View mapFrame = findViewById(R.id.network_picker_map_frame);
-        final boolean mapShow = res.getBoolean(R.bool.layout_map_show);
-        mapFrame.setVisibility(!isInMultiWindowMode() && mapShow ? View.VISIBLE : View.GONE);
-
-        final LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) listFrame.getLayoutParams();
-        layoutParams.width = listShow && mapShow ? res.getDimensionPixelSize(R.dimen.layout_list_width)
-                : LinearLayout.LayoutParams.MATCH_PARENT;
+    protected void updateFragments() {
+        updateFragments(R.id.network_picker_list_frame);
     }
 
     private void updateGUI() {
         listAdapter.notifyDataSetChanged();
         mapView.invalidate();
-    }
-
-    private String prefsGetNetwork() {
-        return prefs.getString(Constants.PREFS_KEY_NETWORK_PROVIDER, null);
-    }
-
-    private NetworkId prefsGetNetworkId() {
-        final String id = prefsGetNetwork();
-        if (id == null)
-            return null;
-
-        try {
-            return NetworkId.valueOf(id);
-        } catch (final IllegalArgumentException x) {
-            log.warn("Ignoring unkown selected network: {}", id);
-            return null;
-        }
     }
 
     private void parseIndex() {
@@ -565,11 +526,5 @@ public class NetworkPickerActivity extends ComponentActivity implements Location
         if (prefsValue.length() > 0)
             prefsValue.setLength(prefsValue.length() - 1);
         prefs.edit().putString(Constants.PREFS_KEY_LAST_NETWORK_PROVIDERS, prefsValue.toString()).commit();
-    }
-
-    protected final void setPrimaryColor(final int colorResId) {
-        final int color = getResources().getColor(colorResId);
-        actionBar.setBackgroundColor(color);
-        setTaskDescription(new TaskDescription(null, null, color));
     }
 }

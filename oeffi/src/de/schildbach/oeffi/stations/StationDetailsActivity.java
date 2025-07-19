@@ -244,15 +244,8 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             return windowInsets;
         });
 
-        mapView = findViewById(R.id.stations_station_details_map);
+        mapView = setupMapView();
         mapView.setStationsAware(this);
-        final TextView mapDisclaimerView = findViewById(R.id.stations_station_details_map_disclaimer);
-        mapDisclaimerView.setText(mapView.getTileProvider().getTileSource().getCopyrightNotice());
-        ViewCompat.setOnApplyWindowInsetsListener(mapDisclaimerView, (v, windowInsets) -> {
-            final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(0, 0, 0, insets.bottom);
-            return windowInsets;
-        });
 
         resultStatusView = findViewById(R.id.stations_station_details_result_status);
 
@@ -358,8 +351,8 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         updateFragments();
     }
 
-    private void updateFragments() {
-        updateFragments(R.id.stations_station_details_list_fragment, R.id.stations_station_details_map_fragment);
+    protected void updateFragments() {
+        updateFragments(R.id.stations_station_details_list_fragment);
     }
 
     private void updateGUI() {

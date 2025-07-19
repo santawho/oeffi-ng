@@ -245,7 +245,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private Location highlightedLocation;
     private Point location;
     private int selectedLegIndex = -1;
-    private boolean mapEnabled = false;
     protected boolean isPaused = false;
 
     private int LEGSGROUP_INSERT_INDEX;
@@ -291,12 +290,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         setupFromTrip(baseTrip);
 
-        final boolean isPortrait = res.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
-        setContentView(isPortrait
-                ? R.layout.directions_trip_details_content_portrait
-                : R.layout.directions_trip_details_content_landscape,
+        final View contentView = setContentView(
+                R.layout.directions_trip_details_content_portrait,
+                R.layout.directions_trip_details_content_landscape,
                 isTaskRoot());
-        final View contentView = findViewById(android.R.id.content);
         ViewCompat.setOnApplyWindowInsetsListener(contentView, (v, windowInsets) -> {
             final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(insets.left, 0, insets.right, 0);
@@ -364,13 +361,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             updateGUI();
         });
 
-        if (isPortrait && res.getBoolean(R.bool.layout_map_show_toggleable)) {
-            actionBar.addButton(R.drawable.ic_map_white_24dp, R.string.directions_trip_details_action_showmap_title)
-                    .setOnClickListener(v -> {
-                        mapEnabled = !mapEnabled;
-                        updateFragments();
-                    });
-        }
+        addShowMapButtonToActionBar();
 
         actionBar.addButton(R.drawable.ic_share_white_24dp, R.string.directions_trip_details_action_share_title)
                 .setOnClickListener(v -> {
@@ -483,7 +474,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final TextView disclaimerSourceView = findViewById(R.id.directions_trip_details_disclaimer_source);
         updateDisclaimerSource(disclaimerSourceView, network.name(), null);
 
-        mapView = findViewById(R.id.directions_trip_details_map);
+        mapView = setupMapView();
         mapView.setTripAware(new TripAware() {
             public Trip getTrip() {
                 return tripRenderer.trip;
@@ -504,13 +495,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
                 return tripRenderer.legs.get(selectedLegIndex).equals(part);
             }
-        });
-        final TextView mapDisclaimerView = findViewById(R.id.directions_trip_details_map_disclaimer);
-        mapDisclaimerView.setText(mapView.getTileProvider().getTileSource().getCopyrightNotice());
-        ViewCompat.setOnApplyWindowInsetsListener(mapDisclaimerView, (v, windowInsets) -> {
-            final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(0, 0, 0, insets.bottom);
-            return windowInsets;
         });
 
         View nextEvent = findViewById(R.id.directions_trip_details_next_event_container);
@@ -697,13 +681,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         return null;
     }
 
-    private void updateFragments() {
-        updateFragments(R.id.directions_trip_details_list_frame, R.id.directions_trip_details_map_frame);
-    }
-
-    @Override
-    protected boolean isMapEnabled(Resources res) {
-        return mapEnabled || super.isMapEnabled(res);
+    protected void updateFragments() {
+        updateFragments(R.id.directions_trip_details_list_frame);
     }
 
     protected void updateGUI() {

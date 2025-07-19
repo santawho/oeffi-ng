@@ -93,27 +93,6 @@
         </FrameLayout>
     </LinearLayout>
 
-    <FrameLayout
-        android:id="@+id/stations_station_details_map_fragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:elevation="@dimen/elevation_map">
-
-        <de.schildbach.oeffi.OeffiMapView
-            android:id="@+id/stations_station_details_map"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:alpha="@dimen/alpha_bright_white" />
-
-        <TextView
-            android:id="@+id/stations_station_details_map_disclaimer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|left"
-            android:layout_marginBottom="@dimen/text_padding_vertical"
-            android:layout_marginLeft="@dimen/text_padding_horizontal_verylax"
-            android:textSize="@dimen/font_size_disclaimer"
-            android:textColor="@color/fg_significant_on_light" />
-    </FrameLayout>
+    <include layout="@layout/map_frame" />
 
 </LinearLayout>

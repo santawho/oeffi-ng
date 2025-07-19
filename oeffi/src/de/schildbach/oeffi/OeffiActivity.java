@@ -17,13 +17,18 @@
 
 package de.schildbach.oeffi;
 
+import android.Manifest;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorSet;
 import android.app.ActivityManager.TaskDescription;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -43,6 +48,7 @@ import android.widget.TextView;
 import androidx.activity.ComponentActivity;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.splashscreen.SplashScreen;
 import androidx.core.view.MenuProvider;
@@ -68,6 +74,7 @@ import de.schildbach.oeffi.util.NavigationMenuAdapter;
 import de.schildbach.oeffi.util.SpeechInput;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.ViewUtils;
+import de.schildbach.oeffi.util.ZoomControls;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.Product;
@@ -101,9 +108,13 @@ public abstract class OeffiActivity extends ComponentActivity {
     protected String[] linkArgs;
     protected Set<Product> savedProducts;
 
+    protected boolean isPortrait;
+    private boolean mapEnabled = false;
     private DrawerLayout navigationDrawerLayout;
     private MenuProvider navigationDrawerMenuProvider;
     private View navigationDrawerFooterView;
+
+    protected LocationManager locationManager;
 
     protected Logger log;
 
@@ -117,6 +128,7 @@ public abstract class OeffiActivity extends ComponentActivity {
         SplashScreen.installSplashScreen(this);
 
         this.prefs = Application.getInstance().getSharedPreferences();
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         final Intent intent = getIntent();
         linkArgs = intent.getStringArrayExtra(INTENT_EXTRA_LINK_ARGS);
@@ -140,6 +152,17 @@ public abstract class OeffiActivity extends ComponentActivity {
         super.onCreate(savedInstanceState);
 
         ErrorReporter.getInstance().check(this, applicationVersionCode(), application.okHttpClient());
+    }
+
+    public void setContentView(final int portraitLayoutResID, final int landscapeLayoutResID) {
+        setContentView(portraitLayoutResID, landscapeLayoutResID, true);
+    }
+
+    public View setContentView(final int portraitLayoutResID, final int landscapeLayoutResID, final boolean showNavigation) {
+        isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+        setContentView(isPortrait ? portraitLayoutResID : landscapeLayoutResID, showNavigation);
+        final View contentView = findViewById(android.R.id.content);
+        return contentView;
     }
 
     @Override
@@ -524,6 +547,13 @@ public abstract class OeffiActivity extends ComponentActivity {
         }
     }
 
+    protected void updateFragments() {
+    }
+
+    protected void updateFragments(final int listFrameResId) {
+        updateFragments(listFrameResId, R.id.map_frame);
+    }
+
     protected void updateFragments(final int listFrameResId, final int mapFrameResId) {
         final Resources res = getResources();
 
@@ -532,21 +562,23 @@ public abstract class OeffiActivity extends ComponentActivity {
         listFrame.setVisibility(isInMultiWindowMode() || listShow ? View.VISIBLE : View.GONE);
 
         final View mapFrame = findViewById(mapFrameResId);
-        boolean mapShow = !isInMultiWindowMode() && isMapEnabled(res);
-        mapFrame.setVisibility(mapShow ? View.VISIBLE : View.GONE);
+        if (mapFrame != null) {
+            boolean mapShow = !isInMultiWindowMode() && isMapEnabled(res);
+            mapFrame.setVisibility(mapShow ? View.VISIBLE : View.GONE);
 
-        ViewParent container = mapFrame.getParent();
-        final boolean isVertical = (container instanceof LinearLayout
-                && ((LinearLayout) container).getOrientation() == LinearLayout.VERTICAL);
+            ViewParent container = mapFrame.getParent();
+            final boolean isVertical = (container instanceof LinearLayout
+                    && ((LinearLayout) container).getOrientation() == LinearLayout.VERTICAL);
 
-        if (isVertical) {
-            listFrame.getLayoutParams().height = listShow && mapShow
-                    ? res.getDimensionPixelSize(R.dimen.layout_list_height)
-                    : LinearLayout.LayoutParams.MATCH_PARENT;
-        } else {
-            listFrame.getLayoutParams().width = listShow && mapShow
-                    ? res.getDimensionPixelSize(R.dimen.layout_list_width)
-                    : LinearLayout.LayoutParams.MATCH_PARENT;
+            if (isVertical) {
+                listFrame.getLayoutParams().height = listShow && mapShow
+                        ? res.getDimensionPixelSize(R.dimen.layout_list_height)
+                        : LinearLayout.LayoutParams.MATCH_PARENT;
+            } else {
+                listFrame.getLayoutParams().width = listShow && mapShow
+                        ? res.getDimensionPixelSize(R.dimen.layout_list_width)
+                        : LinearLayout.LayoutParams.MATCH_PARENT;
+            }
         }
 
         final ViewGroup navigationDrawer = findViewById(R.id.navigation_drawer_layout);
@@ -557,7 +589,7 @@ public abstract class OeffiActivity extends ComponentActivity {
     }
 
     protected boolean isMapEnabled(final Resources res) {
-        return res.getBoolean(R.bool.layout_map_show);
+        return mapEnabled || res.getBoolean(R.bool.layout_map_show);
     }
 
     protected String prefsGetNetwork() {
@@ -745,5 +777,44 @@ public abstract class OeffiActivity extends ComponentActivity {
 
     public boolean isDarkMode() {
         return Application.getInstance().isDarkMode();
+    }
+
+    protected OeffiMapView setupMapView() {
+        final OeffiMapView mapView = findViewById(R.id.map_view);
+
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            android.location.Location location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+            if (location != null)
+                mapView.animateToLocation(location.getLatitude(), location.getLongitude());
+        }
+
+        final TextView mapDisclaimerView = findViewById(R.id.map_disclaimer);
+        mapDisclaimerView.setText(mapView.getTileProvider().getTileSource().getCopyrightNotice());
+        ViewCompat.setOnApplyWindowInsetsListener(mapDisclaimerView, (v, windowInsets) -> {
+            final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(0, 0, 0, insets.bottom);
+            return windowInsets;
+        });
+
+        final ZoomControls zoom = findViewById(R.id.map_zoom);
+        ViewCompat.setOnApplyWindowInsetsListener(zoom, (v, windowInsets) -> {
+            final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(0, 0, 0, insets.bottom);
+            return windowInsets;
+        });
+        mapView.setZoomControls(zoom);
+
+        return mapView;
+    }
+
+    protected void addShowMapButtonToActionBar() {
+        if (isPortrait && getResources().getBoolean(R.bool.layout_map_show_toggleable)) {
+            getMyActionBar().addButton(R.drawable.ic_map_white_24dp, R.string.directions_trip_details_action_showmap_title)
+                    .setOnClickListener(v -> {
+                        mapEnabled = !mapEnabled;
+                        updateFragments();
+                    });
+        }
     }
 }

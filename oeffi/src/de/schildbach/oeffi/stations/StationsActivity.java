@@ -316,24 +316,9 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         final Button missingCapabilityButton = findViewById(R.id.stations_network_missing_capability_button);
         missingCapabilityButton.setOnClickListener(selectNetworkListener);
 
-        mapView = findViewById(R.id.stations_map);
+        mapView = setupMapView();
         mapView.setStationsAware(this);
         mapView.setLocationAware(this);
-        final TextView mapDisclaimerView = findViewById(R.id.stations_map_disclaimer);
-        mapDisclaimerView.setText(mapView.getTileProvider().getTileSource().getCopyrightNotice());
-        ViewCompat.setOnApplyWindowInsetsListener(mapDisclaimerView, (v, windowInsets) -> {
-            final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(0, 0, 0, insets.bottom);
-            return windowInsets;
-        });
-
-        final ZoomControls zoom = findViewById(R.id.stations_map_zoom);
-        ViewCompat.setOnApplyWindowInsetsListener(zoom, (v, windowInsets) -> {
-            final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(0, 0, 0, insets.bottom);
-            return windowInsets;
-        });
-        mapView.setZoomControls(zoom);
 
         connectivityWarningView = findViewById(R.id.stations_connectivity_warning_box);
         final View disclaimerView = findViewById(R.id.stations_disclaimer_group);
@@ -586,8 +571,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         updateFragments();
     }
 
-    private void updateFragments() {
-        updateFragments(R.id.navigation_drawer_layout, R.id.stations_map_fragment);
+    protected void updateFragments() {
+        updateFragments(R.id.navigation_drawer_layout);
     }
 
     @Override

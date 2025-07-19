@@ -98,36 +98,6 @@
         <include layout="@layout/navigation_drawer" />
     </androidx.drawerlayout.widget.DrawerLayout>
 
-    <FrameLayout
-        android:id="@+id/directions_map_fragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:elevation="@dimen/elevation_map">
-
-        <de.schildbach.oeffi.OeffiMapView
-            android:id="@+id/directions_map"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:alpha="@dimen/alpha_bright_white" />
-
-        <TextView
-            android:id="@+id/directions_map_disclaimer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|left"
-            android:layout_marginBottom="@dimen/text_padding_vertical"
-            android:layout_marginLeft="@dimen/text_padding_horizontal_verylax"
-            android:textSize="@dimen/font_size_disclaimer"
-            android:textColor="@color/fg_significant_on_light" />
-
-        <de.schildbach.oeffi.util.ZoomControls
-            android:id="@+id/directions_map_zoom"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|right"
-            android:layout_margin="8dp"
-            android:orientation="vertical"
-            android:visibility="invisible" />
-    </FrameLayout>
+    <include layout="@layout/map_frame" />
 
 </LinearLayout>

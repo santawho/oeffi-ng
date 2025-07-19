@@ -13,7 +13,7 @@
         android:orientation="horizontal">
 
         <include layout="@layout/directions_trip_details_list_frame" />
-        <include layout="@layout/directions_trip_details_map_frame" />
+        <include layout="@layout/map_frame" />
     </LinearLayout>
 
     <include layout="@layout/navigation_drawer" />
