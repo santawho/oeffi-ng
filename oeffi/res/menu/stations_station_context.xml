@@ -9,18 +9,6 @@
         android:id="@+id/station_context_directions_alternative_from"
         android:title="@string/station_context_alternative_from_title"/>
     <item
-        android:id="@+id/station_context_add_favorite"
-        android:title="@string/station_context_add_favorite_title" />
-    <item
-        android:id="@+id/station_context_remove_favorite"
-        android:title="@string/station_context_remove_favorite_title" />
-    <item
-        android:id="@+id/station_context_add_ignore"
-        android:title="@string/station_context_add_ignore_title" />
-    <item
-        android:id="@+id/station_context_remove_ignore"
-        android:title="@string/station_context_remove_ignore_title" />
-    <item
         android:id="@+id/station_context_show_departures"
         android:title="@string/station_context_details_title" />
     <item
@@ -43,6 +31,18 @@
     <item
         android:id="@+id/station_context_directions_to"
         android:title="@string/station_context_directions_to_title" />
+    <item
+        android:id="@+id/station_context_add_favorite"
+        android:title="@string/station_context_add_favorite_title" />
+    <item
+        android:id="@+id/station_context_remove_favorite"
+        android:title="@string/station_context_remove_favorite_title" />
+    <item
+        android:id="@+id/station_context_add_ignore"
+        android:title="@string/station_context_add_ignore_title" />
+    <item
+        android:id="@+id/station_context_remove_ignore"
+        android:title="@string/station_context_remove_ignore_title" />
     <item
         android:id="@+id/station_context_launcher_shortcut"
         android:title="@string/station_context_launcher_shortcut_title" />
