@@ -46,7 +46,6 @@ public class MyActionBar extends LinearLayout {
     private ViewGroup titlesGroup;
     private TextView primaryTitleView;
     private TextView secondaryTitleView;
-    private View progressView;
     private ImageButton progressButton;
 //    private ImageView progressImage;
 
@@ -83,9 +82,7 @@ public class MyActionBar extends LinearLayout {
         titlesGroup = findViewById(R.id.action_bar_titles);
         primaryTitleView = findViewById(R.id.action_bar_primary_title);
         secondaryTitleView = findViewById(R.id.action_bar_secondary_title);
-        progressView = findViewById(R.id.action_bar_progress);
         progressButton = findViewById(R.id.action_bar_progress_button);
-//        progressImage = findViewById(R.id.action_bar_progress_image);
     }
 
     public void setDrawer(final OnClickListener onClickListener) {
@@ -187,7 +184,7 @@ public class MyActionBar extends LinearLayout {
 
     public View addProgressButton() {
         progressAlwaysVisible = true;
-        progressView.setVisibility(View.VISIBLE);
+        progressButton.setVisibility(View.VISIBLE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             progressButton.setTooltipText(progressButton.getContentDescription());
         return getProgressButton();
@@ -201,7 +198,7 @@ public class MyActionBar extends LinearLayout {
         if (progressCount++ == 0) {
             handler.removeCallbacksAndMessages(null);
             handler.post(() -> {
-                progressView.setVisibility(View.VISIBLE);
+                progressButton.setVisibility(View.VISIBLE);
                 if (progressAnimation == null) {
                     progressAnimation = AnimationUtils.loadAnimation(context, R.anim.rotate);
 //                    progressImage.startAnimation(progressAnimation);
@@ -220,7 +217,7 @@ public class MyActionBar extends LinearLayout {
                     progressAnimation = null;
                 }
                 if (!progressAlwaysVisible)
-                    progressView.setVisibility(View.GONE);
+                    progressButton.setVisibility(View.GONE);
             }, 200);
         }
     }
