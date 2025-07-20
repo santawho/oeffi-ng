@@ -18,6 +18,8 @@
 package de.schildbach.oeffi.util;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.webkit.MimeTypeMap;
 
@@ -114,11 +116,27 @@ public class GoogleMapsUtils {
     }
 
     public static Intent getOpenKmlIntent(final File kmlFile) {
-        final Uri contentUri = Application.getInstance().getSharedFileContentUri(kmlFile);
+        final Application application = Application.getInstance();
+        final Uri contentUri = application.getSharedFileContentUri(kmlFile);
         String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension("kml");
-        return new Intent(Intent.ACTION_VIEW)
+        final Intent intent = new Intent(Intent.ACTION_VIEW)
                 .setDataAndType(contentUri, mimeType)
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+// THE REAL REASON FOR OSMAND NOT WORKING IS: THEY CANNOT HANDLE KML AND REQUIRE TO USE GPX !!!
+///  NOTE: OSMAND seems to support a tag <osmand:color> inside GPX. No other app probably ...
+//        // grant permisions for all apps that can handle given intent
+//        // see: https://stackoverflow.com/questions/45541013/opening-gpx-file-in-osmand-from-another-application
+//        // OSMAND, for example, does not open the KML when just adding FLAG_GRANT_READ_URI_PERMISSION to the intent
+//        // requires in manifest:
+//        //     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" tools:ignore="QueryAllPackagesPermission" />
+//        List<ResolveInfo> resInfoList = application.getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_ALL);
+//        for (ResolveInfo resolveInfo : resInfoList) {
+//            String packageName = resolveInfo.activityInfo.packageName;
+//            application.grantUriPermission(packageName, contentUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+//        }
+
+        return intent;
     }
 }
