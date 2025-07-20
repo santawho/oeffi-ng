@@ -80,6 +80,7 @@ import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.TripAware;
 import de.schildbach.oeffi.util.GoogleMapsUtils;
+import de.schildbach.oeffi.util.KmlProducer;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.util.TimeSpec.DepArr;
 import de.schildbach.oeffi.directions.navigation.TripRenderer;
@@ -1897,7 +1898,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private Intent showKmlInExternalMapsApp() {
         try {
             final File kmlFile = new File(Application.getInstance().getShareDir(), "shareroute.kml");
-            GoogleMapsUtils.writeTripAsKml(tripRenderer.trip, kmlFile);
+            new KmlProducer(application).writeTrip(tripRenderer.trip, kmlFile);
             final Intent kmlIntent = GoogleMapsUtils.getOpenKmlIntent(kmlFile);
             return Intent.createChooser(kmlIntent, "xxx");
         } catch (Exception e) {

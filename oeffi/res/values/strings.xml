@@ -494,4 +494,13 @@
     <string name="app_installer_download_failed_title">Download failed</string>
     <string name="app_installer_download_failed_message">Cannot download APK file. Try again later.</string>
 
+    <!-- KML labeling -->
+    <string name="kml_trip_name">Trip from %1$s to %2$s</string>
+    <string name="kml_public_leg_name">%1$s from %2$s to %3$s</string>
+    <string name="kml_individual_leg_name">%1$s from %2$s to %3$s</string>
+    <string name="kml_individual_type_walk">Walk</string>
+    <string name="kml_individual_type_bike">By bike</string>
+    <string name="kml_individual_type_car">By car</string>
+    <string name="kml_individual_type_transfer">Transfer</string>
+
 </resources>
