@@ -14,5 +14,9 @@
         android:id="@+id/directions_location_favorite_station"
         android:icon="@drawable/ic_star_grey600_24dp"
         android:title="@string/directions_location_context_favorite_station" />
+    <item
+        android:id="@+id/directions_location_alternate_search"
+        android:icon="@drawable/ic_search_grey600_24dp"
+        android:title="@string/directions_location_context_alternate_search" />
 
 </menu>

@@ -31,6 +31,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import de.schildbach.oeffi.R;
+import de.schildbach.pte.LocationSearchProviderId;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
@@ -38,6 +39,7 @@ import de.schildbach.pte.dto.LocationType;
 public class AutoCompleteLocationAdapter extends BaseAdapter implements Filterable {
     private final LocationView locationView;
     private final NetworkId network;
+    private LocationSearchProviderId searchProviderId;
 
     private ImageButton filterStationButton;
     private ImageButton filterAddressButton;
@@ -122,6 +124,10 @@ public class AutoCompleteLocationAdapter extends BaseAdapter implements Filterab
         locationView.refreshAutoCompleteResults();
     }
 
+    public void setAlternateSearchProvider(final LocationSearchProviderId searchProviderId) {
+        this.searchProviderId = searchProviderId;
+    }
+
     public class LocationFilter extends Filter {
         @Override
         protected FilterResults performFiltering(final CharSequence constraint) {
@@ -131,7 +137,7 @@ public class AutoCompleteLocationAdapter extends BaseAdapter implements Filterab
             if (filterAddresses) suggestedLocationTypes.add(LocationType.ADDRESS);
             if (filterPois) suggestedLocationTypes.add(LocationType.POI);
             final List<Location> results = LocationSuggestionsCollector.collectSuggestions(
-                    constraint, suggestedLocationTypes, network);
+                    constraint, suggestedLocationTypes, network, searchProviderId);
             if (results != null) {
                 filterResults.values = results;
                 filterResults.count = results.size();

@@ -75,6 +75,8 @@ import java.util.concurrent.TimeUnit;
 public class Application extends android.app.Application {
     private static final Logger log = LoggerFactory.getLogger(Application.class);
 
+    private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0";
+
     private static Application instance;
 
     public static Application getInstance() {
@@ -98,6 +100,10 @@ public class Application extends android.app.Application {
 
     public File getLogFile() {
         return logFile;
+    }
+
+    public static String getUserAgent() {
+        return USER_AGENT;
     }
 
     public SpeechInput getSpeechInput() {

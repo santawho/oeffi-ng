@@ -11,9 +11,11 @@ import java.util.List;
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.directions.QueryHistoryProvider;
+import de.schildbach.oeffi.network.LocationSearchProviderFactory;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
+import de.schildbach.pte.LocationSearchProvider;
+import de.schildbach.pte.LocationSearchProviderId;
 import de.schildbach.pte.NetworkId;
-import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.Point;
@@ -23,7 +25,8 @@ public class LocationSuggestionsCollector {
     public static List<Location> collectSuggestions(
             final CharSequence constraint,
             final AbstractSet<LocationType> suggestedLocationTypes,
-            final NetworkId network) {
+            final NetworkId network,
+            final LocationSearchProviderId searchProviderId) {
         if (constraint == null)
             return null;
         final String constraintStr = constraint.toString().trim();
@@ -100,8 +103,10 @@ public class LocationSuggestionsCollector {
             final int constraintLength = constraint.length();
             if (constraintLength >= 3) {
                 final int maxLocations = constraintLength >= 8 ? 15 : constraintLength * 2;
-                final NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
-                final SuggestLocationsResult suggestLocationsResult = networkProvider
+                final LocationSearchProvider locationSearchProvider = searchProviderId != null
+                    ? LocationSearchProviderFactory.provider(searchProviderId)
+                    : NetworkProviderFactory.provider(network);
+                final SuggestLocationsResult suggestLocationsResult = locationSearchProvider
                         .suggestLocations(constraint, suggestedLocationTypes, maxLocations);
                 if (suggestLocationsResult.status == SuggestLocationsResult.Status.OK) {
                     final List<Location> foundLocations = suggestLocationsResult.getLocations();

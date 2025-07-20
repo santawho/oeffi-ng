@@ -47,6 +47,7 @@ import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GeocoderThread;
 import de.schildbach.oeffi.util.LocationHelper;
 import de.schildbach.oeffi.util.PopupHelper;
+import de.schildbach.pte.LocationSearchProviderId;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.Point;
@@ -105,6 +106,15 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
 
     public void setStationAsAddressEnabled(final boolean stationAsAddressEnabled) {
         this.stationAsAddressEnabled = stationAsAddressEnabled;
+    }
+
+    public void setAlternateSearchProvider(final LocationSearchProviderId searchProviderId) {
+        if (autoCompleteLocationAdapter != null)
+            autoCompleteLocationAdapter.setAlternateSearchProvider(searchProviderId);
+    }
+
+    public void clearAlternateSearchProvider() {
+        setAlternateSearchProvider(null);
     }
 
     @Override
@@ -337,6 +347,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         setText(null);
         hint = null;
         autoCompleteLocationAdapter.resetFilters();
+        clearAlternateSearchProvider();
         updateAppearance();
         fireChanged();
 

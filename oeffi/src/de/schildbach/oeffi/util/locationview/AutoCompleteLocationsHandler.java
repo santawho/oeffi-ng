@@ -74,7 +74,7 @@ public class AutoCompleteLocationsHandler {
             final List<Location> locations = LocationSuggestionsCollector.collectSuggestions(
                     constraint,
                     EnumSet.of(LocationType.STATION, LocationType.ADDRESS, LocationType.POI),
-                    network);
+                    network, null);
             final Location location = getMatchingLocation(locations);
             if (location != null) {
                 activity.runOnUiThread(() -> {

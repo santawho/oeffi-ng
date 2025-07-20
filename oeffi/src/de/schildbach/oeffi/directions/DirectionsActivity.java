@@ -30,7 +30,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Canvas;
 import android.location.Address;
@@ -105,6 +104,7 @@ import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.oeffi.util.locationview.LocationTextView;
 import de.schildbach.oeffi.util.locationview.LocationView;
+import de.schildbach.pte.LocationSearchProviderId;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.NetworkProvider.Capability;
@@ -334,6 +334,9 @@ public class DirectionsActivity extends OeffiMainActivity implements
             } else if (item.getItemId() == R.id.directions_location_favorite_station) {
                 if (network != null)
                     pickStationLauncher.launch(network);
+                return true;
+            } else if (item.getItemId() == R.id.directions_location_alternate_search) {
+                locationView.setAlternateSearchProvider(LocationSearchProviderId.Nominamtim);
                 return true;
             } else {
                 return false;
@@ -852,6 +855,13 @@ public class DirectionsActivity extends OeffiMainActivity implements
         viewFromLocation.setAdapter(new AutoCompleteLocationAdapter(viewFromLocation, network));
         viewViaLocation.setAdapter(new AutoCompleteLocationAdapter(viewViaLocation, network));
         viewToLocation.setAdapter(new AutoCompleteLocationAdapter(viewToLocation, network));
+        resetLocationViewsBehaviour();
+    }
+
+    private void resetLocationViewsBehaviour() {
+        viewFromLocation.clearAlternateSearchProvider();
+        viewViaLocation.clearAlternateSearchProvider();
+        viewToLocation.clearAlternateSearchProvider();
     }
 
     private boolean initProductToggles() {
@@ -1360,6 +1370,8 @@ public class DirectionsActivity extends OeffiMainActivity implements
     }
 
     private void handleGo() {
+        resetLocationViewsBehaviour();
+
         final NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
 
         final Location from = viewFromLocation.getLocation();
