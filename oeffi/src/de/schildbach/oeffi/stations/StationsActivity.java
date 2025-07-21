@@ -73,6 +73,7 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.StationsAware;
 import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.directions.QueryJourneyRunnable;
+import de.schildbach.oeffi.util.GeoUtils;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.network.NetworkPickerActivity;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
@@ -695,16 +696,11 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                         i.remove();
                         stationsMap.remove(station.location.id);
                     } else {
-                        if (hadPresetTime) {
+                        if (hadPresetTime)
                             station.departures = null;
-                        }
 
-                        if (station.location.hasCoord()) {
-                            android.location.Location.distanceBetween(deviceLocation.getLatAsDouble(),
-                                    deviceLocation.getLonAsDouble(), station.location.getLatAsDouble(),
-                                    station.location.getLonAsDouble(), distanceBetweenResults);
-                            station.setDistanceAndBearing(distanceBetweenResults[0], distanceBetweenResults[1]);
-                        }
+                        if (station.location.hasCoord())
+                            station.setDistanceAndBearing(GeoUtils.distanceBetween(deviceLocation, station.location.coord));
                     }
                 }
             }
@@ -905,18 +901,12 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                             log.info("Got {}", result.toShortString());
 
                             final List<Station> freshStations = new ArrayList<>(result.locations.size());
-                            final float[] distanceBetweenResults = new float[2];
 
                             for (final Location location : result.locations) {
                                 if (location.type == LocationType.STATION) {
                                     final Station station = new Station(network, location, null);
-                                    if (deviceLocation != null) {
-                                        android.location.Location.distanceBetween(referenceLocation.getLatAsDouble(),
-                                                referenceLocation.getLonAsDouble(), location.getLatAsDouble(),
-                                                location.getLonAsDouble(), distanceBetweenResults);
-                                        station.setDistanceAndBearing(distanceBetweenResults[0],
-                                                distanceBetweenResults[1]);
-                                    }
+                                    if (deviceLocation != null)
+                                        station.setDistanceAndBearing(GeoUtils.distanceBetween(referenceLocation.coord, location.coord));
                                     freshStations.add(station);
                                 }
                             }
@@ -953,12 +943,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
                 if (favType == FavoriteStationsProvider.TYPE_FAVORITE) {
                     final Station station = new Station(network, location, null);
-                    if (deviceLocation != null && location.hasCoord()) {
-                        android.location.Location.distanceBetween(deviceLocation.getLatAsDouble(),
-                                deviceLocation.getLonAsDouble(), location.getLatAsDouble(), location.getLonAsDouble(),
-                                distanceBetweenResults);
-                        station.setDistanceAndBearing(distanceBetweenResults[0], distanceBetweenResults[1]);
-                    }
+                    if (deviceLocation != null && location.hasCoord())
+                        station.setDistanceAndBearing(GeoUtils.distanceBetween(deviceLocation, location.coord));
                     freshStations.add(station);
                 }
             }
@@ -972,21 +958,10 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                 @Override
                 protected void onPostExecute(final List<Station> freshStations) {
                     final Location referenceLocation = getReferenceLocation();
-
                     if (referenceLocation != null) {
-                        final double referenceLat = referenceLocation.getLatAsDouble();
-                        final double referenceLon = referenceLocation.getLonAsDouble();
-
-                        final float[] distanceBetweenResults = new float[2];
-
                         for (final Station freshStation : freshStations) {
-                            if (freshStation.location.hasCoord()) {
-                                android.location.Location.distanceBetween(referenceLat, referenceLon,
-                                        freshStation.location.getLatAsDouble(), freshStation.location.getLonAsDouble(),
-                                        distanceBetweenResults);
-                                freshStation.setDistanceAndBearing(distanceBetweenResults[0],
-                                        distanceBetweenResults[1]);
-                            }
+                            if (freshStation.location.hasCoord())
+                                freshStation.setDistanceAndBearing(GeoUtils.distanceBetween(referenceLocation.coord, freshStation.location.coord));
                         }
                     }
 
@@ -1504,22 +1479,14 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         public void onLocationChanged(final android.location.Location here) {
             log.info("Got relevant location: {}", here);
 
-            final double hereLat = here.getLatitude();
-            final double hereLon = here.getLongitude();
-            deviceLocation = Point.fromDouble(hereLat, hereLon);
-
+            deviceLocation = Point.fromDouble(here.getLatitude(), here.getLongitude());
             stationListAdapter.setDeviceLocation(here);
 
             // re-calculate distances for sorting
             if (fixedLocation == null) {
-                final float[] distanceBetweenResults = new float[2];
-
                 for (final Station station : stations) {
-                    if (station.location.hasCoord()) {
-                        android.location.Location.distanceBetween(hereLat, hereLon, station.location.getLatAsDouble(),
-                                station.location.getLonAsDouble(), distanceBetweenResults);
-                        station.setDistanceAndBearing(distanceBetweenResults[0], distanceBetweenResults[1]);
-                    }
+                    if (station.location.hasCoord())
+                        station.setDistanceAndBearing(GeoUtils.distanceBetween(here, station.location.coord));
                 }
 
                 stationListAdapter.notifyDataSetChanged();

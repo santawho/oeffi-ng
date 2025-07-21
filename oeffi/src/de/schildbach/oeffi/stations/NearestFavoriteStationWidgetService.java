@@ -53,6 +53,7 @@ import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.Formats;
+import de.schildbach.oeffi.util.GeoUtils;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
@@ -288,13 +289,10 @@ public class NearestFavoriteStationWidgetService extends JobService {
                     NetworkProviderFactory.provider(networkId); // check if existent
 
                     if (stationPoint.getLatAsDouble() > 0 || stationPoint.getLonAsDouble() > 0) {
-                        final float[] distanceBetweenResults = new float[1];
-                        android.location.Location.distanceBetween(here.getLatitude(), here.getLongitude(),
-                                stationPoint.getLatAsDouble(), stationPoint.getLonAsDouble(), distanceBetweenResults);
-                        final float distance = distanceBetweenResults[0];
                         final Favorite favorite = new Favorite(
-                                networkId, stationId, stationType, stationPlace, stationName,
-                                stationPoint, distance);
+                                networkId,
+                                stationId, stationType, stationPlace, stationName, stationPoint,
+                                GeoUtils.distanceBetween(here, stationPoint).distanceInMeters);
                         favorites.add(favorite);
                     }
                 } catch (final IllegalArgumentException x) {

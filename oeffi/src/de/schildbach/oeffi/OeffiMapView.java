@@ -35,6 +35,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 import de.schildbach.oeffi.stations.LineView;
 import de.schildbach.oeffi.stations.Station;
+import de.schildbach.oeffi.util.GeoUtils;
 import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.oeffi.util.ZoomControls;
 import de.schildbach.pte.dto.Location;
@@ -426,8 +427,6 @@ public class OeffiMapView extends MapView {
                 final double tappedLon = p.getLongitude();
                 boolean consumed = false;
 
-                final float[] distanceBetweenResults = new float[1];
-
                 if (tripAware != null) {
                     int tappedLegIndex = -1;
                     float tappedPointDistance = 0;
@@ -435,9 +434,7 @@ public class OeffiMapView extends MapView {
                     int iRoute = 0;
                     for (final Leg leg : tripAware.getTrip().legs) {
                         for (final Point point : leg.path) {
-                            android.location.Location.distanceBetween(tappedLat, tappedLon, point.getLatAsDouble(),
-                                    point.getLonAsDouble(), distanceBetweenResults);
-                            final float distance = distanceBetweenResults[0];
+                            final float distance = GeoUtils.distanceBetween(tappedLat, tappedLon, point).distanceInMeters;
                             if (tappedLegIndex == -1 || distance < tappedPointDistance) {
                                 tappedLegIndex = iRoute;
                                 tappedPointDistance = distance;
@@ -458,10 +455,7 @@ public class OeffiMapView extends MapView {
                     float tappedStationDistance = 0;
 
                     for (final Station station : stationsAware.getStations()) {
-                        android.location.Location.distanceBetween(tappedLat, tappedLon,
-                                station.location.getLatAsDouble(), station.location.getLonAsDouble(),
-                                distanceBetweenResults);
-                        final float distance = distanceBetweenResults[0];
+                        final float distance = GeoUtils.distanceBetween(tappedLat, tappedLon, station.location.coord).distanceInMeters;
                         if (tappedStation == null || distance < tappedStationDistance) {
                             tappedStation = station;
                             tappedStationDistance = distance;
@@ -475,10 +469,7 @@ public class OeffiMapView extends MapView {
                         } else {
                             final Point deviceLocation = locationAware.getDeviceLocation();
                             if (deviceLocation != null) {
-                                android.location.Location.distanceBetween(tappedLat, tappedLon,
-                                        deviceLocation.getLatAsDouble(), deviceLocation.getLonAsDouble(),
-                                        distanceBetweenResults);
-                                final float distance = distanceBetweenResults[0];
+                                final float distance = GeoUtils.distanceBetween(tappedLat, tappedLon, deviceLocation).distanceInMeters;
                                 if (distance < tappedStationDistance) {
                                     stationsAware.selectStation(null);
                                     consumed = true;

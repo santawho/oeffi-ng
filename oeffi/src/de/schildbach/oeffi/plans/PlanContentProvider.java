@@ -36,6 +36,7 @@ import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.URLs;
 import de.schildbach.oeffi.util.Downloader;
+import de.schildbach.oeffi.util.GeoUtils;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Point;
 import okhttp3.HttpUrl;
@@ -364,20 +365,14 @@ public class PlanContentProvider extends ContentProvider {
             final int lonColumn = cursor.getColumnIndexOrThrow(KEY_PLAN_LON);
 
             final Comparator<Integer> comparator = new Comparator<Integer>() {
-                private final float[] distanceBetweenResults = new float[1];
-
                 public int compare(final Integer index1, final Integer index2) {
                     cursor.moveToPosition(index1);
                     final Point p1 = Point.from1E6(cursor.getInt(latColumn), cursor.getInt(lonColumn));
-                    android.location.Location.distanceBetween(lat, lon, p1.getLatAsDouble(), p1.getLonAsDouble(),
-                            distanceBetweenResults);
-                    final float dist1 = distanceBetweenResults[0];
+                    final float dist1 = GeoUtils.distanceBetween(lat, lon, p1).distanceInMeters;
 
                     cursor.moveToPosition(index2);
                     final Point p2 = Point.from1E6(cursor.getInt(latColumn), cursor.getInt(lonColumn));
-                    android.location.Location.distanceBetween(lat, lon, p2.getLatAsDouble(), p2.getLonAsDouble(),
-                            distanceBetweenResults);
-                    final float dist2 = distanceBetweenResults[0];
+                    final float dist2 = GeoUtils.distanceBetween(lat, lon, p2).distanceInMeters;
                     return Float.compare(dist1, dist2);
                 }
             };

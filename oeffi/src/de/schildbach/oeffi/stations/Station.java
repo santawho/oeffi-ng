@@ -17,6 +17,7 @@
 
 package de.schildbach.oeffi.stations;
 
+import de.schildbach.oeffi.util.GeoUtils;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Departure;
 import de.schildbach.pte.dto.LineDestination;
@@ -63,6 +64,10 @@ public class Station {
         this.lines = lines;
 
         relevantProduct = null;
+    }
+
+    public void setDistanceAndBearing(final GeoUtils.DistanceResult distanceResult) {
+        setDistanceAndBearing(distanceResult.distanceInMeters, distanceResult.initialBearing);
     }
 
     public void setDistanceAndBearing(final float distance, final float bearing) {

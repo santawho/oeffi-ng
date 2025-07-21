@@ -79,6 +79,7 @@ import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.TripAware;
+import de.schildbach.oeffi.util.GeoUtils;
 import de.schildbach.oeffi.util.GoogleMapsUtils;
 import de.schildbach.oeffi.util.KmlProducer;
 import de.schildbach.oeffi.util.TimeSpec;
@@ -783,16 +784,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             return;
 
         float minDistance = Float.MAX_VALUE;
-        final float[] distanceBetweenResults = new float[1];
         for (final TripRenderer.LegContainer legC : tripRenderer.legs) {
             if (legC.publicLeg != null) {
                 final Trip.Public publicLeg = legC.publicLeg;
 
                 if (publicLeg.departure.hasCoord()) {
-                    android.location.Location.distanceBetween(publicLeg.departure.getLatAsDouble(),
-                            publicLeg.departure.getLonAsDouble(), location.getLatAsDouble(),
-                            location.getLonAsDouble(), distanceBetweenResults);
-                    final float distance = distanceBetweenResults[0];
+                    final float distance = GeoUtils.distanceBetween(publicLeg.departure.coord, location).distanceInMeters;
                     if (distance < minDistance) {
                         minDistance = distance;
                         highlightedLocation = publicLeg.departure;
@@ -803,10 +800,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 if (intermediateStops != null) {
                     for (final Stop stop : intermediateStops) {
                         if (stop.location.hasCoord()) {
-                            android.location.Location.distanceBetween(stop.location.getLatAsDouble(),
-                                    stop.location.getLonAsDouble(), location.getLatAsDouble(),
-                                    location.getLonAsDouble(), distanceBetweenResults);
-                            final float distance = distanceBetweenResults[0];
+                            final float distance = GeoUtils.distanceBetween(stop.location.coord, location).distanceInMeters;
                             if (distance < minDistance) {
                                 minDistance = distance;
                                 highlightedLocation = stop.location;
@@ -816,10 +810,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 }
 
                 if (publicLeg.arrival.hasCoord()) {
-                    android.location.Location.distanceBetween(publicLeg.arrival.getLatAsDouble(),
-                            publicLeg.arrival.getLonAsDouble(), location.getLatAsDouble(),
-                            location.getLonAsDouble(), distanceBetweenResults);
-                    final float distance = distanceBetweenResults[0];
+                    final float distance = GeoUtils.distanceBetween(publicLeg.arrival.coord, location).distanceInMeters;
                     if (distance < minDistance) {
                         minDistance = distance;
                         highlightedLocation = publicLeg.arrival;
