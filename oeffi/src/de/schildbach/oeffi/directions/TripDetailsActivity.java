@@ -246,7 +246,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     protected RenderConfig renderConfig;
     private Date highlightedTime;
     private Location highlightedLocation;
-    private Point location;
+    private Point deviceLocation;
     private int selectedLegIndex = -1;
     protected boolean isPaused = false;
 
@@ -352,7 +352,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 }
             } else {
                 locationManager.removeUpdates(TripDetailsActivity.this);
-                location = null;
+                deviceLocation = null;
 
                 getMapView().setLocationAware(null);
             }
@@ -620,9 +620,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     .getLastKnownLocation(provider);
             if (lastKnownLocation != null
                     && (lastKnownLocation.getLatitude() != 0 || lastKnownLocation.getLongitude() != 0))
-                location = LocationHelper.locationToPoint(lastKnownLocation);
+                deviceLocation = LocationHelper.locationToPoint(lastKnownLocation);
             else
-                location = null;
+                deviceLocation = null;
             getMapView().setLocationAware(TripDetailsActivity.this);
         }
     }
@@ -644,7 +644,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     public void onLocationChanged(final android.location.Location location) {
-        this.location = LocationHelper.locationToPoint(location);
+        this.deviceLocation = LocationHelper.locationToPoint(location);
 
         updateGUI();
     }
@@ -664,7 +664,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     public final Point getDeviceLocation() {
-        return location;
+        return deviceLocation;
     }
 
     public final Location getReferenceLocation() {
@@ -780,7 +780,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     private void updateHighlightedLocation() {
         highlightedLocation = null;
-        if (location == null)
+        if (deviceLocation == null)
             return;
 
         float minDistance = Float.MAX_VALUE;
@@ -789,7 +789,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 final Trip.Public publicLeg = legC.publicLeg;
 
                 if (publicLeg.departure.hasCoord()) {
-                    final float distance = GeoUtils.distanceBetween(publicLeg.departure.coord, location).distanceInMeters;
+                    final float distance = GeoUtils.distanceBetween(publicLeg.departure.coord, deviceLocation).distanceInMeters;
                     if (distance < minDistance) {
                         minDistance = distance;
                         highlightedLocation = publicLeg.departure;
@@ -800,7 +800,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 if (intermediateStops != null) {
                     for (final Stop stop : intermediateStops) {
                         if (stop.location.hasCoord()) {
-                            final float distance = GeoUtils.distanceBetween(stop.location.coord, location).distanceInMeters;
+                            final float distance = GeoUtils.distanceBetween(stop.location.coord, deviceLocation).distanceInMeters;
                             if (distance < minDistance) {
                                 minDistance = distance;
                                 highlightedLocation = stop.location;
@@ -810,7 +810,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 }
 
                 if (publicLeg.arrival.hasCoord()) {
-                    final float distance = GeoUtils.distanceBetween(publicLeg.arrival.coord, location).distanceInMeters;
+                    final float distance = GeoUtils.distanceBetween(publicLeg.arrival.coord, deviceLocation).distanceInMeters;
                     if (distance < minDistance) {
                         minDistance = distance;
                         highlightedLocation = publicLeg.arrival;
@@ -942,9 +942,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         final Stop departureStop = leg.departureStop;
         final Location departureLocation = departureStop.location;
-        final Location entryLocation = leg.entryLocation != null ? leg.entryLocation
-                : highlightedLocation != null ? highlightedLocation
-                : departureLocation;
+        final Location entryLocation = leg.entryLocation != null ? leg.entryLocation : departureLocation;
 
         boolean isArrivalSection = false;
 
