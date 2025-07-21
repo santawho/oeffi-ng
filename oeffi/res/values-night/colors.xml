@@ -8,6 +8,7 @@
     <color name="fg_less_significant">#aaaaaa</color>
     <color name="fg_insignificant">#888888</color>
     <color name="fg_highlighted">#ff9966</color>
+    <color name="fg_simulated">#cc00ff</color>
     <color name="fg_arrow">#ff6666</color>
     <color name="fg_position">#000000</color>
     <color name="fg_trip_next_event_normal">#ffffff</color>

@@ -13,6 +13,7 @@
     <color name="fg_insignificant_darkdefault">#888888</color>
     <color name="fg_highlighted">#dd9055</color>
     <color name="fg_highlighted_darkdefault">#ff9966</color>
+    <color name="fg_simulated">#8800cc</color>
     <color name="fg_trip_leg_frame_feeder">#99ff66</color>
     <color name="fg_trip_leg_frame_connection">#ff9966</color>
     <color name="fg_arrow">#aa0000</color>

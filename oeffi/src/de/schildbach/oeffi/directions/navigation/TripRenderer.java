@@ -26,11 +26,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.Formats;
+import de.schildbach.oeffi.util.GeoUtils;
 import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.Point;
@@ -50,6 +52,15 @@ public class TripRenderer {
         public final LegContainer transferFrom;
         public final LegContainer transferTo;
         public final boolean transferCritical;
+        public Point refPoint;
+        public Date refTime;
+        public Stop nearestStop;
+        public float distanceToNearestStop;
+        public Stop sectionOtherStop;
+        public float sectionLength;
+        public boolean sectionIsAfterNearestStop; // otherwise is before
+        public Date plannedTimeAtRefPoint;
+        public Trip.Public simulatedPublicLeg;
 
         public LegContainer(
                 final int legIndex,
@@ -82,8 +93,155 @@ public class TripRenderer {
         }
 
         public void setCurrentLegState(Trip.Public updatedLeg) {
-            if (initialLeg != null)
+            if (initialLeg != null) {
                 publicLeg = updatedLeg;
+                setRefPoint(refPoint, refTime);
+            }
+        }
+
+        private void setRefPoint(final Point refPoint, final Date refTime) {
+            this.refPoint = refPoint;
+            this.refTime = refTime;
+            nearestStop = null;
+            sectionOtherStop = null;
+            distanceToNearestStop = Float.MAX_VALUE;
+            sectionLength = Float.MAX_VALUE;
+            simulatedPublicLeg = null;
+            if (publicLeg == null)
+                return;
+            if (refPoint == null)
+                return;
+
+            final Consumer<Consumer<Stop>> evalAllStops = consumer -> {
+                consumer.accept(publicLeg.departureStop);
+                if (publicLeg.intermediateStops != null) {
+                    for (Stop intermediateStop : publicLeg.intermediateStops)
+                        consumer.accept(intermediateStop);
+                }
+                consumer.accept(publicLeg.arrivalStop);
+            };
+
+            // first step: nearest stop
+            evalAllStops.accept(stop -> {
+                final Location location = stop.location;
+                if (!location.hasCoord())
+                    return;
+                final float distanceToRef = GeoUtils.distanceBetween(location.coord, refPoint).distanceInMeters;
+                if (distanceToRef > distanceToNearestStop)
+                    return;
+                nearestStop = stop;
+                distanceToNearestStop = distanceToRef;
+            });
+
+            if (nearestStop == null)
+                return;
+
+            final float MINIMUM_REQUIRED_DISTANCE = 500;
+            final Point nearestStopCoord = nearestStop.location.coord;
+
+            // second step: nearest other stop to the nearest stop that is at least 500 meters afar.
+            sectionIsAfterNearestStop = false;
+            evalAllStops.accept(new Consumer<Stop>() {
+                boolean isAfterNearestStop = false;
+                float minDist = Float.MAX_VALUE;
+                @Override
+                public void accept(final Stop stop) {
+                    final Location location = stop.location;
+                    if (stop == nearestStop) {
+                        isAfterNearestStop = true;
+                        return;
+                    }
+                    if (!location.hasCoord())
+                        return;
+                    final float distanceToNearest = GeoUtils.distanceBetween(location.coord, nearestStopCoord).distanceInMeters;
+                    if (distanceToNearest < MINIMUM_REQUIRED_DISTANCE)
+                        return;
+                    final float distanceToRef = GeoUtils.distanceBetween(location.coord, refPoint).distanceInMeters;
+                    if (distanceToRef > minDist)
+                        return;
+                    minDist = distanceToRef;
+                    sectionOtherStop = stop;
+                    sectionLength = distanceToNearest;
+                    sectionIsAfterNearestStop = isAfterNearestStop;
+                }
+            });
+
+            if (sectionOtherStop != null) {
+                final Stop beginStop, endStop;
+                final float beginDist;
+                if (sectionIsAfterNearestStop) {
+                    beginStop = nearestStop;
+                    endStop = sectionOtherStop;
+                    beginDist = distanceToNearestStop;
+                } else {
+                    beginStop = sectionOtherStop;
+                    endStop = nearestStop;
+                    beginDist = sectionLength - distanceToNearestStop;
+                }
+                final float distRel = beginDist / sectionLength; // should be between 0.0 and 1.0
+                if (distRel <= 0.0) {
+                    plannedTimeAtRefPoint = beginStop.plannedDepartureTime;
+                } else if (distRel >= 1.0) {
+                    plannedTimeAtRefPoint = endStop.plannedArrivalTime;
+                } else {
+                    final long beginTime = beginStop.plannedDepartureTime.getTime();
+                    final long endTime = endStop.plannedArrivalTime.getTime();
+                    plannedTimeAtRefPoint = new Date(beginTime + (long) (distRel * (float) (endTime - beginTime)));
+                }
+
+                final long delayAtRefPoint = refTime.getTime() - plannedTimeAtRefPoint.getTime();
+                if (delayAtRefPoint > 0) {
+                    Stop departureStop = publicLeg.departureStop;
+                    Stop arrivalStop = publicLeg.arrivalStop;
+                    List<Stop> intermediateStops = publicLeg.intermediateStops;
+                    if (arrivalStop != endStop && intermediateStops != null) {
+                        intermediateStops = new ArrayList<>();
+                        boolean delayedArrival = false;
+                        for (Stop stop : publicLeg.intermediateStops) {
+                            final boolean delayedDeparture;
+                            if (delayedArrival) {
+                                final long stopIntervalLength = stop.plannedDepartureTime.getTime() - stop.plannedArrivalTime.getTime();
+                                delayedDeparture = stopIntervalLength < 4 * 60000;
+                            } else {
+                                delayedDeparture = false;
+                            }
+                            intermediateStops.add(new Stop(
+                                    stop.location,
+                                    stop.plannedArrivalTime,
+                                    delayedArrival ? new Date(stop.plannedArrivalTime.getTime() + delayAtRefPoint) : stop.predictedArrivalTime,
+                                    stop.plannedArrivalPosition, stop.predictedArrivalPosition,
+                                    stop.arrivalCancelled,
+                                    stop.plannedDepartureTime,
+                                    delayedDeparture ? new Date(stop.plannedDepartureTime.getTime() + delayAtRefPoint) : stop.predictedDepartureTime,
+                                    stop.plannedDeparturePosition, stop.predictedDeparturePosition,
+                                    stop.departureCancelled));
+                            if (!delayedDeparture)
+                                delayedArrival = false;
+                            if (stop == beginStop)
+                                delayedArrival = true;
+                        }
+                    }
+                    arrivalStop = new Stop(
+                            arrivalStop.location,
+                            arrivalStop.plannedArrivalTime, new Date(arrivalStop.plannedArrivalTime.getTime() + delayAtRefPoint),
+                            arrivalStop.plannedArrivalPosition, arrivalStop.predictedArrivalPosition,
+                            arrivalStop.arrivalCancelled,
+                            arrivalStop.plannedDepartureTime, arrivalStop.predictedDepartureTime,
+                            arrivalStop.plannedDeparturePosition, arrivalStop.predictedDeparturePosition,
+                            arrivalStop.departureCancelled);
+
+                    simulatedPublicLeg = new Trip.Public(
+                            publicLeg.line,
+                            publicLeg.destination,
+                            departureStop,
+                            arrivalStop,
+                            intermediateStops,
+                            publicLeg.path,
+                            publicLeg.message,
+                            publicLeg.journeyRef,
+                            refTime);
+                }
+            }
         }
     }
 
@@ -138,7 +296,10 @@ public class TripRenderer {
     public List<LegContainer> legs = new ArrayList<>();
     public LegContainer currentLeg;
     public final Map<LegKey, Boolean> legExpandStates;
+    public LegContainer nearestPublicLeg;
     public NotificationData notificationData;
+    public Point refPoint;
+    public Date refTime;
     private Boolean feasible;
 
     public TripRenderer(final TripRenderer previous, final Trip trip, final boolean isJourney, final Date now) {
@@ -147,6 +308,20 @@ public class TripRenderer {
         this.legExpandStates = previous != null ? previous.legExpandStates : new HashMap<>();
         setupFromTrip(trip);
         evaluateByTime(now);
+    }
+
+    public void setRefPoint(final Point refPoint, final Date refTime) {
+        this.refPoint = refPoint;
+        this.refTime = refTime;
+        nearestPublicLeg = null;
+        float minDistance = Float.MAX_VALUE;
+        for (LegContainer leg : legs) {
+            leg.setRefPoint(refPoint, refTime);
+            if (leg.nearestStop != null && leg.distanceToNearestStop < minDistance) {
+                nearestPublicLeg = leg;
+                minDistance = leg.distanceToNearestStop;
+            }
+        }
     }
 
     public boolean isFeasible() {

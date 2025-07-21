@@ -79,7 +79,6 @@ import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.TripAware;
-import de.schildbach.oeffi.util.GeoUtils;
 import de.schildbach.oeffi.util.GoogleMapsUtils;
 import de.schildbach.oeffi.util.KmlProducer;
 import de.schildbach.oeffi.util.TimeSpec;
@@ -229,6 +228,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private int colorSignificant;
     private int colorInsignificant;
     private int colorHighlighted;
+    private int colorSimulated;
     private int colorPosition, colorPositionBackground, colorPositionBackgroundChanged;
     private int colorLegPublicPastBackground, colorLegPublicNowBackground, colorLegPublicFutureBackground;
     private int colorLegIndividualPastBackground, colorLegIndividualNowBackground, colorLegIndividualFutureBackground;
@@ -247,6 +247,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private Date highlightedTime;
     private Location highlightedLocation;
     private Point deviceLocation;
+    private Date deviceLocationTime;
     private int selectedLegIndex = -1;
     protected boolean isPaused = false;
 
@@ -272,6 +273,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         colorSignificant = res.getColor(R.color.fg_significant);
         colorInsignificant = res.getColor(R.color.fg_insignificant);
         colorHighlighted = res.getColor(R.color.fg_highlighted);
+        colorSimulated = res.getColor(R.color.fg_simulated);
         colorPosition = res.getColor(R.color.fg_position);
         colorPositionBackground = res.getColor(R.color.bg_position);
         colorPositionBackgroundChanged = res.getColor(R.color.bg_position_changed);
@@ -352,7 +354,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 }
             } else {
                 locationManager.removeUpdates(TripDetailsActivity.this);
-                deviceLocation = null;
+                updateDeviceLocationDependencies(null, null);
 
                 getMapView().setLocationAware(null);
             }
@@ -618,11 +620,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             @SuppressLint("MissingPermission")
             final android.location.Location lastKnownLocation = locationManager
                     .getLastKnownLocation(provider);
-            if (lastKnownLocation != null
-                    && (lastKnownLocation.getLatitude() != 0 || lastKnownLocation.getLongitude() != 0))
-                deviceLocation = LocationHelper.locationToPoint(lastKnownLocation);
-            else
-                deviceLocation = null;
+            updateDeviceLocationDependencies(lastKnownLocation == null
+                    || (lastKnownLocation.getLatitude() == 0 && lastKnownLocation.getLongitude() == 0)
+                    ? null : LocationHelper.locationToPoint(lastKnownLocation), new Date());
             getMapView().setLocationAware(TripDetailsActivity.this);
         }
     }
@@ -644,8 +644,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     public void onLocationChanged(final android.location.Location location) {
-        this.deviceLocation = LocationHelper.locationToPoint(location);
-
+        updateDeviceLocationDependencies(LocationHelper.locationToPoint(location), new Date());
         updateGUI();
     }
 
@@ -682,7 +681,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     protected void updateGUI() {
         final Date now = new Date();
         updateHighlightedTime(now);
-        updateHighlightedLocation();
         updateDevInfo();
 
         TripRenderer.LegContainer currentLeg = null;
@@ -744,7 +742,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             if (legC.publicLeg == null)
                 continue;
 
-            final Trip.Public publicLeg = legC.publicLeg;
+            final Trip.Public publicLeg = legC.simulatedPublicLeg != null ? legC.simulatedPublicLeg : legC.publicLeg;
             Date arrivalTime, departureTime;
 
             departureTime = publicLeg.getDepartureTime();
@@ -778,46 +776,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
     }
 
-    private void updateHighlightedLocation() {
-        highlightedLocation = null;
-        if (deviceLocation == null)
-            return;
+    private void updateDeviceLocationDependencies(final Point newDeviceLocation, final Date now) {
+        deviceLocation = newDeviceLocation;
+        deviceLocationTime = now;
 
-        float minDistance = Float.MAX_VALUE;
-        for (final TripRenderer.LegContainer legC : tripRenderer.legs) {
-            if (legC.publicLeg != null) {
-                final Trip.Public publicLeg = legC.publicLeg;
-
-                if (publicLeg.departure.hasCoord()) {
-                    final float distance = GeoUtils.distanceBetween(publicLeg.departure.coord, deviceLocation).distanceInMeters;
-                    if (distance < minDistance) {
-                        minDistance = distance;
-                        highlightedLocation = publicLeg.departure;
-                    }
-                }
-
-                final List<Stop> intermediateStops = publicLeg.intermediateStops;
-                if (intermediateStops != null) {
-                    for (final Stop stop : intermediateStops) {
-                        if (stop.location.hasCoord()) {
-                            final float distance = GeoUtils.distanceBetween(stop.location.coord, deviceLocation).distanceInMeters;
-                            if (distance < minDistance) {
-                                minDistance = distance;
-                                highlightedLocation = stop.location;
-                            }
-                        }
-                    }
-                }
-
-                if (publicLeg.arrival.hasCoord()) {
-                    final float distance = GeoUtils.distanceBetween(publicLeg.arrival.coord, deviceLocation).distanceInMeters;
-                    if (distance < minDistance) {
-                        minDistance = distance;
-                        highlightedLocation = publicLeg.arrival;
-                    }
-                }
-            }
-        }
+        tripRenderer.setRefPoint(deviceLocation, deviceLocationTime);
+        final TripRenderer.LegContainer nearestPublicLeg = tripRenderer.nearestPublicLeg;
+        highlightedLocation = nearestPublicLeg == null ? null : nearestPublicLeg.nearestStop.location;
     }
 
     private void updateLocations() {
@@ -871,7 +836,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final TripRenderer.LegContainer walkLegC,
             final TripRenderer.LegContainer nextLegC,
             final Date now) {
-        Trip.Public leg = legC.publicLeg;
+        final boolean isSimulatedLeg = legC.simulatedPublicLeg != null;
+        final Trip.Public leg = isSimulatedLeg ? legC.simulatedPublicLeg : legC.publicLeg;
         final Location destination = leg.destination;
         final String destinationName = Formats.fullLocationName(destination);
         final boolean showDestination = destinationName != null;
@@ -948,7 +914,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         final View departureRow = stopRow(PearlView.Type.DEPARTURE, departureStop, "-", leg,
                 leg.getDepartureTime().equals(highlightedTime),
-                departureLocation.equals(highlightedLocation), now, collapseColumns);
+                departureLocation.equals(highlightedLocation), now, collapseColumns, isSimulatedLeg);
         stopsView.addView(departureRow);
 
         isArrivalSection |= departureLocation.id.equals(entryLocation.id);
@@ -973,14 +939,14 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                         final View stopRow = stopRow(hasStopTime ? PearlView.Type.INTERMEDIATE_ARRIVAL : PearlView.Type.PASSING,
                                 stop, previousPlace, leg,
                                 isArrivalTimeHighlighted || (!isLongStay && isDepartureTimeHighlighted),
-                                stopLocation.equals(highlightedLocation), now, collapseColumns);
+                                stopLocation.equals(highlightedLocation), now, collapseColumns, isSimulatedLeg);
                         stopsView.addView(stopRow);
 
                         if (isLongStay) {
                             final View depRow = stopRow(PearlView.Type.DEPARTURE_FOR_INTERMEDIATE_ARRIVAL,
                                     stop, previousPlace, leg,
                                     isDepartureTimeHighlighted,
-                                    stopLocation.equals(highlightedLocation), now, collapseColumns);
+                                    stopLocation.equals(highlightedLocation), now, collapseColumns, isSimulatedLeg);
                             stopsView.addView(depRow);
                         }
                     } else {
@@ -988,14 +954,14 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                             final View depRow = stopRow(PearlView.Type.ARRIVAL_FOR_INTERMEDIATE_DEPARTURE,
                                     stop, previousPlace, leg,
                                     isDepartureTimeHighlighted,
-                                    stopLocation.equals(highlightedLocation), now, collapseColumns);
+                                    stopLocation.equals(highlightedLocation), now, collapseColumns, isSimulatedLeg);
                             stopsView.addView(depRow);
                         }
 
                         final View stopRow = stopRow(hasStopTime ? PearlView.Type.INTERMEDIATE_DEPARTURE : PearlView.Type.PASSING,
                                 stop, previousPlace, leg,
                                 isDepartureTimeHighlighted || (!isLongStay && isArrivalTimeHighlighted),
-                                stopLocation.equals(highlightedLocation), now, collapseColumns);
+                                stopLocation.equals(highlightedLocation), now, collapseColumns, isSimulatedLeg);
                         stopsView.addView(stopRow);
                     }
 
@@ -1022,7 +988,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         isArrivalSection = true;
         final View arrivalRow = stopRow(PearlView.Type.ARRIVAL, leg.arrivalStop, previousPlace, leg,
                 leg.getArrivalTime().equals(highlightedTime),
-                leg.arrivalStop.location.equals(highlightedLocation), now, collapseColumns);
+                leg.arrivalStop.location.equals(highlightedLocation), now, collapseColumns, isSimulatedLeg);
         stopsView.addView(arrivalRow);
 
         stopsView.setColumnCollapsed(1, collapseColumns.collapseDateColumn);
@@ -1481,8 +1447,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     private View stopRow(
             final PearlView.Type pearlType,
-            final Stop stop, final String previousPlace, final Trip.Public leg, final boolean highlightTime,
-            final boolean highlightLocation, final Date now, final CollapseColumns collapseColumns) {
+            final Stop stop, final String previousPlace, final Trip.Public leg,
+            final boolean highlightTime, final boolean highlightLocation,
+            final Date now, final CollapseColumns collapseColumns, final boolean isSimulatedLeg) {
         final View row = inflater.inflate(R.layout.directions_trip_details_public_entry_stop, null);
 
         final boolean isTimePredicted;
@@ -1630,7 +1597,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             stopTimeView.setText(isTimeDeparture ? timeText + "°" : timeText);
             setStrikeThru(stopTimeView, isCancelled);
         }
-        final int stopTimeColor = highlightTime ? colorHighlighted : colorSignificant;
+        final int stopTimeColor =
+                highlightTime ? colorHighlighted
+                : isSimulatedLeg ? colorSimulated
+                : colorSignificant;
         stopDateView.setTextColor(stopTimeColor);
         stopTimeView.setTextColor(stopTimeColor);
         final boolean stopTimeBold = highlightTime || (renderConfig.isJourney ? isEntryOrExit
