@@ -48,7 +48,7 @@ println "applicationId = ${CREDENTIALS.applicationId}"
 
 android {
     namespace 'de.schildbach.oeffi'
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         applicationId "de.schildbach.oeffi"
