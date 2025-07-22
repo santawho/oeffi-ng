@@ -19,4 +19,11 @@
     <string name="navigation_preferences_refresh_beep_summary">Spiele Piepstöne, wenn die Navigationsdaten im Hintergrund aufgefrischt werden</string>
     <string name="navigation_preferences_refresh_beep_title">Hintergrundtöne</string>
 
+    <string name="navigation_alarm_dialog_message">Setze einen Alarm für die Abfahrt in\n%1$s</string>
+    <string name="navigation_alarm_dialog_time_label">Minuten\nim Voraus</string>
+    <string name="navigation_alarm_dialog_save_default_label">Als Standard speichern für\n%1$s</string>
+    <string name="navigation_alarm_dialog_delete_default_label">Aktuellen Standard löschen für\n%1$s</string>
+    <string name="navigation_alarm_dialog_set_alarm_label">Alarm setzen</string>
+    <string name="navigation_alarm_dialog_clear_alarm_label">Alarm löschen</string>
+
 </resources>

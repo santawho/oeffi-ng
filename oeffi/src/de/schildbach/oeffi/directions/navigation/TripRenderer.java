@@ -400,7 +400,7 @@ public class TripRenderer {
                 TripRenderer.LegContainer nextLegC = (iNext < legs.size()) ? legs.get(iNext) : null;
                 isCurrent = updatePublicLeg(legC, walkLegC, nextLegC, now);
             } else {
-                isCurrent = updateIndividualLeg(legC, now);
+                isCurrent = updateIndividualLeg(legC, iLeg == 0, now);
             }
             if (isCurrent) {
                 currentLeg = legC;
@@ -433,7 +433,7 @@ public class TripRenderer {
             // leg is in the past
         } else {
             // leg is now
-            setNextEventType(true);
+            setNextEventType(true, false);
             setPrevEventLatestTime(beginTime, plannedBeginTime);
             final boolean eventIsNow = setNextEventTimeLeft(now, endTime, plannedEndTime, 0);
             String targetName = Formats.fullLocationName(arrivalStop.location);
@@ -483,6 +483,7 @@ public class TripRenderer {
 
     private boolean updateIndividualLeg(
             final TripRenderer.LegContainer legC,
+            final boolean isInitialIndividual,
             final Date now) {
         final Trip.Individual leg = legC.individualLeg;
         final Trip.Public nextPublicLeg = legC.transferTo != null ? legC.transferTo.publicLeg : null;
@@ -498,7 +499,7 @@ public class TripRenderer {
             // leg is in the past
         } else {
             // leg is now
-            setNextEventType(false);
+            setNextEventType(false, isInitialIndividual);
             setPrevEventLatestTime(beginTime, plannedBeginTime);
             final boolean eventIsNow = setNextEventTimeLeft(now, endTime, transferTo != null ? plannedEndTime : null, leg != null ? leg.min : 0);
             final String targetName = (transferTo != null) ? Formats.fullLocationName(transferTo.location) : null;
@@ -582,9 +583,11 @@ public class TripRenderer {
     }
 
     public boolean nextEventTypeIsPublic;
+    public boolean nextEventIsInitialIndividual;
 
-    private void setNextEventType(boolean isPublic) {
+    private void setNextEventType(final boolean isPublic, final boolean isInitialIndividual) {
         nextEventTypeIsPublic = isPublic;
+        nextEventIsInitialIndividual = isInitialIndividual;
     }
 
     public Date nextEventClock;

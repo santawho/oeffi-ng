@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingHorizontal="@dimen/text_padding_horizontal_verylax"
+    android:paddingVertical="@dimen/text_padding_vertical_verylax" >
+
+    <TextView
+        android:id="@+id/navigation_alarm_dialog_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textStyle="bold"
+        android:textSize="@dimen/font_size_xlarge"
+        android:text="@string/navigation_alarm_dialog_message" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center" >
+        <NumberPicker
+            android:id="@+id/navigation_alarm_dialog_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/navigation_alarm_dialog_time_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/navigation_alarm_dialog_time_label" />
+    </LinearLayout>
+
+    <CheckBox
+        android:id="@+id/navigation_alarm_dialog_save_default"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/navigation_alarm_dialog_save_default_label" />
+
+    <Button
+        android:id="@+id/navigation_alarm_dialog_delete_default"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:maxLines="3"
+        android:text="@string/navigation_alarm_dialog_delete_default_label" />
+
+    <RelativeLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/navigation_alarm_dialog_clear_alarm"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:text="@string/navigation_alarm_dialog_clear_alarm_label" />
+
+        <Button
+            android:id="@+id/navigation_alarm_dialog_set_alarm"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:text="@string/navigation_alarm_dialog_set_alarm_label" />
+    </RelativeLayout>
+
+</LinearLayout>

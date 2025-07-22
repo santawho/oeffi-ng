@@ -30,14 +30,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.AudioAttributes;
-import android.media.AudioFocusRequest;
 import android.media.AudioManager;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.service.notification.StatusBarNotification;
 import android.view.View;
@@ -58,9 +54,11 @@ import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
 import de.schildbach.oeffi.util.ClockUtils;
+import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.ResourceUri;
 import de.schildbach.pte.DbWebProvider;
+import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Trip;
@@ -239,13 +237,14 @@ public class NavigationNotification {
     public static final class Configuration implements Serializable {
         private static final long serialVersionUID = -3466636027523660100L;
 
-        boolean soundEnabled;
+        public boolean soundEnabled;
+        public Integer startAlarmMinutes;
     }
 
     public static final class ExtraData implements Serializable {
         private static final long serialVersionUID = -2218877489048279370L;
 
-        boolean refreshAllLegs;
+        public boolean refreshAllLegs;
     }
 
     private final Context context;
@@ -299,7 +298,17 @@ public class NavigationNotification {
         final Bundle extras = getActiveNotificationExtras();
         if (extras == null) {
             this.intentData = aIntentData;
-            this.configuration = configuration != null ? configuration : new Configuration();
+            if (configuration != null) {
+                this.configuration = configuration;
+            } else {
+                final Configuration conf = new Configuration();
+                final Trip.Public firstPublicLeg = this.intentData.trip.getFirstPublicLeg();
+                if (firstPublicLeg != null) {
+                    conf.startAlarmMinutes = new StartAlarmManager().getDefaultTime(
+                            this.intentData.network, firstPublicLeg.departure.id);
+                }
+                this.configuration = conf;
+            }
             this.extraData = new ExtraData();
             this.lastNotified = lastNotified;
         } else {
@@ -314,21 +323,29 @@ public class NavigationNotification {
             NavigationNotification.prefs = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
+    public NetworkId getNetwork() {
+        return intentData == null ? null : intentData.network;
+    }
+
     public Trip getTrip() {
         return intentData == null ? null : intentData.trip;
+    }
+
+    public Configuration getConfiguration() {
+        return configuration;
     }
 
     public static void updateFromForeground(
             final Context context, final Intent intent,
             final Trip trip, final Configuration configuration) {
         NavigationAlarmManager.runOnHandlerThread(() -> {
-            new NavigationNotification(context, intent).updateFromForeground(trip, configuration);
+            new NavigationNotification(context, intent).internUpdateFromForeground(trip, configuration);
         });
     }
 
-    private void updateFromForeground(final Trip newTrip, final Configuration configuration) {
-        if (configuration != null)
-            this.configuration = configuration;
+    private void internUpdateFromForeground(final Trip newTrip, final Configuration newConfiguration) {
+        if (newConfiguration != null)
+            this.configuration = newConfiguration;
         update(newTrip);
         if (lastNotified != null) {
             final long refreshAt = lastNotified.refreshNotificationRequiredAt;
@@ -382,6 +399,16 @@ public class NavigationNotification {
         long nextRefreshTimeMs;
         long nextTripReloadTimeMs;
         if (tripRenderer.nextEventEarliestTime != null) {
+            if (tripRenderer.nextEventIsInitialIndividual) {
+                final Integer startAlarmMinutes = configuration.startAlarmMinutes;
+                if (startAlarmMinutes != null) {
+                    final long earliest = tripRenderer.nextEventEarliestTime.getTime();
+                    final long estimated = tripRenderer.nextEventEstimatedTime.getTime();
+                    final long startAlarmAt = (2 * earliest + estimated) / 3 - startAlarmMinutes * 60000;
+                    log.info("alarm for start at {} set to {}",
+                            tripRenderer.nextEventTargetName, Formats.formatTime(context, startAlarmAt));
+                }
+            }
             final long timeLeft = tripRenderer.nextEventEarliestTime.getTime() - nowTime;
             if (timeLeft < 240000) {
                 // last 4 minutes and after, 30 secs refresh interval

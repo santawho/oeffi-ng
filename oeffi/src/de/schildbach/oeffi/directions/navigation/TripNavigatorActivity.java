@@ -45,6 +45,7 @@ import javax.net.ssl.SSLException;
 
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.QueryTripsRunnable;
+import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
 import de.schildbach.oeffi.directions.TripsOverviewActivity;
@@ -416,9 +417,11 @@ public class TripNavigatorActivity extends TripDetailsActivity {
             return;
 
         final Trip trip = aTrip != null ? aTrip : tripRenderer.trip;
-        NavigationNotification.Configuration configuration = new NavigationNotification.Configuration();
+        final Intent intent = getIntent();
+        final NavigationNotification navigationNotification = new NavigationNotification(this, intent);
+        NavigationNotification.Configuration configuration = Objects.clone(navigationNotification.getConfiguration());
         configuration.soundEnabled = soundEnabled;
-        NavigationNotification.updateFromForeground(this, getIntent(), trip, configuration);
+        NavigationNotification.updateFromForeground(this, intent, trip, configuration);
     }
 
     @Override
@@ -435,30 +438,45 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         return overviewConfig;
     }
 
-    private boolean isStartAlarmActive = false;
-
     @Override
     protected boolean updateIndividualLeg(final View row, final TripRenderer.LegContainer legC, final Date now) {
+        final ImageButton progressBell = row.findViewById(R.id.directions_trip_details_individual_entry_progress_bell);
+        progressBell.setVisibility(View.GONE);
+
         final boolean isNow = super.updateIndividualLeg(row, legC, now);
         if (!isNow)
-            return false;
+            return isNow;
 
-        final ImageButton progressBell = row.findViewById(R.id.directions_trip_details_individual_entry_progress_bell);
+        final boolean isInitialIndividualLeg = legC.legIndex <= 0;
+        if (!isInitialIndividualLeg)
+            return isNow;
+
+        final TripRenderer.LegContainer transferTo = legC.transferTo;
+        if (transferTo == null)
+            return isNow;
+
+        final Trip.Public firstPublicLeg = transferTo.publicLeg;
+        if (firstPublicLeg == null)
+            return isNow;
+
         progressBell.setVisibility(View.VISIBLE);
-        progressBell.setOnClickListener(v -> {
-            isStartAlarmActive = !isStartAlarmActive;
-            setBellState(progressBell, isStartAlarmActive);
-        });
-        setBellState(progressBell, isStartAlarmActive);
 
-        return true;
+        final NavigationNotification navigationNotification = new NavigationNotification(this, getIntent());
+        progressBell.setOnClickListener(v -> new StartAlarmManager().showConfigureStartAlarmDialog(
+                this, getIntent(),
+                isAlarmActive -> updateBellState(progressBell, isAlarmActive)));
+
+        final Integer startAlarmMinutes = navigationNotification.getConfiguration().startAlarmMinutes;
+        updateBellState(progressBell,startAlarmMinutes != null);
+
+        return isNow;
     }
 
-    private void setBellState(final ImageButton progressBell, final boolean isActive) {
-        final Drawable drawable = getDrawable(isActive
+    private void updateBellState(final ImageButton progressBell, final boolean isAlarmActive) {
+        final Drawable drawable = getDrawable(isAlarmActive
                 ? R.drawable.ic_bell_on_black_24dp
                 : R.drawable.ic_bell_off_black_24dp);
-        final int colorId = isActive ? R.color.fg_significant : R.color.fg_insignificant;
+        final int colorId = isAlarmActive ? R.color.fg_significant : R.color.fg_insignificant;
         drawable.setTint(getColor(colorId));
         progressBell.setImageDrawable(drawable);
     }

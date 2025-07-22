@@ -25,4 +25,11 @@
     <string name="navigation_preferences_refresh_beep_summary">Play beep sounds when refreshing the navigation in background</string>
     <string name="navigation_preferences_refresh_beep_title">Background Sounds</string>
 
+    <string name="navigation_alarm_dialog_message">Set an alarm for departure at\n%1$s</string>
+    <string name="navigation_alarm_dialog_time_label">minutes\nin advance</string>
+    <string name="navigation_alarm_dialog_save_default_label">Save as default for\n%1$s</string>
+    <string name="navigation_alarm_dialog_delete_default_label">Delete current default for\n%1$s</string>
+    <string name="navigation_alarm_dialog_set_alarm_label">Set Alarm</string>
+    <string name="navigation_alarm_dialog_clear_alarm_label">Clear Alarm</string>
+
 </resources>
