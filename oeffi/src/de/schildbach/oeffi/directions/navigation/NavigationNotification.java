@@ -405,8 +405,10 @@ public class NavigationNotification {
                     final long earliest = tripRenderer.nextEventEarliestTime.getTime();
                     final long estimated = tripRenderer.nextEventEstimatedTime.getTime();
                     final long startAlarmAt = (2 * earliest + estimated) / 3 - startAlarmMinutes * 60000;
-                    log.info("alarm for start at {} set to {}",
-                            tripRenderer.nextEventTargetName, Formats.formatTime(context, startAlarmAt));
+                    if (startAlarmAt > nowTime) {
+                        log.info("alarm for start at {} set to {}",
+                                tripRenderer.nextEventTargetName, Formats.formatTime(context, startAlarmAt));
+                    }
                 }
             }
             final long timeLeft = tripRenderer.nextEventEarliestTime.getTime() - nowTime;
