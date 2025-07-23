@@ -239,6 +239,7 @@ public class NavigationNotification {
 
         public boolean soundEnabled;
         public Long startAlarmMillis;
+        public long startAlarmId;
     }
 
     public static final class ExtraData implements Serializable {
@@ -306,6 +307,7 @@ public class NavigationNotification {
                 if (firstPublicLeg != null) {
                     conf.startAlarmMillis = new StartAlarmManager(context).getDefaultTime(
                             this.intentData.network, firstPublicLeg.departure.id);
+                    conf.startAlarmId = System.currentTimeMillis();
                 }
                 this.configuration = conf;
             }
@@ -544,17 +546,17 @@ public class NavigationNotification {
                 }
             }
         }
-        newNotified.startAlarmPlayed = lastNotified.startAlarmPlayed;
+        newNotified.playedStartAlarmId = lastNotified.playedStartAlarmId;
         if (startAlarmAtMs > 0) {
             if (startAlarmAtMs <= nowTime) {
-                if (lastNotified.startAlarmPlayed) {
+                if (lastNotified.playedStartAlarmId == configuration.startAlarmId) {
                     log.info("alarm for start at {} was at {}, but already fired before",
                             tripRenderer.nextEventTargetName, Formats.formatTime(context, startAlarmAtMs));
                 } else {
                     log.info("alarm for start at {} should have been at {}, now firing",
                             tripRenderer.nextEventTargetName, Formats.formatTime(context, startAlarmAtMs));
                     new StartAlarmManager(context).fireAlarm(context, intentData, tripRenderer);
-                    newNotified.startAlarmPlayed = true;
+                    newNotified.playedStartAlarmId = configuration.startAlarmId;
                 }
             } else {
                 log.info("alarm for start at {} set to {}",

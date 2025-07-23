@@ -219,6 +219,7 @@ public class StartAlarmManager {
                         if (saveDefaultCheckBox.isChecked())
                             saveDefault(networkId, firstPublicLeg.departure, timeValue);
                         configuration.startAlarmMillis = timeValue;
+                        configuration.startAlarmId = System.currentTimeMillis();
                         NavigationNotification.updateFromForeground(getContext(),
                                 navigationNotificationIntent, null, configuration);
                         if (finishedListener != null)
