@@ -238,7 +238,7 @@ public class NavigationNotification {
         private static final long serialVersionUID = -3466636027523660100L;
 
         public boolean soundEnabled;
-        public Integer startAlarmMinutes;
+        public Long startAlarmMillis;
     }
 
     public static final class ExtraData implements Serializable {
@@ -304,7 +304,7 @@ public class NavigationNotification {
                 final Configuration conf = new Configuration();
                 final Trip.Public firstPublicLeg = this.intentData.trip.getFirstPublicLeg();
                 if (firstPublicLeg != null) {
-                    conf.startAlarmMinutes = new StartAlarmManager().getDefaultTime(
+                    conf.startAlarmMillis = new StartAlarmManager(context).getDefaultTime(
                             this.intentData.network, firstPublicLeg.departure.id);
                 }
                 this.configuration = conf;
@@ -385,6 +385,8 @@ public class NavigationNotification {
         return notification.extras;
     }
 
+    static Long pppp;
+
     @SuppressLint("ScheduleExactAlarm")
     private boolean update(final Trip aTrip) {
         final Trip trip = aTrip != null ? aTrip : intentData.trip;
@@ -398,18 +400,20 @@ public class NavigationNotification {
         boolean refreshAllLegs = false;
         long nextRefreshTimeMs;
         long nextTripReloadTimeMs;
+        final Long startAlarmMillisInAdvance = configuration.startAlarmMillis;
+        final long startAlarmAtMs;
         if (tripRenderer.nextEventEarliestTime != null) {
             if (tripRenderer.nextEventIsInitialIndividual) {
-                final Integer startAlarmMinutes = configuration.startAlarmMinutes;
-                if (startAlarmMinutes != null) {
+                if (startAlarmMillisInAdvance != null) {
                     final long earliest = tripRenderer.nextEventEarliestTime.getTime();
                     final long estimated = tripRenderer.nextEventEstimatedTime.getTime();
-                    final long startAlarmAt = (2 * earliest + estimated) / 3 - startAlarmMinutes * 60000;
-                    if (startAlarmAt > nowTime) {
-                        log.info("alarm for start at {} set to {}",
-                                tripRenderer.nextEventTargetName, Formats.formatTime(context, startAlarmAt));
-                    }
+                    startAlarmAtMs = (2 * earliest + estimated) / 3 - startAlarmMillisInAdvance;
+//                    if (pppp == null) pppp = nowTime + 10000; startAlarmAtMs = pppp;
+                } else {
+                    startAlarmAtMs = 0;
                 }
+            } else {
+                startAlarmAtMs = startAlarmMillisInAdvance != null ? nowTime : -1;
             }
             final long timeLeft = tripRenderer.nextEventEarliestTime.getTime() - nowTime;
             if (timeLeft < 240000) {
@@ -444,6 +448,7 @@ public class NavigationNotification {
                 nextRefreshTimeMs = 0;
                 nextTripReloadTimeMs = 0;
             }
+            startAlarmAtMs = 0;
         }
 //nextRefreshTimeMs = nowTime + 30000;
         final Date timeoutAt = new Date(trip.getLastArrivalTime().getTime() + KEEP_NOTIFICATION_FOR_MINUTES * 60000);
@@ -539,6 +544,25 @@ public class NavigationNotification {
                 }
             }
         }
+        newNotified.startAlarmPlayed = lastNotified.startAlarmPlayed;
+        if (startAlarmAtMs > 0) {
+            if (startAlarmAtMs <= nowTime) {
+                if (lastNotified.startAlarmPlayed) {
+                    log.info("alarm for start at {} was at {}, but already fired before",
+                            tripRenderer.nextEventTargetName, Formats.formatTime(context, startAlarmAtMs));
+                } else {
+                    log.info("alarm for start at {} should have been at {}, now firing",
+                            tripRenderer.nextEventTargetName, Formats.formatTime(context, startAlarmAtMs));
+                    new StartAlarmManager(context).fireAlarm(context, intentData, tripRenderer);
+                    newNotified.startAlarmPlayed = true;
+                }
+            } else {
+                log.info("alarm for start at {} set to {}",
+                        tripRenderer.nextEventTargetName, Formats.formatTime(context, startAlarmAtMs));
+                if (startAlarmAtMs < nextRefreshTimeMs)
+                    nextRefreshTimeMs = startAlarmAtMs;
+            }
+        }
         newNotified.leftTimeReminded = lastNotified.leftTimeReminded;
         long nextReminderTimeMs = 0;
         if (tripRenderer.currentLeg != null) {
@@ -629,6 +653,7 @@ public class NavigationNotification {
                 .setDeleteIntent(getPendingActionIntent(ACTION_DELETE, trip))
                 .setAutoCancel(false)
                 .setOngoing(true)
+                .setLocalOnly(true)
                 .setUsesChronometer(true)
                 .setWhen(nowTime)
                 .setTimeoutAfter(duration)
@@ -692,7 +717,7 @@ public class NavigationNotification {
             final Trip trip) {
         final Intent intent = TripNavigatorActivity.buildStartIntent(
                 context, intentData.network, trip, intentData.renderConfig,
-                deleteRequest, showNextEvent, false);
+                deleteRequest, showNextEvent, null, false);
         return PendingIntent.getActivity(context,
                 (deleteRequest ? 1 : 0) + (showNextEvent ? 2 : 0),
                 intent, PendingIntent.FLAG_IMMUTABLE);

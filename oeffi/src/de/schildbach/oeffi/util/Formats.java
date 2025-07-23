@@ -27,16 +27,29 @@ import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.Position;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 
 public final class Formats {
-    public static String formatDate(final Context context, final long time) {
-        return DateUtils.formatDateTime(context, time, DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_ABBREV_WEEKDAY
+    public static String formatDate( final Context context, final Date date) {
+        return formatDate(context, date.getTime());
+    }
+
+    public static String formatDate( final Context context, final long time) {
+        return DateUtils.formatDateTime(context, time,
+                DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_ABBREV_WEEKDAY
                 | DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_MONTH);
     }
 
-    public static String formatDate(final Context context, final long now, final long time, final boolean abbreviate,
-            final String todayString) {
+    public static String formatDate(
+            final Context context, final long now, final Date date,
+            final boolean abbreviate, final String todayString) {
+        return formatDate(context, now, date.getTime(), abbreviate, todayString);
+    }
+
+    public static String formatDate(
+            final Context context, final long now, final long time,
+            final boolean abbreviate, final String todayString) {
         // today
         if (DateUtils.isToday(time))
             return todayString;
@@ -67,8 +80,16 @@ public final class Formats {
         return formatDate(context, time);
     }
 
+    public static String formatDate(final Context context, final long now, final Date date) {
+        return formatDate(context, now, date.getTime());
+    }
+
     public static String formatDate(final Context context, final long now, final long time) {
         return formatDate(context, now, time, false, context.getString(R.string.time_today));
+    }
+
+    public static String formatTime(final Context context, final Date date) {
+        return formatTime(context, date.getTime());
     }
 
     public static String formatTime(final Context context, final long time) {

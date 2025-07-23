@@ -66,6 +66,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     private static final long NAVIGATION_AUTO_REFRESH_INTERVAL_SECS = 110;
     public static final String INTENT_EXTRA_DELETEREQUEST = TripNavigatorActivity.class.getName() + ".deleterequest";
     public static final String INTENT_EXTRA_NEXTEVENT = TripNavigatorActivity.class.getName() + ".nextevent";
+    public static final String INTENT_EXTRA_PLAYALARM = TripNavigatorActivity.class.getName() + ".playalarm";
 
     public static void startNavigation(
             final Activity contextActivity,
@@ -75,7 +76,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         rc.isNavigation = true;
         rc.isJourney = renderConfig.isJourney;
         rc.queryTripsRequestData = renderConfig.queryTripsRequestData;
-        Intent intent = buildStartIntent(contextActivity, network, trip, rc, false, false, sameWindow);
+        Intent intent = buildStartIntent(contextActivity, network, trip, rc, false, false, null, sameWindow);
         contextActivity.startActivity(intent);
     }
 
@@ -83,17 +84,21 @@ public class TripNavigatorActivity extends TripDetailsActivity {
             final Context context,
             final NetworkId network, final Trip trip, final RenderConfig renderConfig,
             final boolean deleteRequest, final boolean showNextEvent,
+            final String playAlarmNotificationTag,
             final boolean sameWindow) {
         renderConfig.isNavigation = true;
         final Intent intent = TripDetailsActivity.buildStartIntent(TripNavigatorActivity.class, context, network, trip, renderConfig);
         intent.putExtra(INTENT_EXTRA_DELETEREQUEST, deleteRequest);
         intent.putExtra(INTENT_EXTRA_NEXTEVENT, showNextEvent);
+        if (playAlarmNotificationTag != null)
+            intent.putExtra(INTENT_EXTRA_PLAYALARM, playAlarmNotificationTag);
         intent.addFlags(
-                sameWindow ? Intent.FLAG_ACTIVITY_CLEAR_TASK : Intent.FLAG_ACTIVITY_NEW_TASK
+                (sameWindow ? Intent.FLAG_ACTIVITY_CLEAR_TASK : Intent.FLAG_ACTIVITY_NEW_TASK)
                 | Intent.FLAG_ACTIVITY_NEW_DOCUMENT
                 // | Intent.FLAG_ACTIVITY_MULTIPLE_TASK
                 // | Intent.FLAG_ACTIVITY_SINGLE_TOP
                 // | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                | (playAlarmNotificationTag != null ? Intent.FLAG_ACTIVITY_NO_USER_ACTION : 0)
                 | Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS);
         final Uri uri = new Uri.Builder()
                 .scheme("data")
@@ -120,6 +125,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         final Intent intent = getIntent();
         handleDeleteNotification(intent);
         handleSwitchToNextEvent(intent);
+        handlePlayAlarm(intent);
     }
 
     @Override
@@ -218,6 +224,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         if (!handleDeleteNotification(intent)) {
             doCheckAutoRefresh(true);
             handleSwitchToNextEvent(intent);
+            handlePlayAlarm(intent);
         }
     }
 
@@ -233,6 +240,14 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
         askStopNavigation();
         return true;
+    }
+
+    private void handlePlayAlarm(final Intent intent) {
+        final String playAlarmNotificationTag = intent.getStringExtra(INTENT_EXTRA_PLAYALARM);
+        if (playAlarmNotificationTag == null)
+            return;
+
+        new StartAlarmManager(this).showAlarmDialog(playAlarmNotificationTag);
     }
 
     private void askStopNavigation() {
@@ -462,12 +477,11 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         progressBell.setVisibility(View.VISIBLE);
 
         final NavigationNotification navigationNotification = new NavigationNotification(this, getIntent());
-        progressBell.setOnClickListener(v -> new StartAlarmManager().showConfigureStartAlarmDialog(
-                this, getIntent(),
-                isAlarmActive -> updateBellState(progressBell, isAlarmActive)));
+        progressBell.setOnClickListener(v -> new StartAlarmManager(this).showConfigureStartAlarmDialog(
+                getIntent(), isAlarmActive -> updateBellState(progressBell, isAlarmActive)));
 
-        final Integer startAlarmMinutes = navigationNotification.getConfiguration().startAlarmMinutes;
-        updateBellState(progressBell,startAlarmMinutes != null);
+        final Long startAlarmMillis = navigationNotification.getConfiguration().startAlarmMillis;
+        updateBellState(progressBell,startAlarmMillis != null);
 
         return isNow;
     }

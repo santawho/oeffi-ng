@@ -18,22 +18,34 @@
 package de.schildbach.oeffi.directions.navigation;
 
 import android.app.Dialog;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.AudioAttributes;
+import android.media.RingtoneManager;
+import android.os.Build;
 import android.os.Bundle;
-import android.view.View;
+import android.service.notification.StatusBarNotification;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.directions.TripDetailsActivity;
+import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.ViewUtils;
@@ -42,16 +54,60 @@ import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.Trip;
 
 public class StartAlarmManager {
+    private static Logger log = LoggerFactory.getLogger(StartAlarmManager.class);
+
     public interface StartAlarmDialogFinishedListener {
         void onStartAlarmDialogFinished(boolean isAlarmActive);
     }
 
+    private static final String CHANNEL_ID = "startalarm";
+    private static final String TAG_PREFIX = StartAlarmManager.class.getName() + ":";
+
+    private static boolean notificationChannelCreated;
+
+    private final Context context;
+
+    public StartAlarmManager(final Context context) {
+        this.context = context;
+    }
+
+    private void createNotificationChannel() {
+        if (notificationChannelCreated)
+            return;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = context.getString(R.string.navigation_startalarm_notification_channel_name);
+            String description = context.getString(R.string.navigation_startalarm_notification_channel_description);
+            final NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_HIGH);
+            channel.setDescription(description);
+            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+            channel.enableLights(true);
+            channel.enableVibration(true);
+            channel.setSound(
+                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM),
+                    new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).build());
+            getNotificationManager().createNotificationChannel(channel);
+        }
+        notificationChannelCreated = true;
+    }
+
+    private NotificationManager getNotificationManager() {
+        return (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+    }
+
+    private Notification findNotificationByTag(final String tag) {
+        final StatusBarNotification[] activeNotifications = getNotificationManager().getActiveNotifications();
+        for (StatusBarNotification statusBarNotification : activeNotifications) {
+            if (tag.equals(statusBarNotification.getTag()))
+                return statusBarNotification.getNotification();
+        }
+        return null;
+    }
+
     public void showConfigureStartAlarmDialog(
-            @NonNull final Context context,
             final Intent navigationNotificationIntent,
             final StartAlarmDialogFinishedListener finishedListener) {
         final ConfigureStartAlarmDialog dialog = new ConfigureStartAlarmDialog(
-                context, navigationNotificationIntent, finishedListener);
+                navigationNotificationIntent, finishedListener);
         dialog.show();
     }
 
@@ -59,24 +115,24 @@ public class StartAlarmManager {
         return String.format("start_alarm_%s_%s", networkId.name(), stationId);
     }
 
-    public Integer getDefaultTime(final NetworkId networkId, final String stationId) {
+    public Long getDefaultTime(final NetworkId networkId, final String stationId) {
         final String key = getDefaultTimePrefKey(networkId, stationId);
-        final int value = Application.getInstance().getSharedPreferences().getInt(key, -1);
+        final long value = Application.getInstance().getSharedPreferences().getLong(key, -1);
         return value < 0 ? null : value;
     }
 
-    public void setDefaultTime(final NetworkId networkId, final String stationId, final Integer minutes) {
+    public void setDefaultTime(final NetworkId networkId, final String stationId, final Long millis) {
         final String key = getDefaultTimePrefKey(networkId, stationId);
         final SharedPreferences.Editor edit = Application.getInstance().getSharedPreferences().edit();
-        if (minutes == null)
+        if (millis == null)
             edit.remove(key);
         else
-            edit.putInt(key, minutes);
+            edit.putLong(key, millis);
         edit.apply();
     }
 
-    private void saveDefault(final NetworkId networkId, final Location location, final int minutes) {
-        setDefaultTime(networkId, location.id, minutes);
+    private void saveDefault(final NetworkId networkId, final Location location, final Long millis) {
+        setDefaultTime(networkId, location.id, millis);
     }
 
     private void deleteDefault(final NetworkId networkId, final Location location) {
@@ -93,7 +149,6 @@ public class StartAlarmManager {
         private CheckBox saveDefaultCheckBox;
 
         public ConfigureStartAlarmDialog(
-                @NonNull final Context context,
                 final Intent navigationNotificationIntent,
                 final StartAlarmDialogFinishedListener finishedListener) {
             super(context);
@@ -108,18 +163,18 @@ public class StartAlarmManager {
             final NavigationNotification navigationNotification = new NavigationNotification(getContext(), navigationNotificationIntent);
             final NetworkId networkId = navigationNotification.getNetwork();
             final NavigationNotification.Configuration configuration = Objects.clone(navigationNotification.getConfiguration());
-            final Integer currentTimeValue = configuration.startAlarmMinutes;
-            final boolean isAlarmActive = currentTimeValue != null;
+            final Long currentStartAlarmMillis = configuration.startAlarmMillis;
+            final boolean isAlarmActive = currentStartAlarmMillis != null;
 
             final Trip.Public firstPublicLeg = navigationNotification.getTrip().getFirstPublicLeg();
-            final Integer currentDefaultTime = getDefaultTime(networkId, firstPublicLeg.departure.id);
+            final Long currentDefaultTime = getDefaultTime(networkId, firstPublicLeg.departure.id);
             final boolean isDefaultSet = currentDefaultTime != null;
 
             int presetValue;
             if (isAlarmActive) {
-                presetValue = currentTimeValue;
+                presetValue = (int) (currentStartAlarmMillis / 60000);
             } else if (isDefaultSet) {
-                presetValue = currentDefaultTime;
+                presetValue = (int) (currentDefaultTime / 60000);
             } else {
                 final Date departureTime = firstPublicLeg.getDepartureTime();
                 presetValue = ((int) ((departureTime.getTime() - new Date().getTime()) / 60000) + MIN_TIME_VALUE) / 2;
@@ -160,10 +215,10 @@ public class StartAlarmManager {
 
             findViewById(R.id.navigation_alarm_dialog_set_alarm)
                     .setOnClickListener(view -> {
-                        final int timeValue = timePicker.getValue();
+                        final long timeValue = (long) timePicker.getValue() * 60000;
                         if (saveDefaultCheckBox.isChecked())
                             saveDefault(networkId, firstPublicLeg.departure, timeValue);
-                        configuration.startAlarmMinutes = timeValue;
+                        configuration.startAlarmMillis = timeValue;
                         NavigationNotification.updateFromForeground(getContext(),
                                 navigationNotificationIntent, null, configuration);
                         if (finishedListener != null)
@@ -175,12 +230,90 @@ public class StartAlarmManager {
             clearAlarmButton.setOnClickListener(view -> {
                 if (finishedListener != null)
                     finishedListener.onStartAlarmDialogFinished(false);
-                configuration.startAlarmMinutes = null;
+                configuration.startAlarmMillis = null;
                 NavigationNotification.updateFromForeground(getContext(),
                         navigationNotificationIntent, null, configuration);
                 dismiss();
             });
             ViewUtils.setVisibility(clearAlarmButton, isAlarmActive);
         }
+    }
+
+    public void fireAlarm(
+            final Context context,
+            final TripDetailsActivity.IntentData intentData,
+            final TripRenderer tripRenderer) {
+        log.debug("alarm fired, open navigator activity");
+        final Trip trip = tripRenderer.trip;
+        final String notificationTag = TAG_PREFIX + trip.getUniqueId();
+
+        final PendingIntent contentIntent = PendingIntent.getActivity(context, 99,
+                TripNavigatorActivity.buildStartIntent(
+                        context, intentData.network, trip, intentData.renderConfig,
+                        false, true, null, false),
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        final PendingIntent fullScreenIntent = PendingIntent.getActivity(context, 99,
+                TripNavigatorActivity.buildStartIntent(
+                        context, intentData.network, trip, intentData.renderConfig,
+                        false, true, notificationTag, false),
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        createNotificationChannel();
+
+        final String title = context.getString(R.string.navigation_startalarm_notification_title,
+                tripRenderer.trip.to.uniqueShortName());
+        final String message = context.getString(R.string.navigation_startalarm_notification_message,
+                tripRenderer.nextEventTargetName,
+                Formats.formatTime(context, tripRenderer.nextEventEarliestTime),
+                Formats.formatTime(context, tripRenderer.nextEventEstimatedTime),
+                tripRenderer.nextEventTimeLeftValue, tripRenderer.nextEventTimeLeftUnit);
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(
+                context, CHANNEL_ID)
+                .setContentIntent(contentIntent)
+                .setFullScreenIntent(fullScreenIntent, true)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setSmallIcon(R.drawable.ic_oeffi_directions_grey600_36dp)
+                .setOngoing(false)
+                .setAutoCancel(true)
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
+                .setWhen(0)
+                .setCategory(NotificationCompat.CATEGORY_ALARM)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setLocalOnly(true);
+
+        final Notification notification = notificationBuilder.build();
+        notification.flags |= NotificationCompat.FLAG_INSISTENT;
+        log.info("set alarm notification with tag={}", notificationTag);
+        getNotificationManager().notify(notificationTag, 0, notification);
+    }
+
+    public void dismissAlarm(final String notificationTag) {
+        getNotificationManager().cancel(notificationTag, 0);
+    }
+
+    public void showAlarmDialog(final String notificationTag) {
+        if (notificationTag == null)
+            return;
+        final Notification notification = findNotificationByTag(notificationTag);
+        if (notification == null)
+            return;
+        final Bundle extras = notification.extras;
+        final String title = extras.getString(Notification.EXTRA_TITLE);
+        final String message = extras.getString(Notification.EXTRA_TEXT);
+
+        DialogBuilder.get(context)
+                .setTitle(title)
+                .setMessage(message)
+                .setCancelable(false)
+                .setPositiveButton(android.R.string.ok, (dialog, which) ->
+                        dismissAlarm(notificationTag))
+                .setOnKeyListener((dialog, keyCode, event) -> {
+                    dismissAlarm(notificationTag);
+                    return true;
+                })
+                .show();
     }
 }

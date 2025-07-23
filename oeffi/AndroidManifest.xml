@@ -42,6 +42,10 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.TURN_SCREEN_ON" />
 
     <uses-feature
         android:name="android.hardware.touchscreen"
@@ -278,6 +282,7 @@
             android:configChanges="keyboard|keyboardHidden"
             android:label="@string/trip_details_title"
             android:taskAffinity="${applicationId}.directions"
+            android:showOnLockScreen="false"
             android:showWhenLocked="false" />
 
         <activity
@@ -287,7 +292,9 @@
             android:taskAffinity="${applicationId}.navigation"
             android:autoRemoveFromRecents="false"
             android:excludeFromRecents="false"
-            android:showWhenLocked="true" />
+            android:showOnLockScreen="true"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true" />
 
         <activity
             android:name=".directions.DirectionsShortcutActivity"

@@ -26,4 +26,19 @@
     <string name="navigation_alarm_dialog_set_alarm_label">Alarm setzen</string>
     <string name="navigation_alarm_dialog_clear_alarm_label">Alarm löschen</string>
 
+    <string name="navigation_notification_channel_name">Navigation</string>
+    <string name="navigation_notification_channel_description">Navigationsanweisungen</string>
+    <string name="navigation_notification_subtext">nach %1$s</string>
+    <string name="navigation_stopnav_title">Navigation abbrechen</string>
+    <string name="navigation_stopnav_text">Möchtest Du diese Navigation wirklich beenden?</string>
+    <string name="navigation_stopnav_stop">Beenden</string>
+    <string name="navigation_stopnav_continue">Weiter navigieren</string>
+    <string name="navigation_opennav_showtrip">Verlauf</string>
+    <string name="navigation_opennav_shownextevent">Öffnen</string>
+
+    <string name="navigation_startalarm_notification_channel_name">Start-Alarm</string>
+    <string name="navigation_startalarm_notification_channel_description">Alarm für bevorstehende Navigation</string>
+    <string name="navigation_startalarm_notification_title">Reise nach %1$s beginnt bald</string>
+    <string name="navigation_startalarm_notification_message">Abfahrt in %1$s nach Plan um %2$s, heute ungefähr um %3$s, noch %4$s %5$s</string>
+
 </resources>
