@@ -387,7 +387,7 @@ public class NavigationNotification {
         return notification.extras;
     }
 
-    static Long pppp;
+//    static Long pppp;
 
     @SuppressLint("ScheduleExactAlarm")
     private boolean update(final Trip aTrip) {
