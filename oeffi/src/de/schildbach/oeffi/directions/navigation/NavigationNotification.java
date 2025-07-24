@@ -703,13 +703,6 @@ public class NavigationNotification {
         soundManager.playAlarmSoundAndVibration(actualUsage, actualSoundId, vibrationPattern);
     }
 
-    private void playBeep(
-            final int soundUsage,
-            final int soundId) {
-        if (prefs.getBoolean(Constants.PREFS_KEY_NAVIGATION_REFRESH_BEEP, true))
-            playAlarmSoundAndVibration(soundUsage, soundId, null, false);
-    }
-
     public void remove() {
         getNotificationManager(context).cancel(notificationTag, 0);
     }
@@ -777,11 +770,11 @@ public class NavigationNotification {
             if (newTrip != null) {
                 final boolean alarmPlayed = update(newTrip);
                 context.sendBroadcast(new Intent(ACTION_UPDATE_TRIGGER));
-                if (!alarmPlayed) {
-                    playBeep(AudioAttributes.USAGE_NOTIFICATION, R.raw.nav_refresh_beep);
+                if (!alarmPlayed && prefs.getBoolean(Constants.PREFS_KEY_NAVIGATION_REFRESH_BEEP, true)) {
+                    playAlarmSoundAndVibration(AudioAttributes.USAGE_NOTIFICATION, R.raw.nav_refresh_beep, null, false);
                 }
             } else {
-                playBeep(AudioAttributes.USAGE_NOTIFICATION, R.raw.nav_refresh_error);
+                playAlarmSoundAndVibration(AudioAttributes.USAGE_NOTIFICATION, R.raw.nav_refresh_error, null, false);
                 update(null);
             }
         } else {
