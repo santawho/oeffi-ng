@@ -311,16 +311,31 @@ public class StartAlarmManager {
         final String title = extras.getString(Notification.EXTRA_TITLE);
         final String message = extras.getString(Notification.EXTRA_TEXT);
 
-        DialogBuilder.get(context)
-                .setTitle(title)
-                .setMessage(message)
-                .setCancelable(false)
-                .setPositiveButton(android.R.string.ok, (dialog, which) ->
-                        dismissAlarm(notificationTag))
-                .setOnKeyListener((dialog, keyCode, event) -> {
-                    dismissAlarm(notificationTag);
-                    return true;
-                })
-                .show();
+        final Dialog dialog = new Dialog(context);
+        dialog.setContentView(R.layout.navigation_alarm_popup);
+        ((TextView) dialog.findViewById(R.id.navigation_alarm_popup_title)).setText(title);
+        ((TextView) dialog.findViewById(R.id.navigation_alarm_popup_message)).setText(message);
+        dialog.findViewById(R.id.navigation_alarm_popup_button_ok).setOnClickListener(v -> {
+            dismissAlarm(notificationTag);
+            dialog.dismiss();
+        });
+        dialog.setOnKeyListener((d, keyCode, event) -> {
+            dismissAlarm(notificationTag);
+            dialog.dismiss();
+            return true;
+        });
+        dialog.show();
+
+//        DialogBuilder.get(context)
+//                .setTitle(title)
+//                .setMessage(message)
+//                .setCancelable(false)
+//                .setPositiveButton(android.R.string.ok, (dialog, which) ->
+//                        dismissAlarm(notificationTag))
+//                .setOnKeyListener((dialog, keyCode, event) -> {
+//                    dismissAlarm(notificationTag);
+//                    return true;
+//                })
+//                .show();
     }
 }

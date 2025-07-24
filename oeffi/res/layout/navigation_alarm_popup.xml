@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <TextView
+        android:id="@+id/navigation_alarm_popup_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingVertical="@dimen/text_padding_vertical_verylax"
+        android:paddingHorizontal="@dimen/text_padding_horizontal_verylax"
+        android:textSize="@dimen/font_size_large"
+        android:textStyle="bold"
+        />
+
+    <TextView
+        android:id="@+id/navigation_alarm_popup_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingVertical="@dimen/text_padding_vertical_lax"
+        android:paddingHorizontal="@dimen/text_padding_horizontal_verylax"
+        android:textSize="@dimen/font_size_normal"
+        />
+
+    <Button
+        android:id="@+id/navigation_alarm_popup_button_ok"
+        style="@style/My.Widget.Button.Border"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/navigation_startalarm_popup_button_ok"
+        android:layout_marginVertical="@dimen/text_padding_vertical_verylax"
+        android:layout_marginHorizontal="@dimen/text_padding_horizontal_verylax"
+        android:paddingVertical="@dimen/text_padding_vertical_verylax"
+        android:paddingHorizontal="@dimen/text_padding_horizontal_verylax"
+        />
+
+</LinearLayout>
