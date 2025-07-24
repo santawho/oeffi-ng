@@ -251,7 +251,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         if (playAlarmNotificationTag == null)
             return;
 
-        new StartAlarmManager(this).showAlarmDialog(playAlarmNotificationTag);
+        new StartAlarmManager(this).showAlarmPopupDialog(playAlarmNotificationTag);
     }
 
     private void askStopNavigation() {

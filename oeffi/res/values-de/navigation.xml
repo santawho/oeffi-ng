@@ -40,7 +40,7 @@
     <string name="navigation_startalarm_notification_channel_name">Start-Alarm</string>
     <string name="navigation_startalarm_notification_channel_description">Alarm für bevorstehende Navigation</string>
     <string name="navigation_startalarm_notification_title">Reise nach %1$s beginnt bald</string>
-    <string name="navigation_startalarm_notification_message">Abfahrt in %1$s nach Plan um %2$s, heute vsl. um %3$s, noch %4$s %5$s</string>
+    <string name="navigation_startalarm_notification_message">Abfahrt in %1$s nach Plan um %2$s, heute vsl. um %3$s / noch %4$s %5$s</string>
     <string name="navigation_startalarm_popup_button_ok">Alarm beenden</string>
 
 </resources>

@@ -44,7 +44,6 @@ import org.slf4j.LoggerFactory;
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
-import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.ViewUtils;
@@ -301,7 +300,7 @@ public class StartAlarmManager {
         getNotificationManager().cancel(notificationTag, 0);
     }
 
-    public void showAlarmDialog(final String notificationTag) {
+    public void showAlarmPopupDialog(final String notificationTag) {
         if (notificationTag == null)
             return;
         final Notification notification = findNotificationByTag(notificationTag);
