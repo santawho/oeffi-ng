@@ -269,8 +269,9 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
 
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-        application.startActivity(
-                Intent.createChooser(intent, application.getString(R.string.error_reporter_mail_intent_chooser_title)));
+        application.startActivity(Intent
+                .createChooser(intent, application.getString(R.string.error_reporter_mail_intent_chooser_title))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
 
     private void saveAsFile(final String errorContent) {
