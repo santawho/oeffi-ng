@@ -17,6 +17,7 @@
 
 package de.schildbach.oeffi.directions.navigation;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -39,8 +40,6 @@ import androidx.core.app.NotificationCompat;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Date;
 
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
@@ -111,18 +110,19 @@ public class StartAlarmManager {
         dialog.show();
     }
 
-    private String getDefaultTimePrefKey(final NetworkId networkId, final String stationId) {
-        return String.format("start_alarm_%s_%s", networkId.name(), stationId);
+    @SuppressLint("DefaultLocale")
+    private String getDefaultTimePrefKey(final NetworkId networkId, final String stationId, final int walkMinutes) {
+        return String.format("start_alarm_%s_%s_%d", networkId.name(), stationId, walkMinutes);
     }
 
-    public Long getDefaultTime(final NetworkId networkId, final String stationId) {
-        final String key = getDefaultTimePrefKey(networkId, stationId);
+    public Long getDefaultTime(final NetworkId networkId, final String stationId, final int walkMinutes) {
+        final String key = getDefaultTimePrefKey(networkId, stationId, walkMinutes);
         final long value = Application.getInstance().getSharedPreferences().getLong(key, -1);
         return value < 0 ? null : value;
     }
 
-    public void setDefaultTime(final NetworkId networkId, final String stationId, final Long millis) {
-        final String key = getDefaultTimePrefKey(networkId, stationId);
+    public void setDefaultTime(final NetworkId networkId, final String stationId, final int walkMinutes, final Long millis) {
+        final String key = getDefaultTimePrefKey(networkId, stationId, walkMinutes);
         final SharedPreferences.Editor edit = Application.getInstance().getSharedPreferences().edit();
         if (millis == null)
             edit.remove(key);
@@ -131,12 +131,12 @@ public class StartAlarmManager {
         edit.apply();
     }
 
-    private void saveDefault(final NetworkId networkId, final Location location, final Long millis) {
-        setDefaultTime(networkId, location.id, millis);
+    private void saveDefault(final NetworkId networkId, final Location location, final int walkMinutes, final Long millis) {
+        setDefaultTime(networkId, location.id, walkMinutes, millis);
     }
 
-    private void deleteDefault(final NetworkId networkId, final Location location) {
-        setDefaultTime(networkId, location.id, null);
+    private void deleteDefault(final NetworkId networkId, final Location location, final int walkMinutes) {
+        setDefaultTime(networkId, location.id, walkMinutes, null);
     }
 
     private class ConfigureStartAlarmDialog extends Dialog {
@@ -166,8 +166,11 @@ public class StartAlarmManager {
             final Long currentStartAlarmMillis = configuration.startAlarmMillis;
             final boolean isAlarmActive = currentStartAlarmMillis != null;
 
-            final Trip.Public firstPublicLeg = navigationNotification.getTrip().getFirstPublicLeg();
-            final Long currentDefaultTime = getDefaultTime(networkId, firstPublicLeg.departure.id);
+            final Trip trip = navigationNotification.getTrip();
+            final Trip.Public firstPublicLeg = trip.getFirstPublicLeg();
+            final Trip.Leg firstLeg = trip.legs.isEmpty() ? null : trip.legs.get(0);
+            final int walkMinutes = (firstLeg instanceof Trip.Individual) ? ((Trip.Individual) firstLeg).min : 0;
+            final Long currentDefaultTime = firstPublicLeg == null ? null : getDefaultTime(networkId, firstPublicLeg.departure.id, walkMinutes);
             final boolean isDefaultSet = currentDefaultTime != null;
 
             int presetValue;
@@ -175,9 +178,10 @@ public class StartAlarmManager {
                 presetValue = (int) (currentStartAlarmMillis / 60000);
             } else if (isDefaultSet) {
                 presetValue = (int) (currentDefaultTime / 60000);
+            } else if (firstPublicLeg == null) {
+                presetValue = MIN_TIME_VALUE;
             } else {
-                final Date departureTime = firstPublicLeg.getDepartureTime();
-                presetValue = ((int) ((departureTime.getTime() - new Date().getTime()) / 60000) + MIN_TIME_VALUE) / 2;
+                presetValue = walkMinutes;
                 if (presetValue < MIN_TIME_VALUE)
                     presetValue = MIN_TIME_VALUE;
                 else if (presetValue > MAX_TIME_VALUE)
@@ -188,7 +192,9 @@ public class StartAlarmManager {
 
             setContentView(R.layout.navigation_alarm_dialog);
 
-            final String departureName = Formats.makeBreakableStationName(firstPublicLeg.departure.uniqueShortName());
+            String departureName = Formats.makeBreakableStationName(firstPublicLeg.departure.uniqueShortName());
+            if (walkMinutes > 0)
+                departureName = getContext().getString(R.string.navigation_alarm_dialog_stationname_with_walk, departureName, walkMinutes);
             ((TextView) findViewById(R.id.navigation_alarm_dialog_message)).setText(
                     context.getString(R.string.navigation_alarm_dialog_message, departureName));
 
@@ -207,7 +213,7 @@ public class StartAlarmManager {
             deleteDefaultButton.setText(
                     context.getString(R.string.navigation_alarm_dialog_delete_default_label, departureName));
             deleteDefaultButton.setOnClickListener(view -> {
-                deleteDefault(networkId, firstPublicLeg.departure);
+                deleteDefault(networkId, firstPublicLeg.departure, walkMinutes);
                 ViewUtils.setVisibility(saveDefaultCheckBox, true);
                 ViewUtils.setVisibility(deleteDefaultButton, false);
             });
@@ -217,7 +223,7 @@ public class StartAlarmManager {
                     .setOnClickListener(view -> {
                         final long timeValue = (long) timePicker.getValue() * 60000;
                         if (saveDefaultCheckBox.isChecked())
-                            saveDefault(networkId, firstPublicLeg.departure, timeValue);
+                            saveDefault(networkId, firstPublicLeg.departure, walkMinutes, timeValue);
                         configuration.startAlarmMillis = timeValue;
                         configuration.startAlarmId = System.currentTimeMillis();
                         NavigationNotification.updateFromForeground(getContext(),

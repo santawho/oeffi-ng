@@ -303,10 +303,12 @@ public class NavigationNotification {
                 this.configuration = configuration;
             } else {
                 final Configuration conf = new Configuration();
-                final Trip.Public firstPublicLeg = this.intentData.trip.getFirstPublicLeg();
+                final Trip.Public firstPublicLeg = trip.getFirstPublicLeg();
                 if (firstPublicLeg != null) {
+                    final Trip.Leg firstLeg = trip.legs.isEmpty() ? null : trip.legs.get(0);
+                    final int walkMinutes = (firstLeg instanceof Trip.Individual) ? ((Trip.Individual) firstLeg).min : 0;
                     conf.startAlarmMillis = new StartAlarmManager(context).getDefaultTime(
-                            this.intentData.network, firstPublicLeg.departure.id);
+                            aIntentData.network, firstPublicLeg.departure.id, walkMinutes);
                     conf.startAlarmId = System.currentTimeMillis();
                 }
                 this.configuration = conf;

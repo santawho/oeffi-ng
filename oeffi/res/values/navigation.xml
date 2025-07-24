@@ -29,6 +29,7 @@
     <string name="navigation_alarm_dialog_time_label">minutes\nin advance</string>
     <string name="navigation_alarm_dialog_save_default_label">Save as default for\n%1$s</string>
     <string name="navigation_alarm_dialog_delete_default_label">Delete current default for\n%1$s</string>
+    <string name="navigation_alarm_dialog_stationname_with_walk">%1$s\nwith walk of %2$d minutes</string>
     <string name="navigation_alarm_dialog_set_alarm_label">Set Alarm</string>
     <string name="navigation_alarm_dialog_clear_alarm_label">Clear Alarm</string>
 

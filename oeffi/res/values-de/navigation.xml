@@ -23,6 +23,7 @@
     <string name="navigation_alarm_dialog_time_label">Minuten\nim Voraus</string>
     <string name="navigation_alarm_dialog_save_default_label">Als Standard speichern für\n%1$s</string>
     <string name="navigation_alarm_dialog_delete_default_label">Aktuellen Standard löschen für\n%1$s</string>
+    <string name="navigation_alarm_dialog_stationname_with_walk">%1$s\nmit Fußweg von %2$d Minuten</string>
     <string name="navigation_alarm_dialog_set_alarm_label">Alarm setzen</string>
     <string name="navigation_alarm_dialog_clear_alarm_label">Alarm löschen</string>
 
