@@ -17,15 +17,21 @@
 
 package de.schildbach.oeffi.directions.navigation;
 
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.IBinder;
 import android.os.Process;
+import android.provider.Settings;
+
+import androidx.annotation.Nullable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +44,8 @@ import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.util.ClockUtils;
 
 public class NavigationAlarmManager {
+    private static final String ACTION_IGNORE_COMMAND = "ignore.command";
+
     private final static long MIN_PERIOD_MS = 30000;
     private static NavigationAlarmManager instance;
     private static final Logger log = LoggerFactory.getLogger(NavigationAlarmManager.class);
@@ -94,10 +102,35 @@ public class NavigationAlarmManager {
     }
 
     public static class RefreshReceiver extends BroadcastReceiver {
+        public static PendingIntent getPendingIntent(final Context context) {
+            return PendingIntent.getBroadcast(context, 0,
+                    new Intent(context, RefreshReceiver.class), PendingIntent.FLAG_IMMUTABLE);
+        }
+
         @Override
         public void onReceive(Context context, Intent intent) {
             log.info("refresh alarm was fired");
             runOnHandlerThread(() -> getInstance().onRefreshTimer());
+        }
+    }
+
+    public static class RefreshService extends Service {
+        public static PendingIntent getPendingIntent(final Context context) {
+            return PendingIntent.getForegroundService(context, 0,
+                    new Intent(context, RefreshService.class), PendingIntent.FLAG_IMMUTABLE);
+        }
+
+        @Nullable
+        @Override
+        public IBinder onBind(final Intent intent) {
+            return null;
+        }
+
+        @Override
+        public int onStartCommand(final Intent intent, final int flags, final int startId) {
+            log.info("refresh alarm was fired");
+            runOnHandlerThread(() -> getInstance().onRefreshTimer());
+            return super.onStartCommand(intent, flags, startId);
         }
     }
 
@@ -106,9 +139,8 @@ public class NavigationAlarmManager {
     }
 
     private PendingIntent getPendingRefreshIntent() {
-        final Context context = getContext();
-        final Intent intent = new Intent(context, RefreshReceiver.class);
-        return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+//        return RefreshReceiver.getPendingIntent(getContext());
+        return RefreshService.getPendingIntent(getContext());
     }
 
     private void onRefreshTimer() {
@@ -163,5 +195,16 @@ public class NavigationAlarmManager {
         } else {
             log.info("refresh alarm: keeping next refresh at {}", LOG_TIME_FORMAT.format(refreshAt));
         }
+    }
+
+    public boolean checkPermission(final Activity activityToRequestPermission) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (!getSystemAlarmManager().canScheduleExactAlarms()) {
+                if (activityToRequestPermission != null)
+                    activityToRequestPermission.startActivity(new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM));
+                return false;
+            }
+        }
+        return true;
     }
 }

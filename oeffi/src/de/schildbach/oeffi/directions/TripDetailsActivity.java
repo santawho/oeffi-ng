@@ -2044,9 +2044,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     private void startNavigation(final Trip trip, final RenderConfig renderConfig) {
-        TripNavigatorActivity.startNavigation(this, network, trip, renderConfig, isTaskRoot());
-        setResult(RESULT_OK, new Intent());
-        finish();
+        if (TripNavigatorActivity.startNavigation(this, network, trip, renderConfig, isTaskRoot())) {
+            setResult(RESULT_OK, new Intent());
+            finish();
+        }
     }
 
     public void onTripUpdated(final Trip updatedTrip) {

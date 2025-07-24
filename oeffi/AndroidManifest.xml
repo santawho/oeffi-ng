@@ -38,6 +38,7 @@
     <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM"/>
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
@@ -194,6 +195,8 @@
 
         <receiver android:name=".directions.navigation.NavigationAlarmManager$RefreshReceiver" />
         <receiver android:name=".directions.navigation.NavigationNotification$ActionReceiver" />
+        <service android:name=".directions.navigation.NavigationAlarmManager$RefreshService"
+            android:exported="false" />
 
         <service
             android:name=".stations.NearestFavoriteStationWidgetService"

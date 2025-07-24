@@ -68,16 +68,20 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     public static final String INTENT_EXTRA_NEXTEVENT = TripNavigatorActivity.class.getName() + ".nextevent";
     public static final String INTENT_EXTRA_PLAYALARM = TripNavigatorActivity.class.getName() + ".playalarm";
 
-    public static void startNavigation(
+    public static boolean startNavigation(
             final Activity contextActivity,
             final NetworkId network, final Trip trip, final RenderConfig renderConfig,
             final boolean sameWindow) {
-            RenderConfig rc = new RenderConfig();
+        if (!NavigationAlarmManager.getInstance().checkPermission(contextActivity))
+            return false;
+
+        RenderConfig rc = new RenderConfig();
         rc.isNavigation = true;
         rc.isJourney = renderConfig.isJourney;
         rc.queryTripsRequestData = renderConfig.queryTripsRequestData;
         Intent intent = buildStartIntent(contextActivity, network, trip, rc, false, false, null, sameWindow);
         contextActivity.startActivity(intent);
+        return true;
     }
 
     protected static Intent buildStartIntent(
