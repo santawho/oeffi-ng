@@ -389,7 +389,7 @@ public class NavigationNotification {
         return notification.extras;
     }
 
-    static Long pppp;
+//    static Long pppp;
 
     @SuppressLint("ScheduleExactAlarm")
     private boolean update(final Trip aTrip) {
@@ -411,8 +411,8 @@ public class NavigationNotification {
                 if (startAlarmMillisInAdvance != null) {
                     final long earliest = tripRenderer.nextEventEarliestTime.getTime();
                     final long estimated = tripRenderer.nextEventEstimatedTime.getTime();
-//                    startAlarmAtMs = (2 * earliest + estimated) / 3 - startAlarmMillisInAdvance;
-                    if (pppp == null) pppp = nowTime + 10000; startAlarmAtMs = pppp;
+                    startAlarmAtMs = (2 * earliest + estimated) / 3 - startAlarmMillisInAdvance;
+//                    if (pppp == null) pppp = nowTime + 10000; startAlarmAtMs = pppp;
                 } else {
                     startAlarmAtMs = 0;
                 }
