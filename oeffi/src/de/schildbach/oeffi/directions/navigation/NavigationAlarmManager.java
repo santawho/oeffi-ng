@@ -139,8 +139,8 @@ public class NavigationAlarmManager {
     }
 
     private PendingIntent getPendingRefreshIntent() {
-//        return RefreshReceiver.getPendingIntent(getContext());
-        return RefreshService.getPendingIntent(getContext());
+        return RefreshReceiver.getPendingIntent(getContext());
+//        return RefreshService.getPendingIntent(getContext());
     }
 
     private void onRefreshTimer() {
