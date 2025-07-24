@@ -494,4 +494,8 @@
     <string name="kml_individual_type_car">By car</string>
     <string name="kml_individual_type_transfer">Transfer</string>
 
+    <!-- log viewer -->
+    <string name="log_viewer_button_forwards_button">Move to later logs</string>
+    <string name="log_viewer_button_backwards_button">Move to earlier logs</string>
+
 </resources>

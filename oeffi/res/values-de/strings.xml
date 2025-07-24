@@ -493,4 +493,8 @@
     <string name="kml_individual_type_car">Autofahrt</string>
     <string name="kml_individual_type_transfer">Übergang</string>
 
+    <!-- log viewer -->
+    <string name="log_viewer_button_forwards_button">Gehe zu späteren Logs</string>
+    <string name="log_viewer_button_backwards_button">Gehe zu früheren Logs</string>
+
 </resources>

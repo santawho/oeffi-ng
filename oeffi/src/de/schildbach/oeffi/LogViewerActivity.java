@@ -19,7 +19,10 @@ package de.schildbach.oeffi;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Html;
 import android.view.View;
 import android.widget.ScrollView;
@@ -33,9 +36,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,6 +51,8 @@ import de.schildbach.oeffi.util.ColorHash;
 
 public class LogViewerActivity extends OeffiActivity {
     private static final Logger log = LoggerFactory.getLogger(LogViewerActivity.class);
+
+    private static final int BLOCK_SIZE = 200000;
 
     private static final ColorHash colorHash = new ColorHash(
             Arrays.asList(0.25, 0.27, 0.35, 0.40, 0.45), // available lightness values
@@ -60,6 +69,7 @@ public class LogViewerActivity extends OeffiActivity {
     private MyActionBar actionBar;
     private boolean firstLoad;
     private final Map<String, String> colorMap = new HashMap<>();
+    private long currentOffset;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -73,6 +83,10 @@ public class LogViewerActivity extends OeffiActivity {
         actionBar.setBackgroundColor(getResources().getColor(R.color.bg_action_bar_logviewer));
         actionBar.setPrimaryTitle(R.string.global_options_show_log_title);
         actionBar.addProgressButton().setOnClickListener(view -> refresh(true));
+        actionBar.addButton(R.drawable.ic_expand_more_white_24dp, R.string.log_viewer_button_forwards_button)
+                .setOnClickListener(v -> moveRelative(BLOCK_SIZE / 2));
+        actionBar.addButton(R.drawable.ic_expand_less_white_24dp, R.string.log_viewer_button_backwards_button)
+                .setOnClickListener(v -> moveRelative(-(BLOCK_SIZE / 2)));
 
         final View contentView = findViewById(android.R.id.content);
         ViewCompat.setOnApplyWindowInsetsListener(contentView, (v, windowInsets) -> {
@@ -89,28 +103,60 @@ public class LogViewerActivity extends OeffiActivity {
         firstLoad = false;
     }
 
+    private void moveRelative(final long offset) {
+        currentOffset += offset;
+        refresh(false);
+    }
+
     private void refresh(final boolean scrollToEnd) {
         final File logFile = Application.getInstance().getLogFile();
+        final long fileSize = logFile.length();
         StringBuilder sb = new StringBuilder();
-        try (
-                FileReader fileReader = new FileReader(logFile);
-                BufferedReader reader = new BufferedReader(fileReader)
-        ) {
-            final long USE_CHARACTERS_FROM_END = 200000;
-            final long skip = logFile.length() - USE_CHARACTERS_FROM_END;
-            if (skip > 0)
-                reader.skip(skip);
-            actionBar.startProgress();
-            String line;
-            int numLines = -1;
-            while ((line = reader.readLine()) != null) {
-                if (numLines >= 0) {
-                    if (numLines > 0) sb.append("<br>");
-                    final String htmlLine = makeHtmlLine(line);
-                    sb.append(htmlLine);
+        final boolean endOfScrollReached;
+        final long maxOffset = fileSize - BLOCK_SIZE;
+        if (scrollToEnd)
+            currentOffset = maxOffset;
+        if (currentOffset < 0) {
+            currentOffset = 0;
+            endOfScrollReached = true;
+        } else if (currentOffset > maxOffset) {
+            currentOffset = maxOffset;
+            endOfScrollReached = true;
+        } else {
+            endOfScrollReached = false;
+        }
+        actionBar.startProgress();
+        try (FileInputStream fis = new FileInputStream(logFile)) {
+            fis.skip(currentOffset);
+            final byte[] block = new byte[BLOCK_SIZE];
+            final int blockSize = fis.read(block);
+            int startOfFirstLine = 0;
+            if (currentOffset != 0) {
+                while (startOfFirstLine < blockSize) {
+                    if (block[startOfFirstLine] == '\n') {
+                        startOfFirstLine += 1;
+                        break;
+                    }
+                    startOfFirstLine += 1;
                 }
-                numLines += 1;
             }
+            boolean isLastLineComplete = blockSize > 0 && block[blockSize - 1] == '\n';
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(
+                    new ByteArrayInputStream(block, startOfFirstLine, blockSize - startOfFirstLine)));
+            String line;
+            String prevLine = null;
+            int numLines = 0;
+            while ((line = reader.readLine()) != null) {
+                if (prevLine != null) {
+                    if (numLines > 0)
+                        sb.append("<br>");
+                    sb.append(prevLine);
+                    numLines += 1;
+                }
+                prevLine = makeHtmlLine(line);
+            }
+            if (isLastLineComplete && prevLine != null)
+                sb.append(prevLine);
         } catch (IOException e) {
             log.error("reading {}", logFile, e);
             return;
@@ -125,6 +171,15 @@ public class LogViewerActivity extends OeffiActivity {
                 final int height = textView.getHeight();
                 scrollView.scrollTo(0, height);
             });
+        }
+
+        if (endOfScrollReached) {
+            final int normalColor = getColor(R.color.bg_level0);
+            final Color colorA = Color.valueOf(normalColor);
+            final Color colorB = Color.valueOf(1 - colorA.red(), 1 - colorA.green(), 1 - colorA.blue(), colorA.alpha());
+            final int invertedColor = colorB.toArgb();
+            textView.setBackgroundColor(invertedColor);
+            new Handler(Looper.getMainLooper()).postDelayed(() -> textView.setBackgroundColor(normalColor), 500);
         }
     }
 
