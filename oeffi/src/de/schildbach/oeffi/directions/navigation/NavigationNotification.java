@@ -354,7 +354,8 @@ public class NavigationNotification {
         if (lastNotified != null) {
             final long refreshAt = lastNotified.refreshNotificationRequiredAt;
             if (refreshAt > 0)
-                NavigationAlarmManager.getInstance().start(refreshAt);
+                NavigationAlarmManager.getInstance().start(refreshAt,
+                        getPendingActivityIntent(false, true, newTrip));
         }
     }
 

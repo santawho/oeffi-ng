@@ -315,14 +315,19 @@ public class StartAlarmManager {
         ((TextView) dialog.findViewById(R.id.navigation_alarm_popup_title)).setText(title);
         ((TextView) dialog.findViewById(R.id.navigation_alarm_popup_message)).setText(message);
         dialog.findViewById(R.id.navigation_alarm_popup_button_ok).setOnClickListener(v -> {
-            dismissAlarm(notificationTag);
+            // dismissAlarm(notificationTag); -- done in dismiss listener
             dialog.dismiss();
         });
         dialog.setOnKeyListener((d, keyCode, event) -> {
-            dismissAlarm(notificationTag);
+            // dismissAlarm(notificationTag); -- done in dismiss listener
             dialog.dismiss();
             return true;
         });
+        dialog.setOnDismissListener(d -> {
+            dismissAlarm(notificationTag);
+        });
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
         dialog.show();
 
 //        DialogBuilder.get(context)

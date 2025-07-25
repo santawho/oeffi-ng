@@ -62,6 +62,7 @@ public class NavigationAlarmManager {
     private long refreshAt = Long.MAX_VALUE;
     private HandlerThread backgroundThread;
     private Handler backgroundHandler;
+    private PendingIntent showInfoIntent;
 
     private NavigationAlarmManager() {
         backgroundThread = new HandlerThread("NavAlarmThread", Process.THREAD_PRIORITY_BACKGROUND);
@@ -69,7 +70,8 @@ public class NavigationAlarmManager {
         backgroundHandler = new Handler(backgroundThread.getLooper());
     }
 
-    public void start(long newRefreshAt) {
+    public void start(long newRefreshAt, final PendingIntent showInfoIntent) {
+        this.showInfoIntent = showInfoIntent;
         if (!stopped) {
             if (newRefreshAt + MIN_PERIOD_MS < refreshAt) {
                 refreshAt = newRefreshAt;
@@ -161,7 +163,7 @@ public class NavigationAlarmManager {
                 log.info("restart alarm: no navigation running, stopping alarms");
                 break;
             }
-            long timeToWait = refreshAt - new Date().getTime();
+            long timeToWait = refreshAt - System.currentTimeMillis();
             if (timeToWait > 0) {
                 if (timeToWait < 5000) {
                     timeToWait = 5000;
@@ -170,12 +172,14 @@ public class NavigationAlarmManager {
                     log.info("restart alarm: refresh at {}, time to wait = {}", LOG_TIME_FORMAT.format(refreshAt), timeToWait);
                 }
                 final AlarmManager alarmManager = getSystemAlarmManager();
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()) {
-                    long triggerAtMillis = ClockUtils.elapsedTimePlus(timeToWait);
-                    alarmManager.setExactAndAllowWhileIdle(
-                            // AlarmManager.RTC_WAKEUP, refreshAt,
-                            AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtMillis,
+                if (canScheduleExactAlarms()) {
+                    alarmManager.setAlarmClock(
+                            new AlarmManager.AlarmClockInfo(ClockUtils.clockPlus(timeToWait), showInfoIntent),
                             getPendingRefreshIntent());
+//                    alarmManager.setExactAndAllowWhileIdle(
+//                            // AlarmManager.RTC_WAKEUP, ClockUtils.clockPlus(timeToWait),
+//                            AlarmManager.ELAPSED_REALTIME_WAKEUP, ClockUtils.elapsedTimePlus(timeToWait),
+//                            getPendingRefreshIntent());
                 }
                 break;
             }
@@ -197,14 +201,17 @@ public class NavigationAlarmManager {
         }
     }
 
+    private boolean canScheduleExactAlarms() {
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.S || getSystemAlarmManager().canScheduleExactAlarms();
+    }
+
     public boolean checkPermission(final Activity activityToRequestPermission) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (!getSystemAlarmManager().canScheduleExactAlarms()) {
-                if (activityToRequestPermission != null)
-                    activityToRequestPermission.startActivity(new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM));
-                return false;
-            }
-        }
-        return true;
+        if (canScheduleExactAlarms())
+            return true;
+
+        if (activityToRequestPermission != null)
+            activityToRequestPermission.startActivity(new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM));
+
+        return false;
     }
 }
