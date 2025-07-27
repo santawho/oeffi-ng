@@ -226,7 +226,7 @@ public class StartAlarmManager {
                         configuration.startAlarmMillis = timeValue;
                         configuration.startAlarmId = System.currentTimeMillis();
                         NavigationNotification.updateFromForeground(getContext(),
-                                navigationNotificationIntent, null, configuration);
+                                navigationNotificationIntent, configuration);
                         if (finishedListener != null)
                             finishedListener.onStartAlarmDialogFinished(true);
                         dismiss();
@@ -238,7 +238,7 @@ public class StartAlarmManager {
                     finishedListener.onStartAlarmDialogFinished(false);
                 configuration.startAlarmMillis = null;
                 NavigationNotification.updateFromForeground(getContext(),
-                        navigationNotificationIntent, null, configuration);
+                        navigationNotificationIntent, configuration);
                 dismiss();
             });
             ViewUtils.setVisibility(clearAlarmButton, isAlarmActive);

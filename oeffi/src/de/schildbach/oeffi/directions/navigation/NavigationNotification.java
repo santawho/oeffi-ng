@@ -341,6 +341,12 @@ public class NavigationNotification {
 
     public static void updateFromForeground(
             final Context context, final Intent intent,
+            final Configuration configuration) {
+        updateFromForeground(context, intent, null, configuration);
+    }
+
+    public static void updateFromForeground(
+            final Context context, final Intent intent,
             final Trip trip, final Configuration configuration) {
         NavigationAlarmManager.runOnHandlerThread(() -> {
             new NavigationNotification(context, intent).internUpdateFromForeground(trip, configuration);
@@ -350,12 +356,13 @@ public class NavigationNotification {
     private void internUpdateFromForeground(final Trip newTrip, final Configuration newConfiguration) {
         if (newConfiguration != null)
             this.configuration = newConfiguration;
-        update(newTrip);
+        final Trip trip = newTrip != null ? newTrip : getTrip();
+        update(trip);
         if (lastNotified != null) {
             final long refreshAt = lastNotified.refreshNotificationRequiredAt;
             if (refreshAt > 0)
                 NavigationAlarmManager.getInstance().start(refreshAt,
-                        getPendingActivityIntent(false, true, newTrip));
+                        getPendingActivityIntent(false, true, trip));
         }
     }
 
@@ -394,7 +401,7 @@ public class NavigationNotification {
 
     @SuppressLint("ScheduleExactAlarm")
     private boolean update(final Trip aTrip) {
-        final Trip trip = aTrip != null ? aTrip : intentData.trip;
+        final Trip trip = aTrip != null ? aTrip : getTrip();
         final Date tripUpdatedAtDate = trip.updatedAt;
         log.info("updating with {} trip updated at {}", aTrip != null ? "new" : "old", NavigationAlarmManager.LOG_TIME_FORMAT.format(tripUpdatedAtDate));
         final long tripUpdatedAt = tripUpdatedAtDate.getTime();
@@ -765,7 +772,7 @@ public class NavigationNotification {
         if (lastNotified.refreshTripRequiredAt > 0 && nowTime >= lastNotified.refreshTripRequiredAt) {
             try {
                 log.info("refreshing trip");
-                final Navigator navigator = new Navigator(intentData.network, intentData.trip);
+                final Navigator navigator = new Navigator(intentData.network, getTrip());
                 newTrip = navigator.refresh(refreshAllLegs, now);
             } catch (IOException e) {
                 log.error("error while refreshing trip", e);
