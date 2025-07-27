@@ -108,7 +108,8 @@ public class NavigationNotification {
 
     private static SharedPreferences prefs;
 
-    private static void createNotificationChannel(final Context context) {
+    public static void createNotificationChannel(final Context context) {
+        TravelAlarmManager.createNotificationChannel(context);
         if (notificationChannelCreated)
             return;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -238,8 +239,8 @@ public class NavigationNotification {
         private static final long serialVersionUID = -3466636027523660100L;
 
         public boolean soundEnabled;
-        public Long startAlarmMillis;
-        public long startAlarmId;
+        public Long travelAlarmMillis;
+        public long travelAlarmId;
     }
 
     public static final class ExtraData implements Serializable {
@@ -307,9 +308,9 @@ public class NavigationNotification {
                 if (firstPublicLeg != null) {
                     final Trip.Leg firstLeg = trip.legs.isEmpty() ? null : trip.legs.get(0);
                     final int walkMinutes = (firstLeg instanceof Trip.Individual) ? ((Trip.Individual) firstLeg).min : 0;
-                    conf.startAlarmMillis = new StartAlarmManager(context).getDefaultTime(
+                    conf.travelAlarmMillis = new TravelAlarmManager(context).getDefaultTime(
                             aIntentData.network, firstPublicLeg.departure.id, walkMinutes);
-                    conf.startAlarmId = System.currentTimeMillis();
+                    conf.travelAlarmId = System.currentTimeMillis();
                 }
                 this.configuration = conf;
             }
@@ -405,27 +406,26 @@ public class NavigationNotification {
         final Date tripUpdatedAtDate = trip.updatedAt;
         log.info("updating with {} trip updated at {}", aTrip != null ? "new" : "old", NavigationAlarmManager.LOG_TIME_FORMAT.format(tripUpdatedAtDate));
         final long tripUpdatedAt = tripUpdatedAtDate.getTime();
-        createNotificationChannel(context);
         final Date now = new Date();
         final long nowTime = now.getTime();
         final TripRenderer tripRenderer = new TripRenderer(null, trip, false, now);
         boolean refreshAllLegs = false;
         long nextRefreshTimeMs;
         long nextTripReloadTimeMs;
-        final Long startAlarmMillisInAdvance = configuration.startAlarmMillis;
-        final long startAlarmAtMs;
+        final Long travelAlarmMillisInAdvance = configuration.travelAlarmMillis;
+        final long travelAlarmAtMs;
         if (tripRenderer.nextEventEarliestTime != null) {
             if (tripRenderer.nextEventIsInitialIndividual) {
-                if (startAlarmMillisInAdvance != null) {
+                if (travelAlarmMillisInAdvance != null) {
                     final long earliest = tripRenderer.nextEventEarliestTime.getTime();
                     final long estimated = tripRenderer.nextEventEstimatedTime.getTime();
-                    startAlarmAtMs = (2 * earliest + estimated) / 3 - startAlarmMillisInAdvance;
-//                    if (pppp == null) pppp = nowTime + 10000; startAlarmAtMs = pppp;
+                    travelAlarmAtMs = (2 * earliest + estimated) / 3 - travelAlarmMillisInAdvance;
+//                    if (pppp == null) pppp = nowTime + 10000; travelAlarmAtMs = pppp;
                 } else {
-                    startAlarmAtMs = 0;
+                    travelAlarmAtMs = 0;
                 }
             } else {
-                startAlarmAtMs = startAlarmMillisInAdvance != null ? nowTime : -1;
+                travelAlarmAtMs = travelAlarmMillisInAdvance != null ? nowTime : -1;
             }
             final long timeLeft = tripRenderer.nextEventEarliestTime.getTime() - nowTime;
             if (timeLeft < 240000) {
@@ -460,7 +460,7 @@ public class NavigationNotification {
                 nextRefreshTimeMs = 0;
                 nextTripReloadTimeMs = 0;
             }
-            startAlarmAtMs = 0;
+            travelAlarmAtMs = 0;
         }
 //nextRefreshTimeMs = nowTime + 30000;
         final Date timeoutAt = new Date(trip.getLastArrivalTime().getTime() + KEEP_NOTIFICATION_FOR_MINUTES * 60000);
@@ -556,23 +556,23 @@ public class NavigationNotification {
                 }
             }
         }
-        newNotified.playedStartAlarmId = lastNotified.playedStartAlarmId;
-        if (startAlarmAtMs > 0) {
-            if (startAlarmAtMs <= nowTime) {
-                if (lastNotified.playedStartAlarmId == configuration.startAlarmId) {
+        newNotified.playedTravelAlarmId = lastNotified.playedTravelAlarmId;
+        if (travelAlarmAtMs > 0) {
+            if (travelAlarmAtMs <= nowTime) {
+                if (lastNotified.playedTravelAlarmId == configuration.travelAlarmId) {
                     log.info("alarm for start at {} was at {}, but already fired before",
-                            tripRenderer.nextEventTargetName, Formats.formatTime(context, startAlarmAtMs));
+                            tripRenderer.nextEventTargetName, Formats.formatTime(context, travelAlarmAtMs));
                 } else {
                     log.info("alarm for start at {} should have been at {}, now firing",
-                            tripRenderer.nextEventTargetName, Formats.formatTime(context, startAlarmAtMs));
-                    new StartAlarmManager(context).fireAlarm(context, intentData, tripRenderer);
-                    newNotified.playedStartAlarmId = configuration.startAlarmId;
+                            tripRenderer.nextEventTargetName, Formats.formatTime(context, travelAlarmAtMs));
+                    new TravelAlarmManager(context).fireAlarm(context, intentData, tripRenderer);
+                    newNotified.playedTravelAlarmId = configuration.travelAlarmId;
                 }
             } else {
                 log.info("alarm for start at {} set to {}",
-                        tripRenderer.nextEventTargetName, Formats.formatTime(context, startAlarmAtMs));
-                if (startAlarmAtMs < nextRefreshTimeMs)
-                    nextRefreshTimeMs = startAlarmAtMs;
+                        tripRenderer.nextEventTargetName, Formats.formatTime(context, travelAlarmAtMs));
+                if (travelAlarmAtMs < nextRefreshTimeMs)
+                    nextRefreshTimeMs = travelAlarmAtMs;
             }
         }
         newNotified.leftTimeReminded = lastNotified.leftTimeReminded;

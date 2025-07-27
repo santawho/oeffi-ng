@@ -37,10 +37,17 @@
     <string name="navigation_opennav_showtrip">Verlauf</string>
     <string name="navigation_opennav_shownextevent">Öffnen</string>
 
-    <string name="navigation_startalarm_notification_channel_name">Start-Alarm</string>
-    <string name="navigation_startalarm_notification_channel_description">Alarm für bevorstehende Navigation</string>
-    <string name="navigation_startalarm_notification_title">Reise nach %1$s beginnt bald</string>
-    <string name="navigation_startalarm_notification_message">Abfahrt in %1$s nach Plan um %2$s, heute vsl. um %3$s / noch %4$s %5$s</string>
-    <string name="navigation_startalarm_popup_button_ok">Alarm beenden</string>
+    <string name="navigation_travelalarm_notification_start_channel_name">Reisewecker, Start der Reise</string>
+    <string name="navigation_travelalarm_notification_start_channel_description">Alarm für bevorstehende Navigation</string>
+    <string name="navigation_travelalarm_notification_start_title">Reise nach %1$s beginnt bald</string>
+    <string name="navigation_travelalarm_notification_departure_channel_name">Reisewecker, nächste Abfahrt</string>
+    <string name="navigation_travelalarm_notification_departure_channel_description">Alarm für Abfahrt am Umstieg</string>
+    <string name="navigation_travelalarm_notification_departure_title">Abfahrt in %1$s steht bevor</string>
+    <string name="navigation_travelalarm_notification_departure_message">Abfahrt in %1$s nach Plan um %2$s, heute vsl. um %3$s / noch %4$s %5$s</string>
+    <string name="navigation_travelalarm_notification_arrival_channel_name">Reisewecker, nächste Ankunft</string>
+    <string name="navigation_travelalarm_notification_arrival_channel_description">Alarm für Ankunft</string>
+    <string name="navigation_travelalarm_notification_arrival_title">Ankunft in %1$s steht bevor</string>
+    <string name="navigation_travelalarm_notification_arrival_message">Ankunft in %1$s nach Plan um %2$s, heute vsl. um %3$s / noch %4$s %5$s</string>
+    <string name="navigation_travelalarm_popup_button_dismiss_alarm">Alarm beenden</string>
 
 </resources>

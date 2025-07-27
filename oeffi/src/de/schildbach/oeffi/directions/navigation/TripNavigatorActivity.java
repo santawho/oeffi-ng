@@ -251,7 +251,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         if (playAlarmNotificationTag == null)
             return;
 
-        new StartAlarmManager(this).showAlarmPopupDialog(playAlarmNotificationTag);
+        new TravelAlarmManager(this).showAlarmPopupDialog(playAlarmNotificationTag);
     }
 
     private void askStopNavigation() {
@@ -481,11 +481,11 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         progressBell.setVisibility(View.VISIBLE);
 
         final NavigationNotification navigationNotification = new NavigationNotification(this, getIntent());
-        progressBell.setOnClickListener(v -> new StartAlarmManager(this).showConfigureStartAlarmDialog(
+        progressBell.setOnClickListener(v -> new TravelAlarmManager(this).showConfigureTravelAlarmDialog(
                 getIntent(), isAlarmActive -> updateBellState(progressBell, isAlarmActive)));
 
-        final Long startAlarmMillis = navigationNotification.getConfiguration().startAlarmMillis;
-        updateBellState(progressBell,startAlarmMillis != null);
+        final Long travelAlarmMillis = navigationNotification.getConfiguration().travelAlarmMillis;
+        updateBellState(progressBell,travelAlarmMillis != null);
 
         return isNow;
     }

@@ -19,6 +19,7 @@ package de.schildbach.oeffi;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -51,6 +52,7 @@ import com.google.common.base.Stopwatch;
 
 import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.directions.QueryHistoryProvider;
+import de.schildbach.oeffi.directions.navigation.NavigationNotification;
 import de.schildbach.oeffi.plans.PlansPickerActivity;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
 import de.schildbach.oeffi.stations.StationsActivity;
@@ -170,6 +172,8 @@ public class Application extends android.app.Application {
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         createShortcuts();
+
+        NavigationNotification.createNotificationChannel(this);
 
         final OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.followRedirects(true);

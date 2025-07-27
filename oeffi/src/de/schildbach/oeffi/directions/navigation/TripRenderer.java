@@ -288,7 +288,7 @@ public class TripRenderer {
         public long leftTimeReminded;
         public boolean nextTransferCritical;
         public String transfersCritical;
-        public long playedStartAlarmId;
+        public long playedTravelAlarmId;
     }
 
     public final Trip trip;

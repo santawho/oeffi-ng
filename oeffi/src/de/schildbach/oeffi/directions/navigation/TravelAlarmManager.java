@@ -51,49 +51,74 @@ import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.Trip;
 
-public class StartAlarmManager {
-    private static Logger log = LoggerFactory.getLogger(StartAlarmManager.class);
+public class TravelAlarmManager {
+    private static Logger log = LoggerFactory.getLogger(TravelAlarmManager.class);
 
-    public interface StartAlarmDialogFinishedListener {
-        void onStartAlarmDialogFinished(boolean isAlarmActive);
+    public interface TravelAlarmDialogFinishedListener {
+        void onTravelAlarmDialogFinished(boolean isAlarmActive);
     }
 
-    private static final String CHANNEL_ID = "startalarm";
-    private static final String TAG_PREFIX = StartAlarmManager.class.getName() + ":";
+    private static final String[] LEGACY_CHANNEL_IDS = new String[]{ "startalarm" };
+    private static final String START_CHANNEL_ID = "travelalarm-start";
+    private static final String DEPARTURE_CHANNEL_ID = "travelalarm-departure";
+    private static final String ARRIVAL_CHANNEL_ID = "travelalarm-arrival";
+    private static final String TAG_PREFIX = TravelAlarmManager.class.getName() + ":";
 
     private static boolean notificationChannelCreated;
 
-    private final Context context;
-
-    public StartAlarmManager(final Context context) {
-        this.context = context;
-    }
-
-    private void createNotificationChannel() {
+    public static void createNotificationChannel(final Context context) {
         if (notificationChannelCreated)
             return;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = context.getString(R.string.navigation_startalarm_notification_channel_name);
-            String description = context.getString(R.string.navigation_startalarm_notification_channel_description);
-            final NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_HIGH);
-            channel.setDescription(description);
-            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-            channel.enableLights(true);
-            channel.enableVibration(true);
-            channel.setSound(
-                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM),
-                    new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).build());
-            getNotificationManager().createNotificationChannel(channel);
+            final NotificationManager notificationManager = getNotificationManager(context);
+            for (String channelId : LEGACY_CHANNEL_IDS) {
+                notificationManager.deleteNotificationChannel(channelId);
+            }
+
+            createNotificationChannel(START_CHANNEL_ID,
+                    context.getString(R.string.navigation_travelalarm_notification_start_channel_name),
+                    context.getString(R.string.navigation_travelalarm_notification_start_channel_description),
+                    notificationManager);
+            createNotificationChannel(DEPARTURE_CHANNEL_ID,
+                    context.getString(R.string.navigation_travelalarm_notification_departure_channel_name),
+                    context.getString(R.string.navigation_travelalarm_notification_departure_channel_description),
+                    notificationManager);
+            createNotificationChannel(ARRIVAL_CHANNEL_ID,
+                    context.getString(R.string.navigation_travelalarm_notification_arrival_channel_name),
+                    context.getString(R.string.navigation_travelalarm_notification_arrival_channel_description),
+                    notificationManager);
         }
         notificationChannelCreated = true;
     }
 
-    private NotificationManager getNotificationManager() {
+    private static void createNotificationChannel(
+            final String channelId,
+            final CharSequence name,
+            final String description,
+            final NotificationManager notificationManager) {
+        final NotificationChannel channel = new NotificationChannel(channelId, name, NotificationManager.IMPORTANCE_HIGH);
+        channel.setDescription(description);
+        channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+        channel.enableLights(true);
+        channel.enableVibration(true);
+        channel.setSound(
+                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM),
+                new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).build());
+        notificationManager.createNotificationChannel(channel);
+    }
+
+    private static NotificationManager getNotificationManager(final Context context) {
         return (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
+    private final Context context;
+
+    public TravelAlarmManager(final Context context) {
+        this.context = context;
+    }
+
     private Notification findNotificationByTag(final String tag) {
-        final StatusBarNotification[] activeNotifications = getNotificationManager().getActiveNotifications();
+        final StatusBarNotification[] activeNotifications = getNotificationManager(context).getActiveNotifications();
         for (StatusBarNotification statusBarNotification : activeNotifications) {
             if (tag.equals(statusBarNotification.getTag()))
                 return statusBarNotification.getNotification();
@@ -101,10 +126,10 @@ public class StartAlarmManager {
         return null;
     }
 
-    public void showConfigureStartAlarmDialog(
+    public void showConfigureTravelAlarmDialog(
             final Intent navigationNotificationIntent,
-            final StartAlarmDialogFinishedListener finishedListener) {
-        final ConfigureStartAlarmDialog dialog = new ConfigureStartAlarmDialog(
+            final TravelAlarmDialogFinishedListener finishedListener) {
+        final ConfigureTravelAlarmDialog dialog = new ConfigureTravelAlarmDialog(
                 navigationNotificationIntent, finishedListener);
         dialog.show();
     }
@@ -138,18 +163,18 @@ public class StartAlarmManager {
         setDefaultTime(networkId, location.id, walkMinutes, null);
     }
 
-    private class ConfigureStartAlarmDialog extends Dialog {
+    private class ConfigureTravelAlarmDialog extends Dialog {
         public static final int MIN_TIME_VALUE = 8;
         public static final int MAX_TIME_VALUE = 120;
 
-        final StartAlarmDialogFinishedListener finishedListener;
+        final TravelAlarmDialogFinishedListener finishedListener;
         final Intent navigationNotificationIntent;
         private NumberPicker timePicker;
         private CheckBox saveDefaultCheckBox;
 
-        public ConfigureStartAlarmDialog(
+        public ConfigureTravelAlarmDialog(
                 final Intent navigationNotificationIntent,
-                final StartAlarmDialogFinishedListener finishedListener) {
+                final TravelAlarmDialogFinishedListener finishedListener) {
             super(context);
             this.navigationNotificationIntent = navigationNotificationIntent;
             this.finishedListener = finishedListener;
@@ -162,8 +187,8 @@ public class StartAlarmManager {
             final NavigationNotification navigationNotification = new NavigationNotification(getContext(), navigationNotificationIntent);
             final NetworkId networkId = navigationNotification.getNetwork();
             final NavigationNotification.Configuration configuration = Objects.clone(navigationNotification.getConfiguration());
-            final Long currentStartAlarmMillis = configuration.startAlarmMillis;
-            final boolean isAlarmActive = currentStartAlarmMillis != null;
+            final Long currentTravelAlarmMillis = configuration.travelAlarmMillis;
+            final boolean isAlarmActive = currentTravelAlarmMillis != null;
 
             final Trip trip = navigationNotification.getTrip();
             final Trip.Public firstPublicLeg = trip.getFirstPublicLeg();
@@ -174,7 +199,7 @@ public class StartAlarmManager {
 
             int presetValue;
             if (isAlarmActive) {
-                presetValue = (int) (currentStartAlarmMillis / 60000);
+                presetValue = (int) (currentTravelAlarmMillis / 60000);
             } else if (isDefaultSet) {
                 presetValue = (int) (currentDefaultTime / 60000);
             } else if (firstPublicLeg == null) {
@@ -223,20 +248,20 @@ public class StartAlarmManager {
                         final long timeValue = (long) timePicker.getValue() * 60000;
                         if (saveDefaultCheckBox.isChecked())
                             saveDefault(networkId, firstPublicLeg.departure, walkMinutes, timeValue);
-                        configuration.startAlarmMillis = timeValue;
-                        configuration.startAlarmId = System.currentTimeMillis();
+                        configuration.travelAlarmMillis = timeValue;
+                        configuration.travelAlarmId = System.currentTimeMillis();
                         NavigationNotification.updateFromForeground(getContext(),
                                 navigationNotificationIntent, configuration);
                         if (finishedListener != null)
-                            finishedListener.onStartAlarmDialogFinished(true);
+                            finishedListener.onTravelAlarmDialogFinished(true);
                         dismiss();
                     });
 
             final Button clearAlarmButton = findViewById(R.id.navigation_alarm_dialog_clear_alarm);
             clearAlarmButton.setOnClickListener(view -> {
                 if (finishedListener != null)
-                    finishedListener.onStartAlarmDialogFinished(false);
-                configuration.startAlarmMillis = null;
+                    finishedListener.onTravelAlarmDialogFinished(false);
+                configuration.travelAlarmMillis = null;
                 NavigationNotification.updateFromForeground(getContext(),
                         navigationNotificationIntent, configuration);
                 dismiss();
@@ -264,18 +289,16 @@ public class StartAlarmManager {
                         false, true, notificationTag, false),
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
-        createNotificationChannel();
-
-        final String title = context.getString(R.string.navigation_startalarm_notification_title,
+        final String title = context.getString(R.string.navigation_travelalarm_notification_start_title,
                 tripRenderer.trip.to.uniqueShortName());
-        final String message = context.getString(R.string.navigation_startalarm_notification_message,
+        final String message = context.getString(R.string.navigation_travelalarm_notification_departure_message,
                 tripRenderer.nextEventTargetName,
                 Formats.formatTime(context, tripRenderer.nextEventEarliestTime),
                 Formats.formatTime(context, tripRenderer.nextEventEstimatedTime),
                 tripRenderer.nextEventTimeLeftValue, tripRenderer.nextEventTimeLeftUnit);
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(
-                context, CHANNEL_ID)
+                context, START_CHANNEL_ID)
                 .setContentIntent(contentIntent)
                 .setFullScreenIntent(fullScreenIntent, true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -293,11 +316,11 @@ public class StartAlarmManager {
         final Notification notification = notificationBuilder.build();
         notification.flags |= NotificationCompat.FLAG_INSISTENT;
         log.info("set alarm notification with tag={}", notificationTag);
-        getNotificationManager().notify(notificationTag, 0, notification);
+        getNotificationManager(context).notify(notificationTag, 0, notification);
     }
 
     public void dismissAlarm(final String notificationTag) {
-        getNotificationManager().cancel(notificationTag, 0);
+        getNotificationManager(context).cancel(notificationTag, 0);
     }
 
     public void showAlarmPopupDialog(final String notificationTag) {
@@ -314,7 +337,7 @@ public class StartAlarmManager {
         dialog.setContentView(R.layout.navigation_alarm_popup);
         ((TextView) dialog.findViewById(R.id.navigation_alarm_popup_title)).setText(title);
         ((TextView) dialog.findViewById(R.id.navigation_alarm_popup_message)).setText(message);
-        dialog.findViewById(R.id.navigation_alarm_popup_button_ok).setOnClickListener(v -> {
+        dialog.findViewById(R.id.navigation_travelalarm_popup_button_ok).setOnClickListener(v -> {
             // dismissAlarm(notificationTag); -- done in dismiss listener
             dialog.dismiss();
         });
