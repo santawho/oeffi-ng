@@ -58,6 +58,15 @@ public class TravelAlarmManager {
         void onTravelAlarmDialogFinished(boolean isAlarmActive);
     }
 
+    private static final String PREF_KEY_TRAVELALARM_TIME_RATIO = "travelalarm_time_ratio";
+    private static final String PREF_KEY_TRAVELALARM_START_TIME_DEFAULT = "travelalarm_start_time_default";
+    private static final String PREF_KEY_TRAVELALARM_START_LEAD_TIME = "travelalarm_start_lead_time";
+    private static final String PREF_KEY_TRAVELALARM_ARRIVAL_TIME_DEFAULT = "travelalarm_arrival_time_default";
+    private static final String PREF_KEY_TRAVELALARM_ARRIVAL_LEAD_TIME = "travelalarm_arrival_lead_time";
+    private static final String PREF_KEY_TRAVELALARM_DEPARTURE_TIME_DEFAULT = "travelalarm_departure_time_default";
+    private static final String PREF_KEY_TRAVELALARM_DEPARTURE_LEAD_TIME = "travelalarm_departure_lead_time";
+    public static final String PREF_KEY_TRAVELALARM_START = "travelalarm_start_%s_%s_%d";
+
     private static final String[] LEGACY_CHANNEL_IDS = new String[]{ "startalarm" };
     private static final String START_CHANNEL_ID = "travelalarm-start";
     private static final String DEPARTURE_CHANNEL_ID = "travelalarm-departure";
@@ -134,20 +143,28 @@ public class TravelAlarmManager {
         dialog.show();
     }
 
-    @SuppressLint("DefaultLocale")
-    private String getDefaultTimePrefKey(final NetworkId networkId, final String stationId, final int walkMinutes) {
-        return String.format("start_alarm_%s_%s_%d", networkId.name(), stationId, walkMinutes);
+    private SharedPreferences getSharedPreferences() {
+        return Application.getInstance().getSharedPreferences();
     }
 
-    public Long getDefaultTime(final NetworkId networkId, final String stationId, final int walkMinutes) {
-        final String key = getDefaultTimePrefKey(networkId, stationId, walkMinutes);
-        final long value = Application.getInstance().getSharedPreferences().getLong(key, -1);
+    public int getTimeRatioPercent() {
+        return getSharedPreferences().getInt(PREF_KEY_TRAVELALARM_TIME_RATIO, 33);
+    }
+
+    @SuppressLint("DefaultLocale")
+    private String getDefaultTimeStartPrefKey(final NetworkId networkId, final String stationId, final int walkMinutes) {
+        return String.format(PREF_KEY_TRAVELALARM_START, networkId.name(), stationId, walkMinutes);
+    }
+
+    public Long getDefaultTimeStart(final NetworkId networkId, final String stationId, final int walkMinutes) {
+        final String key = getDefaultTimeStartPrefKey(networkId, stationId, walkMinutes);
+        final long value = getSharedPreferences().getLong(key, -1);
         return value < 0 ? null : value;
     }
 
-    public void setDefaultTime(final NetworkId networkId, final String stationId, final int walkMinutes, final Long millis) {
-        final String key = getDefaultTimePrefKey(networkId, stationId, walkMinutes);
-        final SharedPreferences.Editor edit = Application.getInstance().getSharedPreferences().edit();
+    public void setDefaultTimeStart(final NetworkId networkId, final String stationId, final int walkMinutes, final Long millis) {
+        final String key = getDefaultTimeStartPrefKey(networkId, stationId, walkMinutes);
+        final SharedPreferences.Editor edit = getSharedPreferences().edit();
         if (millis == null)
             edit.remove(key);
         else
@@ -155,12 +172,12 @@ public class TravelAlarmManager {
         edit.apply();
     }
 
-    private void saveDefault(final NetworkId networkId, final Location location, final int walkMinutes, final Long millis) {
-        setDefaultTime(networkId, location.id, walkMinutes, millis);
+    private void saveDefaultStart(final NetworkId networkId, final Location location, final int walkMinutes, final Long millis) {
+        setDefaultTimeStart(networkId, location.id, walkMinutes, millis);
     }
 
-    private void deleteDefault(final NetworkId networkId, final Location location, final int walkMinutes) {
-        setDefaultTime(networkId, location.id, walkMinutes, null);
+    private void deleteDefaultStart(final NetworkId networkId, final Location location, final int walkMinutes) {
+        setDefaultTimeStart(networkId, location.id, walkMinutes, null);
     }
 
     private class ConfigureTravelAlarmDialog extends Dialog {
@@ -194,7 +211,7 @@ public class TravelAlarmManager {
             final Trip.Public firstPublicLeg = trip.getFirstPublicLeg();
             final Trip.Leg firstLeg = trip.legs.isEmpty() ? null : trip.legs.get(0);
             final int walkMinutes = (firstLeg instanceof Trip.Individual) ? ((Trip.Individual) firstLeg).min : 0;
-            final Long currentDefaultTime = firstPublicLeg == null ? null : getDefaultTime(networkId, firstPublicLeg.departure.id, walkMinutes);
+            final Long currentDefaultTime = firstPublicLeg == null ? null : getDefaultTimeStart(networkId, firstPublicLeg.departure.id, walkMinutes);
             final boolean isDefaultSet = currentDefaultTime != null;
 
             int presetValue;
@@ -237,7 +254,7 @@ public class TravelAlarmManager {
             deleteDefaultButton.setText(
                     context.getString(R.string.navigation_alarm_dialog_delete_default_label, departureName));
             deleteDefaultButton.setOnClickListener(view -> {
-                deleteDefault(networkId, firstPublicLeg.departure, walkMinutes);
+                deleteDefaultStart(networkId, firstPublicLeg.departure, walkMinutes);
                 ViewUtils.setVisibility(saveDefaultCheckBox, true);
                 ViewUtils.setVisibility(deleteDefaultButton, false);
             });
@@ -247,7 +264,7 @@ public class TravelAlarmManager {
                     .setOnClickListener(view -> {
                         final long timeValue = (long) timePicker.getValue() * 60000;
                         if (saveDefaultCheckBox.isChecked())
-                            saveDefault(networkId, firstPublicLeg.departure, walkMinutes, timeValue);
+                            saveDefaultStart(networkId, firstPublicLeg.departure, walkMinutes, timeValue);
                         configuration.travelAlarmMillis = timeValue;
                         configuration.travelAlarmId = System.currentTimeMillis();
                         NavigationNotification.updateFromForeground(getContext(),

@@ -250,6 +250,7 @@ public class NavigationNotification {
     }
 
     private final Context context;
+    private final TravelAlarmManager travelAlarmManager;
     private final String notificationTag;
     private final TripDetailsActivity.IntentData intentData;
     private TripRenderer.NotificationData lastNotified;
@@ -268,6 +269,7 @@ public class NavigationNotification {
             final Configuration configuration,
             final TripRenderer.NotificationData lastNotified) {
         this.context = context;
+        this.travelAlarmManager = new TravelAlarmManager(context);
         final Trip trip = aIntentData.trip;
         final String uniqueId = trip.getUniqueId();
         final StringBuilder b = new StringBuilder();
@@ -308,7 +310,7 @@ public class NavigationNotification {
                 if (firstPublicLeg != null) {
                     final Trip.Leg firstLeg = trip.legs.isEmpty() ? null : trip.legs.get(0);
                     final int walkMinutes = (firstLeg instanceof Trip.Individual) ? ((Trip.Individual) firstLeg).min : 0;
-                    conf.travelAlarmMillis = new TravelAlarmManager(context).getDefaultTime(
+                    conf.travelAlarmMillis = travelAlarmManager.getDefaultTimeStart(
                             aIntentData.network, firstPublicLeg.departure.id, walkMinutes);
                     conf.travelAlarmId = System.currentTimeMillis();
                 }
@@ -414,12 +416,14 @@ public class NavigationNotification {
         long nextTripReloadTimeMs;
         final Long travelAlarmMillisInAdvance = configuration.travelAlarmMillis;
         final long travelAlarmAtMs;
+        final int timeRatioPercent = travelAlarmManager.getTimeRatioPercent();
         if (tripRenderer.nextEventEarliestTime != null) {
             if (tripRenderer.nextEventIsInitialIndividual) {
                 if (travelAlarmMillisInAdvance != null) {
                     final long earliest = tripRenderer.nextEventEarliestTime.getTime();
                     final long estimated = tripRenderer.nextEventEstimatedTime.getTime();
-                    travelAlarmAtMs = (2 * earliest + estimated) / 3 - travelAlarmMillisInAdvance;
+                    final long baseTime = (earliest * (100 - timeRatioPercent) + estimated * timeRatioPercent) / 100;
+                    travelAlarmAtMs = baseTime - travelAlarmMillisInAdvance;
 //                    if (pppp == null) pppp = nowTime + 10000; travelAlarmAtMs = pppp;
                 } else {
                     travelAlarmAtMs = 0;
@@ -565,7 +569,7 @@ public class NavigationNotification {
                 } else {
                     log.info("alarm for start at {} should have been at {}, now firing",
                             tripRenderer.nextEventTargetName, Formats.formatTime(context, travelAlarmAtMs));
-                    new TravelAlarmManager(context).fireAlarm(context, intentData, tripRenderer);
+                    travelAlarmManager.fireAlarm(context, intentData, tripRenderer);
                     newNotified.playedTravelAlarmId = configuration.travelAlarmId;
                 }
             } else {

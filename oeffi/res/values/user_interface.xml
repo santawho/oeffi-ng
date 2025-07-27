@@ -96,6 +96,7 @@
     <string name="user_interface_voice_control_error">Voice control error. (%s)</string>
 
     <string name="user_interface_developer_options_category_title">Developer Options</string>
-    <string name="user_interface_developer_options_show_extra_infos_enabled_title">Activate certain elements to aid in the development process.</string>
+    <string name="user_interface_developer_options_show_extra_infos_enabled_title">Activate developer options</string>
+    <string name="user_interface_developer_options_show_extra_infos_enabled_summary">Activate certain elements to aid in the development process.</string>
 
 </resources>

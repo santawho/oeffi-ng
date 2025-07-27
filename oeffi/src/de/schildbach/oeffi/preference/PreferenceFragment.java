@@ -26,6 +26,14 @@ public class PreferenceFragment extends android.preference.PreferenceFragment {
         preferenceActivity = (PreferenceActivity) context;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        final CharSequence title = getPreferenceScreen().getTitle();
+        if (title != null && title.length() > 0)
+            preferenceActivity.setTitle(title);
+    }
+
     protected void removeOrDisablePreference(final String preferenceName) {
         removeOrDisablePreference(findPreference(preferenceName));
     }

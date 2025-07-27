@@ -133,6 +133,7 @@ public class PreferenceActivity extends android.preference.PreferenceActivity {
                 || UserInterfaceFragment.class.getName().equals(fragmentName)
                 || DirectionsFragment.class.getName().equals(fragmentName)
                 || NavigationFragment.class.getName().equals(fragmentName)
+                || TravelAlarmFragment.class.getName().equals(fragmentName)
                 || ShortcutsFragment.class.getName().equals(fragmentName)
                 || AboutFragment.class.getName().equals(fragmentName)
                 || DonateFragment.class.getName().equals(fragmentName);

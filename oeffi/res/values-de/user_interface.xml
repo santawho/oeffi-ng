@@ -79,6 +79,7 @@
     <string name="user_interface_voice_control_error">Sprachsteuerung, Fehler. (%s)</string>
 
     <string name="user_interface_developer_options_category_title">Entwickler-Optionen</string>
-    <string name="user_interface_developer_options_show_extra_infos_enabled_title">Elemente zur Unterstützung des Enticklunsprozesses aktivieren.</string>
+    <string name="user_interface_developer_options_show_extra_infos_enabled_title">Entwickler-Optionen aktivieren</string>
+    <string name="user_interface_developer_options_show_extra_infos_enabled_summary">Elemente zur Unterstützung des Entwicklungsprozesses aktivieren.</string>
 
 </resources>

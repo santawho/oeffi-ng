@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/navigation_preferences_title" >
+
+    <PreferenceScreen
+        android:fragment="de.schildbach.oeffi.preference.TravelAlarmFragment"
+        android:title="@string/navigation_travelalarm_preferences_title"
+        android:summary="@string/navigation_travelalarm_preferences_summary" />
 
     <ListPreference
         android:defaultValue="USAGE_NOTIFICATION_EVENT"
