@@ -48,7 +48,7 @@ println "applicationId = ${CREDENTIALS.applicationId}"
 
 android {
     namespace 'de.schildbach.oeffi'
-    compileSdk 36
+    compileSdk 35
 
     defaultConfig {
         applicationId "de.schildbach.oeffi"
@@ -153,6 +153,8 @@ android {
 dependencies {
     implementation libs.support.v13
     implementation libs.preference.v7
+//    implementation libs.preference.v14
+//    implementation libs.preferencex
     implementation libs.jsr305
     implementation libs.annotation
     implementation libs.recyclerview
