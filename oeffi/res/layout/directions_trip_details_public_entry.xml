@@ -86,19 +86,41 @@
         android:shrinkColumns="5"
         android:stretchColumns="5" />
 
-    <TextView
+    <RelativeLayout
         android:id="@+id/directions_trip_details_public_entry_progress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/bg_trip_details_time_left"
         android:layout_marginLeft="@dimen/text_padding_horizontal_verylax"
         android:layout_marginRight="@dimen/text_padding_horizontal_verylax"
-        android:layout_marginTop="@dimen/text_padding_vertical_lax"
+        android:layout_marginTop="@dimen/text_padding_vertical_verylax"
+        android:layout_marginBottom="@dimen/text_padding_vertical_verylax"
         android:paddingTop="@dimen/text_padding_vertical"
         android:paddingBottom="@dimen/text_padding_vertical"
-        android:gravity="center"
-        android:textSize="@dimen/font_size_large"
-        android:background="@color/bg_trip_details_time_left"
-        android:visibility="gone" />
+        android:visibility="gone" >
+        <TextView
+            android:id="@+id/directions_trip_details_public_entry_progress_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:paddingStart="@dimen/text_padding_horizontal"
+            android:paddingEnd="@dimen/text_padding_horizontal"
+            android:gravity="center"
+            android:textColor="@color/fg_significant"
+            android:textSize="@dimen/font_size_large" />
+        <ImageButton
+            android:id="@+id/directions_trip_details_public_entry_progress_bell"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:paddingStart="0dp"
+            android:paddingEnd="@dimen/text_padding_horizontal"
+            android:src="@drawable/ic_bell_on_black_24dp"
+            android:tint="@color/fg_significant" />
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/directions_trip_details_public_entry_message"

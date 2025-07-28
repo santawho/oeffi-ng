@@ -13,7 +13,7 @@
         android:gravity="center"
         android:textStyle="bold"
         android:textSize="@dimen/font_size_xlarge"
-        android:text="@string/navigation_alarm_dialog_message" />
+        android:text="@string/navigation_alarm_dialog_message_start" />
 
     <LinearLayout
         android:orientation="horizontal"

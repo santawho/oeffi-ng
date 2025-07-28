@@ -45,10 +45,11 @@ public class TripRenderer {
     public static final int TRANSFER_CRITICAL_MINUTES = 3;
 
     public static class LegContainer {
-        public int legIndex;
+        public final int legContainerIndex;
+        public final int legIndex;
         public @Nullable Trip.Individual individualLeg;
         public @Nullable Trip.Public publicLeg;
-        public final @Nullable Trip.Public initialLeg;
+        public @Nullable Trip.Public initialLeg;
         public final LegContainer transferFrom;
         public final LegContainer transferTo;
         public final boolean transferCritical;
@@ -63,8 +64,10 @@ public class TripRenderer {
         public Trip.Public simulatedPublicLeg;
 
         public LegContainer(
+                final int legContainerIndex,
                 final int legIndex,
                 final @Nullable Trip.Public baseLeg) {
+            this.legContainerIndex = legContainerIndex;
             this.legIndex = legIndex;
             this.publicLeg = baseLeg;
             this.initialLeg = baseLeg;
@@ -75,10 +78,12 @@ public class TripRenderer {
         }
 
         public LegContainer(
+                final int legContainerIndex,
                 final int legIndex,
                 final @Nullable Trip.Individual baseLeg,
                 final LegContainer transferFrom, final LegContainer transferTo,
                 final boolean transferCritical) {
+            this.legContainerIndex = legContainerIndex;
             this.legIndex = legIndex;
             this.individualLeg = baseLeg;
             this.transferFrom = transferFrom;
@@ -358,8 +363,11 @@ public class TripRenderer {
             if (leg instanceof Trip.Individual) {
                 final Trip.Individual individualLeg = (Trip.Individual) leg;
                 final LegContainer transferFrom = (prevLeg instanceof Trip.Public) ? prevC : null;
-                final LegContainer transferTo = (nextLeg instanceof Trip.Public) ? new LegContainer(iNext, (Trip.Public) nextLeg) : null;
-                legs.add(new LegContainer(iLeg, individualLeg, transferFrom, transferTo, isTransferCritical(individualLeg, transferFrom, transferTo)));
+                final LegContainer transferTo = (nextLeg instanceof Trip.Public)
+                        ? new LegContainer(legs.size() + 1, iNext, (Trip.Public) nextLeg)
+                        : null;
+                legs.add(new LegContainer(legs.size(), iLeg, individualLeg,
+                        transferFrom, transferTo, isTransferCritical(individualLeg, transferFrom, transferTo)));
                 if (transferTo != null) {
                     setupPath(nextLeg);
                     legs.add(transferTo);
@@ -372,9 +380,10 @@ public class TripRenderer {
                 prevC = transferTo;
             } else if (leg instanceof Trip.Public) {
                 final Trip.Public publicLeg = (Trip.Public) leg;
-                final LegContainer newC = new LegContainer(iLeg, publicLeg);
+                final LegContainer newC = new LegContainer(legs.size() + 1, iLeg, publicLeg);
                 if (prevC != null || iLeg == 0) {
-                    legs.add(new LegContainer(-1, null, prevC, newC, isTransferCritical(null, prevC, newC)));
+                    legs.add(new LegContainer(legs.size(), -1, null,
+                            prevC, newC, isTransferCritical(null, prevC, newC)));
                 }
                 legs.add(newC);
                 prevC = newC;

@@ -18,6 +18,7 @@
 package de.schildbach.oeffi.directions.navigation;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -55,7 +56,7 @@ public class TravelAlarmManager {
     private static Logger log = LoggerFactory.getLogger(TravelAlarmManager.class);
 
     public interface TravelAlarmDialogFinishedListener {
-        void onTravelAlarmDialogFinished(boolean isAlarmActive);
+        void onTravelAlarmDialogFinished();
     }
 
     private static final String PREF_KEY_TRAVELALARM_TIME_RATIO = "travelalarm_time_ratio";
@@ -135,14 +136,6 @@ public class TravelAlarmManager {
         return null;
     }
 
-    public void showConfigureTravelAlarmDialog(
-            final Intent navigationNotificationIntent,
-            final TravelAlarmDialogFinishedListener finishedListener) {
-        final ConfigureTravelAlarmDialog dialog = new ConfigureTravelAlarmDialog(
-                navigationNotificationIntent, finishedListener);
-        dialog.show();
-    }
-
     private SharedPreferences getSharedPreferences() {
         return Application.getInstance().getSharedPreferences();
     }
@@ -156,10 +149,9 @@ public class TravelAlarmManager {
         return String.format(PREF_KEY_TRAVELALARM_START, networkId.name(), stationId, walkMinutes);
     }
 
-    public Long getDefaultTimeStart(final NetworkId networkId, final String stationId, final int walkMinutes) {
+    public long getDefaultTimeStart(final NetworkId networkId, final String stationId, final int walkMinutes) {
         final String key = getDefaultTimeStartPrefKey(networkId, stationId, walkMinutes);
-        final long value = getSharedPreferences().getLong(key, -1);
-        return value < 0 ? null : value;
+        return getSharedPreferences().getLong(key, -1);
     }
 
     public void setDefaultTimeStart(final NetworkId networkId, final String stationId, final int walkMinutes, final Long millis) {
@@ -180,111 +172,102 @@ public class TravelAlarmManager {
         setDefaultTimeStart(networkId, location.id, walkMinutes, null);
     }
 
-    private class ConfigureTravelAlarmDialog extends Dialog {
-        public static final int MIN_TIME_VALUE = 8;
-        public static final int MAX_TIME_VALUE = 120;
+    private long getMinutePreferenceInMillis(final String key, final int defValue) {
+        final String string = getSharedPreferences().getString(key, null);
+        final int v = (string == null) ? defValue : Integer.parseInt(string);
+        if (v <= 0)
+            return v;
+        return (long) v * 60000;
+    }
 
-        final TravelAlarmDialogFinishedListener finishedListener;
-        final Intent navigationNotificationIntent;
-        private NumberPicker timePicker;
-        private CheckBox saveDefaultCheckBox;
+    public long getStartAlarmTimeDefault() {
+        return getMinutePreferenceInMillis(PREF_KEY_TRAVELALARM_START_TIME_DEFAULT, 0);
+    }
 
-        public ConfigureTravelAlarmDialog(
-                final Intent navigationNotificationIntent,
-                final TravelAlarmDialogFinishedListener finishedListener) {
-            super(context);
-            this.navigationNotificationIntent = navigationNotificationIntent;
-            this.finishedListener = finishedListener;
+    public long getStartAlarmLeadTime() {
+        return getMinutePreferenceInMillis(PREF_KEY_TRAVELALARM_START_LEAD_TIME, 15);
+    }
+
+    public long getArrivalAlarmTimeDefault() {
+        return getMinutePreferenceInMillis(PREF_KEY_TRAVELALARM_ARRIVAL_TIME_DEFAULT, 0);
+    }
+
+    public long getArrivalAlarmLeadTime() {
+        return getMinutePreferenceInMillis(PREF_KEY_TRAVELALARM_ARRIVAL_LEAD_TIME, 120);
+    }
+
+    public long getDepartureAlarmTimeDefault() {
+        return getMinutePreferenceInMillis(PREF_KEY_TRAVELALARM_DEPARTURE_TIME_DEFAULT, 0);
+    }
+
+    public long getDepartureAlarmLeadTime() {
+        return getMinutePreferenceInMillis(PREF_KEY_TRAVELALARM_DEPARTURE_LEAD_TIME, 30);
+    }
+
+    private long getWeightedTime(final long earliestEventTime, final long estimatedEventTime) {
+        final int timeRatioPercent = getTimeRatioPercent();
+        return (earliestEventTime * (100 - timeRatioPercent) + estimatedEventTime * timeRatioPercent) / 100;
+    }
+
+    public long getStartAlarm(
+            final long earliestEventTime, final long estimatedEventTime,
+            final long explicitSettingMs,
+            final NetworkId networkId, final String stationId, final int walkMinutes,
+            final long beginningOfNavigation, final long now) {
+        if (explicitSettingMs == 0)
+            return 0;
+        else if (explicitSettingMs > 0)
+            return getWeightedTime(earliestEventTime, estimatedEventTime) - explicitSettingMs;
+
+        long alarmTimeBeforeEventMs = getDefaultTimeStart(networkId, stationId, walkMinutes);
+        if (alarmTimeBeforeEventMs < 0) {
+            alarmTimeBeforeEventMs = getStartAlarmTimeDefault();
+            if (alarmTimeBeforeEventMs <= 0)
+                return 0;
         }
+        final long alarmTimeMs = getWeightedTime(earliestEventTime, estimatedEventTime) - alarmTimeBeforeEventMs;
+        final long leadTime = getStartAlarmLeadTime();
+        if (alarmTimeMs - beginningOfNavigation < leadTime)
+            return 0;
+        return alarmTimeMs;
+    }
 
-        @Override
-        protected void onCreate(final Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
+    public long getArrivalAlarm(
+            final long earliestEventTime, final long estimatedEventTime,
+            final long explicitSettingMs,
+            final long beginningOfLeg, final long now) {
+        if (explicitSettingMs == 0)
+            return 0;
+        else if (explicitSettingMs > 0)
+            return getWeightedTime(earliestEventTime, estimatedEventTime) - explicitSettingMs;
 
-            final NavigationNotification navigationNotification = new NavigationNotification(getContext(), navigationNotificationIntent);
-            final NetworkId networkId = navigationNotification.getNetwork();
-            final NavigationNotification.Configuration configuration = Objects.clone(navigationNotification.getConfiguration());
-            final Long currentTravelAlarmMillis = configuration.travelAlarmMillis;
-            final boolean isAlarmActive = currentTravelAlarmMillis != null;
+        long alarmTimeBeforeEventMs = getArrivalAlarmTimeDefault();
+        if (alarmTimeBeforeEventMs <= 0)
+            return 0;
+        final long alarmTimeMs = getWeightedTime(earliestEventTime, estimatedEventTime) - alarmTimeBeforeEventMs;
+        final long leadTime = getArrivalAlarmLeadTime();
+        if (alarmTimeMs - beginningOfLeg < leadTime)
+            return 0;
+        return alarmTimeMs;
+    }
 
-            final Trip trip = navigationNotification.getTrip();
-            final Trip.Public firstPublicLeg = trip.getFirstPublicLeg();
-            final Trip.Leg firstLeg = trip.legs.isEmpty() ? null : trip.legs.get(0);
-            final int walkMinutes = (firstLeg instanceof Trip.Individual) ? ((Trip.Individual) firstLeg).min : 0;
-            final Long currentDefaultTime = firstPublicLeg == null ? null : getDefaultTimeStart(networkId, firstPublicLeg.departure.id, walkMinutes);
-            final boolean isDefaultSet = currentDefaultTime != null;
+    public long getDepartureAlarm(
+            final long earliestEventTime, final long estimatedEventTime,
+            final long explicitSettingMs,
+            final long beginningOfChangeover, final long now) {
+        if (explicitSettingMs == 0)
+            return 0;
+        else if (explicitSettingMs > 0)
+            return getWeightedTime(earliestEventTime, estimatedEventTime) - explicitSettingMs;
 
-            int presetValue;
-            if (isAlarmActive) {
-                presetValue = (int) (currentTravelAlarmMillis / 60000);
-            } else if (isDefaultSet) {
-                presetValue = (int) (currentDefaultTime / 60000);
-            } else if (firstPublicLeg == null) {
-                presetValue = MIN_TIME_VALUE;
-            } else {
-                presetValue = walkMinutes;
-                if (presetValue < MIN_TIME_VALUE)
-                    presetValue = MIN_TIME_VALUE;
-                else if (presetValue > MAX_TIME_VALUE)
-                    presetValue = MAX_TIME_VALUE;
-            }
-
-            final Context context = getContext();
-
-            setContentView(R.layout.navigation_alarm_dialog);
-
-            String departureName = Formats.makeBreakableStationName(firstPublicLeg.departure.uniqueShortName());
-            if (walkMinutes > 0)
-                departureName = getContext().getString(R.string.navigation_alarm_dialog_stationname_with_walk, departureName, walkMinutes);
-            ((TextView) findViewById(R.id.navigation_alarm_dialog_message)).setText(
-                    context.getString(R.string.navigation_alarm_dialog_message, departureName));
-
-            timePicker = findViewById(R.id.navigation_alarm_dialog_time);
-            timePicker.setMinValue(MIN_TIME_VALUE);
-            timePicker.setMaxValue(MAX_TIME_VALUE);
-            timePicker.setValue(presetValue);
-
-            saveDefaultCheckBox = findViewById(R.id.navigation_alarm_dialog_save_default);
-            saveDefaultCheckBox.setText(
-                    context.getString(R.string.navigation_alarm_dialog_save_default_label, departureName));
-            saveDefaultCheckBox.setChecked(false);
-            ViewUtils.setVisibility(saveDefaultCheckBox, !isDefaultSet);
-
-            final Button deleteDefaultButton = findViewById(R.id.navigation_alarm_dialog_delete_default);
-            deleteDefaultButton.setText(
-                    context.getString(R.string.navigation_alarm_dialog_delete_default_label, departureName));
-            deleteDefaultButton.setOnClickListener(view -> {
-                deleteDefaultStart(networkId, firstPublicLeg.departure, walkMinutes);
-                ViewUtils.setVisibility(saveDefaultCheckBox, true);
-                ViewUtils.setVisibility(deleteDefaultButton, false);
-            });
-            ViewUtils.setVisibility(deleteDefaultButton, isDefaultSet);
-
-            findViewById(R.id.navigation_alarm_dialog_set_alarm)
-                    .setOnClickListener(view -> {
-                        final long timeValue = (long) timePicker.getValue() * 60000;
-                        if (saveDefaultCheckBox.isChecked())
-                            saveDefaultStart(networkId, firstPublicLeg.departure, walkMinutes, timeValue);
-                        configuration.travelAlarmMillis = timeValue;
-                        configuration.travelAlarmId = System.currentTimeMillis();
-                        NavigationNotification.updateFromForeground(getContext(),
-                                navigationNotificationIntent, configuration);
-                        if (finishedListener != null)
-                            finishedListener.onTravelAlarmDialogFinished(true);
-                        dismiss();
-                    });
-
-            final Button clearAlarmButton = findViewById(R.id.navigation_alarm_dialog_clear_alarm);
-            clearAlarmButton.setOnClickListener(view -> {
-                if (finishedListener != null)
-                    finishedListener.onTravelAlarmDialogFinished(false);
-                configuration.travelAlarmMillis = null;
-                NavigationNotification.updateFromForeground(getContext(),
-                        navigationNotificationIntent, configuration);
-                dismiss();
-            });
-            ViewUtils.setVisibility(clearAlarmButton, isAlarmActive);
-        }
+        long alarmTimeBeforeEventMs = getDepartureAlarmTimeDefault();
+        if (alarmTimeBeforeEventMs <= 0)
+            return 0;
+        final long alarmTimeMs = getWeightedTime(earliestEventTime, estimatedEventTime) - alarmTimeBeforeEventMs;
+        final long leadTime = getDepartureAlarmLeadTime();
+        if (alarmTimeMs - beginningOfChangeover < leadTime)
+            return 0;
+        return alarmTimeMs;
     }
 
     public void fireAlarm(
@@ -369,17 +352,197 @@ public class TravelAlarmManager {
         dialog.setCancelable(false);
         dialog.setCanceledOnTouchOutside(false);
         dialog.show();
+    }
 
-//        DialogBuilder.get(context)
-//                .setTitle(title)
-//                .setMessage(message)
-//                .setCancelable(false)
-//                .setPositiveButton(android.R.string.ok, (dialog, which) ->
-//                        dismissAlarm(notificationTag))
-//                .setOnKeyListener((dialog, keyCode, event) -> {
-//                    dismissAlarm(notificationTag);
-//                    return true;
-//                })
-//                .show();
+    public void showConfigureTravelAlarmDialog(
+            final TripRenderer.LegContainer legContainer,
+            final Intent navigationNotificationIntent,
+            final TravelAlarmDialogFinishedListener finishedListener) {
+        final ConfigureTravelAlarmDialog dialog = new ConfigureTravelAlarmDialog(
+                legContainer, navigationNotificationIntent, finishedListener);
+        dialog.show();
+    }
+
+    private class ConfigureTravelAlarmDialog extends Dialog {
+        public static final int MIN_TIME_VALUE = 1;
+        public static final int MIN_TIME_SUGGEST_VALUE = 8;
+        public static final int MAX_TIME_VALUE = 120;
+
+        final TravelAlarmDialogFinishedListener finishedListener;
+        final TripRenderer.LegContainer legContainer;
+        final Intent navigationNotificationIntent;
+        private NumberPicker timePicker;
+        private CheckBox saveDefaultCheckBox;
+
+        public ConfigureTravelAlarmDialog(
+                final TripRenderer.LegContainer legContainer,
+                final Intent navigationNotificationIntent,
+                final TravelAlarmDialogFinishedListener finishedListener) {
+            super(context);
+            this.legContainer = legContainer;
+            this.navigationNotificationIntent = navigationNotificationIntent;
+            this.finishedListener = finishedListener;
+            setOnDismissListener(dialog -> {
+                if (finishedListener != null)
+                    finishedListener.onTravelAlarmDialogFinished();
+            });
+        }
+
+        @Override
+        protected void onCreate(final Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+
+            final NavigationNotification navigationNotification = new NavigationNotification(getContext(), navigationNotificationIntent);
+            final NetworkId networkId = navigationNotification.getNetwork();
+            final NavigationNotification.Configuration configuration = Objects.clone(navigationNotification.getConfiguration());
+            final NavigationNotification.ExtraData extraData = navigationNotification.getExtraData();
+
+            final int legIndex;
+            final boolean alarmIsForDeparture;
+            if (legContainer.publicLeg != null) {
+                legIndex = legContainer.legIndex;
+                alarmIsForDeparture = false;
+            } else if (legContainer.individualLeg != null) {
+                legIndex = legContainer.transferTo.legIndex;
+                alarmIsForDeparture = true;
+            } else {
+                legIndex = legContainer.transferTo.legIndex;
+                alarmIsForDeparture = true;
+            }
+
+            final long currentTravelAlarmAtMs;
+            final long travelAlarmExplicitMs;
+            if (alarmIsForDeparture) {
+                currentTravelAlarmAtMs = extraData.currentTravelAlarmAtMsForLegDeparture[1 + legIndex];
+                travelAlarmExplicitMs = configuration.travelAlarmExplicitMsForLegDeparture[1 + legIndex];
+            } else {
+                currentTravelAlarmAtMs = extraData.currentTravelAlarmAtMsForLegArrival[1 + legIndex];
+                travelAlarmExplicitMs = configuration.travelAlarmExplicitMsForLegArrival[1 + legIndex];
+            }
+
+            final boolean isAlarmActive = (travelAlarmExplicitMs >= 0) ? (travelAlarmExplicitMs > 0) : (currentTravelAlarmAtMs > 0);
+
+            final Trip trip = navigationNotification.getTrip();
+            final boolean isInitialIndividualLeg = legIndex < 0 || (legIndex == 0 && legContainer.publicLeg == null);
+            final Trip.Public firstPublicLeg = trip.getFirstPublicLeg();
+            final Trip.Leg firstLeg = trip.legs.isEmpty() ? null : trip.legs.get(0);
+            final int walkMinutes = (firstLeg instanceof Trip.Individual) ? ((Trip.Individual) firstLeg).min : 0;
+            long currentDefaultTime;
+            final boolean isDefaultSet;
+            final boolean isLocationDefaultSet;
+            if (isInitialIndividualLeg) {
+                currentDefaultTime = getDefaultTimeStart(networkId, firstPublicLeg.departure.id, walkMinutes);
+                if (currentDefaultTime > 0) {
+                    isDefaultSet = true;
+                    isLocationDefaultSet = true;
+                } else {
+                    currentDefaultTime = getStartAlarmTimeDefault();
+                    isDefaultSet = currentDefaultTime > 0;
+                    isLocationDefaultSet = false;
+                }
+            } else if (legContainer.publicLeg != null) {
+                currentDefaultTime = getArrivalAlarmTimeDefault();
+                isDefaultSet = currentDefaultTime > 0;
+                isLocationDefaultSet = false;
+            } else {
+                currentDefaultTime = getDepartureAlarmTimeDefault();
+                isDefaultSet = currentDefaultTime > 0;
+                isLocationDefaultSet = false;
+            }
+
+            int presetValue;
+            if (travelAlarmExplicitMs > 0) {
+                presetValue = (int) (travelAlarmExplicitMs / 60000);
+            } else if (isDefaultSet) {
+                presetValue = (int) (currentDefaultTime / 60000);
+            } else if (firstPublicLeg == null) {
+                presetValue = MIN_TIME_SUGGEST_VALUE;
+            } else {
+                presetValue = walkMinutes;
+                if (presetValue < MIN_TIME_SUGGEST_VALUE)
+                    presetValue = MIN_TIME_SUGGEST_VALUE;
+                else if (presetValue > MAX_TIME_VALUE)
+                    presetValue = MAX_TIME_VALUE;
+            }
+
+            final Activity context = (Activity) TravelAlarmManager.this.context;
+
+            setContentView(R.layout.navigation_alarm_dialog);
+
+            saveDefaultCheckBox = findViewById(R.id.navigation_alarm_dialog_save_default);
+            final Button deleteDefaultButton = findViewById(R.id.navigation_alarm_dialog_delete_default);
+
+            if (isInitialIndividualLeg && firstPublicLeg != null) {
+                String departureName = Formats.makeBreakableStationName(firstPublicLeg.departure.uniqueShortName());
+                if (walkMinutes > 0)
+                    departureName = getContext().getString(R.string.navigation_alarm_dialog_stationname_with_walk, departureName, walkMinutes);
+                ((TextView) findViewById(R.id.navigation_alarm_dialog_message)).setText(
+                        context.getString(R.string.navigation_alarm_dialog_message_start, departureName));
+
+                saveDefaultCheckBox = findViewById(R.id.navigation_alarm_dialog_save_default);
+                saveDefaultCheckBox.setText(
+                        context.getString(R.string.navigation_alarm_dialog_save_default_label, departureName));
+                saveDefaultCheckBox.setChecked(false);
+                ViewUtils.setVisibility(saveDefaultCheckBox, !isLocationDefaultSet);
+
+                deleteDefaultButton.setText(
+                        context.getString(R.string.navigation_alarm_dialog_delete_default_label, departureName));
+                deleteDefaultButton.setOnClickListener(view -> {
+                    deleteDefaultStart(networkId, firstPublicLeg.departure, walkMinutes);
+                    ViewUtils.setVisibility(saveDefaultCheckBox, true);
+                    ViewUtils.setVisibility(deleteDefaultButton, false);
+                });
+                ViewUtils.setVisibility(deleteDefaultButton, isLocationDefaultSet);
+            } else {
+                ViewUtils.setVisibility(saveDefaultCheckBox, false);
+                ViewUtils.setVisibility(deleteDefaultButton, false);
+                if (legContainer.publicLeg != null) {
+                    String arrivalName = Formats.makeBreakableStationName(legContainer.publicLeg.arrival.uniqueShortName());
+                    ((TextView) findViewById(R.id.navigation_alarm_dialog_message)).setText(
+                            context.getString(R.string.navigation_alarm_dialog_message_arrival, arrivalName));
+                } else {
+                    String departureName = Formats.makeBreakableStationName(legContainer.transferTo.publicLeg.departure.uniqueShortName());
+                    ((TextView) findViewById(R.id.navigation_alarm_dialog_message)).setText(
+                            context.getString(R.string.navigation_alarm_dialog_message_departure, departureName));
+                }
+            }
+
+            timePicker = findViewById(R.id.navigation_alarm_dialog_time);
+            timePicker.setMinValue(MIN_TIME_VALUE);
+            timePicker.setMaxValue(MAX_TIME_VALUE);
+            timePicker.setValue(presetValue);
+
+            findViewById(R.id.navigation_alarm_dialog_set_alarm)
+                    .setOnClickListener(view -> {
+                        final long timeValue = (long) timePicker.getValue() * 60000;
+                        if (saveDefaultCheckBox.isChecked())
+                            saveDefaultStart(networkId, firstPublicLeg.departure, walkMinutes, timeValue);
+                        if (alarmIsForDeparture) {
+                            configuration.travelAlarmExplicitMsForLegDeparture[1 + legIndex] = timeValue;
+                            configuration.travelAlarmIdForLegDeparture[1 + legIndex] = System.currentTimeMillis();
+                        } else {
+                            configuration.travelAlarmExplicitMsForLegArrival[1 + legIndex] = timeValue;
+                            configuration.travelAlarmIdForLegArrival[1 + legIndex] = System.currentTimeMillis();
+                        }
+                        NavigationNotification.updateFromForeground(getContext(),
+                                navigationNotificationIntent, configuration,
+                                () -> context.runOnUiThread(this::dismiss));
+                    });
+
+            final Button clearAlarmButton = findViewById(R.id.navigation_alarm_dialog_clear_alarm);
+            clearAlarmButton.setOnClickListener(view -> {
+                if (alarmIsForDeparture) {
+                    configuration.travelAlarmExplicitMsForLegDeparture[1 + legIndex] = 0;
+                    configuration.travelAlarmIdForLegDeparture[1 + legIndex] = System.currentTimeMillis();
+                } else {
+                    configuration.travelAlarmExplicitMsForLegArrival[1 + legIndex] = 0;
+                    configuration.travelAlarmIdForLegArrival[1 + legIndex] = System.currentTimeMillis();
+                }
+                NavigationNotification.updateFromForeground(getContext(),
+                        navigationNotificationIntent, configuration,
+                        () -> context.runOnUiThread(this::dismiss));
+            });
+            ViewUtils.setVisibility(clearAlarmButton, isAlarmActive);
+        }
     }
 }

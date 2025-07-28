@@ -56,9 +56,11 @@ import java.util.Locale;
 public class StationContextMenu extends PopupMenu {
     private static final Logger log = LoggerFactory.getLogger(StationContextMenu.class);
 
-    public StationContextMenu(final Context context, final View anchor, final NetworkId network, final Location station,
+    public StationContextMenu(
+            final Context context, final View anchor, final NetworkId network, final Location station,
             final Integer favState, final boolean showFavorite, final boolean showIgnore, final boolean showMap,
             final boolean showDepartures, final boolean showNearbyDepartures,
+            final boolean showTravelAlarmDeparture, final boolean showTravelAlarmArrival,
             final boolean showDirections, final boolean showDirectionsVia, final boolean showAlternativeDirections,
             final boolean showNavigateTo, final boolean showShortcut) {
         super(context, anchor);
@@ -78,6 +80,8 @@ public class StationContextMenu extends PopupMenu {
             mapItem.setVisible(false);
         menu.findItem(R.id.station_context_show_departures).setVisible(showDepartures);
         menu.findItem(R.id.station_context_nearby_departures).setVisible(showNearbyDepartures);
+        menu.findItem(R.id.station_context_set_departure_travel_alarm).setVisible(showTravelAlarmDeparture);
+        menu.findItem(R.id.station_context_set_arrival_travel_alarm).setVisible(showTravelAlarmArrival);
         menu.findItem(R.id.station_context_directions_from).setVisible(showDirections);
         menu.findItem(R.id.station_context_directions_via).setVisible(showDirectionsVia);
         menu.findItem(R.id.station_context_directions_to).setVisible(showDirections);

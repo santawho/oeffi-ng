@@ -155,7 +155,9 @@ public class PlanActivity extends ComponentActivity {
             final PopupMenu contextMenu = new StationContextMenu(
                     PlanActivity.this, v, selection.network, selection.location,
                     null, false, false, false,
-                    true, false, false, false,
+                    true, false,
+                    false, false,
+                    false, false,
                     false, false, false);
             contextMenu.setOnMenuItemClickListener(item -> {
                 if (item.getItemId() == R.id.station_context_show_departures) {

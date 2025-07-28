@@ -15,6 +15,12 @@
         android:id="@+id/station_context_nearby_departures"
         android:title="@string/station_context_nearby_departures_title" />
     <item
+        android:id="@+id/station_context_set_departure_travel_alarm"
+        android:title="@string/station_context_set_departure_alarm_title" />
+    <item
+        android:id="@+id/station_context_set_arrival_travel_alarm"
+        android:title="@string/station_context_set_arrival_alarm_title" />
+    <item
         android:id="@+id/station_context_infopage"
         android:title="@string/station_context_infopage_title" />
     <item

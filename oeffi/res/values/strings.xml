@@ -138,6 +138,8 @@
     <string name="station_context_remove_ignore_title">Make visible again</string>
     <string name="station_context_details_title">Show All Departures</string>
     <string name="station_context_nearby_departures_title">Show Nearby Departures</string>
+    <string name="station_context_set_departure_alarm_title">Set travel alarm for departure</string>
+    <string name="station_context_set_arrival_alarm_title">Set travel alarm for arrival</string>
     <string name="station_context_infopage_title">Open Info Page</string>
     <string name="station_context_map_title">Show on Map</string>
     <string name="station_context_directions_from_title">Connection From Here</string>

@@ -440,7 +440,8 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         final NavigationNotification navigationNotification = new NavigationNotification(this, intent);
         NavigationNotification.Configuration configuration = Objects.clone(navigationNotification.getConfiguration());
         configuration.soundEnabled = soundEnabled;
-        NavigationNotification.updateFromForeground(this, intent, trip, configuration);
+        NavigationNotification.updateFromForeground(this, intent, trip, configuration,
+                () -> runOnUiThread(this::updateGUI));
     }
 
     @Override
@@ -457,37 +458,54 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         return overviewConfig;
     }
 
+    private NavigationNotification guiUpdateNavigationNotification;
+
+    @Override
+    protected void updateGUI() {
+        guiUpdateNavigationNotification = new NavigationNotification(this, getIntent());
+        super.updateGUI();
+    }
+
     @Override
     protected boolean updateIndividualLeg(final View row, final TripRenderer.LegContainer legC, final Date now) {
-        final ImageButton progressBell = row.findViewById(R.id.directions_trip_details_individual_entry_progress_bell);
-        progressBell.setVisibility(View.GONE);
-
         final boolean isNow = super.updateIndividualLeg(row, legC, now);
-        if (!isNow)
-            return isNow;
 
-        final boolean isInitialIndividualLeg = legC.legIndex <= 0;
-        if (!isInitialIndividualLeg)
-            return isNow;
-
-        final TripRenderer.LegContainer transferTo = legC.transferTo;
-        if (transferTo == null)
-            return isNow;
-
-        final Trip.Public firstPublicLeg = transferTo.publicLeg;
-        if (firstPublicLeg == null)
-            return isNow;
-
-        progressBell.setVisibility(View.VISIBLE);
-
-        final NavigationNotification navigationNotification = new NavigationNotification(this, getIntent());
-        progressBell.setOnClickListener(v -> new TravelAlarmManager(this).showConfigureTravelAlarmDialog(
-                getIntent(), isAlarmActive -> updateBellState(progressBell, isAlarmActive)));
-
-        final Long travelAlarmMillis = navigationNotification.getConfiguration().travelAlarmMillis;
-        updateBellState(progressBell,travelAlarmMillis != null);
+        if (isNow) {
+            setupAlarmBellButton(row, R.id.directions_trip_details_individual_entry_progress_bell,
+                    legC, true);
+        }
 
         return isNow;
+    }
+
+    @Override
+    protected boolean updatePublicLeg(final View row, final TripRenderer.LegContainer legC, final TripRenderer.LegContainer walkLegC, final TripRenderer.LegContainer nextLegC, final Date now) {
+        final boolean isNow = super.updatePublicLeg(row, legC, walkLegC, nextLegC, now);
+
+        if (isNow) {
+            setupAlarmBellButton(row, R.id.directions_trip_details_public_entry_progress_bell,
+                    legC, false);
+        }
+
+        return isNow;
+    }
+
+    private void setupAlarmBellButton(
+            final View row,
+            final int bellResId,
+            final TripRenderer.LegContainer legC,
+            final boolean alarmIsForDeparture) {
+        final ImageButton progressBell = row.findViewById(bellResId);
+
+        progressBell.setVisibility(View.VISIBLE);
+        progressBell.setOnClickListener(v -> new TravelAlarmManager(this)
+                .showConfigureTravelAlarmDialog(legC, getIntent(), this::updateGUI));
+
+        final NavigationNotification.ExtraData extraData = guiUpdateNavigationNotification.getExtraData();
+        final long currentTravelAlarmAtMs = alarmIsForDeparture
+                ? extraData.currentTravelAlarmAtMsForLegDeparture[1 + legC.legIndex]
+                : extraData.currentTravelAlarmAtMsForLegArrival[1 + legC.legIndex];
+        updateBellState(progressBell,currentTravelAlarmAtMs > 0);
     }
 
     private void updateBellState(final ImageButton progressBell, final boolean isAlarmActive) {
@@ -497,5 +515,33 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         final int colorId = isAlarmActive ? R.color.fg_significant : R.color.fg_insignificant;
         drawable.setTint(getColor(colorId));
         progressBell.setImageDrawable(drawable);
+    }
+
+    @Override
+    protected boolean isShowTravelAlarm() {
+        return true;
+    }
+
+    @Override
+    protected boolean onStationContextMenuItemClicked(
+            final int menuItemId, final TripRenderer.LegContainer legC, final Stop stop) {
+        if (menuItemId == R.id.station_context_set_departure_travel_alarm) {
+            for (TripRenderer.LegContainer iLegC : tripRenderer.legs) {
+                if (iLegC.transferTo == legC) {
+                    new TravelAlarmManager(this)
+                            .showConfigureTravelAlarmDialog(iLegC, getIntent(), this::updateGUI);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        if (menuItemId == R.id.station_context_set_arrival_travel_alarm) {
+            new TravelAlarmManager(this)
+                    .showConfigureTravelAlarmDialog(legC, getIntent(), this::updateGUI);
+            return true;
+        }
+
+        return false;
     }
 }

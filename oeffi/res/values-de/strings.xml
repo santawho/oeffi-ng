@@ -137,6 +137,8 @@
     <string name="station_context_remove_ignore_title">Wieder sichtbar machen</string>
     <string name="station_context_details_title">Alle Abfahrten zeigen</string>
     <string name="station_context_nearby_departures_title">Abfahrten in der Nähe zeigen</string>
+    <string name="station_context_set_departure_alarm_title">Reisewecker für Abfahrt setzen</string>
+    <string name="station_context_set_arrival_alarm_title">Reisewecker für Ankunft setzen</string>
     <string name="station_context_infopage_title">Infoseite öffnen</string>
     <string name="station_context_map_title">Auf Karte zeigen</string>
     <string name="station_context_directions_from_title">Verbindung von hier</string>
