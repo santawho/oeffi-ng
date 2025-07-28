@@ -4,21 +4,17 @@ import android.content.Context;
 import android.preference.EditTextPreference;
 import android.util.AttributeSet;
 
+/*
+ * NOT USED ANY MORE, REPLACED BY PreferenceFragment.setupDynamicSummary()
+ */
 public class EditTextPreferenceWithSummary extends EditTextPreference {
     public EditTextPreferenceWithSummary(final Context context, final AttributeSet attrs) {
         super(context, attrs);
     }
 
     @Override
-    public void setText(String text) {
-        super.setText(text);
-        notifyChanged();
-    }
-
-    @Override
     public CharSequence getSummary() {
         String text = super.getText();
-        String summary = super.getSummary().toString();
-        return String.format(summary, text == null ? "" : text);
+        return String.format(super.getSummary().toString(), text == null ? "" : text);
     }
 }

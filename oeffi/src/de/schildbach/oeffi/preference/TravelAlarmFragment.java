@@ -28,5 +28,12 @@ public class TravelAlarmFragment extends PreferenceFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preference_travelalarm);
+        setupDynamicSummary("travelalarm_time_ratio", R.string.travelalarm_time_ratio_summary);
+        setupDynamicSummary("travelalarm_start_time_default", R.string.travelalarm_start_time_default_summary);
+        setupDynamicSummary("travelalarm_start_lead_time", R.string.travelalarm_start_lead_time_summary);
+        setupDynamicSummary("travelalarm_arrival_time_default", R.string.travelalarm_arrival_time_default_summary);
+        setupDynamicSummary("travelalarm_arrival_lead_time", R.string.travelalarm_arrival_lead_time_summary);
+        setupDynamicSummary("travelalarm_departure_time_default", R.string.travelalarm_departure_time_default_summary);
+        setupDynamicSummary("travelalarm_departure_lead_time", R.string.travelalarm_departure_lead_time_summary);
     }
 }

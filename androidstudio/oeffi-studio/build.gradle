@@ -151,10 +151,10 @@ android {
 }
 
 dependencies {
-    implementation libs.support.v13
-    implementation libs.preference.v7
+//    implementation libs.support.v13
+//    implementation libs.preference.v7
 //    implementation libs.preference.v14
-//    implementation libs.preferencex
+    implementation libs.preferencex
     implementation libs.jsr305
     implementation libs.annotation
     implementation libs.recyclerview
@@ -173,7 +173,7 @@ dependencies {
     implementation libs.slf4j.api
     implementation libs.logback.android
     implementation libs.msgpack.core
-    implementation libs.library
+    implementation libs.swipelayout
     testImplementation libs.junit
 
 //    implementation libs.appcompat

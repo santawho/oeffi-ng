@@ -11,18 +11,18 @@ guava = "33.4.8-android"
 json = "4.0.28"
 jsr305 = "3.0.2"
 junit = "4.13.2"
-library = "1.2.0"
+swipelayout = "1.2.0"
 logbackAndroid = "3.0.0"
 loggingInterceptor = "5.1.0"
 msgpackCore = "0.9.10"
 okhttp = "5.1.0"
 osmdroidAndroid = "6.1.20"
-preferencex = "1.2.1"
 recyclerview = "1.4.0"
 slf4jApi = "2.0.17"
 supportV13 = "28.0.0"
 preferenceV7 = "28.0.0"
 preferenceV14 = "28.0.0"
+preferencex = "1.2.1"
 
 [libraries]
 activity = { module = "androidx.activity:activity", version.ref = "activity" }
@@ -36,15 +36,15 @@ guava = { module = "com.google.guava:guava", version.ref = "guava" }
 json = { module = 'org.apache.groovy:groovy-json', version.ref = "json" }
 jsr305 = { module = "com.google.code.findbugs:jsr305", version.ref = "jsr305" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
-library = { module = "com.daimajia.swipelayout:library", version.ref = "library" }
+swipelayout = { module = "com.daimajia.swipelayout:library", version.ref = "swipelayout" }
 logback-android = { module = "com.github.tony19:logback-android", version.ref = "logbackAndroid" }
 msgpack-core = { module = "org.msgpack:msgpack-core", version.ref = "msgpackCore" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 okhttp3-logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "loggingInterceptor" }
 osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroidAndroid" }
-#preferencex = { module = "androidx.preference:preference", version.ref = "preferencex" }
+preferencex = { group = "androidx.preference", name = "preference", version.ref = "preferencex" }
 preference-v7 = { module = "com.android.support:preference-v7", version.ref = "preferenceV7" }
-#preference-v14 = { module = "com.android.support:preference-v14", version.ref = "preferenceV14" }
+preference-v14 = { module = "com.android.support:preference-v14", version.ref = "preferenceV14" }
 recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4jApi" }
 support-v13 = { module = "com.android.support:support-v13", version.ref = "supportV13" }

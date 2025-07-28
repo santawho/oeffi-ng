@@ -31,6 +31,8 @@ public class UserInterfaceFragment extends PreferenceFragment {
 
         setupActionPreference("user_interface_location_selector_help", UserInterfaceFragment.class, SelectorHelp.class);
         setupActionPreference("user_interface_voice_control_help", UserInterfaceFragment.class, VoiceControlHelp.class);
+
+        setupDynamicSummary("user_interface_map_tile_resolution", R.string.user_interface_map_tile_resolution_summary);
     }
 
     public static class SelectorHelp extends ShowHelpHandler {

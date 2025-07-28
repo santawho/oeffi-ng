@@ -18,7 +18,7 @@
 
     <string name="user_interface_category_map_title">Maps</string>
     <string name="user_interface_map_tile_resolution_title">Map resolution</string>
-    <string name="user_interface_map_tile_resolution_summary">Set higher for more details, but less readability, and vice versa</string>
+    <string name="user_interface_map_tile_resolution_summary">Set higher for more details, but less readability, and vice versa. [%s]</string>
 
     <string name="user_interface_mainmenu_shareapp_enabled_title">Show \"Share App\" item in main menu</string>
 

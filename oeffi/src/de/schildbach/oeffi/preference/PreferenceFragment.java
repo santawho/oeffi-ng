@@ -5,6 +5,8 @@ import android.content.Context;
 import android.os.Build;
 import android.preference.Preference;
 
+import java.util.Map;
+
 import de.schildbach.oeffi.Application;
 
 public class PreferenceFragment extends android.preference.PreferenceFragment {
@@ -32,6 +34,17 @@ public class PreferenceFragment extends android.preference.PreferenceFragment {
         final CharSequence title = getPreferenceScreen().getTitle();
         if (title != null && title.length() > 0)
             preferenceActivity.setTitle(title);
+    }
+
+    protected void setupDynamicSummary(final String preferenceKey, final int summaryResId) {
+        final Preference preference = findPreference(preferenceKey);
+        preference.setOnPreferenceChangeListener((pref, newValue) -> {
+            preference.setSummary(getString(summaryResId, newValue));
+            return true;
+        });
+        final Map<String, ?> all = preference.getSharedPreferences().getAll();
+        final Object value = all.get(preference.getKey());
+        preference.setSummary(getString(summaryResId, value));
     }
 
     protected void removeOrDisablePreference(final String preferenceName) {
