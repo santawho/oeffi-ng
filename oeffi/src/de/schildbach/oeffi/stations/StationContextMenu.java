@@ -43,6 +43,7 @@ import de.schildbach.oeffi.directions.DirectionsShortcutActivity;
 import de.schildbach.oeffi.plans.PlanActivity;
 import de.schildbach.oeffi.plans.PlanContentProvider;
 import de.schildbach.oeffi.util.DialogBuilder;
+import de.schildbach.oeffi.util.PopupHelper;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
@@ -88,6 +89,7 @@ public class StationContextMenu extends PopupMenu {
         menu.findItem(R.id.station_context_launcher_shortcut).setVisible(showShortcut);
         menu.findItem(R.id.station_context_directions_alternative_from).setVisible(showAlternativeDirections);
         menu.findItem(R.id.station_context_navigate_to).setVisible(showNavigateTo);
+        PopupHelper.setForceShowIcon(this);
     }
 
     public static AlertDialog createLauncherShortcutDialog(final Context context, final NetworkId networkId,

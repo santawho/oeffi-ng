@@ -25,8 +25,19 @@ import java.lang.reflect.Method;
 public class PopupHelper {
     public static void setForceShowIcon(final PopupMenu popupMenu) {
         try {
-            final Class<?> classPopupMenu = Class.forName(popupMenu.getClass().getName());
-            final Field mPopup = classPopupMenu.getDeclaredField("mPopup");
+            Class<?> classPopupMenu = Class.forName(popupMenu.getClass().getName());
+            Field mPopup = null;
+            NoSuchFieldException firstNsfe = null;
+            while (classPopupMenu != null) {
+                try {
+                    mPopup = classPopupMenu.getDeclaredField("mPopup");
+                    break;
+                } catch (NoSuchFieldException nsfe) {
+                    if (firstNsfe == null) firstNsfe = nsfe;
+                    classPopupMenu = classPopupMenu.getSuperclass();
+                }
+            }
+            if (mPopup == null) throw firstNsfe;
             mPopup.setAccessible(true);
             final Object menuPopupHelper = mPopup.get(popupMenu);
             final Class<?> classPopupHelper = Class.forName(menuPopupHelper.getClass().getName());

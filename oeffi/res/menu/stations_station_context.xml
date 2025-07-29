@@ -7,7 +7,8 @@
         android:title="@string/station_context_navigate_to_title"/>
     <item
         android:id="@+id/station_context_directions_alternative_from"
-        android:title="@string/station_context_alternative_from_title"/>
+        android:title="@string/station_context_alternative_from_title"
+        android:icon="@drawable/ic_altroute_grey600_24dp" />
     <item
         android:id="@+id/station_context_show_departures"
         android:title="@string/station_context_details_title" />
@@ -16,10 +17,12 @@
         android:title="@string/station_context_nearby_departures_title" />
     <item
         android:id="@+id/station_context_set_departure_travel_alarm"
-        android:title="@string/station_context_set_departure_alarm_title" />
+        android:title="@string/station_context_set_departure_alarm_title"
+        android:icon="@drawable/ic_bell_grey600_24dp" />
     <item
         android:id="@+id/station_context_set_arrival_travel_alarm"
-        android:title="@string/station_context_set_arrival_alarm_title" />
+        android:title="@string/station_context_set_arrival_alarm_title"
+        android:icon="@drawable/ic_bell_grey600_24dp" />
     <item
         android:id="@+id/station_context_infopage"
         android:title="@string/station_context_infopage_title" />
