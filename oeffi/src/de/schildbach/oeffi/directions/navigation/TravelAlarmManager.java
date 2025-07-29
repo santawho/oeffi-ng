@@ -341,7 +341,9 @@ public class TravelAlarmManager {
     public void fireAlarm(
             final Context context,
             final TripDetailsActivity.IntentData intentData,
-            final TripRenderer tripRenderer) {
+            final TripRenderer tripRenderer,
+            final boolean travelAlarmIsForDeparture,
+            final boolean travelAlarmIsForJourneyStart) {
         log.debug("alarm fired, open navigator activity");
         final Trip trip = tripRenderer.trip;
         final String notificationTag = TAG_PREFIX + trip.getUniqueId();
@@ -357,19 +359,40 @@ public class TravelAlarmManager {
                         false, true, notificationTag, false),
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
-        final String title = context.getString(R.string.navigation_travelalarm_notification_start_title,
-                tripRenderer.trip.to.uniqueShortName());
-        final String message = context.getString(R.string.navigation_travelalarm_notification_departure_message,
+        final String channelId;
+        final int messageResId;
+        final String title;
+        if (travelAlarmIsForJourneyStart) {
+            channelId = START_CHANNEL_ID;
+            title = context.getString(R.string.navigation_travelalarm_notification_start_title,
+                    tripRenderer.trip.to.uniqueShortName());
+            messageResId = R.string.navigation_travelalarm_notification_start_message;
+        } else {
+            final int titleResId;
+            if (travelAlarmIsForDeparture) {
+                channelId = DEPARTURE_CHANNEL_ID;
+                titleResId = R.string.navigation_travelalarm_notification_departure_title;
+                messageResId = R.string.navigation_travelalarm_notification_departure_message;
+            } else {
+                channelId = ARRIVAL_CHANNEL_ID;
+                titleResId = R.string.navigation_travelalarm_notification_arrival_title;
+                messageResId = R.string.navigation_travelalarm_notification_arrival_message;
+            }
+            title = context.getString(titleResId, tripRenderer.nextEventTargetName);
+        }
+        final String message = context.getString(messageResId,
                 tripRenderer.nextEventTargetName,
                 Formats.formatTime(context, tripRenderer.nextEventEarliestTime),
                 Formats.formatTime(context, tripRenderer.nextEventEstimatedTime),
                 tripRenderer.nextEventTimeLeftValue, tripRenderer.nextEventTimeLeftUnit);
 
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(
-                context, START_CHANNEL_ID)
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, channelId)
                 .setContentIntent(contentIntent)
                 .setFullScreenIntent(fullScreenIntent, true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .setBigContentTitle(title)
+                        .bigText(message))
                 .setContentTitle(title)
                 .setContentText(message)
                 .setSmallIcon(R.drawable.ic_oeffi_directions_grey600_36dp)

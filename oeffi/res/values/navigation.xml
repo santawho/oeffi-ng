@@ -49,6 +49,7 @@
     <string name="navigation_travelalarm_notification_start_channel_name">Travel Alarm, start of journey</string>
     <string name="navigation_travelalarm_notification_start_channel_description">Alarm for beginning navigation</string>
     <string name="navigation_travelalarm_notification_start_title">Journey to %1$s about to begin</string>
+    <string name="navigation_travelalarm_notification_start_message">Departure at %1$s scheduled at %2$s, today approx. at %3$s / %4$s %5$s from now</string>
     <string name="navigation_travelalarm_notification_departure_channel_name">Travel Alarm, next departure</string>
     <string name="navigation_travelalarm_notification_departure_channel_description">Alarm for departure at changeover</string>
     <string name="navigation_travelalarm_notification_departure_title">Departure at %1$s is coming up</string>
