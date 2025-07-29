@@ -35,6 +35,9 @@
     <string name="navigation_alarm_dialog_stationname_with_walk">%1$s\nwith walk of %2$d minutes</string>
     <string name="navigation_alarm_dialog_set_alarm_label">Set Alarm</string>
     <string name="navigation_alarm_dialog_clear_alarm_label">Clear Alarm</string>
+    <string name="navigation_alarm_dialog_status_alarm_disabled_text">Alarm is currently disabled.</string>
+    <string name="navigation_alarm_dialog_status_alarm_inactive_text">Alarm is currently inactive or not yet fixed.</string>
+    <string name="navigation_alarm_dialog_status_alarm_at_text">Alarm will go off at %s.</string>
 
     <string name="navigation_notification_channel_name">Navigation</string>
     <string name="navigation_notification_channel_description">Navigation instructions</string>

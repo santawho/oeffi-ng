@@ -29,6 +29,9 @@
     <string name="navigation_alarm_dialog_stationname_with_walk">%1$s\nmit Fußweg von %2$d Minuten</string>
     <string name="navigation_alarm_dialog_set_alarm_label">Alarm setzen</string>
     <string name="navigation_alarm_dialog_clear_alarm_label">Alarm löschen</string>
+    <string name="navigation_alarm_dialog_status_alarm_disabled_text">Alarm ist ausgeschaltet.</string>
+    <string name="navigation_alarm_dialog_status_alarm_inactive_text">Alarm ist derzeit inaktiv oder noch nicht festgelegt.</string>
+    <string name="navigation_alarm_dialog_status_alarm_at_text">Alarm wird um %s ausgelöst.</string>
 
     <string name="navigation_notification_channel_name">Navigation</string>
     <string name="navigation_notification_channel_description">Navigationsanweisungen</string>
@@ -57,7 +60,7 @@
     <string name="navigation_travelalarm_preferences_summary">Einstellungen zum Reisewecker</string>
     <string name="travelalarm_time_ratio_title">Verhältnis der geschätzten Zeit</string>
     <string name="travelalarm_time_ratio_summary">Das Verhältnis von geschätzter und geplanter Zeit beim Berechnen der Alarmzeit (empfohlen = 33%%) [%s%%]</string>
-    <string name="travelalarm_start_time_category_title">Alarm at Start of Journey</string>
+    <string name="travelalarm_start_time_category_title">Alarm zum Beginn der Reise</string>
     <string name="travelalarm_start_time_default_title">Start-Standardzeit</string>
     <string name="travelalarm_start_time_default_summary">Standardzeit in Minuten, auf die ein Alarm am Beginn einer Reise gesetzt wird (0=aus). [%s]</string>
     <string name="travelalarm_start_lead_time_title">Start-Vorlaufzeit</string>

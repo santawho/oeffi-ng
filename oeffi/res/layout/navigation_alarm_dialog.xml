@@ -15,6 +15,14 @@
         android:textSize="@dimen/font_size_xlarge"
         android:text="@string/navigation_alarm_dialog_message_start" />
 
+    <TextView
+        android:id="@+id/navigation_alarm_dialog_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/text_padding_horizontal_verylax"
+        android:paddingTop="@dimen/text_padding_vertical_verylax"
+        android:textSize="@dimen/font_size_small" />
+
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="wrap_content"
@@ -48,7 +56,6 @@
         android:text="@string/navigation_alarm_dialog_delete_default_label" />
 
     <RelativeLayout
-        android:orientation="horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 

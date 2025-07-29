@@ -96,6 +96,14 @@ public final class Formats {
         return DateFormat.getTimeFormat(context).format(time);
     }
 
+    public static String formatTime(final Context context, final long now, final long time) {
+        final long diff = time - now;
+        if (diff < -8 * 3600000 || diff > 8 * 3600000)
+            return formatDate(context, now, time) + " " + formatTime(context, time);
+
+        return formatTime(context, time);
+    }
+
     public static String formatTimeDiff(final Context context, final long from, final long to) {
         return formatTimeDiff(context, from, to, true);
     }

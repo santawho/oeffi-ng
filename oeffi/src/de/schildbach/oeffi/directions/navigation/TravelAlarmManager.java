@@ -285,6 +285,8 @@ public class TravelAlarmManager {
         final boolean isDefaultSet;
         final boolean isLocationDefaultSet;
         final boolean isAlarmActive;
+        final boolean isAlarmDisabled;
+        final long currentTravelAlarmAtMs;
 
         public TravelAlarmState(
             final TripRenderer.LegContainer legContainer,
@@ -295,6 +297,7 @@ public class TravelAlarmManager {
 
             networkId = navigationNotification.getNetwork();
             final NavigationNotification.Configuration configuration = navigationNotification.getConfiguration();
+            final NavigationNotification.ExtraData extraData = navigationNotification.getExtraData();
             final Trip trip = navigationNotification.getTrip();
 
             legIndex = legContainer.legIndex;
@@ -325,15 +328,18 @@ public class TravelAlarmManager {
                     isLocationDefaultSet = false;
                 }
                 travelAlarmExplicitMs = configuration.travelAlarmExplicitMsForLegDeparture[legIndex];
+                currentTravelAlarmAtMs = extraData.currentTravelAlarmAtMsForLegDeparture[legIndex];
             } else {
                 isInitialIndividualLeg = false;
                 currentDefaultTime = getArrivalAlarmTimeDefault();
                 isDefaultSet = currentDefaultTime > 0;
                 isLocationDefaultSet = false;
                 travelAlarmExplicitMs = configuration.travelAlarmExplicitMsForLegArrival[legIndex];
+                currentTravelAlarmAtMs = extraData.currentTravelAlarmAtMsForLegArrival[legIndex];
                 walkMinutes = 0;
             }
 
+            isAlarmDisabled = travelAlarmExplicitMs == 0;
             isAlarmActive = (travelAlarmExplicitMs >= 0) ? (travelAlarmExplicitMs > 0) : isDefaultSet;
         }
     }
@@ -490,6 +496,17 @@ public class TravelAlarmManager {
             final NavigationNotification navigationNotification = new NavigationNotification(getContext(), navigationNotificationIntent);
             final TravelAlarmState travelAlarmState = new TravelAlarmState(legContainer, alarmIsForDeparture, navigationNotification);
 
+            final String statusText;
+            if (travelAlarmState.isAlarmDisabled) {
+                statusText = context.getString(R.string.navigation_alarm_dialog_status_alarm_disabled_text);
+            } else if (travelAlarmState.currentTravelAlarmAtMs > 0) {
+                final String alarmTime = Formats.formatTime(context,
+                        System.currentTimeMillis(), travelAlarmState.currentTravelAlarmAtMs);
+                statusText = context.getString(R.string.navigation_alarm_dialog_status_alarm_at_text, alarmTime);
+            } else {
+                statusText = context.getString(R.string.navigation_alarm_dialog_status_alarm_inactive_text);
+            }
+
             int presetValue;
             if (travelAlarmState.travelAlarmExplicitMs > 0) {
                 presetValue = (int) (travelAlarmState.travelAlarmExplicitMs / 60000);
@@ -507,6 +524,7 @@ public class TravelAlarmManager {
 
             final Activity context = (Activity) TravelAlarmManager.this.context;
             setContentView(R.layout.navigation_alarm_dialog);
+            ((TextView) findViewById(R.id.navigation_alarm_dialog_status)).setText(statusText);
 
             saveDefaultCheckBox = findViewById(R.id.navigation_alarm_dialog_save_default);
             final Button deleteDefaultButton = findViewById(R.id.navigation_alarm_dialog_delete_default);
