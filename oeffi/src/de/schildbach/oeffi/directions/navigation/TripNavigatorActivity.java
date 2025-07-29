@@ -472,7 +472,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
         if (isNow) {
             setupAlarmBellButton(row, R.id.directions_trip_details_individual_entry_progress_bell,
-                    legC, true);
+                    legC.transferTo, true);
         }
 
         return isNow;
@@ -499,20 +499,21 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
         progressBell.setVisibility(View.VISIBLE);
         progressBell.setOnClickListener(v -> new TravelAlarmManager(this)
-                .showConfigureTravelAlarmDialog(legC, getIntent(), this::updateGUI));
+                .showConfigureTravelAlarmDialog(legC, alarmIsForDeparture, getIntent(), this::updateGUI));
 
-        final NavigationNotification.ExtraData extraData = guiUpdateNavigationNotification.getExtraData();
-        final long currentTravelAlarmAtMs = alarmIsForDeparture
-                ? extraData.currentTravelAlarmAtMsForLegDeparture[1 + legC.legIndex]
-                : extraData.currentTravelAlarmAtMsForLegArrival[1 + legC.legIndex];
-        updateBellState(progressBell,currentTravelAlarmAtMs > 0);
-    }
+        final TravelAlarmManager.TravelAlarmState travelAlarmState = new TravelAlarmManager(this)
+                .new TravelAlarmState(legC, alarmIsForDeparture, guiUpdateNavigationNotification);
 
-    private void updateBellState(final ImageButton progressBell, final boolean isAlarmActive) {
-        final Drawable drawable = getDrawable(isAlarmActive
-                ? R.drawable.ic_bell_on_black_24dp
-                : R.drawable.ic_bell_off_black_24dp);
-        final int colorId = isAlarmActive ? R.color.fg_significant : R.color.fg_insignificant;
+        final int drawableResId;
+        final int colorId;
+        if (travelAlarmState.isAlarmActive) {
+            drawableResId = R.drawable.ic_bell_on_black_24dp;
+            colorId = R.color.fg_significant;
+        } else {
+            drawableResId = R.drawable.ic_bell_off_black_24dp;
+            colorId = R.color.fg_insignificant;
+        }
+        final Drawable drawable = getDrawable(drawableResId);
         drawable.setTint(getColor(colorId));
         progressBell.setImageDrawable(drawable);
     }
@@ -526,19 +527,14 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     protected boolean onStationContextMenuItemClicked(
             final int menuItemId, final TripRenderer.LegContainer legC, final Stop stop) {
         if (menuItemId == R.id.station_context_set_departure_travel_alarm) {
-            for (TripRenderer.LegContainer iLegC : tripRenderer.legs) {
-                if (iLegC.transferTo == legC) {
-                    new TravelAlarmManager(this)
-                            .showConfigureTravelAlarmDialog(iLegC, getIntent(), this::updateGUI);
-                    return true;
-                }
-            }
-            return false;
+            new TravelAlarmManager(this)
+                    .showConfigureTravelAlarmDialog(legC, true, getIntent(), this::updateGUI);
+            return true;
         }
 
         if (menuItemId == R.id.station_context_set_arrival_travel_alarm) {
             new TravelAlarmManager(this)
-                    .showConfigureTravelAlarmDialog(legC, getIntent(), this::updateGUI);
+                    .showConfigureTravelAlarmDialog(legC, false, getIntent(), this::updateGUI);
             return true;
         }
 
