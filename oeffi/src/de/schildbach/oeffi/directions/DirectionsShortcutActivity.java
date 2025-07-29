@@ -221,8 +221,10 @@ public class DirectionsShortcutActivity extends OeffiActivity implements Locatio
                     else
                         historyUri = null;
 
+                    final TripsOverviewActivity.RenderConfig renderConfig = new TripsOverviewActivity.RenderConfig();
+                    renderConfig.referenceTime = time;
                     TripsOverviewActivity.start(DirectionsShortcutActivity.this, networkProvider.id(),
-                            TimeSpec.DepArr.DEPART, result, historyUri, reloadRequestData);
+                            TimeSpec.DepArr.DEPART, result, historyUri, reloadRequestData, renderConfig);
                     finish();
                 } else if (result.status == QueryTripsResult.Status.UNKNOWN_FROM) {
                     errorDialog(R.string.directions_message_unknown_from);

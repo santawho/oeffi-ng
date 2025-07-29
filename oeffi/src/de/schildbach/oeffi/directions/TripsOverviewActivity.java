@@ -114,11 +114,6 @@ public class TripsOverviewActivity extends OeffiActivity {
     private static final String INTENT_EXTRA_RENDERCONFIG = TripDetailsActivity.class.getName() + ".config";
 
     public static void start(final Context context, final NetworkId network, final TimeSpec.DepArr depArr,
-            final QueryTripsResult result, final Uri historyUri, final TripRequestData reloadRequestData) {
-        start(context, network, depArr, result, historyUri, reloadRequestData, new RenderConfig());
-    }
-
-    public static void start(final Context context, final NetworkId network, final TimeSpec.DepArr depArr,
             final QueryTripsResult result, final Uri historyUri, final TripRequestData reloadRequestData,
             final RenderConfig renderConfig) {
         final Intent intent = new Intent(context, TripsOverviewActivity.class);

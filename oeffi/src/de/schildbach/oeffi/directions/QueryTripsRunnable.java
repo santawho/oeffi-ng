@@ -80,13 +80,13 @@ public abstract class QueryTripsRunnable implements Runnable {
 
     private final NetworkProvider networkProvider;
 
-    private final Location from;
-    private final Location via;
-    private final Location to;
-    private final TimeSpec time;
-    private final TripOptions options;
-    private final TripRef tripRef;
-    private final TripShare tripShare;
+    protected final Location from;
+    protected final Location via;
+    protected final Location to;
+    protected final TimeSpec time;
+    protected final TripOptions options;
+    protected final TripRef tripRef;
+    protected final TripShare tripShare;
 
     private AtomicBoolean cancelled = new AtomicBoolean(false);
 
