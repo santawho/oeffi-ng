@@ -464,15 +464,15 @@ public class TripRenderer {
             setNextEventActions(
                     nextLegC != null
                             ? (eventIsNow
-                                ? R.string.directions_trip_details_next_event_action_ride_now
-                                : R.string.directions_trip_details_next_event_action_ride)
+                                ? R.string.navigation_next_event_action_ride_now
+                                : R.string.navigation_next_event_action_ride)
                             : (eventIsNow
-                                ? R.string.directions_trip_details_next_event_action_arrival_now
-                                : R.string.directions_trip_details_next_event_action_arrival),
+                                ? R.string.navigation_next_event_action_arrival_now
+                                : R.string.navigation_next_event_action_arrival),
                         walkLegC == null ? 0
-                            : nextLegC == null ? R.string.directions_trip_details_next_event_action_next_final_transfer
-                            : depChanged ? R.string.directions_trip_details_next_event_action_next_transfer
-                            : R.string.directions_trip_details_next_event_action_next_interchange
+                            : nextLegC == null ? R.string.navigation_next_event_action_next_final_transfer
+                            : depChanged ? R.string.navigation_next_event_action_next_transfer
+                            : R.string.navigation_next_event_action_next_interchange
             );
 
             // if (nextPublicLeg != null)
@@ -528,14 +528,14 @@ public class TripRenderer {
             setNextEventTransferTimes(legC, true, now);
             setNextEventActions(transferTo == null ? 0
                             : transferFrom == null ? (eventIsNow
-                                        ? R.string.directions_trip_details_next_event_action_departure_now
-                                        : R.string.directions_trip_details_next_event_action_departure)
+                                        ? R.string.navigation_next_event_action_departure_now
+                                        : R.string.navigation_next_event_action_departure)
                             : depChanged ? (eventIsNow
-                                        ? R.string.directions_trip_details_next_event_action_transfer_now
-                                        : R.string.directions_trip_details_next_event_action_transfer)
+                                        ? R.string.navigation_next_event_action_transfer_now
+                                        : R.string.navigation_next_event_action_transfer)
                             : (eventIsNow
-                                        ? R.string.directions_trip_details_next_event_action_interchange_now
-                                        : R.string.directions_trip_details_next_event_action_interchange),
+                                        ? R.string.navigation_next_event_action_interchange_now
+                                        : R.string.navigation_next_event_action_interchange),
                     0);
 
              if (nextPublicLeg != null)

@@ -576,13 +576,12 @@ public class TravelAlarmManager {
                         final long timeValue = (long) timePicker.getValue() * 60000;
                         if (saveDefaultCheckBox.isChecked())
                             saveDefaultStart(travelAlarmState.networkId, travelAlarmState.publicLeg.departure, travelAlarmState.walkMinutes, timeValue);
-                        if (alarmIsForDeparture) {
-                            configuration.travelAlarmExplicitMsForLegDeparture[travelAlarmState.legIndex] = timeValue;
-                            configuration.travelAlarmIdForLegDeparture[travelAlarmState.legIndex] = System.currentTimeMillis();
-                        } else {
-                            configuration.travelAlarmExplicitMsForLegArrival[travelAlarmState.legIndex] = timeValue;
-                            configuration.travelAlarmIdForLegArrival[travelAlarmState.legIndex] = System.currentTimeMillis();
-                        }
+
+                        if (alarmIsForDeparture)
+                            configuration.setTravelAlarmExplicitMsForLegDeparture(travelAlarmState.legIndex, timeValue);
+                        else
+                            configuration.setTravelAlarmExplicitMsForLegArrival(travelAlarmState.legIndex, timeValue);
+
                         NavigationNotification.updateFromForeground(getContext(),
                                 navigationNotificationIntent, configuration,
                                 () -> context.runOnUiThread(this::dismiss));
@@ -590,13 +589,11 @@ public class TravelAlarmManager {
 
             final Button clearAlarmButton = findViewById(R.id.navigation_alarm_dialog_clear_alarm);
             clearAlarmButton.setOnClickListener(view -> {
-                if (alarmIsForDeparture) {
-                    configuration.travelAlarmExplicitMsForLegDeparture[travelAlarmState.legIndex] = 0;
-                    configuration.travelAlarmIdForLegDeparture[travelAlarmState.legIndex] = System.currentTimeMillis();
-                } else {
-                    configuration.travelAlarmExplicitMsForLegArrival[travelAlarmState.legIndex] = 0;
-                    configuration.travelAlarmIdForLegArrival[travelAlarmState.legIndex] = System.currentTimeMillis();
-                }
+                if (alarmIsForDeparture)
+                    configuration.setTravelAlarmExplicitMsForLegDeparture(travelAlarmState.legIndex, 0);
+                else
+                    configuration.setTravelAlarmExplicitMsForLegArrival(travelAlarmState.legIndex, 0);
+
                 NavigationNotification.updateFromForeground(getContext(),
                         navigationNotificationIntent, configuration,
                         () -> context.runOnUiThread(this::dismiss));

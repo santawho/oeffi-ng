@@ -58,22 +58,22 @@
     <string name="navigation_travelalarm_popup_button_dismiss_alarm">Alarm beenden</string>
 
     <string name="navigation_travelalarm_preferences_summary">Einstellungen zum Reisewecker</string>
-    <string name="travelalarm_time_ratio_title">Verhältnis der geschätzten Zeit</string>
-    <string name="travelalarm_time_ratio_summary">Das Verhältnis von geschätzter und geplanter Zeit beim Berechnen der Alarmzeit (empfohlen = 33%%) [%s%%]</string>
+    <string name="travelalarm_time_ratio_title">Gewichtung der geschätzten Zeit</string>
+    <string name="travelalarm_time_ratio_summary">Die Gewichtung von geschätzter und geplanter Zeit beim Berechnen der Alarmzeit (empfohlen = 33%%) [%s%%]</string>
     <string name="travelalarm_start_time_category_title">Alarm zum Beginn der Reise</string>
     <string name="travelalarm_start_time_default_title">Start-Standardzeit</string>
     <string name="travelalarm_start_time_default_summary">Standardzeit in Minuten, auf die ein Alarm am Beginn einer Reise gesetzt wird (0=aus). [%s]</string>
     <string name="travelalarm_start_lead_time_title">Start-Vorlaufzeit</string>
-    <string name="travelalarm_start_lead_time_summary">Aktiviere den Alarm nur, wenn die Zeit vor dem Alarm vom Beginn der Navigation mindestens diese Anzahl Minuten ist. [%s]</string>
+    <string name="travelalarm_start_lead_time_summary">Aktiviere den Alarm automatisch nur, wenn die Zeit vor dem Alarm vom Beginn der Navigation mindestens diese Anzahl Minuten ist. [%s]</string>
     <string name="travelalarm_arrival_time_category_title">Alarm zur Ankunft</string>
     <string name="travelalarm_arrival_time_default_title">Ankunft-Standardzeit</string>
     <string name="travelalarm_arrival_time_default_summary">Standardzeit in Minuten, auf die ein Alarm bei einer Ankunft gesetzt wird (0=aus). [%s]</string>
     <string name="travelalarm_arrival_lead_time_title">Ankunft-Vorlaufzeit</string>
-    <string name="travelalarm_arrival_lead_time_summary">Aktiviere den Alarm nur, wenn die Zeit vor dem Alarm vom Beginn des Reiseabschnitts mindestens diese Anzahl Minuten ist. [%s]</string>
+    <string name="travelalarm_arrival_lead_time_summary">Aktiviere den Alarm automatisch nur, wenn die Zeit vor dem Alarm vom Beginn des Reiseabschnitts mindestens diese Anzahl Minuten ist. [%s]</string>
     <string name="travelalarm_departure_time_category_title">Alarm zur Abfahrt beim Umsteigen</string>
     <string name="travelalarm_departure_time_default_title">Abfahrt-Standardzeit</string>
     <string name="travelalarm_departure_time_default_summary">Standardzeit in Minuten, auf die ein Alarm bei der Abfahrt an einem Umstieg gesetzt wird (0=aus). [%s]</string>
     <string name="travelalarm_departure_lead_time_title">Abfahrt-Vorlaufzeit</string>
-    <string name="travelalarm_departure_lead_time_summary">Aktiviere den Alarm nur, wenn die Zeit vor dem Alarm vom Beginn des Umstiegs mindestens diese Anzahl Minuten ist. [%s]</string>
+    <string name="travelalarm_departure_lead_time_summary">Aktiviere den Alarm automatisch nur, wenn die Zeit vor dem Alarm vom Beginn des Umstiegs mindestens diese Anzahl Minuten ist. [%s]</string>
 
 </resources>

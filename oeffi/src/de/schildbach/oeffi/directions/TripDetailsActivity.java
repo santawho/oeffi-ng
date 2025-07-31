@@ -495,8 +495,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
         });
 
-        View nextEvent = findViewById(R.id.directions_trip_details_next_event_container);
+        View nextEvent = findViewById(R.id.navigation_next_event_container);
         nextEvent.setOnClickListener(view -> setShowNextEvent(false));
+
+        View backToItinarary = findViewById(R.id.navigation_next_event_back_to_itinerary);
+        backToItinarary.setOnClickListener(view -> setShowNextEvent(false));
     }
 
     private void updateDevInfo() {
@@ -604,7 +607,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     protected boolean isShowingNextEvent() {
-        return findViewById(R.id.directions_trip_details_next_event).getVisibility() == View.VISIBLE;
+        return findViewById(R.id.navigation_next_event).getVisibility() == View.VISIBLE;
     }
 
     private void goBack() {
@@ -726,7 +729,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         View listContent = findViewById(R.id.directions_trip_details_list_content);
         listContent.setVisibility(showEvent ? View.GONE : View.VISIBLE);
 
-        View nextEvent = findViewById(R.id.directions_trip_details_next_event);
+        View nextEvent = findViewById(R.id.navigation_next_event);
         nextEvent.setVisibility(showEvent ? View.VISIBLE : View.GONE);
     }
 
@@ -1223,25 +1226,25 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         findViewById(viewId).setBackgroundColor(color);
     }
 
-    private void updateNavigationInstructions() {
+    protected void updateNavigationInstructions() {
         final int colorHighlight = getColor(R.color.bg_trip_details_public_now);
         final int colorNormal = getColor(R.color.bg_level0);
         final int colorHighIfPublic = tripRenderer.nextEventTypeIsPublic ? colorHighlight : colorNormal;
         final int colorHighIfChangeover = tripRenderer.nextEventTypeIsPublic ? colorNormal : colorHighlight;
-        setViewBackgroundColor(R.id.directions_trip_details_next_event_current_action, colorHighlight);
-        setViewBackgroundColor(R.id.directions_trip_details_next_event_next_action, colorNormal);
-        setViewBackgroundColor(R.id.directions_trip_details_next_event_time, colorHighlight);
-        setViewBackgroundColor(R.id.directions_trip_details_next_event_target, colorHighlight);
-        setViewBackgroundColor(R.id.directions_trip_details_next_event_positions, colorHighIfChangeover);
-        setViewBackgroundColor(R.id.directions_trip_details_next_event_departure, colorNormal);
-        setViewBackgroundColor(R.id.directions_trip_details_next_event_connection, colorHighIfChangeover);
-        setViewBackgroundColor(R.id.directions_trip_details_next_event_changeover, colorHighIfChangeover);
-        setViewBackgroundColor(R.id.directions_trip_details_next_event_clock, colorNormal);
+        setViewBackgroundColor(R.id.navigation_next_event_current_action, colorHighlight);
+        setViewBackgroundColor(R.id.navigation_next_event_next_action, colorNormal);
+        setViewBackgroundColor(R.id.navigation_next_event_time, colorHighlight);
+        setViewBackgroundColor(R.id.navigation_next_event_target, colorHighlight);
+        setViewBackgroundColor(R.id.navigation_next_event_positions, colorHighIfChangeover);
+        setViewBackgroundColor(R.id.navigation_next_event_departure, colorNormal);
+        setViewBackgroundColor(R.id.navigation_next_event_connection, colorHighIfChangeover);
+        setViewBackgroundColor(R.id.navigation_next_event_changeover, colorHighIfChangeover);
+        setViewBackgroundColor(R.id.navigation_next_event_clock, colorNormal);
 
-        TextView clock = findViewById(R.id.directions_trip_details_next_event_clock);
+        TextView clock = findViewById(R.id.navigation_next_event_clock);
         clock.setText(Formats.formatTime(this, tripRenderer.nextEventClock.getTime()));
 
-        TextView currentAction = findViewById(R.id.directions_trip_details_next_event_current_action);
+        TextView currentAction = findViewById(R.id.navigation_next_event_current_action);
         if (tripRenderer.nextEventCurrentStringId > 0) {
             final String s = getString(tripRenderer.nextEventCurrentStringId);
             currentAction.setText(s);
@@ -1250,7 +1253,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             currentAction.setVisibility(View.GONE);
         }
 
-        TextView nextAction = findViewById(R.id.directions_trip_details_next_event_next_action);
+        TextView nextAction = findViewById(R.id.navigation_next_event_next_action);
         if (tripRenderer.nextEventNextStringId > 0) {
             final String s = getString(tripRenderer.nextEventNextStringId);
             nextAction.setText(s);
@@ -1259,8 +1262,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             nextAction.setVisibility(View.GONE);
         }
 
-        final TextView valueView = findViewById(R.id.directions_trip_details_next_event_time_value);
-        final Chronometer valueChronoView = findViewById(R.id.directions_trip_details_next_event_time_chronometer);
+        final TextView valueView = findViewById(R.id.navigation_next_event_time_value);
+        final Chronometer valueChronoView = findViewById(R.id.navigation_next_event_time_chronometer);
         valueChronoView.stop();
         final String valueStr = tripRenderer.nextEventTimeLeftValue;
         final String chronoFormat = tripRenderer.nextEventTimeLeftChronometerFormat;
@@ -1278,17 +1281,17 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 valueChronoView.setVisibility(View.GONE);
                 valueView.setTextColor(getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_trip_next_event_important : R.color.fg_trip_next_event_normal));
                 if (TripRenderer.NO_TIME_LEFT_VALUE.equals(valueStr))
-                    valueView.setText(R.string.directions_trip_details_next_event_no_time_left);
+                    valueView.setText(R.string.navigation_next_event_no_time_left);
                 else
                     valueView.setText(valueStr);
             }
         }
         // valueView.setTextColor(getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_trip_next_event_important : R.color.fg_trip_next_event_normal));
-        TextView unitView = findViewById(R.id.directions_trip_details_next_event_time_unit);
+        TextView unitView = findViewById(R.id.navigation_next_event_time_unit);
         unitView.setText(tripRenderer.nextEventTimeLeftUnit);
-        findViewById(R.id.directions_trip_details_next_event_time_hourglass)
+        findViewById(R.id.navigation_next_event_time_hourglass)
                 .setVisibility(tripRenderer.nextEventTimeHourglassVisible ? View.VISIBLE : View.GONE);
-        TextView explainView = findViewById(R.id.directions_trip_details_next_event_time_explain);
+        TextView explainView = findViewById(R.id.navigation_next_event_time_explain);
         if (tripRenderer.nextEventTimeLeftExplainStr != null) {
             explainView.setVisibility(View.VISIBLE);
             explainView.setText(tripRenderer.nextEventTimeLeftExplainStr);
@@ -1296,7 +1299,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             explainView.setVisibility(View.GONE);
         }
 
-        TextView targetView = findViewById(R.id.directions_trip_details_next_event_target);
+        TextView targetView = findViewById(R.id.navigation_next_event_target);
         if (tripRenderer.nextEventTargetName != null) {
             targetView.setText(tripRenderer.nextEventTargetName);
             targetView.setVisibility(View.VISIBLE);
@@ -1304,11 +1307,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             targetView.setVisibility(View.GONE);
         }
 
-        findViewById(R.id.directions_trip_details_next_event_positions)
+        findViewById(R.id.navigation_next_event_positions)
             .setVisibility(tripRenderer.nextEventPositionsAvailable ? View.VISIBLE : View.GONE);
 
-        final TextView from = findViewById(R.id.directions_trip_details_next_event_position_from);
-        final TextView to = findViewById(R.id.directions_trip_details_next_event_position_to);
+        final TextView from = findViewById(R.id.navigation_next_event_position_from);
+        final TextView to = findViewById(R.id.navigation_next_event_position_to);
 
         if (tripRenderer.nextEventArrivalPosName != null) {
             from.setVisibility(View.VISIBLE);
@@ -1326,8 +1329,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             to.setVisibility(View.GONE);
         }
 
-        final ImageView positionsWalkIcon = findViewById(R.id.directions_trip_details_next_event_positions_walk_icon);
-        final View positionsWalkArrow = findViewById(R.id.directions_trip_details_next_event_positions_walk_arrow);
+        final ImageView positionsWalkIcon = findViewById(R.id.navigation_next_event_positions_walk_icon);
+        final View positionsWalkArrow = findViewById(R.id.navigation_next_event_positions_walk_arrow);
         if (tripRenderer.nextEventStopChange) {
             final int iconId = tripRenderer.nextEventTransferIconId;
             positionsWalkIcon.setImageDrawable(res.getDrawable(iconId != 0 ? iconId : R.drawable.ic_directions_walk_grey600_24dp));
@@ -1339,47 +1342,47 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
 
         if (tripRenderer.nextEventTransportLine == null) {
-            findViewById(R.id.directions_trip_details_next_event_connection).setVisibility(View.GONE);
+            findViewById(R.id.navigation_next_event_connection).setVisibility(View.GONE);
         } else {
-            findViewById(R.id.directions_trip_details_next_event_connection).setVisibility(View.VISIBLE);
+            findViewById(R.id.navigation_next_event_connection).setVisibility(View.VISIBLE);
 
-            final LineView lineView = findViewById(R.id.directions_trip_details_next_event_connection_line);
+            final LineView lineView = findViewById(R.id.navigation_next_event_connection_line);
             lineView.setVisibility(View.VISIBLE);
             lineView.setLine(tripRenderer.nextEventTransportLine);
 
-            TextView destView = findViewById(R.id.directions_trip_details_next_event_connection_to);
+            TextView destView = findViewById(R.id.navigation_next_event_connection_to);
             destView.setText(tripRenderer.nextEventTransportDestinationName);
         }
 
         if (!tripRenderer.nextEventChangeOverAvailable) {
-            findViewById(R.id.directions_trip_details_next_event_changeover)
+            findViewById(R.id.navigation_next_event_changeover)
                     .setVisibility(View.GONE);
         } else {
-            findViewById(R.id.directions_trip_details_next_event_changeover)
+            findViewById(R.id.navigation_next_event_changeover)
                     .setVisibility(View.VISIBLE);
 
             if (tripRenderer.nextEventTransferAvailable) {
-                findViewById(R.id.directions_trip_details_next_event_transfer)
+                findViewById(R.id.navigation_next_event_transfer)
                         .setVisibility(View.VISIBLE);
 
-                TextView transferValueView = findViewById(R.id.directions_trip_details_next_event_transfer_value);
+                TextView transferValueView = findViewById(R.id.navigation_next_event_transfer_value);
                 transferValueView.setText(tripRenderer.nextEventTransferLeftTimeValue);
                 transferValueView.setTextColor(getColor(tripRenderer.nextEventTransferLeftTimeCritical
                         ? R.color.fg_trip_next_event_important
                         : R.color.fg_trip_next_event_normal));
 
                 if (tripRenderer.nextEventTransferLeftTimeFromNowValue != null) {
-                    findViewById(R.id.directions_trip_details_next_event_transfer_time)
+                    findViewById(R.id.navigation_next_event_transfer_time)
                             .setVisibility(View.VISIBLE);
 
-                    TextView transferTimeValueView = findViewById(R.id.directions_trip_details_next_event_transfer_time_value);
+                    TextView transferTimeValueView = findViewById(R.id.navigation_next_event_transfer_time_value);
                     transferTimeValueView.setText(tripRenderer.nextEventTransferLeftTimeFromNowValue);
                 } else {
-                    findViewById(R.id.directions_trip_details_next_event_transfer_time)
+                    findViewById(R.id.navigation_next_event_transfer_time)
                             .setVisibility(View.GONE);
                 }
 
-                TextView transferExplainView = findViewById(R.id.directions_trip_details_next_event_transfer_explain);
+                TextView transferExplainView = findViewById(R.id.navigation_next_event_transfer_explain);
                 if (tripRenderer.nextEventTransferExplain != null) {
                     transferExplainView.setVisibility(View.VISIBLE);
                     transferExplainView.setText(tripRenderer.nextEventTransferExplain);
@@ -1387,35 +1390,35 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     transferExplainView.setVisibility(View.GONE);
                 }
             } else {
-                findViewById(R.id.directions_trip_details_next_event_transfer)
+                findViewById(R.id.navigation_next_event_transfer)
                         .setVisibility(View.GONE);
             }
 
             if (tripRenderer.nextEventTransferWalkAvailable) {
-                findViewById(R.id.directions_trip_details_next_event_walk)
+                findViewById(R.id.navigation_next_event_walk)
                         .setVisibility(View.VISIBLE);
-                ((TextView) findViewById(R.id.directions_trip_details_next_event_walk_value))
+                ((TextView) findViewById(R.id.navigation_next_event_walk_value))
                         .setText(tripRenderer.nextEventTransferWalkTimeValue);
-                ((ImageView) findViewById(R.id.directions_trip_details_next_event_walk_icon))
+                ((ImageView) findViewById(R.id.navigation_next_event_walk_icon))
                         .setImageDrawable(res.getDrawable(tripRenderer.nextEventTransferIconId));
             } else {
-                findViewById(R.id.directions_trip_details_next_event_walk)
+                findViewById(R.id.navigation_next_event_walk)
                         .setVisibility(View.GONE);
             }
 
             if (tripRenderer.nextPublicLegDurationTimeValue != null) {
-                findViewById(R.id.directions_trip_details_next_event_upcoming_ride)
+                findViewById(R.id.navigation_next_event_upcoming_ride)
                         .setVisibility(View.VISIBLE);
 
-                ((TextView) findViewById(R.id.directions_trip_details_next_event_upcoming_ride_value))
+                ((TextView) findViewById(R.id.navigation_next_event_upcoming_ride_value))
                         .setText(tripRenderer.nextPublicLegDurationTimeValue);
             } else {
-                findViewById(R.id.directions_trip_details_next_event_upcoming_ride)
+                findViewById(R.id.navigation_next_event_upcoming_ride)
                         .setVisibility(View.GONE);
             }
         }
 
-        TextView depView = findViewById(R.id.directions_trip_details_next_event_departure);
+        TextView depView = findViewById(R.id.navigation_next_event_departure);
         depView.setText(tripRenderer.nextEventDepartureName);
         depView.setVisibility(tripRenderer.nextEventDepartureName != null ? View.VISIBLE : View.GONE);
     }

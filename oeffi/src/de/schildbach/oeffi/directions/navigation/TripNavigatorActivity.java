@@ -31,6 +31,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -45,6 +47,7 @@ import javax.net.ssl.SSLException;
 
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.QueryTripsRunnable;
+import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
@@ -495,11 +498,13 @@ public class TripNavigatorActivity extends TripDetailsActivity {
             final int bellResId,
             final TripRenderer.LegContainer legC,
             final boolean alarmIsForDeparture) {
-        final ImageButton progressBell = row.findViewById(bellResId);
+        final ImageButton bellButton = row.findViewById(bellResId);
 
-        progressBell.setVisibility(View.VISIBLE);
-        progressBell.setOnClickListener(v -> new TravelAlarmManager(this)
-                .showConfigureTravelAlarmDialog(legC, alarmIsForDeparture, getIntent(), this::updateGUI));
+        bellButton.setVisibility(View.VISIBLE);
+        bellButton.setOnClickListener(v -> {
+            new TravelAlarmManager(this).showConfigureTravelAlarmDialog(
+                    legC, alarmIsForDeparture, getIntent(), this::updateGUI);
+        });
 
         final TravelAlarmManager.TravelAlarmState travelAlarmState = new TravelAlarmManager(this)
                 .new TravelAlarmState(legC, alarmIsForDeparture, guiUpdateNavigationNotification);
@@ -515,7 +520,72 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         }
         final Drawable drawable = getDrawable(drawableResId);
         drawable.setTint(getColor(colorId));
-        progressBell.setImageDrawable(drawable);
+        bellButton.setImageDrawable(drawable);
+    }
+
+    @Override
+    protected void updateNavigationInstructions() {
+        super.updateNavigationInstructions();
+
+        final boolean alarmIsForDeparture;
+        final TripRenderer.LegContainer legContainer;
+        if (tripRenderer.nextEventTypeIsPublic) {
+            alarmIsForDeparture = false;
+            legContainer = tripRenderer.currentLeg;
+        } else {
+            alarmIsForDeparture = true;
+            legContainer = tripRenderer.currentLeg.transferTo;
+        }
+
+        final View alarmView = findViewById(R.id.navigation_next_event_alarm);
+        alarmView.setVisibility(View.VISIBLE);
+        alarmView.setOnClickListener(v -> {
+            new TravelAlarmManager(this).showConfigureTravelAlarmDialog(
+                    legContainer, alarmIsForDeparture,
+                    getIntent(), this::updateGUI);
+        });
+
+        final TravelAlarmManager.TravelAlarmState travelAlarmState =
+                new TravelAlarmManager(this).new TravelAlarmState(
+                        legContainer, alarmIsForDeparture,
+                        guiUpdateNavigationNotification);
+
+        final long alarmAtMs = travelAlarmState.currentTravelAlarmAtMs;
+        final long now = System.currentTimeMillis();
+
+        final View detailsView = findViewById(R.id.navigation_next_event_alarm_details);
+        final TextView timeView = findViewById(R.id.navigation_next_event_alarm_details_time);
+        final TextView offsetView = findViewById(R.id.navigation_next_event_alarm_details_offset);
+        final TextView sleepView = findViewById(R.id.navigation_next_event_alarm_details_sleep);
+        final int bellResId;
+        if (alarmAtMs <= 0) {
+            detailsView.setVisibility(View.GONE);
+            bellResId = R.drawable.ic_bell_off_black_24dp;
+        } else {
+            detailsView.setVisibility(View.VISIBLE);
+            bellResId = R.drawable.ic_bell_on_black_24dp;
+            timeView.setText(Formats.formatTime(this, alarmAtMs));
+            offsetView.setText(formatDuration(tripRenderer.nextEventEstimatedTime.getTime() - alarmAtMs));
+            final ImageView sleepIcon = findViewById(R.id.navigation_next_event_alarm_details_sleep_icon);
+            final long sleepMs = alarmAtMs - now;
+            if (sleepMs > 0) {
+                sleepView.setVisibility(View.VISIBLE);
+                sleepIcon.setVisibility(View.VISIBLE);
+                sleepView.setText(formatDuration(sleepMs));
+            } else {
+                sleepView.setVisibility(View.GONE);
+                sleepIcon.setVisibility(View.GONE);
+            }
+        }
+        ((ImageView) findViewById(R.id.navigation_next_event_alarm_bell)).setImageDrawable(getDrawable(bellResId));
+    }
+
+    private String formatDuration(final long millis) {
+        final long minutes = (millis + 30000) / 60000;
+        if (minutes < 100)
+            return Long.toString(minutes);
+        final long hours = (minutes + 30) / 60;
+        return hours + "h";
     }
 
     @Override

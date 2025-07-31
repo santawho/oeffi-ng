@@ -56,18 +56,18 @@
     <dimen name="elevation_panel">6dp</dimen>
     <dimen name="elevation_action_bar">8dp</dimen>
 
-    <dimen name="directions_trip_details_next_event_clock_fontsize">90sp</dimen>
-    <dimen name="directions_trip_details_next_event_time_fontsize">90sp</dimen>
-    <dimen name="directions_trip_details_next_event_time_fontsize_decor">48sp</dimen>
-    <dimen name="directions_trip_details_next_event_time_fontsize_explain">32sp</dimen>
-    <dimen name="directions_trip_details_next_event_target_fontsize">36sp</dimen>
-    <dimen name="directions_trip_details_next_event_position_from_fontsize">36sp</dimen>
-    <dimen name="directions_trip_details_next_event_position_to_fontsize">48sp</dimen>
-    <dimen name="directions_trip_details_next_event_departure_fontsize">24sp</dimen>
-    <dimen name="directions_trip_details_next_event_connection_line_fontsize">24sp</dimen>
-    <dimen name="directions_trip_details_next_event_connection_to_fontsize">24sp</dimen>
-    <dimen name="directions_trip_details_next_event_transfer_fontsize">36sp</dimen>
-    <dimen name="directions_trip_details_next_event_transfer_explain_fontsize">24sp</dimen>
+    <dimen name="navigation_next_event_clock_fontsize">90sp</dimen>
+    <dimen name="navigation_next_event_time_fontsize">90sp</dimen>
+    <dimen name="navigation_next_event_time_fontsize_decor">48sp</dimen>
+    <dimen name="navigation_next_event_time_fontsize_explain">32sp</dimen>
+    <dimen name="navigation_next_event_target_fontsize">36sp</dimen>
+    <dimen name="navigation_next_event_position_from_fontsize">36sp</dimen>
+    <dimen name="navigation_next_event_position_to_fontsize">48sp</dimen>
+    <dimen name="navigation_next_event_departure_fontsize">24sp</dimen>
+    <dimen name="navigation_next_event_connection_line_fontsize">24sp</dimen>
+    <dimen name="navigation_next_event_connection_to_fontsize">24sp</dimen>
+    <dimen name="navigation_next_event_transfer_fontsize">36sp</dimen>
+    <dimen name="navigation_next_event_transfer_explain_fontsize">24sp</dimen>
 
     <dimen name="navigation_notification_next_event_time_fontsize">42sp</dimen>
     <dimen name="navigation_notification_next_event_time_fontsize_decor">24sp</dimen>

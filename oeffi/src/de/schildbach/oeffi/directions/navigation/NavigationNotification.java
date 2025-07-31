@@ -48,7 +48,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Date;
 
 import de.schildbach.oeffi.Constants;
@@ -247,12 +246,25 @@ public class NavigationNotification {
 
         public Configuration(final int numLegSlots) {
             travelAlarmExplicitMsForLegDeparture = new long[numLegSlots];
-            Arrays.fill(travelAlarmExplicitMsForLegDeparture, -1);
             travelAlarmIdForLegDeparture = new long[numLegSlots];
-
             travelAlarmExplicitMsForLegArrival = new long[numLegSlots];
-            Arrays.fill(travelAlarmExplicitMsForLegArrival, -1);
             travelAlarmIdForLegArrival = new long[numLegSlots];
+            for (int i = 0; i < numLegSlots; i += 1) {
+                travelAlarmExplicitMsForLegDeparture[i] = -1;
+                travelAlarmIdForLegDeparture[i] = 2L * i + 1;
+                travelAlarmExplicitMsForLegArrival[i] = -1;
+                travelAlarmIdForLegArrival[i] = 2L * i + 2;
+            }
+        }
+
+        public void setTravelAlarmExplicitMsForLegDeparture(final int index, final long timeMs) {
+            travelAlarmExplicitMsForLegDeparture[index] = timeMs;
+            travelAlarmIdForLegDeparture[index] = System.currentTimeMillis();
+        }
+
+        public void setTravelAlarmExplicitMsForLegArrival(final int index, final long timeMs) {
+            travelAlarmExplicitMsForLegArrival[index] = timeMs;
+            travelAlarmIdForLegArrival[index] = System.currentTimeMillis();
         }
     }
 
@@ -910,7 +922,7 @@ public class NavigationNotification {
                         context.getColor(tripRenderer.nextEventTimeLeftCritical ? R.color.fg_trip_next_event_important : R.color.fg_trip_next_event_normal));
             } else {
                 if (TripRenderer.NO_TIME_LEFT_VALUE.equals(valueStr))
-                    valueStr = context.getString(R.string.directions_trip_details_next_event_no_time_left);
+                    valueStr = context.getString(R.string.navigation_next_event_no_time_left);
                 remoteViews.setViewVisibility(R.id.navigation_notification_next_event_time_value, View.VISIBLE);
                 remoteViews.setViewVisibility(R.id.navigation_notification_next_event_time_chronometer, View.GONE);
                 remoteViews.setTextViewText(R.id.navigation_notification_next_event_time_value, valueStr);

@@ -64,22 +64,22 @@
     <string name="navigation_travelalarm_popup_button_dismiss_alarm">Stop Alarm</string>
 
     <string name="navigation_travelalarm_preferences_summary">Settings regarding the travel alarm</string>
-    <string name="travelalarm_time_ratio_title">Ratio of estimated time</string>
-    <string name="travelalarm_time_ratio_summary">The ratio between estimated and scheduled time for computing the alarm time (recommended = 33%%) [%s%%]</string>
+    <string name="travelalarm_time_ratio_title">Weighting of estimated time</string>
+    <string name="travelalarm_time_ratio_summary">The weighting between estimated and scheduled time for computing the alarm time (recommended = 33%%) [%s%%]</string>
     <string name="travelalarm_start_time_category_title">Alarm at Start of Journey</string>
     <string name="travelalarm_start_time_default_title">Start default time</string>
     <string name="travelalarm_start_time_default_summary">Default time in minutes for alarm to be set at start of journey (0=off). [%s]</string>
     <string name="travelalarm_start_lead_time_title">Start lead time</string>
-    <string name="travelalarm_start_lead_time_summary">Only activate alarm, when time before alarm from start of navigation is at least this number of minutes. [%s]</string>
+    <string name="travelalarm_start_lead_time_summary">Activate alarm automatically only, when time before alarm from start of navigation is at least this number of minutes. [%s]</string>
     <string name="travelalarm_arrival_time_category_title">Alarm at arrivals</string>
     <string name="travelalarm_arrival_time_default_title">Arrival default time</string>
     <string name="travelalarm_arrival_time_default_summary">Default time in minutes for alarm to be set at an arrival (0=off). [%s]</string>
     <string name="travelalarm_arrival_lead_time_title">Arrival lead time</string>
-    <string name="travelalarm_arrival_lead_time_summary">Only activate alarm, when time before alarm from departure of the leg is at least this number of minutes. [%s]</string>
+    <string name="travelalarm_arrival_lead_time_summary">Activate alarm automatically only, when time before alarm from departure of the leg is at least this number of minutes. [%s]</string>
     <string name="travelalarm_departure_time_category_title">Alarm at Changeover Departures</string>
     <string name="travelalarm_departure_time_default_title">Departure default time</string>
     <string name="travelalarm_departure_time_default_summary">Default time in minutes for alarm to be set at the departure of a changeover (0=off). [%s]</string>
     <string name="travelalarm_departure_lead_time_title">Departure lead time</string>
-    <string name="travelalarm_departure_lead_time_summary">Only activate alarm, when time before alarm from arrival at the changeover is at least this number of minutes. [%s]</string>
+    <string name="travelalarm_departure_lead_time_summary">Activate alarm automatically only, when time before alarm from arrival at the changeover is at least this number of minutes. [%s]</string>
 
 </resources>
