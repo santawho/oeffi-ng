@@ -165,6 +165,11 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     }
 
     @Override
+    protected boolean allowScreenLock() {
+        return true;
+    }
+
+    @Override
     protected void setupFromTrip(final Trip trip) {
         final Trip tripFromPresentNotification = new NavigationNotification(this, getIntent()).getTrip();
         navigator = new Navigator(network, tripFromPresentNotification);

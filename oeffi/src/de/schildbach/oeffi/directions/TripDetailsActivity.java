@@ -74,6 +74,7 @@ import com.google.common.base.Supplier;
 
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
+import de.schildbach.oeffi.DeviceAdmin;
 import de.schildbach.oeffi.LocationAware;
 import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiActivity;
@@ -495,11 +496,34 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
         });
 
-        View nextEvent = findViewById(R.id.navigation_next_event_container);
-        nextEvent.setOnClickListener(view -> setShowNextEvent(false));
+        final View.OnClickListener exitNextEventViewClicked = view -> setShowNextEvent(false);
+        final View.OnLongClickListener lockDeviceNextEventViewLongClicked = view -> {
+            DeviceAdmin.enterLockScreenAndShutOffDisplay(this);
+            return true;
+        };
 
-        View backToItinarary = findViewById(R.id.navigation_next_event_back_to_itinerary);
-        backToItinarary.setOnClickListener(view -> setShowNextEvent(false));
+        final View nextEventView = findViewById(R.id.navigation_next_event);
+        final View nextEventContainerView = findViewById(R.id.navigation_next_event_container);
+        final View nextEventBackView = findViewById(R.id.navigation_next_event_back_to_itinerary);
+
+        nextEventView.setOnClickListener(exitNextEventViewClicked);
+        nextEventContainerView.setOnClickListener(exitNextEventViewClicked);
+        nextEventBackView.setOnClickListener(exitNextEventViewClicked);
+
+        if (allowScreenLock()) {
+            nextEventView.setLongClickable(true);
+            nextEventView.setOnLongClickListener(lockDeviceNextEventViewLongClicked);
+
+            nextEventContainerView.setLongClickable(true);
+            nextEventContainerView.setOnLongClickListener(lockDeviceNextEventViewLongClicked);
+
+            nextEventBackView.setLongClickable(true);
+            nextEventBackView.setOnLongClickListener(lockDeviceNextEventViewLongClicked);
+        }
+    }
+
+    protected boolean allowScreenLock() {
+        return false;
     }
 
     private void updateDevInfo() {

@@ -198,6 +198,16 @@
         <service android:name=".directions.navigation.NavigationAlarmManager$RefreshService"
             android:exported="false" />
 
+        <receiver android:name=".DeviceAdmin$Receiver"
+            android:exported="true"
+            android:permission="android.permission.BIND_DEVICE_ADMIN">
+            <meta-data android:name="android.app.device_admin"
+                android:resource="@xml/device_admin_policies" />
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+            </intent-filter>
+        </receiver>
+
         <service
             android:name=".stations.NearestFavoriteStationWidgetService"
             android:permission="android.permission.BIND_JOB_SERVICE"
