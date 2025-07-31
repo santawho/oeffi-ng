@@ -527,17 +527,23 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     protected void updateNavigationInstructions() {
         super.updateNavigationInstructions();
 
+        final TripRenderer.LegContainer currentLeg = tripRenderer.currentLeg;
+        final View alarmView = findViewById(R.id.navigation_next_event_alarm);
+        if (currentLeg == null) {
+            alarmView.setVisibility(View.GONE);
+            return;
+        }
+
         final boolean alarmIsForDeparture;
         final TripRenderer.LegContainer legContainer;
         if (tripRenderer.nextEventTypeIsPublic) {
             alarmIsForDeparture = false;
-            legContainer = tripRenderer.currentLeg;
+            legContainer = currentLeg;
         } else {
             alarmIsForDeparture = true;
-            legContainer = tripRenderer.currentLeg.transferTo;
+            legContainer = currentLeg.transferTo;
         }
 
-        final View alarmView = findViewById(R.id.navigation_next_event_alarm);
         alarmView.setVisibility(View.VISIBLE);
         alarmView.setOnClickListener(v -> {
             new TravelAlarmManager(this).showConfigureTravelAlarmDialog(
