@@ -121,6 +121,8 @@
     <string name="network_tlem_comment">Lokal- und Regionalverkehr (z.B. London, Birmingham)</string>
     <string name="network_mersey_label">Liverpool</string>
     <string name="network_mersey_comment">Lokal- und Regionalverkehr</string>
+    <string name="network_pl_label">Polen</string>
+    <string name="network_pl_comment">Fern-, Regional und Lokalverkehr (z.B. Warschau)</string>
     <string name="network_dub_label">Dubai</string>
     <string name="network_dub_comment">Lokalverkehr</string>
     <string name="network_bart_label">San Francisco</string>

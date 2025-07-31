@@ -43,6 +43,7 @@ import android.os.Process;
 import android.provider.ContactsContract.CommonDataKinds;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
+import android.view.KeyEvent;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -454,15 +455,16 @@ public class DirectionsActivity extends OeffiMainActivity implements
         viewToLocation = findViewById(R.id.directions_to);
         viewToLocation.setListener(locationChangeListener);
         viewToLocation.setOnEditorActionListener((v, actionId, event) -> {
-            if (actionId == EditorInfo.IME_ACTION_GO) {
-                viewGo.performClick();
-                return true;
-            } else if (actionId == EditorInfo.IME_ACTION_DONE) {
-                requestFocusFirst();
-                return true;
-            } else {
-                return false;
+            if (event == null || event.getAction() == KeyEvent.ACTION_DOWN) {
+                if (actionId == EditorInfo.IME_ACTION_GO) {
+                    viewGo.performClick();
+                    return true;
+                } else if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    requestFocusFirst();
+                    return true;
+                }
             }
+            return false;
         });
         viewToLocation.setContextMenuItemClickListener(new LocationContextMenuItemClickListener(viewToLocation,
                 requestLocationPermissionToLauncher, pickContactToLauncher, pickStationToLauncher));

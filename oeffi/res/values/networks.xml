@@ -121,6 +121,8 @@
     <string name="network_tlem_comment">local and regional (e.g. London, Birmingham)</string>
     <string name="network_mersey_label">Liverpool</string>
     <string name="network_mersey_comment">local and regional</string>
+    <string name="network_pl_label">Poland</string>
+    <string name="network_pl_comment">long-distance, regional and local (e.g. Warsaw)</string>
     <string name="network_dub_label">Dubai</string>
     <string name="network_dub_comment">local</string>
     <string name="network_bart_label">San Francisco</string>

@@ -25,7 +25,7 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:3.12.13'
     //noinspection GradleDependency
     implementation 'com.squareup.okhttp3:logging-interceptor:3.12.13'
-    implementation 'com.google.guava:guava:33.3.0-android'
+    implementation 'com.google.guava:guava:33.4.0-android'
     implementation 'org.osmdroid:osmdroid-android:6.1.20'
     //noinspection GradleDependency
     implementation 'org.slf4j:slf4j-api:2.0.9'

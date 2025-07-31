@@ -29,6 +29,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -40,7 +41,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.Switch;
@@ -64,7 +64,6 @@ import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.network.NetworkResources;
 import de.schildbach.oeffi.plans.PlansPickerActivity;
 import de.schildbach.oeffi.preference.AboutFragment;
-import de.schildbach.oeffi.preference.DonateFragment;
 import de.schildbach.oeffi.preference.PreferenceActivity;
 import de.schildbach.oeffi.stations.FavoriteStationsActivity;
 import de.schildbach.oeffi.stations.StationsActivity;
@@ -293,11 +292,6 @@ public abstract class OeffiActivity extends ComponentActivity {
                     return true;
                 }
 
-                if (itemId == R.id.global_options_donate) {
-                    PreferenceActivity.start(OeffiActivity.this, DonateFragment.class);
-                    return true;
-                }
-
                 if (itemId == R.id.global_options_report_bug) {
                     ErrorReporter.sendBugMail(application, application.packageInfo());
                     return true;
@@ -390,6 +384,8 @@ public abstract class OeffiActivity extends ComponentActivity {
         navigationDrawerFooterView.setOnClickListener(v -> {
             handler.removeCallbacksAndMessages(null);
             heartbeat.start();
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.global_options_gift_url))));
+            closeNavigation();
         });
 
         getMyActionBar().setDrawer(v -> toggleNavigation());

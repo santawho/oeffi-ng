@@ -22,12 +22,6 @@
         android:title="@string/plans_activity_title"
         android:titleCondensed="@string/global_options_plans_comment" />
     <item
-        android:id="@+id/global_options_donate"
-        android:visible="@bool/flags_show_donate"
-        android:icon="@drawable/ic_cash_multiple_grey600_24dp"
-        android:orderInCategory="999"
-        android:title="@string/global_options_donate_title" />
-    <item
         android:id="@+id/global_options_report_bug"
         android:icon="@drawable/ic_ladybug_grey600_24dp"
         android:orderInCategory="999"

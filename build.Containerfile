@@ -18,8 +18,11 @@ FROM debian:bookworm-slim AS build-stage
 
 # install debian packages
 ENV DEBIAN_FRONTEND noninteractive
-RUN /usr/bin/apt-get update && \
-    /usr/bin/apt-get --yes install disorderfs openjdk-17-jdk-headless gradle sdkmanager && \
+RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=locked \
+    --mount=target=/var/cache/apt,type=cache,sharing=locked \
+    /bin/rm -f /etc/apt/apt.conf.d/docker-clean && \
+    /usr/bin/apt-get update && \
+    /usr/bin/apt-get --yes --no-install-recommends install disorderfs openjdk-17-jdk-headless gradle sdkmanager && \
     /bin/ln -fs /usr/share/zoneinfo/CET /etc/localtime && \
     /usr/sbin/dpkg-reconfigure --frontend noninteractive tzdata && \
     /bin/ln -s /proc/self/mounts /etc/mtab && \
@@ -34,10 +37,13 @@ COPY --chown=builder / project/
 
 # accept SDK licenses
 ENV ANDROID_HOME /home/builder/android-sdk
-RUN yes | /usr/bin/sdkmanager --licenses >/dev/null
+RUN --mount=target=/home/builder/android-sdk,type=cache,uid=1000,gid=1000,sharing=locked \
+    yes | /usr/bin/sdkmanager --licenses >/dev/null
 
 # build project
-RUN if [ -e /dev/fuse ] ; \
+RUN --mount=target=/home/builder/android-sdk,type=cache,uid=1000,gid=1000,sharing=locked \
+    --mount=target=/home/builder/.gradle,type=cache,uid=1000,gid=1000,sharing=locked \
+    if [ -e /dev/fuse ] ; \
       then /bin/mv project project.u && /bin/mkdir project && \
       /usr/bin/disorderfs --sort-dirents=yes --reverse-dirents=no project.u project ; \
     fi && \

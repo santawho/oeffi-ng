@@ -29,13 +29,13 @@
     <string name="global_options_stations_comment">Departure times and delays</string>
     <string name="global_options_directions_comment">From door to door</string>
     <string name="global_options_plans_comment">For a rough overview</string>
-    <string name="global_options_donate_title">Donate</string>
     <string name="global_options_show_log_title">Show log</string>
     <string name="global_options_report_bug_title">Report bug</string>
     <string name="global_options_preferences_title">Settings</string>
     <string name="global_options_extras_title">Extras</string>
     <string name="global_options_clear_navigation_title">Clear all navigations</string>
     <string name="global_options_about_title">About %1$s</string>
+    <string name="global_options_gift_url">https://oeffi.schildbach.de/gift.html</string>
     <string name="global_options_share_app_title">Share %1$s</string>
     <string name="global_options_share_app_text">This is the link to download and install the %1$s app.\n\n%2$s</string>
 
@@ -75,11 +75,6 @@
     <string name="about_show_qr_summary">Show QR code to share the app with a local friend</string>
     <string name="about_participate_title">Participate</string>
     <string name="about_market_app_title">Rate or Review Öffi</string>
-    <string name="about_donate_title">Donations</string>
-    <string name="about_donate_bitcoin_title">Donate Bitcoins</string>
-    <string name="about_donate_bitcoin_summary">Bitcoin is an Internet currency.</string>
-    <string name="about_donate_euro_title">Donate Euros</string>
-    <string name="about_donate_euro_summary">https://oeffi.schildbach.de/donate.html</string>
 
     <!-- network picker -->
     <string name="network_picker_firsttime_message">Because you are using Öffi for the first time, you need to pick a region that suits you well. You
