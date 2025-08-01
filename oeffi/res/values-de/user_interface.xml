@@ -11,6 +11,17 @@
         <item>Dunkler Modus</item>
     </string-array>
 
+    <string name="user_interface_accessibility_settings_title">Bildschirm ausschalten</string>
+    <string name="user_interface_accessibility_settings_summary">
+        Wenn der Bildschirm gesperrt ist, kann er durch langes Halten wieder ausgeschaltet werden.
+        Verwende die System-Einstellungen für Bedienungshilfen um die heruntergeladene App Öffi zu aktivieren.
+    </string>
+    <string name="user_interface_accessibility_service_description">
+        Wenn die App im Navigationsmodus ist und das Gerät aufwacht, ohne dass der Bildschirm entsperrt wird,
+        kannst Du den Bildschirm durch langes Tippen wieder ausschalten.
+        Die App liest niemals deinen Bildschirminhalt oder interagiert auf eine andere Weise mit dem Gerät.
+    </string>
+
     <string name="user_interface_category_map_title">Landkarten</string>
     <string name="user_interface_map_tile_resolution_title">Auflösung von Landkarten</string>
     <string name="user_interface_map_tile_resolution_summary">Setze dies höher für mehr Details, aber weniger Lesbarkeit, und umgekehrt. [%s]</string>

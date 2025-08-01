@@ -198,15 +198,27 @@
         <service android:name=".directions.navigation.NavigationAlarmManager$RefreshService"
             android:exported="false" />
 
-        <receiver android:name=".DeviceAdmin$Receiver"
+<!--        <receiver android:name=".DeviceAdmin$MyDeviceAdminReceiver"-->
+<!--            android:exported="true"-->
+<!--            android:permission="android.permission.BIND_DEVICE_ADMIN">-->
+<!--            <meta-data android:name="android.app.device_admin"-->
+<!--                android:resource="@xml/device_admin_policies" />-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />-->
+<!--            </intent-filter>-->
+<!--        </receiver>-->
+
+        <service android:name=".DeviceAdmin$MyAccessibilityService"
             android:exported="true"
-            android:permission="android.permission.BIND_DEVICE_ADMIN">
-            <meta-data android:name="android.app.device_admin"
-                android:resource="@xml/device_admin_policies" />
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:label="@string/app_name">
             <intent-filter>
-                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+                <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
-        </receiver>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service_config" />
+        </service>
 
         <service
             android:name=".stations.NearestFavoriteStationWidgetService"

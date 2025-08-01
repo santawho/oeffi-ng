@@ -21,7 +21,6 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.KeyguardManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -498,7 +497,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         final View.OnClickListener exitNextEventViewClicked = view -> setShowNextEvent(false);
         final View.OnLongClickListener lockDeviceNextEventViewLongClicked = view -> {
-            DeviceAdmin.enterLockScreenAndShutOffDisplay(this);
+            DeviceAdmin.enterLockScreenAndShutOffDisplay(this, true);
             return true;
         };
 
@@ -741,8 +740,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             findViewById(R.id.directions_trip_details_finished).setVisibility(View.VISIBLE);
         } else {
             findViewById(R.id.directions_trip_details_finished).setVisibility(View.GONE);
-            final KeyguardManager keyguard = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
-            if (keyguard.isKeyguardLocked()) {
+            if (DeviceAdmin.isScreenLocked()) {
                 showEvent = showNextEventWhenLocked;
             } else {
                 showEvent = showNextEventWhenUnlocked;
@@ -1235,8 +1233,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     protected void setShowNextEvent(final boolean showNextEvent) {
-        final KeyguardManager keyguard = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
-        if (keyguard.isKeyguardLocked()) {
+        if (DeviceAdmin.isScreenLocked()) {
             showNextEventWhenLocked = showNextEvent;
             showNextEventWhenUnlocked = showNextEvent;
         } else {

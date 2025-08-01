@@ -16,6 +16,17 @@
         <item>on</item>
     </string-array>
 
+    <string name="user_interface_accessibility_settings_title">Shut off screen</string>
+    <string name="user_interface_accessibility_settings_summary">
+        When the screen is locked, long tap to shut off the screen again.
+        Use the system\'s accessibility settings to enable the downloaded app Öffi.
+    </string>
+    <string name="user_interface_accessibility_service_description">
+        When in navigation mode and the device wakes up without becoming unlocked,
+        you can switch off the screen by long tapping on the screen.
+        The app does not read your screen or interact in any other way with the device.
+    </string>
+
     <string name="user_interface_category_map_title">Maps</string>
     <string name="user_interface_map_tile_resolution_title">Map resolution</string>
     <string name="user_interface_map_tile_resolution_summary">Set higher for more details, but less readability, and vice versa. [%s]</string>

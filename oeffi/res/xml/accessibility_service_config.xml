@@ -1,0 +1,10 @@
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/user_interface_accessibility_service_description"
+    />
+
+<!--    android:packageNames="de.santawho.oeffi_ng,de.santawho.oeffi_ng.debug" -->
+<!--    android:accessibilityEventTypes="typeAllMask"-->
+<!--    android:accessibilityFlags="flagDefault"-->
+<!--    android:accessibilityFeedbackType="feedbackHaptic"-->
+<!--    android:notificationTimeout="100"-->
+<!--    android:canRetrieveWindowContent="false"-->

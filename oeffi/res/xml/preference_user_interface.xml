@@ -10,6 +10,13 @@
         android:title="@string/user_interface_darkmode_switch_title"
         android:summary="@string/user_interface_darkmode_switch_summary" />
 
+    <Preference
+        android:key="accessibility_settings"
+        android:title="@string/user_interface_accessibility_settings_title"
+        android:summary="@string/user_interface_accessibility_settings_summary" >
+        <intent android:action="android.settings.ACCESSIBILITY_SETTINGS" />
+    </Preference>
+
     <CheckBoxPreference
         android:key="user_interface_mainmenu_shareapp_enabled"
         android:defaultValue="false"
