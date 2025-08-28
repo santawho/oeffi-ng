@@ -539,8 +539,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         postLoadNextVisible(0);
     }
 
-    @Override
-    protected void onChangeNetwork(final NetworkId network) {
+    private void resetContent() {
         clearListFilter();
 
         stations.clear();
@@ -548,9 +547,15 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         products.clear();
         products.addAll(loadProductFilter());
 
+        stationListAdapter.setBaseTime(null);
         stationListAdapter.notifyDataSetChanged();
         getMapView().invalidate();
         loading = true;
+    }
+
+    @Override
+    protected void onChangeNetwork(final NetworkId network) {
+        resetContent();
 
         updateDisclaimerSource(disclaimerSourceView, network.name(), null);
         updateGUI();
@@ -616,6 +621,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     }
 
     private void handleIntent(final Intent intent) {
+        resetContent();
+
         final String query = intent.getStringExtra(SearchManager.QUERY);
         if (query != null)
             setListFilter(query.trim());
@@ -684,8 +691,6 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
             if (deviceLocation != null) {
                 getMapView().animateToLocation(deviceLocation.getLatAsDouble(), deviceLocation.getLonAsDouble());
-
-                final float[] distanceBetweenResults = new float[2];
 
                 // remove non-favorites and re-calculate distances
                 for (final Iterator<Station> i = stations.iterator(); i.hasNext();) {
