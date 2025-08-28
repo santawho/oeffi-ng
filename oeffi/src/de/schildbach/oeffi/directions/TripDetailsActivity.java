@@ -51,6 +51,7 @@ import android.text.method.LinkMovementMethod;
 import android.text.style.RelativeSizeSpan;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Chronometer;
@@ -365,10 +366,15 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         addShowMapButtonToActionBar();
 
+        final boolean isShareCalendarVisible = !renderConfig.isNavigation && !renderConfig.isAlternativeConnectionSearch;
+
         actionBar.addButton(R.drawable.ic_share_white_24dp, R.string.directions_trip_details_action_share_title)
                 .setOnClickListener(v -> {
                     final PopupMenu popupMenu = new PopupMenu(TripDetailsActivity.this, v);
                     popupMenu.inflate(R.menu.directions_trip_details_action_share);
+                    final Menu menu = popupMenu.getMenu();
+                    if (isShareCalendarVisible)
+                        menu.findItem(R.id.directions_trip_details_action_add_to_calendar).setVisible(true);
                     popupMenu.setOnMenuItemClickListener(item -> {
                         final int itemId = item.getItemId();
                         final Supplier<Intent> intentSupplier;
@@ -414,6 +420,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                             return true;
                         } else if (itemId == R.id.directions_trip_details_action_open_external_maps_app) {
                             intentSupplier = () -> showKmlInExternalMapsApp();
+                        } else if (itemId == R.id.directions_trip_details_action_add_to_calendar) {
+                            shareCalendarEntry();
+                            return true;
                         } else {
                             return false;
                         }
@@ -428,19 +437,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     });
                     popupMenu.show();
                 });
-        if (!renderConfig.isNavigation && !renderConfig.isAlternativeConnectionSearch) {
-            actionBar.addButton(R.drawable.ic_today_white_24dp, R.string.directions_trip_details_action_calendar_title)
-                    .setOnClickListener(v -> {
-                        backgroundHandler.post(() -> {
-                            try {
-                                final Intent intent = scheduleTripIntent(tripRenderer.trip, true);
-                                runOnUiThread(() -> startActivity(intent));
-                            } catch (final ActivityNotFoundException x) {
-                                new Toast(this).longToast(R.string.directions_trip_details_action_calendar_notfound);
-                            }
-                        });
-                    });
-        }
+//        if (isShareCalendarVisible) {
+//            actionBar.addButton(R.drawable.ic_today_white_24dp, R.string.directions_trip_details_action_calendar_title)
+//                    .setOnClickListener(v -> shareCalendarEntry());
+//        }
         addActionBarButtons();
 
         findViewById(R.id.directions_trip_details_not_feasible).setVisibility(tripRenderer.isFeasible() ? View.GONE : View.VISIBLE);
@@ -519,6 +519,17 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             nextEventBackView.setLongClickable(true);
             nextEventBackView.setOnLongClickListener(lockDeviceNextEventViewLongClicked);
         }
+    }
+
+    private void shareCalendarEntry() {
+        backgroundHandler.post(() -> {
+            try {
+                final Intent intent = scheduleTripIntent(tripRenderer.trip, true);
+                runOnUiThread(() -> startActivity(intent));
+            } catch (final ActivityNotFoundException x) {
+                new Toast(this).longToast(R.string.directions_trip_details_action_calendar_notfound);
+            }
+        });
     }
 
     protected boolean allowScreenLock() {
