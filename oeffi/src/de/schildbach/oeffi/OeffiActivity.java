@@ -150,8 +150,6 @@ public abstract class OeffiActivity extends ComponentActivity {
 
         EdgeToEdge.enable(this, Constants.STATUS_BAR_STYLE);
         super.onCreate(savedInstanceState);
-
-        ErrorReporter.getInstance().check(application, applicationVersionCode(), application.okHttpClient());
     }
 
     @Override
@@ -194,6 +192,8 @@ public abstract class OeffiActivity extends ComponentActivity {
         super.onResume();
         if (mapView != null)
             mapView.onResume();
+
+        ErrorReporter.getInstance().check(this, applicationVersionCode(), application.okHttpClient());
     }
 
     @Override

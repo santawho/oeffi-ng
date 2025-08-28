@@ -17,6 +17,7 @@
 
 package de.schildbach.oeffi.util;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
@@ -73,6 +74,7 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
     private final StringBuilder report = new StringBuilder();
     private File filesDir, cacheDir;
     private NetworkId networkId;
+    private boolean alreadyChecked;
 
     private static final Logger log = LoggerFactory.getLogger(ErrorReporter.class);
 
@@ -319,19 +321,23 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
 
     private final static Pattern PATTERN_VERSION = Pattern.compile("<dt id=\"(\\d+)\">([^<]*)</dt>");
 
-    public void check(final Application application, final int applicationVersionCode, final OkHttpClient okHttpClient) {
+    public void check(final Activity activity, final int applicationVersionCode, final OkHttpClient okHttpClient) {
+        if (alreadyChecked)
+            return;
         if (Debug.isDebuggerConnected())
             return;
         if (!stackTraceFile.exists())
             return;
 
-        String changeLogUrl = application.getString(R.string.about_changelog_url);
+        alreadyChecked = true;
+
+        String changeLogUrl = activity.getString(R.string.about_changelog_url);
         if (!changeLogUrl.isEmpty()) {
-            dialog(application, null);
+            dialog(activity, null);
             return;
         }
 
-        final HttpUrl.Builder url = HttpUrl.parse(application.getString(R.string.about_changelog_summary)).newBuilder();
+        final HttpUrl.Builder url = HttpUrl.parse(activity.getString(R.string.about_changelog_summary)).newBuilder();
         url.addQueryParameter("version", Integer.toString(applicationVersionCode));
         url.addQueryParameter("sdk", Integer.toString(Build.VERSION.SDK_INT));
         url.addQueryParameter("check", null);
@@ -360,32 +366,32 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
             }
 
             private void callback(final String newVersion) {
-                callbackHandler.post(() -> dialog(application, newVersion));
+                callbackHandler.post(() -> dialog(activity, newVersion));
             }
         });
     }
 
-    private void dialog(final Application application, final String newVersion) {
-        final DialogBuilder builder = DialogBuilder.warn(application, R.string.alert_crash_report_title);
-        builder.setMessage(newVersion != null ? application.getString(R.string.alert_crash_report_new_version, newVersion)
-                : application.getString(R.string.alert_crash_report_message));
+    private void dialog(final Activity activity, final String newVersion) {
+        final DialogBuilder builder = DialogBuilder.warn(activity, R.string.alert_crash_report_title);
+        builder.setMessage(newVersion != null ? activity.getString(R.string.alert_crash_report_new_version, newVersion)
+                : activity.getString(R.string.alert_crash_report_message));
         builder.setNegativeButton(R.string.alert_crash_report_negative, (dialog, which) -> stackTraceFile.delete());
         if (newVersion != null) {
-            final Installer installer = Installer.from(application);
+            final Installer installer = Installer.from(activity);
             if (installer != null) {
                 builder.setNeutralButton(installer.displayName, (dialog, which) -> {
                     stackTraceFile.delete();
-                    application.startActivity(new Intent(Intent.ACTION_VIEW, installer.appMarketUriFor(application)));
+                    activity.startActivity(new Intent(Intent.ACTION_VIEW, installer.appMarketUriFor(activity)));
                 });
             }
             builder.setPositiveButton(R.string.alert_crash_report_download, (dialog, which) -> {
                 stackTraceFile.delete();
-                application.startActivity(
+                activity.startActivity(
                         new Intent(Intent.ACTION_VIEW, Uri.parse(URLs.getOeffiBaseUrl() + "download.html")));
             });
         } else {
             builder.setPositiveButton(R.string.alert_crash_report_positive, (dialog, which) -> {
-                sendError(application);
+                sendError(Application.getInstance());
                 stackTraceFile.delete();
             });
         }
