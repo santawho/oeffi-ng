@@ -357,6 +357,11 @@
                 android:textSize="@dimen/navigation_next_event_clock_fontsize"
                 android:textColor="@color/fg_less_significant">
             </TextView>
+
+            <Space
+                android:id="@+id/navigation_next_event_bottom_offset"
+                android:layout_width="match_parent"
+                android:layout_height="0dp" />
         </LinearLayout>
     </ScrollView>
 

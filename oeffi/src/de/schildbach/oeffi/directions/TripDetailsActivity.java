@@ -303,6 +303,15 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             return windowInsets;
         });
 
+        final View bottomOffset = findViewById(R.id.navigation_next_event_bottom_offset);
+        ViewCompat.setOnApplyWindowInsetsListener(bottomOffset, (view, windowInsets) -> {
+            final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            final ViewGroup.LayoutParams layoutParams = bottomOffset.getLayoutParams();
+            layoutParams.height = insets.bottom;
+            bottomOffset.setLayoutParams(layoutParams);
+            return windowInsets;
+        });
+
         actionBar = getMyActionBar();
         actionBar.setBack(isTaskRoot() ? null : v -> goBack());
 
