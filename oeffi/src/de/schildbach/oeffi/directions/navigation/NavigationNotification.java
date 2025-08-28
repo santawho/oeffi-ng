@@ -882,7 +882,8 @@ public class NavigationNotification {
         remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_next_action, colorNormal);
         remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_time, colorHighlight);
         remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_target, colorHighlight);
-        remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_positions, colorHighIfChangeover);
+        remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_positions_big, colorHighIfChangeover);
+        remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_positions_small, colorHighIfChangeover);
         remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_departure, colorNormal);
         remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_connection, colorHighIfChangeover);
         remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_changeover, colorHighIfChangeover);
@@ -947,33 +948,69 @@ public class NavigationNotification {
             remoteViews.setViewVisibility(R.id.navigation_notification_next_event_target, View.GONE);
         }
 
-        remoteViews.setViewVisibility(R.id.navigation_notification_next_event_positions,
-                tripRenderer.nextEventPositionsAvailable ? View.VISIBLE : View.GONE);
+        remoteViews.setViewVisibility(R.id.navigation_notification_next_event_positions_big, View.GONE);
+        remoteViews.setViewVisibility(R.id.navigation_notification_next_event_positions_small, View.GONE);
+        if (tripRenderer.nextEventPositionsAvailable) {
+            final boolean isBigPositions = 7 <
+                      (tripRenderer.nextEventArrivalPosName != null ? tripRenderer.nextEventArrivalPosName.length() : 0)
+                    + (tripRenderer.nextEventDeparturePosName != null ? tripRenderer.nextEventDeparturePosName.length() : 0);
 
-        if (tripRenderer.nextEventArrivalPosName != null) {
-            remoteViews.setViewVisibility(R.id.navigation_notification_next_event_position_from, View.VISIBLE);
-            remoteViews.setTextViewText(R.id.navigation_notification_next_event_position_from, tripRenderer.nextEventArrivalPosName);
-            remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_position_from,
-                    context.getColor(tripRenderer.nextEventArrivalPosChanged ? R.color.bg_position_changed : R.color.bg_position));
-        } else {
-            remoteViews.setViewVisibility(R.id.navigation_notification_next_event_position_from, View.GONE);
-        }
+            remoteViews.setViewVisibility(isBigPositions
+                    ? R.id.navigation_notification_next_event_positions_big
+                    : R.id.navigation_notification_next_event_positions_small,
+                    View.VISIBLE);
 
-        if (tripRenderer.nextEventDeparturePosName != null) {
-            remoteViews.setViewVisibility(R.id.navigation_notification_next_event_position_to, View.VISIBLE);
-            remoteViews.setTextViewText(R.id.navigation_notification_next_event_position_to, tripRenderer.nextEventDeparturePosName);
-            remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_position_to,
-                    context.getColor(tripRenderer.nextEventDeparturePosChanged ? R.color.bg_position_changed : R.color.bg_position));
-        } else {
-            remoteViews.setViewVisibility(R.id.navigation_notification_next_event_position_to, View.GONE);
-        }
+            final int id_navigation_notification_next_event_position_from = isBigPositions
+                    ? R.id.navigation_notification_next_event_position_from_big
+                    : R.id.navigation_notification_next_event_position_from_small;
+            if (tripRenderer.nextEventArrivalPosName != null) {
+                remoteViews.setViewVisibility(id_navigation_notification_next_event_position_from, View.VISIBLE);
+                remoteViews.setTextViewText(id_navigation_notification_next_event_position_from, tripRenderer.nextEventArrivalPosName);
+                remoteViewsSetBackgroundColor(remoteViews, id_navigation_notification_next_event_position_from,
+                        context.getColor(tripRenderer.nextEventArrivalPosChanged ? R.color.bg_position_changed : R.color.bg_position));
+            } else {
+                remoteViews.setViewVisibility(id_navigation_notification_next_event_position_from, View.GONE);
+            }
 
-        if (tripRenderer.nextEventStopChange) {
-            final int iconId = tripRenderer.nextEventTransferIconId;
-            remoteViews.setImageViewResource(R.id.navigation_notification_next_event_positions_walk_icon,
-                    iconId != 0 ? iconId : R.drawable.ic_directions_walk_grey600_24dp);
-            remoteViews.setViewVisibility(R.id.navigation_notification_next_event_positions_walk_icon, View.VISIBLE);
-            remoteViews.setViewVisibility(R.id.navigation_notification_next_event_positions_walk_arrow, View.VISIBLE);
+            final int id_navigation_notification_next_event_position_to = isBigPositions
+                    ? R.id.navigation_notification_next_event_position_to_big
+                    : R.id.navigation_notification_next_event_position_to_small;
+            if (tripRenderer.nextEventDeparturePosName != null) {
+                remoteViews.setViewVisibility(id_navigation_notification_next_event_position_to, View.VISIBLE);
+                remoteViews.setTextViewText(id_navigation_notification_next_event_position_to, tripRenderer.nextEventDeparturePosName);
+                remoteViewsSetBackgroundColor(remoteViews, id_navigation_notification_next_event_position_to,
+                        context.getColor(tripRenderer.nextEventDeparturePosChanged ? R.color.bg_position_changed : R.color.bg_position));
+            } else {
+                remoteViews.setViewVisibility(id_navigation_notification_next_event_position_to, View.GONE);
+            }
+
+            final int id_navigation_notification_next_event_positions_walk_icon = isBigPositions
+                    ? R.id.navigation_notification_next_event_positions_walk_icon_big
+                    : R.id.navigation_notification_next_event_positions_walk_icon_small;
+            final int id_navigation_notification_next_event_positions_from_walk_arrow = isBigPositions
+                    ? R.id.navigation_notification_next_event_positions_from_walk_arrow_big
+                    : R.id.navigation_notification_next_event_positions_from_walk_arrow_small;
+            final int id_navigation_notification_next_event_positions_to_walk_arrow = isBigPositions
+                    ? R.id.navigation_notification_next_event_positions_to_walk_arrow_big
+                    : R.id.navigation_notification_next_event_positions_to_walk_arrow_small;
+            if (tripRenderer.nextEventStopChange) {
+                final int iconId = tripRenderer.nextEventTransferIconId;
+                remoteViews.setImageViewResource(id_navigation_notification_next_event_positions_walk_icon,
+                        iconId != 0 ? iconId : R.drawable.ic_directions_walk_grey600_24dp);
+                remoteViews.setViewVisibility(id_navigation_notification_next_event_positions_walk_icon, View.VISIBLE);
+                remoteViews.setViewVisibility(id_navigation_notification_next_event_positions_from_walk_arrow, View.VISIBLE);
+                remoteViews.setViewVisibility(id_navigation_notification_next_event_positions_to_walk_arrow, View.VISIBLE);
+            } else {
+                remoteViews.setViewVisibility(id_navigation_notification_next_event_positions_walk_icon, View.GONE);
+                if (tripRenderer.nextEventDeparturePosName != null) {
+                    remoteViews.setViewVisibility(id_navigation_notification_next_event_positions_to_walk_arrow, View.VISIBLE);
+                    remoteViews.setViewVisibility(id_navigation_notification_next_event_positions_from_walk_arrow, View.GONE);
+                } else {
+                    remoteViews.setViewVisibility(id_navigation_notification_next_event_positions_to_walk_arrow, View.GONE);
+                    remoteViews.setViewVisibility(id_navigation_notification_next_event_positions_from_walk_arrow,
+                            tripRenderer.nextEventArrivalPosName != null ? View.VISIBLE : View.GONE);
+                }
+            }
         }
 
         if (tripRenderer.nextEventTransportLine == null) {

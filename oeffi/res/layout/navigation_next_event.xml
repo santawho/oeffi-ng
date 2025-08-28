@@ -94,54 +94,73 @@
                 android:id="@+id/navigation_next_event_positions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 android:gravity="center">
-                <TextView
-                    android:id="@+id/navigation_next_event_position_from"
+                <LinearLayout
+                    android:id="@+id/navigation_next_event_positions_from_layout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingVertical="0dp"
-                    android:paddingHorizontal="8dp"
-                    android:textStyle="bold"
-                    android:textSize="@dimen/navigation_next_event_position_from_fontsize"
-                    android:background="@color/bg_position"
-                    android:textColor="@color/fg_position"/>
-                <TextView
-                    android:id="@+id/navigation_next_event_positions_walk_arrow"
-                    android:visibility="gone"
+                    android:orientation="horizontal"
+                    android:gravity="center">
+                    <TextView
+                        android:id="@+id/navigation_next_event_position_from"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingVertical="0dp"
+                        android:paddingHorizontal="8dp"
+                        android:textStyle="bold"
+                        android:textSize="@dimen/navigation_next_event_position_from_fontsize"
+                        android:background="@color/bg_position"
+                        android:textColor="@color/fg_position"/>
+                    <TextView
+                        android:id="@+id/navigation_next_event_positions_from_walk_arrow"
+                        android:visibility="gone"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/fg_trip_next_event_normal"
+                        android:paddingBottom="10dp"
+                        android:paddingHorizontal="8dp"
+                        android:textSize="@dimen/navigation_next_event_position_to_fontsize"
+                        android:text="➜"
+                        tools:ignore="HardcodedText" />
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/navigation_next_event_positions_to_layout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/fg_trip_next_event_normal"
-                    android:paddingBottom="10dp"
-                    android:paddingHorizontal="8dp"
-                    android:textSize="@dimen/navigation_next_event_position_to_fontsize"
-                    android:text="➜"
-                    tools:ignore="HardcodedText" />
-                <ImageView
-                    android:id="@+id/navigation_next_event_positions_walk_icon"
-                    android:visibility="gone"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:tint="@color/fg_trip_next_event_normal" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/fg_trip_next_event_normal"
-                    android:paddingBottom="10dp"
-                    android:paddingHorizontal="8dp"
-                    android:textSize="@dimen/navigation_next_event_position_to_fontsize"
-                    android:text="➜"
-                    tools:ignore="HardcodedText" />
-                <TextView
-                    android:id="@+id/navigation_next_event_position_to"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingVertical="0dp"
-                    android:paddingHorizontal="8dp"
-                    android:textStyle="bold"
-                    android:textSize="@dimen/navigation_next_event_position_to_fontsize"
-                    android:background="@color/bg_position"
-                    android:textColor="@color/fg_position"/>
+                    android:orientation="horizontal"
+                    android:gravity="center">
+                    <ImageView
+                        android:id="@+id/navigation_next_event_positions_walk_icon"
+                        android:visibility="gone"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:scaleType="center"
+                        android:scaleX="1.5"
+                        android:scaleY="1.5"
+                        android:tint="@color/fg_trip_next_event_normal" />
+                    <TextView
+                        android:id="@+id/navigation_next_event_positions_to_walk_arrow"
+                        android:visibility="gone"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/fg_trip_next_event_normal"
+                        android:paddingBottom="10dp"
+                        android:paddingHorizontal="8dp"
+                        android:textSize="@dimen/navigation_next_event_position_to_fontsize"
+                        android:text="➜"
+                        tools:ignore="HardcodedText" />
+                    <TextView
+                        android:id="@+id/navigation_next_event_position_to"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingVertical="0dp"
+                        android:paddingHorizontal="8dp"
+                        android:textStyle="bold"
+                        android:textSize="@dimen/navigation_next_event_position_to_fontsize"
+                        android:background="@color/bg_position"
+                        android:textColor="@color/fg_position"/>
+                </LinearLayout>
             </LinearLayout>
             <TextView
                 android:id="@+id/navigation_next_event_departure"

@@ -1267,6 +1267,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         findViewById(viewId).setBackgroundColor(color);
     }
 
+    private boolean globalLayoutListenerAdded;
+
     protected void updateNavigationInstructions() {
         final int colorHighlight = getColor(R.color.bg_trip_details_public_now);
         final int colorNormal = getColor(R.color.bg_level0);
@@ -1348,38 +1350,72 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             targetView.setVisibility(View.GONE);
         }
 
-        findViewById(R.id.navigation_next_event_positions)
-            .setVisibility(tripRenderer.nextEventPositionsAvailable ? View.VISIBLE : View.GONE);
+        final LinearLayout nextEventPositionsLayout = findViewById(R.id.navigation_next_event_positions);
+        if (tripRenderer.nextEventPositionsAvailable) {
+            nextEventPositionsLayout.setVisibility(View.VISIBLE);
 
-        final TextView from = findViewById(R.id.navigation_next_event_position_from);
-        final TextView to = findViewById(R.id.navigation_next_event_position_to);
+            final TextView from = findViewById(R.id.navigation_next_event_position_from);
+            final TextView to = findViewById(R.id.navigation_next_event_position_to);
 
-        if (tripRenderer.nextEventArrivalPosName != null) {
-            from.setVisibility(View.VISIBLE);
-            from.setText(tripRenderer.nextEventArrivalPosName);
-            from.setBackgroundColor(tripRenderer.nextEventArrivalPosChanged ? colorPositionBackgroundChanged : colorPositionBackground);
+            if (tripRenderer.nextEventArrivalPosName != null) {
+                from.setVisibility(View.VISIBLE);
+                from.setText(tripRenderer.nextEventArrivalPosName);
+                from.setBackgroundColor(tripRenderer.nextEventArrivalPosChanged ? colorPositionBackgroundChanged : colorPositionBackground);
+            } else {
+                from.setVisibility(View.GONE);
+            }
+
+            if (tripRenderer.nextEventDeparturePosName != null) {
+                to.setVisibility(View.VISIBLE);
+                to.setText(tripRenderer.nextEventDeparturePosName);
+                to.setBackgroundColor(tripRenderer.nextEventDeparturePosChanged ? colorPositionBackgroundChanged : colorPositionBackground);
+            } else {
+                to.setVisibility(View.GONE);
+            }
+
+            final ImageView positionsWalkIcon = findViewById(R.id.navigation_next_event_positions_walk_icon);
+            final View positionsFromWalkArrow = findViewById(R.id.navigation_next_event_positions_from_walk_arrow);
+            final View positionsToWalkArrow = findViewById(R.id.navigation_next_event_positions_to_walk_arrow);
+            if (tripRenderer.nextEventStopChange) {
+                final int iconId = tripRenderer.nextEventTransferIconId;
+                positionsWalkIcon.setImageDrawable(res.getDrawable(iconId != 0 ? iconId : R.drawable.ic_directions_walk_grey600_24dp));
+                positionsWalkIcon.setVisibility(View.VISIBLE);
+                positionsFromWalkArrow.setVisibility(View.VISIBLE);
+                positionsToWalkArrow.setVisibility(View.VISIBLE);
+            } else {
+                positionsWalkIcon.setVisibility(View.GONE);
+                if (tripRenderer.nextEventDeparturePosName != null) {
+                    positionsToWalkArrow.setVisibility(View.VISIBLE);
+                    positionsFromWalkArrow.setVisibility(View.GONE);
+                } else {
+                    positionsToWalkArrow.setVisibility(View.GONE);
+                    positionsFromWalkArrow.setVisibility(tripRenderer.nextEventArrivalPosName != null ? View.VISIBLE : View.GONE);
+                }
+            }
+
+            final LinearLayout fromLayout = findViewById(R.id.navigation_next_event_positions_from_layout);
+            final LinearLayout toLayout = findViewById(R.id.navigation_next_event_positions_to_layout);
+
+            nextEventPositionsLayout.setOrientation(LinearLayout.VERTICAL); // try vertical first to measure both sub-layouts
+            if (!globalLayoutListenerAdded) {
+                globalLayoutListenerAdded = true;
+                nextEventPositionsLayout.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
+                    final int fromWidth = fromLayout.getWidth();
+                    final int toWidth = toLayout.getWidth();
+                    final int parentWidth = nextEventPositionsLayout.getWidth();
+
+                    if (parentWidth == 0)
+                        return;
+
+                    if (nextEventPositionsLayout.getOrientation() == LinearLayout.HORIZONTAL)
+                        return; // already horizontal
+
+                    if (fromWidth + toWidth < parentWidth)
+                        nextEventPositionsLayout.setOrientation(LinearLayout.HORIZONTAL);
+                });
+            }
         } else {
-            from.setVisibility(View.GONE);
-        }
-
-        if (tripRenderer.nextEventDeparturePosName != null) {
-            to.setVisibility(View.VISIBLE);
-            to.setText(tripRenderer.nextEventDeparturePosName);
-            to.setBackgroundColor(tripRenderer.nextEventDeparturePosChanged ? colorPositionBackgroundChanged : colorPositionBackground);
-        } else {
-            to.setVisibility(View.GONE);
-        }
-
-        final ImageView positionsWalkIcon = findViewById(R.id.navigation_next_event_positions_walk_icon);
-        final View positionsWalkArrow = findViewById(R.id.navigation_next_event_positions_walk_arrow);
-        if (tripRenderer.nextEventStopChange) {
-            final int iconId = tripRenderer.nextEventTransferIconId;
-            positionsWalkIcon.setImageDrawable(res.getDrawable(iconId != 0 ? iconId : R.drawable.ic_directions_walk_grey600_24dp));
-            positionsWalkIcon.setVisibility(View.VISIBLE);
-            positionsWalkArrow.setVisibility(View.VISIBLE);
-        } else {
-            positionsWalkIcon.setVisibility(View.GONE);
-            positionsWalkArrow.setVisibility(View.GONE);
+            nextEventPositionsLayout.setVisibility(View.GONE);
         }
 
         if (tripRenderer.nextEventTransportLine == null) {
