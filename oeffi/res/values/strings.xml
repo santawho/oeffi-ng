@@ -335,15 +335,15 @@
 
     <!-- directions trip connection evaluation -->
     <string name="directions_trip_conneval_with_transfer">%1$s with %2$s</string>
-    <string name="directions_trip_conneval_missed">&lt;b>Connection &lt;u>missed&lt;/u> by %1$d minutes&lt;/b></string>
-    <string name="directions_trip_conneval_difficult_possibly_missed">&lt;b>Connection difficult despite delayed departure, only %1$d minutes&lt;/b></string>
-    <string name="directions_trip_conneval_difficult">&lt;b>Connection difficult, only %1$d minutes&lt;/b></string>
-    <string name="directions_trip_conneval_endangered_possibly_difficult">&lt;b>Connection endangered despite delayed departure, only %1$d minutes&lt;/b></string>
-    <string name="directions_trip_conneval_endangered">&lt;b>Connection endangered, only %1$d minutes&lt;/b></string>
-    <string name="directions_trip_conneval_possibly_difficult">&lt;b>Connection only possible due to delayed departure, currently in %1$d minutes&lt;/b></string>
-    <string name="directions_trip_conneval_possibly_endangered">&lt;b>Connection not endangered only due to delayed departure, currently in %1$d minutes&lt;/b></string>
-    <string name="directions_trip_conneval_possibly_good">Connection currently in &lt;b>%1$d minutes&lt;/b> due to delayed departure</string>
-    <string name="directions_trip_conneval_good">Connection in &lt;b>%1$d minutes&lt;/b></string>
+    <string name="directions_trip_conneval_missed">&lt;b>Connection &lt;u>missed&lt;/u> by %1$d minutes&lt;/b>%2$s</string>
+    <string name="directions_trip_conneval_difficult_possibly_missed">&lt;b>Connection difficult despite delayed departure, only %1$d minutes&lt;/b>%2$s</string>
+    <string name="directions_trip_conneval_difficult">&lt;b>Connection difficult, only %1$d minutes&lt;/b>%2$s</string>
+    <string name="directions_trip_conneval_endangered_possibly_difficult">&lt;b>Connection endangered despite delayed departure, only %1$d minutes&lt;/b>%2$s</string>
+    <string name="directions_trip_conneval_endangered">&lt;b>Connection endangered, only %1$d minutes&lt;/b>%2$s</string>
+    <string name="directions_trip_conneval_possibly_difficult">&lt;b>Connection only possible due to delayed departure, currently in %1$d minutes&lt;/b>%2$s</string>
+    <string name="directions_trip_conneval_possibly_endangered">&lt;b>Connection not endangered only due to delayed departure, currently in %1$d minutes&lt;/b>%2$s</string>
+    <string name="directions_trip_conneval_possibly_good">Connection currently in &lt;b>%1$d minutes&lt;/b> due to delayed departure%2$s</string>
+    <string name="directions_trip_conneval_good">Connection (currently) in &lt;b>%1$d minutes&lt;/b>%2$s</string>
 
     <plurals name="directions_trip_details_public_entry_collapsed_intermediate_stops">
         <item quantity="one">…%d intermediate stop…</item>

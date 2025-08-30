@@ -334,15 +334,15 @@
 
     <!-- directions trip connection evaluation -->
     <string name="directions_trip_conneval_with_transfer">%1$s mit %2$s</string>
-    <string name="directions_trip_conneval_missed">&lt;b>Anschluss &lt;u>verpasst&lt;/u> um %1$d Minuten&lt;/b></string>
-    <string name="directions_trip_conneval_difficult_possibly_missed">&lt;b>Anschluss schwierig trotz verspäteter Abfahrt, nur %1$d Minuten&lt;/b></string>
-    <string name="directions_trip_conneval_difficult">&lt;b>Anschluss schwierig, nur %1$d Minuten&lt;/b></string>
-    <string name="directions_trip_conneval_endangered_possibly_difficult">&lt;b>Anschluss gefährdet trotz verspäteter Abfahrt, nur %1$d Minuten&lt;/b></string>
-    <string name="directions_trip_conneval_endangered">&lt;b>Anschluss gefährdet, nur %1$d Minuten&lt;/b></string>
-    <string name="directions_trip_conneval_possibly_difficult">&lt;b>Anschluss nur durch verspätete Abfahrt erreichbar, aktuell in %1$d Minuten&lt;/b></string>
-    <string name="directions_trip_conneval_possibly_endangered">&lt;b>Anschluss nur durch verspätete Abfahrt nicht gefährdet, aktuell in %1$d Minuten&lt;/b></string>
-    <string name="directions_trip_conneval_possibly_good">Anschluss aktuell in &lt;b>%1$d Minuten&lt;/b> durch verspätete Abfahrt</string>
-    <string name="directions_trip_conneval_good">Anschluss in &lt;b>%1$d Minuten&lt;/b></string>
+    <string name="directions_trip_conneval_missed">&lt;b>Anschluss &lt;u>verpasst&lt;/u> um %1$d Minuten&lt;/b>%2$s</string>
+    <string name="directions_trip_conneval_difficult_possibly_missed">&lt;b>Anschluss schwierig trotz verspäteter Abfahrt, nur %1$d Minuten&lt;/b>%2$s</string>
+    <string name="directions_trip_conneval_difficult">&lt;b>Anschluss schwierig, nur %1$d Minuten&lt;/b>%2$s</string>
+    <string name="directions_trip_conneval_endangered_possibly_difficult">&lt;b>Anschluss gefährdet trotz verspäteter Abfahrt, nur %1$d Minuten&lt;/b>%2$s</string>
+    <string name="directions_trip_conneval_endangered">&lt;b>Anschluss gefährdet, nur %1$d Minuten&lt;/b>%2$s</string>
+    <string name="directions_trip_conneval_possibly_difficult">&lt;b>Anschluss nur durch verspätete Abfahrt erreichbar, aktuell in %1$d Minuten&lt;/b>%2$s</string>
+    <string name="directions_trip_conneval_possibly_endangered">&lt;b>Anschluss nur durch verspätete Abfahrt nicht gefährdet, aktuell in %1$d Minuten&lt;/b>%2$s</string>
+    <string name="directions_trip_conneval_possibly_good">Anschluss aktuell in &lt;b>%1$d Minuten&lt;/b>%2$s durch verspätete Abfahrt</string>
+    <string name="directions_trip_conneval_good">Anschluss (aktuell) in &lt;b>%1$d Minuten&lt;/b>%2$s</string>
 
     <plurals name="directions_trip_details_public_entry_collapsed_intermediate_stops">
         <item quantity="one">…%d Zwischenhalt…</item>

@@ -1105,6 +1105,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         return stayMillis >= 300000; // 5 minutes
     }
 
+    @SuppressLint("DefaultLocale")
     protected boolean updateIndividualLeg(final View row, final TripRenderer.LegContainer legC, final Date now) {
         final Trip.Individual leg = legC.individualLeg;
         String legText = null;
@@ -1157,42 +1158,60 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         } else if (transferTo == null) {
             // walk at the end
         } else {
-            final Date arrMinTime = transferFrom.plannedArrivalTime;
-            final Date arrMaxTime = transferFrom.predictedArrivalTime != null ? transferFrom.predictedArrivalTime : arrMinTime;
-            final Date depMinTime = transferTo.plannedDepartureTime;
-            final Date depMaxTime = transferTo.predictedDepartureTime != null ? transferTo.predictedDepartureTime : depMinTime;
-            long diffMinSecs = (depMinTime.getTime() - arrMaxTime.getTime()) / 1000 - 60;
-            long diffMaxSecs = (depMaxTime.getTime() - arrMaxTime.getTime()) / 1000 - 60;
+            final long arrMinTime = transferFrom.plannedArrivalTime.getTime();
+            final long arrMaxTime = transferFrom.predictedArrivalTime != null ? transferFrom.predictedArrivalTime.getTime() : arrMinTime;
+            final long arrDelaySecs = (arrMaxTime - arrMinTime) / 1000;
+            final long depMinTime = transferTo.plannedDepartureTime.getTime();
+            final long depMaxTime = transferTo.predictedDepartureTime != null ? transferTo.predictedDepartureTime.getTime() : depMinTime;
+            final long depDelaySecs = (depMaxTime - depMinTime) / 1000;
+            long diffOrgSecs = (depMinTime - arrMinTime) / 1000 - 60;
+            long diffMinSecs = (depMinTime - arrMaxTime) / 1000 - 60;
+            long diffMaxSecs = (depMaxTime - arrMaxTime) / 1000 - 60;
             long leftMinSecs = diffMinSecs - requiredSecs;
             long leftMaxSecs = diffMaxSecs - requiredSecs;
             timeText = Long.toString((diffMaxSecs + 30) / 60);
+            final String timeExplainText;
+            if (arrDelaySecs != 0) {
+                if (depDelaySecs != 0) {
+                    timeExplainText = String.format(" (%d-%d+%d)", diffOrgSecs / 60, arrDelaySecs / 60, depDelaySecs / 60);
+                } else {
+                    timeExplainText = String.format(" (%d-%d)", diffOrgSecs / 60, arrDelaySecs / 60);
+                }
+            } else if (depDelaySecs != 0) {
+                timeExplainText = String.format(" (%d+%d)", diffOrgSecs / 60, depDelaySecs / 60);
+            } else {
+                timeExplainText = "";
+            }
             if (diffMaxSecs < 0) {
                 timeIsCritical = true;
-                transferText = getString(R.string.directions_trip_conneval_missed, (-diffMaxSecs - 60) / 60);
-                timeText = Long.toString(-((-diffMaxSecs - 30) / 60));
-            } else if (leftMaxSecs < 0) {
-                timeIsCritical = true;
-                if (diffMinSecs < 0) {
-                    transferText = getString(R.string.directions_trip_conneval_difficult_possibly_missed, diffMaxSecs / 60);
-                } else {
-                    transferText = getString(R.string.directions_trip_conneval_difficult, diffMaxSecs / 60);
-                }
-            } else if (leftMaxSecs < 180) {
-                timeIsCritical = true;
-                if (leftMinSecs < 0) {
-                    transferText = getString(R.string.directions_trip_conneval_endangered_possibly_difficult, diffMaxSecs / 60);
-                } else {
-                    transferText = getString(R.string.directions_trip_conneval_endangered, diffMaxSecs / 60);
-                }
-            } else if (leftMinSecs < 0) {
-                timeIsCritical = true;
-                transferText = getString(R.string.directions_trip_conneval_possibly_difficult, diffMaxSecs / 60);
-            } else if (leftMinSecs < 180) {
-                transferText = getString(R.string.directions_trip_conneval_possibly_endangered, diffMaxSecs / 60);
-            } else if (leftMinSecs != leftMaxSecs) {
-                transferText = getString(R.string.directions_trip_conneval_possibly_good, diffMaxSecs / 60);
+                transferText = getString(R.string.directions_trip_conneval_missed, (-diffMaxSecs) / 60, timeExplainText);
+                timeText = Long.toString(-((-diffMaxSecs + 30) / 60));
             } else {
-                transferText = getString(R.string.directions_trip_conneval_good, diffMaxSecs / 60);
+                final long diffMaxMins = diffMaxSecs / 60;
+                if (leftMaxSecs < 0) {
+                    timeIsCritical = true;
+                    if (diffMinSecs < 0) {
+                        transferText = getString(R.string.directions_trip_conneval_difficult_possibly_missed, diffMaxMins, timeExplainText);
+                    } else {
+                        transferText = getString(R.string.directions_trip_conneval_difficult, diffMaxMins, timeExplainText);
+                    }
+                } else if (leftMaxSecs < 180) {
+                    timeIsCritical = true;
+                    if (leftMinSecs < 0) {
+                        transferText = getString(R.string.directions_trip_conneval_endangered_possibly_difficult, diffMaxMins, timeExplainText);
+                    } else {
+                        transferText = getString(R.string.directions_trip_conneval_endangered, diffMaxMins, timeExplainText);
+                    }
+                } else if (leftMinSecs < 0) {
+                    timeIsCritical = true;
+                    transferText = getString(R.string.directions_trip_conneval_possibly_difficult, diffMaxMins, timeExplainText);
+                } else if (leftMinSecs < 180) {
+                    transferText = getString(R.string.directions_trip_conneval_possibly_endangered, diffMaxMins, timeExplainText);
+                } else if (leftMinSecs != leftMaxSecs) {
+                    transferText = getString(R.string.directions_trip_conneval_possibly_good, diffMaxMins, timeExplainText);
+                } else {
+                    transferText = getString(R.string.directions_trip_conneval_good, diffMaxMins, timeExplainText);
+                }
             }
         }
 
