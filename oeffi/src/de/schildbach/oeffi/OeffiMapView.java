@@ -331,29 +331,33 @@ public class OeffiMapView extends MapView {
                                     if (stationsAware.isSelectedStation(station.location.id))
                                         selectedStation = station;
 
+                                    final Drawable iconDrawable;
                                     final Product product = station.getRelevantProduct();
                                     if (product == null)
-                                        drawAt(canvas, stationDefaultIcon, point.x, point.y, false, 0);
+                                        iconDrawable = stationDefaultIcon;
                                     else if (product == Product.HIGH_SPEED_TRAIN)
-                                        drawAt(canvas, stationHighspeedIcon, point.x, point.y, false, 0);
+                                        iconDrawable = stationHighspeedIcon;
                                     else if (product == Product.REGIONAL_TRAIN)
-                                        drawAt(canvas, stationTrainIcon, point.x, point.y, false, 0);
+                                        iconDrawable = stationTrainIcon;
                                     else if (product == Product.SUBURBAN_TRAIN)
-                                        drawAt(canvas, stationSuburbanIcon, point.x, point.y, false, 0);
+                                        iconDrawable = stationSuburbanIcon;
                                     else if (product == Product.SUBWAY)
-                                        drawAt(canvas, stationSubwayIcon, point.x, point.y, false, 0);
+                                        iconDrawable = stationSubwayIcon;
                                     else if (product == Product.TRAM)
-                                        drawAt(canvas, stationTramIcon, point.x, point.y, false, 0);
+                                        iconDrawable = stationTramIcon;
                                     else if (product == Product.BUS)
-                                        drawAt(canvas, stationBusIcon, point.x, point.y, false, 0);
+                                        iconDrawable = stationBusIcon;
                                     else if (product == Product.FERRY)
-                                        drawAt(canvas, stationFerryIcon, point.x, point.y, false, 0);
+                                        iconDrawable = stationFerryIcon;
                                     else if (product == Product.CABLECAR)
-                                        drawAt(canvas, stationCablecarIcon, point.x, point.y, false, 0);
+                                        iconDrawable = stationCablecarIcon;
                                     else if (product == Product.ON_DEMAND)
-                                        drawAt(canvas, stationCallIcon, point.x, point.y, false, 0);
+                                        iconDrawable = stationCallIcon;
+                                    else if (product == Product.REPLACEMENT_SERVICE)
+                                        iconDrawable = stationBusIcon;
                                     else
-                                        drawAt(canvas, stationDefaultIcon, point.x, point.y, false, 0);
+                                        iconDrawable = stationDefaultIcon;
+                                    drawAt(canvas, iconDrawable, point.x, point.y, false, 0);
                                 }
                             }
 
