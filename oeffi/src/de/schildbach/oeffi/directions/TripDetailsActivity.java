@@ -936,14 +936,18 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         final ToggleImageButton expandButton = row
                 .findViewById(R.id.directions_trip_details_public_entry_expand);
-        final Boolean checked = tripRenderer.legExpandStates.get(new TripRenderer.LegKey(leg));
+        final Integer legExpandStates = tripRenderer.legExpandStates.get(new TripRenderer.LegKey(leg));
+        final boolean isStopsExpanded = legExpandStates != null && (legExpandStates & TripRenderer.LEG_EXPAND_STATE_STOPS) != 0;
+        final boolean isMessagesExpanded = legExpandStates != null && (legExpandStates & TripRenderer.LEG_EXPAND_STATE_MESSAGES) != 0;
         expandButton.setVisibility(
                 !renderConfig.isJourney && intermediateStops != null && !intermediateStops.isEmpty()
                         ? View.VISIBLE
                         : View.GONE);
-        expandButton.setChecked(checked != null ? checked : false);
-        expandButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            tripRenderer.legExpandStates.put(new TripRenderer.LegKey(leg), isChecked);
+        expandButton.setChecked(isStopsExpanded || isMessagesExpanded);
+        expandButton.setOnClickListener(v -> {
+            tripRenderer.legExpandStates.put(new TripRenderer.LegKey(leg),
+                    isStopsExpanded || isMessagesExpanded ? 0 :
+                        TripRenderer.LEG_EXPAND_STATE_STOPS | TripRenderer.LEG_EXPAND_STATE_MESSAGES);
             updateGUI();
         });
 
@@ -970,7 +974,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         String previousPlace = departureLocation.place;
 
         if (intermediateStops != null) {
-            if (expandButton.isChecked()) {
+            if (isStopsExpanded) {
                 for (final Stop stop : intermediateStops) {
                     final Location stopLocation = stop.location;
                     final Date arrivalTime = stop.getArrivalTime();
@@ -1030,7 +1034,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     final View collapsedIntermediateStopsRow = collapsedIntermediateStopsRow(numIntermediateStops,
                             leg.line.style);
                     stopsView.addView(collapsedIntermediateStopsRow);
-                    collapsedIntermediateStopsRow.setOnClickListener(v -> expandButton.setChecked(true));
+                    collapsedIntermediateStopsRow.setOnClickListener(v -> {
+                        tripRenderer.legExpandStates.put(new TripRenderer.LegKey(leg),
+                                TripRenderer.LEG_EXPAND_STATE_STOPS |
+                                    (isMessagesExpanded ? TripRenderer.LEG_EXPAND_STATE_MESSAGES : 0));
+                        updateGUI();
+                    });
                 }
             }
         }
@@ -1052,9 +1061,25 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final String message = leg.message != null ? leg.message : leg.line.message;
         if (message != null) {
             messageView.setVisibility(View.VISIBLE);
-            Spanned html = Html.fromHtml(HtmlUtils.makeLinksClickableInHtml(message), Html.FROM_HTML_MODE_COMPACT);
+            final String displayMessage;
+            if (isMessagesExpanded) {
+                displayMessage = message;
+                messageView.setTextColor(colorSignificant);
+            } else {
+                displayMessage = getString(R.string.directions_trip_details_shortened_message,
+                        message.substring(0, Math.min(message.length(), 60)));
+                messageView.setTextColor(colorInsignificant);
+            };
+            Spanned html = Html.fromHtml(HtmlUtils.makeLinksClickableInHtml(displayMessage), Html.FROM_HTML_MODE_COMPACT);
             messageView.setText(html);
             messageView.setMovementMethod(LinkMovementMethod.getInstance());
+            messageView.setOnClickListener(v -> {
+                tripRenderer.legExpandStates.put(new TripRenderer.LegKey(leg),
+                        TripRenderer.LEG_EXPAND_STATE_MESSAGES |
+                                (isStopsExpanded ? TripRenderer.LEG_EXPAND_STATE_STOPS : 0));
+                updateGUI();
+            });
+
         } else {
             messageView.setVisibility(View.GONE);
         }

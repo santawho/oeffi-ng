@@ -301,7 +301,9 @@ public class TripRenderer {
 
     public List<LegContainer> legs = new ArrayList<>();
     public LegContainer currentLeg;
-    public final Map<LegKey, Boolean> legExpandStates;
+    public static final int LEG_EXPAND_STATE_STOPS = 1;
+    public static final int LEG_EXPAND_STATE_MESSAGES = 2;
+    public final Map<LegKey, Integer> legExpandStates;
     public LegContainer nearestPublicLeg;
     public NotificationData notificationData;
     public Point refPoint;
@@ -374,7 +376,7 @@ public class TripRenderer {
                     ++iLeg;
 
                     if (isJourney) {
-                        legExpandStates.put(new LegKey(nextLeg), true);
+                        legExpandStates.put(new LegKey(nextLeg), TripRenderer.LEG_EXPAND_STATE_STOPS | TripRenderer.LEG_EXPAND_STATE_MESSAGES);
                     }
                 }
                 prevC = transferTo;
@@ -389,7 +391,7 @@ public class TripRenderer {
                 prevC = newC;
 
                 if (isJourney) {
-                    legExpandStates.put(new LegKey(leg), true);
+                    legExpandStates.put(new LegKey(leg), TripRenderer.LEG_EXPAND_STATE_STOPS | TripRenderer.LEG_EXPAND_STATE_MESSAGES);
                 }
             }
 
