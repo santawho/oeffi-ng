@@ -153,7 +153,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private boolean anyProviderEnabled = false;
     private boolean loading = true;
 
-    private Set<Product> products = new HashSet<>(Product.ALL);
+    private Set<Product> products = new HashSet<>(Product.ALL_SELECTABLE);
     private String accurateLocationProvider, lowPowerLocationProvider;
 
     private MyActionBar actionBar;

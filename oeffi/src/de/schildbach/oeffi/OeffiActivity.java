@@ -692,7 +692,7 @@ public abstract class OeffiActivity extends ComponentActivity {
 
     protected Set<Product> getNetworkDefaultProducts() {
         final NetworkProvider networkProvider = network != null ? NetworkProviderFactory.provider(network) : null;
-        return networkProvider != null ? networkProvider.defaultProducts() : Product.ALL;
+        return networkProvider != null ? networkProvider.defaultProducts() : Product.ALL_SELECTABLE;
     }
 
     protected Set<Product> loadProductFilter() {
@@ -701,7 +701,7 @@ public abstract class OeffiActivity extends ComponentActivity {
         final String networkSpecificKey = Constants.PREFS_KEY_PRODUCT_FILTER + "_" + network;
         String value = prefs.getString(networkSpecificKey, null);
         if (value != null) {
-            keepProducts = Product.ALL;
+            keepProducts = Product.ALL_SELECTABLE;
         } else {
             // do not load the default preference, instead let value be null to take the network defaults
             // value = prefs.getString(Constants.PREFS_KEY_PRODUCT_FILTER, null);
