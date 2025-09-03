@@ -252,7 +252,7 @@ public abstract class OeffiActivity extends ComponentActivity {
                         FavoriteStationsActivity.start(OeffiActivity.this);
                     } else {
                         StationsActivity.start(OeffiActivity.this, true);
-                        finish();
+                        // finish(); // why?
                         overridePendingTransition(R.anim.enter_from_left, R.anim.exit_to_right);
                     }
                     return true;
@@ -262,7 +262,7 @@ public abstract class OeffiActivity extends ComponentActivity {
                     if (OeffiActivity.this instanceof StationsActivity)
                         return true;
                     StationsActivity.start(OeffiActivity.this, false);
-                    finish();
+                    // finish(); // why?
                     overridePendingTransition(R.anim.enter_from_left, R.anim.exit_to_right);
                     return true;
                 }
@@ -273,7 +273,7 @@ public abstract class OeffiActivity extends ComponentActivity {
                     final Intent intent = new Intent(OeffiActivity.this, DirectionsActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
-                    finish();
+                    // finish(); // why?
                     if (OeffiActivity.this instanceof StationsActivity)
                         overridePendingTransition(R.anim.enter_from_right, R.anim.exit_to_left);
                     else
@@ -287,7 +287,7 @@ public abstract class OeffiActivity extends ComponentActivity {
                     final Intent intent = new Intent(OeffiActivity.this, PlansPickerActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
-                    finish();
+                    // finish(); // why?
                     overridePendingTransition(R.anim.enter_from_right, R.anim.exit_to_left);
                     return true;
                 }
@@ -540,6 +540,17 @@ public abstract class OeffiActivity extends ComponentActivity {
     protected void closeNavigation() {
         if (navigationDrawerLayout != null)
             navigationDrawerLayout.closeDrawer(Gravity.LEFT);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if (!isMainActivity() && isTaskRoot())
+            finishAndRemoveTask();
+    }
+
+    public boolean isMainActivity() {
+        return false;
     }
 
     @Override

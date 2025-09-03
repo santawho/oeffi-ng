@@ -18,6 +18,7 @@
 package de.schildbach.oeffi.stations;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
@@ -188,7 +189,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         return "stations";
     }
 
-    public static void start(final Context context, final boolean openFavorites) {
+    public static void start(final Activity context, final boolean openFavorites) {
         final Intent intent = new Intent(context, StationsActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(StationsActivity.INTENT_EXTRA_OPEN_FAVORITES, openFavorites);
@@ -197,7 +198,6 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
     public static void start(final Context context, final NetworkId networkId, final Location location, final Date time) {
         final Intent intent = new Intent(context, StationsActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         if (networkId != null)
             intent.putExtra(StationsActivity.INTENT_EXTRA_NETWORK, networkId.name());
         if (location != null)

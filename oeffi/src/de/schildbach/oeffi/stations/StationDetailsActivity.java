@@ -107,13 +107,23 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
     public static void start(
             final Context context, final NetworkId networkId,
             final Location station, final Date presetTime,
-            final List<Departure> departures) {
+            final List<Departure> departures,
+            final boolean newTask) {
         final Intent intent = StationDetailsActivity.fillIntent(
                 new Intent(context, StationDetailsActivity.class),
                 networkId, station, presetTime);
         if (departures != null)
             intent.putExtra(StationDetailsActivity.INTENT_EXTRA_DEPARTURES, (Serializable) departures);
+        if (newTask)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
+    }
+
+    public static void start(
+            final Context context, final NetworkId networkId,
+            final Location station, final Date presetTime,
+            final List<Departure> departures) {
+        start(context, networkId, station, presetTime, departures, false);
     }
 
     public static Intent fillIntent(

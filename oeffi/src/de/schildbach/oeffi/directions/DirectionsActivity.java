@@ -384,268 +384,273 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
         if (intent.hasExtra(INTENT_EXTRA_RENDERCONFIG))
             renderConfig = (TripsOverviewActivity.RenderConfig) intent.getSerializableExtra(INTENT_EXTRA_RENDERCONFIG);
-        else
+        else if (!isNewIntent)
             renderConfig = new TripsOverviewActivity.RenderConfig();
 
-        setContentView(R.layout.directions_content);
-        final View contentView = findViewById(android.R.id.content);
-        ViewCompat.setOnApplyWindowInsetsListener(contentView, (v, windowInsets) -> {
-            final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(insets.left, 0, insets.right, 0);
-            return windowInsets;
-        });
-
-        final MyActionBar actionBar = getMyActionBar();
-        setPrimaryColor(renderConfig.actionBarColor > 0 ? renderConfig.actionBarColor : R.color.bg_action_bar_directions);
-        actionBar.setPrimaryTitle(R.string.directions_activity_title);
-        addShowMapButtonToActionBar();
-        actionBar.setTitlesOnClickListener(v -> NetworkPickerActivity.start(DirectionsActivity.this));
-        buttonExpand = actionBar.addToggleButton(R.drawable.ic_expand_white_24dp,
-                R.string.directions_action_expand_title);
-        buttonExpand.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            expandForm(isChecked);
-            updateMap();
-        });
-        if (renderConfig.isAlternativeConnectionSearch) {
-            actionBar.addButton(R.drawable.ic_clear_white_24dp, R.string.directions_action_restart_planning_title)
-                    .setOnClickListener(v -> {
-                        finish();
-                        final Intent newIntent = new Intent(this, DirectionsActivity.class);
-                        newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(newIntent);
-                    });
-        } else {
-            actionBar.addButton(R.drawable.ic_shuffle_white_24dp, R.string.directions_action_return_trip_title)
-                    .setOnClickListener(v -> viewToLocation.exchangeWith(viewFromLocation));
-        }
-        actionBar.overflow(R.menu.directions_options, item -> {
-            if (item.getItemId() == R.id.directions_options_clear_history) {
-                if (network != null)
-                    showDialog(DIALOG_CLEAR_HISTORY);
-                return true;
-            } else {
-                return false;
-            }
-        });
-
-        findViewById(R.id.directions_network_missing_capability_button)
-                .setOnClickListener(v -> NetworkPickerActivity.start(DirectionsActivity.this));
-        connectivityWarningView = findViewById(R.id.directions_connectivity_warning_box);
-
-        initLayoutTransitions();
-
-        final LocationView.Listener locationChangeListener = (view) -> {
-            updateMap();
-            queryHistoryListAdapter.clearSelectedEntry();
-            requestFocusFirst();
-        };
-
-        viewFromLocation = findViewById(R.id.directions_from);
-        viewFromLocation.setListener(locationChangeListener);
-        viewFromLocation.setContextMenuItemClickListener(new LocationContextMenuItemClickListener(viewFromLocation,
-                requestLocationPermissionFromLauncher, pickContactFromLauncher, pickStationFromLauncher));
-        viewFromLocation.setEnabled(!renderConfig.isAlternativeConnectionSearch);
-        viewFromLocation.setStationAsAddressEnabled(true);
-
-        viewViaLocation = findViewById(R.id.directions_via);
-        viewViaLocation.setListener(locationChangeListener);
-        viewViaLocation.setContextMenuItemClickListener(new LocationContextMenuItemClickListener(viewViaLocation,
-                requestLocationPermissionViaLauncher, pickContactViaLauncher, pickStationViaLauncher));
-
-        viewToLocation = findViewById(R.id.directions_to);
-        viewToLocation.setListener(locationChangeListener);
-        viewToLocation.setOnEditorActionListener((v, actionId, event) -> {
-            if (event == null || event.getAction() == KeyEvent.ACTION_DOWN) {
-                if (actionId == EditorInfo.IME_ACTION_GO) {
-                    viewGo.performClick();
-                    return true;
-                } else if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    requestFocusFirst();
-                    return true;
-                }
-            }
-            return false;
-        });
-        viewToLocation.setContextMenuItemClickListener(new LocationContextMenuItemClickListener(viewToLocation,
-                requestLocationPermissionToLauncher, pickContactToLauncher, pickStationToLauncher));
-        viewToLocation.setStationAsAddressEnabled(true);
-
-        setupAutoCompleteLocationAdapters();
-
-        viewProducts = findViewById(R.id.directions_products);
-        viewProductToggles.clear();
-        viewProductToggles.add(findViewById(R.id.directions_products_i));
-        viewProductToggles.add(findViewById(R.id.directions_products_r));
-        viewProductToggles.add(findViewById(R.id.directions_products_s));
-        viewProductToggles.add(findViewById(R.id.directions_products_u));
-        viewProductToggles.add(findViewById(R.id.directions_products_t));
-        viewProductToggles.add(findViewById(R.id.directions_products_b));
-        viewProductToggles.add(findViewById(R.id.directions_products_p));
-        viewProductToggles.add(findViewById(R.id.directions_products_f));
-        viewProductToggles.add(findViewById(R.id.directions_products_c));
-
-        final OnLongClickListener productLongClickListener = clickedView -> {
-            final DialogBuilder builder = DialogBuilder.get(DirectionsActivity.this);
-            builder.setTitle(R.string.directions_products_prompt);
-            builder.setItems(R.array.directions_products, (dialog, which) -> {
-                final Set<Product> networkDefaultProducts = getNetworkDefaultProducts();
-                final Function<View, Boolean> checkedStateFunction;
-                switch (which) {
-                    case 0: // only this
-                        checkedStateFunction = (view) -> view.equals(clickedView);
-                        break;
-                    case 1: // all except this
-                        checkedStateFunction = (view) -> !view.equals(clickedView);
-                        break;
-                    case 2: // network defaults
-                        checkedStateFunction = (view) -> networkDefaultProducts.contains(
-                                Product.fromCode(((String) view.getTag()).charAt(0)));
-                        break;
-                    case 3: // all true
-                        checkedStateFunction = (view) -> true;
-                        break;
-                    case 4: // only local products
-                        checkedStateFunction = (view) -> Product.LOCAL_PRODUCTS.contains(
-                                Product.fromCode(((String) view.getTag()).charAt(0)));
-                        break;
-                    default:
-                        return;
-                }
-                for (final ToggleImageButton view : viewProductToggles)
-                    view.setChecked(checkedStateFunction.apply(view));
+        if (!isNewIntent) {
+            setContentView(R.layout.directions_content);
+            final View contentView = findViewById(android.R.id.content);
+            ViewCompat.setOnApplyWindowInsetsListener(contentView, (v, windowInsets) -> {
+                final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(insets.left, 0, insets.right, 0);
+                return windowInsets;
             });
-            builder.show();
-            return true;
-        };
-        for (final View view : viewProductToggles)
-            view.setOnLongClickListener(productLongClickListener);
 
-        viewBike = findViewById(R.id.directions_option_bike);
-
-        viewTimeDepArr = findViewById(R.id.directions_time_dep_arr);
-        viewTimeDepArr.setOnClickListener(v -> {
-            final DialogBuilder builder = DialogBuilder.get(DirectionsActivity.this);
-            builder.setTitle(R.string.directions_set_time_prompt);
-            builder.setItems(R.array.directions_set_time, (dialog, which) -> {
-                final String[] parts = getResources().getStringArray(R.array.directions_set_time_values)[which]
-                        .split("_");
-                final DepArr depArr = DepArr.valueOf(parts[0]);
-                if (parts[1].equals("AT")) {
-                    time = new TimeSpec.Absolute(depArr, time.timeInMillis());
-                } else if (parts[1].equals("IN")) {
-                    if (parts.length > 2) {
-                        time = new TimeSpec.Relative(depArr,
-                                Long.parseLong(parts[2]) * DateUtils.MINUTE_IN_MILLIS);
-                    } else {
-                        time = new TimeSpec.Relative(depArr, 0);
-                        handleDiffClick();
-                    }
-                } else {
-                    throw new IllegalStateException(parts[1]);
-                }
-                updateGUI();
+            final MyActionBar actionBar = getMyActionBar();
+            setPrimaryColor(renderConfig.actionBarColor > 0 ? renderConfig.actionBarColor : R.color.bg_action_bar_directions);
+            actionBar.setPrimaryTitle(R.string.directions_activity_title);
+            addShowMapButtonToActionBar();
+            actionBar.setTitlesOnClickListener(v -> NetworkPickerActivity.start(DirectionsActivity.this));
+            buttonExpand = actionBar.addToggleButton(R.drawable.ic_expand_white_24dp,
+                    R.string.directions_action_expand_title);
+            buttonExpand.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                expandForm(isChecked);
+                updateMap();
             });
-            builder.show();
-        });
-
-        viewTime1 = findViewById(R.id.directions_time_1);
-        viewTime2 = findViewById(R.id.directions_time_2);
-
-        viewGo = findViewById(R.id.directions_go);
-        viewGo.setOnClickListener(v -> handleGo());
-
-        viewQueryHistoryList = findViewById(android.R.id.list);
-        viewQueryHistoryList.setLayoutManager(new LinearLayoutManager(this));
-        viewQueryHistoryList.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
-        queryHistoryListAdapter = new QueryHistoryAdapter(this, network, this, this);
-        viewQueryHistoryList.setAdapter(queryHistoryListAdapter);
-        ViewCompat.setOnApplyWindowInsetsListener(viewQueryHistoryList, (v, windowInsets) -> {
-            final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(),
-                    insets.bottom);
-            return windowInsets;
-        });
-
-        viewQueryHistoryEmpty = findViewById(R.id.directions_query_history_empty);
-
-        viewQueryMissingCapability = findViewById(R.id.directions_network_missing_capability);
-
-        quickReturnView = findViewById(R.id.directions_quick_return);
-        final CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(
-                quickReturnView.getLayoutParams().width, quickReturnView.getLayoutParams().height);
-        layoutParams.setBehavior(new QuickReturnBehavior());
-        quickReturnView.setLayoutParams(layoutParams);
-        quickReturnView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
-            final int height = bottom - top;
-            viewQueryHistoryList.setPadding(viewQueryHistoryList.getPaddingLeft(), height,
-                    viewQueryHistoryList.getPaddingRight(), viewQueryHistoryList.getPaddingBottom());
-            viewQueryHistoryEmpty.setPadding(viewQueryHistoryEmpty.getPaddingLeft(), height,
-                    viewQueryHistoryEmpty.getPaddingRight(), viewQueryHistoryEmpty.getPaddingBottom());
-            viewQueryMissingCapability.setPadding(viewQueryMissingCapability.getPaddingLeft(), height,
-                    viewQueryMissingCapability.getPaddingRight(), viewQueryMissingCapability.getPaddingBottom());
-        });
-
-        locationSelector = findViewById(R.id.directions_location_selector);
-        locationSelector.setLocationSelectionListener(this);
-        locationSelector.setup(this, prefs);
-        locationSelector.setNetwork(network);
-
-        getMapView().getOverlays().add(new Overlay() {
-            private Location pinLocation;
-            private View pinView;
-
-            @Override
-            public void draw(final Canvas canvas, final MapView mapView, final boolean shadow) {
-                if (pinView != null)
-                    pinView.requestLayout();
-            }
-
-            @Override
-            public boolean onSingleTapConfirmed(final MotionEvent e, final MapView mapView) {
-                final IGeoPoint p = mapView.getProjection().fromPixels((int) e.getX(), (int) e.getY());
-                pinLocation = Location.coord(Point.fromDouble(p.getLatitude(), p.getLongitude()));
-
-                final View view = getLayoutInflater().inflate(R.layout.directions_map_pin, null);
-                final LocationTextView locationView = view
-                        .findViewById(R.id.directions_map_pin_location);
-                final View buttonGroup = view.findViewById(R.id.directions_map_pin_buttons);
-                buttonGroup.findViewById(R.id.directions_map_pin_button_from).setOnClickListener(v -> {
-                    viewFromLocation.setLocation(pinLocation);
-                    mapView.removeAllViews();
-                });
-                buttonGroup.findViewById(R.id.directions_map_pin_button_to).setOnClickListener(v -> {
-                    viewToLocation.setLocation(pinLocation);
-                    mapView.removeAllViews();
-                });
-                locationView.setLocation(pinLocation);
-                locationView.setShowLocationType(false);
-
-                // exchange view for the pin
-                if (pinView != null)
-                    mapView.removeView(pinView);
-                pinView = view;
-                mapView.addView(pinView, new MapView.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT, p, MapView.LayoutParams.BOTTOM_CENTER, 0, 0));
-
-                new GeocoderThread(DirectionsActivity.this, p.getLatitude(), p.getLongitude(),
-                        new GeocoderThread.Callback() {
-                            public void onGeocoderResult(final Address address) {
-                                pinLocation = GeocoderThread.addressToLocation(address);
-                                locationView.setLocation(pinLocation);
-                                locationView.setShowLocationType(false);
-                            }
-
-                            public void onGeocoderFail(final Exception exception) {
-                                log.info("Problem in geocoder: {}", exception.getMessage());
-                            }
+            if (renderConfig.isAlternativeConnectionSearch) {
+                actionBar.addButton(R.drawable.ic_clear_white_24dp, R.string.directions_action_restart_planning_title)
+                        .setOnClickListener(v -> {
+                            finish();
+                            final Intent newIntent = new Intent(this, DirectionsActivity.class);
+                            newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(newIntent);
                         });
-
-                final IMapController controller = mapView.getController();
-                controller.animateTo(p);
-
-                return false;
+            } else {
+                actionBar.addButton(R.drawable.ic_shuffle_white_24dp, R.string.directions_action_return_trip_title)
+                        .setOnClickListener(v -> viewToLocation.exchangeWith(viewFromLocation));
             }
-        });
+            actionBar.overflow(R.menu.directions_options, item -> {
+                if (item.getItemId() == R.id.directions_options_clear_history) {
+                    if (network != null)
+                        showDialog(DIALOG_CLEAR_HISTORY);
+                    return true;
+                } else {
+                    return false;
+                }
+            });
+
+            findViewById(R.id.directions_network_missing_capability_button)
+                    .setOnClickListener(v -> NetworkPickerActivity.start(DirectionsActivity.this));
+            connectivityWarningView = findViewById(R.id.directions_connectivity_warning_box);
+
+            initLayoutTransitions();
+
+            final LocationView.Listener locationChangeListener = (view) -> {
+                updateMap();
+                queryHistoryListAdapter.clearSelectedEntry();
+                requestFocusFirst();
+            };
+
+            viewFromLocation = findViewById(R.id.directions_from);
+            viewFromLocation.setListener(locationChangeListener);
+            viewFromLocation.setContextMenuItemClickListener(new LocationContextMenuItemClickListener(viewFromLocation,
+                    requestLocationPermissionFromLauncher, pickContactFromLauncher, pickStationFromLauncher));
+            viewFromLocation.setEnabled(!renderConfig.isAlternativeConnectionSearch);
+            viewFromLocation.setStationAsAddressEnabled(true);
+
+            viewViaLocation = findViewById(R.id.directions_via);
+            viewViaLocation.setListener(locationChangeListener);
+            viewViaLocation.setContextMenuItemClickListener(new LocationContextMenuItemClickListener(viewViaLocation,
+                    requestLocationPermissionViaLauncher, pickContactViaLauncher, pickStationViaLauncher));
+
+            viewToLocation = findViewById(R.id.directions_to);
+            viewToLocation.setListener(locationChangeListener);
+            viewToLocation.setOnEditorActionListener((v, actionId, event) -> {
+                if (event == null || event.getAction() == KeyEvent.ACTION_DOWN) {
+                    if (actionId == EditorInfo.IME_ACTION_GO) {
+                        viewGo.performClick();
+                        return true;
+                    } else if (actionId == EditorInfo.IME_ACTION_DONE) {
+                        requestFocusFirst();
+                        return true;
+                    }
+                }
+                return false;
+            });
+            viewToLocation.setContextMenuItemClickListener(new LocationContextMenuItemClickListener(viewToLocation,
+                    requestLocationPermissionToLauncher, pickContactToLauncher, pickStationToLauncher));
+            viewToLocation.setStationAsAddressEnabled(true);
+
+            setupAutoCompleteLocationAdapters();
+
+            viewProducts = findViewById(R.id.directions_products);
+            viewProductToggles.clear();
+            viewProductToggles.add(findViewById(R.id.directions_products_i));
+            viewProductToggles.add(findViewById(R.id.directions_products_r));
+            viewProductToggles.add(findViewById(R.id.directions_products_s));
+            viewProductToggles.add(findViewById(R.id.directions_products_u));
+            viewProductToggles.add(findViewById(R.id.directions_products_t));
+            viewProductToggles.add(findViewById(R.id.directions_products_b));
+            viewProductToggles.add(findViewById(R.id.directions_products_p));
+            viewProductToggles.add(findViewById(R.id.directions_products_f));
+            viewProductToggles.add(findViewById(R.id.directions_products_c));
+
+            final OnLongClickListener productLongClickListener = clickedView -> {
+                final DialogBuilder builder = DialogBuilder.get(DirectionsActivity.this);
+                builder.setTitle(R.string.directions_products_prompt);
+                builder.setItems(R.array.directions_products, (dialog, which) -> {
+                    final Set<Product> networkDefaultProducts = getNetworkDefaultProducts();
+                    final Function<View, Boolean> checkedStateFunction;
+                    switch (which) {
+                        case 0: // only this
+                            checkedStateFunction = (view) -> view.equals(clickedView);
+                            break;
+                        case 1: // all except this
+                            checkedStateFunction = (view) -> !view.equals(clickedView);
+                            break;
+                        case 2: // network defaults
+                            checkedStateFunction = (view) -> networkDefaultProducts.contains(
+                                    Product.fromCode(((String) view.getTag()).charAt(0)));
+                            break;
+                        case 3: // all true
+                            checkedStateFunction = (view) -> true;
+                            break;
+                        case 4: // only local products
+                            checkedStateFunction = (view) -> Product.LOCAL_PRODUCTS.contains(
+                                    Product.fromCode(((String) view.getTag()).charAt(0)));
+                            break;
+                        default:
+                            return;
+                    }
+                    for (final ToggleImageButton view : viewProductToggles)
+                        view.setChecked(checkedStateFunction.apply(view));
+                });
+                builder.show();
+                return true;
+            };
+            for (final View view : viewProductToggles)
+                view.setOnLongClickListener(productLongClickListener);
+
+            viewBike = findViewById(R.id.directions_option_bike);
+
+            viewTimeDepArr = findViewById(R.id.directions_time_dep_arr);
+            viewTimeDepArr.setOnClickListener(v -> {
+                final DialogBuilder builder = DialogBuilder.get(DirectionsActivity.this);
+                builder.setTitle(R.string.directions_set_time_prompt);
+                builder.setItems(R.array.directions_set_time, (dialog, which) -> {
+                    final String[] parts = getResources().getStringArray(R.array.directions_set_time_values)[which]
+                            .split("_");
+                    final DepArr depArr = DepArr.valueOf(parts[0]);
+                    if (parts[1].equals("AT")) {
+                        time = new TimeSpec.Absolute(depArr, time.timeInMillis());
+                    } else if (parts[1].equals("IN")) {
+                        if (parts.length > 2) {
+                            time = new TimeSpec.Relative(depArr,
+                                    Long.parseLong(parts[2]) * DateUtils.MINUTE_IN_MILLIS);
+                        } else {
+                            time = new TimeSpec.Relative(depArr, 0);
+                            handleDiffClick();
+                        }
+                    } else {
+                        throw new IllegalStateException(parts[1]);
+                    }
+                    updateGUI();
+                });
+                builder.show();
+            });
+
+            viewTime1 = findViewById(R.id.directions_time_1);
+            viewTime2 = findViewById(R.id.directions_time_2);
+
+            viewGo = findViewById(R.id.directions_go);
+            viewGo.setOnClickListener(v -> handleGo());
+
+            viewQueryHistoryList = findViewById(android.R.id.list);
+            viewQueryHistoryList.setLayoutManager(new LinearLayoutManager(this));
+            viewQueryHistoryList.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
+            queryHistoryListAdapter = new QueryHistoryAdapter(this, network, this, this);
+            viewQueryHistoryList.setAdapter(queryHistoryListAdapter);
+            ViewCompat.setOnApplyWindowInsetsListener(viewQueryHistoryList, (v, windowInsets) -> {
+                final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(),
+                        insets.bottom);
+                return windowInsets;
+            });
+
+            viewQueryHistoryEmpty = findViewById(R.id.directions_query_history_empty);
+
+            viewQueryMissingCapability = findViewById(R.id.directions_network_missing_capability);
+
+            quickReturnView = findViewById(R.id.directions_quick_return);
+            final CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(
+                    quickReturnView.getLayoutParams().width, quickReturnView.getLayoutParams().height);
+            layoutParams.setBehavior(new QuickReturnBehavior());
+            quickReturnView.setLayoutParams(layoutParams);
+            quickReturnView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                final int height = bottom - top;
+                viewQueryHistoryList.setPadding(viewQueryHistoryList.getPaddingLeft(), height,
+                        viewQueryHistoryList.getPaddingRight(), viewQueryHistoryList.getPaddingBottom());
+                viewQueryHistoryEmpty.setPadding(viewQueryHistoryEmpty.getPaddingLeft(), height,
+                        viewQueryHistoryEmpty.getPaddingRight(), viewQueryHistoryEmpty.getPaddingBottom());
+                viewQueryMissingCapability.setPadding(viewQueryMissingCapability.getPaddingLeft(), height,
+                        viewQueryMissingCapability.getPaddingRight(), viewQueryMissingCapability.getPaddingBottom());
+            });
+
+            locationSelector = findViewById(R.id.directions_location_selector);
+            locationSelector.setLocationSelectionListener(this);
+            locationSelector.setup(this, prefs);
+            locationSelector.setNetwork(network);
+
+            getMapView().getOverlays().add(new Overlay() {
+                private Location pinLocation;
+                private View pinView;
+
+                @Override
+                public void draw(final Canvas canvas, final MapView mapView, final boolean shadow) {
+                    if (pinView != null)
+                        pinView.requestLayout();
+                }
+
+                @Override
+                public boolean onSingleTapConfirmed(final MotionEvent e, final MapView mapView) {
+                    final IGeoPoint p = mapView.getProjection().fromPixels((int) e.getX(), (int) e.getY());
+                    pinLocation = Location.coord(Point.fromDouble(p.getLatitude(), p.getLongitude()));
+
+                    final View view = getLayoutInflater().inflate(R.layout.directions_map_pin, null);
+                    final LocationTextView locationView = view
+                            .findViewById(R.id.directions_map_pin_location);
+                    final View buttonGroup = view.findViewById(R.id.directions_map_pin_buttons);
+                    buttonGroup.findViewById(R.id.directions_map_pin_button_from).setOnClickListener(v -> {
+                        viewFromLocation.setLocation(pinLocation);
+                        mapView.removeAllViews();
+                    });
+                    buttonGroup.findViewById(R.id.directions_map_pin_button_to).setOnClickListener(v -> {
+                        viewToLocation.setLocation(pinLocation);
+                        mapView.removeAllViews();
+                    });
+                    locationView.setLocation(pinLocation);
+                    locationView.setShowLocationType(false);
+
+                    // exchange view for the pin
+                    if (pinView != null)
+                        mapView.removeView(pinView);
+                    pinView = view;
+                    mapView.addView(pinView, new MapView.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT, p, MapView.LayoutParams.BOTTOM_CENTER, 0, 0));
+
+                    new GeocoderThread(DirectionsActivity.this, p.getLatitude(), p.getLongitude(),
+                            new GeocoderThread.Callback() {
+                                public void onGeocoderResult(final Address address) {
+                                    pinLocation = GeocoderThread.addressToLocation(address);
+                                    locationView.setLocation(pinLocation);
+                                    locationView.setShowLocationType(false);
+                                }
+
+                                public void onGeocoderFail(final Exception exception) {
+                                    log.info("Problem in geocoder: {}", exception.getMessage());
+                                }
+                            });
+
+                    final IMapController controller = mapView.getController();
+                    controller.animateTo(p);
+
+                    return false;
+                }
+            });
+        }
+
+        boolean autoProvidedFrom = false;
+        boolean autoProvidedTo = false;
 
         final ComponentName intentComponentName = intent.getComponent();
         final String intentClassName = intentComponentName.getClassName();
@@ -701,10 +706,14 @@ public class DirectionsActivity extends OeffiMainActivity implements
                 }
             }
         } else {
-            if (intent.hasExtra(INTENT_EXTRA_FROM_LOCATION))
+            if (intent.hasExtra(INTENT_EXTRA_FROM_LOCATION)) {
+                autoProvidedFrom = true;
                 viewFromLocation.setLocation((Location) intent.getSerializableExtra(INTENT_EXTRA_FROM_LOCATION));
-            if (intent.hasExtra(INTENT_EXTRA_TO_LOCATION))
+            }
+            if (intent.hasExtra(INTENT_EXTRA_TO_LOCATION)) {
+                autoProvidedTo = true;
                 viewToLocation.setLocation((Location) intent.getSerializableExtra(INTENT_EXTRA_TO_LOCATION));
+            }
             if (intent.hasExtra(INTENT_EXTRA_VIA_LOCATION))
                 viewViaLocation.setLocation((Location) intent.getSerializableExtra(INTENT_EXTRA_VIA_LOCATION));
             if (intent.hasExtra(INTENT_EXTRA_TIME_SPEC))
@@ -746,6 +755,10 @@ public class DirectionsActivity extends OeffiMainActivity implements
         // initial focus
         if (!viewToLocation.isInTouchMode()) {
             requestFocusFirst();
+        }
+
+        if (autoProvidedFrom && autoProvidedTo) {
+            handleGo();
         }
     }
 

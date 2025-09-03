@@ -111,6 +111,11 @@ public abstract class OeffiMainActivity extends OeffiActivity {
         }
     }
 
+    @Override
+    public boolean isMainActivity() {
+        return true;
+    }
+
     protected abstract String taskName();
 
     protected void setActionBarSecondaryTitleFromNetwork() {
