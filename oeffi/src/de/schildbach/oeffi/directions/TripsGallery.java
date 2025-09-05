@@ -34,6 +34,10 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Gallery;
 import com.google.common.math.LongMath;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.TimeSpec;
@@ -45,6 +49,8 @@ import java.util.GregorianCalendar;
 import java.util.List;
 
 public class TripsGallery extends Gallery {
+    private static final Logger log = LoggerFactory.getLogger(TripsGallery.class);
+
     private TripsOverviewActivity.RenderConfig renderConfig;
     private OnScrollListener onScrollListener;
 
@@ -195,17 +201,22 @@ public class TripsGallery extends Gallery {
             long minTime = Long.MAX_VALUE;
             long maxTime = 0;
 
-            for (int i = first; i <= last; i++) {
-                final TripInfo tripInfo = adapter.getItem(i);
-                if (tripInfo != null) {
-                    final Trip trip = tripInfo.trip;
-                    final Date tripMinTime = trip.getMinTime();
-                    if (tripMinTime != null && tripMinTime.getTime() < minTime)
-                        minTime = tripMinTime.getTime();
+            for (int index = first; index <= last; index++) {
+                try {
+                    final TripInfo tripInfo = adapter.getItem(index);
+                    if (tripInfo != null) {
+                        final Trip trip = tripInfo.trip;
+                        final Date tripMinTime = trip.getMinTime();
+                        if (tripMinTime != null && tripMinTime.getTime() < minTime)
+                            minTime = tripMinTime.getTime();
 
-                    final Date tripMaxTime = trip.getMaxTime();
-                    if (tripMaxTime != null && tripMaxTime.getTime() > maxTime)
-                        maxTime = tripMaxTime.getTime();
+                        final Date tripMaxTime = trip.getMaxTime();
+                        if (tripMaxTime != null && tripMaxTime.getTime() > maxTime)
+                            maxTime = tripMaxTime.getTime();
+                    }
+                } catch (IllegalStateException ise) {
+                    log.error("cannot get adapter item at position {}, first={}, last={}", index, first, last, ise);
+                    // ignore and continue
                 }
             }
 

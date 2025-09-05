@@ -45,6 +45,9 @@ import android.widget.Adapter;
 import android.widget.BaseAdapter;
 import com.google.common.base.Preconditions;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.TimeSpec;
@@ -68,6 +71,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class TripsGalleryAdapter extends BaseAdapter {
+    private static final Logger log = LoggerFactory.getLogger(TripsGallery.class);
+
     private List<TripInfo> trips = Collections.emptyList();
     private TripsOverviewActivity.RenderConfig renderConfig;
     private boolean canScrollLater = true, canScrollEarlier = true;
@@ -315,7 +320,9 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         return count;
     }
 
-    public TripInfo getItem(int position) {
+    public TripInfo getItem(final int aPosition) {
+        int position = aPosition;
+
         if (!canScrollEarlier) {
             if (position == 0)
                 return null;
@@ -335,6 +342,8 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             position--;
         }
 
+        log.error("cannot getItem at position={}, canScrollEarlier={}, canScrollLater={}, #trips={}",
+                aPosition, canScrollEarlier, canScrollLater, trips.size());
         throw new IllegalStateException();
     }
 
