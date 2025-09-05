@@ -310,7 +310,8 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         };
         registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
 
-        load(null, false);
+        if (!autoRefreshDisabled)
+            load(null, false);
 
         updateFragments();
     }
