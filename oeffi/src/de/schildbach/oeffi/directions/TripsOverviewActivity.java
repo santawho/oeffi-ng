@@ -135,7 +135,8 @@ public class TripsOverviewActivity extends OeffiActivity {
 
     private MyActionBar actionBar;
     private ImageButton searchMoreButton;
-    private @Nullable QueryTripsContext context;
+    private @Nullable QueryTripsContext queryTripsContextEarlier;
+    private @Nullable QueryTripsContext queryTripsContextLater;
     private TripsGallery barView;
 
     private final NavigableSet<TripInfo> trips = new TreeSet<>((tripC1, tripC2) -> {
@@ -172,11 +173,12 @@ public class TripsOverviewActivity extends OeffiActivity {
             }
         }
 
-        return ComparisonChain.start() //
-                    .compare(trip1.getFirstDepartureTime(), trip2.getFirstDepartureTime()) //
-                    .compare(trip1.getLastArrivalTime(), trip2.getLastArrivalTime()) //
-                    .compare(trip1.numChanges, trip2.numChanges, Ordering.natural().nullsLast()) //
-                    .result();
+        final int result = ComparisonChain.start() //
+                .compare(trip1.getFirstDepartureTime(), trip2.getFirstDepartureTime()) //
+                .compare(trip1.getLastArrivalTime(), trip2.getLastArrivalTime()) //
+                .compare(trip1.numChanges, trip2.numChanges, Ordering.natural().nullsLast()) //
+                .result();
+        return result;
     });
 
     private boolean queryMoreTripsEnabled = false;
@@ -235,13 +237,13 @@ public class TripsOverviewActivity extends OeffiActivity {
             searchMoreButton.setOnClickListener(view -> {
                 setSearchMoreButtonEnabled(false);
                 searchMoreRequested = true;
-                foregroundHandler.post(checkMoreRunnable);
+                postCheckMoreRunnable(false);
             });
         }
         actionBar.addProgressButton().setOnClickListener(v -> {
             setSearchMoreButtonEnabled(false);
             reloadRequested = true;
-            foregroundHandler.post(checkMoreRunnable);
+            postCheckMoreRunnable(false);
         });
 
         barView = findViewById(R.id.trips_bar_view);
@@ -276,7 +278,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         });
         barView.setOnScrollListener(() -> {
 //            log.info("barView.onScrollListener -> foregroundHandler.post(checkMoreRunnable)");
-            foregroundHandler.post(checkMoreRunnable);
+            postCheckMoreRunnable(false);
         });
 
         final View disclaimerView = findViewById(R.id.directions_trip_overview_disclaimer_group);
@@ -311,7 +313,7 @@ public class TripsOverviewActivity extends OeffiActivity {
 
         // delay because GUI is not initialized immediately
 //        log.info("onStart -> foregroundHandler.postDelayed(checkMoreRunnable, 50)");
-        foregroundHandler.postDelayed(checkMoreRunnable, 50);
+        postCheckMoreRunnable(true);
     }
 
     @Override
@@ -332,13 +334,17 @@ public class TripsOverviewActivity extends OeffiActivity {
         super.onDestroy();
     }
 
+    public void postCheckMoreRunnable(final boolean delayed) {
+//        log.info("fetch more");
+        foregroundHandler.postDelayed(checkMoreRunnable, delayed ? 50 : 0);
+    }
+
     private final Runnable checkMoreRunnable = new Runnable() {
         public void run() {
             if (!queryMoreTripsEnabled || queryMoreTripsRunning || backgroundHandler == null)
                 return;
-            final QueryTripsContext context = TripsOverviewActivity.this.context;
 
-            final int positionOffset = context != null && context.canQueryEarlier() ? 0 : 1;
+            final int positionOffset = queryTripsContextEarlier != null && queryTripsContextEarlier.canQueryEarlier() ? 0 : 1;
             final int lastVisiblePosition = barView.getLastVisiblePosition() - positionOffset;
             final int firstVisiblePosition = barView.getFirstVisiblePosition() - positionOffset;
 
@@ -346,21 +352,21 @@ public class TripsOverviewActivity extends OeffiActivity {
             if (reloadRequested) {
                 reloadRequested = false;
                 searchMoreContext.reset();
-                queryTripsRunnable = new QueryMoreTripsRunnable(context, false, false, true, searchMoreContext);
+                queryTripsRunnable = new QueryMoreTripsRunnable(queryTripsContextLater, false, false, true, searchMoreContext);
             } else if (searchMoreRequested) {
                 searchMoreRequested = false;
                 final SearchMoreContext.NextRoundInfo nextRoundInfo = searchMoreContext.prepareNextRound(TripsOverviewActivity.this);
                 if (nextRoundInfo != null) {
-                    queryTripsRunnable = new QueryMoreTripsRunnable(context, false, false, false, searchMoreContext);
+                    queryTripsRunnable = new QueryMoreTripsRunnable(queryTripsContextLater, false, false, false, searchMoreContext);
                     if (nextRoundInfo.infoText != null)
                         runOnUiThread(() -> new Toast(TripsOverviewActivity.this).toast(nextRoundInfo.infoText));
                 }
-            } else if (context != null && context.canQueryLater() && (lastVisiblePosition == AdapterView.INVALID_POSITION
-                    || lastVisiblePosition + 1 >= trips.size())) {
-                queryTripsRunnable = new QueryMoreTripsRunnable(context, false, true, false, searchMoreContext);
-            } else if (context != null && context.canQueryEarlier()
+            } else if (queryTripsContextLater != null && queryTripsContextLater.canQueryLater()
+                    && (lastVisiblePosition == AdapterView.INVALID_POSITION || lastVisiblePosition + 1 >= trips.size())) {
+                queryTripsRunnable = new QueryMoreTripsRunnable(queryTripsContextLater, false, true, false, searchMoreContext);
+            } else if (queryTripsContextEarlier != null && queryTripsContextEarlier.canQueryEarlier()
                     && (firstVisiblePosition == AdapterView.INVALID_POSITION || firstVisiblePosition <= 0)) {
-                queryTripsRunnable = new QueryMoreTripsRunnable(context, true, false, false, searchMoreContext);
+                queryTripsRunnable = new QueryMoreTripsRunnable(queryTripsContextEarlier, true, false, false, searchMoreContext);
             } else if (searchMoreContext.searchMorePossible()) {
                 runOnUiThread(() -> setSearchMoreButtonEnabled(true));
             }
@@ -393,21 +399,23 @@ public class TripsOverviewActivity extends OeffiActivity {
         public void run() {
             runOnUiThread(() -> actionBar.startProgress());
 
+            boolean foregroundRunning = false;
             try {
                 if (refreshPrepend)
                     setupPrepend(true);
 
-                doRequest();
+                foregroundRunning = doRequest();
             } finally {
-                queryMoreTripsRunning = false;
-
-                runOnUiThread(() -> {
-                    actionBar.stopProgress();
-                });
+                if (!foregroundRunning) {
+                    queryMoreTripsRunning = false;
+                    runOnUiThread(() -> {
+                        actionBar.stopProgress();
+                    });
+                }
             }
         }
 
-        private void doRequest() {
+        private boolean doRequest() {
             int tries = 0;
 
             while (true) {
@@ -434,18 +442,24 @@ public class TripsOverviewActivity extends OeffiActivity {
 
                     runOnUiThread(() -> {
                         log.debug("Got {} ({})", result.toShortString(), later ? "later" : "earlier");
+                        final int countNew;
                         if (result.status == QueryTripsResult.Status.OK) {
-                            processResult(result, earlier, later, searchMoreContext);
-
-                            // fetch more
-//                            log.info("fetch more -> foregroundHandler.postDelayed(checkMoreRunnable, 50)");
-                            foregroundHandler.postDelayed(checkMoreRunnable, 50);
+                            countNew = processResult(result, earlier, later, searchMoreContext);
                         } else if (result.status == QueryTripsResult.Status.NO_TRIPS) {
+                            countNew = 0;
                             // ignore
                         } else {
+                            countNew = 0;
                             new Toast(TripsOverviewActivity.this).toast(R.string.toast_network_problem);
                         }
+                        queryMoreTripsRunning = false;
+                        actionBar.stopProgress();
+
+                        // fetch more
+                        if (countNew > 0)
+                            postCheckMoreRunnable(true);
                     });
+                    return true;
                 } catch (final SessionExpiredException | NotFoundException x) {
                     runOnUiThread(() -> new Toast(TripsOverviewActivity.this).longToast(R.string.toast_session_expired));
                 } catch (final InvalidDataException x) {
@@ -488,6 +502,7 @@ public class TripsOverviewActivity extends OeffiActivity {
 
                 break;
             }
+            return false;
         }
     }
 
@@ -613,10 +628,16 @@ public class TripsOverviewActivity extends OeffiActivity {
         if (firstPublicLeg == null)
             return null;
         final Date departureTime = firstPublicLeg.getDepartureTime();
-        if (departureTime == null || departureTime.before(renderConfig.prependToStopIsLegDeparture
-                ? renderConfig.prependToStop.plannedDepartureTime
-                : renderConfig.prependToStop.plannedArrivalTime))
+        if (departureTime == null)
             return null;
+        final Date prependTime = renderConfig.prependToStopIsLegDeparture
+                ? renderConfig.prependToStop.plannedDepartureTime
+                : renderConfig.prependToStop.plannedArrivalTime;
+        if (prependTime != null) {
+            final long diff = departureTime.getTime() - prependTime.getTime();
+            if (diff < -300000) // 5 mins tolerance
+                return null;
+        }
 
         final List<Trip.Leg> newLegs = new LinkedList<>();
 
@@ -687,7 +708,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         return newTrip;
     }
 
-    private void processInitialResult(
+    private int processInitialResult(
             final QueryTripsResult result,
             final SearchMoreContext searchMoreContext) {
         // update header
@@ -709,10 +730,10 @@ public class TripsOverviewActivity extends OeffiActivity {
 //            serverProductView.setVisibility(View.VISIBLE);
         }
 
-        processResult(result, false, false, searchMoreContext);
+        return processResult(result, false, false, searchMoreContext);
     }
 
-    private void processResult(
+    private int processResult(
             final QueryTripsResult result,
             final boolean earlier, final boolean later,
             final SearchMoreContext searchMoreContext) {
@@ -744,16 +765,25 @@ public class TripsOverviewActivity extends OeffiActivity {
         }
         searchMoreContext.tellNewTripsAddedAndAddMoreIfNecessary(countNew, trips);
 
-        // redraw
-        barView.setTrips(new ArrayList<>(trips), result.context != null && result.context.canQueryLater(),
-                result.context != null && result.context.canQueryEarlier());
+        if (countNew > 0) {
+            // redraw
+            barView.setTrips(new ArrayList<>(trips), result.context != null && result.context.canQueryLater(),
+                    result.context != null && result.context.canQueryEarlier());
 
-        // initial cursor positioning
-        if (initial && !trips.isEmpty())
-            barView.setSelection(searchMoreContext.departureBased ? 1 : trips.size() - 1);
+            // initial cursor positioning
+            if (initial && !trips.isEmpty())
+                barView.setSelection(searchMoreContext.departureBased ? 1 : trips.size() - 1);
+        }
+
 
         // save context for next request
-        context = result.context;
+        if (!earlier)
+            queryTripsContextLater = result.context;
+
+        if (!later)
+            queryTripsContextEarlier = result.context;
+
+        return countNew;
     }
 
     private void setSearchMoreButtonEnabled(final boolean enabled) {
