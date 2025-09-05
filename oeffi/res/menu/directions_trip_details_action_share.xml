@@ -3,26 +3,40 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/directions_trip_details_action_share_short"
-        android:title="@string/directions_trip_details_action_share_short_title" />
-    <item
-        android:id="@+id/directions_trip_details_action_share_long"
-        android:title="@string/directions_trip_details_action_share_long_title" />
-    <item
-        android:id="@+id/directions_trip_details_action_share_link"
-        android:title="@string/directions_trip_details_action_share_link_title" />
-    <item
-        android:id="@+id/directions_trip_details_action_open_direct_link"
-        android:title="@string/directions_trip_details_action_open_direct_link_title" />
-    <item
-        android:id="@+id/directions_trip_details_action_open_share_link"
-        android:title="@string/directions_trip_details_action_open_share_link_title" />
-    <item
-        android:id="@+id/directions_trip_details_action_open_external_maps_app"
-        android:title="@string/directions_trip_details_action_open_external_maps_app_title" />
-    <item
         android:id="@+id/directions_trip_details_action_add_to_calendar"
         android:title="@string/directions_trip_details_action_calendar_title"
+        android:icon="@drawable/ic_today_white_24dp"
+        android:iconTint="#757575"
         android:visible="false" />
+    <item
+        android:id="@+id/directions_trip_details_action_share_short"
+        android:title="@string/directions_trip_details_action_share_short_title"
+        android:icon="@drawable/ic_share_white_24dp"
+        android:iconTint="#757575" />
+    <item
+        android:id="@+id/directions_trip_details_action_share_long"
+        android:title="@string/directions_trip_details_action_share_long_title"
+        android:icon="@drawable/ic_share_white_24dp"
+        android:iconTint="#757575" />
+    <item
+        android:id="@+id/directions_trip_details_action_share_link"
+        android:title="@string/directions_trip_details_action_share_link_title"
+        android:icon="@drawable/ic_share_white_24dp"
+        android:iconTint="#757575" />
+    <item
+        android:id="@+id/directions_trip_details_action_open_direct_link"
+        android:title="@string/directions_trip_details_action_open_direct_link_title"
+        android:icon="@drawable/ic_open_ext_black_24dp"
+        android:iconTint="#757575" />
+    <item
+        android:id="@+id/directions_trip_details_action_open_share_link"
+        android:title="@string/directions_trip_details_action_open_share_link_title"
+        android:icon="@drawable/ic_open_ext_black_24dp"
+        android:iconTint="#757575" />
+    <item
+        android:id="@+id/directions_trip_details_action_open_external_maps_app"
+        android:title="@string/directions_trip_details_action_open_external_maps_app_title"
+        android:icon="@drawable/ic_map_white_24dp"
+        android:iconTint="#757575" />
 
 </menu>

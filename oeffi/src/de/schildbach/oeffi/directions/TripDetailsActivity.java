@@ -36,6 +36,7 @@ import android.location.Criteria;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -381,6 +382,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 .setOnClickListener(v -> {
                     final PopupMenu popupMenu = new PopupMenu(TripDetailsActivity.this, v);
                     popupMenu.inflate(R.menu.directions_trip_details_action_share);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+                        popupMenu.setForceShowIcon(true);
                     final Menu menu = popupMenu.getMenu();
                     if (isShareCalendarVisible)
                         menu.findItem(R.id.directions_trip_details_action_add_to_calendar).setVisible(true);
