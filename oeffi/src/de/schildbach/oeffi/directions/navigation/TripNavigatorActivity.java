@@ -522,18 +522,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         final TravelAlarmManager.TravelAlarmState travelAlarmState = new TravelAlarmManager(this)
                 .new TravelAlarmState(legC, alarmIsForDeparture, guiUpdateNavigationNotification);
 
-        final int drawableResId;
-        final int colorId;
-        if (travelAlarmState.isAlarmActive) {
-            drawableResId = R.drawable.ic_bell_on_black_24dp;
-            colorId = R.color.fg_significant;
-        } else {
-            drawableResId = R.drawable.ic_bell_off_black_24dp;
-            colorId = R.color.fg_insignificant;
-        }
-        final Drawable drawable = getDrawable(drawableResId);
-        drawable.setTint(getColor(colorId));
-        bellButton.setImageDrawable(drawable);
+        setupBellButton(bellButton, travelAlarmState.isAlarmActive);
     }
 
     @Override
@@ -576,13 +565,10 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         final TextView timeView = findViewById(R.id.navigation_next_event_alarm_details_time);
         final TextView offsetView = findViewById(R.id.navigation_next_event_alarm_details_offset);
         final TextView sleepView = findViewById(R.id.navigation_next_event_alarm_details_sleep);
-        final int bellResId;
         if (alarmAtMs <= 0) {
             detailsView.setVisibility(View.GONE);
-            bellResId = R.drawable.ic_bell_off_black_24dp;
         } else {
             detailsView.setVisibility(View.VISIBLE);
-            bellResId = R.drawable.ic_bell_on_black_24dp;
             timeView.setText(Formats.formatTime(this, alarmAtMs));
             offsetView.setText(formatDuration(tripRenderer.nextEventEstimatedTime.getTime() - alarmAtMs));
             final ImageView sleepIcon = findViewById(R.id.navigation_next_event_alarm_details_sleep_icon);
@@ -596,7 +582,23 @@ public class TripNavigatorActivity extends TripDetailsActivity {
                 sleepIcon.setVisibility(View.GONE);
             }
         }
-        ((ImageView) findViewById(R.id.navigation_next_event_alarm_bell)).setImageDrawable(getDrawable(bellResId));
+
+        setupBellButton(findViewById(R.id.navigation_next_event_alarm_bell), travelAlarmState.isAlarmActive);
+    }
+
+    private void setupBellButton(final ImageView bellButton, final boolean isAlarmActive) {
+        final int drawableResId;
+        final int colorId;
+        if (isAlarmActive) {
+            drawableResId = R.drawable.ic_bell_on_black_24dp;
+            colorId = R.color.fg_significant;
+        } else {
+            drawableResId = R.drawable.ic_bell_off_black_24dp;
+            colorId = R.color.fg_insignificant;
+        }
+        final Drawable drawable = getDrawable(drawableResId);
+        drawable.setTint(getColor(colorId));
+        bellButton.setImageDrawable(drawable);
     }
 
     private String formatDuration(final long millis) {
