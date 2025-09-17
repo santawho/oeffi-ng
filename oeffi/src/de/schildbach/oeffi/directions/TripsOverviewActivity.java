@@ -143,8 +143,8 @@ public class TripsOverviewActivity extends OeffiActivity {
         Trip trip1 = tripC1.trip;
         Trip trip2 = tripC2.trip;
 
-        String id1 = trip1.getUniqueId();
-        String id2 = trip2.getUniqueId();
+        final String id1 = trip1.getUniqueId();
+        final String id2 = trip2.getUniqueId();
 
         // if (trip1.equals(trip2))
         if (id1.equals(id2))
@@ -173,12 +173,14 @@ public class TripsOverviewActivity extends OeffiActivity {
             }
         }
 
-        final int result = ComparisonChain.start() //
+        return ComparisonChain.start() //
                 .compare(trip1.getFirstDepartureTime(), trip2.getFirstDepartureTime()) //
                 .compare(trip1.getLastArrivalTime(), trip2.getLastArrivalTime()) //
                 .compare(trip1.numChanges, trip2.numChanges, Ordering.natural().nullsLast()) //
+                // trips with equal duration and change-overs, ...
+                // make sure they are different, otherwise one of them would be dropped ...
+                .compare(id1, id2) // ... and ensure same order every time (IDs are never equal)
                 .result();
-        return result;
     });
 
     private boolean queryMoreTripsEnabled = false;
