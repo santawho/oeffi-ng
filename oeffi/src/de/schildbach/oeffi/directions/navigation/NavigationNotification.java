@@ -447,6 +447,7 @@ public class NavigationNotification {
         final TripRenderer tripRenderer = new TripRenderer(null, trip, false, now);
         boolean refreshAllLegs = false;
         long nextRefreshTimeMs;
+        String nextRefreshTimeReason;
         long nextTripReloadTimeMs;
         final long travelAlarmAtMs;
         final boolean travelAlarmIsForDeparture;
@@ -497,33 +498,41 @@ public class NavigationNotification {
             final long timeLeft = tripRenderer.nextEventEarliestTime.getTime() - nowTime;
             if (timeLeft < 240000) {
                 // last 4 minutes and after, 30 secs refresh interval
+                nextRefreshTimeReason = String.format("#1, timeLeft=%d", timeLeft);
                 nextRefreshTimeMs = nowTime + 30000;
                 nextTripReloadTimeMs = tripUpdatedAt + 60000;
             } else if (timeLeft < 600000) {
                 // last 10 minutes and after, 60 secs refresh interval
+                nextRefreshTimeReason = String.format("#2, timeLeft=%d", timeLeft);
                 nextRefreshTimeMs = nowTime + 60000;
                 nextTripReloadTimeMs = tripUpdatedAt + 120000;
             } else {
                 final Date prevEventLatestTime = tripRenderer.prevEventLatestTime;
-                final long timeOver = nowTime - (prevEventLatestTime != null ? prevEventLatestTime.getTime() : 0);
-                if (timeOver < 300000) {
+                final long prevEventLatestTimeValue = prevEventLatestTime != null ? prevEventLatestTime.getTime() : 0;
+                final long timeOver = nowTime - prevEventLatestTimeValue;
+                if (prevEventLatestTime != null && timeOver < 300000) {
                     // max 5 minutes after the beginning of the current action, 60 secs refresh interval
+                    nextRefreshTimeReason = String.format("#3, timeLeft=%d, timeOver=%d, prevEventLatestTime=%s", timeLeft, timeOver, prevEventLatestTime);
                     nextRefreshTimeMs = nowTime + 60000;
                     nextTripReloadTimeMs = nextRefreshTimeMs;
                 } else {
                     // approaching, refresh after 25% of the remaining time
+                    nextRefreshTimeReason = String.format("#4, timeLeft=%d, timeOver=%d, prevEventLatestTime=%s", timeLeft, timeOver, prevEventLatestTime);
                     nextRefreshTimeMs = nowTime + ((timeLeft * 25) / 100);
                     nextTripReloadTimeMs = nextRefreshTimeMs;
                 }
             }
         } else {
-            final long timeOver = nowTime - trip.getLastArrivalTime().getTime();
+            final long lastArrivalTime = trip.getLastArrivalTime().getTime();
+            final long timeOver = nowTime - lastArrivalTime;
             if (timeOver < 300000) {
                 // max 5 minutes after the trip, 60 secs refresh interval
+                nextRefreshTimeReason = String.format("#5, timeOver=%d, lastArrivalTime=%d", timeOver, lastArrivalTime);
                 nextRefreshTimeMs = nowTime + 60000;
                 nextTripReloadTimeMs = nextRefreshTimeMs;
             } else {
                 // no refresh
+                nextRefreshTimeReason = String.format("#6, timeOver=%d, lastArrivalTime=%d", timeOver, lastArrivalTime);
                 nextRefreshTimeMs = 0;
                 nextTripReloadTimeMs = 0;
             }
@@ -559,8 +568,10 @@ public class NavigationNotification {
         final long nextEventTimeLeftMs = tripRenderer.nextEventTimeLeftMs;
         final long nextEventTimeLeftTo10MinsBoundaryMs = nowTime
                 + nextEventTimeLeftMs - (nextEventTimeLeftMs / 600000) * 600000 + 2000;
-        if (nextEventTimeLeftTo10MinsBoundaryMs < nextRefreshTimeMs)
+        if (nextEventTimeLeftTo10MinsBoundaryMs < nextRefreshTimeMs) {
+            nextRefreshTimeReason = String.format("#7, nextRefreshTimeMs=%d, nextEventTimeLeftTo10MinsBoundaryMs=%d", nextRefreshTimeMs, nextEventTimeLeftTo10MinsBoundaryMs);
             nextRefreshTimeMs = nextEventTimeLeftTo10MinsBoundaryMs;
+        }
         if (lastNotified == null || newNotified.currentLegIndex != lastNotified.currentLegIndex) {
             if (lastNotified == null) {
                 log.info("first notification !!");
@@ -645,8 +656,10 @@ public class NavigationNotification {
             } else {
                 log.info("travel alarm for {} at {} set to {}", alarmTypeForLog,
                         tripRenderer.nextEventTargetName, Formats.formatTime(context, travelAlarmAtMs));
-                if (travelAlarmAtMs < nextRefreshTimeMs)
+                if (travelAlarmAtMs < nextRefreshTimeMs) {
+                    nextRefreshTimeReason = String.format("#8, nextRefreshTimeMs=%d, travelAlarmAtMs=%d", nextRefreshTimeMs, travelAlarmAtMs);
                     nextRefreshTimeMs = travelAlarmAtMs;
+                }
             }
         }
         newNotified.leftTimeReminded = lastNotified.leftTimeReminded;
@@ -684,24 +697,29 @@ public class NavigationNotification {
                 log.info("resetting");
                 newNotified.leftTimeReminded = Long.MAX_VALUE;
             }
-            if (nextReminderTimeMs > 0 && nextReminderTimeMs < nextRefreshTimeMs + 20000)
+            if (nextReminderTimeMs > 0 && nextReminderTimeMs < nextRefreshTimeMs + 20000) {
+                nextRefreshTimeReason = String.format("#9, nextRefreshTimeMs=%d, nextReminderTimeMs=%d", nextRefreshTimeMs, nextReminderTimeMs);
                 nextRefreshTimeMs = nextReminderTimeMs;
+            }
         }
 
         final boolean anyChanges = timeChanged || posChanged || nextTransferCriticalChanged || anyTransferCriticalChanged;
         log.info("timeChanged={}, posChanged={} nextTransferCriticalChanged={} anyTransferCriticalChanged={} reminderSoundId={}",
                 timeChanged, posChanged, nextTransferCriticalChanged, anyTransferCriticalChanged, reminderSoundId);
 
-        if (nextTripReloadTimeMs > 0 && nextTripReloadTimeMs < nextRefreshTimeMs)
+        if (nextTripReloadTimeMs > 0 && nextTripReloadTimeMs < nextRefreshTimeMs) {
+            nextRefreshTimeReason = String.format("#10, nextRefreshTimeMs=%d, nextTripReloadTimeMs=%d", nextRefreshTimeMs, nextTripReloadTimeMs);
             nextRefreshTimeMs = nextTripReloadTimeMs;
+        }
 
         newNotified.refreshNotificationRequiredAt = nextRefreshTimeMs;
         newNotified.refreshTripRequiredAt = nextTripReloadTimeMs;
 
         if (nextRefreshTimeMs > 0) {
-            log.info("refreshing in {} secs at {}, reminder at {}, trip reload at {}",
+            log.info("refreshing in {} secs at {} (reason: {}), reminder at {}, trip reload at {}",
                     (nextRefreshTimeMs - nowTime) / 1000,
                     NavigationAlarmManager.LOG_TIME_FORMAT.format(nextRefreshTimeMs),
+                    nextRefreshTimeReason,
                     NavigationAlarmManager.LOG_TIME_FORMAT.format(nextReminderTimeMs),
                     NavigationAlarmManager.LOG_TIME_FORMAT.format(nextTripReloadTimeMs));
         } else {

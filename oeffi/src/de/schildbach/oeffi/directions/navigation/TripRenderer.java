@@ -512,7 +512,8 @@ public class TripRenderer {
         } else {
             // leg is now
             setNextEventType(false, isInitialIndividual);
-            setPrevEventLatestTime(beginTime, plannedBeginTime);
+            if (transferFrom != null)
+                setPrevEventLatestTime(beginTime, plannedBeginTime);
             final boolean eventIsNow = setNextEventTimeLeft(now, endTime, transferTo != null ? plannedEndTime : null, leg != null ? leg.min : 0);
             final String targetName = (transferTo != null) ? Formats.fullLocationName(transferTo.location) : null;
             setNextEventTarget(targetName);
