@@ -8,6 +8,11 @@ including delays and replacement bus service for more and more transport authori
 **A lot of new features** have been added in this fork and continue to be added. Stay tuned!
 See details in the [Wiki](https://github.com/santawho/oeffi-ng/wiki).
 
+## Discussions
+
+There is a public Matrix group at https://matrix.to/#/#oeffi-ng:matrix.org .
+And of course, you may add issues on the Github repository.
+
 ## Disclaimer
 
 The current state of the project is "_continuous beta_". That means: be prepared for
