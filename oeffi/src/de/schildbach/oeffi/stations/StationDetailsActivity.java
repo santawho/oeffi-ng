@@ -737,6 +737,8 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         private final TextView capacity1stView;
         private final TextView capacity2ndView;
         private final TextView msgView;
+        private String msgViewMessageText;
+        private boolean msgViewExpanded;
 
         private final StationDetailsActivity context;
         private final java.text.DateFormat timeFormat;
@@ -753,6 +755,12 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             capacity1stView = itemView.findViewById(R.id.stations_station_entry_capacity_1st_class);
             capacity2ndView = itemView.findViewById(R.id.stations_station_entry_capacity_2nd_class);
             msgView = itemView.findViewById(R.id.stations_station_entry_msg);
+            msgViewExpanded = false;
+            msgViewMessageText = null;
+            msgView.setOnClickListener(v -> {
+                msgViewExpanded = !msgViewExpanded;
+                renderMsgView();
+            });
 
             this.context = context;
             this.timeFormat = DateFormat.getTimeFormat(context);
@@ -849,16 +857,32 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             }
 
             // message
-            if (departure.message != null || departure.line.message != null) {
-                msgView.setVisibility(View.VISIBLE);
-                final String message = Joiner.on('\n').skipNulls().join(departure.message, departure.line.message);
-                Spanned html = Html.fromHtml(HtmlUtils.makeLinksClickableInHtml(message), Html.FROM_HTML_MODE_COMPACT);
-                msgView.setText(html);
-                msgView.setMovementMethod(LinkMovementMethod.getInstance());
-            } else {
+            msgViewMessageText = (departure.message == null && departure.line.message == null) ? null
+                : Joiner.on('\n').skipNulls().join(departure.message, departure.line.message);
+            msgViewExpanded = false;
+            renderMsgView();
+        }
+
+        private void renderMsgView() {
+            if (msgViewMessageText == null) {
                 msgView.setVisibility(View.GONE);
                 msgView.setText(null);
+                return;
             }
+
+            msgView.setVisibility(View.VISIBLE);
+            final String displayMessage;
+            if (msgViewExpanded || msgViewMessageText.length() < 80) {
+                displayMessage = msgViewMessageText;
+                msgView.setTextColor(context.getColor(R.color.fg_significant));
+            } else {
+                displayMessage = context.getString(R.string.directions_trip_details_shortened_message,
+                        msgViewMessageText.substring(0, Math.min(msgViewMessageText.length(), 60)));
+                msgView.setTextColor(context.getColor(R.color.fg_insignificant));
+            };
+            Spanned html = Html.fromHtml(HtmlUtils.makeLinksClickableInHtml(displayMessage), Html.FROM_HTML_MODE_COMPACT);
+            msgView.setText(html);
+            msgView.setMovementMethod(LinkMovementMethod.getInstance());
         }
 
         private void setStrikeThru(final TextView view, final boolean strikeThru) {

@@ -1065,7 +1065,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         if (message != null) {
             messageView.setVisibility(View.VISIBLE);
             final String displayMessage;
-            if (isMessagesExpanded) {
+            if (isMessagesExpanded || message.length() < 80) {
                 displayMessage = message;
                 messageView.setTextColor(colorSignificant);
             } else {
