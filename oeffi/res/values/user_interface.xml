@@ -27,6 +27,10 @@
         The app does not read your screen or interact in any other way with the device.
     </string>
 
+    <string name="user_interface_category_directions_title">Directions</string>
+    <string name="user_interface_directions_autogo_enabled_title">Automatic \"Go\"</string>
+    <string name="user_interface_directions_autogo_enabled_summary">Start directions search automatically when origin and destination have been entered</string>
+
     <string name="user_interface_category_map_title">Maps</string>
     <string name="user_interface_map_tile_resolution_title">Map resolution</string>
     <string name="user_interface_map_tile_resolution_summary">Set higher for more details, but less readability, and vice versa. [%s]</string>

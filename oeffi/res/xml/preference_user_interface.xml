@@ -11,7 +11,7 @@
         android:summary="@string/user_interface_darkmode_switch_summary" />
 
     <Preference
-        android:key="accessibility_settings"
+        android:key="user_interface_accessibility_settings"
         android:title="@string/user_interface_accessibility_settings_title"
         android:summary="@string/user_interface_accessibility_settings_summary" >
         <intent android:action="android.settings.ACCESSIBILITY_SETTINGS" />
@@ -21,6 +21,16 @@
         android:key="user_interface_mainmenu_shareapp_enabled"
         android:defaultValue="false"
         android:title="@string/user_interface_mainmenu_shareapp_enabled_title" />
+
+    <PreferenceCategory android:title="@string/user_interface_category_directions_title">
+
+        <CheckBoxPreference
+            android:key="user_interface_directions_autogo_enabled"
+            android:defaultValue="true"
+            android:title="@string/user_interface_directions_autogo_enabled_title"
+            android:summary="@string/user_interface_directions_autogo_enabled_summary" />
+
+    </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/user_interface_category_map_title">
 

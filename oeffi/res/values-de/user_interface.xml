@@ -22,6 +22,10 @@
         Die App liest niemals deinen Bildschirminhalt oder interagiert auf eine andere Weise mit dem Gerät.
     </string>
 
+    <string name="user_interface_category_directions_title">Verbindungen</string>
+    <string name="user_interface_directions_autogo_enabled_title">Automatisches \"Los\"</string>
+    <string name="user_interface_directions_autogo_enabled_summary">Starte die Verbindungssuche automatisch, wenn Start and Ziel eingegeben wurden</string>
+
     <string name="user_interface_category_map_title">Landkarten</string>
     <string name="user_interface_map_tile_resolution_title">Auflösung von Landkarten</string>
     <string name="user_interface_map_tile_resolution_summary">Setze dies höher für mehr Details, aber weniger Lesbarkeit, und umgekehrt. [%s]</string>

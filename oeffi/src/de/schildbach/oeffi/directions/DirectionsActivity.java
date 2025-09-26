@@ -464,7 +464,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             viewToLocation.setOnEditorActionListener((v, actionId, event) -> {
                 if (event == null || event.getAction() == KeyEvent.ACTION_DOWN) {
                     if (actionId == EditorInfo.IME_ACTION_GO) {
-                        viewGo.performClick();
+                        handleAutoGo();
                         return true;
                     } else if (actionId == EditorInfo.IME_ACTION_DONE) {
                         requestFocusFirst();
@@ -757,7 +757,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             time = command.time;
             autoCompleteLocationsHandler.start(result -> {
                 if (result.success)
-                    handleGo();
+                    handleAutoGo();
             });
         }
 
@@ -780,7 +780,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         }
 
         if (autoProvidedFrom && autoProvidedTo) {
-            handleGo();
+            handleAutoGo();
         }
     }
 
@@ -1404,6 +1404,11 @@ public class DirectionsActivity extends OeffiMainActivity implements
             return false;
 
         return true;
+    }
+
+    private void handleAutoGo() {
+        if (prefs.getBoolean("user_interface_directions_autogo_enabled", true))
+            handleGo();
     }
 
     private void handleGo() {
