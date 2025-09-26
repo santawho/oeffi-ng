@@ -256,6 +256,12 @@ public class DirectionsActivity extends OeffiMainActivity implements
                     resultPickStation(contentUri, viewToLocation);
             });
 
+    public static Location EMPTY_LOCATION = new Location(LocationType.ANY, null, null, null, null);
+
+    private static boolean isEmptyLocation(final Location location) {
+        return location == null || (location.type == LocationType.ANY && location.name == null);
+    }
+
     public static void start(
             final Context context,
             @Nullable final Location fromLocation,
@@ -707,15 +713,31 @@ public class DirectionsActivity extends OeffiMainActivity implements
             }
         } else {
             if (intent.hasExtra(INTENT_EXTRA_FROM_LOCATION)) {
-                autoProvidedFrom = true;
-                viewFromLocation.setLocation((Location) intent.getSerializableExtra(INTENT_EXTRA_FROM_LOCATION));
+                final Location location = (Location) intent.getSerializableExtra(INTENT_EXTRA_FROM_LOCATION);
+                if (isEmptyLocation(location)) {
+                    viewFromLocation.reset();
+                } else {
+                    viewFromLocation.setLocation(location);
+                    autoProvidedFrom = true;
+                }
             }
             if (intent.hasExtra(INTENT_EXTRA_TO_LOCATION)) {
-                autoProvidedTo = true;
-                viewToLocation.setLocation((Location) intent.getSerializableExtra(INTENT_EXTRA_TO_LOCATION));
+                final Location location = (Location) intent.getSerializableExtra(INTENT_EXTRA_TO_LOCATION);
+                if (isEmptyLocation(location)) {
+                    viewToLocation.reset();
+                } else {
+                    viewToLocation.setLocation(location);
+                    autoProvidedTo = true;
+                }
             }
-            if (intent.hasExtra(INTENT_EXTRA_VIA_LOCATION))
-                viewViaLocation.setLocation((Location) intent.getSerializableExtra(INTENT_EXTRA_VIA_LOCATION));
+            if (intent.hasExtra(INTENT_EXTRA_VIA_LOCATION)) {
+                final Location location = (Location) intent.getSerializableExtra(INTENT_EXTRA_VIA_LOCATION);
+                if (isEmptyLocation(location)) {
+                    viewViaLocation.reset();
+                } else {
+                    viewViaLocation.setLocation(location);
+                }
+            }
             if (intent.hasExtra(INTENT_EXTRA_TIME_SPEC))
                 time = (TimeSpec) intent.getSerializableExtra(INTENT_EXTRA_TIME_SPEC);
 

@@ -2250,7 +2250,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final JourneyRef currentJourneyRef,
             final JourneyRef feederJourneyRef,
             final JourneyRef connectionJourneyRef,
-            final TimeSpec.Absolute time) {
+            final TimeSpec time) {
         TripsOverviewActivity.RenderConfig overviewConfig = new TripsOverviewActivity.RenderConfig();
         overviewConfig.isAlternativeConnectionSearch = true;
         overviewConfig.referenceTime = time;
@@ -2274,12 +2274,14 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final QueryTripsRunnable.TripRequestData queryTripsRequestData,
             final TripsOverviewActivity.RenderConfig overviewConfig) {
         final Date arrivalTime = stop.getArrivalTime();
-        final TimeSpec.Absolute time = new TimeSpec.Absolute(DepArr.DEPART,
+        final TimeSpec time = new TimeSpec.Absolute(DepArr.DEPART,
                 arrivalTime != null ? arrivalTime.getTime() : stop.getDepartureTime().getTime());
         DirectionsActivity.start(TripDetailsActivity.this,
                 stop.location,
-                renderConfig.isJourney ? ((Trip.Public) tripRenderer.trip.legs.get(0)).entryLocation : tripRenderer.trip.to,
-                null,
+                renderConfig.isJourney
+                        ? ((Trip.Public) tripRenderer.trip.legs.get(0)).exitLocation
+                        : DirectionsActivity.EMPTY_LOCATION, // tripRenderer.trip.to,
+                renderConfig.isJourney ? DirectionsActivity.EMPTY_LOCATION : null,
                 time,
                 getOverviewConfig(stop, isLegDeparture, currentJourneyRef, feederJourneyRef, connectionJourneyRef, time),
                 Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -2295,7 +2297,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final QueryTripsRunnable.TripRequestData queryTripsRequestData,
             final TripsOverviewActivity.RenderConfig overviewConfig) {
         final Location entry;
-        final TimeSpec.Absolute time;
+        final TimeSpec time;
         if (renderConfig.isJourney) {
             Trip.Public journeyLeg = (Trip.Public) tripRenderer.trip.legs.get(0);
             entry = journeyLeg.entryLocation;
@@ -2328,7 +2330,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final QueryTripsRunnable.TripRequestData queryTripsRequestData,
             final TripsOverviewActivity.RenderConfig overviewConfig) {
         final Location exit;
-        final TimeSpec.Absolute time;
+        final TimeSpec time;
         if (renderConfig.isJourney) {
             Trip.Public journeyLeg = (Trip.Public) tripRenderer.trip.legs.get(0);
             exit = journeyLeg.exitLocation;
