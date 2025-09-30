@@ -59,7 +59,7 @@ import de.schildbach.pte.dto.QueryJourneyResult;
 import de.schildbach.pte.dto.QueryTripsContext;
 import de.schildbach.pte.dto.QueryTripsResult;
 import de.schildbach.pte.dto.Stop;
-import de.schildbach.pte.dto.Timestamp;
+import de.schildbach.pte.dto.PTDate;
 import de.schildbach.pte.dto.Trip;
 import de.schildbach.pte.dto.TripOptions;
 import de.schildbach.pte.exception.InternalErrorException;
@@ -265,8 +265,8 @@ public class TripsOverviewActivity extends OeffiActivity {
                         TripDetailsActivity.start(TripsOverviewActivity.this, network, trip, config);
                     }
 
-                    final Timestamp firstPublicLegDepartureTime = trip.getFirstPublicLegDepartureTime();
-                    final Timestamp lastPublicLegArrivalTime = trip.getLastPublicLegArrivalTime();
+                    final PTDate firstPublicLegDepartureTime = trip.getFirstPublicLegDepartureTime();
+                    final PTDate lastPublicLegArrivalTime = trip.getLastPublicLegArrivalTime();
 
                     // save last trip to history
                     if (firstPublicLegDepartureTime != null && lastPublicLegArrivalTime != null && historyUri != null) {
@@ -630,10 +630,10 @@ public class TripsOverviewActivity extends OeffiActivity {
         final Trip.Public firstPublicLeg = trip.getFirstPublicLeg();
         if (firstPublicLeg == null)
             return null;
-        final Timestamp departureTime = firstPublicLeg.getDepartureTime();
+        final PTDate departureTime = firstPublicLeg.getDepartureTime();
         if (departureTime == null)
             return null;
-        final Timestamp prependTime = renderConfig.prependToStopIsLegDeparture
+        final PTDate prependTime = renderConfig.prependToStopIsLegDeparture
                 ? renderConfig.prependToStop.plannedDepartureTime
                 : renderConfig.prependToStop.plannedArrivalTime;
         if (prependTime != null) {
@@ -728,7 +728,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         // update server product
         if (result.header != null) {
             final TextView serverProductView = findViewById(R.id.trips_server_product);
-            updateDisclaimerSource(serverProductView, network.name(), null);
+            updateDisclaimerSource(serverProductView, network, null);
 //            serverProductView.setText(product(result.header));
 //            serverProductView.setVisibility(View.VISIBLE);
         }
@@ -959,18 +959,18 @@ public class TripsOverviewActivity extends OeffiActivity {
                     final Trip.Public leg = (Trip.Public) aLeg;
                     if (prevLeg != null) {
                         if (transferStationId.equals(leg.departureStop.location.id)) {
-                            final Timestamp departureTime = leg.departureStop.getDepartureTime();
+                            final PTDate departureTime = leg.departureStop.getDepartureTime();
                             for (Trip feedingTrip: tripsToStation) {
                                 final Trip.Leg lastLeg = feedingTrip.legs.get(feedingTrip.legs.size() - 1);
                                 final Trip.Public lastPublicLeg;
                                 final Trip.Individual connectingWalkLeg;
-                                final Timestamp arrivalTime;
+                                final PTDate arrivalTime;
                                 if (lastLeg instanceof Trip.Public) {
                                     lastPublicLeg = (Trip.Public) lastLeg;
                                     arrivalTime = lastPublicLeg.arrivalStop.plannedArrivalTime;
                                 } else if (lastLeg instanceof Trip.Individual){
                                     connectingWalkLeg = (Trip.Individual) lastLeg;
-                                    final Timestamp walkArrivalTime = connectingWalkLeg.arrivalTime;
+                                    final PTDate walkArrivalTime = connectingWalkLeg.arrivalTime;
                                     final Trip.Leg secondLastLeg = feedingTrip.legs.get(feedingTrip.legs.size() - 2);
                                     if (!(secondLastLeg instanceof Trip.Public))
                                         continue;

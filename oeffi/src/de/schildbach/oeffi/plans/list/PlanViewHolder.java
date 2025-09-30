@@ -87,8 +87,8 @@ public class PlanViewHolder extends RecyclerView.ViewHolder {
         validFromView.setText(
                 valid ? null : context.getString(R.string.plans_picker_entry_valid_from, dateFormat.format(validFrom)));
 
-        if (plan.networkLogo != null) {
-            final NetworkResources networkResources = NetworkResources.instance(context, plan.networkLogo);
+        if (plan.networkId != null) {
+            final NetworkResources networkResources = NetworkResources.instance(context, plan.networkId);
             networkLogoView.setVisibility(View.VISIBLE);
             networkLogoView.setImageDrawable(networkResources.icon);
         } else {

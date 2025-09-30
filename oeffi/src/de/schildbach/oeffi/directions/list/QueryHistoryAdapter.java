@@ -28,6 +28,8 @@ import android.provider.BaseColumns;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import androidx.recyclerview.widget.RecyclerView;
+
+import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.QueryHistoryProvider;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
@@ -37,7 +39,7 @@ import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.Point;
 
 public class QueryHistoryAdapter extends RecyclerView.Adapter<QueryHistoryViewHolder> {
-    private final Context context;
+    private final OeffiActivity context;
     private final ContentResolver contentResolver;
     private final LayoutInflater inflater;
     private final NetworkId network;
@@ -71,7 +73,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<QueryHistoryViewHo
 
     private long selectedRowId = RecyclerView.NO_ID;
 
-    public QueryHistoryAdapter(final Context context, final NetworkId network,
+    public QueryHistoryAdapter(final OeffiActivity context, final NetworkId network,
             final QueryHistoryClickListener clickListener,
             final QueryHistoryContextMenuItemListener contextMenuItemListener) {
         this.context = context;

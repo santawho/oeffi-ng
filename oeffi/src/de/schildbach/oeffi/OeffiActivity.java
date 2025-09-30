@@ -188,7 +188,7 @@ public abstract class OeffiActivity extends ComponentActivity {
     }
 
     protected void updateFromPreferences() {
-        timeZoneSelector = new TimeZoneSelector(prefs.getString(PREFS_KEY_PREFFERED_TIMEZONE, "location"), network);
+        timeZoneSelector = new TimeZoneSelector(this, prefs.getString(PREFS_KEY_PREFFERED_TIMEZONE, "location"), network);
     }
 
     public TimeZoneSelector getTimeZoneSelector() {
@@ -682,12 +682,25 @@ public abstract class OeffiActivity extends ComponentActivity {
         return mapEnabled || res.getBoolean(R.bool.layout_map_show);
     }
 
-    protected String prefsGetNetwork() {
-        return prefs.getString(Constants.PREFS_KEY_NETWORK_PROVIDER, null);
+    protected String prefsGetNetworkName() {
+        final String networkName = prefs.getString(Constants.PREFS_KEY_NETWORK_PROVIDER, null);
+        if (networkName != null)
+            return networkName;
+
+        final String defaultNetworkName = getDefaultNetworkName();
+        if (defaultNetworkName == null)
+            return null;
+
+        prefs.edit().putString(Constants.PREFS_KEY_NETWORK_PROVIDER, defaultNetworkName).apply();
+        return defaultNetworkName;
+    }
+
+    protected String getDefaultNetworkName() {
+        return NetworkId.DEUTSCHLANDTICKET.name();
     }
 
     protected NetworkId prefsGetNetworkId() {
-        final String id = prefsGetNetwork();
+        final String id = prefsGetNetworkName();
         if (id == null)
             return null;
 
@@ -820,7 +833,7 @@ public abstract class OeffiActivity extends ComponentActivity {
         setTaskDescription(new TaskDescription(null, null, color));
     }
 
-    protected void updateDisclaimerSource(final TextView disclaimerSourceView, final String network,
+    protected void updateDisclaimerSource(final TextView disclaimerSourceView, final NetworkId network,
             final CharSequence defaultLabel) {
         final NetworkResources networkRes = NetworkResources.instance(this, network);
         final Drawable networkResIcon = networkRes.icon;

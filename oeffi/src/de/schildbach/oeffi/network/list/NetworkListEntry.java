@@ -17,9 +17,11 @@
 
 package de.schildbach.oeffi.network.list;
 
+import de.schildbach.pte.NetworkId;
+
 public interface NetworkListEntry {
-    public static class Network implements NetworkListEntry {
-        public final String id;
+    class Network implements NetworkListEntry {
+        public final NetworkId id;
         public final String state;
         public final String group;
         public final String coverage;
@@ -27,7 +29,7 @@ public interface NetworkListEntry {
         public static final String STATE_DEPRECATED = "deprecated";
         public static final String STATE_DISABLED = "disabled";
 
-        public Network(final String id, final String state, final String group, final String coverage) {
+        public Network(final NetworkId id, final String state, final String group, final String coverage) {
             this.id = id;
             this.state = state;
             this.group = group;
@@ -47,7 +49,7 @@ public interface NetworkListEntry {
         }
     }
 
-    public static class Separator implements NetworkListEntry {
+    class Separator implements NetworkListEntry {
         public final String label;
 
         public Separator(final String label) {

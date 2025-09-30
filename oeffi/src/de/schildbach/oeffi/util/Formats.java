@@ -25,119 +25,116 @@ import de.schildbach.oeffi.R;
 import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.Position;
-import de.schildbach.pte.dto.Timestamp;
+import de.schildbach.pte.dto.PTDate;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.SimpleTimeZone;
 
 public final class Formats {
-    private static final String VARIABLE_TIMEZONE_ID = "?";
-
-    public static String formatDate( final Context context, final Timestamp timestamp) {
-        return formatDate(context, timestamp.getTime(), timestamp.getOffset());
+    public static String formatDate(final TimeZoneSelector timeZoneSelector, final PTDate timestamp) {
+        return formatDate(timeZoneSelector, timestamp.getTime(), timestamp.getOffset());
     }
 
-    public static String formatDate( final Context context, final Date date, final int offset) {
-        return formatDate(context, date.getTime(), offset);
+    public static String formatDate(final TimeZoneSelector timeZoneSelector, final Date date, final int offset) {
+        return formatDate(timeZoneSelector, date.getTime(), offset);
     }
 
-    public static String formatDate(final Context context, final long time, final int offset) {
+    public static String formatDate(final TimeZoneSelector timeZoneSelector, final long time, final int offset) {
         // return DateUtils.formatDateTime(context, time,
         //         DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_ABBREV_WEEKDAY
         //                 | DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_MONTH);
-        return getTimeFormat(context, offset).format(time);
+        return getTimeFormat(timeZoneSelector, time, offset).format(time);
     }
 
-    public static java.text.DateFormat getDateFormat(final Context context, final int offset) {
-        final java.text.DateFormat dateFormat = DateFormat.getDateFormat(context);
-        dateFormat.setTimeZone(new SimpleTimeZone(offset, VARIABLE_TIMEZONE_ID));
+    public static java.text.DateFormat getDateFormat(final TimeZoneSelector timeZoneSelector, final long time, final int offset) {
+        final java.text.DateFormat dateFormat = DateFormat.getDateFormat(timeZoneSelector.context);
+        dateFormat.setTimeZone(timeZoneSelector.getTimeZoneForOffset(time, offset));
         return dateFormat;
     }
 
     public static String formatDate(
-            final Context context, final long now, final Date date, final int offset,
+            final TimeZoneSelector timeZoneSelector, final long now, final Date date, final int offset,
             final boolean abbreviate, final String todayString) {
-        return formatDate(context, now, date.getTime(), offset, abbreviate, todayString);
+        return formatDate(timeZoneSelector, now, date.getTime(), offset, abbreviate, todayString);
     }
 
 
     public static String formatDate(
-            final Context context, final long now, final Timestamp timestamp,
+            final TimeZoneSelector timeZoneSelector, final long now, final PTDate timestamp,
             final boolean abbreviate, final String todayString) {
-        return formatDate(context, now, timestamp.getTime(), timestamp.getOffset(), abbreviate, todayString);
+        return formatDate(timeZoneSelector, now, timestamp.getTime(), timestamp.getOffset(), abbreviate, todayString);
     }
 
     public static String formatDate(
-            final Context context, final long now, final long time, final int offset,
+            final TimeZoneSelector timeZoneSelector, final long now, final long time, final int offset,
             final boolean abbreviate, final String todayString) {
         // today
         if (DateUtils.isToday(time))
             return todayString;
 
-        final Calendar calendar = new GregorianCalendar(new SimpleTimeZone(offset, VARIABLE_TIMEZONE_ID));
+        final Calendar calendar = new GregorianCalendar(timeZoneSelector.getTimeZoneForOffset(time, offset));
         calendar.setTimeInMillis(time);
         if (time > now) {
             // tomorrow
             calendar.add(Calendar.DAY_OF_MONTH, -1);
             if (DateUtils.isToday(calendar.getTimeInMillis()))
-                return context.getString(abbreviate ? R.string.time_tomorrow_abbrev : R.string.time_tomorrow);
+                return timeZoneSelector.context.getString(abbreviate ? R.string.time_tomorrow_abbrev : R.string.time_tomorrow);
 
             // next several days
             if (time - now < DateUtils.DAY_IN_MILLIS * 6) {
                 int flags = DateUtils.FORMAT_SHOW_WEEKDAY;
                 if (abbreviate)
                     flags |= DateUtils.FORMAT_ABBREV_WEEKDAY;
-                return DateUtils.formatDateTime(context, time, flags);
+                return DateUtils.formatDateTime(timeZoneSelector.context, time, flags);
             }
         } else {
             // yesterday
             calendar.add(Calendar.DAY_OF_MONTH, 1);
             if (DateUtils.isToday(calendar.getTimeInMillis()))
-                return context.getString(abbreviate ? R.string.time_yesterday_abbrev : R.string.time_yesterday);
+                return timeZoneSelector.context.getString(abbreviate ? R.string.time_yesterday_abbrev : R.string.time_yesterday);
         }
 
         // default
-        return formatDate(context, time, offset);
+        return formatDate(timeZoneSelector, time, offset);
     }
 
-    public static String formatDate(final Context context, final long now, final Timestamp timestamp) {
-        return formatDate(context, now, timestamp.getDate(), timestamp.getOffset());
+    public static String formatDate(final TimeZoneSelector timeZoneSelector, final long now, final PTDate timestamp) {
+        return formatDate(timeZoneSelector, now, timestamp, timestamp.getOffset());
     }
 
-    public static String formatDate(final Context context, final long now, final Date date, final int offset) {
-        return formatDate(context, now, date.getTime(), offset);
+    public static String formatDate(final TimeZoneSelector timeZoneSelector, final long now, final Date date, final int offset) {
+        return formatDate(timeZoneSelector, now, date.getTime(), offset);
     }
 
-    public static String formatDate(final Context context, final long now, final long time, final int offset) {
-        return formatDate(context, now, time, offset, false, context.getString(R.string.time_today));
+    public static String formatDate(final TimeZoneSelector timeZoneSelector, final long now, final long time, final int offset) {
+        return formatDate(timeZoneSelector, now, time, offset, false, timeZoneSelector.context.getString(R.string.time_today));
     }
 
-    public static String formatTime(final Context context, final Date date, final int offset) {
-        return formatTime(context, date.getTime(), offset);
+    public static String formatTime(final TimeZoneSelector timeZoneSelector, final Date date, final int offset) {
+        return formatTime(timeZoneSelector, date.getTime(), offset);
     }
 
-    public static String formatTime(final Context context, final Timestamp timestamp) {
-        return formatTime(context, timestamp.getTime(), timestamp.getOffset());
+    public static String formatTime(final TimeZoneSelector timeZoneSelector, final PTDate timestamp) {
+        return formatTime(timeZoneSelector, timestamp.getTime(), timestamp.getOffset());
     }
 
-    public static String formatTime(final Context context, final long time, final int offset) {
-        return getTimeFormat(context, offset).format(time);
+    public static String formatTime(final TimeZoneSelector timeZoneSelector, final long time, final int offset) {
+        return getTimeFormat(timeZoneSelector, time, offset).format(time);
     }
 
-    public static java.text.DateFormat getTimeFormat(final Context context, final int offset) {
-        final java.text.DateFormat timeFormat = DateFormat.getTimeFormat(context);
-        timeFormat.setTimeZone(new SimpleTimeZone(offset, VARIABLE_TIMEZONE_ID));
+    public static java.text.DateFormat getTimeFormat(final TimeZoneSelector timeZoneSelector, final long time, final int offset) {
+        final java.text.DateFormat timeFormat = DateFormat.getTimeFormat(timeZoneSelector.context);
+        timeFormat.setTimeZone(timeZoneSelector.getTimeZoneForOffset(time, offset));
         return timeFormat;
     }
 
-    public static String formatTime(final Context context, final long now, final long time, final int offset) {
-        final String timeString = formatTime(context, time, offset);
+    public static String formatTime(final TimeZoneSelector timeZoneSelector, final long now, final long time, final int offset) {
+        final String timeString = formatTime(timeZoneSelector, time, offset);
 
         final long diff = time - now;
         if (diff < -8 * 3600000 || diff > 8 * 3600000)
-            return formatDate(context, now, time, offset) + " " + timeString;
+            return formatDate(timeZoneSelector, now, time, offset) + " " + timeString;
 
         return timeString;
     }

@@ -26,6 +26,8 @@ import java.util.Locale;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import de.schildbach.pte.NetworkId;
+
 public class NetworkResources {
     public final @Nullable Drawable icon;
     public final boolean isLogo;
@@ -44,8 +46,8 @@ public class NetworkResources {
         this.cooperation = cooperation;
     }
 
-    public static NetworkResources instance(final Context context, final String networkId) {
-        final String prefix = "network_" + networkId.toLowerCase(Locale.ENGLISH);
+    public static NetworkResources instance(final Context context, final NetworkId networkId) {
+        final String prefix = "network_" + networkId.name().toLowerCase(Locale.ENGLISH);
         final Resources res = context.getResources();
         final String packageName = context.getPackageName();
 
@@ -64,7 +66,7 @@ public class NetworkResources {
             isLogo = false;
         }
         final int labelId = res.getIdentifier(prefix + "_label", "string", packageName);
-        final String label = labelId != 0 ? res.getString(labelId) : networkId;
+        final String label = labelId != 0 ? res.getString(labelId) : networkId.name();
         final int commentId = res.getIdentifier(prefix + "_comment", "string", packageName);
         final String comment = commentId != 0 ? res.getString(commentId) : null;
         final int licenseId = res.getIdentifier(prefix + "_license", "string", packageName);

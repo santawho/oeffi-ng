@@ -32,7 +32,6 @@ import android.os.HandlerThread;
 import android.os.Process;
 import android.text.Html;
 import android.text.Spanned;
-import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
@@ -54,7 +53,6 @@ import com.google.common.base.Joiner;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiActivity;
-import de.schildbach.oeffi.OeffiMapView;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.StationsAware;
 import de.schildbach.oeffi.directions.QueryJourneyRunnable;
@@ -75,7 +73,7 @@ import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.Product;
 import de.schildbach.pte.dto.QueryDeparturesResult;
 import de.schildbach.pte.dto.StationDepartures;
-import de.schildbach.pte.dto.Timestamp;
+import de.schildbach.pte.dto.PTDate;
 
 import org.osmdroid.util.GeoPoint;
 import org.slf4j.Logger;
@@ -280,8 +278,8 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             timeView.setVisibility(View.VISIBLE);
             final long presetTimeMs = presetTime.getTime();
             final String text = String.format("%s %s",
-                    Formats.formatDate(this, System.currentTimeMillis(), presetTimeMs, Timestamp.NETWORK_OFFSET),
-                    Formats.formatTime(this, presetTimeMs, Timestamp.NETWORK_OFFSET));
+                    Formats.formatDate(timeZoneSelector, System.currentTimeMillis(), presetTimeMs, PTDate.NETWORK_OFFSET),
+                    Formats.formatTime(timeZoneSelector, presetTimeMs, PTDate.NETWORK_OFFSET));
             timeView.setText(text);
         }
 
@@ -295,7 +293,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             return windowInsets;
         });
         disclaimerSourceView = findViewById(R.id.stations_station_details_disclaimer_source);
-        updateDisclaimerSource(disclaimerSourceView, selectedNetwork.name(), null);
+        updateDisclaimerSource(disclaimerSourceView, selectedNetwork, null);
     }
 
     @Override
@@ -422,7 +420,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                     @Override
                     protected void onResult(final QueryDeparturesResult result) {
                         if (result.header != null) {
-                            updateDisclaimerSource(disclaimerSourceView, selectedNetwork.name(),
+                            updateDisclaimerSource(disclaimerSourceView, selectedNetwork,
                                     product(result.header));
                         }
 
@@ -770,11 +768,11 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             final boolean refIsNow = context.presetTime == null;
             final long referenceTime = (refIsNow ? new Date() : context.presetTime).getTime();
 
-            final Timestamp predictedTime = departure.predictedTime;
-            final Timestamp plannedTime = departure.plannedTime;
+            final PTDate predictedTime = departure.predictedTime;
+            final PTDate plannedTime = departure.plannedTime;
             final boolean cancelled = departure.cancelled;
 
-            Timestamp time;
+            PTDate time;
             final boolean isPredicted = predictedTime != null;
             if (predictedTime != null)
                 time = predictedTime;
@@ -794,11 +792,11 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             setStrikeThru(timeRelView, cancelled);
 
             // time abs
-            final Timestamp displayTime = timeZoneSelector.getDisplay(time);
-            final StringBuilder timeAbs = new StringBuilder(Formats.formatDate(context, referenceTime, displayTime, false, ""));
+            final PTDate displayTime = timeZoneSelector.getDisplay(time);
+            final StringBuilder timeAbs = new StringBuilder(Formats.formatDate(timeZoneSelector, referenceTime, displayTime, false, ""));
             if (timeAbs.length() > 0)
                 timeAbs.append(',').append(Constants.CHAR_HAIR_SPACE);
-            timeAbs.append(Formats.formatTime(context, displayTime));
+            timeAbs.append(Formats.formatTime(timeZoneSelector, displayTime));
             timeAbsView.setText(timeAbs);
             timeAbsView.setTypeface(Typeface.DEFAULT, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
             setStrikeThru(timeAbsView, cancelled);

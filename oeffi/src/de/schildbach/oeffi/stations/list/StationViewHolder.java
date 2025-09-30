@@ -51,7 +51,7 @@ import de.schildbach.pte.dto.LineDestination;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.Product;
 import de.schildbach.pte.dto.QueryDeparturesResult;
-import de.schildbach.pte.dto.Timestamp;
+import de.schildbach.pte.dto.PTDate;
 
 import javax.annotation.Nullable;
 import java.util.Date;
@@ -336,8 +336,8 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
                             }
 
                             long time;
-                            final Timestamp predictedTime = departure.predictedTime;
-                            final Timestamp plannedTime = departure.plannedTime;
+                            final PTDate predictedTime = departure.predictedTime;
+                            final PTDate plannedTime = departure.plannedTime;
                             final boolean isPredicted = predictedTime != null;
                             if (predictedTime != null)
                                 time = predictedTime.getTime();
@@ -438,9 +438,9 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
         if (departures.size() < 3)
             return 0;
         int interval = 0;
-        Timestamp lastPlannedTime = null;
+        PTDate lastPlannedTime = null;
         for (final Departure departure : departures) {
-            final Timestamp plannedTime = departure.plannedTime;
+            final PTDate plannedTime = departure.plannedTime;
             if (plannedTime == null)
                 return 0;
             if (lastPlannedTime != null) {

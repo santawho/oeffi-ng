@@ -137,7 +137,7 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
         listView = findViewById(android.R.id.list);
         listView.setLayoutManager(new LinearLayoutManager(this));
         listView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
-        final String network = prefsGetNetwork();
+        final NetworkId network = prefsGetNetworkId();
         listAdapter = new NetworksAdapter(this, network, this, this);
         listView.setAdapter(listAdapter);
         ViewCompat.setOnApplyWindowInsetsListener(listView, (v, windowInsets) -> {
@@ -283,7 +283,7 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
     @Override
     public boolean onKeyDown(final int keyCode, final KeyEvent event) {
         // disable back key if no network is selected
-        if (keyCode == KeyEvent.KEYCODE_BACK && prefsGetNetwork() == null)
+        if (keyCode == KeyEvent.KEYCODE_BACK && prefsGetNetworkId() == null)
             return true;
 
         return super.onKeyDown(keyCode, event);
@@ -291,10 +291,10 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
 
     public void onNetworkClick(final NetworkListEntry.Network entry) {
         // persist in preferences
-        prefs.edit().putString(Constants.PREFS_KEY_NETWORK_PROVIDER, entry.id).commit();
+        prefs.edit().putString(Constants.PREFS_KEY_NETWORK_PROVIDER, entry.id.name()).commit();
 
         // put last selected network to the front
-        final NetworkId network = NetworkId.valueOf(entry.id);
+        final NetworkId network = entry.id;
         lastNetworks.remove(network);
         lastNetworks.add(0, network);
         while (lastNetworks.size() > MAX_LAST_NETWORKS)
@@ -339,13 +339,13 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
                     continue;
 
                 final String[] fields = line.split("\\|");
-                final String networkId = fields[0];
+                final String networkName = fields[0];
                 final String group = fields[1];
                 final String coverage = fields.length >= 3 ? fields[2] : "";
                 final String state = fields.length >= 4 ? fields[3] : null;
-                final NetworkListEntry entry = new NetworkListEntry.Network(networkId, state, group, coverage);
+                final NetworkListEntry entry = new NetworkListEntry.Network(NetworkId.valueOf(networkName), state, group, coverage);
 
-                entriesMap.put(networkId, entry);
+                entriesMap.put(networkName, entry);
             }
         } catch (final Exception x) {
             throw new RuntimeException("problem parsing: '" + line + "'", x);
@@ -427,7 +427,7 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
                 || NetworkListEntry.Network.STATE_DISABLED.equals(network.state))
             return false;
 
-        final NetworkProvider networkProvider = NetworkProviderFactory.provider(NetworkId.valueOf(network.id));
+        final NetworkProvider networkProvider = NetworkProviderFactory.provider(network.id);
 
         boolean inArea = false;
 

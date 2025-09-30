@@ -46,7 +46,6 @@ import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
-import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.RelativeSizeSpan;
@@ -110,7 +109,7 @@ import de.schildbach.pte.dto.Point;
 import de.schildbach.pte.dto.Position;
 import de.schildbach.pte.dto.Stop;
 import de.schildbach.pte.dto.Style;
-import de.schildbach.pte.dto.Timestamp;
+import de.schildbach.pte.dto.PTDate;
 import de.schildbach.pte.dto.Trip;
 import de.schildbach.pte.dto.TripShare;
 
@@ -128,7 +127,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
-import java.util.SimpleTimeZone;
 import java.util.TimeZone;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -249,7 +247,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     protected NetworkId network;
     protected TripRenderer tripRenderer;
     protected RenderConfig renderConfig;
-    private Timestamp highlightedTime;
+    private PTDate highlightedTime;
     private Location highlightedLocation;
     private Point deviceLocation;
     private Date deviceLocationTime;
@@ -486,7 +484,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             return windowInsets;
         });
         final TextView disclaimerSourceView = findViewById(R.id.directions_trip_details_disclaimer_source);
-        updateDisclaimerSource(disclaimerSourceView, network.name(), null);
+        updateDisclaimerSource(disclaimerSourceView, network, null);
 
         getMapView().setTripAware(new TripAware() {
             public Trip getTrip() {
@@ -558,8 +556,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final long loadedAt = tripRenderer.trip.loadedAt.getTime();
             final long updatedAt = tripRenderer.trip.updatedAt.getTime();
             devinfoView.setText(String.format("loaded at %s, updated at %s",
-                    Formats.formatTime(this, loadedAt, Timestamp.SYSTEM_OFFSET),
-                    Formats.formatTime(this, updatedAt, Timestamp.SYSTEM_OFFSET)));
+                    Formats.formatTime(timeZoneSelector, loadedAt, PTDate.SYSTEM_OFFSET),
+                    Formats.formatTime(timeZoneSelector, updatedAt, PTDate.SYSTEM_OFFSET)));
         } else {
             devinfoView.setVisibility(View.GONE);
         }
@@ -784,7 +782,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private void updateHighlightedTime(final Date now) {
         highlightedTime = null;
 
-        final Timestamp firstPublicLegDepartureTime = tripRenderer.trip.getFirstPublicLegDepartureTime();
+        final PTDate firstPublicLegDepartureTime = tripRenderer.trip.getFirstPublicLegDepartureTime();
         if (firstPublicLegDepartureTime == null
                 || firstPublicLegDepartureTime.getTime() - now.getTime() > 10 * DateUtils.MINUTE_IN_MILLIS)
             return;
@@ -794,10 +792,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 continue;
 
             final Trip.Public publicLeg = legC.simulatedPublicLeg != null ? legC.simulatedPublicLeg : legC.publicLeg;
-            Timestamp arrivalTime, departureTime;
+            PTDate arrivalTime, departureTime;
 
             departureTime = publicLeg.getDepartureTime();
-            if (departureTime.getDate().after(now)) {
+            if (departureTime.after(now)) {
                 highlightedTime = departureTime;
                 return;
             }
@@ -806,13 +804,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             if (intermediateStops != null) {
                 for (final Stop stop : intermediateStops) {
                     departureTime = stop.getDepartureTime();
-                    if (departureTime != null && departureTime.getDate().after(now)) {
+                    if (departureTime != null && departureTime.after(now)) {
                         highlightedTime = departureTime;
                         return;
                     }
 
                     arrivalTime = stop.getArrivalTime();
-                    if (arrivalTime != null && arrivalTime.getDate().after(now)) {
+                    if (arrivalTime != null && arrivalTime.after(now)) {
                         highlightedTime = arrivalTime;
                         return;
                     }
@@ -820,7 +818,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
 
             arrivalTime = publicLeg.getArrivalTime();
-            if (arrivalTime.getDate().after(now)) {
+            if (arrivalTime.after(now)) {
                 highlightedTime = arrivalTime;
                 return;
             }
@@ -916,7 +914,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         if (destination != null) {
             destinationView.setVisibility(View.VISIBLE);
             destinationView.setText(Constants.DESTINATION_ARROW_PREFIX + Formats.makeBreakableStationName(destinationName));
-            destinationView.setOnClickListener(destination.hasId() ? new LocationClickListener(destination, Timestamp.toDate(leg.getArrivalTime())) : null);
+            destinationView.setOnClickListener(destination.hasId() ? new LocationClickListener(destination, leg.getArrivalTime()) : null);
         } else {
             destinationView.setVisibility(View.GONE);
         }
@@ -983,8 +981,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             if (isStopsExpanded) {
                 for (final Stop stop : intermediateStops) {
                     final Location stopLocation = stop.location;
-                    final Timestamp arrivalTime = stop.getArrivalTime();
-                    final Timestamp departureTime = stop.getDepartureTime();
+                    final PTDate arrivalTime = stop.getArrivalTime();
+                    final PTDate departureTime = stop.getDepartureTime();
                     final boolean hasStopTime = arrivalTime != null || departureTime != null;
                     final boolean isArrivalTimeHighlighted = arrivalTime != null && arrivalTime.equals(highlightedTime);
                     final boolean isDepartureTimeHighlighted = departureTime != null && departureTime.equals(highlightedTime);
@@ -1095,22 +1093,22 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             devinfoView.setVisibility(View.VISIBLE);
             final Date updateDelayedUntil = leg.updateDelayedUntil;
             devinfoView.setText(String.format("loaded at %s, %s",
-                    Formats.formatTime(this, leg.loadedAt.getTime(), Timestamp.SYSTEM_OFFSET),
+                    Formats.formatTime(timeZoneSelector, leg.loadedAt.getTime(), PTDate.SYSTEM_OFFSET),
                     updateDelayedUntil == null ? "is fresh" : String.format("next update at %s",
-                            Formats.formatTime(this, updateDelayedUntil.getTime(), Timestamp.SYSTEM_OFFSET))));
+                            Formats.formatTime(timeZoneSelector, updateDelayedUntil.getTime(), PTDate.SYSTEM_OFFSET))));
         } else {
             devinfoView.setVisibility(View.GONE);
         }
 
         final View progressView = row.findViewById(R.id.directions_trip_details_public_entry_progress);
         progressView.setVisibility(View.GONE);
-        Timestamp beginTime = departureStop.getDepartureTime();
-        Timestamp endTime = leg.arrivalStop.getArrivalTime();
-        if (now.before(beginTime.getDate())) {
+        PTDate beginTime = departureStop.getDepartureTime();
+        PTDate endTime = leg.arrivalStop.getArrivalTime();
+        if (now.before(beginTime)) {
             // leg is in the future
             row.setBackgroundColor(colorLegPublicFutureBackground);
             return false;
-        } else if (now.after(endTime.getDate())) {
+        } else if (now.after(endTime)) {
             // leg is in the past
             row.setBackgroundColor(colorLegPublicPastBackground);
             return false;
@@ -1122,12 +1120,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         progressView.setOnClickListener(view -> setShowNextEvent(true));
 
         final TextView progressText = row.findViewById(R.id.directions_trip_details_public_entry_progress_text);
-        progressText.setText(getLeftTimeFormatted(now, endTime.getDate()));
+        progressText.setText(getLeftTimeFormatted(now, endTime));
 
         return true;
     }
 
-    private boolean isLongStay(final Timestamp arrivalTime, final Timestamp departureTime) {
+    private boolean isLongStay(final PTDate arrivalTime, final PTDate departureTime) {
         if (arrivalTime == null)
             return false;
         if (departureTime == null)
@@ -1279,13 +1277,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         final View progressView = row.findViewById(R.id.directions_trip_details_individual_entry_progress);
         progressView.setVisibility(View.GONE);
-        Timestamp beginTime = transferFrom != null ? transferFrom.getArrivalTime() : leg == null ? null : leg.departureTime;
-        Timestamp endTime = transferTo != null ? transferTo.getDepartureTime() : leg == null ? null : leg.arrivalTime;
-        if (transferFrom != null && beginTime != null && now.before(beginTime.getDate())) {
+        PTDate beginTime = transferFrom != null ? transferFrom.getArrivalTime() : leg == null ? null : leg.departureTime;
+        PTDate endTime = transferTo != null ? transferTo.getDepartureTime() : leg == null ? null : leg.arrivalTime;
+        if (transferFrom != null && beginTime != null && now.before(beginTime)) {
             // leg is in the future
             row.setBackgroundColor(colorLegIndividualFutureBackground);
             return false;
-        } else if (endTime != null && now.after(endTime.getDate())) {
+        } else if (endTime != null && now.after(endTime)) {
             // leg is in the past
             row.setBackgroundColor(colorLegIndividualPastBackground);
             return false;
@@ -1297,7 +1295,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         progressView.setOnClickListener(view -> setShowNextEvent(true));
 
         final TextView progressText = row.findViewById(R.id.directions_trip_details_individual_entry_progress_text);
-        progressText.setText(getLeftTimeFormatted(now, endTime.getDate()));
+        progressText.setText(getLeftTimeFormatted(now, endTime));
 
         return true;
     }
@@ -1335,7 +1333,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         setViewBackgroundColor(R.id.navigation_next_event_clock, colorNormal);
 
         TextView clock = findViewById(R.id.navigation_next_event_clock);
-        clock.setText(Formats.formatTime(this, tripRenderer.nextEventClock.getTime(), Timestamp.SYSTEM_OFFSET));
+        clock.setText(Formats.formatTime(timeZoneSelector, tripRenderer.nextEventClock.getTime(), PTDate.SYSTEM_OFFSET));
 
         TextView currentAction = findViewById(R.id.navigation_next_event_current_action);
         if (tripRenderer.nextEventCurrentStringId > 0) {
@@ -1582,10 +1580,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             calendar = new GregorianCalendar(timeZone);
         }
 
-        public boolean dateChanged(final Timestamp time) {
+        public boolean dateChanged(final PTDate time) {
             final int oldYear = calendar.get(Calendar.YEAR);
             final int oldDayOfYear = calendar.get(Calendar.DAY_OF_YEAR);
-            calendar.setTime(time.getDate());
+            calendar.setTime(time);
             return calendar.get(Calendar.YEAR) != oldYear || calendar.get(Calendar.DAY_OF_YEAR) != oldDayOfYear;
         }
     }
@@ -1599,7 +1597,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final Trip.Public leg = legC.publicLeg;
 
         final boolean isTimePredicted;
-        final Timestamp time;
+        final PTDate time;
         final boolean isTimeDeparture;
         final Long delay;
         final boolean isCancelled;
@@ -1736,13 +1734,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         stopDateView.setText(null);
         stopTimeView.setText(null);
         if (time != null) {
-            final Timestamp displayTime = timeZoneSelector.getDisplay(time);
+            final PTDate displayTime = timeZoneSelector.getDisplay(time);
             if (collapseColumns.dateChanged(displayTime)) {
-                stopDateView.setText(Formats.formatDate(TripDetailsActivity.this,
+                stopDateView.setText(Formats.formatDate(timeZoneSelector,
                         now.getTime(), displayTime, true, res.getString(R.string.time_today_abbrev)));
                 collapseColumns.collapseDateColumn = false;
             }
-            final String timeText = Formats.formatTime(TripDetailsActivity.this, displayTime);
+            final String timeText = Formats.formatTime(timeZoneSelector, displayTime);
             stopTimeView.setText(isTimeDeparture ? timeText + "°" : timeText);
             setStrikeThru(stopTimeView, isCancelled);
         }
@@ -1908,18 +1906,18 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     showNavigateTo, false);
             contextMenu.setOnMenuItemClickListener(item -> {
                 int menuItemId = item.getItemId();
-                Timestamp time = stop.getArrivalTime();
+                PTDate time = stop.getArrivalTime();
                 if (time == null)
                     time = stop.getDepartureTime(true);
                 if (menuItemId == R.id.station_context_show_departures) {
                     StationDetailsActivity.start(TripDetailsActivity.this, network, stop.location,
-                            time == null ? null : time.getDate(),
+                            time == null ? null : time,
                             null,
                             shallShowChildActivitiesInNewTask());
                     return true;
                 } else if (menuItemId == R.id.station_context_nearby_departures) {
                     StationsActivity.start(TripDetailsActivity.this, network, stop.location,
-                            time == null ? null : time.getDate());
+                            time == null ? null : time);
                     return true;
                 } else if (menuItemId == R.id.station_context_navigate_to) {
                     startNavigationForJourneyToExit(stop);
@@ -2022,10 +2020,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 trip.from.uniqueShortName(), trip.to.uniqueShortName()));
         intent.putExtra(CalendarContract.Events.DESCRIPTION, tripToLongText(trip, withLink));
         intent.putExtra(CalendarContract.Events.EVENT_LOCATION, trip.from.uniqueShortName());
-        final Timestamp firstDepartureTime = trip.getFirstDepartureTime();
+        final PTDate firstDepartureTime = trip.getFirstDepartureTime();
         if (firstDepartureTime != null)
             intent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, firstDepartureTime.getTime());
-        final Timestamp lastArrivalTime = trip.getLastArrivalTime();
+        final PTDate lastArrivalTime = trip.getLastArrivalTime();
         if (lastArrivalTime != null)
             intent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, lastArrivalTime.getTime());
         intent.putExtra(CalendarContract.Events.ACCESS_LEVEL, CalendarContract.Events.ACCESS_DEFAULT);
@@ -2051,15 +2049,15 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         if (firstPublicLeg == null || lastPublicLeg == null)
             return null;
 
-        final Timestamp departureTime = timeZoneSelector.getDisplay(firstPublicLeg.getDepartureTime(true));
-        final String departureDateStr = Formats.formatDate(this, departureTime);
-        final String departureTimeStr = Formats.formatTime(this, departureTime);
+        final PTDate departureTime = timeZoneSelector.getDisplay(firstPublicLeg.getDepartureTime(true));
+        final String departureDateStr = Formats.formatDate(timeZoneSelector, departureTime);
+        final String departureTimeStr = Formats.formatTime(timeZoneSelector, departureTime);
         final String departureLineStr = firstPublicLeg.line.label;
         final String departureNameStr = firstPublicLeg.departure.uniqueShortName();
 
-        final Timestamp arrivalTime = timeZoneSelector.getDisplay(lastPublicLeg.getArrivalTime(true));
-        final String arrivalDateStr = Formats.formatDate(this, arrivalTime);
-        final String arrivalTimeStr = Formats.formatTime(this, arrivalTime);
+        final PTDate arrivalTime = timeZoneSelector.getDisplay(lastPublicLeg.getArrivalTime(true));
+        final String arrivalDateStr = Formats.formatDate(timeZoneSelector, arrivalTime);
+        final String arrivalTimeStr = Formats.formatTime(timeZoneSelector, arrivalTime);
         final String arrivalLineStr = lastPublicLeg.line.label;
         final String arrivalNameStr = lastPublicLeg.arrival.uniqueShortName();
 
@@ -2082,16 +2080,16 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 final String lineDestinationStr = lineDestination != null
                         ? " " + Constants.CHAR_RIGHTWARDS_ARROW + " " + lineDestination.uniqueShortName() : "";
 
-                final Timestamp departureTime = timeZoneSelector.getDisplay(publicLeg.getDepartureTime(true));
-                final String departureDateStr = Formats.formatDate(this, departureTime);
-                final String departureTimeStr = Formats.formatTime(this, departureTime);
+                final PTDate departureTime = timeZoneSelector.getDisplay(publicLeg.getDepartureTime(true));
+                final String departureDateStr = Formats.formatDate(timeZoneSelector, departureTime);
+                final String departureTimeStr = Formats.formatTime(timeZoneSelector, departureTime);
                 final String departureNameStr = publicLeg.departure.uniqueShortName();
                 final String departurePositionStr = publicLeg.getDeparturePosition() != null
                         ? publicLeg.getDeparturePosition().toString() : "";
 
-                final Timestamp arrivalTime = timeZoneSelector.getDisplay(publicLeg.getArrivalTime(true));
-                final String arrivalDateStr = Formats.formatDate(this, arrivalTime);
-                final String arrivalTimeStr = Formats.formatTime(this, arrivalTime);
+                final PTDate arrivalTime = timeZoneSelector.getDisplay(publicLeg.getArrivalTime(true));
+                final String arrivalDateStr = Formats.formatDate(timeZoneSelector, arrivalTime);
+                final String arrivalTimeStr = Formats.formatTime(timeZoneSelector, arrivalTime);
                 final String arrivalNameStr = publicLeg.arrival.uniqueShortName();
                 final String arrivalPositionStr = publicLeg.getArrivalPosition() != null
                         ? publicLeg.getArrivalPosition().toString() : "";
@@ -2282,7 +2280,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final JourneyRef connectionJourneyRef,
             final QueryTripsRunnable.TripRequestData queryTripsRequestData,
             final TripsOverviewActivity.RenderConfig overviewConfig) {
-        final Timestamp arrivalTime = stop.getArrivalTime();
+        final PTDate arrivalTime = stop.getArrivalTime();
         final TimeSpec time = new TimeSpec.Absolute(DepArr.DEPART,
                 arrivalTime != null ? arrivalTime.getTime() : stop.getDepartureTime().getTime());
         DirectionsActivity.start(TripDetailsActivity.this,
@@ -2311,12 +2309,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             Trip.Public journeyLeg = (Trip.Public) tripRenderer.trip.legs.get(0);
             entry = journeyLeg.entryLocation;
             final Stop entryStop = journeyLeg.findStopByLocation(entry);
-            final Timestamp arrivalTime = entryStop.getArrivalTime();
+            final PTDate arrivalTime = entryStop.getArrivalTime();
             time = new TimeSpec.Absolute(DepArr.DEPART,
                     arrivalTime != null ? arrivalTime.getTime() : entryStop.getDepartureTime().getTime());
         } else {
             entry = tripRenderer.trip.from;
-            final Timestamp arrivalTime = stop.getArrivalTime();
+            final PTDate arrivalTime = stop.getArrivalTime();
             time = new TimeSpec.Absolute(DepArr.ARRIVE,
                     arrivalTime != null ? arrivalTime.getTime() : stop.getDepartureTime().getTime());
         }
@@ -2344,12 +2342,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             Trip.Public journeyLeg = (Trip.Public) tripRenderer.trip.legs.get(0);
             exit = journeyLeg.exitLocation;
             final Stop exitStop = journeyLeg.findStopByLocation(exit);
-            final Timestamp departureTime = exitStop.getDepartureTime();
+            final PTDate departureTime = exitStop.getDepartureTime();
             time = new TimeSpec.Absolute(DepArr.DEPART,
                     departureTime != null ? departureTime.getTime() : exitStop.getArrivalTime().getTime());
         } else {
             exit = tripRenderer.trip.to;
-            final Timestamp departureTime = stop.getDepartureTime();
+            final PTDate departureTime = stop.getDepartureTime();
             time = new TimeSpec.Absolute(DepArr.DEPART,
                     departureTime != null ? departureTime.getTime() : stop.getArrivalTime().getTime());
         }

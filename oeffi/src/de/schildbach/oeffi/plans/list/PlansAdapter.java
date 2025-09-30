@@ -31,6 +31,7 @@ import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.URLs;
 import de.schildbach.oeffi.plans.PlanContentProvider;
+import de.schildbach.pte.NetworkId;
 import okhttp3.Cache;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -192,7 +193,8 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
         final String urlStr = cursor.getString(urlColumn);
         final HttpUrl url = urlStr != null ? HttpUrl.parse(urlStr) : null;
         final File localFile = new File(context.getDir(Constants.PLANS_DIR, Context.MODE_PRIVATE), planId + ".png");
-        return new Plan(rowId, planId, name, disclaimer, validFrom, networkLogo, url, localFile);
+        final NetworkId networkId = networkLogo == null ? null : NetworkId.valueOf(networkLogo);
+        return new Plan(rowId, planId, name, disclaimer, validFrom, networkId, url, localFile);
     }
 
     public static class Plan {
@@ -204,19 +206,19 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
         @Nullable
         public final Date validFrom;
         @Nullable
-        public final String networkLogo;
+        public final NetworkId networkId;
         @Nullable
         public final HttpUrl url;
         public final File localFile;
 
         protected Plan(final long rowId, final String planId, final String name, final String disclaimer,
-                final Date validFrom, final String networkLogo, final HttpUrl url, final File localFile) {
+                final Date validFrom, final NetworkId networkId, final HttpUrl url, final File localFile) {
             this.rowId = rowId;
             this.planId = checkNotNull(planId);
             this.name = checkNotNull(name);
             this.disclaimer = disclaimer;
             this.validFrom = validFrom;
-            this.networkLogo = networkLogo;
+            this.networkId = networkId;
             this.url = url;
             this.localFile = checkNotNull(localFile);
         }

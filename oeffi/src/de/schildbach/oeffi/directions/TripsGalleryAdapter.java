@@ -36,7 +36,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
-import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.util.TypedValue;
 import android.view.View;
@@ -59,7 +58,7 @@ import de.schildbach.pte.dto.Position;
 import de.schildbach.pte.dto.Stop;
 import de.schildbach.pte.dto.Style;
 import de.schildbach.pte.dto.Style.Shape;
-import de.schildbach.pte.dto.Timestamp;
+import de.schildbach.pte.dto.PTDate;
 import de.schildbach.pte.dto.Trip;
 import de.schildbach.pte.dto.Trip.Individual;
 import de.schildbach.pte.dto.Trip.Leg;
@@ -67,7 +66,6 @@ import de.schildbach.pte.dto.Trip.Public;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -81,7 +79,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
     private boolean canScrollLater = true, canScrollEarlier = true;
     private long minTime = 0, maxTime = 0;
 
-    private final Context context;
+    private final OeffiActivity context;
     private final boolean darkMode;
 
     private static final int VIEW_TYPE_TRIP = 0;
@@ -118,7 +116,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
     private final int tripWidth;
 
     public TripsGalleryAdapter(final Context context) {
-        this.context = context;
+        this.context = (OeffiActivity) context;
         final Resources res = context.getResources();
         this.darkMode = Application.getInstance().isDarkMode();
 
@@ -530,8 +528,8 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                             && departureDelay / DateUtils.MINUTE_IN_MILLIS != 0)
                             || (arrivalDelay != null && arrivalDelay / DateUtils.MINUTE_IN_MILLIS != 0);
 
-                    final Timestamp plannedDepartureTime = publicLeg.departureStop.plannedDepartureTime;
-                    final Timestamp plannedArrivalTime = publicLeg.arrivalStop.plannedArrivalTime;
+                    final PTDate plannedDepartureTime = publicLeg.departureStop.plannedDepartureTime;
+                    final PTDate plannedArrivalTime = publicLeg.arrivalStop.plannedArrivalTime;
 
                     if (isDelayed && plannedDepartureTime != null && plannedArrivalTime != null) {
                         final long tPlannedDeparture = plannedDepartureTime.getTime();
@@ -585,13 +583,13 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             }
 
             // then draw arr/dep times
-            Timestamp startTime = null;
+            PTDate startTime = null;
             boolean startCancelled = false;
             Paint startPaint = null;
             int startYabs = 0;
             Position departurePosition;
             final Public firstPublicLeg = trip.getFirstPublicLeg();
-            final Timestamp publicDepartureTime;
+            final PTDate publicDepartureTime;
             if (firstPublicLeg != null) {
                 final Stop publicDepartureStop = firstPublicLeg.departureStop;
                 final boolean publicDepartureCancelled = publicDepartureStop.departureCancelled;
@@ -617,7 +615,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                 publicDepartureTime = null;
             }
 
-            final Timestamp individualDepartureTime = trip.getFirstDepartureTime();
+            final PTDate individualDepartureTime = trip.getFirstDepartureTime();
             if (individualDepartureTime != null) {
                 final int individualYabs = drawTime(canvas, centerX, startYabs, height,
                         true, individualTimePaint, false, individualDepartureTime,
@@ -634,12 +632,12 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                 startYabs = drawRemaining(canvas, centerX, startYabs, height, true, startPaint, startCancelled, diff);
             }
 
-            Timestamp endTime = null;
+            PTDate endTime = null;
             boolean endCancelled = false;
             Paint endPaint = null;
             int endYabs = 0;
             final Public lastPublicLeg = trip.getLastPublicLeg();
-            final Timestamp publicArrivalTime;
+            final PTDate publicArrivalTime;
             if (lastPublicLeg != null) {
                 final Stop publicArrivalStop = lastPublicLeg.arrivalStop;
                 final boolean publicArrivalCancelled = publicArrivalStop.arrivalCancelled;
@@ -656,7 +654,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                 publicArrivalTime = null;
             }
 
-            final Timestamp individualArrivalTime = trip.getLastArrivalTime();
+            final PTDate individualArrivalTime = trip.getLastArrivalTime();
             if (individualArrivalTime != null) {
                 final int individualYabs = drawTime(canvas, centerX, endYabs, height,
                         false, individualTimePaint, false, individualArrivalTime,
@@ -801,12 +799,13 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             }
         }
 
-        private int drawTime(final Canvas canvas, final int centerX, final int aY, final int height, final boolean above,
-                final Paint paint, final boolean strikeThru, final Timestamp time, final @Nullable Timestamp timeKeepOut) {
+        private int drawTime(
+                final Canvas canvas, final int centerX, final int aY, final int height, final boolean above,
+                final Paint paint, final boolean strikeThru, final PTDate time, final @Nullable PTDate timeKeepOut) {
             final FontMetrics metrics = paint.getFontMetrics();
 
             final float y;
-            final String str = Formats.formatTime(context, ((OeffiActivity) context).getTimeZoneSelector().getDisplay(time));
+            final String str = Formats.formatTime(context.getTimeZoneSelector(), time);
             final float fontHeight = (-metrics.ascent + metrics.descent); // + 4 * density;
 
             if (strikeThru)
