@@ -75,6 +75,8 @@ import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.Product;
 import de.schildbach.pte.dto.QueryDeparturesResult;
 import de.schildbach.pte.dto.StationDepartures;
+import de.schildbach.pte.dto.Timestamp;
+
 import org.osmdroid.util.GeoPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -278,8 +280,8 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             timeView.setVisibility(View.VISIBLE);
             final long presetTimeMs = presetTime.getTime();
             final String text = String.format("%s %s",
-                    Formats.formatDate(this, System.currentTimeMillis(), presetTimeMs),
-                    Formats.formatTime(this, presetTimeMs));
+                    Formats.formatDate(this, System.currentTimeMillis(), presetTimeMs, Timestamp.NETWORK_OFFSET),
+                    Formats.formatTime(this, presetTimeMs, Timestamp.NETWORK_OFFSET));
             timeView.setText(text);
         }
 
@@ -727,7 +729,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         }
     }
 
-    private static class DepartureViewHolder extends RecyclerView.ViewHolder {
+    private class DepartureViewHolder extends RecyclerView.ViewHolder {
         private final TextView timeRelView;
         private final TextView timeAbsView;
         private final TextView delayView;
@@ -741,7 +743,6 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         private boolean msgViewExpanded;
 
         private final StationDetailsActivity context;
-        private final java.text.DateFormat timeFormat;
 
         public DepartureViewHolder(final StationDetailsActivity context, final View itemView) {
             super(itemView);
@@ -763,40 +764,41 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             });
 
             this.context = context;
-            this.timeFormat = DateFormat.getTimeFormat(context);
         }
 
         public void bind(final NetworkId network, final Location station, final Departure departure) {
             final boolean refIsNow = context.presetTime == null;
             final long referenceTime = (refIsNow ? new Date() : context.presetTime).getTime();
 
-            final Date predictedTime = departure.predictedTime;
-            final Date plannedTime = departure.plannedTime;
+            final Timestamp predictedTime = departure.predictedTime;
+            final Timestamp plannedTime = departure.plannedTime;
             final boolean cancelled = departure.cancelled;
 
-            long time;
+            Timestamp time;
             final boolean isPredicted = predictedTime != null;
             if (predictedTime != null)
-                time = predictedTime.getTime();
+                time = predictedTime;
             else if (plannedTime != null)
-                time = plannedTime.getTime();
+                time = plannedTime;
             else
                 throw new IllegalStateException();
 
-            final boolean isPast = time < referenceTime;
+            final long timeMillis = time.getTime();
+            final boolean isPast = timeMillis < referenceTime;
 
             itemView.setBackgroundColor(context.getColor(isPast ? R.color.bg_station_before : R.color.bg_level0));
 
             // time rel
-            timeRelView.setText(Formats.formatTimeDiff(context, referenceTime, time, refIsNow));
+            timeRelView.setText(Formats.formatTimeDiff(context, referenceTime, timeMillis, refIsNow));
             timeRelView.setTypeface(Typeface.DEFAULT, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
             setStrikeThru(timeRelView, cancelled);
 
             // time abs
-            final StringBuilder timeAbs = new StringBuilder(Formats.formatDate(context, referenceTime, time, false, ""));
+            final Timestamp displayTime = timeZoneSelector.getDisplay(time);
+            final StringBuilder timeAbs = new StringBuilder(Formats.formatDate(context, referenceTime, displayTime, false, ""));
             if (timeAbs.length() > 0)
                 timeAbs.append(',').append(Constants.CHAR_HAIR_SPACE);
-            timeAbs.append(timeFormat.format(time));
+            timeAbs.append(Formats.formatTime(context, displayTime));
             timeAbsView.setText(timeAbs);
             timeAbsView.setTypeface(Typeface.DEFAULT, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
             setStrikeThru(timeAbsView, cancelled);

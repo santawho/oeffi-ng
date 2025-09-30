@@ -61,6 +61,7 @@ import de.schildbach.pte.DbWebProvider;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.Line;
+import de.schildbach.pte.dto.Timestamp;
 import de.schildbach.pte.dto.Trip;
 
 public class NavigationNotification {
@@ -646,16 +647,16 @@ public class NavigationNotification {
                         : configuration.travelAlarmIdForLegArrival[travelAlarmLegIndex];
                 if (lastNotified.playedTravelAlarmId == travelAlarmId) {
                     log.info("travel alarm for {} at {} was at {}, but already fired before", alarmTypeForLog,
-                            tripRenderer.nextEventTargetName, Formats.formatTime(context, travelAlarmAtMs));
+                            tripRenderer.nextEventTargetName, Formats.formatTime(context, travelAlarmAtMs, Timestamp.SYSTEM_OFFSET));
                 } else {
                     log.info("travel alarm for {} at {} should have been at {}, now firing", alarmTypeForLog,
-                            tripRenderer.nextEventTargetName, Formats.formatTime(context, travelAlarmAtMs));
+                            tripRenderer.nextEventTargetName, Formats.formatTime(context, travelAlarmAtMs, Timestamp.SYSTEM_OFFSET));
                     travelAlarmManager.fireAlarm(context, intentData, tripRenderer, travelAlarmIsForDeparture, travelAlarmIsForJourneyStart);
                     newNotified.playedTravelAlarmId = travelAlarmId;
                 }
             } else {
                 log.info("travel alarm for {} at {} set to {}", alarmTypeForLog,
-                        tripRenderer.nextEventTargetName, Formats.formatTime(context, travelAlarmAtMs));
+                        tripRenderer.nextEventTargetName, Formats.formatTime(context, travelAlarmAtMs, Timestamp.SYSTEM_OFFSET));
                 if (travelAlarmAtMs < nextRefreshTimeMs) {
                     nextRefreshTimeReason = String.format("#8, nextRefreshTimeMs=%d, travelAlarmAtMs=%d", nextRefreshTimeMs, travelAlarmAtMs);
                     nextRefreshTimeMs = travelAlarmAtMs;

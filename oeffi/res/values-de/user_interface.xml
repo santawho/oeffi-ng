@@ -97,4 +97,12 @@
     <string name="user_interface_developer_options_show_extra_infos_enabled_title">Entwickler-Optionen aktivieren</string>
     <string name="user_interface_developer_options_show_extra_infos_enabled_summary">Elemente zur Unterstützung des Entwicklungsprozesses aktivieren.</string>
 
+    <string name="common_preffered_timezone_title">Zeitzone</string>
+    <string name="common_preffered_timezone_summary">Bevorzugte Quelle der Zeitzone. [%s]</string>
+    <array name="common_preffered_timezone_entries">
+        <item>System</item>
+        <item>Verkehrsnetz</item>
+        <item>Lokation</item>
+    </array>
+
 </resources>

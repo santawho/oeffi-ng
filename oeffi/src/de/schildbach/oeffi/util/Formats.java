@@ -25,36 +25,58 @@ import de.schildbach.oeffi.R;
 import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.Position;
+import de.schildbach.pte.dto.Timestamp;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.SimpleTimeZone;
 
 public final class Formats {
-    public static String formatDate( final Context context, final Date date) {
-        return formatDate(context, date.getTime());
+    private static final String VARIABLE_TIMEZONE_ID = "?";
+
+    public static String formatDate( final Context context, final Timestamp timestamp) {
+        return formatDate(context, timestamp.getTime(), timestamp.getOffset());
     }
 
-    public static String formatDate( final Context context, final long time) {
-        return DateUtils.formatDateTime(context, time,
-                DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_ABBREV_WEEKDAY
-                | DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_MONTH);
+    public static String formatDate( final Context context, final Date date, final int offset) {
+        return formatDate(context, date.getTime(), offset);
+    }
+
+    public static String formatDate(final Context context, final long time, final int offset) {
+        // return DateUtils.formatDateTime(context, time,
+        //         DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_ABBREV_WEEKDAY
+        //                 | DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_MONTH);
+        return getTimeFormat(context, offset).format(time);
+    }
+
+    public static java.text.DateFormat getDateFormat(final Context context, final int offset) {
+        final java.text.DateFormat dateFormat = DateFormat.getDateFormat(context);
+        dateFormat.setTimeZone(new SimpleTimeZone(offset, VARIABLE_TIMEZONE_ID));
+        return dateFormat;
     }
 
     public static String formatDate(
-            final Context context, final long now, final Date date,
+            final Context context, final long now, final Date date, final int offset,
             final boolean abbreviate, final String todayString) {
-        return formatDate(context, now, date.getTime(), abbreviate, todayString);
+        return formatDate(context, now, date.getTime(), offset, abbreviate, todayString);
+    }
+
+
+    public static String formatDate(
+            final Context context, final long now, final Timestamp timestamp,
+            final boolean abbreviate, final String todayString) {
+        return formatDate(context, now, timestamp.getTime(), timestamp.getOffset(), abbreviate, todayString);
     }
 
     public static String formatDate(
-            final Context context, final long now, final long time,
+            final Context context, final long now, final long time, final int offset,
             final boolean abbreviate, final String todayString) {
         // today
         if (DateUtils.isToday(time))
             return todayString;
 
-        final Calendar calendar = new GregorianCalendar();
+        final Calendar calendar = new GregorianCalendar(new SimpleTimeZone(offset, VARIABLE_TIMEZONE_ID));
         calendar.setTimeInMillis(time);
         if (time > now) {
             // tomorrow
@@ -77,31 +99,47 @@ public final class Formats {
         }
 
         // default
-        return formatDate(context, time);
+        return formatDate(context, time, offset);
     }
 
-    public static String formatDate(final Context context, final long now, final Date date) {
-        return formatDate(context, now, date.getTime());
+    public static String formatDate(final Context context, final long now, final Timestamp timestamp) {
+        return formatDate(context, now, timestamp.getDate(), timestamp.getOffset());
     }
 
-    public static String formatDate(final Context context, final long now, final long time) {
-        return formatDate(context, now, time, false, context.getString(R.string.time_today));
+    public static String formatDate(final Context context, final long now, final Date date, final int offset) {
+        return formatDate(context, now, date.getTime(), offset);
     }
 
-    public static String formatTime(final Context context, final Date date) {
-        return formatTime(context, date.getTime());
+    public static String formatDate(final Context context, final long now, final long time, final int offset) {
+        return formatDate(context, now, time, offset, false, context.getString(R.string.time_today));
     }
 
-    public static String formatTime(final Context context, final long time) {
-        return DateFormat.getTimeFormat(context).format(time);
+    public static String formatTime(final Context context, final Date date, final int offset) {
+        return formatTime(context, date.getTime(), offset);
     }
 
-    public static String formatTime(final Context context, final long now, final long time) {
+    public static String formatTime(final Context context, final Timestamp timestamp) {
+        return formatTime(context, timestamp.getTime(), timestamp.getOffset());
+    }
+
+    public static String formatTime(final Context context, final long time, final int offset) {
+        return getTimeFormat(context, offset).format(time);
+    }
+
+    public static java.text.DateFormat getTimeFormat(final Context context, final int offset) {
+        final java.text.DateFormat timeFormat = DateFormat.getTimeFormat(context);
+        timeFormat.setTimeZone(new SimpleTimeZone(offset, VARIABLE_TIMEZONE_ID));
+        return timeFormat;
+    }
+
+    public static String formatTime(final Context context, final long now, final long time, final int offset) {
+        final String timeString = formatTime(context, time, offset);
+
         final long diff = time - now;
         if (diff < -8 * 3600000 || diff > 8 * 3600000)
-            return formatDate(context, now, time) + " " + formatTime(context, time);
+            return formatDate(context, now, time, offset) + " " + timeString;
 
-        return formatTime(context, time);
+        return timeString;
     }
 
     public static String formatTimeDiff(final Context context, final long from, final long to) {

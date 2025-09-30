@@ -52,6 +52,7 @@ import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
+import de.schildbach.pte.dto.Timestamp;
 import de.schildbach.pte.dto.Trip;
 
 public class TravelAlarmManager {
@@ -388,8 +389,8 @@ public class TravelAlarmManager {
         }
         final String message = context.getString(messageResId,
                 tripRenderer.nextEventTargetName,
-                Formats.formatTime(context, tripRenderer.nextEventEarliestTime),
-                Formats.formatTime(context, tripRenderer.nextEventEstimatedTime),
+                Formats.formatTime(context, tripRenderer.nextEventEarliestTime, Timestamp.SYSTEM_OFFSET),
+                Formats.formatTime(context, tripRenderer.nextEventEstimatedTime, Timestamp.SYSTEM_OFFSET),
                 tripRenderer.nextEventTimeLeftValue, tripRenderer.nextEventTimeLeftUnit);
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, channelId)
@@ -501,7 +502,7 @@ public class TravelAlarmManager {
                 statusText = context.getString(R.string.navigation_alarm_dialog_status_alarm_disabled_text);
             } else if (travelAlarmState.currentTravelAlarmAtMs > 0) {
                 final String alarmTime = Formats.formatTime(context,
-                        System.currentTimeMillis(), travelAlarmState.currentTravelAlarmAtMs);
+                        System.currentTimeMillis(), travelAlarmState.currentTravelAlarmAtMs, Timestamp.SYSTEM_OFFSET);
                 statusText = context.getString(R.string.navigation_alarm_dialog_status_alarm_at_text, alarmTime);
             } else {
                 statusText = context.getString(R.string.navigation_alarm_dialog_status_alarm_inactive_text);

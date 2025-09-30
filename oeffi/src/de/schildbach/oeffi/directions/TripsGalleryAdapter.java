@@ -49,7 +49,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.schildbach.oeffi.Application;
+import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.pte.dto.Fare;
 import de.schildbach.pte.dto.Line;
@@ -57,6 +59,7 @@ import de.schildbach.pte.dto.Position;
 import de.schildbach.pte.dto.Stop;
 import de.schildbach.pte.dto.Style;
 import de.schildbach.pte.dto.Style.Shape;
+import de.schildbach.pte.dto.Timestamp;
 import de.schildbach.pte.dto.Trip;
 import de.schildbach.pte.dto.Trip.Individual;
 import de.schildbach.pte.dto.Trip.Leg;
@@ -403,7 +406,6 @@ public final class TripsGalleryAdapter extends BaseAdapter {
     private class TripView extends View {
         private TripInfo tripInfo;
         private final Resources res = getResources();
-        private final java.text.DateFormat timeFormat;
 
         private final float density = res.getDisplayMetrics().density;
         private final float publicBoxFraction = res.getFraction(R.fraction.trips_overview_entry_public_box_fraction, 1,
@@ -420,8 +422,6 @@ public final class TripsGalleryAdapter extends BaseAdapter {
 
         private TripView(final Context context) {
             super(context);
-
-            timeFormat = DateFormat.getTimeFormat(context);
 
 //            final TypedArray ta = context.obtainStyledAttributes(new int[] { android.R.attr.selectableItemBackground });
 //            setBackgroundDrawable(ta.getDrawable(0));
@@ -530,8 +530,8 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                             && departureDelay / DateUtils.MINUTE_IN_MILLIS != 0)
                             || (arrivalDelay != null && arrivalDelay / DateUtils.MINUTE_IN_MILLIS != 0);
 
-                    final Date plannedDepartureTime = publicLeg.departureStop.plannedDepartureTime;
-                    final Date plannedArrivalTime = publicLeg.arrivalStop.plannedArrivalTime;
+                    final Timestamp plannedDepartureTime = publicLeg.departureStop.plannedDepartureTime;
+                    final Timestamp plannedArrivalTime = publicLeg.arrivalStop.plannedArrivalTime;
 
                     if (isDelayed && plannedDepartureTime != null && plannedArrivalTime != null) {
                         final long tPlannedDeparture = plannedDepartureTime.getTime();
@@ -585,13 +585,13 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             }
 
             // then draw arr/dep times
-            Date startTime = null;
+            Timestamp startTime = null;
             boolean startCancelled = false;
             Paint startPaint = null;
             int startYabs = 0;
             Position departurePosition;
             final Public firstPublicLeg = trip.getFirstPublicLeg();
-            final Date publicDepartureTime;
+            final Timestamp publicDepartureTime;
             if (firstPublicLeg != null) {
                 final Stop publicDepartureStop = firstPublicLeg.departureStop;
                 final boolean publicDepartureCancelled = publicDepartureStop.departureCancelled;
@@ -617,7 +617,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                 publicDepartureTime = null;
             }
 
-            final Date individualDepartureTime = trip.getFirstDepartureTime();
+            final Timestamp individualDepartureTime = trip.getFirstDepartureTime();
             if (individualDepartureTime != null) {
                 final int individualYabs = drawTime(canvas, centerX, startYabs, height,
                         true, individualTimePaint, false, individualDepartureTime,
@@ -634,12 +634,12 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                 startYabs = drawRemaining(canvas, centerX, startYabs, height, true, startPaint, startCancelled, diff);
             }
 
-            Date endTime = null;
+            Timestamp endTime = null;
             boolean endCancelled = false;
             Paint endPaint = null;
             int endYabs = 0;
             final Public lastPublicLeg = trip.getLastPublicLeg();
-            final Date publicArrivalTime;
+            final Timestamp publicArrivalTime;
             if (lastPublicLeg != null) {
                 final Stop publicArrivalStop = lastPublicLeg.arrivalStop;
                 final boolean publicArrivalCancelled = publicArrivalStop.arrivalCancelled;
@@ -656,7 +656,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                 publicArrivalTime = null;
             }
 
-            final Date individualArrivalTime = trip.getLastArrivalTime();
+            final Timestamp individualArrivalTime = trip.getLastArrivalTime();
             if (individualArrivalTime != null) {
                 final int individualYabs = drawTime(canvas, centerX, endYabs, height,
                         false, individualTimePaint, false, individualArrivalTime,
@@ -802,12 +802,11 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         }
 
         private int drawTime(final Canvas canvas, final int centerX, final int aY, final int height, final boolean above,
-                final Paint paint, final boolean strikeThru, final Date time, final @Nullable Date timeKeepOut) {
+                final Paint paint, final boolean strikeThru, final Timestamp time, final @Nullable Timestamp timeKeepOut) {
             final FontMetrics metrics = paint.getFontMetrics();
 
-            final long t = time.getTime();
             final float y;
-            final String str = timeFormat.format(t);
+            final String str = Formats.formatTime(context, ((OeffiActivity) context).getTimeZoneSelector().getDisplay(time));
             final float fontHeight = (-metrics.ascent + metrics.descent); // + 4 * density;
 
             if (strikeThru)
@@ -818,7 +817,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             if (timeKeepOut != null) {
                 final long tKeepOut = timeKeepOut.getTime();
                 final float yKeepOut = timeToCoord(tKeepOut, height);
-                if (t == tKeepOut)
+                if (time.getTime() == tKeepOut)
                     return Integer.MIN_VALUE; // don't draw anything
 
                 if (above)

@@ -71,6 +71,7 @@ import de.schildbach.oeffi.util.DividerItemDecoration;
 import de.schildbach.oeffi.util.ErrorReporter;
 import de.schildbach.oeffi.util.NavigationMenuAdapter;
 import de.schildbach.oeffi.util.SpeechInput;
+import de.schildbach.oeffi.util.TimeZoneSelector;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.oeffi.util.ZoomControls;
@@ -93,6 +94,7 @@ public abstract class OeffiActivity extends ComponentActivity {
 
     protected static final String PREFS_KEY_VOICE_CONTROL_MODE = "user_interface_voice_control_mode";
     protected static final String PREFS_KEY_VOICE_TOGGLE_STATE = "user_interface_voice_control_toggle";
+    protected static final String PREFS_KEY_PREFFERED_TIMEZONE = "common_preffered_timezone";
     public static final String VOICE_CONTROL_OPTION_ALWAYS = "always";
     public static final String VOICE_CONTROL_OPTION_TOGGLE = "toggle";
     public static final String VOICE_CONTROL_OPTION_TRIGGER = "trigger";
@@ -103,6 +105,7 @@ public abstract class OeffiActivity extends ComponentActivity {
     private final Handler handler = new Handler();
 
     protected SharedPreferences prefs;
+    protected TimeZoneSelector timeZoneSelector;
     protected NetworkId network;
     protected String[] linkArgs;
     protected Set<Product> savedProducts;
@@ -184,9 +187,25 @@ public abstract class OeffiActivity extends ComponentActivity {
         updateNavigation();
     }
 
+    protected void updateFromPreferences() {
+        timeZoneSelector = new TimeZoneSelector(prefs.getString(PREFS_KEY_PREFFERED_TIMEZONE, "location"), network);
+    }
+
+    public TimeZoneSelector getTimeZoneSelector() {
+        return timeZoneSelector;
+    }
+
+    @Override
+    protected void onStart() {
+        updateFromPreferences();
+        super.onStart();
+    }
+
     @Override
     protected void onResume() {
         checkChangeNetwork();
+        updateFromPreferences();
+
         updateNavigation();
 
         super.onResume();

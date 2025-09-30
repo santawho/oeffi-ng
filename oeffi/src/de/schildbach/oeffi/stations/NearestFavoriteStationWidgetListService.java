@@ -35,6 +35,7 @@ import de.schildbach.pte.dto.Departure;
 import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Position;
 import de.schildbach.pte.dto.Style;
+import de.schildbach.pte.dto.Timestamp;
 
 import java.util.Date;
 import java.util.List;
@@ -121,8 +122,8 @@ public class NearestFavoriteStationWidgetListService extends RemoteViewsService 
                     departurePosition != null ? departurePosition.toString() : null);
 
             // delay
-            final Date predictedTime = departure.predictedTime;
-            final Date plannedTime = departure.plannedTime;
+            final Timestamp predictedTime = departure.predictedTime;
+            final Timestamp plannedTime = departure.plannedTime;
             final boolean isPredicted = predictedTime != null;
             final long delay = predictedTime != null && plannedTime != null
                     ? predictedTime.getTime() - plannedTime.getTime() : 0;

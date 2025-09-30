@@ -115,6 +115,7 @@ import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.Point;
 import de.schildbach.pte.dto.Product;
 import de.schildbach.pte.dto.QueryTripsResult;
+import de.schildbach.pte.dto.Timestamp;
 import de.schildbach.pte.dto.Trip;
 import de.schildbach.pte.dto.TripOptions;
 import de.schildbach.pte.dto.TripRef;
@@ -995,10 +996,10 @@ public class DirectionsActivity extends OeffiMainActivity implements
             final long t = ((TimeSpec.Absolute) time).timeMs;
             viewTime1.setVisibility(View.VISIBLE);
             viewTime1.setOnClickListener(dateClickListener);
-            viewTime1.setText(Formats.formatDate(this, now, t));
+            viewTime1.setText(Formats.formatDate(this, now, t, Timestamp.SYSTEM_OFFSET));
             viewTime2.setVisibility(View.VISIBLE);
             viewTime2.setOnClickListener(timeClickListener);
-            viewTime2.setText(Formats.formatTime(this, t));
+            viewTime2.setText(Formats.formatTime(this, t, Timestamp.SYSTEM_OFFSET));
         } else if (time instanceof TimeSpec.Relative) {
             final long diff = ((TimeSpec.Relative) time).diffMs;
             viewTime1.setVisibility(View.VISIBLE);

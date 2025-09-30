@@ -61,6 +61,7 @@ import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.QueryTripsResult;
 import de.schildbach.pte.dto.Stop;
+import de.schildbach.pte.dto.Timestamp;
 import de.schildbach.pte.dto.Trip;
 import okhttp3.HttpUrl;
 
@@ -354,7 +355,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
             final JourneyRef feederJourneyRef,
             final JourneyRef connectionJourneyRef,
             QueryTripsRunnable.TripRequestData queryTripsRequestData) {
-        final Date arrivalTime = stop.getArrivalTime();
+        final Timestamp arrivalTime = stop.getArrivalTime();
         final TimeSpec.Absolute time = new TimeSpec.Absolute(TimeSpec.DepArr.DEPART,
                 arrivalTime != null ? arrivalTime.getTime() : stop.getDepartureTime().getTime());
         final TripsOverviewActivity.RenderConfig overviewConfig = getOverviewConfig(
@@ -569,7 +570,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
             detailsView.setVisibility(View.GONE);
         } else {
             detailsView.setVisibility(View.VISIBLE);
-            timeView.setText(Formats.formatTime(this, alarmAtMs));
+            timeView.setText(Formats.formatTime(this, alarmAtMs, Timestamp.SYSTEM_OFFSET));
             offsetView.setText(formatDuration(tripRenderer.nextEventEstimatedTime.getTime() - alarmAtMs));
             final ImageView sleepIcon = findViewById(R.id.navigation_next_event_alarm_details_sleep_icon);
             final long sleepMs = alarmAtMs - now;

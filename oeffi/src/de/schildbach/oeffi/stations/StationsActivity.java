@@ -104,6 +104,7 @@ import de.schildbach.pte.dto.Product;
 import de.schildbach.pte.dto.QueryDeparturesResult;
 import de.schildbach.pte.dto.StationDepartures;
 import de.schildbach.pte.dto.SuggestLocationsResult;
+import de.schildbach.pte.dto.Timestamp;
 import okhttp3.HttpUrl;
 import org.osmdroid.util.GeoPoint;
 import org.slf4j.Logger;
@@ -790,7 +791,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
             final String locationName = fixedLocation.name != null ? fixedLocation.uniqueShortName()
                     : String.format(Locale.ENGLISH, "%.6f, %.6f", fixedLocation.getLatAsDouble(), fixedLocation.getLonAsDouble());
             final String text = presetTime == null ? locationName
-                    : String.format("%s @ %s", locationName, Formats.formatTime(this, presetTime.getTime()));
+                    : String.format("%s @ %s", locationName, Formats.formatTime(this, presetTime, Timestamp.NETWORK_OFFSET));
             ((TextView) findViewById(R.id.stations_location_text)).setText(text);
         }
 

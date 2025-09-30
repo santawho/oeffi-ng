@@ -39,6 +39,7 @@ import de.schildbach.oeffi.util.Formats;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
+import de.schildbach.pte.dto.Timestamp;
 
 public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
     private final Context context;
@@ -97,8 +98,8 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
         if (hasSavedTrip) {
             tripView.setVisibility(View.VISIBLE);
             final long now = System.currentTimeMillis();
-            tripView.setText(Formats.formatDate(context, now, savedTripDepartureTime) + "\n"
-                    + Formats.formatTime(context, savedTripDepartureTime));
+            tripView.setText(Formats.formatDate(context, now, savedTripDepartureTime, Timestamp.NETWORK_OFFSET) + "\n"
+                    + Formats.formatTime(context, savedTripDepartureTime, Timestamp.NETWORK_OFFSET));
             tripView.setOnClickListener(v -> {
                 final int position = getAdapterPosition();
                 if (position != RecyclerView.NO_POSITION)

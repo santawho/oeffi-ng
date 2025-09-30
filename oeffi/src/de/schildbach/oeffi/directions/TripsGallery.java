@@ -38,9 +38,12 @@ import com.google.common.math.LongMath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.TimeSpec;
+import de.schildbach.oeffi.util.TimeZoneSelector;
+import de.schildbach.pte.dto.Timestamp;
 import de.schildbach.pte.dto.Trip;
 
 import java.util.Calendar;
@@ -81,7 +84,8 @@ public class TripsGallery extends Gallery {
         }
 
         public void draw(Canvas canvas, long time, int height, int width, boolean labelRight, boolean labelUp) {
-            final String label = timeFormat.format(time);
+            final int offset = ((OeffiActivity) context).getTimeZoneSelector().getOffset(time, Timestamp.NETWORK_OFFSET);
+            final String label = Formats.formatTime(context, time, offset);
             final float y = adapter.timeToCoord(time, height);
             labelTextPaint.getTextBounds(label, 0, label.length(), bounds);
             bounds.inset(-timeLabelPaddingHorizontal, -timeLabelPaddingVertical);
@@ -112,7 +116,6 @@ public class TripsGallery extends Gallery {
     private final Context context;
     private final int paddingHorizontal, paddingHorizontalCram;
     private final int timeLabelPaddingHorizontal, timeLabelPaddingVertical;
-    private final java.text.DateFormat timeFormat;
 
     private final TripsGalleryAdapter adapter;
 
@@ -157,8 +160,6 @@ public class TripsGallery extends Gallery {
 
         currentTimeLine = new TimeLine(colorCurrentTime, colorSignificantInverse, strokeWidth, labelTextSize);
         referenceTimeLine = new TimeLine(colorReferenceTime, colorSignificantInverse, strokeWidth, labelTextSize);
-
-        timeFormat = DateFormat.getTimeFormat(context);
 
         setHorizontalFadingEdgeEnabled(false);
 
@@ -206,11 +207,11 @@ public class TripsGallery extends Gallery {
                     final TripInfo tripInfo = adapter.getItem(index);
                     if (tripInfo != null) {
                         final Trip trip = tripInfo.trip;
-                        final Date tripMinTime = trip.getMinTime();
+                        final Timestamp tripMinTime = trip.getMinTime();
                         if (tripMinTime != null && tripMinTime.getTime() < minTime)
                             minTime = tripMinTime.getTime();
 
-                        final Date tripMaxTime = trip.getMaxTime();
+                        final Timestamp tripMaxTime = trip.getMaxTime();
                         if (tripMaxTime != null && tripMaxTime.getTime() > maxTime)
                             maxTime = tripMaxTime.getTime();
                     }
@@ -329,22 +330,25 @@ public class TripsGallery extends Gallery {
         long firstGrid = 0;
         boolean hasDateBorder = false;
 
-        while (gridPtr.getTimeInMillis() < maxTime) {
-            final long t = gridPtr.getTimeInMillis();
+        final TimeZoneSelector timeZoneSelector = ((OeffiActivity) context).getTimeZoneSelector();
 
-            if (t >= minTime) {
+        while (gridPtr.getTimeInMillis() < maxTime) {
+            final long timeInMillis = gridPtr.getTimeInMillis();
+
+            if (timeInMillis >= minTime) {
                 // safe first grid line
                 if (firstGrid == 0)
-                    firstGrid = t;
+                    firstGrid = timeInMillis;
 
                 final boolean isDateBorder = gridPtr.get(Calendar.HOUR_OF_DAY) == 0
                         && gridPtr.get(Calendar.MINUTE) == 0;
-                final float y = adapter.timeToCoord(t, height);
+                final float y = adapter.timeToCoord(timeInMillis, height);
 
+                final int offset = timeZoneSelector.getOffset(timeInMillis, Timestamp.NETWORK_OFFSET);
                 labelTime.setLength(0);
-                labelTime.append(timeFormat.format(t));
+                labelTime.append(Formats.formatTime(context, timeInMillis, offset));
                 if (isDateBorder) {
-                    labelTime.append(", ").append(Formats.formatDate(context, now, t));
+                    labelTime.append(", ").append(Formats.formatDate(context, now, timeInMillis, offset));
                     hasDateBorder = true;
                 }
 
@@ -365,9 +369,10 @@ public class TripsGallery extends Gallery {
 
         // retroactively add date to first grid line
         if (!hasDateBorder && firstGrid > 0) {
+            final int firstGridOffset = timeZoneSelector.getOffset(firstGrid, Timestamp.NETWORK_OFFSET);
             labelTime.setLength(0);
-            labelTime.append(timeFormat.format(firstGrid)).append(", ")
-                    .append(Formats.formatDate(context, now, firstGrid));
+            labelTime.append(Formats.formatTime(context, firstGrid, firstGridOffset)).append(", ")
+                    .append(Formats.formatDate(context, now, firstGrid, firstGridOffset));
 
             gridLabelPaint.getTextBounds(labelTime.toString(), 0, labelTime.length(), bounds);
             bounds.offsetTo(paddingHorizontal, Math.round(adapter.timeToCoord(firstGrid, height)) - bounds.height());
