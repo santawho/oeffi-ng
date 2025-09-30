@@ -152,6 +152,7 @@ public abstract class OeffiActivity extends ComponentActivity {
         savedProducts = loadProductFilter();
 
         EdgeToEdge.enable(this, Constants.STATUS_BAR_STYLE);
+        updateFromPreferences();
         super.onCreate(savedInstanceState);
     }
 
