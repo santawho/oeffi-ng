@@ -434,7 +434,12 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
                 || NetworkListEntry.Network.STATE_DISABLED.equals(network.state))
             return false;
 
-        final NetworkProvider networkProvider = NetworkProviderFactory.provider(network.id);
+        final NetworkProvider networkProvider;
+        try {
+            networkProvider = NetworkProviderFactory.provider(network.id);
+        } catch (IllegalArgumentException iae) {
+            return false;
+        }
 
         boolean inArea = false;
 
