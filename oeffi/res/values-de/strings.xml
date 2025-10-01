@@ -61,6 +61,7 @@
     <string name="about_license_title">Lizenz</string>
     <string name="about_privacy_policy_title">Datenschutz-Bestimmungen</string>
     <string name="about_source_title">Quellcode</string>
+    <string name="about_forum_title">Forum / Diskussion</string>
     <string name="about_changelog_title">Änderungshistorie anzeigen</string>
     <string name="about_changelog_summary">https://oeffi.schildbach.de/changelog_de.html</string>
     <string name="about_faq_title">FAQ - häufig gestellte Fragen</string>

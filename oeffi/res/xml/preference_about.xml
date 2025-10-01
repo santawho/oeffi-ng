@@ -70,12 +70,21 @@
             android:key="about_market_app"
             android:title="@string/about_market_app_title" />
         <Preference
+            android:key="about_forum"
+            android:summary="@string/about_forum_url"
+            android:title="@string/about_forum_title">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="@string/about_forum_url" />
+        </Preference>
+        <Preference
             android:key="about_source"
             android:summary="@string/about_git_url"
             android:title="@string/about_source_title">
             <intent
                 android:action="android.intent.action.VIEW"
-                android:data="@string/about_git_url" />
+                android:data="@string/about_git_url" >
+            </intent>
         </Preference>
         <Preference
             android:key="about_twitter"

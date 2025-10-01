@@ -4,6 +4,7 @@
     <string name="app_name">Öffi</string>
     <string name="about_donate_bitcoin_uri">bitcoin:bc1q8ruc8hanp7hrzfs48dvtuzz4ukmpe7cgsvvzrt</string>
     <string name="about_git_url">https://gitlab.com/oeffi/oeffi</string>
+    <string name="about_forum_url">https://matrix.to/#/#öffi:schildbach.de</string>
     <string name="about_changelog_url" />
     <string name="about_update_apk_url" />
     <string name="about_update_manifest_url" />

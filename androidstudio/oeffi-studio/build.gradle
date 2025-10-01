@@ -42,6 +42,7 @@ CREDENTIALS.github_url = "https://github.com/${CREDENTIALS.github_user}/${CREDEN
 CREDENTIALS.github_release_url = "${CREDENTIALS.github_url}/releases/latest/download"
 CREDENTIALS.asset_name_apk_file = "oeffi-ng.apk"
 CREDENTIALS.asset_name_manifest = "manifest.json"
+CREDENTIALS.forum_url = "https://matrix.to/#/#oeffi-ng:matrix.org"
 
 project.oeffi.CREDENTIALS = CREDENTIALS
 
@@ -82,6 +83,7 @@ android {
             versionNameSuffix "-ng${CREDENTIALS.editionName ? "-${CREDENTIALS.editionName}" : ''}"
             resValue "string", "app_name", "Öffi NG${CREDENTIALS.editionName ? " ${CREDENTIALS.editionName}" : ''}"
             resValue "string", "about_git_url", "${CREDENTIALS.github_url}"
+            resValue "string", "about_forum_url", "${CREDENTIALS.forum_url}"
             resValue "string", "about_changelog_url", "${CREDENTIALS.github_url}/wiki"
             resValue "string", "about_update_apk_url", "${CREDENTIALS.github_release_url}/${CREDENTIALS.asset_name_apk_file}"
             resValue "string", "about_update_manifest_url", "${CREDENTIALS.github_release_url}/${CREDENTIALS.asset_name_manifest}"
