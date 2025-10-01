@@ -35,7 +35,8 @@ if (!oeffi_ng_password) {
     }
 }
 
-CREDENTIALS.applicationId = "de.santawho.oeffi_ng${gitBranch != null && gitBranch !== 'main' && gitBranch != 'master' && gitBranch != 'nextgen' ? ".${gitBranch}" : ''}"
+CREDENTIALS.editionName = "${gitBranch != null && gitBranch !== 'main' && gitBranch != 'master' && gitBranch != 'nextgen' ? gitBranch : null}"
+CREDENTIALS.applicationId = "de.santawho.oeffi_ng${CREDENTIALS.editionName ? ".${CREDENTIALS.editionName}" : ''}"
 CREDENTIALS.report_email = "oeffi.report@santawho.de"
 CREDENTIALS.github_url = "https://github.com/${CREDENTIALS.github_user}/${CREDENTIALS.github_repo}"
 CREDENTIALS.github_release_url = "${CREDENTIALS.github_url}/releases/latest/download"
@@ -78,8 +79,8 @@ android {
             dimension 'flavor'
             applicationId "${CREDENTIALS.applicationId}"
             // applicationIdSuffix '.ng'
-            versionNameSuffix '-ng'
-            resValue "string", "app_name", "Öffi NG"
+            versionNameSuffix "-ng${CREDENTIALS.editionName ? "-${CREDENTIALS.editionName}" : ''}"
+            resValue "string", "app_name", "Öffi NG${CREDENTIALS.editionName ? " ${CREDENTIALS.editionName}" : ''}"
             resValue "string", "about_git_url", "${CREDENTIALS.github_url}"
             resValue "string", "about_changelog_url", "${CREDENTIALS.github_url}/wiki"
             resValue "string", "about_update_apk_url", "${CREDENTIALS.github_release_url}/${CREDENTIALS.asset_name_apk_file}"
@@ -87,7 +88,7 @@ android {
             resValue "string", "about_update_modified", timeModifiedStr  // If-Modified-Since: xxx, 25 Feb 2025 17:10:00 GMT
             resValue "string", "error_reporter_mail_address", "${CREDENTIALS.report_email}"
             resValue "string", "app_url_host", "santawho.de"
-            resValue "string", "app_url_path_prefix", "/@apps/oeffi-ng/"
+            resValue "string", "app_url_path_prefix", "/@apps/oeffi-ng${CREDENTIALS.editionName ? "-${CREDENTIALS.editionName}" : ''}"
             resValue "string", "about_faq_url", "en~${CREDENTIALS.github_url}/wiki/faq~~de~${CREDENTIALS.github_url}/wiki/faq"
             resValue "string", "about_privacy_policy_url", "en~${CREDENTIALS.github_url}/wiki/privacy-policy~~de~${CREDENTIALS.github_url}/wiki/privacy-policy"
             resValue "string", "oeffi_base_default_url", "https://santawho.github.io/oeffi-web/"
@@ -123,8 +124,8 @@ android {
             applicationIdSuffix '.debug'
             versionNameSuffix '-debug'
 
-            resValue "string", "app_name", "Öffi NG Debug"
-            resValue "string", "app_url_path_prefix", "/@apps/oeffi-ng-debug/"
+            resValue "string", "app_name", "Öffi NG${CREDENTIALS.editionName ? " ${CREDENTIALS.editionName}" : ''} Debug"
+            resValue "string", "app_url_path_prefix", "/@apps/oeffi-ng${CREDENTIALS.editionName ? "-${CREDENTIALS.editionName}" : ''}-debug/"
         }
         preview {
 //            minifyEnabled true
