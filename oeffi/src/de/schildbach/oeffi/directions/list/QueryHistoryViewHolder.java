@@ -31,6 +31,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.daimajia.swipe.SimpleSwipeListener;
 import com.daimajia.swipe.SwipeLayout;
 
+import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.locationview.LocationTextView;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
@@ -39,9 +40,10 @@ import de.schildbach.oeffi.util.Formats;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
+import de.schildbach.pte.dto.PTDate;
 
 public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
-    private final Context context;
+    private final OeffiActivity context;
     private final NetworkId network;
     private final LocationTextView fromView;
     private final LocationTextView toView;
@@ -60,7 +62,7 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
     private boolean hasSavedTrip;
     private PopupMenu contextMenu;
 
-    public QueryHistoryViewHolder(final View itemView, final Context context, final NetworkId network) {
+    public QueryHistoryViewHolder(final View itemView, final OeffiActivity context, final NetworkId network) {
         super(itemView);
         this.context = context;
         this.network = network;
@@ -97,8 +99,8 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
         if (hasSavedTrip) {
             tripView.setVisibility(View.VISIBLE);
             final long now = System.currentTimeMillis();
-            tripView.setText(Formats.formatDate(context, now, savedTripDepartureTime) + "\n"
-                    + Formats.formatTime(context, savedTripDepartureTime));
+            tripView.setText(Formats.formatDate(context.getTimeZoneSelector(), now, savedTripDepartureTime, PTDate.NETWORK_OFFSET) + "\n"
+                    + Formats.formatTime(context.getTimeZoneSelector(), savedTripDepartureTime, PTDate.NETWORK_OFFSET));
             tripView.setOnClickListener(v -> {
                 final int position = getAdapterPosition();
                 if (position != RecyclerView.NO_POSITION)

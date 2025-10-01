@@ -88,17 +88,18 @@ public abstract class OeffiMainActivity extends OeffiActivity {
         versionCode = applicationVersionCode();
         final int lastVersionCode = prefs.getInt(Constants.PREFS_KEY_LAST_VERSION, 0);
 
-        if (prefsGetNetwork() == null) {
-            // NetworkPickerActivity.start(this);
-            prefs.edit().putString(Constants.PREFS_KEY_NETWORK_PROVIDER, NetworkId.DEUTSCHLANDTICKET.name()).commit();
+        if (prefsGetNetworkId() == null) {
+            NetworkPickerActivity.start(this);
 
             prefs.edit().putLong(Constants.PREFS_KEY_LAST_INFO_AT, now).apply();
 
-            downloadAndProcessMessages(prefsGetNetwork());
+            downloadAndProcessMessages(prefsGetNetworkId());
         } else if (versionCode != lastVersionCode) {
-            prefs.edit().putInt(Constants.PREFS_KEY_LAST_VERSION, versionCode).commit();
+            prefs.edit()
+                    .putInt(Constants.PREFS_KEY_LAST_VERSION, versionCode)
+                    .apply();
         } else {
-            downloadAndProcessMessages(prefsGetNetwork());
+            downloadAndProcessMessages(prefsGetNetworkId());
         }
     }
 
@@ -119,7 +120,7 @@ public abstract class OeffiMainActivity extends OeffiActivity {
     protected abstract String taskName();
 
     protected void setActionBarSecondaryTitleFromNetwork() {
-        final String network = this.network != null ? this.network.name() : prefsGetNetwork();
+        final NetworkId network = this.network != null ? this.network : prefsGetNetworkId();
         if (network != null)
             getMyActionBar().setSecondaryTitle(NetworkResources.instance(this, network).label);
     }
@@ -134,7 +135,7 @@ public abstract class OeffiMainActivity extends OeffiActivity {
         return super.onCreateDialog(id, bundle);
     }
 
-    private void downloadAndProcessMessages(final String network) {
+    private void downloadAndProcessMessages(final NetworkId network) {
         final HttpUrl.Builder remoteUrl = URLs.getMessagesBaseUrl().newBuilder();
         remoteUrl.addPathSegment("messages.txt");
         final String installerPackageName = Installer.installerPackageName(this);
@@ -157,7 +158,7 @@ public abstract class OeffiMainActivity extends OeffiActivity {
         }, new UiThreadExecutor());
     }
 
-    private void processMessages(final String network) {
+    private void processMessages(final NetworkId network) {
 
         String line = null;
         final File indexFile = new File(getFilesDir(), "messages.txt");
@@ -186,7 +187,7 @@ public abstract class OeffiMainActivity extends OeffiActivity {
 
     private final Pattern PATTERN_KEY_VALUE = Pattern.compile("([\\w-]+):(.*)");
 
-    private boolean processMessageLine(final String network, final String line) throws ParseException {
+    private boolean processMessageLine(final NetworkId network, final String line) throws ParseException {
         final Iterator<String> fieldIterator = Splitter.on('|').trimResults().split(line).iterator();
         final String id = fieldIterator.next();
         final String conditions = fieldIterator.next();
@@ -222,7 +223,7 @@ public abstract class OeffiMainActivity extends OeffiActivity {
                     if (applicationVersionCode() >= version)
                         return false;
                 } else if (name.equals("network")) {
-                    if (network == null || !value.equalsIgnoreCase(network))
+                    if (network == null || !value.equalsIgnoreCase(network.name()))
                         return false;
                 } else if (name.equals("lang")) {
                     if (!value.equalsIgnoreCase(Locale.getDefault().getLanguage()))

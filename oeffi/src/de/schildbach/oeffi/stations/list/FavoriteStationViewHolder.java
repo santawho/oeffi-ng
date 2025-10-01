@@ -66,7 +66,7 @@ public class FavoriteStationViewHolder extends RecyclerView.ViewHolder {
 
         if (showNetwork) {
             try {
-                final NetworkResources networkRes = NetworkResources.instance(context, network.name());
+                final NetworkResources networkRes = NetworkResources.instance(context, network);
                 networkView.setText(networkRes.label);
             } catch (final Resources.NotFoundException x) {
                 networkView.setText(network.name());

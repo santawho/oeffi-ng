@@ -50,17 +50,21 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 
+import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
+import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
 import de.schildbach.oeffi.util.ClockUtils;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.ResourceUri;
+import de.schildbach.oeffi.util.TimeZoneSelector;
 import de.schildbach.pte.DbWebProvider;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.Line;
+import de.schildbach.pte.dto.PTDate;
 import de.schildbach.pte.dto.Trip;
 
 public class NavigationNotification {
@@ -228,7 +232,7 @@ public class NavigationNotification {
         }
     }
 
-    public static void remove(final Context context, final Intent intent) {
+    public static void remove(final OeffiActivity context, final Intent intent) {
         NavigationAlarmManager.runOnHandlerThread(() -> {
             new NavigationNotification(context, intent).remove();
         });
@@ -438,6 +442,7 @@ public class NavigationNotification {
 
     @SuppressLint("ScheduleExactAlarm")
     private boolean update(final Trip aTrip) {
+        final TimeZoneSelector timeZoneSelector = Application.getInstance().getTimeZoneSelector();
         final Trip trip = aTrip != null ? aTrip : getTrip();
         final Date tripUpdatedAtDate = trip.updatedAt;
         log.info("updating with {} trip updated at {}", aTrip != null ? "new" : "old", NavigationAlarmManager.LOG_TIME_FORMAT.format(tripUpdatedAtDate));
@@ -646,16 +651,16 @@ public class NavigationNotification {
                         : configuration.travelAlarmIdForLegArrival[travelAlarmLegIndex];
                 if (lastNotified.playedTravelAlarmId == travelAlarmId) {
                     log.info("travel alarm for {} at {} was at {}, but already fired before", alarmTypeForLog,
-                            tripRenderer.nextEventTargetName, Formats.formatTime(context, travelAlarmAtMs));
+                            tripRenderer.nextEventTargetName, Formats.formatTime(timeZoneSelector, travelAlarmAtMs, PTDate.SYSTEM_OFFSET));
                 } else {
                     log.info("travel alarm for {} at {} should have been at {}, now firing", alarmTypeForLog,
-                            tripRenderer.nextEventTargetName, Formats.formatTime(context, travelAlarmAtMs));
+                            tripRenderer.nextEventTargetName, Formats.formatTime(timeZoneSelector, travelAlarmAtMs, PTDate.SYSTEM_OFFSET));
                     travelAlarmManager.fireAlarm(context, intentData, tripRenderer, travelAlarmIsForDeparture, travelAlarmIsForJourneyStart);
                     newNotified.playedTravelAlarmId = travelAlarmId;
                 }
             } else {
                 log.info("travel alarm for {} at {} set to {}", alarmTypeForLog,
-                        tripRenderer.nextEventTargetName, Formats.formatTime(context, travelAlarmAtMs));
+                        tripRenderer.nextEventTargetName, Formats.formatTime(timeZoneSelector, travelAlarmAtMs, PTDate.SYSTEM_OFFSET));
                 if (travelAlarmAtMs < nextRefreshTimeMs) {
                     nextRefreshTimeReason = String.format("#8, nextRefreshTimeMs=%d, travelAlarmAtMs=%d", nextRefreshTimeMs, travelAlarmAtMs);
                     nextRefreshTimeMs = travelAlarmAtMs;
@@ -826,7 +831,7 @@ public class NavigationNotification {
 
     public static class ActionReceiver extends BroadcastReceiver {
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive(final Context context, final Intent intent) {
             NavigationAlarmManager.runOnHandlerThread(() -> {
                 final NavigationNotification navigationNotification = new NavigationNotification(context, intent);
                 switch (intent.getIntExtra(INTENT_EXTRA_ACTION, 0)) {

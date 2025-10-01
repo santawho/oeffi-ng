@@ -115,6 +115,7 @@ import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.Point;
 import de.schildbach.pte.dto.Product;
 import de.schildbach.pte.dto.QueryTripsResult;
+import de.schildbach.pte.dto.PTDate;
 import de.schildbach.pte.dto.Trip;
 import de.schildbach.pte.dto.TripOptions;
 import de.schildbach.pte.dto.TripRef;
@@ -992,27 +993,25 @@ public class DirectionsActivity extends OeffiMainActivity implements
             viewTime2.setVisibility(View.GONE);
         } else if (time instanceof TimeSpec.Absolute) {
             final long now = System.currentTimeMillis();
-            final long t = ((TimeSpec.Absolute) time).timeMs;
+            final PTDate ptDatetime = PTDate.withUnknownLocationSpecificOffset(((TimeSpec.Absolute) time).timeMs);
             viewTime1.setVisibility(View.VISIBLE);
             viewTime1.setOnClickListener(dateClickListener);
-            viewTime1.setText(Formats.formatDate(this, now, t));
+            viewTime1.setText(Formats.formatDate(timeZoneSelector, now, ptDatetime));
             viewTime2.setVisibility(View.VISIBLE);
             viewTime2.setOnClickListener(timeClickListener);
-            viewTime2.setText(Formats.formatTime(this, t));
+            viewTime2.setText(Formats.formatTime(timeZoneSelector, ptDatetime));
         } else if (time instanceof TimeSpec.Relative) {
             final long diff = ((TimeSpec.Relative) time).diffMs;
             viewTime1.setVisibility(View.VISIBLE);
-            viewTime1
-                    .setText(diff > 0 ? getString(R.string.directions_time_relative, Formats.formatTimeDiff(this, diff))
-                            : getString(R.string.time_now));
+            viewTime1.setText(diff == 0 ? getString(R.string.time_now)
+                    : getString(R.string.directions_time_relative, Formats.formatTimeDiff(this, diff)));
             viewTime1.setOnClickListener(diffClickListener);
             viewTime2.setVisibility(View.GONE);
         }
     }
 
     private final OnClickListener dateClickListener = v -> {
-        final Calendar calendar = new GregorianCalendar();
-        calendar.setTimeInMillis(((TimeSpec.Absolute) time).timeMs);
+        final Calendar calendar = getTimePickerCalendar();
         final int year = calendar.get(Calendar.YEAR);
         final int month = calendar.get(Calendar.MONTH);
         final int day = calendar.get(Calendar.DAY_OF_MONTH);
@@ -1027,8 +1026,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
     };
 
     private final OnClickListener timeClickListener = v -> {
-        final Calendar calendar = new GregorianCalendar();
-        calendar.setTimeInMillis(((TimeSpec.Absolute) time).timeMs);
+        final Calendar calendar = getTimePickerCalendar();
         final int hour = calendar.get(Calendar.HOUR_OF_DAY);
         final int minute = calendar.get(Calendar.MINUTE);
 
@@ -1039,6 +1037,12 @@ public class DirectionsActivity extends OeffiMainActivity implements
             updateGUI();
         }, hour, minute, DateFormat.is24HourFormat(DirectionsActivity.this)).show();
     };
+
+    private Calendar getTimePickerCalendar() {
+        final Calendar calendar = new GregorianCalendar(timeZoneSelector.getInputTimeZone());
+        calendar.setTimeInMillis(((TimeSpec.Absolute) time).timeMs);
+        return calendar;
+    }
 
     private final OnClickListener diffClickListener = v -> handleDiffClick();
 

@@ -32,7 +32,6 @@ import android.os.HandlerThread;
 import android.os.Process;
 import android.text.Html;
 import android.text.Spanned;
-import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
@@ -54,7 +53,6 @@ import com.google.common.base.Joiner;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiActivity;
-import de.schildbach.oeffi.OeffiMapView;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.StationsAware;
 import de.schildbach.oeffi.directions.QueryJourneyRunnable;
@@ -75,6 +73,8 @@ import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.Product;
 import de.schildbach.pte.dto.QueryDeparturesResult;
 import de.schildbach.pte.dto.StationDepartures;
+import de.schildbach.pte.dto.PTDate;
+
 import org.osmdroid.util.GeoPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -278,8 +278,8 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             timeView.setVisibility(View.VISIBLE);
             final long presetTimeMs = presetTime.getTime();
             final String text = String.format("%s %s",
-                    Formats.formatDate(this, System.currentTimeMillis(), presetTimeMs),
-                    Formats.formatTime(this, presetTimeMs));
+                    Formats.formatDate(timeZoneSelector, System.currentTimeMillis(), presetTimeMs, PTDate.NETWORK_OFFSET),
+                    Formats.formatTime(timeZoneSelector, presetTimeMs, PTDate.NETWORK_OFFSET));
             timeView.setText(text);
         }
 
@@ -293,7 +293,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             return windowInsets;
         });
         disclaimerSourceView = findViewById(R.id.stations_station_details_disclaimer_source);
-        updateDisclaimerSource(disclaimerSourceView, selectedNetwork.name(), null);
+        updateDisclaimerSource(disclaimerSourceView, selectedNetwork, null);
     }
 
     @Override
@@ -420,7 +420,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                     @Override
                     protected void onResult(final QueryDeparturesResult result) {
                         if (result.header != null) {
-                            updateDisclaimerSource(disclaimerSourceView, selectedNetwork.name(),
+                            updateDisclaimerSource(disclaimerSourceView, selectedNetwork,
                                     product(result.header));
                         }
 
@@ -727,7 +727,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         }
     }
 
-    private static class DepartureViewHolder extends RecyclerView.ViewHolder {
+    private class DepartureViewHolder extends RecyclerView.ViewHolder {
         private final TextView timeRelView;
         private final TextView timeAbsView;
         private final TextView delayView;
@@ -741,7 +741,6 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         private boolean msgViewExpanded;
 
         private final StationDetailsActivity context;
-        private final java.text.DateFormat timeFormat;
 
         public DepartureViewHolder(final StationDetailsActivity context, final View itemView) {
             super(itemView);
@@ -763,40 +762,41 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             });
 
             this.context = context;
-            this.timeFormat = DateFormat.getTimeFormat(context);
         }
 
         public void bind(final NetworkId network, final Location station, final Departure departure) {
             final boolean refIsNow = context.presetTime == null;
             final long referenceTime = (refIsNow ? new Date() : context.presetTime).getTime();
 
-            final Date predictedTime = departure.predictedTime;
-            final Date plannedTime = departure.plannedTime;
+            final PTDate predictedTime = departure.predictedTime;
+            final PTDate plannedTime = departure.plannedTime;
             final boolean cancelled = departure.cancelled;
 
-            long time;
+            PTDate time;
             final boolean isPredicted = predictedTime != null;
             if (predictedTime != null)
-                time = predictedTime.getTime();
+                time = predictedTime;
             else if (plannedTime != null)
-                time = plannedTime.getTime();
+                time = plannedTime;
             else
                 throw new IllegalStateException();
 
-            final boolean isPast = time < referenceTime;
+            final long timeMillis = time.getTime();
+            final boolean isPast = timeMillis < referenceTime;
 
             itemView.setBackgroundColor(context.getColor(isPast ? R.color.bg_station_before : R.color.bg_level0));
 
             // time rel
-            timeRelView.setText(Formats.formatTimeDiff(context, referenceTime, time, refIsNow));
+            timeRelView.setText(Formats.formatTimeDiff(context, referenceTime, timeMillis, refIsNow));
             timeRelView.setTypeface(Typeface.DEFAULT, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
             setStrikeThru(timeRelView, cancelled);
 
             // time abs
-            final StringBuilder timeAbs = new StringBuilder(Formats.formatDate(context, referenceTime, time, false, ""));
+            final PTDate displayTime = timeZoneSelector.getDisplay(time);
+            final StringBuilder timeAbs = new StringBuilder(Formats.formatDate(timeZoneSelector, referenceTime, displayTime, false, ""));
             if (timeAbs.length() > 0)
                 timeAbs.append(',').append(Constants.CHAR_HAIR_SPACE);
-            timeAbs.append(timeFormat.format(time));
+            timeAbs.append(Formats.formatTime(timeZoneSelector, displayTime));
             timeAbsView.setText(timeAbs);
             timeAbsView.setTypeface(Typeface.DEFAULT, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
             setStrikeThru(timeAbsView, cancelled);

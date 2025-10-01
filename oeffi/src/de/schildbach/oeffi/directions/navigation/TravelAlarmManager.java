@@ -49,9 +49,11 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
+import de.schildbach.oeffi.util.TimeZoneSelector;
 import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
+import de.schildbach.pte.dto.PTDate;
 import de.schildbach.pte.dto.Trip;
 
 public class TravelAlarmManager {
@@ -386,10 +388,11 @@ public class TravelAlarmManager {
             }
             title = context.getString(titleResId, tripRenderer.nextEventTargetName);
         }
+        final TimeZoneSelector timeZoneSelector = Application.getInstance().getTimeZoneSelector();
         final String message = context.getString(messageResId,
                 tripRenderer.nextEventTargetName,
-                Formats.formatTime(context, tripRenderer.nextEventEarliestTime),
-                Formats.formatTime(context, tripRenderer.nextEventEstimatedTime),
+                Formats.formatTime(timeZoneSelector, tripRenderer.nextEventEarliestTime, PTDate.SYSTEM_OFFSET),
+                Formats.formatTime(timeZoneSelector, tripRenderer.nextEventEstimatedTime, PTDate.SYSTEM_OFFSET),
                 tripRenderer.nextEventTimeLeftValue, tripRenderer.nextEventTimeLeftUnit);
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, channelId)
@@ -500,8 +503,8 @@ public class TravelAlarmManager {
             if (travelAlarmState.isAlarmDisabled) {
                 statusText = context.getString(R.string.navigation_alarm_dialog_status_alarm_disabled_text);
             } else if (travelAlarmState.currentTravelAlarmAtMs > 0) {
-                final String alarmTime = Formats.formatTime(context,
-                        System.currentTimeMillis(), travelAlarmState.currentTravelAlarmAtMs);
+                final String alarmTime = Formats.formatTime(Application.getInstance().getTimeZoneSelector(),
+                        System.currentTimeMillis(), travelAlarmState.currentTravelAlarmAtMs, PTDate.SYSTEM_OFFSET);
                 statusText = context.getString(R.string.navigation_alarm_dialog_status_alarm_at_text, alarmTime);
             } else {
                 statusText = context.getString(R.string.navigation_alarm_dialog_status_alarm_inactive_text);

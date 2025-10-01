@@ -109,6 +109,8 @@ public final class NetworkProviderFactory {
             return new DbProvider.Fernverkehr();
         else if (networkId.equals(NetworkId.DBREGIO))
             return new DbProvider.Regio();
+        else if (networkId.equals(NetworkId.DBINTERNATIONAL))
+            return new DbProvider.International();
 //        else if (networkId.equals(NetworkId.DBDEUTSCHLANDTICKETWEB))
 //            return new DbWebProvider.DeutschlandTicket();
 //        else if (networkId.equals(NetworkId.DBWEB))

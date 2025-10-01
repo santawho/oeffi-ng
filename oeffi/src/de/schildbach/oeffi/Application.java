@@ -59,6 +59,7 @@ import de.schildbach.oeffi.stations.StationsActivity;
 import de.schildbach.oeffi.util.AppInstaller;
 import de.schildbach.oeffi.util.ErrorReporter;
 import de.schildbach.oeffi.util.SpeechInput;
+import de.schildbach.oeffi.util.TimeZoneSelector;
 import de.schildbach.pte.NetworkId;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -95,6 +96,7 @@ public class Application extends android.app.Application {
     private SpeechInput speechInput;
     private SharedPreferences prefs;
     private String appName;
+    private TimeZoneSelector timeZoneSelector;
 
     public Application() {
         instance = this;
@@ -153,10 +155,15 @@ public class Application extends android.app.Application {
         return prefs.getBoolean(Constants.PREFS_KEY_USER_INTERFACE_DEVELOPER_OPTIONS_SHOW_EXTRA_INFOS_ENABLED, false);
     }
 
+    public TimeZoneSelector getTimeZoneSelector() {
+        return timeZoneSelector;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
 
+        timeZoneSelector = new TimeZoneSelector(this);
         initLogging();
 
         ErrorReporter.getInstance().init(this);

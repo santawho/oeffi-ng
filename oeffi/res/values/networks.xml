@@ -10,6 +10,8 @@
     <string name="network_db_comment">Germany, long-distance and regional</string>
     <string name="network_dbregio_label">Deutsche Bahn Regional</string>
     <string name="network_dbregio_comment">Germany, optimized for regional traffic (long-distance optional)</string>
+    <string name="network_dbinternational_label">Deutsche Bahn International</string>
+    <string name="network_dbinternational_comment">Europe; by Deutsche Bahn</string>
     <string name="network_dbdeutschlandticket_label">Deutsche Bahn Deutschland-Ticket</string>
     <string name="network_dbdeutschlandticket_comment">Germany, optimized for Deutschland-Ticket (regional traffic)</string>
     <string name="network_dbweb_label">Deutsche Bahn (1)</string>

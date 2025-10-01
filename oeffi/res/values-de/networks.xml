@@ -11,6 +11,8 @@
     <string name="network_db_comment">Deutschland, Fern- und Regionalverkehr</string>
     <string name="network_dbregio_label">Deutsche Bahn Regional</string>
     <string name="network_dbregio_comment">Deutschland, optimiert für Regionalverkehr (Fernverkehr optional)</string>
+    <string name="network_dbinternational_label">Deutsche Bahn International</string>
+    <string name="network_dbinternational_comment">Europa; durch Deutsche Bahn</string>
     <string name="network_dbdeutschlandticket_label">Deutsche Bahn Deutschland-Ticket</string>
     <string name="network_dbdeutschlandticket_comment">Deutschland, optimiert für das Deutschland-Ticket (Regionalverkehr)</string>
     <string name="network_dbweb_label">Deutsche Bahn (1)</string>

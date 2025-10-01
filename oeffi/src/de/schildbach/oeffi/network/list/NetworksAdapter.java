@@ -22,6 +22,7 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import androidx.recyclerview.widget.RecyclerView;
 import de.schildbach.oeffi.R;
+import de.schildbach.pte.NetworkId;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -29,13 +30,13 @@ import java.util.List;
 public class NetworksAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final Context context;
     private final LayoutInflater inflater;
-    private final String previouslySelectedNetwork;
+    private final NetworkId previouslySelectedNetwork;
     private final NetworkClickListener clickListener;
     private final NetworkContextMenuItemListener contextMenuItemListener;
 
     private final List<NetworkListEntry> entries = new LinkedList<>();
 
-    public NetworksAdapter(final Context context, final String previouslySelectedNetwork,
+    public NetworksAdapter(final Context context, final NetworkId previouslySelectedNetwork,
             final NetworkClickListener clickListener, final NetworkContextMenuItemListener contextMenuItemListener) {
         this.context = context;
         this.inflater = LayoutInflater.from(context);

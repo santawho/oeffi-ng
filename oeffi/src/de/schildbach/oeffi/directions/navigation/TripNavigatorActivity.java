@@ -20,7 +20,6 @@ package de.schildbach.oeffi.directions.navigation;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -43,8 +42,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Date;
 
-import javax.net.ssl.SSLException;
-
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.directions.QueryTripsRunnable;
@@ -53,16 +50,13 @@ import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
 import de.schildbach.oeffi.directions.TripsOverviewActivity;
-import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.pte.NetworkId;
-import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.JourneyRef;
-import de.schildbach.pte.dto.QueryTripsResult;
 import de.schildbach.pte.dto.Stop;
+import de.schildbach.pte.dto.PTDate;
 import de.schildbach.pte.dto.Trip;
-import okhttp3.HttpUrl;
 
 public class TripNavigatorActivity extends TripDetailsActivity {
     private static final Logger log = LoggerFactory.getLogger(TripNavigatorActivity.class);
@@ -354,7 +348,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
             final JourneyRef feederJourneyRef,
             final JourneyRef connectionJourneyRef,
             QueryTripsRunnable.TripRequestData queryTripsRequestData) {
-        final Date arrivalTime = stop.getArrivalTime();
+        final PTDate arrivalTime = stop.getArrivalTime();
         final TimeSpec.Absolute time = new TimeSpec.Absolute(TimeSpec.DepArr.DEPART,
                 arrivalTime != null ? arrivalTime.getTime() : stop.getDepartureTime().getTime());
         final TripsOverviewActivity.RenderConfig overviewConfig = getOverviewConfig(
@@ -569,7 +563,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
             detailsView.setVisibility(View.GONE);
         } else {
             detailsView.setVisibility(View.VISIBLE);
-            timeView.setText(Formats.formatTime(this, alarmAtMs));
+            timeView.setText(Formats.formatTime(timeZoneSelector, alarmAtMs, PTDate.SYSTEM_OFFSET));
             offsetView.setText(formatDuration(tripRenderer.nextEventEstimatedTime.getTime() - alarmAtMs));
             final ImageView sleepIcon = findViewById(R.id.navigation_next_event_alarm_details_sleep_icon);
             final long sleepMs = alarmAtMs - now;

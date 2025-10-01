@@ -38,6 +38,7 @@ import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.Point;
 import de.schildbach.pte.dto.Position;
 import de.schildbach.pte.dto.Stop;
+import de.schildbach.pte.dto.PTDate;
 import de.schildbach.pte.dto.Trip;
 
 public class TripRenderer {
@@ -60,7 +61,7 @@ public class TripRenderer {
         public Stop sectionOtherStop;
         public float sectionLength;
         public boolean sectionIsAfterNearestStop; // otherwise is before
-        public Date plannedTimeAtRefPoint;
+        public PTDate plannedTimeAtRefPoint;
         public Trip.Public simulatedPublicLeg;
 
         public LegContainer(
@@ -191,7 +192,9 @@ public class TripRenderer {
                 } else {
                     final long beginTime = beginStop.plannedDepartureTime.getTime();
                     final long endTime = endStop.plannedArrivalTime.getTime();
-                    plannedTimeAtRefPoint = new Date(beginTime + (long) (distRel * (float) (endTime - beginTime)));
+                    plannedTimeAtRefPoint = new PTDate(
+                            new Date(beginTime + (long) (distRel * (float) (endTime - beginTime))),
+                            beginStop.plannedDepartureTime.getOffset());
                 }
 
                 final long delayAtRefPoint = refTime.getTime() - plannedTimeAtRefPoint.getTime();
@@ -213,11 +216,15 @@ public class TripRenderer {
                             intermediateStops.add(new Stop(
                                     stop.location,
                                     stop.plannedArrivalTime,
-                                    delayedArrival ? new Date(stop.plannedArrivalTime.getTime() + delayAtRefPoint) : stop.predictedArrivalTime,
+                                    delayedArrival
+                                            ? new PTDate(stop.plannedArrivalTime.getTime() + delayAtRefPoint, stop.plannedArrivalTime.getOffset())
+                                            : stop.predictedArrivalTime,
                                     stop.plannedArrivalPosition, stop.predictedArrivalPosition,
                                     stop.arrivalCancelled,
                                     stop.plannedDepartureTime,
-                                    delayedDeparture ? new Date(stop.plannedDepartureTime.getTime() + delayAtRefPoint) : stop.predictedDepartureTime,
+                                    delayedDeparture
+                                            ? new PTDate(stop.plannedDepartureTime.getTime() + delayAtRefPoint, stop.plannedDepartureTime.getOffset())
+                                            : stop.predictedDepartureTime,
                                     stop.plannedDeparturePosition, stop.predictedDeparturePosition,
                                     stop.departureCancelled));
                             if (!delayedDeparture)
@@ -228,7 +235,10 @@ public class TripRenderer {
                     }
                     arrivalStop = new Stop(
                             arrivalStop.location,
-                            arrivalStop.plannedArrivalTime, new Date(arrivalStop.plannedArrivalTime.getTime() + delayAtRefPoint),
+                            arrivalStop.plannedArrivalTime,
+                            new PTDate(
+                                    arrivalStop.plannedArrivalTime.getTime() + delayAtRefPoint,
+                                    arrivalStop.plannedArrivalTime.getOffset()),
                             arrivalStop.plannedArrivalPosition, arrivalStop.predictedArrivalPosition,
                             arrivalStop.arrivalCancelled,
                             arrivalStop.plannedDepartureTime, arrivalStop.predictedDepartureTime,
@@ -347,8 +357,8 @@ public class TripRenderer {
             return false;
         final Stop arrivalStop = transferFrom.publicLeg.arrivalStop;
         final Stop departureStop = transferTo.publicLeg.departureStop;
-        final Date arrTime = arrivalStop.getArrivalTime();
-        final Date depTime = departureStop.getDepartureTime();
+        final PTDate arrTime = arrivalStop.getArrivalTime();
+        final PTDate depTime = departureStop.getDepartureTime();
         final int leftMins = (int) ((depTime.getTime() - arrTime.getTime()) / 60000 - 1);
         final int walkMins = individualLeg != null ? individualLeg.min : 0;
         return leftMins - walkMins < TRANSFER_CRITICAL_MINUTES;
@@ -435,10 +445,10 @@ public class TripRenderer {
         final Trip.Public leg = legC.publicLeg;
         final Stop departureStop = leg.departureStop;
         final Stop arrivalStop = leg.arrivalStop;
-        final Date beginTime = departureStop.getDepartureTime();
-        final Date plannedBeginTime = departureStop.plannedDepartureTime;
-        final Date endTime = arrivalStop.getArrivalTime();
-        final Date plannedEndTime = arrivalStop.plannedArrivalTime;
+        final PTDate beginTime = departureStop.getDepartureTime();
+        final PTDate plannedBeginTime = departureStop.plannedDepartureTime;
+        final PTDate endTime = arrivalStop.getArrivalTime();
+        final PTDate plannedEndTime = arrivalStop.plannedArrivalTime;
         if (now.before(beginTime)) {
             // leg is in the future
         } else if (now.after(endTime)) {
@@ -501,10 +511,10 @@ public class TripRenderer {
         final Trip.Public nextPublicLeg = legC.transferTo != null ? legC.transferTo.publicLeg : null;
         final Stop transferFrom = legC.transferFrom != null ? legC.transferFrom.publicLeg.arrivalStop : null;
         final Stop transferTo = nextPublicLeg != null ? nextPublicLeg.departureStop : null;
-        final Date beginTime = transferFrom != null ? transferFrom.getArrivalTime() : leg == null ? null : leg.departureTime;
-        final Date plannedBeginTime = transferFrom != null ? transferFrom.plannedArrivalTime : leg == null ? null : leg.departureTime;
-        final Date endTime = transferTo != null ? transferTo.getDepartureTime() : leg == null ? null : leg.arrivalTime;
-        final Date plannedEndTime = transferTo != null ? transferTo.plannedDepartureTime : leg == null ? null : leg.arrivalTime;
+        final PTDate beginTime = transferFrom != null ? transferFrom.getArrivalTime() : leg == null ? null : leg.departureTime;
+        final PTDate plannedBeginTime = transferFrom != null ? transferFrom.plannedArrivalTime : leg == null ? null : leg.departureTime;
+        final PTDate endTime = transferTo != null ? transferTo.getDepartureTime() : leg == null ? null : leg.arrivalTime;
+        final PTDate plannedEndTime = transferTo != null ? transferTo.plannedDepartureTime : leg == null ? null : leg.arrivalTime;
         if (transferFrom != null && beginTime != null && now.before(beginTime)) {
             // leg is in the future
         } else if (endTime != null && now.after(endTime)) {
@@ -628,14 +638,14 @@ public class TripRenderer {
     public boolean nextEventTimeHourglassVisible;
     public String nextEventTimeLeftExplainStr;
 
-    private void setPrevEventLatestTime(final Date beginTime, final Date plannedBeginTime) {
+    private void setPrevEventLatestTime(final PTDate beginTime, final PTDate plannedBeginTime) {
         prevEventLatestTime = beginTime;
-        if (plannedBeginTime != null && plannedBeginTime.after(beginTime))
+        if (plannedBeginTime != null && plannedBeginTime.after(prevEventLatestTime))
             prevEventLatestTime = plannedBeginTime;
     }
 
     @SuppressLint("DefaultLocale")
-    private boolean setNextEventTimeLeft(final Date now, final Date endTime, final Date plannedEndTime, final int walkMins) {
+    private boolean setNextEventTimeLeft(final Date now, final PTDate endTime, final PTDate plannedEndTime, final int walkMins) {
         boolean retValue = false;
         nextEventEstimatedTime = endTime;
         nextEventEarliestTime = endTime;
@@ -770,8 +780,8 @@ public class TripRenderer {
             nextEventTransferAvailable = true;
             final Stop arrivalStop = walkLegC.transferFrom.publicLeg.arrivalStop;
             final Stop departureStop = walkLegC.transferTo.publicLeg.departureStop;
-            final Date arrTime = arrivalStop.getArrivalTime();
-            final Date depTime = departureStop.getDepartureTime();
+            final PTDate arrTime = arrivalStop.getArrivalTime();
+            final PTDate depTime = departureStop.getDepartureTime();
             final long leftMins = (depTime.getTime() - arrTime.getTime()) / 60000 - 1;
             nextEventTransferLeftTimeValue = Long.toString(leftMins);
             nextEventTransferLeftTimeCritical = leftMins - walkMins < TRANSFER_CRITICAL_MINUTES;
@@ -831,7 +841,7 @@ public class TripRenderer {
 
     public String nextPublicLegDurationTimeValue;
 
-    public void setNextPublicLegDuration(final Date begin, final Date end) {
+    public void setNextPublicLegDuration(final PTDate begin, final PTDate end) {
         this.nextPublicLegDurationTimeValue = Long.toString((end.getTime() - begin.getTime()) / 60000);
     }
 }
