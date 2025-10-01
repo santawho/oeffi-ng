@@ -335,7 +335,7 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
                 if (line == null)
                     break;
                 line = line.trim();
-                if (line.length() == 0 || line.charAt(0) == '#')
+                if (line.isEmpty() || line.charAt(0) == '#')
                     continue;
 
                 final String[] fields = line.split("\\|");
@@ -343,7 +343,14 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
                 final String group = fields[1];
                 final String coverage = fields.length >= 3 ? fields[2] : "";
                 final String state = fields.length >= 4 ? fields[3] : null;
-                final NetworkListEntry entry = new NetworkListEntry.Network(NetworkId.valueOf(networkName), state, group, coverage);
+                final NetworkId networkId;
+                try {
+                    networkId = NetworkId.valueOf(networkName);
+                } catch (IllegalArgumentException iae) {
+                    log.warn("networks file {} contains entry for non-existing provider \"{}\"", INDEX_FILENAME, networkName);
+                    continue;
+                }
+                final NetworkListEntry entry = new NetworkListEntry.Network(networkId, state, group, coverage);
 
                 entriesMap.put(networkName, entry);
             }
