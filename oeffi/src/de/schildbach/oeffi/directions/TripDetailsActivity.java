@@ -69,6 +69,8 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Supplier;
 
@@ -81,6 +83,7 @@ import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.TripAware;
 import de.schildbach.oeffi.util.GoogleMapsUtils;
+import de.schildbach.oeffi.util.HorizontalPager;
 import de.schildbach.oeffi.util.KmlProducer;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.util.TimeSpec.DepArr;
@@ -227,6 +230,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     protected MyActionBar actionBar;
     private LayoutInflater inflater;
+    protected HorizontalPager viewPager;
     private Resources res;
     private int colorSignificant;
     private int colorInsignificant;
@@ -253,6 +257,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private Date deviceLocationTime;
     private int selectedLegIndex = -1;
     protected boolean isPaused = false;
+    protected SwipeRefreshLayout swipeRefreshForTripList;
+    protected SwipeRefreshLayout swipeRefreshForNextEvent;
 
     private int LEGSGROUP_INSERT_INDEX;
 
@@ -532,6 +538,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             nextEventBackView.setLongClickable(true);
             nextEventBackView.setOnLongClickListener(lockDeviceNextEventViewLongClicked);
         }
+
+        swipeRefreshForTripList = findViewById(R.id.directions_trip_details_list_content);
+        swipeRefreshForNextEvent = findViewById(R.id.navigation_next_event);
+        swipeRefreshForTripList.setEnabled(false);
+        swipeRefreshForNextEvent.setEnabled(false);
+
+        viewPager = findViewById(R.id.directions_trip_details_pager);
     }
 
     private void shareCalendarEntry() {
@@ -654,7 +667,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     protected boolean isShowingNextEvent() {
-        return findViewById(R.id.navigation_next_event).getVisibility() == View.VISIBLE;
+        return viewPager.getCurrentView().getId() == R.id.navigation_next_event;
     }
 
     private void goBack() {
@@ -725,7 +738,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     protected void updateFragments() {
-        updateFragments(R.id.directions_trip_details_list_frame);
+        updateFragments(isPortrait
+                ? R.id.directions_trip_details_list_content
+                : R.id.directions_trip_details_content_frame);
     }
 
     protected void updateGUI() {
@@ -772,11 +787,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
         }
 
-        View listContent = findViewById(R.id.directions_trip_details_list_content);
-        listContent.setVisibility(showEvent ? View.GONE : View.VISIBLE);
-
-        View nextEvent = findViewById(R.id.navigation_next_event);
-        nextEvent.setVisibility(showEvent ? View.VISIBLE : View.GONE);
+        viewPager.setCurrentView(showEvent ? R.id.navigation_next_event : R.id.directions_trip_details_list_frame, true);
     }
 
     private void updateHighlightedTime(final Date now) {

@@ -112,6 +112,7 @@ public abstract class OeffiActivity extends ComponentActivity {
 
     protected boolean isPortrait;
     private boolean mapEnabled = false;
+    private View mapFrame;
     private OeffiMapView mapView;
     private DrawerLayout navigationDrawerLayout;
     private MenuProvider navigationDrawerMenuProvider;
@@ -586,10 +587,6 @@ public abstract class OeffiActivity extends ComponentActivity {
     protected void updateFragments() {
     }
 
-    protected void updateFragments(final int listFrameResId) {
-        updateFragments(listFrameResId, R.id.map_frame);
-    }
-
     protected OeffiMapView getMapView() {
         if (mapView == null)
             mapView = findViewById(R.id.map_view);
@@ -600,7 +597,7 @@ public abstract class OeffiActivity extends ComponentActivity {
     protected void onMapSetVisible() {
     }
 
-    protected void updateFragments(final int listFrameResId, final int mapFrameResId) {
+    protected void updateFragments(final int listFrameResId) {
         final Resources res = getResources();
 
         final View listFrame = findViewById(listFrameResId);
@@ -608,7 +605,6 @@ public abstract class OeffiActivity extends ComponentActivity {
         ViewUtils.setVisibility(listFrame, isInMultiWindowMode() || listShow);
 
         final boolean mapShow;
-        final View mapFrame = findViewById(mapFrameResId);
         if (mapFrame != null) {
             mapShow = !isInMultiWindowMode() && isMapEnabled(res);
             ViewUtils.setVisibility(mapFrame, mapShow);
@@ -635,11 +631,14 @@ public abstract class OeffiActivity extends ComponentActivity {
     }
 
     private void setupMapView(final View contentView) {
-        final View mapFrame = contentView.findViewById(R.id.map_frame);
+        mapFrame = isPortrait ? contentView.findViewById(R.id.vertical_map_frame) : null;
+        if (mapFrame == null)
+            mapFrame = contentView.findViewById(R.id.map_frame);
+
         if (mapFrame == null)
             return;
 
-        mapView = findViewById(R.id.map_view);
+        mapView = mapFrame.findViewById(R.id.map_view);
         final LinearLayout mapFrameContainer = (LinearLayout) mapFrame.getParent();
         mapFrameContainer.setOrientation(isPortrait ? LinearLayout.VERTICAL : LinearLayout.HORIZONTAL);
 
@@ -650,7 +649,7 @@ public abstract class OeffiActivity extends ComponentActivity {
                 mapView.animateToLocation(location.getLatitude(), location.getLongitude());
         }
 
-        final TextView mapDisclaimerView = findViewById(R.id.map_disclaimer);
+        final TextView mapDisclaimerView = mapFrame.findViewById(R.id.map_disclaimer);
         mapDisclaimerView.setText(mapView.getTileProvider().getTileSource().getCopyrightNotice());
         ViewCompat.setOnApplyWindowInsetsListener(mapDisclaimerView, (v, windowInsets) -> {
             final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -658,7 +657,7 @@ public abstract class OeffiActivity extends ComponentActivity {
             return windowInsets;
         });
 
-        final ZoomControls zoom = findViewById(R.id.map_zoom);
+        final ZoomControls zoom = mapFrame.findViewById(R.id.map_zoom);
         ViewCompat.setOnApplyWindowInsetsListener(zoom, (v, windowInsets) -> {
             final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(0, 0, 0, insets.bottom);

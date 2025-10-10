@@ -49,6 +49,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import com.google.common.base.Joiner;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.MyActionBar;
@@ -164,6 +166,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
     private TextView resultStatusView;
     private TextView disclaimerSourceView;
     private boolean hideCancelledDepartures;
+    private SwipeRefreshLayout swipeRefresh;
 
     private BroadcastReceiver tickReceiver;
     private boolean autoRefreshDisabled = false;
@@ -198,10 +201,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         setPrimaryColor(R.color.bg_action_bar_stations);
         actionBar.setBack(isTaskRoot() ? null : v -> finish());
         actionBar.swapTitles();
-        actionBar.addProgressButton().setOnClickListener(v -> {
-            autoRefreshDisabled = false;
-            load(null, false);
-        });
+        actionBar.addProgressButton().setOnClickListener(v -> requestRefresh());
         addShowMapButtonToActionBar();
         favoriteButton = actionBar.addToggleButton(R.drawable.ic_star_24dp,
                 R.string.stations_station_details_action_favorite_title);
@@ -239,6 +239,9 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             autoRefreshDisabled = true;
             load(nextEarlierTime, true);
         });
+
+        swipeRefresh = findViewById(R.id.stations_station_details_refresh);
+        swipeRefresh.setOnRefreshListener(this::requestRefresh);
 
         viewAnimator = findViewById(R.id.stations_station_details_list_layout);
 
@@ -389,6 +392,11 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         return selectedFilteredDepartures;
     }
 
+    private void requestRefresh() {
+        autoRefreshDisabled = false;
+        load(null, false);
+    }
+
     private void load(final Date time, final boolean earlier) {
         final boolean modeAppend;
         final Date fromTime;
@@ -409,11 +417,13 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 .post(new QueryDeparturesRunnable(handler, networkProvider, requestedStationId, fromTime, MAX_DEPARTURES) {
                     @Override
                     protected void onPreExecute() {
+                        swipeRefresh.setRefreshing(true);
                         actionBar.startProgress();
                     }
 
                     @Override
                     protected void onPostExecute() {
+                        swipeRefresh.setRefreshing(false);
                         actionBar.stopProgress();
                     }
 

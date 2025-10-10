@@ -36,6 +36,8 @@ import android.widget.TextView;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -139,6 +141,7 @@ public class TripsOverviewActivity extends OeffiActivity {
     private @Nullable QueryTripsContext queryTripsContextEarlier;
     private @Nullable QueryTripsContext queryTripsContextLater;
     private TripsGallery barView;
+    private SwipeRefreshLayout swipeRefresh;
 
     private final NavigableSet<TripInfo> trips = new TreeSet<>((tripC1, tripC2) -> {
         Trip trip1 = tripC1.trip;
@@ -243,11 +246,10 @@ public class TripsOverviewActivity extends OeffiActivity {
                 postCheckMoreRunnable(false);
             });
         }
-        actionBar.addProgressButton().setOnClickListener(v -> {
-            setSearchMoreButtonEnabled(false);
-            reloadRequested = true;
-            postCheckMoreRunnable(false);
-        });
+        actionBar.addProgressButton().setOnClickListener(v -> requestReload());
+
+        swipeRefresh = findViewById(R.id.trips_refresh);
+        swipeRefresh.setOnRefreshListener(() -> requestReload());
 
         barView = findViewById(R.id.trips_bar_view);
         barView.setRenderConfig(renderConfig);
@@ -337,6 +339,12 @@ public class TripsOverviewActivity extends OeffiActivity {
         super.onDestroy();
     }
 
+    private void requestReload() {
+        setSearchMoreButtonEnabled(false);
+        reloadRequested = true;
+        postCheckMoreRunnable(false);
+    }
+
     public void postCheckMoreRunnable(final boolean delayed) {
 //        log.info("fetch more");
         foregroundHandler.postDelayed(checkMoreRunnable, delayed ? 50 : 0);
@@ -412,6 +420,7 @@ public class TripsOverviewActivity extends OeffiActivity {
                 if (!foregroundRunning) {
                     queryMoreTripsRunning = false;
                     runOnUiThread(() -> {
+                        swipeRefresh.setRefreshing(false);
                         actionBar.stopProgress();
                     });
                 }
@@ -426,18 +435,19 @@ public class TripsOverviewActivity extends OeffiActivity {
 
                 try {
                     final NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
-                    final TripRequestData requestData = searchMoreContext.getNextRequestData();
-                    final QueryTripsResult netResult = (earlier || later)
-                        ? networkProvider.queryMoreTrips(
-                                context,
-                                later)
-                        : networkProvider.queryTrips(
-                            requestData.from,
-                            requestData.via,
-                            requestData.to,
-                            requestData.date,
-                            requestData.dep,
-                            requestData.options);
+                    final QueryTripsResult netResult;
+                    if (earlier || later) {
+                        netResult = networkProvider.queryMoreTrips(context, later);
+                    } else {
+                        final TripRequestData requestData = searchMoreContext.getNextRequestData();
+                        netResult = networkProvider.queryTrips(
+                                requestData.from,
+                                requestData.via,
+                                requestData.to,
+                                requestData.date,
+                                requestData.dep,
+                                requestData.options);
+                    }
 
                     final QueryTripsResult result = (netResult.status == QueryTripsResult.Status.OK)
                             ? preprocessResult(netResult)
@@ -456,6 +466,8 @@ public class TripsOverviewActivity extends OeffiActivity {
                             new Toast(TripsOverviewActivity.this).toast(R.string.toast_network_problem);
                         }
                         queryMoreTripsRunning = false;
+
+                        swipeRefresh.setRefreshing(false);
                         actionBar.stopProgress();
 
                         // fetch more
@@ -1080,8 +1092,15 @@ public class TripsOverviewActivity extends OeffiActivity {
         }
 
         public TripRequestData getNextRequestData() {
-            if (currentRound <= 0)
-                return reloadRequestData;
+            if (currentRound <= 0) {
+                final Date now = new Date();
+                if (reloadRequestData.date.after(now))
+                    return reloadRequestData;
+
+                final TripRequestData clone = reloadRequestData.clone();
+                clone.date = now;
+                return clone;
+            }
 
             return nextRequestData;
         }

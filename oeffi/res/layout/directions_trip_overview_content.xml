@@ -7,7 +7,8 @@
 
     <include layout="@layout/action_bar" />
 
-    <FrameLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/trips_refresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -45,6 +46,6 @@
                 android:text="@string/disclaimer_responsibility_2line"
                 android:textSize="@dimen/font_size_disclaimer" />
         </FrameLayout>
-    </FrameLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </LinearLayout>

@@ -63,6 +63,8 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
 import com.google.common.primitives.Ints;
@@ -166,6 +168,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private TextView disclaimerSourceView;
     private View filterActionButton;
     private ViewGroup locationProvidersView;
+    private SwipeRefreshLayout swipeRefresh;
 
     private QueryJourneyRunnable queryJourneyRunnable;
     private final Handler handler = new Handler();
@@ -247,11 +250,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         setPrimaryColor(R.color.bg_action_bar_stations);
         actionBar.setPrimaryTitle(R.string.stations_activity_title);
         actionBar.setTitlesOnClickListener(v -> NetworkPickerActivity.start(StationsActivity.this));
-        actionBar.addProgressButton().setOnClickListener(v -> {
-            for (final Station station : stations)
-                station.requestedAt = null;
-            handler.post(initStationsRunnable);
-        });
+        actionBar.addProgressButton().setOnClickListener(v -> requestRefresh());
         actionBar.addButton(R.drawable.ic_star_white_24dp, R.string.stations_options_favorites_title)
                 .setOnClickListener(view -> FavoriteStationsActivity.start(StationsActivity.this));
         addShowMapButtonToActionBar();
@@ -299,6 +298,9 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         //                return false;
         //            }
         //        });
+
+        swipeRefresh = findViewById(R.id.stations_refresh);
+        swipeRefresh.setOnRefreshListener(this::requestRefresh);
 
         locationProvidersView = findViewById(R.id.stations_list_location_providers);
 
@@ -538,6 +540,12 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         super.onResume();
 
         postLoadNextVisible(0);
+    }
+
+    private void requestRefresh() {
+        for (final Station station : stations)
+            station.requestedAt = null;
+        handler.post(initStationsRunnable);
     }
 
     private void resetContent() {
@@ -894,6 +902,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                 backgroundHandler.post(() -> {
                     runOnUiThread(() -> {
                         actionBar.startProgress();
+                        // swipeRefresh.setRefreshing(true);
                         loading = true;
                         updateGUI();
                     });
@@ -923,6 +932,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                         log.info("IO problem while querying for nearby locations to " + referenceLocation, x);
                     } finally {
                         runOnUiThread(() -> {
+                            swipeRefresh.setRefreshing(false);
                             actionBar.stopProgress();
                             loading = false;
                             updateGUI();
@@ -1131,10 +1141,12 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                                 @Override
                                 protected void onPreExecute() {
                                     actionBar.startProgress();
+                                    // swipeRefresh.setRefreshing(true);
                                 }
 
                                 @Override
                                 protected void onPostExecute() {
+                                    swipeRefresh.setRefreshing(false);
                                     actionBar.stopProgress();
                                 }
 

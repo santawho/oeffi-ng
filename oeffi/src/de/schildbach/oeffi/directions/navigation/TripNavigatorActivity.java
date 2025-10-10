@@ -124,6 +124,12 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        swipeRefreshForTripList.setOnRefreshListener(this::refreshNavigation);
+        swipeRefreshForTripList.setEnabled(true);
+        swipeRefreshForNextEvent.setOnRefreshListener(this::refreshNavigation);
+        swipeRefreshForNextEvent.setEnabled(true);
+
         final Intent intent = getIntent();
         handleDeleteNotification(intent);
         handleSwitchToNextEvent(intent);
@@ -177,8 +183,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
                         ? R.color.bg_action_alternative_directions
                         : R.color.bg_action_bar_navigation);
         actionBar.setPrimaryTitle(getString(R.string.navigation_details_title));
-        actionBar.addProgressButton().setOnClickListener(buttonView ->
-                refreshNavigation(true, true));
+        actionBar.addProgressButton().setOnClickListener(buttonView -> refreshNavigation());
     }
 
     @Override
@@ -307,12 +312,18 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         return true;
     }
 
+    private void refreshNavigation() {
+        refreshNavigation(true, true);
+    }
+
     private void refreshNavigation(final boolean doNotificationUpdate, final boolean forceRefreshAll) {
         if (navigationRefreshRunnable != null)
             return;
 
         nextNavigationRefreshTime = -1; // block auto-refresh
         actionBar.startProgress();
+        // swipeRefreshForTripList.setRefreshing(true);
+        // swipeRefreshForNextEvent.setRefreshing(true);
 
         navigationRefreshRunnable = () -> {
             try {
@@ -331,6 +342,8 @@ public class TripNavigatorActivity extends TripDetailsActivity {
             } finally {
                 navigationRefreshRunnable = null;
                 runOnUiThread(() -> {
+                    swipeRefreshForTripList.setRefreshing(false);
+                    swipeRefreshForNextEvent.setRefreshing(false);
                     actionBar.stopProgress();
                     nextNavigationRefreshTime = new Date().getTime()
                             + NAVIGATION_AUTO_REFRESH_INTERVAL_SECS * 1000;

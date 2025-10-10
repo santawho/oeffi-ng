@@ -20,7 +20,8 @@
 
             <include layout="@layout/action_bar" />
 
-            <FrameLayout
+            <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                android:id="@+id/stations_refresh"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
@@ -397,7 +398,7 @@
                         android:text="@string/disclaimer_responsibility_2line"
                         android:textSize="@dimen/font_size_disclaimer" />
                 </LinearLayout>
-            </FrameLayout>
+            </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
         </LinearLayout>
 
         <include layout="@layout/map_frame" />
