@@ -37,60 +37,65 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <ViewAnimator
-                android:id="@+id/stations_station_details_list_layout"
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/stations_station_details_list"
+                <ViewAnimator
+                    android:id="@+id/stations_station_details_list_layout"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:clipToPadding="false"
-                    android:scrollbars="none" />
+                    android:layout_height="match_parent">
 
-                <TextView
-                    android:id="@+id/stations_station_details_result_status"
-                    android:layout_width="wrap_content"
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/stations_station_details_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:clipToPadding="false"
+                        android:scrollbars="none" />
+
+                    <TextView
+                        android:id="@+id/stations_station_details_result_status"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginLeft="@dimen/text_padding_horizontal_verylax"
+                        android:layout_marginRight="@dimen/text_padding_horizontal_verylax"
+                        android:gravity="center"
+                        android:textSize="@dimen/font_size_large" />
+                </ViewAnimator>
+
+                <LinearLayout
+                    android:id="@+id/stations_station_details_disclaimer_group"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
+                    android:layout_gravity="bottom"
                     android:layout_marginLeft="@dimen/text_padding_horizontal_verylax"
                     android:layout_marginRight="@dimen/text_padding_horizontal_verylax"
-                    android:gravity="center"
-                    android:textSize="@dimen/font_size_large" />
-            </ViewAnimator>
+                    android:layout_marginTop="@dimen/text_padding_vertical"
+                    android:layout_marginBottom="@dimen/text_padding_vertical"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
 
-            <LinearLayout
-                android:id="@+id/stations_station_details_disclaimer_group"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:layout_marginLeft="@dimen/text_padding_horizontal_verylax"
-                android:layout_marginRight="@dimen/text_padding_horizontal_verylax"
-                android:layout_marginTop="@dimen/text_padding_vertical"
-                android:layout_marginBottom="@dimen/text_padding_vertical"
-                android:baselineAligned="false"
-                android:orientation="horizontal">
+                    <TextView
+                        android:id="@+id/stations_station_details_disclaimer_source"
+                        android:layout_width="0px"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom"
+                        android:layout_weight="1"
+                        android:drawablePadding="@dimen/text_padding_horizontal_lax"
+                        android:gravity="bottom|left"
+                        android:maxLines="2"
+                        android:textSize="@dimen/font_size_disclaimer" />
 
-                <TextView
-                    android:id="@+id/stations_station_details_disclaimer_source"
-                    android:layout_width="0px"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
-                    android:layout_weight="1"
-                    android:drawablePadding="@dimen/text_padding_horizontal_lax"
-                    android:gravity="bottom|left"
-                    android:maxLines="2"
-                    android:textSize="@dimen/font_size_disclaimer" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
-                    android:gravity="bottom|right"
-                    android:text="@string/disclaimer_responsibility_2line"
-                    android:textSize="@dimen/font_size_disclaimer" />
-            </LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom"
+                        android:gravity="bottom|right"
+                        android:text="@string/disclaimer_responsibility_2line"
+                        android:textSize="@dimen/font_size_disclaimer" />
+                </LinearLayout>
+            </FrameLayout>
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     </LinearLayout>
 
