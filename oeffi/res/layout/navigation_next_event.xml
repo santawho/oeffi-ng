@@ -389,18 +389,18 @@
         </ScrollView>
 
         <ImageView
-        android:id="@+id/navigation_next_event_back_to_itinerary"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:tint="@color/fg_trip_next_event_normal"
-        android:scaleX="2"
-        android:scaleY="2"
-        android:translationX="@dimen/text_padding_horizontal_verylax"
-        android:translationY="@dimen/text_padding_vertical_verylax"
-        android:paddingHorizontal="@dimen/text_padding_horizontal"
-        android:paddingVertical="@dimen/text_padding_vertical"
-        android:src="@drawable/ic_arrow_back_white_24dp"/>
+            android:id="@+id/navigation_next_event_back_to_itinerary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:tint="@color/fg_trip_next_event_normal"
+            android:scaleX="2"
+            android:scaleY="2"
+            android:translationX="@dimen/text_padding_horizontal_verylax"
+            android:translationY="@dimen/text_padding_vertical_verylax"
+            android:paddingHorizontal="@dimen/text_padding_horizontal"
+            android:paddingVertical="@dimen/text_padding_vertical"
+            android:src="@drawable/ic_arrow_back_white_24dp"/>
 
     </FrameLayout>
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
