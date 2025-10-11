@@ -245,6 +245,8 @@
 
                 <include layout="@layout/navigation_next_event" />
 
+                <include layout="@layout/navigation_event_log" android:visibility="gone" />
+
             </de.schildbach.oeffi.util.HorizontalPager>
         </LinearLayout>
 

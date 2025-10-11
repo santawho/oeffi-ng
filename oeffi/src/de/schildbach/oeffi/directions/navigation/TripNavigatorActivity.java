@@ -112,7 +112,6 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     }
 
     private Navigator navigator;
-    private QueryTripsRunnable queryTripsRunnable;
     private Runnable navigationRefreshRunnable;
     private long nextNavigationRefreshTime = 0;
     private boolean navigationNotificationBeingDeleted;
@@ -124,6 +123,8 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        findViewById(R.id.navigation_event_log).setVisibility(View.VISIBLE);
 
         swipeRefreshForTripList.setOnRefreshListener(this::refreshNavigation);
         swipeRefreshForTripList.setEnabled(true);
@@ -209,7 +210,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     @Override
     public void onBackPressed() {
         if (isShowingNextEvent())
-            setShowNextEvent(false);
+            setShowPage(R.id.directions_trip_details_list_frame);
         else
             moveTaskToBack(true); // super.onBackPressed();
     }
@@ -242,7 +243,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
     private void handleSwitchToNextEvent(final Intent intent) {
         final boolean showNextEvent = intent.getBooleanExtra(INTENT_EXTRA_NEXTEVENT, false);
-        setShowNextEvent(showNextEvent);
+        setShowPage(showNextEvent ? R.id.navigation_next_event : R.id.directions_trip_details_list_frame);
     }
 
     private boolean handleDeleteNotification(final Intent intent) {

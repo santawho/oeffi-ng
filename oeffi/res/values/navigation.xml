@@ -82,4 +82,6 @@
     <string name="travelalarm_departure_lead_time_title">Departure lead time</string>
     <string name="travelalarm_departure_lead_time_summary">Activate alarm automatically only, when time before alarm from arrival at the changeover is at least this number of minutes. [%s]</string>
 
+    <string name="navigation_event_log_heading">Events</string>
+
 </resources>

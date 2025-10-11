@@ -242,8 +242,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private DisplayMetrics displayMetrics;
     private LocationManager locationManager;
     private BroadcastReceiver tickReceiver;
-    private boolean showNextEventWhenUnlocked = false;
-    private boolean showNextEventWhenLocked = true;
+    private int showScreenIdWhenUnlocked = R.id.directions_trip_details_list_frame;
+    private int showScreenIdWhenLocked = R.id.navigation_next_event;
 
     private ViewGroup legsGroup;
     private ToggleImageButton trackButton;
@@ -514,7 +514,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
         });
 
-        final View.OnClickListener exitNextEventViewClicked = view -> setShowNextEvent(false);
+        final View.OnClickListener exitNextEventViewClicked = view -> setShowPage(R.id.directions_trip_details_list_frame);
         final View.OnLongClickListener lockDeviceNextEventViewLongClicked = view -> {
             DeviceAdmin.enterLockScreenAndShutOffDisplay(this, true);
             return true;
@@ -545,6 +545,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         swipeRefreshForNextEvent.setEnabled(false);
 
         viewPager = findViewById(R.id.directions_trip_details_pager);
+        viewPager.setOnScreenSwitchListener((prevScreen, newScreen) -> {
+            final int newId = viewPager.getCurrentView().getId();
+            setShowPage(newId);
+        });
     }
 
     private void shareCalendarEntry() {
@@ -661,7 +665,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     @Override
     public void onBackPressed() {
         if (isShowingNextEvent())
-            setShowNextEvent(false);
+            setShowPage(R.id.directions_trip_details_list_frame);
         else
             super.onBackPressed();
     }
@@ -672,7 +676,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     private void goBack() {
         if (isShowingNextEvent())
-            setShowNextEvent(false);
+            setShowPage(R.id.directions_trip_details_list_frame);
         else
             finish();
     }
@@ -771,23 +775,23 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         tripRenderer.evaluateByTime(now);
         updateNavigationInstructions();
 
-        final boolean showEvent;
+        final int showId;
         if (currentLeg == null) {
-            showEvent = false;
-            showNextEventWhenUnlocked = false;
-            showNextEventWhenLocked = false;
+            showId = R.id.directions_trip_details_list_frame;
+            showScreenIdWhenUnlocked = R.id.directions_trip_details_list_frame;
+            showScreenIdWhenLocked = R.id.directions_trip_details_list_frame;
             findViewById(R.id.directions_trip_details_finished).setVisibility(View.VISIBLE);
         } else {
             findViewById(R.id.directions_trip_details_finished).setVisibility(View.GONE);
             if (DeviceAdmin.isScreenLocked()) {
-                showEvent = showNextEventWhenLocked;
+                showId = showScreenIdWhenLocked;
             } else {
-                showEvent = showNextEventWhenUnlocked;
-                showNextEventWhenLocked = true;
+                showId = showScreenIdWhenUnlocked;
+                showScreenIdWhenLocked = R.id.navigation_next_event;
             }
         }
 
-        viewPager.setCurrentView(showEvent ? R.id.navigation_next_event : R.id.directions_trip_details_list_frame, true);
+        viewPager.setCurrentView(showId, true);
     }
 
     private void updateHighlightedTime(final Date now) {
@@ -1128,7 +1132,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         // leg is now
         row.setBackgroundColor(colorLegPublicNowBackground);
         progressView.setVisibility(View.VISIBLE);
-        progressView.setOnClickListener(view -> setShowNextEvent(true));
+        progressView.setOnClickListener(view -> setShowPage(R.id.navigation_next_event));
 
         final TextView progressText = row.findViewById(R.id.directions_trip_details_public_entry_progress_text);
         progressText.setText(getLeftTimeFormatted(now, endTime));
@@ -1303,7 +1307,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         // leg is now
         row.setBackgroundColor(colorLegIndividualNowBackground);
         progressView.setVisibility(View.VISIBLE);
-        progressView.setOnClickListener(view -> setShowNextEvent(true));
+        progressView.setOnClickListener(view -> setShowPage(R.id.navigation_next_event));
 
         final TextView progressText = row.findViewById(R.id.directions_trip_details_individual_entry_progress_text);
         progressText.setText(getLeftTimeFormatted(now, endTime));
@@ -1311,13 +1315,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         return true;
     }
 
-    protected void setShowNextEvent(final boolean showNextEvent) {
+    protected void setShowPage(final int showId) {
         if (DeviceAdmin.isScreenLocked()) {
-            showNextEventWhenLocked = showNextEvent;
-            showNextEventWhenUnlocked = showNextEvent;
+            showScreenIdWhenLocked = showId;
+            showScreenIdWhenUnlocked = showId;
         } else {
-            showNextEventWhenUnlocked = showNextEvent;
-            showNextEventWhenLocked = true;
+            showScreenIdWhenUnlocked = showId;
+            showScreenIdWhenLocked = R.id.navigation_next_event;
         }
         updateGUI();
     }

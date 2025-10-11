@@ -76,4 +76,6 @@
     <string name="travelalarm_departure_lead_time_title">Abfahrt-Vorlaufzeit</string>
     <string name="travelalarm_departure_lead_time_summary">Aktiviere den Alarm automatisch nur, wenn die Zeit vor dem Alarm vom Beginn des Umstiegs mindestens diese Anzahl Minuten ist. [%s]</string>
 
+    <string name="navigation_event_log_heading">Ereignisse</string>
+
 </resources>
