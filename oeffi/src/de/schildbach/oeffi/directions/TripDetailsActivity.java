@@ -1038,7 +1038,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     }
                     isRowSimulated |= isHighlightedLocation;
 
-                    previousPlace = stopLocation.place;
+                    if (stopLocation.place != null)
+                        previousPlace = stopLocation.place;
+
                     isArrivalSection |= stopLocation.id.equals(entryLocation.id);
                 }
             } else {
