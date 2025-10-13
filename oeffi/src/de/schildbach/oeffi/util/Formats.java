@@ -139,8 +139,18 @@ public final class Formats {
         return timeString;
     }
 
+    public static String formatTimeDiff(final Context context, final Date from, final Date to) {
+        return formatTimeDiff(context, from, to, true);
+    }
+
     public static String formatTimeDiff(final Context context, final long from, final long to) {
         return formatTimeDiff(context, from, to, true);
+    }
+
+    public static String formatTimeDiff(final Context context, final Date from, final Date to, final boolean refIsNow) {
+        if (to == null || from == null)
+            return "?";
+        return formatTimeDiff(context, to.getTime(), from.getTime(), refIsNow);
     }
 
     public static String formatTimeDiff(final Context context, final long from, final long to, final boolean refIsNow) {

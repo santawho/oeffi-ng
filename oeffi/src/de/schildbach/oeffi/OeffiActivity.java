@@ -94,7 +94,6 @@ public abstract class OeffiActivity extends ComponentActivity {
 
     protected static final String PREFS_KEY_VOICE_CONTROL_MODE = "user_interface_voice_control_mode";
     protected static final String PREFS_KEY_VOICE_TOGGLE_STATE = "user_interface_voice_control_toggle";
-    protected static final String PREFS_KEY_PREFFERED_TIMEZONE = "common_preffered_timezone";
     public static final String VOICE_CONTROL_OPTION_ALWAYS = "always";
     public static final String VOICE_CONTROL_OPTION_TOGGLE = "toggle";
     public static final String VOICE_CONTROL_OPTION_TRIGGER = "trigger";
@@ -190,7 +189,7 @@ public abstract class OeffiActivity extends ComponentActivity {
     }
 
     protected void updateFromPreferences() {
-        timeZoneSelector = new TimeZoneSelector(this, prefs.getString(PREFS_KEY_PREFFERED_TIMEZONE, "location"), network);
+        timeZoneSelector = Application.getInstance().getPreferredNetworkTimeZoneSelector(network);
     }
 
     public TimeZoneSelector getTimeZoneSelector() {
@@ -682,34 +681,8 @@ public abstract class OeffiActivity extends ComponentActivity {
         return mapEnabled || res.getBoolean(R.bool.layout_map_show);
     }
 
-    protected String prefsGetNetworkName() {
-        final String networkName = prefs.getString(Constants.PREFS_KEY_NETWORK_PROVIDER, null);
-        if (networkName != null)
-            return networkName;
-
-        final String defaultNetworkName = getDefaultNetworkName();
-        if (defaultNetworkName == null)
-            return null;
-
-        prefs.edit().putString(Constants.PREFS_KEY_NETWORK_PROVIDER, defaultNetworkName).apply();
-        return defaultNetworkName;
-    }
-
-    protected String getDefaultNetworkName() {
-        return NetworkId.DEUTSCHLANDTICKET.name();
-    }
-
     protected NetworkId prefsGetNetworkId() {
-        final String id = prefsGetNetworkName();
-        if (id == null)
-            return null;
-
-        try {
-            return NetworkId.valueOf(id);
-        } catch (final IllegalArgumentException x) {
-            log.warn("Ignoring unkown selected network: {}", id);
-            return null;
-        }
+        return Application.getInstance().prefsGetNetworkId();
     }
 
     protected NetworkProvider.Optimize prefsGetOptimizeTrip() {

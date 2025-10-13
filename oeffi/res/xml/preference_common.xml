@@ -17,11 +17,11 @@
 <!--            android:targetClass="de.schildbach.oeffi.network.NetworkPickerActivity" />-->
     </Preference>
     <ListPreference
-        android:key="common_preffered_timezone"
-        android:title="@string/common_preffered_timezone_title"
-        android:summary="@string/common_preffered_timezone_summary"
-        android:entries="@array/common_preffered_timezone_entries"
-        android:entryValues="@array/common_preffered_timezone_values"
+        android:key="common_preferred_timezone"
+        android:title="@string/common_preferred_timezone_title"
+        android:summary="@string/common_preferred_timezone_summary"
+        android:entries="@array/common_preferred_timezone_entries"
+        android:entryValues="@array/common_preferred_timezone_values"
         android:defaultValue="location" />
     <CheckBoxPreference
         android:defaultValue="true"

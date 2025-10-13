@@ -388,7 +388,7 @@ public class TravelAlarmManager {
             }
             title = context.getString(titleResId, tripRenderer.nextEventTargetName);
         }
-        final TimeZoneSelector timeZoneSelector = Application.getInstance().getTimeZoneSelector();
+        final TimeZoneSelector timeZoneSelector = Application.getInstance().getSystemTimeZoneSelector();
         final String message = context.getString(messageResId,
                 tripRenderer.nextEventTargetName,
                 Formats.formatTime(timeZoneSelector, tripRenderer.nextEventEarliestTime, PTDate.SYSTEM_OFFSET),
@@ -496,14 +496,14 @@ public class TravelAlarmManager {
         protected void onCreate(final Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
-            final NavigationNotification navigationNotification = new NavigationNotification(getContext(), navigationNotificationIntent);
+            final NavigationNotification navigationNotification = new NavigationNotification(navigationNotificationIntent);
             final TravelAlarmState travelAlarmState = new TravelAlarmState(legContainer, alarmIsForDeparture, navigationNotification);
 
             final String statusText;
             if (travelAlarmState.isAlarmDisabled) {
                 statusText = context.getString(R.string.navigation_alarm_dialog_status_alarm_disabled_text);
             } else if (travelAlarmState.currentTravelAlarmAtMs > 0) {
-                final String alarmTime = Formats.formatTime(Application.getInstance().getTimeZoneSelector(),
+                final String alarmTime = Formats.formatTime(Application.getInstance().getSystemTimeZoneSelector(),
                         System.currentTimeMillis(), travelAlarmState.currentTravelAlarmAtMs, PTDate.SYSTEM_OFFSET);
                 statusText = context.getString(R.string.navigation_alarm_dialog_status_alarm_at_text, alarmTime);
             } else {

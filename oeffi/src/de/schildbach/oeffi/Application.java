@@ -19,7 +19,6 @@ package de.schildbach.oeffi;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -96,7 +95,7 @@ public class Application extends android.app.Application {
     private SpeechInput speechInput;
     private SharedPreferences prefs;
     private String appName;
-    private TimeZoneSelector timeZoneSelector;
+    private TimeZoneSelector systemTimeZoneSelector;
 
     public Application() {
         instance = this;
@@ -155,15 +154,53 @@ public class Application extends android.app.Application {
         return prefs.getBoolean(Constants.PREFS_KEY_USER_INTERFACE_DEVELOPER_OPTIONS_SHOW_EXTRA_INFOS_ENABLED, false);
     }
 
-    public TimeZoneSelector getTimeZoneSelector() {
-        return timeZoneSelector;
+    public TimeZoneSelector getSystemTimeZoneSelector() {
+        return systemTimeZoneSelector;
+    }
+
+    public TimeZoneSelector getPreferredNetworkTimeZoneSelector() {
+        return getPreferredNetworkTimeZoneSelector(prefsGetNetworkId());
+    }
+
+    public TimeZoneSelector getPreferredNetworkTimeZoneSelector(final NetworkId network) {
+        return new TimeZoneSelector(this, prefs.getString(Constants.PREFS_KEY_PREFERRED_TIMEZONE, "location"), network);
+    }
+
+    public String prefsGetNetworkName() {
+        final String networkName = prefs.getString(Constants.PREFS_KEY_NETWORK_PROVIDER, null);
+        if (networkName != null)
+            return networkName;
+
+        final String defaultNetworkName = getDefaultNetworkName();
+        if (defaultNetworkName == null)
+            return null;
+
+        prefs.edit().putString(Constants.PREFS_KEY_NETWORK_PROVIDER, defaultNetworkName).apply();
+        return defaultNetworkName;
+    }
+
+    public String getDefaultNetworkName() {
+        return NetworkId.DEUTSCHLANDTICKET.name();
+    }
+
+    public NetworkId prefsGetNetworkId() {
+        final String id = prefsGetNetworkName();
+        if (id == null)
+            return null;
+
+        try {
+            return NetworkId.valueOf(id);
+        } catch (final IllegalArgumentException x) {
+            log.warn("Ignoring unkown selected network: {}", id);
+            return null;
+        }
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        timeZoneSelector = new TimeZoneSelector(this);
+        systemTimeZoneSelector = new TimeZoneSelector(this);
         initLogging();
 
         ErrorReporter.getInstance().init(this);

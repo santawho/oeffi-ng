@@ -48,7 +48,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
@@ -64,7 +67,10 @@ import de.schildbach.pte.DbWebProvider;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.Line;
+import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.PTDate;
+import de.schildbach.pte.dto.Position;
+import de.schildbach.pte.dto.Stop;
 import de.schildbach.pte.dto.Trip;
 
 public class NavigationNotification {
@@ -211,7 +217,7 @@ public class NavigationNotification {
             final Configuration configuration =
                     (Configuration) Objects.deserialize(extras.getByteArray(EXTRA_CONFIGURATION));
             final NavigationNotification navigationNotification = new NavigationNotification(
-                    context, intentData, configuration, notificationData);
+                    intentData, configuration, notificationData);
             final ExtraData extraData = (ExtraData) Objects.deserialize(extras.getByteArray(EXTRA_DATA));
             final long refreshAt = navigationNotification.refresh(extraData != null && extraData.refreshAllLegs);
             if (refreshAt > 0 && refreshAt < minRefreshAt)
@@ -234,7 +240,7 @@ public class NavigationNotification {
 
     public static void remove(final OeffiActivity context, final Intent intent) {
         NavigationAlarmManager.runOnHandlerThread(() -> {
-            new NavigationNotification(context, intent).remove();
+            new NavigationNotification(intent).remove();
         });
     }
 
@@ -278,14 +284,49 @@ public class NavigationNotification {
         public boolean refreshAllLegs;
         public long[] currentTravelAlarmAtMsForLegDeparture;
         public long[] currentTravelAlarmAtMsForLegArrival;
+        public EventLogEntry[] eventLogEntries;
 
         public ExtraData(final int numLegSlots) {
             currentTravelAlarmAtMsForLegDeparture = new long[numLegSlots];
             currentTravelAlarmAtMsForLegArrival = new long[numLegSlots];
+            eventLogEntries = new EventLogEntry[0];
         }
     }
 
-    private final Context context;
+    public static final class EventLogEntry implements Serializable {
+        private static final long serialVersionUID = -4350168363141237103L;
+
+        public enum Type {
+            MESSAGE,
+            PUBLIC_LEG_START,
+            PUBLIC_LEG_END,
+            PUBLIC_LEG_END_REMINDER,
+            TRANSFER_START,
+            TRANSFER_END_REMINDER,
+            DEPARTURE_DELAY_CHANGE,
+            ARRIVAL_DELAY_CHANGE,
+            DEPARTURE_POSITION_CHANGE,
+            ARRIVAL_POSITION_CHANGE;
+        }
+
+        public final long timestamp;
+
+        public final Type type;
+
+        public final String message;
+
+        public EventLogEntry(final long timestamp, final Type type, final String message) {
+            this.timestamp = timestamp;
+            this.type = type;
+            this.message = message;
+        }
+
+        public EventLogEntry(final Type type, final String message) {
+            this(System.currentTimeMillis(), type, message);
+        }
+    }
+
+    private final Application context;
     private final TravelAlarmManager travelAlarmManager;
     private final String notificationTag;
     private final TripDetailsActivity.IntentData intentData;
@@ -293,18 +334,15 @@ public class NavigationNotification {
     private Configuration configuration;
     private ExtraData extraData;
 
-    public NavigationNotification(
-            final Context context,
-            final Intent intent) {
-        this(context, new TripDetailsActivity.IntentData(intent), null, null);
+    public NavigationNotification(final Intent intent) {
+        this(new TripDetailsActivity.IntentData(intent), null, null);
     }
 
     private NavigationNotification(
-            final Context context,
             final TripDetailsActivity.IntentData aIntentData,
             final Configuration configuration,
             final TripRenderer.NotificationData lastNotified) {
-        this.context = context;
+        this.context = Application.getInstance();
         this.travelAlarmManager = new TravelAlarmManager(context);
         final Trip trip = aIntentData.trip;
         final String uniqueId = trip.getUniqueId();
@@ -388,7 +426,7 @@ public class NavigationNotification {
             final Trip trip, final Configuration configuration,
             final Runnable doneListener) {
         NavigationAlarmManager.runOnHandlerThread(() -> {
-            new NavigationNotification(context, intent).internUpdateFromForeground(trip, configuration);
+            new NavigationNotification(intent).internUpdateFromForeground(trip, configuration);
             if (doneListener != null)
                 doneListener.run();
         });
@@ -442,7 +480,7 @@ public class NavigationNotification {
 
     @SuppressLint("ScheduleExactAlarm")
     private boolean update(final Trip aTrip) {
-        final TimeZoneSelector timeZoneSelector = Application.getInstance().getTimeZoneSelector();
+        final TimeZoneSelector systemTimeZoneSelector = Application.getInstance().getSystemTimeZoneSelector();
         final Trip trip = aTrip != null ? aTrip : getTrip();
         final Date tripUpdatedAtDate = trip.updatedAt;
         log.info("updating with {} trip updated at {}", aTrip != null ? "new" : "old", NavigationAlarmManager.LOG_TIME_FORMAT.format(tripUpdatedAtDate));
@@ -459,6 +497,7 @@ public class NavigationNotification {
         final boolean travelAlarmIsForJourneyStart;
         final int travelAlarmLegIndex;
         final String alarmTypeForLog;
+        final List<EventLogEntry> newEventLogEntries = new ArrayList<>();
         if (tripRenderer.nextEventEarliestTime != null) {
             if (tripRenderer.nextEventIsInitialIndividual) {
                 travelAlarmIsForDeparture = true;
@@ -590,13 +629,20 @@ public class NavigationNotification {
             }
             lastNotified.leftTimeReminded = Long.MAX_VALUE;
             lastNotified.eventTime = newNotified.plannedEventTime;
-            if (newNotified.publicDepartureLegIndex != lastNotified.publicDepartureLegIndex)
+            if (newNotified.publicDepartureLegIndex != lastNotified.publicDepartureLegIndex) {
+                addEventLogPublicLegStart(newEventLogEntries, (Trip.Public) trip.legs.get(newNotified.publicDepartureLegIndex));
                 lastNotified.departurePosition = newNotified.plannedDeparturePosition;
-            if (newNotified.publicArrivalLegIndex != lastNotified.publicArrivalLegIndex)
+            }
+            if (newNotified.publicArrivalLegIndex != lastNotified.publicArrivalLegIndex) {
+                addEventLogPublicLegEnd(newEventLogEntries, (Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
                 lastNotified.nextTransferCritical = false;
+            }
         }
         if (newNotified.departurePosition != null && !newNotified.departurePosition.equals(lastNotified.departurePosition)) {
-            log.info("switching position from {} to {}", lastNotified.departurePosition, newNotified.departurePosition);
+            log.info("switching departure position from {} to {}", lastNotified.departurePosition, newNotified.departurePosition);
+            addEventLogDeparturePositionChange(newEventLogEntries,
+                    (Trip.Public) trip.legs.get(newNotified.publicDepartureLegIndex),
+                    lastNotified.departurePosition);
             posChanged = true;
         }
         if (newNotified.eventTime != null && lastNotified.eventTime != null) {
@@ -611,6 +657,10 @@ public class NavigationNotification {
             }
             if (timeChanged) {
                 log.info("time changed: leftSecs={}, diffSecs={}, accepting new time", leftSecs, diffSecs);
+                if (newNotified.isArrival)
+                    addEventLogArrivalDelayChange(newEventLogEntries, (Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
+                else
+                    addEventLogDepartureDelayChange(newEventLogEntries, (Trip.Public) trip.legs.get(newNotified.publicDepartureLegIndex));
             } else {
                 log.info("time not changed: leftSecs={}, diffSecs={}, keeping new time", leftSecs, diffSecs);
                 newNotified.eventTime = lastNotified.eventTime;
@@ -651,16 +701,16 @@ public class NavigationNotification {
                         : configuration.travelAlarmIdForLegArrival[travelAlarmLegIndex];
                 if (lastNotified.playedTravelAlarmId == travelAlarmId) {
                     log.info("travel alarm for {} at {} was at {}, but already fired before", alarmTypeForLog,
-                            tripRenderer.nextEventTargetName, Formats.formatTime(timeZoneSelector, travelAlarmAtMs, PTDate.SYSTEM_OFFSET));
+                            tripRenderer.nextEventTargetName, Formats.formatTime(systemTimeZoneSelector, travelAlarmAtMs, PTDate.SYSTEM_OFFSET));
                 } else {
                     log.info("travel alarm for {} at {} should have been at {}, now firing", alarmTypeForLog,
-                            tripRenderer.nextEventTargetName, Formats.formatTime(timeZoneSelector, travelAlarmAtMs, PTDate.SYSTEM_OFFSET));
+                            tripRenderer.nextEventTargetName, Formats.formatTime(systemTimeZoneSelector, travelAlarmAtMs, PTDate.SYSTEM_OFFSET));
                     travelAlarmManager.fireAlarm(context, intentData, tripRenderer, travelAlarmIsForDeparture, travelAlarmIsForJourneyStart);
                     newNotified.playedTravelAlarmId = travelAlarmId;
                 }
             } else {
                 log.info("travel alarm for {} at {} set to {}", alarmTypeForLog,
-                        tripRenderer.nextEventTargetName, Formats.formatTime(timeZoneSelector, travelAlarmAtMs, PTDate.SYSTEM_OFFSET));
+                        tripRenderer.nextEventTargetName, Formats.formatTime(systemTimeZoneSelector, travelAlarmAtMs, PTDate.SYSTEM_OFFSET));
                 if (travelAlarmAtMs < nextRefreshTimeMs) {
                     nextRefreshTimeReason = String.format("#8, nextRefreshTimeMs=%d, travelAlarmAtMs=%d", nextRefreshTimeMs, travelAlarmAtMs);
                     nextRefreshTimeMs = travelAlarmAtMs;
@@ -675,6 +725,10 @@ public class NavigationNotification {
                 nextReminderTimeMs = nowTime + nextEventTimeLeftMs;
                 if (lastNotified.leftTimeReminded > REMINDER_SECOND_MS) {
                     log.info("reminding 2 mins = {}", nextReminderTimeMs);
+                    if (newNotified.isArrival)
+                        addEventLogPublicLegEndReminder(newEventLogEntries, (Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
+                    else
+                        addEventLogTransferEndReminder(newEventLogEntries, (Trip.Public) trip.legs.get(newNotified.publicDepartureLegIndex));
                     reminderSoundId = SOUND_REMIND_IMPORTANT;
                     newNotified.leftTimeReminded = REMINDER_SECOND_MS;
                 }
@@ -683,6 +737,10 @@ public class NavigationNotification {
                 nextReminderTimeMs = nowTime + nextEventTimeLeftMs - REMINDER_SECOND_MS;
                 if (lastNotified.leftTimeReminded > REMINDER_FIRST_MS) {
                     log.info("reminding 6 mins = {}", nextReminderTimeMs);
+                    if (newNotified.isArrival)
+                        addEventLogPublicLegEndReminder(newEventLogEntries, (Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
+                    else
+                        addEventLogTransferEndReminder(newEventLogEntries, (Trip.Public) trip.legs.get(newNotified.publicDepartureLegIndex));
                     reminderSoundId = SOUND_REMIND_NORMAL;
                     newNotified.leftTimeReminded = REMINDER_FIRST_MS;
 
@@ -736,12 +794,23 @@ public class NavigationNotification {
                 new TripDetailsActivity.IntentData(intentData.network, trip, intentData.renderConfig)));
         extras.putByteArray(EXTRA_LASTNOTIFIED, Objects.serialize(newNotified));
         extras.putByteArray(EXTRA_CONFIGURATION, Objects.serialize(configuration));
+
         final ExtraData newExtraData = extraData != null ? Objects.clone(extraData) : new ExtraData(1 + trip.legs.size());
         newExtraData.refreshAllLegs = refreshAllLegs;
         if (travelAlarmIsForDeparture)
             newExtraData.currentTravelAlarmAtMsForLegDeparture[travelAlarmLegIndex] = travelAlarmAtMs;
         else
             newExtraData.currentTravelAlarmAtMsForLegArrival[travelAlarmLegIndex] = travelAlarmAtMs;
+
+        final int newEventLogEntriesSize = newEventLogEntries.size();
+        if (newEventLogEntriesSize > 0) {
+            int offset = newExtraData.eventLogEntries.length;
+            final EventLogEntry[] entries = Arrays.copyOf(newExtraData.eventLogEntries, offset + newEventLogEntriesSize);
+            for (EventLogEntry logEntry : newEventLogEntries)
+                entries[offset++] = logEntry;
+            newExtraData.eventLogEntries = entries;
+        }
+
         extras.putByteArray(EXTRA_DATA, Objects.serialize(newExtraData));
 
         final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, CHANNEL_ID)
@@ -833,7 +902,7 @@ public class NavigationNotification {
         @Override
         public void onReceive(final Context context, final Intent intent) {
             NavigationAlarmManager.runOnHandlerThread(() -> {
-                final NavigationNotification navigationNotification = new NavigationNotification(context, intent);
+                final NavigationNotification navigationNotification = new NavigationNotification(intent);
                 switch (intent.getIntExtra(INTENT_EXTRA_ACTION, 0)) {
                     case ACTION_REFRESH:
                         navigationNotification.update(null);
@@ -1099,5 +1168,154 @@ public class NavigationNotification {
 
     private static void remoteViewsSetBackgroundColor(final RemoteViews remoteViews, int viewId, int color) {
         remoteViews.setInt(viewId, "setBackgroundColor", color);
+    }
+
+    private TimeZoneSelector getNetworkTimeZoneSelector() {
+        NetworkId network = getNetwork();
+        if (network == null)
+            network = context.prefsGetNetworkId();
+        return context.getPreferredNetworkTimeZoneSelector(network);
+    }
+
+    private String platformForMessage(final Position prevPosition, final Position newPosition) {
+        final String prevText = prevPosition == null ? "?" : prevPosition.toString();
+        final String newText = newPosition == null ? "?" : newPosition.toString();
+        if (prevText.equals(newText))
+            return context.getString(R.string.navigation_event_log_position_unchanged_format, newText);
+        return context.getString(R.string.navigation_event_log_position_changed_format, newText, prevText);
+    }
+
+    private void addEventLogMessage(final List<EventLogEntry> entries, final String text) {
+        entries.add(new EventLogEntry(EventLogEntry.Type.MESSAGE, context.getString(
+                R.string.navigation_event_log_entry_message,
+                text)));
+    }
+
+    private void addEventLogPublicLegStart(final List<EventLogEntry> entries, final Trip.Public publicLeg) {
+        final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
+        final Stop stop = publicLeg.departureStop;
+        final PTDate predictedTime = stop.getDepartureTime(false);
+        final PTDate plannedTime = stop.getDepartureTime(true);
+        entries.add(new EventLogEntry(EventLogEntry.Type.PUBLIC_LEG_START, context.getString(
+                R.string.navigation_event_log_entry_public_leg_start,
+                publicLeg.line.label,
+                Formats.fullLocationName(publicLeg.departure),
+                platformForMessage(stop.plannedDeparturePosition, stop.getDeparturePosition()),
+                Formats.formatTime(timeZoneSelector, predictedTime),
+                Formats.formatTime(timeZoneSelector, plannedTime),
+                Formats.formatTimeDiff(context, plannedTime, predictedTime, false))));
+    }
+
+    private void addEventLogPublicLegEnd(final List<EventLogEntry> entries, final Trip.Public publicLeg) {
+        final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
+        final Stop stop = publicLeg.arrivalStop;
+        final PTDate predictedTime = stop.getArrivalTime(false);
+        final PTDate plannedTime = stop.getArrivalTime(true);
+        entries.add(new EventLogEntry(EventLogEntry.Type.PUBLIC_LEG_END, context.getString(
+                R.string.navigation_event_log_entry_public_leg_end,
+                publicLeg.line.label,
+                Formats.fullLocationName(publicLeg.arrival),
+                platformForMessage(stop.plannedArrivalPosition, stop.getArrivalPosition()),
+                Formats.formatTime(timeZoneSelector, predictedTime),
+                Formats.formatTime(timeZoneSelector, plannedTime),
+                Formats.formatTimeDiff(context, plannedTime, predictedTime, false))));
+    }
+
+    private void addEventLogPublicLegEndReminder(final List<EventLogEntry> entries, final Trip.Public publicLeg) {
+        final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
+        final Stop stop = publicLeg.arrivalStop;
+        final PTDate predictedTime = stop.getArrivalTime(false);
+        final PTDate plannedTime = stop.getArrivalTime(true);
+        entries.add(new EventLogEntry(EventLogEntry.Type.PUBLIC_LEG_END_REMINDER, context.getString(
+                R.string.navigation_event_log_entry_public_leg_end_reminder,
+                Formats.fullLocationName(publicLeg.arrival),
+                Formats.formatTimeDiff(context, new Date(), predictedTime, true),
+                platformForMessage(stop.plannedArrivalPosition, stop.getArrivalPosition()),
+                Formats.formatTime(timeZoneSelector, predictedTime),
+                Formats.formatTimeDiff(context, plannedTime, predictedTime, false))));
+    }
+
+    private void addEventLogTransferStart(
+            final List<EventLogEntry> entries,
+            final Trip.Public toPublicLeg) {
+        final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
+        final Stop stop = toPublicLeg == null ? null : toPublicLeg.departureStop;
+        final PTDate predictedTime = stop == null ? null : stop.getDepartureTime(false);
+        final PTDate plannedTime = stop == null ? null : stop.getDepartureTime(true);
+        entries.add(new EventLogEntry(EventLogEntry.Type.TRANSFER_START, context.getString(
+                R.string.navigation_event_log_entry_transfer_start,
+                platformForMessage(stop.plannedDeparturePosition, stop.getDeparturePosition()),
+                toPublicLeg.line.label,
+                Formats.formatTime(timeZoneSelector, predictedTime),
+                Formats.formatTime(timeZoneSelector, plannedTime),
+                Formats.formatTimeDiff(context, plannedTime, predictedTime, false))));
+    }
+
+    private void addEventLogTransferEndReminder(
+            final List<EventLogEntry> entries,
+            final Trip.Public toPublicLeg) {
+        final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
+        final Stop stop = toPublicLeg == null ? null : toPublicLeg.departureStop;
+        final PTDate predictedTime = stop == null ? null : stop.getDepartureTime(false);
+        final PTDate plannedTime = stop == null ? null : stop.getDepartureTime(true);
+        entries.add(new EventLogEntry(EventLogEntry.Type.TRANSFER_END_REMINDER, context.getString(
+                R.string.navigation_event_log_entry_transfer_end_reminder,
+                Formats.formatTimeDiff(context, new Date(), predictedTime, true),
+                platformForMessage(stop.plannedDeparturePosition, stop.getDeparturePosition()),
+                toPublicLeg.line.label,
+                Formats.formatTime(timeZoneSelector, predictedTime),
+                Formats.formatTime(timeZoneSelector, plannedTime),
+                Formats.formatTimeDiff(context, plannedTime, predictedTime, false))));
+    }
+
+    private void addEventLogDepartureDelayChange(final List<EventLogEntry> entries, final Trip.Public publicLeg) {
+        final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
+        final Stop stop = publicLeg.departureStop;
+        final PTDate predictedTime = stop.getDepartureTime(false);
+        final PTDate plannedTime = stop.getDepartureTime(true);
+        entries.add(new EventLogEntry(EventLogEntry.Type.DEPARTURE_DELAY_CHANGE, context.getString(
+                R.string.navigation_event_log_entry_departure_delay_change,
+                publicLeg.line.label,
+                Formats.fullLocationName(stop.location),
+                Formats.formatTimeDiff(context, plannedTime, predictedTime, false),
+                Formats.formatTime(timeZoneSelector, predictedTime))));
+    }
+
+    private void addEventLogArrivalDelayChange(final List<EventLogEntry> entries, final Trip.Public publicLeg) {
+        final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
+        final Stop stop = publicLeg.arrivalStop;
+        final PTDate predictedTime = stop.getArrivalTime(false);
+        final PTDate plannedTime = stop.getArrivalTime(true);
+        entries.add(new EventLogEntry(EventLogEntry.Type.ARRIVAL_DELAY_CHANGE, context.getString(
+                R.string.navigation_event_log_entry_arrival_delay_change,
+                publicLeg.line.label,
+                Formats.fullLocationName(stop.location),
+                Formats.formatTimeDiff(context, plannedTime, predictedTime, false),
+                Formats.formatTime(timeZoneSelector, predictedTime))));
+    }
+
+    private void addEventLogDeparturePositionChange(
+            final List<EventLogEntry> entries,
+            final Trip.Public publicLeg,
+            final Position prevPosition) {
+        final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
+        final Stop stop = publicLeg.departureStop;
+        entries.add(new EventLogEntry(EventLogEntry.Type.DEPARTURE_POSITION_CHANGE, context.getString(
+                R.string.navigation_event_log_entry_departure_position_change,
+                platformForMessage(prevPosition, stop.getDeparturePosition()),
+                publicLeg.line.label,
+                Formats.fullLocationName(stop.location),
+                Formats.formatTime(timeZoneSelector, stop.getDepartureTime(true)))));
+    }
+
+    private void addEventLogArrivalPositionChange(final List<EventLogEntry> entries, final Trip.Public publicLeg) {
+        final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
+        final Stop stop = publicLeg.arrivalStop;
+        entries.add(new EventLogEntry(EventLogEntry.Type.ARRIVAL_POSITION_CHANGE, context.getString(
+                R.string.navigation_event_log_entry_arrival_position_change,
+                platformForMessage(stop.plannedArrivalPosition, stop.getArrivalPosition()),
+                publicLeg.line.label,
+                Formats.fullLocationName(stop.location),
+                Formats.formatTime(timeZoneSelector, stop.getDepartureTime(true)))));
     }
 }

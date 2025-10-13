@@ -44,8 +44,6 @@ import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.util.ClockUtils;
 
 public class NavigationAlarmManager {
-    private static final String ACTION_IGNORE_COMMAND = "ignore.command";
-
     private final static long MIN_PERIOD_MS = 30000;
     private static NavigationAlarmManager instance;
     private static final Logger log = LoggerFactory.getLogger(NavigationAlarmManager.class);

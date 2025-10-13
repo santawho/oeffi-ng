@@ -50,6 +50,7 @@ public class Constants {
 
     public static final Locale DEFAULT_LOCALE = Locale.GERMAN;
 
+    public static final String PREFS_KEY_PREFERRED_TIMEZONE = "common_preferred_timezone";
     public static final String PREFS_KEY_NETWORK_PROVIDER = "network_provider";
     public static final String PREFS_KEY_LAST_NETWORK_PROVIDERS = "last_network_providers";
     public static final String PREFS_KEY_PRODUCT_FILTER = "product_filter";

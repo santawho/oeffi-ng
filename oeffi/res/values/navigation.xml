@@ -83,5 +83,17 @@
     <string name="travelalarm_departure_lead_time_summary">Activate alarm automatically only, when time before alarm from arrival at the changeover is at least this number of minutes. [%s]</string>
 
     <string name="navigation_event_log_heading">Events</string>
+    <string name="navigation_event_log_position_unchanged_format">platform %1$s</string>
+    <string name="navigation_event_log_position_changed_format">platform &lt;i>%1$s!&lt;/i> (changed from %2$s)</string>
+    <string name="navigation_event_log_entry_message">%1$s</string>
+    <string name="navigation_event_log_entry_public_leg_start">&lt;b>Departure&lt;/b> %1$s at %2$s, %3$s, scheduled %4$s, estimated %5$s, delay %6$s</string>
+    <string name="navigation_event_log_entry_public_leg_end">&lt;b>Arrival&lt;/b> %1$s at %2$s, %3$s, scheduled %4$s, estimated %5$s, delay %6$s</string>
+    <string name="navigation_event_log_entry_public_leg_end_reminder">&lt;b>Approaching arrival&lt;/b> at %1$s in %2$s, %3$s, estimated %4$s, delay %5$s</string>
+    <string name="navigation_event_log_entry_transfer_start">&lt;b>Transfer&lt;/b> to %1$s, service %2$s, scheduled %3$s, estimated %4$s, delay %5$s</string>
+    <string name="navigation_event_log_entry_transfer_end_reminder">&lt;b>%1$s left for transfer&lt;/b> to %2$s, service %3$s, scheduled %4$s, estimated %5$s, delay %6$s min</string>
+    <string name="navigation_event_log_entry_departure_delay_change">&lt;b>Delayed departure&lt;/b> of %1$s at %2$s by %3$s, estimated %4$s</string>
+    <string name="navigation_event_log_entry_arrival_delay_change">&lt;b>Delayed arrival&lt;/b> of %1$s at %2$s by %3$s, estimated %4$s</string>
+    <string name="navigation_event_log_entry_departure_position_change">&lt;b>New platform&lt;/b> %1$s for departure of %2$s at %3$s, scheduled %4$s</string>
+    <string name="navigation_event_log_entry_arrival_position_change">&lt;b>New platform&lt;/b> %1$s for arrival of %2$s at %3$s, scheduled %4$s</string>
 
 </resources>

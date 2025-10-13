@@ -173,7 +173,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
     @Override
     protected void setupFromTrip(final Trip trip) {
-        final Trip tripFromPresentNotification = new NavigationNotification(this, getIntent()).getTrip();
+        final Trip tripFromPresentNotification = new NavigationNotification(getIntent()).getTrip();
         navigator = new Navigator(network, tripFromPresentNotification);
         super.setupFromTrip(navigator.getCurrentTrip());
     }
@@ -461,7 +461,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
         final Trip trip = aTrip != null ? aTrip : tripRenderer.trip;
         final Intent intent = getIntent();
-        final NavigationNotification navigationNotification = new NavigationNotification(this, intent);
+        final NavigationNotification navigationNotification = new NavigationNotification(intent);
         NavigationNotification.Configuration configuration = Objects.clone(navigationNotification.getConfiguration());
         configuration.soundEnabled = soundEnabled;
         NavigationNotification.updateFromForeground(this, intent, trip, configuration,
@@ -486,7 +486,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
     @Override
     protected void updateGUI() {
-        guiUpdateNavigationNotification = new NavigationNotification(this, getIntent());
+        guiUpdateNavigationNotification = new NavigationNotification(getIntent());
         super.updateGUI();
     }
 
