@@ -543,10 +543,17 @@ public class TripNavigatorActivity extends TripDetailsActivity {
                     legC, alarmIsForDeparture, getIntent(), this::updateGUI);
         });
 
-        final TravelAlarmManager.TravelAlarmState travelAlarmState = new TravelAlarmManager(this)
-                .new TravelAlarmState(legC, alarmIsForDeparture, guiUpdateNavigationNotification);
+        final boolean isAlarmActive;
+        if (legC != null) {
+            final TravelAlarmManager.TravelAlarmState travelAlarmState =
+                    new TravelAlarmManager(this)
+                            .new TravelAlarmState(legC, alarmIsForDeparture, guiUpdateNavigationNotification);
+            isAlarmActive = travelAlarmState.isAlarmActive;
+        } else {
+            isAlarmActive = false;
+        }
 
-        setupBellButton(bellButton, travelAlarmState.isAlarmActive);
+        setupBellButton(bellButton, isAlarmActive);
     }
 
     @Override
@@ -577,12 +584,20 @@ public class TripNavigatorActivity extends TripDetailsActivity {
                     getIntent(), this::updateGUI);
         });
 
-        final TravelAlarmManager.TravelAlarmState travelAlarmState =
-                new TravelAlarmManager(this).new TravelAlarmState(
-                        legContainer, alarmIsForDeparture,
-                        guiUpdateNavigationNotification);
+        final long alarmAtMs;
+        final boolean isAlarmActive;
+        if (legContainer != null) {
+            final TravelAlarmManager.TravelAlarmState travelAlarmState =
+                    new TravelAlarmManager(this).new TravelAlarmState(
+                            legContainer, alarmIsForDeparture,
+                            guiUpdateNavigationNotification);
+            alarmAtMs = travelAlarmState.currentTravelAlarmAtMs;
+            isAlarmActive = travelAlarmState.isAlarmActive;
+        } else {
+            alarmAtMs = 0;
+            isAlarmActive = false;
+        }
 
-        final long alarmAtMs = travelAlarmState.currentTravelAlarmAtMs;
         final long now = System.currentTimeMillis();
 
         final View detailsView = findViewById(R.id.navigation_next_event_alarm_details);
@@ -607,7 +622,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
             }
         }
 
-        setupBellButton(findViewById(R.id.navigation_next_event_alarm_bell), travelAlarmState.isAlarmActive);
+        setupBellButton(findViewById(R.id.navigation_next_event_alarm_bell), isAlarmActive);
     }
 
     private void setupBellButton(final ImageView bellButton, final boolean isAlarmActive) {
