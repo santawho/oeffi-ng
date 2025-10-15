@@ -28,12 +28,20 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Html;
+import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import org.slf4j.Logger;
@@ -42,6 +50,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Date;
 
+import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.directions.QueryTripsRunnable;
@@ -119,12 +128,18 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     private boolean permissionRequestRunning;
     private boolean soundEnabled = true;
     private boolean isStartupComplete = false;
+    EventLogEntryView eventLogLatestView;
+    ListView eventLogListView;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         findViewById(R.id.navigation_event_log).setVisibility(View.VISIBLE);
+
+        eventLogLatestView = findViewById(R.id.navigation_event_log_latest);
+        eventLogListView = findViewById(R.id.navigation_event_log_list);
+        eventLogLatestView.setTextSize(getResources().getDimension(R.dimen.font_size_large));
 
         swipeRefreshForTripList.setOnRefreshListener(this::refreshNavigation);
         swipeRefreshForTripList.setEnabled(true);
@@ -488,6 +503,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     protected void updateGUI() {
         guiUpdateNavigationNotification = new NavigationNotification(getIntent());
         super.updateGUI();
+        updateEventLog();
     }
 
     @Override
@@ -642,5 +658,119 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         }
 
         return false;
+    }
+
+    private void updateEventLog() {
+        final View noEntriesView = findViewById(R.id.navigation_event_log_no_entries);
+        final NavigationNotification.ExtraData extraData = guiUpdateNavigationNotification.getExtraData();
+        final NavigationNotification.EventLogEntry[] logEntries = extraData == null ? null : extraData.eventLogEntries;
+        if (logEntries == null || logEntries.length == 0) {
+            noEntriesView.setVisibility(View.VISIBLE);
+            eventLogLatestView.setVisibility(View.GONE);
+            eventLogListView.setVisibility(View.GONE);
+            return;
+        }
+
+        noEntriesView.setVisibility(View.GONE);
+        eventLogLatestView.setVisibility(View.VISIBLE);
+        eventLogListView.setVisibility(View.VISIBLE);
+
+        eventLogLatestView.setLogEntry(logEntries[logEntries.length - 1]);
+
+        eventLogListView.setAdapter(new BaseAdapter() {
+            @Override
+            public int getCount() {
+                return logEntries.length - 1;
+            }
+
+            @Override
+            public NavigationNotification.EventLogEntry getItem(final int position) {
+                return logEntries[logEntries.length - 2 - position];
+            }
+
+            @Override
+            public long getItemId(final int position) {
+                return position;
+            }
+
+            @Override
+            public View getView(final int position, final View convertView, final ViewGroup parent) {
+                final EventLogEntryView logView;
+                if (convertView != null) {
+                    logView = (EventLogEntryView) convertView;
+                } else {
+                    logView = (EventLogEntryView) getLayoutInflater().inflate(
+                            R.layout.navigation_event_log_entry, parent, false);
+                }
+                logView.setLogEntry(getItem(position));
+                return logView;
+            }
+        });
+    }
+
+    public static class EventLogEntryView extends LinearLayout {
+        TextView timestampView;
+        TextView messageView;
+        NavigationNotification.EventLogEntry eventLogEntry;
+
+        public EventLogEntryView(final Context context) {
+            this(context, null);
+        }
+
+        public EventLogEntryView(final Context context, @Nullable final AttributeSet attrs) {
+            this(context, attrs, 0);
+        }
+
+        public EventLogEntryView(final Context context, @Nullable final AttributeSet attrs, final int defStyleAttr) {
+            this(context, attrs, defStyleAttr, 0);
+        }
+
+        public EventLogEntryView(final Context context, final AttributeSet attrs, final int defStyleAttr, final int defStyleRes) {
+            super(context, attrs, defStyleAttr, defStyleRes);
+        }
+
+        @Override
+        protected void onFinishInflate() {
+            super.onFinishInflate();
+
+            timestampView = findViewById(R.id.navigation_event_log_entry_timestamp);
+            messageView = findViewById(R.id.navigation_event_log_entry_message);
+        }
+
+        public void setTextSize(final float fontSize) {
+            timestampView.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize);
+            messageView.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize);
+        }
+
+        public void setLogEntry(final NavigationNotification.EventLogEntry eventLogEntry) {
+            this.eventLogEntry = eventLogEntry;
+            final Application application = Application.getInstance();
+            timestampView.setText(Formats.formatTime(application.getSystemTimeZoneSelector(), eventLogEntry.timestamp, 0));
+            messageView.setText(Html.fromHtml(eventLogEntry.message, Html.FROM_HTML_MODE_COMPACT));
+            final int textColorId;
+            switch (eventLogEntry.type) {
+                case PUBLIC_LEG_START:
+                case PUBLIC_LEG_END:
+                    textColorId = R.color.fg_significant;
+                    break;
+                case PUBLIC_LEG_END_REMINDER:
+                case TRANSFER_END_REMINDER:
+                    textColorId = R.color.fg_less_significant;
+                    break;
+                case ARRIVAL_DELAY_CHANGE:
+                case DEPARTURE_DELAY_CHANGE:
+                case ARRIVAL_POSITION_CHANGE:
+                case DEPARTURE_POSITION_CHANGE:
+                case TRANSFER_CRITICAL:
+                    textColorId = R.color.fg_trip_next_event_important;
+                    break;
+                case MESSAGE:
+                case START_STOP:
+                default:
+                    textColorId = R.color.fg_insignificant;
+                    break;
+            }
+            messageView.setTextColor(application.getColor(textColorId));
+        }
     }
 }

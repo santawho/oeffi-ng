@@ -462,6 +462,7 @@
     <string name="product_c">Cablecar</string>
 
     <!-- time -->
+    <string name="time_minutes">min</string>
     <string name="time_yesterday">yesterday</string>
     <string name="time_yesterday_abbrev">y\'day</string>
     <string name="time_today">today</string>

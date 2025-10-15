@@ -777,9 +777,15 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         final int showId;
         if (currentLeg == null) {
-            showId = R.id.directions_trip_details_list_frame;
-            showScreenIdWhenUnlocked = R.id.directions_trip_details_list_frame;
+            // showId = R.id.directions_trip_details_list_frame;
+            if (DeviceAdmin.isScreenLocked()) {
+                showId = R.id.directions_trip_details_list_frame;
+            } else {
+                showId = showScreenIdWhenUnlocked;
+            }
+            // showScreenIdWhenUnlocked = R.id.directions_trip_details_list_frame;
             showScreenIdWhenLocked = R.id.directions_trip_details_list_frame;
+            findViewById(R.id.navigation_next_event).setVisibility(View.GONE);
             findViewById(R.id.directions_trip_details_finished).setVisibility(View.VISIBLE);
         } else {
             findViewById(R.id.directions_trip_details_finished).setVisibility(View.GONE);

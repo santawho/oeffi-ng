@@ -461,6 +461,7 @@
     <string name="product_c">Seilbahn</string>
 
     <!-- time -->
+    <string name="time_minutes">min</string>
     <string name="time_yesterday">gestern</string>
     <string name="time_yesterday_abbrev">gest.</string>
     <string name="time_today">heute</string>

@@ -9,18 +9,36 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/text_padding_vertical_verylax"
-        android:paddingHorizontal="@dimen/text_padding_horizontal_lax"
+        android:paddingHorizontal="@dimen/text_padding_horizontal"
         android:gravity="start"
         android:textSize="@dimen/font_size_large"
         android:textStyle="bold"
         android:text="@string/navigation_event_log_heading"/>
 
     <TextView
+        android:id="@+id/navigation_event_log_no_entries"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/text_padding_vertical_verylax"
         android:gravity="center"
         android:textSize="@dimen/font_size_normal"
-        android:text="... coming soon ..."/>
+        android:text="@string/navigation_event_log_no_entries"/>
+
+    <include layout="@layout/navigation_event_log_entry"
+        android:id="@+id/navigation_event_log_latest" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2px"
+        android:background="@color/bg_divider" />
+
+    <ListView
+        android:id="@+id/navigation_event_log_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingBottom="@dimen/text_padding_vertical_lax"
+        android:divider="@color/bg_divider"
+        android:dividerHeight="2px" />
 
 </LinearLayout>

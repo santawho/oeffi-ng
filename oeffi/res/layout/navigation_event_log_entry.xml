@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<view class="de.schildbach.oeffi.directions.navigation.TripNavigatorActivity$EventLogEntryView"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="@dimen/text_padding_vertical_lax" >
+
+    <TextView
+        android:id="@+id/navigation_event_log_entry_timestamp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/text_padding_horizontal"
+        android:paddingEnd="@dimen/text_padding_horizontal"
+        android:textSize="@dimen/font_size_normal" />
+
+    <TextView
+        android:id="@+id/navigation_event_log_entry_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/text_padding_horizontal_lax"
+        android:paddingEnd="@dimen/text_padding_horizontal"
+        android:textSize="@dimen/font_size_normal" />
+
+</view>

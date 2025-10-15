@@ -411,6 +411,7 @@ public class TripRenderer {
 
     public void evaluateByTime(final Date now) {
         notificationData = new NotificationData();
+        notificationData.currentLegIndex = -1;
         setNextEventClock(now);
         for (int iLeg = 0; iLeg < legs.size(); ++iLeg) {
             final TripRenderer.LegContainer legC = legs.get(iLeg);
