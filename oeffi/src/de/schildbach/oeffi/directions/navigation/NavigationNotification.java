@@ -530,7 +530,7 @@ public class NavigationNotification {
                         configuration.travelAlarmExplicitMsForLegArrival[travelAlarmLegIndex],
                         tripRenderer.currentLeg.publicLeg.departureStop.getDepartureTime().getTime(), nowTime);
                 alarmTypeForLog = "arrival";
-            } else {
+            } else if (tripRenderer.currentLeg.transferTo != null) {
                 travelAlarmLegIndex = tripRenderer.currentLeg.transferTo.legIndex;
                 travelAlarmIsForDeparture = true;
                 travelAlarmIsForJourneyStart = false;
@@ -540,6 +540,12 @@ public class NavigationNotification {
                         configuration.travelAlarmExplicitMsForLegDeparture[travelAlarmLegIndex],
                         tripRenderer.currentLeg.transferFrom.publicLeg.getArrivalTime().getTime(), nowTime);
                 alarmTypeForLog = "departure";
+            } else {
+                travelAlarmAtMs = 0;
+                alarmTypeForLog = "none";
+                travelAlarmIsForDeparture = false;
+                travelAlarmIsForJourneyStart = false;
+                travelAlarmLegIndex = 0;
             }
             final long timeLeft = tripRenderer.nextEventEarliestTime.getTime() - nowTime;
             if (timeLeft < 240000) {
@@ -628,7 +634,7 @@ public class NavigationNotification {
                 lastNotified.publicArrivalLegIndex = -1;
             } else {
                 log.info("switching leg from {} to {}", lastNotified.currentLegIndex, newNotified.currentLegIndex);
-                if (newNotified.currentLegIndex >= 0)
+                if (newNotified.currentLegIndex >= 0 && lastNotified.currentLegIndex < 0)
                     addEventLogNavigationRestarted(newEventLogEntries);
                 reminderSoundId = SOUND_REMIND_NEXTLEG;
             }
