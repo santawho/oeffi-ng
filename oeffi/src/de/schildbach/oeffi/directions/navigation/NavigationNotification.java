@@ -151,7 +151,15 @@ public class NavigationNotification {
     private static int getAudioUsageForSound(final int soundId, boolean onRide) {
         int usage = AudioAttributes.USAGE_NOTIFICATION_EVENT;
         String prefKey = null;
-        if (soundId == SOUND_REMIND_NORMAL
+        final boolean useHeadsetChannel;
+        if (NavigationNotification.prefs.getBoolean(Constants.PREFS_KEY_NAVIGATION_USE_SOUND_CHANNEL_HEADSET, true)) {
+            useHeadsetChannel = NotificationSoundManager.getInstance().isHeadsetConnected();
+        } else {
+            useHeadsetChannel = false;
+        }
+        if (useHeadsetChannel) {
+            prefKey = Constants.PREFS_KEY_NAVIGATION_SOUND_CHANNEL_HEADSET;
+        } else if (soundId == SOUND_REMIND_NORMAL
             || soundId == SOUND_REMIND_IMPORTANT
             || soundId == SOUND_ALARM) {
             prefKey = onRide
@@ -161,10 +169,17 @@ public class NavigationNotification {
             prefKey = Constants.PREFS_KEY_NAVIGATION_SOUND_CHANNEL_RIDE;
         }
         if (prefKey != null) {
-            if (Constants.PREFS_KEY_NAVIGATION_SOUND_CHANNEL_RIDE.equals(prefKey))
-                usage = AudioAttributes.USAGE_NOTIFICATION_EVENT;
-            else if (Constants.PREFS_KEY_NAVIGATION_SOUND_CHANNEL_TRANSFER.equals(prefKey))
-                usage = AudioAttributes.USAGE_ALARM;
+            switch (prefKey) {
+                case Constants.PREFS_KEY_NAVIGATION_SOUND_CHANNEL_HEADSET:
+                    usage = AudioAttributes.USAGE_MEDIA;
+                    break;
+                case Constants.PREFS_KEY_NAVIGATION_SOUND_CHANNEL_RIDE:
+                    usage = AudioAttributes.USAGE_NOTIFICATION_EVENT;
+                    break;
+                case Constants.PREFS_KEY_NAVIGATION_SOUND_CHANNEL_TRANSFER:
+                    usage = AudioAttributes.USAGE_ALARM;
+                    break;
+            }
             final String usageName = NavigationNotification.prefs.getString(prefKey, null);
             if (usageName != null) {
                 try {

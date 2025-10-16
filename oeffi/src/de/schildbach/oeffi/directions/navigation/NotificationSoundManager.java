@@ -19,6 +19,7 @@ package de.schildbach.oeffi.directions.navigation;
 
 import android.content.Context;
 import android.media.AudioAttributes;
+import android.media.AudioDeviceInfo;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.media.Ringtone;
@@ -58,6 +59,10 @@ public class NotificationSoundManager {
         return Application.getInstance();
     }
 
+    private AudioManager getAudioManager() {
+        return (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
+    }
+
     public void playAlarmSoundAndVibration(final int soundUsage, final int soundId, final long[] vibrationPattern) {
         backgroundHandler.post(() -> {
             internPlayAlarmSoundAndVibration(soundUsage, soundId, vibrationPattern);
@@ -76,7 +81,7 @@ public class NotificationSoundManager {
                     .build();
             final Ringtone alarmTone = RingtoneManager.getRingtone(context, ResourceUri.fromResource(context, soundId));
             alarmTone.setAudioAttributes(audioAttributes);
-            final AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+            final AudioManager audioManager = getAudioManager();
             final AudioFocusRequest audioFocusRequest =
                     new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
                             .setAudioAttributes(audioAttributes)
@@ -97,5 +102,24 @@ public class NotificationSoundManager {
             log.info("sound has stopped: {} usage {}", soundId, soundUsage);
             audioManager.abandonAudioFocusRequest(audioFocusRequest);
         }
+    }
+
+    public boolean isHeadsetConnected() {
+        final AudioDeviceInfo[] devices = getAudioManager().getDevices(AudioManager.GET_DEVICES_OUTPUTS);
+        for (AudioDeviceInfo device : devices) {
+            final int deviceType = device.getType();
+            switch (deviceType) {
+                case AudioDeviceInfo.TYPE_HEARING_AID:
+                case AudioDeviceInfo.TYPE_BLE_HEADSET:
+                case AudioDeviceInfo.TYPE_USB_HEADSET:
+                case AudioDeviceInfo.TYPE_WIRED_HEADSET:
+                case AudioDeviceInfo.TYPE_WIRED_HEADPHONES:
+                case AudioDeviceInfo.TYPE_BLUETOOTH_A2DP:
+                    return true;
+                default:
+                    break;
+            }
+        }
+        return false;
     }
 }
