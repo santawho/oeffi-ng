@@ -319,6 +319,8 @@
     <string name="navigation_next_event_no_time_left">JETZT</string>
     <string name="navigation_next_event_action_departure">verbleiben bis Abfahrt in</string>
     <string name="navigation_next_event_action_departure_now">Abfahrt in</string>
+    <string name="navigation_next_event_action_final_transfer">verbleiben für abschließenden Gang nach</string>
+    <string name="navigation_next_event_action_final_transfer_now">Ende des abschließenden Gangs nach</string>
     <string name="navigation_next_event_action_ride">verbleiben für Fahrt nach</string>
     <string name="navigation_next_event_action_ride_now">Aussteigen in</string>
     <string name="navigation_next_event_action_arrival">verbleiben bis Ankunft in</string>

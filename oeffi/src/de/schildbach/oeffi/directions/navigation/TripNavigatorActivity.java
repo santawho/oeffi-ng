@@ -760,12 +760,16 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         public void setLogEntry(final NavigationNotification.EventLogEntry eventLogEntry) {
             this.eventLogEntry = eventLogEntry;
             final Application application = Application.getInstance();
-            timestampView.setText(Formats.formatTime(application.getSystemTimeZoneSelector(), eventLogEntry.timestamp, 0));
+            final String timeText = String.format("%s (%s)",
+                    Formats.formatTime(application.getSystemTimeZoneSelector(), eventLogEntry.timestamp, 0),
+                    Formats.formatTimeDiff(application, System.currentTimeMillis(), eventLogEntry.timestamp));
+            timestampView.setText(timeText);
             messageView.setText(Html.fromHtml(eventLogEntry.message, Html.FROM_HTML_MODE_COMPACT));
             final int textColorId;
             switch (eventLogEntry.type) {
                 case PUBLIC_LEG_START:
                 case PUBLIC_LEG_END:
+                case FINAL_TRANSFER:
                     textColorId = R.color.fg_significant;
                     break;
                 case PUBLIC_LEG_END_REMINDER:

@@ -430,6 +430,7 @@ public final class HorizontalPager extends ViewGroup {
     }
 
     public void setCurrentView(final int id, final boolean animate) {
+        updateVisibleChildren();
         final int childCount = getVisibleChildCount();
         for (int pos = 0; pos < childCount; ++pos) {
             final View child = visibleChildren.get(pos);
@@ -447,6 +448,7 @@ public final class HorizontalPager extends ViewGroup {
      * @param animate True to smoothly scroll to the screen, false to snap instantly
      */
     public void setCurrentScreen(final int newScreen, final boolean animate) {
+        updateVisibleChildren();
         if (newScreen == mCurrentScreen)
             return;
 

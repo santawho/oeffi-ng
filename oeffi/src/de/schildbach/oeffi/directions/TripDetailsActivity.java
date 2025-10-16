@@ -785,16 +785,16 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
             // showScreenIdWhenUnlocked = R.id.directions_trip_details_list_frame;
             showScreenIdWhenLocked = R.id.directions_trip_details_list_frame;
-            findViewById(R.id.navigation_next_event).setVisibility(View.GONE);
             findViewById(R.id.directions_trip_details_finished).setVisibility(View.VISIBLE);
+            findViewById(R.id.navigation_next_event).setVisibility(View.GONE);
         } else {
-            findViewById(R.id.directions_trip_details_finished).setVisibility(View.GONE);
             if (DeviceAdmin.isScreenLocked()) {
                 showId = showScreenIdWhenLocked;
             } else {
                 showId = showScreenIdWhenUnlocked;
                 showScreenIdWhenLocked = R.id.navigation_next_event;
             }
+            findViewById(R.id.directions_trip_details_finished).setVisibility(View.GONE);
         }
 
         viewPager.setCurrentView(showId, true);

@@ -302,6 +302,7 @@ public class NavigationNotification {
             PUBLIC_LEG_START,
             PUBLIC_LEG_END,
             PUBLIC_LEG_END_REMINDER,
+            FINAL_TRANSFER,
             TRANSFER_END_REMINDER,
             DEPARTURE_DELAY_CHANGE,
             ARRIVAL_DELAY_CHANGE,
@@ -629,9 +630,6 @@ public class NavigationNotification {
                 log.info("first notification !!");
                 addEventLogNavigationStarted(newEventLogEntries);
                 lastNotified = new TripRenderer.NotificationData();
-                lastNotified.currentLegIndex = -1;
-                lastNotified.publicDepartureLegIndex = -1;
-                lastNotified.publicArrivalLegIndex = -1;
             } else {
                 log.info("switching leg from {} to {}", lastNotified.currentLegIndex, newNotified.currentLegIndex);
                 if (newNotified.currentLegIndex >= 0 && lastNotified.currentLegIndex < 0)
@@ -643,13 +641,21 @@ public class NavigationNotification {
             lastNotified.leftTimeReminded = Long.MAX_VALUE;
             lastNotified.eventTime = newNotified.plannedEventTime;
             if (newNotified.publicDepartureLegIndex != lastNotified.publicDepartureLegIndex) {
-                if (newNotified.publicDepartureLegIndex >= 0)
-                    addEventLogPublicLegStart(newEventLogEntries, (Trip.Public) trip.legs.get(newNotified.publicDepartureLegIndex));
+                if (!newNotified.isArrival) {
+                    if (newNotified.publicDepartureLegIndex >= 0)
+                        addEventLogTransferStart(newEventLogEntries, (Trip.Public) trip.legs.get(newNotified.publicDepartureLegIndex));
+                    else
+                        addEventLogFinalTransferStart(newEventLogEntries, trip.to);
+                }
                 lastNotified.departurePosition = newNotified.plannedDeparturePosition;
             }
             if (newNotified.publicArrivalLegIndex != lastNotified.publicArrivalLegIndex) {
-                if (newNotified.publicArrivalLegIndex >= 0)
-                    addEventLogPublicLegEnd(newEventLogEntries, (Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
+                if (newNotified.publicArrivalLegIndex >= 0) {
+                    if (newNotified.isArrival)
+                        addEventLogPublicLegStart(newEventLogEntries, (Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
+                    else
+                        addEventLogFinalTransferStart(newEventLogEntries, trip.to);
+                }
                 lastNotified.nextTransferCritical = false;
             }
         }
@@ -749,13 +755,7 @@ public class NavigationNotification {
                 nextReminderTimeMs = nowTime + nextEventTimeLeftMs;
                 if (lastNotified.leftTimeReminded > REMINDER_SECOND_MS) {
                     log.info("reminding 2 mins = {}", nextReminderTimeMs);
-                    if (newNotified.isArrival) {
-                        if (newNotified.publicArrivalLegIndex >= 0)
-                            addEventLogPublicLegEndReminder(newEventLogEntries, (Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
-                    } else {
-                        if (newNotified.publicDepartureLegIndex >= 0)
-                            addEventLogTransferEndReminder(newEventLogEntries, (Trip.Public) trip.legs.get(newNotified.publicDepartureLegIndex));
-                    }
+                    addEventLogReminder(newEventLogEntries, nextEventTimeLeftMs, newNotified, trip);
                     reminderSoundId = SOUND_REMIND_IMPORTANT;
                     newNotified.leftTimeReminded = REMINDER_SECOND_MS;
                 }
@@ -764,13 +764,7 @@ public class NavigationNotification {
                 nextReminderTimeMs = nowTime + nextEventTimeLeftMs - REMINDER_SECOND_MS;
                 if (lastNotified.leftTimeReminded > REMINDER_FIRST_MS) {
                     log.info("reminding 6 mins = {}", nextReminderTimeMs);
-                    if (newNotified.isArrival) {
-                        if (newNotified.publicArrivalLegIndex >= 0)
-                            addEventLogPublicLegEndReminder(newEventLogEntries, (Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
-                    } else {
-                        if (newNotified.publicDepartureLegIndex >= 0)
-                            addEventLogTransferEndReminder(newEventLogEntries, (Trip.Public) trip.legs.get(newNotified.publicDepartureLegIndex));
-                    }
+                    addEventLogReminder(newEventLogEntries, nextEventTimeLeftMs, newNotified, trip);
                     reminderSoundId = SOUND_REMIND_NORMAL;
                     newNotified.leftTimeReminded = REMINDER_FIRST_MS;
 
@@ -1237,13 +1231,13 @@ public class NavigationNotification {
                 R.string.navigation_event_log_entry_nav_end)));
     }
 
-    private void addEventLogPublicLegStart(final List<EventLogEntry> entries, final Trip.Public publicLeg) {
+    private void addEventLogTransferStart(final List<EventLogEntry> entries, final Trip.Public publicLeg) {
         final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
         final Stop stop = publicLeg.departureStop;
         final PTDate predictedTime = stop.getDepartureTime(false);
         final PTDate plannedTime = stop.getDepartureTime(true);
         entries.add(new EventLogEntry(EventLogEntry.Type.PUBLIC_LEG_START, context.getString(
-                R.string.navigation_event_log_entry_public_leg_start,
+                R.string.navigation_event_log_entry_transfer_start,
                 publicLeg.line.label,
                 Formats.fullLocationName(publicLeg.departure),
                 platformForMessage(stop.plannedDeparturePosition, stop.getDeparturePosition()),
@@ -1252,13 +1246,29 @@ public class NavigationNotification {
                 formatTimeSpan(plannedTime, predictedTime))));
     }
 
-    private void addEventLogPublicLegEnd(final List<EventLogEntry> entries, final Trip.Public publicLeg) {
+    private void addEventLogFinalTransferStart(final List<EventLogEntry> entries, final Location destination) {
+        entries.add(new EventLogEntry(EventLogEntry.Type.FINAL_TRANSFER, context.getString(
+                R.string.navigation_event_log_entry_final_transfer_start,
+                Formats.fullLocationName(destination))));
+    }
+
+    private void addEventLogFinalTransferEndReminder(
+            final List<EventLogEntry> entries,
+            final long timeLeftMs,
+            final Location destination) {
+        entries.add(new EventLogEntry(EventLogEntry.Type.TRANSFER_END_REMINDER, context.getString(
+                R.string.navigation_event_log_entry_final_transfer_end_reminder,
+                formatTimeSpan(timeLeftMs),
+                Formats.fullLocationName(destination))));
+    }
+
+    private void addEventLogPublicLegStart(final List<EventLogEntry> entries, final Trip.Public publicLeg) {
         final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
         final Stop stop = publicLeg.arrivalStop;
         final PTDate predictedTime = stop.getArrivalTime(false);
         final PTDate plannedTime = stop.getArrivalTime(true);
         entries.add(new EventLogEntry(EventLogEntry.Type.PUBLIC_LEG_END, context.getString(
-                R.string.navigation_event_log_entry_public_leg_end,
+                R.string.navigation_event_log_entry_public_leg_start,
                 publicLeg.line.label,
                 Formats.fullLocationName(publicLeg.arrival),
                 platformForMessage(stop.plannedArrivalPosition, stop.getArrivalPosition()),
@@ -1267,7 +1277,32 @@ public class NavigationNotification {
                 formatTimeSpan(plannedTime, predictedTime))));
     }
 
-    private void addEventLogPublicLegEndReminder(final List<EventLogEntry> entries, final Trip.Public publicLeg) {
+    private void addEventLogReminder(
+            final List<EventLogEntry> entries,
+            final long nextEventTimeLeftMs,
+            final TripRenderer.NotificationData newNotified,
+            final Trip trip) {
+        if (newNotified.isArrival) {
+            if (newNotified.publicArrivalLegIndex >= 0) {
+                addEventLogPublicLegEndReminder(entries,
+                        nextEventTimeLeftMs,
+                        (Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
+            }
+        } else {
+            if (newNotified.publicDepartureLegIndex >= 0) {
+                addEventLogTransferEndReminder(entries,
+                        nextEventTimeLeftMs,
+                        (Trip.Public) trip.legs.get(newNotified.publicDepartureLegIndex));
+            } else {
+                addEventLogFinalTransferEndReminder(entries, nextEventTimeLeftMs, trip.to);
+            }
+        }
+    }
+
+    private void addEventLogPublicLegEndReminder(
+            final List<EventLogEntry> entries,
+            final long timeLeftMs,
+            final Trip.Public publicLeg) {
         final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
         final Stop stop = publicLeg.arrivalStop;
         final PTDate predictedTime = stop.getArrivalTime(false);
@@ -1275,7 +1310,7 @@ public class NavigationNotification {
         entries.add(new EventLogEntry(EventLogEntry.Type.PUBLIC_LEG_END_REMINDER, context.getString(
                 R.string.navigation_event_log_entry_public_leg_end_reminder,
                 Formats.fullLocationName(publicLeg.arrival),
-                formatTimeSpan(new Date(), predictedTime),
+                formatTimeSpan(timeLeftMs),
                 platformForMessage(stop.plannedArrivalPosition, stop.getArrivalPosition()),
                 Formats.formatTime(timeZoneSelector, predictedTime),
                 formatTimeSpan(plannedTime, predictedTime))));
@@ -1283,6 +1318,7 @@ public class NavigationNotification {
 
     private void addEventLogTransferEndReminder(
             final List<EventLogEntry> entries,
+            final long timeLeftMs,
             final Trip.Public toPublicLeg) {
         final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
         final Stop stop = toPublicLeg == null ? null : toPublicLeg.departureStop;
@@ -1290,7 +1326,7 @@ public class NavigationNotification {
         final PTDate plannedTime = stop == null ? null : stop.getDepartureTime(true);
         entries.add(new EventLogEntry(EventLogEntry.Type.TRANSFER_END_REMINDER, context.getString(
                 R.string.navigation_event_log_entry_transfer_end_reminder,
-                formatTimeSpan(new Date(), predictedTime),
+                formatTimeSpan(timeLeftMs),
                 platformForMessage(stop.plannedDeparturePosition, stop.getDeparturePosition()),
                 toPublicLeg.line.label,
                 Formats.formatTime(timeZoneSelector, plannedTime),
@@ -1360,7 +1396,11 @@ public class NavigationNotification {
     }
 
     private String formatTimeSpan(final Date earlier, final Date later) {
-        long millis = later.getTime() - earlier.getTime();
+        return formatTimeSpan(later.getTime() - earlier.getTime());
+    }
+
+    private String formatTimeSpan(final long timeDiffMs) {
+        long millis = timeDiffMs;
         final boolean isNegative = millis < 0;
         if (isNegative)
             millis = -millis;

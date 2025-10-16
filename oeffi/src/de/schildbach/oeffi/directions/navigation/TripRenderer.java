@@ -288,6 +288,9 @@ public class TripRenderer {
 
         public NotificationData() {
             this.id = ++idc;
+            currentLegIndex = -1;
+            publicArrivalLegIndex = -1;
+            publicDepartureLegIndex = -1;
         }
 
         public long refreshNotificationRequiredAt;
@@ -411,7 +414,6 @@ public class TripRenderer {
 
     public void evaluateByTime(final Date now) {
         notificationData = new NotificationData();
-        notificationData.currentLegIndex = -1;
         setNextEventClock(now);
         for (int iLeg = 0; iLeg < legs.size(); ++iLeg) {
             final TripRenderer.LegContainer legC = legs.get(iLeg);
@@ -526,7 +528,8 @@ public class TripRenderer {
             if (transferFrom != null)
                 setPrevEventLatestTime(beginTime, plannedBeginTime);
             final boolean eventIsNow = setNextEventTimeLeft(now, endTime, transferTo != null ? plannedEndTime : null, leg != null ? leg.min : 0);
-            final String targetName = (transferTo != null) ? Formats.fullLocationName(transferTo.location) : null;
+            final Location targetLocation = transferTo != null ? transferTo.location : leg != null ? leg.arrival : null;
+            final String targetName = (targetLocation != null) ? Formats.fullLocationName(targetLocation) : null;
             setNextEventTarget(targetName);
             final String arrName = (transferFrom != null) ? Formats.fullLocationName(transferFrom.location) : null;
             final boolean depChanged = arrName != null && !arrName.equals(targetName);
@@ -540,7 +543,9 @@ public class TripRenderer {
                     transferTo, depPos, depPos != null && !depPos.equals(plannedDepPos));
             setNextEventTransport(nextPublicLeg);
             setNextEventTransferTimes(legC, true, now);
-            setNextEventActions(transferTo == null ? 0
+            setNextEventActions(transferTo == null ? (eventIsNow
+                                        ? R.string.navigation_next_event_action_final_transfer_now
+                                        : R.string.navigation_next_event_action_final_transfer)
                             : transferFrom == null ? (eventIsNow
                                         ? R.string.navigation_next_event_action_departure_now
                                         : R.string.navigation_next_event_action_departure)

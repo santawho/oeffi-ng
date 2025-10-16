@@ -320,6 +320,8 @@
     <string name="navigation_next_event_no_time_left">NOW</string>
     <string name="navigation_next_event_action_departure">remaining until departure at</string>
     <string name="navigation_next_event_action_departure_now">departure at</string>
+    <string name="navigation_next_event_action_final_transfer">remaining for final transfer to</string>
+    <string name="navigation_next_event_action_final_transfer_now">end of final transfer to</string>
     <string name="navigation_next_event_action_ride">remaining for ride to</string>
     <string name="navigation_next_event_action_ride_now">exit at</string>
     <string name="navigation_next_event_action_arrival">remaining until arrival at</string>

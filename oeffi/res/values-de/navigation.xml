@@ -84,10 +84,12 @@
     <string name="navigation_event_log_entry_nav_start">Navigation beginnt</string>
     <string name="navigation_event_log_entry_nav_restart">Navigation beginnt erneut</string>
     <string name="navigation_event_log_entry_nav_end">Navigation beendet</string>
-    <string name="navigation_event_log_entry_public_leg_start">&lt;b>Abfahrt&lt;/b> %1$s in %2$s, %3$s, geplant %4$s, erwartet %5$s, Verspätung %6$s</string>
-    <string name="navigation_event_log_entry_public_leg_end">&lt;b>Ankunft&lt;/b> %1$s in %2$s, %3$s, geplant %4$s, erwartet %5$s, Verspätung %6$s</string>
+    <string name="navigation_event_log_entry_public_leg_start">&lt;b>Ankunft&lt;/b> %1$s in %2$s, %3$s, geplant %4$s, erwartet %5$s, Verspätung %6$s</string>
     <string name="navigation_event_log_entry_public_leg_end_reminder">&lt;b>Demnächst Ankunft&lt;/b> in %1$s in %2$s, %3$s, erwartet %4$s, Verspätung %5$s</string>
+    <string name="navigation_event_log_entry_transfer_start">&lt;b>Abfahrt&lt;/b> %1$s in %2$s, %3$s, geplant %4$s, erwartet %5$s, Verspätung %6$s</string>
     <string name="navigation_event_log_entry_transfer_end_reminder">&lt;b>%1$s noch für Übergang&lt;/b> nach %2$s, Fahrt %3$s, geplant %4$s, erwartet %5$s, Verspätung %6$s</string>
+    <string name="navigation_event_log_entry_final_transfer_start">&lt;b>Abschließender Gang&lt;/b> nach %1$s</string>
+    <string name="navigation_event_log_entry_final_transfer_end_reminder">&lt;b>%1$s noch für abschlie0enden Gang&lt;/b> nach %2$s</string>
     <string name="navigation_event_log_entry_departure_delay_change">&lt;b>Verspätete Abfahrt&lt;/b> von %1$s in %2$s um %3$s, erwartet %4$s</string>
     <string name="navigation_event_log_entry_arrival_delay_change">&lt;b>Verspätete Ankunft&lt;/b> von %1$s in %2$s um %3$s, erwartet %4$s</string>
     <string name="navigation_event_log_entry_departure_position_change">&lt;b>Neuer Steig&lt;/b> %1$s für Abfahrt von %2$s in %3$s, geplant %4$s</string>

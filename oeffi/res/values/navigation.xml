@@ -90,10 +90,12 @@
     <string name="navigation_event_log_entry_nav_start">Navigation begins</string>
     <string name="navigation_event_log_entry_nav_restart">Navigation restarting</string>
     <string name="navigation_event_log_entry_nav_end">Navigation ended</string>
-    <string name="navigation_event_log_entry_public_leg_start">&lt;b>Transfer to departure&lt;/b> of %1$s at %2$s, %3$s, scheduled %4$s, estimated %5$s, delay %6$s</string>
-    <string name="navigation_event_log_entry_public_leg_end">&lt;b>Travel to arrival&lt;/b> of %1$s at %2$s, %3$s, scheduled %4$s, estimated %5$s, delay %6$s</string>
+    <string name="navigation_event_log_entry_public_leg_start">&lt;b>Travel to arrival&lt;/b> of %1$s at %2$s, %3$s, scheduled %4$s, estimated %5$s, delay %6$s</string>
     <string name="navigation_event_log_entry_public_leg_end_reminder">&lt;b>Approaching arrival&lt;/b> at %1$s in %2$s, %3$s, estimated %4$s, delay %5$s</string>
+    <string name="navigation_event_log_entry_transfer_start">&lt;b>Transfer to departure&lt;/b> of %1$s at %2$s, %3$s, scheduled %4$s, estimated %5$s, delay %6$s</string>
     <string name="navigation_event_log_entry_transfer_end_reminder">&lt;b>%1$s left for transfer&lt;/b> to %2$s, service %3$s, scheduled %4$s, estimated %5$s, delay %6$s</string>
+    <string name="navigation_event_log_entry_final_transfer_start">&lt;b>Final transfer&lt;/b> to %1$s</string>
+    <string name="navigation_event_log_entry_final_transfer_end_reminder">&lt;b>%1$s left for final transfer&lt;/b> to %2$s</string>
     <string name="navigation_event_log_entry_departure_delay_change">&lt;b>Delayed departure&lt;/b> of %1$s at %2$s by %3$s, estimated %4$s</string>
     <string name="navigation_event_log_entry_arrival_delay_change">&lt;b>Delayed arrival&lt;/b> of %1$s at %2$s by %3$s, estimated %4$s</string>
     <string name="navigation_event_log_entry_departure_position_change">&lt;b>New platform&lt;/b> %1$s for departure of %2$s at %3$s, scheduled %4$s</string>
