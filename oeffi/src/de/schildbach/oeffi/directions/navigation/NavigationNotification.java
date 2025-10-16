@@ -36,6 +36,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.service.notification.StatusBarNotification;
+import android.text.Html;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -507,6 +508,7 @@ public class NavigationNotification {
         final Date now = new Date();
         final long nowTime = now.getTime();
         final TripRenderer tripRenderer = new TripRenderer(null, trip, false, now);
+        final List<String> speakTexts = new ArrayList<>();
         boolean refreshAllLegs = false;
         long nextRefreshTimeMs;
         String nextRefreshTimeReason;
@@ -901,10 +903,15 @@ public class NavigationNotification {
         log.info("set notification with tag={}", notificationTag);
         getNotificationManager(context).notify(notificationTag, 0, notification);
 
+//        for (EventLogEntry logEntry : newEventLogEntries) {
+//            final String rawText = Html.fromHtml(logEntry.message, Html.FROM_HTML_MODE_COMPACT).toString();
+//            speakTexts.add(rawText);
+//        }
+
         if (anyChanges) {
-            playAlarmSoundAndVibration(-1, SOUND_ALARM, VIBRATION_PATTERN_ALARM, onRide);
+            playAlarmSoundAndVibration(-1, SOUND_ALARM, VIBRATION_PATTERN_ALARM, speakTexts, onRide);
         } else if (reminderSoundId != 0 && reminderSoundId != SOUND_REMIND_VIA_NOTIFICATION) {
-            playAlarmSoundAndVibration(-1, reminderSoundId, VIBRATION_PATTERN_REMIND, onRide);
+            playAlarmSoundAndVibration(-1, reminderSoundId, VIBRATION_PATTERN_REMIND, speakTexts, onRide);
         }
 
         lastNotified = newNotified;
@@ -915,11 +922,12 @@ public class NavigationNotification {
             final int soundUsage,
             final int aSoundId,
             final long[] vibrationPattern,
-            boolean onRide) {
+            final List<String> speakTexts,
+            final boolean onRide) {
         final int actualSoundId = configuration.soundEnabled ? getActualSound(aSoundId) : 0;
         final int actualUsage = soundUsage >= 0 ? soundUsage : getAudioUsageForSound(aSoundId, onRide);
         final NotificationSoundManager soundManager = NotificationSoundManager.getInstance();
-        soundManager.playAlarmSoundAndVibration(actualUsage, actualSoundId, vibrationPattern);
+        soundManager.playAlarmSoundAndVibration(actualUsage, actualSoundId, vibrationPattern, speakTexts);
     }
 
     public void remove() {
@@ -990,10 +998,10 @@ public class NavigationNotification {
                 final boolean alarmPlayed = update(newTrip);
                 context.sendBroadcast(new Intent(ACTION_UPDATE_TRIGGER));
                 if (!alarmPlayed && prefs.getBoolean(Constants.PREFS_KEY_NAVIGATION_REFRESH_BEEP, true)) {
-                    playAlarmSoundAndVibration(AudioAttributes.USAGE_NOTIFICATION, R.raw.nav_refresh_beep, null, false);
+                    playAlarmSoundAndVibration(AudioAttributes.USAGE_NOTIFICATION, R.raw.nav_refresh_beep, null, null, false);
                 }
             } else {
-                playAlarmSoundAndVibration(AudioAttributes.USAGE_NOTIFICATION, R.raw.nav_refresh_error, null, false);
+                playAlarmSoundAndVibration(AudioAttributes.USAGE_NOTIFICATION, R.raw.nav_refresh_error, null, null, false);
                 update(null);
             }
         } else {

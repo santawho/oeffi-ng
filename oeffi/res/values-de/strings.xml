@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="locale">de</string>
+
     <string name="stations_icon_label">Öffi Haltestellen</string>
     <string name="directions_icon_label">Öffi Verbindungen</string>
     <string name="plans_icon_label">Öffi Netzpläne</string>

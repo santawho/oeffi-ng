@@ -24,15 +24,24 @@ import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
 import android.os.Vibrator;
+import android.speech.tts.TextToSpeech;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.SynchronousQueue;
+
 import de.schildbach.oeffi.Application;
+import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.ResourceUri;
 
 public class NotificationSoundManager {
@@ -48,11 +57,35 @@ public class NotificationSoundManager {
 
     private HandlerThread backgroundThread;
     private Handler backgroundHandler;
+    private TextToSpeech textToSpeech;
+    private boolean isTextToSpeechUp;
+    private final ArrayList<Speakable> speakableQueue = new ArrayList<>();
+
+    public static class Speakable {
+        public final String text;
+        public final int stream;
+
+        public Speakable(final String text, final int stream) {
+            this.text = text;
+            this.stream = stream;
+        }
+    }
 
     private NotificationSoundManager() {
         backgroundThread = new HandlerThread("NavAlarmThread", Process.THREAD_PRIORITY_BACKGROUND);
         backgroundThread.start();
         backgroundHandler = new Handler(backgroundThread.getLooper());
+
+        textToSpeech = new TextToSpeech(getContext(), status -> {
+            isTextToSpeechUp = status == TextToSpeech.SUCCESS;
+            if (isTextToSpeechUp) {
+                final String localeName = Application.getInstance().getString(R.string.locale);
+                final Locale locale = new Locale(localeName);
+                final int result = textToSpeech.setLanguage(locale);
+
+                speakQueue();
+            }
+        });
     }
 
     private Context getContext() {
@@ -63,13 +96,21 @@ public class NotificationSoundManager {
         return (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
     }
 
-    public void playAlarmSoundAndVibration(final int soundUsage, final int soundId, final long[] vibrationPattern) {
+    public void playAlarmSoundAndVibration(
+            final int soundUsage,
+            final int soundId,
+            final long[] vibrationPattern,
+            final List<String> speakTexts) {
         backgroundHandler.post(() -> {
-            internPlayAlarmSoundAndVibration(soundUsage, soundId, vibrationPattern);
+            internPlayAlarmSoundAndVibration(soundUsage, soundId, vibrationPattern, speakTexts);
         });
     }
 
-    private void internPlayAlarmSoundAndVibration(final int soundUsage, final int soundId, final long[] vibrationPattern) {
+    private void internPlayAlarmSoundAndVibration(
+            final int soundUsage,
+            final int soundId,
+            final long[] vibrationPattern,
+            final List<String> speakTexts) {
         final Context context = getContext();
         if (vibrationPattern != null) {
             ((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(vibrationPattern, -1);
@@ -100,7 +141,28 @@ public class NotificationSoundManager {
                 }
             }
             log.info("sound has stopped: {} usage {}", soundId, soundUsage);
+            if (speakTexts != null && !speakTexts.isEmpty()) {
+                final int audioStream = getAudioStreamFromUsage(soundUsage);
+                for (String text : speakTexts) {
+                    log.info("speaking: \"{}\" stream {}", text, audioStream);
+                    speak(text, audioStream);
+                }
+            }
             audioManager.abandonAudioFocusRequest(audioFocusRequest);
+        }
+    }
+
+    private static int getAudioStreamFromUsage(final int soundUsage) {
+        switch (soundUsage) {
+            case AudioAttributes.USAGE_ALARM:
+                return AudioManager.STREAM_ALARM;
+            case AudioAttributes.USAGE_MEDIA:
+                return AudioManager.STREAM_MUSIC;
+            case AudioAttributes.USAGE_NOTIFICATION_EVENT:
+            case AudioAttributes.USAGE_NOTIFICATION:
+            case AudioAttributes.USAGE_NOTIFICATION_RINGTONE:
+            default:
+                return AudioManager.STREAM_NOTIFICATION;
         }
     }
 
@@ -121,5 +183,47 @@ public class NotificationSoundManager {
             }
         }
         return false;
+    }
+
+    public boolean speak(final String text, final int audioStream) {
+        return speak(new Speakable(text, audioStream));
+    }
+
+    public boolean speak(final Speakable speakable) {
+        synchronized (speakableQueue) {
+            speakableQueue.add(speakable);
+        }
+
+        if (isTextToSpeechUp)
+            speakQueue();
+
+        return true;
+    }
+
+    private void speakQueue() {
+        for (;;) {
+            Speakable speakable;
+            synchronized (speakableQueue) {
+                if (speakableQueue.isEmpty())
+                    break;
+
+                speakable = speakableQueue.get(0);
+            }
+            if (!speakSync(speakable))
+                break;
+            synchronized (speakableQueue) {
+                speakableQueue.remove(0);
+            }
+        }
+    }
+
+    private boolean speakSync(final Speakable speakable) {
+        final Bundle params = new Bundle();
+        params.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, speakable.stream);
+
+        final String utteranceId = NotificationSoundManager.class.getName();
+
+        return TextToSpeech.SUCCESS ==
+                textToSpeech.speak(speakable.text, TextToSpeech.QUEUE_ADD, params, utteranceId);
     }
 }
