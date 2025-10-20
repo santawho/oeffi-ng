@@ -795,6 +795,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 showScreenIdWhenLocked = R.id.navigation_next_event;
             }
             findViewById(R.id.directions_trip_details_finished).setVisibility(View.GONE);
+            findViewById(R.id.navigation_next_event).setVisibility(View.VISIBLE);
         }
 
         viewPager.setCurrentView(showId, true);
