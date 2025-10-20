@@ -496,19 +496,22 @@ public class NavigationNotification {
 
 //    static Long pppp;
 
+    List<EventLogEntry> newEventLogEntries;
+    List<String> newSpeakTexts;
+
     @SuppressLint("ScheduleExactAlarm")
     private boolean update(final Trip aTrip) {
         final TimeZoneSelector systemTimeZoneSelector = Application.getInstance().getSystemTimeZoneSelector();
         final Trip trip = aTrip != null ? aTrip : getTrip();
         final Date tripUpdatedAtDate = trip.updatedAt;
         log.info("updating with {} trip updated at {}", aTrip != null ? "new" : "old", NavigationAlarmManager.LOG_TIME_FORMAT.format(tripUpdatedAtDate));
-        final List<EventLogEntry> newEventLogEntries = new ArrayList<>();
-        // addEventLogMessage(newEventLogEntries, "updating");
+        this.newEventLogEntries = new ArrayList<>();
+        this.newSpeakTexts = new ArrayList<>();
+        // addEventOutputMessage(newEventLogEntries, "updating");
         final long tripUpdatedAt = tripUpdatedAtDate.getTime();
         final Date now = new Date();
         final long nowTime = now.getTime();
         final TripRenderer tripRenderer = new TripRenderer(null, trip, false, now);
-        final List<String> speakTexts = new ArrayList<>();
         boolean refreshAllLegs = false;
         long nextRefreshTimeMs;
         String nextRefreshTimeReason;
@@ -645,33 +648,33 @@ public class NavigationNotification {
         if (lastNotified == null || newNotified.currentLegIndex != lastNotified.currentLegIndex) {
             if (lastNotified == null) {
                 log.info("first notification !!");
-                addEventLogNavigationStarted(newEventLogEntries);
+                addEventOutputNavigationStarted();
                 lastNotified = new TripRenderer.NotificationData();
             } else {
                 log.info("switching leg from {} to {}", lastNotified.currentLegIndex, newNotified.currentLegIndex);
                 if (newNotified.currentLegIndex >= 0 && lastNotified.currentLegIndex < 0)
-                    addEventLogNavigationRestarted(newEventLogEntries);
+                    addEventOutputNavigationRestarted();
                 reminderSoundId = SOUND_REMIND_NEXTLEG;
             }
             if (newNotified.currentLegIndex < 0)
-                addEventLogNavigationEnded(newEventLogEntries);
+                addEventOutputNavigationEnded();
             lastNotified.leftTimeReminded = Long.MAX_VALUE;
             lastNotified.eventTime = newNotified.plannedEventTime;
             if (newNotified.publicDepartureLegIndex != lastNotified.publicDepartureLegIndex) {
                 if (!newNotified.isArrival) {
                     if (newNotified.publicDepartureLegIndex >= 0)
-                        addEventLogTransferStart(newEventLogEntries, (Trip.Public) trip.legs.get(newNotified.publicDepartureLegIndex));
+                        addEventOutputTransferStart(nextEventTimeLeftMs, (Trip.Public) trip.legs.get(newNotified.publicDepartureLegIndex));
                     else
-                        addEventLogFinalTransferStart(newEventLogEntries, trip.to);
+                        addEventOutputFinalTransferStart(trip.to);
                 }
                 lastNotified.departurePosition = newNotified.plannedDeparturePosition;
             }
             if (newNotified.publicArrivalLegIndex != lastNotified.publicArrivalLegIndex) {
                 if (newNotified.publicArrivalLegIndex >= 0) {
                     if (newNotified.isArrival)
-                        addEventLogPublicLegStart(newEventLogEntries, (Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
+                        addEventOutputPublicLegStart(nextEventTimeLeftMs, (Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
                     else
-                        addEventLogFinalTransferStart(newEventLogEntries, trip.to);
+                        addEventOutputFinalTransferStart(trip.to);
                 }
                 lastNotified.nextTransferCritical = false;
             }
@@ -679,7 +682,7 @@ public class NavigationNotification {
         if (newNotified.departurePosition != null && !newNotified.departurePosition.equals(lastNotified.departurePosition)) {
             log.info("switching departure position from {} to {}", lastNotified.departurePosition, newNotified.departurePosition);
             if (newNotified.publicDepartureLegIndex >= 0) {
-                addEventLogDeparturePositionChange(newEventLogEntries,
+                addEventOutputDeparturePositionChange(
                         (Trip.Public) trip.legs.get(newNotified.publicDepartureLegIndex),
                         lastNotified.departurePosition);
             }
@@ -699,10 +702,10 @@ public class NavigationNotification {
                 log.info("time changed: leftSecs={}, diffSecs={}, accepting new time", leftSecs, diffSecs);
                 if (newNotified.isArrival) {
                     if (newNotified.publicArrivalLegIndex >= 0)
-                        addEventLogArrivalDelayChange(newEventLogEntries, (Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
+                        addEventOutputArrivalDelayChange((Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
                 } else {
                     if (newNotified.publicDepartureLegIndex >= 0)
-                        addEventLogDepartureDelayChange(newEventLogEntries, (Trip.Public) trip.legs.get(newNotified.publicDepartureLegIndex));
+                        addEventOutputDepartureDelayChange((Trip.Public) trip.legs.get(newNotified.publicDepartureLegIndex));
                 }
             } else {
                 log.info("time not changed: leftSecs={}, diffSecs={}, keeping new time", leftSecs, diffSecs);
@@ -712,7 +715,7 @@ public class NavigationNotification {
         if (newNotified.nextTransferCritical != lastNotified.nextTransferCritical) {
             log.info("transferCritical switching to {}", newNotified.nextTransferCritical);
             nextTransferCriticalChanged = newNotified.nextTransferCritical;
-            addEventLogNextTransferCritical(newEventLogEntries);
+            addEventOutputNextTransferCritical();
         }
         if (!newNotified.transfersCritical.equals(lastNotified.transfersCritical)) {
             final String lastTransfersCritical = lastNotified.transfersCritical;
@@ -738,7 +741,7 @@ public class NavigationNotification {
             }
         }
         if (anyTransferCriticalChanged) {
-            addEventLogAnyTransferCritical(newEventLogEntries);
+            addEventOutputAnyTransferCritical();
         }
         newNotified.playedTravelAlarmId = lastNotified.playedTravelAlarmId;
         if (travelAlarmAtMs > 0) {
@@ -772,7 +775,7 @@ public class NavigationNotification {
                 nextReminderTimeMs = nowTime + nextEventTimeLeftMs;
                 if (lastNotified.leftTimeReminded > REMINDER_SECOND_MS) {
                     log.info("reminding 2 mins = {}", nextReminderTimeMs);
-                    addEventLogReminder(newEventLogEntries, nextEventTimeLeftMs, newNotified, trip);
+                    addEventOutputReminder(nextEventTimeLeftMs, newNotified, trip);
                     reminderSoundId = SOUND_REMIND_IMPORTANT;
                     newNotified.leftTimeReminded = REMINDER_SECOND_MS;
                 }
@@ -781,7 +784,7 @@ public class NavigationNotification {
                 nextReminderTimeMs = nowTime + nextEventTimeLeftMs - REMINDER_SECOND_MS;
                 if (lastNotified.leftTimeReminded > REMINDER_FIRST_MS) {
                     log.info("reminding 6 mins = {}", nextReminderTimeMs);
-                    addEventLogReminder(newEventLogEntries, nextEventTimeLeftMs, newNotified, trip);
+                    addEventOutputReminder(nextEventTimeLeftMs, newNotified, trip);
                     reminderSoundId = SOUND_REMIND_NORMAL;
                     newNotified.leftTimeReminded = REMINDER_FIRST_MS;
 
@@ -903,15 +906,10 @@ public class NavigationNotification {
         log.info("set notification with tag={}", notificationTag);
         getNotificationManager(context).notify(notificationTag, 0, notification);
 
-//        for (EventLogEntry logEntry : newEventLogEntries) {
-//            final String rawText = Html.fromHtml(logEntry.message, Html.FROM_HTML_MODE_COMPACT).toString();
-//            speakTexts.add(rawText);
-//        }
-
         if (anyChanges) {
-            playAlarmSoundAndVibration(-1, SOUND_ALARM, VIBRATION_PATTERN_ALARM, speakTexts, onRide);
+            playAlarmSoundAndVibration(-1, SOUND_ALARM, VIBRATION_PATTERN_ALARM, newSpeakTexts, onRide);
         } else if (reminderSoundId != 0 && reminderSoundId != SOUND_REMIND_VIA_NOTIFICATION) {
-            playAlarmSoundAndVibration(-1, reminderSoundId, VIBRATION_PATTERN_REMIND, speakTexts, onRide);
+            playAlarmSoundAndVibration(-1, reminderSoundId, VIBRATION_PATTERN_REMIND, newSpeakTexts, onRide);
         }
 
         lastNotified = newNotified;
@@ -927,7 +925,13 @@ public class NavigationNotification {
         final int actualSoundId = configuration.soundEnabled ? getActualSound(aSoundId) : 0;
         final int actualUsage = soundUsage >= 0 ? soundUsage : getAudioUsageForSound(aSoundId, onRide);
         final NotificationSoundManager soundManager = NotificationSoundManager.getInstance();
-        soundManager.playAlarmSoundAndVibration(actualUsage, actualSoundId, vibrationPattern, speakTexts);
+        boolean doSpeech = false;
+        if (configuration.soundEnabled) {
+            final String when = NavigationNotification.prefs.getString(Constants.PREFS_KEY_NAVIGATION_SPEECH_OUTPUT, "never");
+            if ("always".equals(when) || ("headphones".equals(when) && soundManager.isHeadsetConnected()))
+                doSpeech = true;
+        };
+        soundManager.playAlarmSoundAndVibration(actualUsage, actualSoundId, vibrationPattern, doSpeech ? speakTexts : null);
     }
 
     public void remove() {
@@ -1225,7 +1229,7 @@ public class NavigationNotification {
         return context.getPreferredNetworkTimeZoneSelector(network);
     }
 
-    private String platformForMessage(final Position prevPosition, final Position newPosition) {
+    private String platformForLogMessage(final Position prevPosition, final Position newPosition) {
         final String prevText = prevPosition == null ? "?" : prevPosition.toString();
         final String newText = newPosition == null ? "?" : newPosition.toString();
         if (prevText.equals(newText))
@@ -1233,189 +1237,306 @@ public class NavigationNotification {
         return context.getString(R.string.navigation_event_log_position_changed_format, newText, prevText);
     }
 
-    private void addEventLogMessage(final List<EventLogEntry> entries, final String text) {
-        entries.add(new EventLogEntry(EventLogEntry.Type.MESSAGE, context.getString(
+    @SuppressLint("StringFormatMatches")
+    private String platformForSpeakText(final Position prevPosition, final Position newPosition) {
+        final String prevText = prevPosition == null ? null : prevPosition.toString();
+        final String newText = newPosition == null ? null : newPosition.toString();
+        if (prevPosition == null) {
+            if (newPosition == null)
+                return "";
+            return context.getString(R.string.navigation_event_speak_position_unchanged_format, newText);
+        }
+        if (newPosition == null || prevText.equals(newText))
+            return context.getString(R.string.navigation_event_speak_position_unchanged_format, prevText);
+        return context.getString(R.string.navigation_event_speak_position_changed_format, newText, prevText);
+    }
+
+    private String timesForSpeakText(final String plannedTime, final String estimatedTime, final long delayMillis) {
+        if (plannedTime == null) {
+            if (estimatedTime == null)
+                return "";
+            return context.getString(R.string.navigation_event_speak_times_nodelay_format, estimatedTime);
+        }
+        if (estimatedTime == null || plannedTime.equals(estimatedTime))
+            return context.getString(R.string.navigation_event_speak_times_nodelay_format, plannedTime);
+        return context.getString(R.string.navigation_event_speak_times_delayed_format,
+                plannedTime, estimatedTime, Long.toString(delayMillis / 60000));
+    }
+
+    private String remainingTimeForSpeakTextAtEnd(final long remainingMillis) {
+        if (remainingMillis < 60000)
+            return context.getString(R.string.navigation_event_speak_notime_left_end_format);
+        return context.getString(R.string.navigation_event_speak_time_left_end_format,
+                Long.toString(remainingMillis / 60000));
+    }
+
+    private String remainingTimeForSpeakText(final long remainingMillis) {
+        if (remainingMillis < 60000)
+            return context.getString(R.string.navigation_event_speak_notime_left_front_format);
+        return context.getString(R.string.navigation_event_speak_time_left_front_format,
+                Long.toString(remainingMillis / 60000));
+    }
+
+    private void addEventLogMessage(final String text) {
+        newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.MESSAGE, context.getString(
                 R.string.navigation_event_log_entry_message,
                 text)));
     }
 
-    private void addEventLogNavigationStarted(final List<EventLogEntry> entries) {
-        entries.add(new EventLogEntry(EventLogEntry.Type.START_STOP, context.getString(
+    private void addEventOutputNavigationStarted() {
+        newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.START_STOP, context.getString(
                 R.string.navigation_event_log_entry_nav_start)));
+        newSpeakTexts.add(context.getString(
+                R.string.navigation_event_speak_nav_start));
     }
 
-    private void addEventLogNavigationRestarted(final List<EventLogEntry> entries) {
-        entries.add(new EventLogEntry(EventLogEntry.Type.START_STOP, context.getString(
+    private void addEventOutputNavigationRestarted() {
+        newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.START_STOP, context.getString(
                 R.string.navigation_event_log_entry_nav_restart)));
+        newSpeakTexts.add(context.getString(
+                R.string.navigation_event_speak_nav_restart));
     }
 
-    private void addEventLogNavigationEnded(final List<EventLogEntry> entries) {
-        entries.add(new EventLogEntry(EventLogEntry.Type.START_STOP, context.getString(
+    private void addEventOutputNavigationEnded() {
+        newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.START_STOP, context.getString(
                 R.string.navigation_event_log_entry_nav_end)));
+        newSpeakTexts.add(context.getString(
+                R.string.navigation_event_speak_nav_end));
     }
 
-    private void addEventLogTransferStart(final List<EventLogEntry> entries, final Trip.Public publicLeg) {
+    @SuppressLint("StringFormatInvalid")
+    private void addEventOutputTransferStart(
+            final long timeLeftMs,
+            final Trip.Public publicLeg) {
         final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
         final Stop stop = publicLeg.departureStop;
         final PTDate predictedTime = stop.getDepartureTime(false);
         final PTDate plannedTime = stop.getDepartureTime(true);
-        entries.add(new EventLogEntry(EventLogEntry.Type.PUBLIC_LEG_START, context.getString(
+        final String lineName = publicLeg.line.label;
+        final String locationName = Formats.fullLocationName(publicLeg.departure);
+        final String plannedTimeString = Formats.formatTime(timeZoneSelector, plannedTime);
+        final String predictedTimeString = Formats.formatTime(timeZoneSelector, predictedTime);
+        newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.PUBLIC_LEG_START, context.getString(
                 R.string.navigation_event_log_entry_transfer_start,
-                publicLeg.line.label,
-                Formats.fullLocationName(publicLeg.departure),
-                platformForMessage(stop.plannedDeparturePosition, stop.getDeparturePosition()),
-                Formats.formatTime(timeZoneSelector, plannedTime),
-                Formats.formatTime(timeZoneSelector, predictedTime),
+                lineName,
+                locationName,
+                platformForLogMessage(stop.plannedDeparturePosition, stop.getDeparturePosition()),
+                plannedTimeString,
+                predictedTimeString,
                 formatTimeSpan(plannedTime, predictedTime))));
+        newSpeakTexts.add(context.getString(
+                R.string.navigation_event_speak_transfer_start,
+                lineName,
+                locationName,
+                platformForSpeakText(stop.plannedDeparturePosition, stop.getDeparturePosition()),
+                timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime()),
+                remainingTimeForSpeakTextAtEnd(timeLeftMs)));
     }
 
-    private void addEventLogFinalTransferStart(final List<EventLogEntry> entries, final Location destination) {
-        entries.add(new EventLogEntry(EventLogEntry.Type.FINAL_TRANSFER, context.getString(
+    private void addEventOutputFinalTransferStart(
+            final Location destination) {
+        final String locationName = Formats.fullLocationName(destination);
+        newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.FINAL_TRANSFER, context.getString(
                 R.string.navigation_event_log_entry_final_transfer_start,
-                Formats.fullLocationName(destination))));
+                locationName)));
+        newSpeakTexts.add(context.getString(
+                R.string.navigation_event_speak_final_transfer_start,
+                locationName));
     }
 
-    private void addEventLogFinalTransferEndReminder(
-            final List<EventLogEntry> entries,
+    private void addEventOutputFinalTransferEndReminder(
             final long timeLeftMs,
             final Location destination) {
-        entries.add(new EventLogEntry(EventLogEntry.Type.TRANSFER_END_REMINDER, context.getString(
+        newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.TRANSFER_END_REMINDER, context.getString(
                 R.string.navigation_event_log_entry_final_transfer_end_reminder,
                 formatTimeSpan(timeLeftMs),
                 Formats.fullLocationName(destination))));
+        // no spoken instruction
     }
 
-    private void addEventLogPublicLegStart(final List<EventLogEntry> entries, final Trip.Public publicLeg) {
-        final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
-        final Stop stop = publicLeg.arrivalStop;
-        final PTDate predictedTime = stop.getArrivalTime(false);
-        final PTDate plannedTime = stop.getArrivalTime(true);
-        entries.add(new EventLogEntry(EventLogEntry.Type.PUBLIC_LEG_END, context.getString(
-                R.string.navigation_event_log_entry_public_leg_start,
-                publicLeg.line.label,
-                Formats.fullLocationName(publicLeg.arrival),
-                platformForMessage(stop.plannedArrivalPosition, stop.getArrivalPosition()),
-                Formats.formatTime(timeZoneSelector, plannedTime),
-                Formats.formatTime(timeZoneSelector, predictedTime),
-                formatTimeSpan(plannedTime, predictedTime))));
-    }
-
-    private void addEventLogReminder(
-            final List<EventLogEntry> entries,
-            final long nextEventTimeLeftMs,
-            final TripRenderer.NotificationData newNotified,
-            final Trip trip) {
-        if (newNotified.isArrival) {
-            if (newNotified.publicArrivalLegIndex >= 0) {
-                addEventLogPublicLegEndReminder(entries,
-                        nextEventTimeLeftMs,
-                        (Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
-            }
-        } else {
-            if (newNotified.publicDepartureLegIndex >= 0) {
-                addEventLogTransferEndReminder(entries,
-                        nextEventTimeLeftMs,
-                        (Trip.Public) trip.legs.get(newNotified.publicDepartureLegIndex));
-            } else {
-                addEventLogFinalTransferEndReminder(entries, nextEventTimeLeftMs, trip.to);
-            }
-        }
-    }
-
-    private void addEventLogPublicLegEndReminder(
-            final List<EventLogEntry> entries,
+    private void addEventOutputPublicLegStart(
             final long timeLeftMs,
             final Trip.Public publicLeg) {
         final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
         final Stop stop = publicLeg.arrivalStop;
         final PTDate predictedTime = stop.getArrivalTime(false);
         final PTDate plannedTime = stop.getArrivalTime(true);
-        entries.add(new EventLogEntry(EventLogEntry.Type.PUBLIC_LEG_END_REMINDER, context.getString(
-                R.string.navigation_event_log_entry_public_leg_end_reminder,
-                Formats.fullLocationName(publicLeg.arrival),
-                formatTimeSpan(timeLeftMs),
-                platformForMessage(stop.plannedArrivalPosition, stop.getArrivalPosition()),
-                Formats.formatTime(timeZoneSelector, predictedTime),
+        final String lineName = publicLeg.line.label;
+        final String locationName = Formats.fullLocationName(publicLeg.arrival);
+        final String plannedTimeString = Formats.formatTime(timeZoneSelector, plannedTime);
+        final String predictedTimeString = Formats.formatTime(timeZoneSelector, predictedTime);
+        newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.PUBLIC_LEG_END, context.getString(
+                R.string.navigation_event_log_entry_public_leg_start,
+                lineName,
+                locationName,
+                platformForLogMessage(stop.plannedArrivalPosition, stop.getArrivalPosition()),
+                plannedTimeString,
+                predictedTimeString,
                 formatTimeSpan(plannedTime, predictedTime))));
+        newSpeakTexts.add(context.getString(
+                R.string.navigation_event_speak_public_leg_start,
+                lineName,
+                locationName,
+                platformForSpeakText(stop.plannedDeparturePosition, stop.getDeparturePosition()),
+                timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime()),
+                remainingTimeForSpeakTextAtEnd(timeLeftMs)));
     }
 
-    private void addEventLogTransferEndReminder(
-            final List<EventLogEntry> entries,
+    private void addEventOutputReminder(
+            final long nextEventTimeLeftMs,
+            final TripRenderer.NotificationData newNotified,
+            final Trip trip) {
+        if (newNotified.isArrival) {
+            if (newNotified.publicArrivalLegIndex >= 0) {
+                addEventOutputPublicLegEndReminder(
+                        nextEventTimeLeftMs,
+                        (Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
+            }
+        } else {
+            if (newNotified.publicDepartureLegIndex >= 0) {
+                addEventOutputTransferEndReminder(
+                        nextEventTimeLeftMs,
+                        (Trip.Public) trip.legs.get(newNotified.publicDepartureLegIndex));
+            } else {
+                addEventOutputFinalTransferEndReminder(nextEventTimeLeftMs, trip.to);
+            }
+        }
+    }
+
+    private void addEventOutputPublicLegEndReminder(
+            final long timeLeftMs,
+            final Trip.Public publicLeg) {
+        final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
+        final Stop stop = publicLeg.arrivalStop;
+        final PTDate predictedTime = stop.getArrivalTime(false);
+        final PTDate plannedTime = stop.getArrivalTime(true);
+        final String locationName = Formats.fullLocationName(publicLeg.arrival);
+        final String plannedTimeString = Formats.formatTime(timeZoneSelector, plannedTime);
+        final String predictedTimeString = Formats.formatTime(timeZoneSelector, predictedTime);
+        newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.PUBLIC_LEG_END_REMINDER, context.getString(
+                R.string.navigation_event_log_entry_public_leg_end_reminder,
+                locationName,
+                formatTimeSpan(timeLeftMs),
+                platformForLogMessage(stop.plannedArrivalPosition, stop.getArrivalPosition()),
+                predictedTimeString,
+                formatTimeSpan(plannedTime, predictedTime))));
+        newSpeakTexts.add(context.getString(
+                R.string.navigation_event_speak_public_leg_end_reminder,
+                remainingTimeForSpeakText(timeLeftMs),
+                locationName,
+                platformForSpeakText(stop.plannedDeparturePosition, stop.getDeparturePosition()),
+                timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime())));
+    }
+
+    private void addEventOutputTransferEndReminder(
             final long timeLeftMs,
             final Trip.Public toPublicLeg) {
         final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
         final Stop stop = toPublicLeg == null ? null : toPublicLeg.departureStop;
         final PTDate predictedTime = stop == null ? null : stop.getDepartureTime(false);
         final PTDate plannedTime = stop == null ? null : stop.getDepartureTime(true);
-        entries.add(new EventLogEntry(EventLogEntry.Type.TRANSFER_END_REMINDER, context.getString(
+        final String lineName = toPublicLeg.line.label;
+        final String plannedTimeString = Formats.formatTime(timeZoneSelector, plannedTime);
+        final String predictedTimeString = Formats.formatTime(timeZoneSelector, predictedTime);
+        newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.TRANSFER_END_REMINDER, context.getString(
                 R.string.navigation_event_log_entry_transfer_end_reminder,
                 formatTimeSpan(timeLeftMs),
-                platformForMessage(stop.plannedDeparturePosition, stop.getDeparturePosition()),
-                toPublicLeg.line.label,
-                Formats.formatTime(timeZoneSelector, plannedTime),
-                Formats.formatTime(timeZoneSelector, predictedTime),
+                platformForLogMessage(stop.plannedDeparturePosition, stop.getDeparturePosition()),
+                lineName,
+                plannedTimeString,
+                predictedTimeString,
                 formatTimeSpan(plannedTime, predictedTime))));
+        newSpeakTexts.add(context.getString(
+                R.string.navigation_event_speak_transfer_end_reminder,
+                remainingTimeForSpeakText(timeLeftMs),
+                lineName,
+                platformForSpeakText(stop.plannedDeparturePosition, stop.getDeparturePosition()),
+                timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime())));
     }
 
-    private void addEventLogDepartureDelayChange(final List<EventLogEntry> entries, final Trip.Public publicLeg) {
+    private void addEventOutputDepartureDelayChange(final Trip.Public publicLeg) {
         final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
         final Stop stop = publicLeg.departureStop;
         final PTDate predictedTime = stop.getDepartureTime(false);
         final PTDate plannedTime = stop.getDepartureTime(true);
-        entries.add(new EventLogEntry(EventLogEntry.Type.DEPARTURE_DELAY_CHANGE, context.getString(
+        final String plannedTimeString = Formats.formatTime(timeZoneSelector, plannedTime);
+        final String predictedTimeString = Formats.formatTime(timeZoneSelector, predictedTime);
+        newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.DEPARTURE_DELAY_CHANGE, context.getString(
                 R.string.navigation_event_log_entry_departure_delay_change,
                 publicLeg.line.label,
                 Formats.fullLocationName(stop.location),
                 formatTimeSpan(plannedTime, predictedTime),
-                Formats.formatTime(timeZoneSelector, predictedTime))));
+                predictedTimeString)));
+        newSpeakTexts.add(context.getString(
+                R.string.navigation_event_speak_departure_delay_change,
+                timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime())));
     }
 
-    private void addEventLogArrivalDelayChange(final List<EventLogEntry> entries, final Trip.Public publicLeg) {
+    private void addEventOutputArrivalDelayChange(
+            final Trip.Public publicLeg) {
         final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
         final Stop stop = publicLeg.arrivalStop;
         final PTDate predictedTime = stop.getArrivalTime(false);
         final PTDate plannedTime = stop.getArrivalTime(true);
-        entries.add(new EventLogEntry(EventLogEntry.Type.ARRIVAL_DELAY_CHANGE, context.getString(
+        final String plannedTimeString = Formats.formatTime(timeZoneSelector, plannedTime);
+        final String predictedTimeString = Formats.formatTime(timeZoneSelector, predictedTime);
+        newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.ARRIVAL_DELAY_CHANGE, context.getString(
                 R.string.navigation_event_log_entry_arrival_delay_change,
                 publicLeg.line.label,
                 Formats.fullLocationName(stop.location),
                 formatTimeSpan(plannedTime, predictedTime),
-                Formats.formatTime(timeZoneSelector, predictedTime))));
+                predictedTimeString)));
+        newSpeakTexts.add(context.getString(
+                R.string.navigation_event_speak_arrival_delay_change,
+                timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime())));
     }
 
-    private void addEventLogDeparturePositionChange(
-            final List<EventLogEntry> entries,
+    private void addEventOutputDeparturePositionChange(
             final Trip.Public publicLeg,
             final Position prevPosition) {
         final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
         final Stop stop = publicLeg.departureStop;
-        entries.add(new EventLogEntry(EventLogEntry.Type.DEPARTURE_POSITION_CHANGE, context.getString(
+        final Position newPosition = stop.getDeparturePosition();
+        newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.DEPARTURE_POSITION_CHANGE, context.getString(
                 R.string.navigation_event_log_entry_departure_position_change,
-                platformForMessage(prevPosition, stop.getDeparturePosition()),
+                platformForLogMessage(prevPosition, newPosition),
                 publicLeg.line.label,
                 Formats.fullLocationName(stop.location),
                 Formats.formatTime(timeZoneSelector, stop.getDepartureTime(true)))));
+        newSpeakTexts.add(context.getString(
+                R.string.navigation_event_speak_departure_position_change,
+                platformForSpeakText(prevPosition, newPosition)));
     }
 
-    private void addEventLogArrivalPositionChange(final List<EventLogEntry> entries, final Trip.Public publicLeg) {
+    private void addEventOutputArrivalPositionChange(
+            final Trip.Public publicLeg,
+            final Position prevPosition) {
         final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
         final Stop stop = publicLeg.arrivalStop;
-        entries.add(new EventLogEntry(EventLogEntry.Type.ARRIVAL_POSITION_CHANGE, context.getString(
+        final Position newPosition = stop.getArrivalPosition();
+        newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.ARRIVAL_POSITION_CHANGE, context.getString(
                 R.string.navigation_event_log_entry_arrival_position_change,
-                platformForMessage(stop.plannedArrivalPosition, stop.getArrivalPosition()),
+                platformForLogMessage(prevPosition, newPosition),
                 publicLeg.line.label,
                 Formats.fullLocationName(stop.location),
                 Formats.formatTime(timeZoneSelector, stop.getDepartureTime(true)))));
+        newSpeakTexts.add(context.getString(
+                R.string.navigation_event_speak_arrival_position_change,
+                platformForSpeakText(prevPosition, newPosition)));
     }
 
-    private void addEventLogNextTransferCritical(final List<EventLogEntry> entries) {
-        entries.add(new EventLogEntry(EventLogEntry.Type.TRANSFER_CRITICAL, context.getString(
+    private void addEventOutputNextTransferCritical() {
+        newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.TRANSFER_CRITICAL, context.getString(
                 R.string.navigation_event_log_entry_next_transfer_critical)));
+        newSpeakTexts.add(context.getString(
+                R.string.navigation_event_speak_next_transfer_critical));
     }
 
-    private void addEventLogAnyTransferCritical(final List<EventLogEntry> entries) {
-        entries.add(new EventLogEntry(EventLogEntry.Type.TRANSFER_CRITICAL, context.getString(
+    private void addEventOutputAnyTransferCritical() {
+        newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.TRANSFER_CRITICAL, context.getString(
                 R.string.navigation_event_log_entry_any_transfer_critical)));
+        newSpeakTexts.add(context.getString(
+                R.string.navigation_event_speak_any_transfer_critical));
     }
 
     private String formatTimeSpan(final Date earlier, final Date later) {

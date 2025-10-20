@@ -25,6 +25,19 @@
     <string name="navigation_preferences_use_sound_channel_headset_summary">Use dedicated sound channel when headphones (wired or Bluetooth) connected</string>
     <string name="navigation_preferences_use_sound_channel_headset_title">Use Headphones Audio Channel</string>
 
+    <string name="navigation_preferences_speech_output_summary">Set when navigation instructions shall be spoken. [%s]</string>
+    <string name="navigation_preferences_speech_output_title">Speech Output</string>
+    <string-array name="navigation_speech_output">
+        <item>Never</item>
+        <item>When headphones connected</item>
+        <item>Always</item>
+    </string-array>
+    <string-array name="navigation_speech_output_values">
+        <item>never</item>
+        <item>headphones</item>
+        <item>always</item>
+    </string-array>
+
     <string name="navigation_preferences_reduced_sounds_summary">Play reduced sounds (shorter and lower volume) as navigation reminders</string>
     <string name="navigation_preferences_reduced_sounds_title">Reduced Sounds</string>
 
@@ -107,5 +120,28 @@
     <string name="navigation_event_log_entry_arrival_position_change">&lt;b>New &lt;/b> %1$s for arrival of %2$s at %3$s, scheduled %4$s</string>
     <string name="navigation_event_log_entry_next_transfer_critical">Next transfer is critical!</string>
     <string name="navigation_event_log_entry_any_transfer_critical">Some transfers are critical!</string>
+
+    <string name="navigation_event_speak_notime_left_front_format">now</string>
+    <string name="navigation_event_speak_time_left_front_format">%1$s min until</string>
+    <string name="navigation_event_speak_notime_left_end_format">no time remaining</string>
+    <string name="navigation_event_speak_time_left_end_format">%1$s min remaining</string>
+    <string name="navigation_event_speak_times_nodelay_format">at %1$s</string>
+    <string name="navigation_event_speak_times_delayed_format">delayed by %3$s min, estimated at %2$s</string>
+    <string name="navigation_event_speak_position_unchanged_format">on platform %1$s</string>
+    <string name="navigation_event_speak_position_changed_format">on changed platform %1$s</string>
+    <string name="navigation_event_speak_nav_start">navigation begins</string>
+    <string name="navigation_event_speak_nav_restart">navigation restarting</string>
+    <string name="navigation_event_speak_nav_end">navigation finished</string>
+    <string name="navigation_event_speak_transfer_start">go to departure of %1$s at %2$s, %3$s, %4$s, %5$s</string>
+    <string name="navigation_event_speak_transfer_end_reminder">%1$s departure of %2$s, %3$s, %4$s</string>
+    <string name="navigation_event_speak_final_transfer_start">finally go to %1$s</string>
+    <string name="navigation_event_speak_public_leg_start">travel by %1$s to %2$s, arrival %4$s, %5$s</string>
+    <string name="navigation_event_speak_public_leg_end_reminder">%1$s arrival at %2$s, %3$s, %4$s</string>
+    <string name="navigation_event_speak_next_transfer_critical">the next transfer is critical</string>
+    <string name="navigation_event_speak_any_transfer_critical">some transfers are critical</string>
+    <string name="navigation_event_speak_departure_delay_change">the delay of the next departure has changed: %1$s</string>
+    <string name="navigation_event_speak_arrival_delay_change">the delay of the next arrival has changed: %1$s</string>
+    <string name="navigation_event_speak_departure_position_change">the platform of the next departure has changed: %1$s</string>
+    <string name="navigation_event_speak_arrival_position_change">the platform of the next arrival has changed: %1$s</string>
 
 </resources>

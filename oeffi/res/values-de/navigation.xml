@@ -19,6 +19,14 @@
     <string name="navigation_preferences_use_sound_channel_headset_summary">Nutze gesonderten Audio Kanal wenn Kopfhörer (per Kabel oder Bluetooth) verbunden sind</string>
     <string name="navigation_preferences_use_sound_channel_headset_title">Nutze Kopfhörer Audio Kanal</string>
 
+    <string name="navigation_preferences_speech_output_summary">Wann sollen Navigationsanweisungen gesprochen werden. [%s]</string>
+    <string name="navigation_preferences_speech_output_title">Sprachausgabe</string>
+    <string-array name="navigation_speech_output">
+        <item>Niemals</item>
+        <item>Wenn Kopfhörer angeschlossen</item>
+        <item>Immer</item>
+    </string-array>
+
     <string name="navigation_preferences_reduced_sounds_summary">Nutze reduzierte Töne (kürzer und geringer Lautstärke) als Navigations-Erinnerungen</string>
     <string name="navigation_preferences_reduced_sounds_title">Reduzierte Töne</string>
 
@@ -101,5 +109,28 @@
     <string name="navigation_event_log_entry_arrival_position_change">&lt;b>Neuer &lt;/b> %1$s für Ankunft von %2$s in %3$s, geplant %4$s</string>
     <string name="navigation_event_log_entry_next_transfer_critical">Der nächste Umstieg is kritisch!</string>
     <string name="navigation_event_log_entry_any_transfer_critical">Einige Umstiege sind kritisch!</string>
+
+    <string name="navigation_event_speak_notime_left_front_format">jetzt</string>
+    <string name="navigation_event_speak_time_left_front_format">%1$s min bis</string>
+    <string name="navigation_event_speak_notime_left_end_format">keine verbleibende Zeit mehr</string>
+    <string name="navigation_event_speak_time_left_end_format">noch %1$s min</string>
+    <string name="navigation_event_speak_times_nodelay_format">um %1$s</string>
+    <string name="navigation_event_speak_times_delayed_format">verspätet um %3$s min, erwartet um %2$s</string>
+    <string name="navigation_event_speak_position_unchanged_format">an Steig %1$s</string>
+    <string name="navigation_event_speak_position_changed_format">an geändertem Steig %1$s</string>
+    <string name="navigation_event_speak_nav_start">Navigation beginnt</string>
+    <string name="navigation_event_speak_nav_restart">Navigation startet neu</string>
+    <string name="navigation_event_speak_nav_end">Navigation beendet</string>
+    <string name="navigation_event_speak_transfer_start">gehe zur Abfahrt von %1$s in %2$s, %3$s, %4$s, %5$s</string>
+    <string name="navigation_event_speak_transfer_end_reminder">%1$s Abfahrt von %2$s, %3$s, %4$s</string>
+    <string name="navigation_event_speak_final_transfer_start">zum Abschluss gehe nach %1$s</string>
+    <string name="navigation_event_speak_public_leg_start">fahre mit %1$s nach %2$s, Ankunft %4$s, %5$s</string>
+    <string name="navigation_event_speak_public_leg_end_reminder">%1$s Ankunft in %2$s, %3$s, %4$s</string>
+    <string name="navigation_event_speak_next_transfer_critical">Der nächste Umstieg is kritisch</string>
+    <string name="navigation_event_speak_any_transfer_critical">Einige Umstiege sind kritisch</string>
+    <string name="navigation_event_speak_departure_delay_change">die Verspätung der nächsten Abfahrt hat sich geändert: %1$s</string>
+    <string name="navigation_event_speak_arrival_delay_change">die Verspätung der nächsten Ankunft hat sich geändert: %1$s</string>
+    <string name="navigation_event_speak_departure_position_change">der Steig der nächsten Abfahrt hat sich geändert: %1$s</string>
+    <string name="navigation_event_speak_arrival_position_change">der Steig der nächsten Ankunft hat sich geändert: %1$s</string>
 
 </resources>

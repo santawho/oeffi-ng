@@ -67,6 +67,7 @@ public class Constants {
     public static final String PREFS_KEY_NAVIGATION_SOUND_CHANNEL_TRANSFER = "navigation_sound_channel_transfer";
     public static final String PREFS_KEY_NAVIGATION_SOUND_CHANNEL_HEADSET = "navigation_sound_channel_headset";
     public static final String PREFS_KEY_NAVIGATION_USE_SOUND_CHANNEL_HEADSET = "navigation_use_sound_channel_headset";
+    public static final String PREFS_KEY_NAVIGATION_SPEECH_OUTPUT = "navigation_speech_output";
     public static final String PREFS_KEY_NAVIGATION_REDUCED_SOUNDS = "navigation_reduced_sounds";
     public static final String PREFS_KEY_NAVIGATION_REFRESH_BEEP = "navigation_refresh_beep";
 
