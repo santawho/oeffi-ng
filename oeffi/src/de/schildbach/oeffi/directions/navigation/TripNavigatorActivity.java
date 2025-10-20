@@ -694,6 +694,11 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
         eventLogListView.setAdapter(new BaseAdapter() {
             @Override
+            public boolean isEnabled(final int position) {
+                return false;
+            }
+
+            @Override
             public int getCount() {
                 return logEntries.length - 1;
             }
@@ -705,7 +710,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
             @Override
             public long getItemId(final int position) {
-                return position;
+                return logEntries.length - 2 - position;
             }
 
             @Override
