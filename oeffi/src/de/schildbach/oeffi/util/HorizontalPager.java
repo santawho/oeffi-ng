@@ -435,7 +435,8 @@ public final class HorizontalPager extends ViewGroup {
         for (int pos = 0; pos < childCount; ++pos) {
             final View child = visibleChildren.get(pos);
             if (child.getId() == id) {
-                setCurrentScreen(pos, animate);
+                if (pos != mCurrentScreen)
+                    setCurrentScreen(pos, animate);
                 break;
             }
         }

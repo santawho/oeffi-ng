@@ -547,7 +547,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         viewPager = findViewById(R.id.directions_trip_details_pager);
         viewPager.setOnScreenSwitchListener((prevScreen, newScreen) -> {
             final int newId = viewPager.getCurrentView().getId();
-            setShowPage(newId);
+            shownPageChanged(newId);
         });
     }
 
@@ -1323,7 +1323,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         return true;
     }
 
-    protected void setShowPage(final int showId) {
+    protected void shownPageChanged(final int showId) {
         if (DeviceAdmin.isScreenLocked()) {
             showScreenIdWhenLocked = showId;
             showScreenIdWhenUnlocked = showId;
@@ -1331,6 +1331,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             showScreenIdWhenUnlocked = showId;
             showScreenIdWhenLocked = R.id.navigation_next_event;
         }
+    }
+
+    protected void setShowPage(final int showId) {
+        shownPageChanged(showId);
         updateGUI();
     }
 
