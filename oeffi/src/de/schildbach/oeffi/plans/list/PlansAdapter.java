@@ -48,7 +48,11 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
+    private static final Logger log = LoggerFactory.getLogger(PlansAdapter.class);
     private final Context context;
     private final Resources res;
     private final LayoutInflater inflater;
@@ -193,7 +197,14 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
         final String urlStr = cursor.getString(urlColumn);
         final HttpUrl url = urlStr != null ? HttpUrl.parse(urlStr) : null;
         final File localFile = new File(context.getDir(Constants.PLANS_DIR, Context.MODE_PRIVATE), planId + ".png");
-        final NetworkId networkId = networkLogo == null ? null : NetworkId.valueOf(networkLogo);
+        NetworkId networkId = null;
+        if (networkLogo != null) {
+            try {
+                networkId = NetworkId.valueOf(networkLogo);
+            } catch (IllegalArgumentException iae) {
+                log.warn("network plan \"{}\" references undefined network id \"{}\"", planId, networkLogo);
+            }
+        }
         return new Plan(rowId, planId, name, disclaimer, validFrom, networkId, url, localFile);
     }
 
