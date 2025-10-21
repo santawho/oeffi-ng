@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.ViewAnimator;
 import androidx.activity.result.contract.ActivityResultContract;
 import androidx.core.graphics.Insets;
@@ -128,12 +129,15 @@ public class FavoriteStationsActivity extends OeffiActivity
         viewNewLocation.setVisibility(View.GONE);
         viewNewLocation.setHint(R.string.stations_favorite_stations_add_location_hint);
         viewNewLocation.setAdapter(new AutoCompleteLocationAdapter(viewNewLocation, network));
+        viewNewLocation.setImeOptions(EditorInfo.IME_ACTION_GO);
         viewNewLocation.setOnEditorActionListener((v, actionId, event) -> {
             final Location location = viewNewLocation.getLocation();
+            if (location == null || location.coord == null)
+                return false;
+
             viewNewLocation.setVisibility(View.GONE);
             viewNewLocation.reset();
-            if (location != null)
-                onNewStationAdded(location);
+            onNewStationAdded(location);
             updateGUI();
             return true;
         });
