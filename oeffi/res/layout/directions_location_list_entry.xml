@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<de.schildbach.oeffi.util.locationview.LocationTextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    style="?android:attr/dropDownItemStyle"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/bg_level0"
+    android:drawablePadding="@dimen/text_padding_horizontal_lax"
+    android:drawableTint="@color/fg_less_significant"
+    android:minHeight="52dp"
+    android:paddingLeft="@dimen/text_padding_horizontal_verylax"
+    android:paddingRight="@dimen/text_padding_horizontal"
+    android:textSize="@dimen/font_size_large" />

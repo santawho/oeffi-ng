@@ -1533,7 +1533,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
     private class AmbiguousLocationAdapter extends ArrayAdapter<Location> {
         public AmbiguousLocationAdapter(final Context context, final List<Location> autocompletes) {
-            super(context, R.layout.location_dropdown_entry, autocompletes);
+            super(context, R.layout.directions_location_list_entry, autocompletes);
         }
 
         @Override
