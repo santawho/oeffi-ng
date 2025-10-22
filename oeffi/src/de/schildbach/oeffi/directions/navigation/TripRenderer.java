@@ -129,6 +129,8 @@ public class TripRenderer {
 
             // first step: nearest stop
             evalAllStops.accept(stop -> {
+                if (stop.plannedArrivalTime == null && stop.plannedDepartureTime == null)
+                    return;
                 final Location location = stop.location;
                 if (!location.hasCoord())
                     return;
@@ -152,13 +154,15 @@ public class TripRenderer {
                 float minDist = Float.MAX_VALUE;
                 @Override
                 public void accept(final Stop stop) {
+                    if (stop.plannedArrivalTime == null && stop.plannedDepartureTime == null)
+                        return;
                     final Location location = stop.location;
+                    if (!location.hasCoord())
+                        return;
                     if (stop == nearestStop) {
                         isAfterNearestStop = true;
                         return;
                     }
-                    if (!location.hasCoord())
-                        return;
                     final float distanceToNearest = GeoUtils.distanceBetween(location.coord, nearestStopCoord).distanceInMeters;
                     if (distanceToNearest < MINIMUM_REQUIRED_DISTANCE)
                         return;
@@ -261,7 +265,7 @@ public class TripRenderer {
     }
 
     public static class LegKey {
-        private String key;
+        private final String key;
         public LegKey(Trip.Leg leg) {
             key = leg.departure.id + "/" + leg.arrival.id;
         }
