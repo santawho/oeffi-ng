@@ -1264,17 +1264,17 @@ public class NavigationNotification {
     }
 
     private String remainingTimeForSpeakTextAtEnd(final long remainingMillis) {
-        if (remainingMillis < 60000)
+        if (remainingMillis < 50000)
             return context.getString(R.string.navigation_event_speak_notime_left_end_format);
         return context.getString(R.string.navigation_event_speak_time_left_end_format,
-                Long.toString(remainingMillis / 60000));
+                Long.toString((remainingMillis + 10000) / 60000));
     }
 
     private String remainingTimeForSpeakText(final long remainingMillis) {
-        if (remainingMillis < 60000)
+        if (remainingMillis < 50000)
             return context.getString(R.string.navigation_event_speak_notime_left_front_format);
         return context.getString(R.string.navigation_event_speak_time_left_front_format,
-                Long.toString(remainingMillis / 60000));
+                Long.toString((remainingMillis + 10000) / 60000));
     }
 
     private void addEventLogMessage(final String text) {
@@ -1377,7 +1377,7 @@ public class NavigationNotification {
                 R.string.navigation_event_speak_public_leg_start,
                 lineName,
                 locationName,
-                platformForSpeakText(stop.plannedDeparturePosition, stop.getDeparturePosition()),
+                platformForSpeakText(stop.plannedArrivalPosition, stop.getArrivalPosition()),
                 timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime()),
                 remainingTimeForSpeakTextAtEnd(timeLeftMs)));
     }

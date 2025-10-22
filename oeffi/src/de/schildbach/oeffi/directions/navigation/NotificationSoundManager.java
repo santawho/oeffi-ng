@@ -30,15 +30,14 @@ import android.os.HandlerThread;
 import android.os.Process;
 import android.os.Vibrator;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.SynchronousQueue;
 
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
@@ -59,6 +58,7 @@ public class NotificationSoundManager {
     private Handler backgroundHandler;
     private TextToSpeech textToSpeech;
     private boolean isTextToSpeechUp;
+    private AudioFocusRequest currentAudioFocusRequest;
     private final ArrayList<Speakable> speakableQueue = new ArrayList<>();
 
     public static class Speakable {
@@ -82,6 +82,26 @@ public class NotificationSoundManager {
                 final String localeName = Application.getInstance().getString(R.string.locale);
                 final Locale locale = new Locale(localeName);
                 final int result = textToSpeech.setLanguage(locale);
+                textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                    @Override
+                    public void onStart(final String utteranceId) {
+                    }
+
+                    @Override
+                    public void onDone(final String utteranceId) {
+                        onEnd(utteranceId, false);
+                    }
+
+                    @Override
+                    public void onError(final String utteranceId) {
+                        onEnd(utteranceId, true);
+                    }
+
+                    private void onEnd(final String utteranceId, final boolean isError) {
+                        if (!textToSpeech.isSpeaking())
+                            onSpeechEnd();
+                    }
+                });
 
                 speakQueue();
             }
@@ -122,18 +142,11 @@ public class NotificationSoundManager {
                     .build();
             final Ringtone alarmTone = RingtoneManager.getRingtone(context, ResourceUri.fromResource(context, soundId));
             alarmTone.setAudioAttributes(audioAttributes);
-            final AudioManager audioManager = getAudioManager();
-            final AudioFocusRequest audioFocusRequest =
-                    new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
-                            .setAudioAttributes(audioAttributes)
-                            .setAcceptsDelayedFocusGain(false)
-                            .setWillPauseWhenDucked(false)
-                            .build();
-            audioManager.requestAudioFocus(audioFocusRequest);
+            requestAudioFocus(audioAttributes);
             log.info("sound starts playing: {} usage {}", soundId, soundUsage);
             alarmTone.play();
             while (alarmTone.isPlaying()) {
-//                    log.info("sound is playing");
+//                log.info("sound is playing");
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
@@ -141,15 +154,49 @@ public class NotificationSoundManager {
                 }
             }
             log.info("sound has stopped: {} usage {}", soundId, soundUsage);
+            boolean isSpeaking = false;
             if (speakTexts != null && !speakTexts.isEmpty()) {
                 final int audioStream = getAudioStreamFromUsage(soundUsage);
                 for (String text : speakTexts) {
                     log.info("speaking: \"{}\" stream {}", text, audioStream);
-                    speak(text, audioStream);
+                    isSpeaking |= speak(text, audioStream);
                 }
             }
-            audioManager.abandonAudioFocusRequest(audioFocusRequest);
+            while (textToSpeech.isSpeaking()) {
+//                log.info("speech is speaking");
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    break;
+                }
+            }
+            abandonAudioFocusRequest();
         }
+    }
+
+    private void requestAudioFocus(final AudioAttributes audioAttributes) {
+        if (currentAudioFocusRequest != null)
+            return;
+
+        log.info("requesting audio focus");
+        final AudioManager audioManager = getAudioManager();
+        currentAudioFocusRequest =
+                new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
+                        .setAudioAttributes(audioAttributes)
+                        .setAcceptsDelayedFocusGain(false)
+                        .setWillPauseWhenDucked(false)
+                        .build();
+        audioManager.requestAudioFocus(currentAudioFocusRequest);
+    }
+
+    private void abandonAudioFocusRequest() {
+        if (currentAudioFocusRequest == null)
+            return;
+
+        log.info("abandoning audio focus");
+        final AudioManager audioManager = getAudioManager();
+        audioManager.abandonAudioFocusRequest(currentAudioFocusRequest);
+        currentAudioFocusRequest = null;
     }
 
     private static int getAudioStreamFromUsage(final int soundUsage) {
@@ -194,13 +241,13 @@ public class NotificationSoundManager {
             speakableQueue.add(speakable);
         }
 
-        if (isTextToSpeechUp)
-            speakQueue();
+        if (!isTextToSpeechUp)
+            return false;
 
-        return true;
+        return speakQueue();
     }
 
-    private void speakQueue() {
+    private boolean speakQueue() {
         for (;;) {
             Speakable speakable;
             synchronized (speakableQueue) {
@@ -210,11 +257,12 @@ public class NotificationSoundManager {
                 speakable = speakableQueue.get(0);
             }
             if (!speakSync(speakable))
-                break;
+                return false;
             synchronized (speakableQueue) {
                 speakableQueue.remove(0);
             }
         }
+        return true;
     }
 
     private boolean speakSync(final Speakable speakable) {
@@ -225,5 +273,9 @@ public class NotificationSoundManager {
 
         return TextToSpeech.SUCCESS ==
                 textToSpeech.speak(speakable.text, TextToSpeech.QUEUE_ADD, params, utteranceId);
+    }
+
+    private void onSpeechEnd() {
+//        abandonAudioFocusRequest();
     }
 }
