@@ -210,25 +210,32 @@ public class TripRenderer {
                         intermediateStops = new ArrayList<>();
                         boolean delayedArrival = false;
                         for (Stop stop : publicLeg.intermediateStops) {
+                            PTDate predictedArrivalTime = stop.predictedArrivalTime;
+                            PTDate predictedDepartureTime = stop.predictedDepartureTime;
+                            final PTDate plannedArrivalTime = stop.plannedArrivalTime;
+                            final PTDate plannedDepartureTime = stop.plannedDepartureTime;
                             final boolean delayedDeparture;
-                            if (delayedArrival) {
-                                final long stopIntervalLength = stop.plannedDepartureTime.getTime() - stop.plannedArrivalTime.getTime();
-                                delayedDeparture = stopIntervalLength < 4 * 60000;
+                            if (plannedArrivalTime != null && plannedDepartureTime != null) {
+                                if (delayedArrival) {
+                                    predictedArrivalTime = new PTDate(plannedArrivalTime.getTime() + delayAtRefPoint, plannedArrivalTime.getOffset());
+                                    final long stopIntervalLength = plannedDepartureTime.getTime() - plannedArrivalTime.getTime();
+                                    delayedDeparture = stopIntervalLength < 4 * 60000;
+                                    if (delayedDeparture)
+                                        predictedDepartureTime = new PTDate(plannedDepartureTime.getTime() + delayAtRefPoint, plannedDepartureTime.getOffset());
+                                } else {
+                                    delayedDeparture = false;
+                                }
                             } else {
-                                delayedDeparture = false;
+                                delayedDeparture = true;
                             }
                             intermediateStops.add(new Stop(
                                     stop.location,
-                                    stop.plannedArrivalTime,
-                                    delayedArrival
-                                            ? new PTDate(stop.plannedArrivalTime.getTime() + delayAtRefPoint, stop.plannedArrivalTime.getOffset())
-                                            : stop.predictedArrivalTime,
+                                    plannedArrivalTime,
+                                    predictedArrivalTime,
                                     stop.plannedArrivalPosition, stop.predictedArrivalPosition,
                                     stop.arrivalCancelled,
-                                    stop.plannedDepartureTime,
-                                    delayedDeparture
-                                            ? new PTDate(stop.plannedDepartureTime.getTime() + delayAtRefPoint, stop.plannedDepartureTime.getOffset())
-                                            : stop.predictedDepartureTime,
+                                    plannedDepartureTime,
+                                    predictedDepartureTime,
                                     stop.plannedDeparturePosition, stop.predictedDeparturePosition,
                                     stop.departureCancelled));
                             if (!delayedDeparture)
@@ -237,12 +244,13 @@ public class TripRenderer {
                                 delayedArrival = true;
                         }
                     }
+                    final PTDate arrivalStopPlannedArrivalTime = arrivalStop.plannedArrivalTime;
                     arrivalStop = new Stop(
                             arrivalStop.location,
-                            arrivalStop.plannedArrivalTime,
+                            arrivalStopPlannedArrivalTime,
                             new PTDate(
-                                    arrivalStop.plannedArrivalTime.getTime() + delayAtRefPoint,
-                                    arrivalStop.plannedArrivalTime.getOffset()),
+                                    arrivalStopPlannedArrivalTime.getTime() + delayAtRefPoint,
+                                    arrivalStopPlannedArrivalTime.getOffset()),
                             arrivalStop.plannedArrivalPosition, arrivalStop.predictedArrivalPosition,
                             arrivalStop.arrivalCancelled,
                             arrivalStop.plannedDepartureTime, arrivalStop.predictedDepartureTime,
