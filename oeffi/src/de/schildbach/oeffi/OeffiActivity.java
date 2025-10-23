@@ -110,6 +110,7 @@ public abstract class OeffiActivity extends ComponentActivity {
     protected Set<Product> savedProducts;
 
     protected boolean isPortrait;
+    protected boolean mapIsAtBottom;
     private boolean mapEnabled = false;
     private View mapFrame;
     private OeffiMapView mapView;
@@ -605,14 +606,14 @@ public abstract class OeffiActivity extends ComponentActivity {
 
         final boolean mapShow;
         if (mapFrame != null) {
-            mapShow = !isInMultiWindowMode() && isMapEnabled(res);
+            mapShow = !isInMultiWindowMode() && isMapEnabled();
             ViewUtils.setVisibility(mapFrame, mapShow);
             ViewUtils.setVisibility(mapView, mapShow);
         } else {
             mapShow = false;
         }
 
-        if (isPortrait) {
+        if (mapIsAtBottom) {
             listFrame.getLayoutParams().height = listShow && mapShow
                     ? res.getDimensionPixelSize(R.dimen.layout_list_height)
                     : LinearLayout.LayoutParams.MATCH_PARENT;
@@ -630,7 +631,10 @@ public abstract class OeffiActivity extends ComponentActivity {
     }
 
     private void setupMapView(final View contentView) {
-        mapFrame = isPortrait ? contentView.findViewById(R.id.vertical_map_frame) : null;
+        final Resources res = getResources();
+        final boolean forceMapOnRightSide = res.getBoolean(R.bool.layout_map_show);
+        mapIsAtBottom = isPortrait && !forceMapOnRightSide;
+        mapFrame = mapIsAtBottom ? contentView.findViewById(R.id.vertical_map_frame) : null;
         if (mapFrame == null)
             mapFrame = contentView.findViewById(R.id.map_frame);
 
@@ -639,7 +643,7 @@ public abstract class OeffiActivity extends ComponentActivity {
 
         mapView = mapFrame.findViewById(R.id.map_view);
         final LinearLayout mapFrameContainer = (LinearLayout) mapFrame.getParent();
-        mapFrameContainer.setOrientation(isPortrait ? LinearLayout.VERTICAL : LinearLayout.HORIZONTAL);
+        mapFrameContainer.setOrientation(mapIsAtBottom ? LinearLayout.VERTICAL : LinearLayout.HORIZONTAL);
 
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -666,7 +670,7 @@ public abstract class OeffiActivity extends ComponentActivity {
     }
 
     protected void addShowMapButtonToActionBar() {
-        if (isPortrait && getResources().getBoolean(R.bool.layout_map_show_toggleable)) {
+        if (mapIsAtBottom && getResources().getBoolean(R.bool.layout_map_show_toggleable)) {
             getMyActionBar().addButton(R.drawable.ic_map_white_24dp, R.string.directions_trip_details_action_showmap_title)
                     .setOnClickListener(v -> {
                         mapEnabled = !mapEnabled;
@@ -677,8 +681,8 @@ public abstract class OeffiActivity extends ComponentActivity {
         }
     }
 
-    protected boolean isMapEnabled(final Resources res) {
-        return mapEnabled || res.getBoolean(R.bool.layout_map_show);
+    protected boolean isMapEnabled() {
+        return mapEnabled || !mapIsAtBottom;
     }
 
     protected NetworkId prefsGetNetworkId() {

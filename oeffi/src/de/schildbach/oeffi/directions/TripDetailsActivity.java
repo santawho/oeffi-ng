@@ -742,7 +742,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     protected void updateFragments() {
-        updateFragments(isPortrait
+        updateFragments(mapIsAtBottom
                 ? R.id.directions_trip_details_list_content
                 : R.id.directions_trip_details_content_frame);
     }
