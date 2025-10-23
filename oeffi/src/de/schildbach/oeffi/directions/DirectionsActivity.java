@@ -1113,7 +1113,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
                     doGo = false;
                 } else {
                     viewToLocation.setLocation(location);
-                    doGo = true;
+                    doGo = isHandleAutoGoEnabled();
                 }
             }
         } else if (numLocations == 2) {
@@ -1410,8 +1410,12 @@ public class DirectionsActivity extends OeffiMainActivity implements
         return true;
     }
 
+    private boolean isHandleAutoGoEnabled() {
+        return prefs.getBoolean("user_interface_directions_autogo_enabled", true);
+    }
+
     private void handleAutoGo() {
-        if (prefs.getBoolean("user_interface_directions_autogo_enabled", true))
+        if (isHandleAutoGoEnabled())
             handleGo();
     }
 
