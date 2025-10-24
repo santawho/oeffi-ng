@@ -363,13 +363,11 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
     private void updateGUI() {
         final List<Departure> selectedDepartures = this.getFilteredDepartures();
-        if (selectedDepartures != null) {
-            if (!selectedDepartures.isEmpty()) {
-                viewAnimator.setDisplayedChild(0);
-                listAdapter.notifyDataSetChanged();
-            } else {
-                statusMessage(getString(R.string.stations_station_details_list_empty));
-            }
+        if (selectedDepartures != null && !selectedDepartures.isEmpty()) {
+            viewAnimator.setDisplayedChild(0);
+            listAdapter.notifyDataSetChanged();
+        } else {
+            statusMessage(getString(R.string.stations_station_details_list_empty));
         }
     }
 
@@ -381,9 +379,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
     private List<Departure> getFilteredDepartures() {
         if (selectedFilteredDepartures == null) {
-            if (selectedAllDepartures == null) {
-                selectedFilteredDepartures = new ArrayList<>();
-            } else {
+            if (selectedAllDepartures != null) {
                 selectedFilteredDepartures = selectedAllDepartures.stream()
                         .filter(departure -> !hideCancelledDepartures || !departure.cancelled)
                         .collect(Collectors.toList());
@@ -437,6 +433,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                         Set<Product> productFilter = loadProductFilter();
                         if (result.status == QueryDeparturesResult.Status.OK) {
                             boolean somethingAdded = false;
+                            Location newSelectedStation = null;
                             for (final StationDepartures stationDepartures : result.stationDepartures) {
                                 Location location = stationDepartures.location;
                                 if (location.hasId()) {
@@ -474,14 +471,18 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                                         station.setLines(lines);
                                     }
 
-                                    if (location.equals(selectedStation)) {
+                                    if (location.equals(selectedStation) || selectedAllDepartures == null) {
                                         somethingAdded = true;
+                                        newSelectedStation = location;
                                         selectedAllDepartures = station.departures;
                                         selectedLines = groupDestinationsByLine(station.getLines());
                                         selectedFilteredDepartures = null;
                                     }
                                 }
                             }
+
+                            if (newSelectedStation != null)
+                                selectedStation = newSelectedStation;
 
                             if (earlier) {
                                 nextEarlierTime = new Date(fromTime.getTime() - 30 * 60 * 1000);
@@ -682,7 +683,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             final List<Station> stations = activity.stations;
             // name and id
             nameView.setText(station.uniqueShortName());
-            idView.setText(station.hasId() ? station.id : "");
+            idView.setText(station.displayId != null ? station.displayId : "");
             if (stations.size() > 1) {
                 multiStationsView.setVisibility(View.VISIBLE);
                 itemView.setOnClickListener(v -> {
