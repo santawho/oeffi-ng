@@ -56,7 +56,7 @@ android {
         applicationId "de.schildbach.oeffi"
 
         minSdk 26
-        targetSdk 35
+        targetSdk 34
 //        versionCode 990000
 //        versionName "99-handmade"
         versionCode timeInt
