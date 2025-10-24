@@ -91,6 +91,7 @@ import de.schildbach.oeffi.stations.FavoriteUtils;
 import de.schildbach.oeffi.stations.StationContextMenu;
 import de.schildbach.oeffi.stations.StationDetailsActivity;
 import de.schildbach.oeffi.stations.StationsActivity;
+import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.oeffi.util.locationview.AutoCompleteLocationAdapter;
 import de.schildbach.oeffi.util.locationview.AutoCompleteLocationsHandler;
 import de.schildbach.oeffi.util.ConnectivityBroadcastReceiver;
@@ -567,6 +568,17 @@ public class DirectionsActivity extends OeffiMainActivity implements
             viewQueryHistoryList.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
             queryHistoryListAdapter = new QueryHistoryAdapter(this, network, this, this);
             viewQueryHistoryList.setAdapter(queryHistoryListAdapter);
+            viewQueryHistoryList.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrolled(@NonNull final RecyclerView recyclerView, final int dx, final int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+                    if ((viewQueryHistoryList.getChildCount() == 0
+                            || viewQueryHistoryList.getChildAt(0).getTop() >= quickReturnView.getBottom())
+                            && quickReturnView.getTranslationY() < 0) {
+                        quickReturnView.setTranslationY(0);
+                    }
+                }
+            });
             ViewCompat.setOnApplyWindowInsetsListener(viewQueryHistoryList, (v, windowInsets) -> {
                 final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
                 v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(),
@@ -581,7 +593,26 @@ public class DirectionsActivity extends OeffiMainActivity implements
             quickReturnView = findViewById(R.id.directions_quick_return);
             final CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(
                     quickReturnView.getLayoutParams().width, quickReturnView.getLayoutParams().height);
-            layoutParams.setBehavior(new QuickReturnBehavior());
+            layoutParams.setBehavior(new CoordinatorLayout.Behavior<View>() { // QuickReturnBehavior
+                @Override
+                public boolean onStartNestedScroll(
+                        final CoordinatorLayout coordinatorLayout, final View child,
+                        final View directTargetChild, final View target,
+                        final int nestedScrollAxes, final int type) {
+                    return (nestedScrollAxes & ViewCompat.SCROLL_AXIS_VERTICAL) != 0;
+                }
+
+                @Override
+                public void onNestedScroll(
+                        final CoordinatorLayout coordinatorLayout, final View child, final View target,
+                        final int dxConsumed, final int dyConsumed, final int dxUnconsumed, final int dyUnconsumed,
+                        final int type) {
+                    final float value = child.getTranslationY() - dyConsumed;
+                    final int min = -child.getHeight();
+                    final float translationY = Floats.constrainToRange(value, min, 0);
+                    child.setTranslationY(translationY);
+                }
+            });
             quickReturnView.setLayoutParams(layoutParams);
             quickReturnView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
                 final int height = bottom - top;
@@ -1299,6 +1330,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             return true;
         } else if (menuItemId == R.id.directions_query_history_context_remove_entry) {
             queryHistoryListAdapter.removeEntry(adapterPosition);
+            ViewUtils.setVisibility(viewQueryHistoryEmpty, queryHistoryListAdapter.getItemCount() == 0);
             return true;
         } else if (menuItemId == R.id.directions_query_history_context_add_favorite) {
             queryHistoryListAdapter.setIsFavorite(adapterPosition, true);
@@ -1548,21 +1580,6 @@ public class DirectionsActivity extends OeffiMainActivity implements
             ((LocationTextView) row).setLocation(location);
 
             return row;
-        }
-    }
-
-    private static final class QuickReturnBehavior extends CoordinatorLayout.Behavior<View> {
-        @Override
-        public boolean onStartNestedScroll(final CoordinatorLayout coordinatorLayout, final View child,
-                final View directTargetChild, final View target, final int nestedScrollAxes, final int type) {
-            return (nestedScrollAxes & ViewCompat.SCROLL_AXIS_VERTICAL) != 0;
-        }
-
-        @Override
-        public void onNestedScroll(final CoordinatorLayout coordinatorLayout, final View child, final View target,
-                final int dxConsumed, final int dyConsumed, final int dxUnconsumed, final int dyUnconsumed,
-                final int type) {
-            child.setTranslationY(Floats.constrainToRange(child.getTranslationY() - dyConsumed, -child.getHeight(), 0));
         }
     }
 
