@@ -6,10 +6,12 @@
     android:orientation="vertical"
     android:background="#00000000">
 
-    <TextView
+    <View
         android:id="@+id/navigation_drawer_status_bar_offset"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:padding="0dp"
+        android:layout_margin="0dp"
         android:background="#80808080" />
 
     <LinearLayout

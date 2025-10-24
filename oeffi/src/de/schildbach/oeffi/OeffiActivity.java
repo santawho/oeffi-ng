@@ -243,7 +243,7 @@ public abstract class OeffiActivity extends ComponentActivity {
         if (statusBarOffsetView != null) {
             final Resources res = getResources();
             final int statusHeight = res.getDimensionPixelSize(res.getIdentifier("status_bar_height", "dimen", "android"));
-            statusBarOffsetView.setPadding(0, statusHeight, 0, 0);
+            statusBarOffsetView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, statusHeight));
         }
 
         navigationDrawerMenuProvider = new MenuProvider() {
