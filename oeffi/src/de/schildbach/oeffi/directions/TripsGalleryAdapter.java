@@ -101,6 +101,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
     private final Paint positionPaintBackground = new Paint();
     private final Paint feederStrokePaint = new Paint();
     private final Paint connectionStrokePaint = new Paint();
+    private final Paint durationPaint = new Paint();
     private final Paint farePaint = new Paint();
     private final Paint cannotScrollPaint = new Paint();
     private final int colorSignificantInverse;
@@ -208,6 +209,12 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         connectionStrokePaint.setColor(res.getColor(R.color.fg_trip_leg_frame_connection));
         connectionStrokePaint.setStrokeWidth(strokeWidth * 2);
         connectionStrokePaint.setAntiAlias(true);
+
+        durationPaint.setColor(colorSignificant);
+        durationPaint.setTypeface(Typeface.DEFAULT);
+        durationPaint.setTextSize(res.getDimension(R.dimen.font_size_small));
+        durationPaint.setAntiAlias(true);
+        durationPaint.setTextAlign(Align.CENTER);
 
         farePaint.setColor(colorSignificant);
         farePaint.setTypeface(Typeface.DEFAULT);
@@ -472,7 +479,13 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             final int paddingVertical = (int) (4 * density);
             int posFromTop = 0;
 
-            final boolean isTravelable = trip.isTravelable();
+            final Long duration = trip.getPublicDuration();
+            final String durationText = duration == null ? null : Formats.formatTimeSpan(duration);
+            posFromTop += paddingVertical;
+            final FontMetrics durationPaintMetrics = durationPaint.getFontMetrics();
+            posFromTop += (int) -durationPaintMetrics.ascent;
+            canvas.drawText(durationText, centerX, posFromTop, durationPaint);
+            posFromTop += (int) durationPaintMetrics.descent;
 
             final List<Fare> fares = trip.fares;
             if (fares != null && !fares.isEmpty()) {
@@ -481,13 +494,13 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                 final String fareText = String.format(Locale.US, "%s\u2009%.2f", fare.currency.getSymbol(), fare.fare);
 
                 posFromTop += paddingVertical;
-                final FontMetrics metrics = farePaint.getFontMetrics();
-                posFromTop += (int) -metrics.ascent;
+                final FontMetrics farePaintMetrics = farePaint.getFontMetrics();
+                posFromTop += (int) -farePaintMetrics.ascent;
                 canvas.drawText(fareText, centerX, posFromTop, farePaint);
-                posFromTop += (int) metrics.descent;
+                posFromTop += (int) farePaintMetrics.descent;
             }
 
-            if (!isTravelable) {
+            if (!trip.isTravelable()) {
                 // warning icon
                 final int warningWidth = warningIcon.getIntrinsicWidth();
                 final int warningHeight = warningIcon.getIntrinsicHeight();

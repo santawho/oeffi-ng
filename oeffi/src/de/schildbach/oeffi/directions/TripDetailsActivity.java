@@ -325,7 +325,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         final Long duration = tripRenderer.trip.getPublicDuration();
         final String durationText = duration == null ? null :
-                getString(R.string.directions_trip_details_duration, formatTimeSpan(duration));
+                getString(R.string.directions_trip_details_duration, Formats.formatTimeSpan(duration));
         final int numChanges = tripRenderer.trip.numChanges == null ? 0 : tripRenderer.trip.numChanges;
         final String numChangesText = numChanges <= 0 ? null :
                 getString(R.string.directions_trip_details_num_changes, numChanges);
@@ -2192,11 +2192,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             log.error("cannot build URL from tripref", e);
             return null;
         }
-    }
-
-    private static String formatTimeSpan(final long millis) {
-        final long mins = millis / DateUtils.MINUTE_IN_MILLIS;
-        return String.format(Locale.ENGLISH, "%d:%02d", mins / 60, mins % 60);
     }
 
     private void startNavigationForJourneyToExit(final Stop exitStop) {

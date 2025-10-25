@@ -180,6 +180,11 @@ public final class Formats {
         }
     }
 
+    public static String formatTimeSpan(final long millis) {
+        final long mins = millis / DateUtils.MINUTE_IN_MILLIS;
+        return String.format("%d:%02d", mins / 60, mins % 60);
+    }
+
     private static final String METER_SUFFIX = Constants.CHAR_HAIR_SPACE + "m";
     private static final String KILOMETER_SUFFIX = Constants.CHAR_HAIR_SPACE + "km";
 
