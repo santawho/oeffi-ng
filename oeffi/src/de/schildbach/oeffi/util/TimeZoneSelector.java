@@ -30,16 +30,22 @@ import de.schildbach.pte.dto.PTDate;
 public class TimeZoneSelector {
     private static final String VARIABLE_TIMEZONE_ID = "?";
 
+    public enum Source {
+        LOCATION,
+        NETWORK,
+        SYSTEM,
+        UTC,
+    }
+
     public final Context context;
-    private final boolean useTimezoneFromSystem;
-    private final boolean useTimeZoneFromNetwork;
+    private final Source timezoneSource;
+    private final TimeZone utcTimezone = TimeZone.getTimeZone("UTC");
     private final TimeZone systemTimezone;
     private final TimeZone networkTimezone;
 
     public TimeZoneSelector(final Context context) {
         this.context = context;
-        useTimezoneFromSystem = true;
-        useTimeZoneFromNetwork = false;
+        timezoneSource = Source.SYSTEM;
         systemTimezone = TimeZone.getDefault();
         networkTimezone = null;
     }
@@ -47,15 +53,14 @@ public class TimeZoneSelector {
     public TimeZoneSelector(final Context context, final String preferredTimezonePreference, final NetworkId network) {
         this.context = context;
 
-        if ("system".equals(preferredTimezonePreference)) {
-            useTimezoneFromSystem = true;
-            useTimeZoneFromNetwork = false;
+        if ("utc".equals(preferredTimezonePreference)) {
+            timezoneSource = Source.UTC;
+        } else if ("system".equals(preferredTimezonePreference)) {
+            timezoneSource = Source.SYSTEM;
         } else if ("network".equals(preferredTimezonePreference)) {
-            useTimezoneFromSystem = false;
-            useTimeZoneFromNetwork = true;
+            timezoneSource = Source.NETWORK;
         } else {
-            useTimezoneFromSystem = false;
-            useTimeZoneFromNetwork = false;
+            timezoneSource = Source.LOCATION;
         }
 
         systemTimezone = TimeZone.getDefault();
@@ -70,10 +75,13 @@ public class TimeZoneSelector {
     }
 
     public int getOffset(final long time, final int offset) {
-        if (useTimezoneFromSystem || PTDate.isOffsetSystem(offset))
+        if (timezoneSource == Source.UTC)
+            return 0;
+
+        if (timezoneSource == Source.SYSTEM || PTDate.isOffsetSystem(offset))
             return systemTimezone.getOffset(time);
 
-        if (useTimeZoneFromNetwork || PTDate.isOffsetNetwork(offset) || PTDate.isOffsetUnknownLocationSpecific(offset))
+        if (timezoneSource == Source.NETWORK || PTDate.isOffsetNetwork(offset) || PTDate.isOffsetUnknownLocationSpecific(offset))
             return networkTimezone.getOffset(time);
 
         return offset;
@@ -91,7 +99,13 @@ public class TimeZoneSelector {
     }
 
     public TimeZone getInputTimeZone() {
-        return useTimezoneFromSystem || networkTimezone == null ? systemTimezone : networkTimezone;
+        if (timezoneSource == Source.UTC)
+            return utcTimezone;
+
+        if (timezoneSource == Source.SYSTEM)
+            return systemTimezone;
+
+        return networkTimezone == null ? systemTimezone : networkTimezone;
     }
 
     public PTDate getDisplay(final PTDate timestamp) {

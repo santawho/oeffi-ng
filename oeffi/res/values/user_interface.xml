@@ -117,11 +117,13 @@
     <string name="common_preferred_timezone_title">Timezone</string>
     <string name="common_preferred_timezone_summary">Preferred source of timezone. [%s]</string>
     <array name="common_preferred_timezone_entries">
+        <item>UTC</item>
         <item>System</item>
         <item>Network Provider</item>
         <item>Location</item>
     </array>
     <array name="common_preferred_timezone_values">
+        <item>utc</item>
         <item>system</item>
         <item>network</item>
         <item>location</item>

@@ -100,6 +100,7 @@
     <string name="common_preferred_timezone_title">Zeitzone</string>
     <string name="common_preferred_timezone_summary">Bevorzugte Quelle der Zeitzone. [%s]</string>
     <array name="common_preferred_timezone_entries">
+        <item>UTC</item>
         <item>System</item>
         <item>Verkehrsnetz</item>
         <item>Lokation</item>
