@@ -44,7 +44,7 @@ public final class Formats {
         // return DateUtils.formatDateTime(context, time,
         //         DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_ABBREV_WEEKDAY
         //                 | DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_MONTH);
-        return getTimeFormat(timeZoneSelector, time, offset).format(time);
+        return getDateFormat(timeZoneSelector, time, offset).format(time);
     }
 
     public static java.text.DateFormat getDateFormat(final TimeZoneSelector timeZoneSelector, final long time, final int offset) {
