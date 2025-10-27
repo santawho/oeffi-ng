@@ -208,17 +208,18 @@
 <!--            </intent-filter>-->
 <!--        </receiver>-->
 
-        <service android:name=".DeviceAdmin$MyAccessibilityService"
-            android:exported="true"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
-            android:label="@string/app_name">
-            <intent-filter>
-                <action android:name="android.accessibilityservice.AccessibilityService" />
-            </intent-filter>
-            <meta-data
-                android:name="android.accessibilityservice"
-                android:resource="@xml/accessibility_service_config" />
-        </service>
+        <!-- disabled because of Play Protect issues, see https://developers.google.com/android/play-protect/warning-dev-guidance -->
+<!--        <service android:name=".DeviceAdmin$MyAccessibilityService"-->
+<!--            android:exported="true"-->
+<!--            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"-->
+<!--            android:label="@string/app_name">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.accessibilityservice.AccessibilityService" />-->
+<!--            </intent-filter>-->
+<!--            <meta-data-->
+<!--                android:name="android.accessibilityservice"-->
+<!--                android:resource="@xml/accessibility_service_config" />-->
+<!--        </service>-->
 
         <service
             android:name=".stations.NearestFavoriteStationWidgetService"
