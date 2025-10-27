@@ -184,8 +184,6 @@ public class DirectionsActivity extends OeffiMainActivity implements
     private BroadcastReceiver connectivityReceiver;
     private BroadcastReceiver tickReceiver;
 
-    private static final int DIALOG_CLEAR_HISTORY = 1;
-
     private static final Logger log = LoggerFactory.getLogger(DirectionsActivity.class);
 
     private static final String INTENT_EXTRA_FROM_LOCATION = DirectionsActivity.class.getName() + ".from_location";
@@ -428,8 +426,26 @@ public class DirectionsActivity extends OeffiMainActivity implements
             }
             actionBar.overflow(R.menu.directions_options, item -> {
                 if (item.getItemId() == R.id.directions_options_clear_history) {
-                    if (network != null)
-                        showDialog(DIALOG_CLEAR_HISTORY);
+                    if (network != null) {
+                        final DialogBuilder builder = DialogBuilder.get(this);
+                        builder.setMessage(R.string.directions_query_history_clear_confirm_message);
+                        builder.setPositiveButton(R.string.directions_query_history_clear_confirm_button_clear_non_favorite,
+                                (dialog, which) -> {
+                                    queryHistoryListAdapter.removeAllEntries(true);
+                                    viewFromLocation.reset();
+                                    viewViaLocation.reset();
+                                    viewToLocation.reset();
+                                });
+                        builder.setNeutralButton(R.string.directions_query_history_clear_confirm_button_clear_all,
+                                (dialog, which) -> {
+                                    queryHistoryListAdapter.removeAllEntries(false);
+                                    viewFromLocation.reset();
+                                    viewViaLocation.reset();
+                                    viewToLocation.reset();
+                                });
+                        builder.setNegativeButton(R.string.directions_query_history_clear_confirm_button_cancel, null);
+                        builder.create().show();
+                    }
                     return true;
                 } else {
                     return false;
@@ -1542,26 +1558,6 @@ public class DirectionsActivity extends OeffiMainActivity implements
             }
         };
         backgroundHandler.post(queryTripsRunnable);
-    }
-
-    @Override
-    protected Dialog onCreateDialog(final int id) {
-        switch (id) {
-        case DIALOG_CLEAR_HISTORY:
-            final DialogBuilder builder = DialogBuilder.get(this);
-            builder.setMessage(R.string.directions_query_history_clear_confirm_message);
-            builder.setPositiveButton(R.string.directions_query_history_clear_confirm_button_clear,
-                    (dialog, which) -> {
-                        queryHistoryListAdapter.removeAllEntries();
-                        viewFromLocation.reset();
-                        viewViaLocation.reset();
-                        viewToLocation.reset();
-                    });
-            builder.setNegativeButton(R.string.directions_query_history_clear_confirm_button_dismiss, null);
-            return builder.create();
-        }
-
-        return super.onCreateDialog(id);
     }
 
     private void resultPickContact(final Uri contentUri, final LocationView targetLocationView) {

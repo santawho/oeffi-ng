@@ -253,9 +253,10 @@
     <!-- query history -->
     <string name="directions_query_history_empty">No saved queries yet</string>
     <string name="directions_query_history_invalid_blob">Cannot display this trip, as it was created by a previous Öffi version.</string>
-    <string name="directions_query_history_clear_confirm_message">Are you sure you want to remove all of your saved queries?</string>
-    <string name="directions_query_history_clear_confirm_button_clear">Clear</string>
-    <string name="directions_query_history_clear_confirm_button_dismiss">Dismiss</string>
+    <string name="directions_query_history_clear_confirm_message">Are you sure you want to remove your saved queries?</string>
+    <string name="directions_query_history_clear_confirm_button_clear_all">Remove really all</string>
+    <string name="directions_query_history_clear_confirm_button_clear_non_favorite">Except favorites</string>
+    <string name="directions_query_history_clear_confirm_button_cancel">Cancel</string>
 
     <!-- query history context menu -->
     <string name="directions_query_history_context_show_trip">Show saved trip</string>

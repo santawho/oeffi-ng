@@ -252,9 +252,10 @@
     <!-- query history -->
     <string name="directions_query_history_empty">Noch keine gespeicherten Anfragen</string>
     <string name="directions_query_history_invalid_blob">Kann diese Fahrt nicht anzeigen, weil sie mit einer früheren Version von Öffi erstellt wurde.</string>
-    <string name="directions_query_history_clear_confirm_message">Bist du dir sicher, daß du alle gespeicherten Anfragen löschen möchtest?</string>
-    <string name="directions_query_history_clear_confirm_button_clear">Löschen</string>
-    <string name="directions_query_history_clear_confirm_button_dismiss">Schließen</string>
+    <string name="directions_query_history_clear_confirm_message">Bist du dir sicher, dass du die gespeicherten Anfragen löschen möchtest?</string>
+    <string name="directions_query_history_clear_confirm_button_clear_all">Wirklich alle löschen</string>
+    <string name="directions_query_history_clear_confirm_button_clear_non_favorite">Außer Favoriten</string>
+    <string name="directions_query_history_clear_confirm_button_cancel">Abbrechen</string>
 
     <!-- query history context menu -->
     <string name="directions_query_history_context_show_trip">Gespeicherte Fahrt anzeigen</string>

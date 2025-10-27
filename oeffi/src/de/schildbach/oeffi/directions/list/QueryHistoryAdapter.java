@@ -140,9 +140,9 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<QueryHistoryViewHo
         cursor.requery();
     }
 
-    public void removeAllEntries() {
+    public void removeAllEntries(final boolean exceptFavorites) {
         final Uri uri = QueryHistoryProvider.CONTENT_URI().buildUpon().appendPath(network.name()).build();
-        contentResolver.delete(uri, null, null);
+        contentResolver.delete(uri, exceptFavorites ? (QueryHistoryProvider.KEY_FAVORITE + "= 0") : null, null);
         notifyItemRangeRemoved(0, getItemCount());
         cursor.requery();
     }
