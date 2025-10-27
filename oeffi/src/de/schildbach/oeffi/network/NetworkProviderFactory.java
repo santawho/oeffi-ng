@@ -180,7 +180,7 @@ public final class NetworkProviderFactory {
         else if (networkId.equals(NetworkId.VRN))
             return new VrnProvider();
         else if (networkId.equals(NetworkId.VVS))
-            return new VvsProvider(HttpUrl.parse("https://www2.vvs.de/oeffi/"));
+            return new VvsProvider(); // HttpUrl.parse("https://www2.vvs.de/oeffi/")
         else if (networkId.equals(NetworkId.DING))
             return new DingProvider();
         else if (networkId.equals(NetworkId.KVV))
