@@ -71,7 +71,6 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.common.base.Throwables;
-import com.google.common.primitives.Floats;
 
 import de.schildbach.oeffi.FromViaToAware;
 import de.schildbach.oeffi.MyActionBar;
@@ -563,22 +562,60 @@ public class DirectionsActivity extends OeffiMainActivity implements
             viewGo = findViewById(R.id.directions_go);
             viewGo.setOnClickListener(v -> handleGo());
 
-            viewQueryHistoryList = findViewById(android.R.id.list);
+            viewQueryHistoryList = findViewById(R.id.directions_query_history_list);
             viewQueryHistoryList.setLayoutManager(new LinearLayoutManager(this));
             viewQueryHistoryList.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
             queryHistoryListAdapter = new QueryHistoryAdapter(this, network, this, this);
             viewQueryHistoryList.setAdapter(queryHistoryListAdapter);
-            viewQueryHistoryList.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            final CoordinatorLayout.LayoutParams coordinatorLayoutParams = new CoordinatorLayout.LayoutParams(
+                    viewQueryHistoryList.getLayoutParams().width, viewQueryHistoryList.getLayoutParams().height);
+            coordinatorLayoutParams.setBehavior(new CoordinatorLayout.Behavior<View>() { // QuickReturnBehavior
                 @Override
-                public void onScrolled(@NonNull final RecyclerView recyclerView, final int dx, final int dy) {
-                    super.onScrolled(recyclerView, dx, dy);
-                    if ((viewQueryHistoryList.getChildCount() == 0
-                            || viewQueryHistoryList.getChildAt(0).getTop() >= quickReturnView.getBottom())
-                            && quickReturnView.getTranslationY() < 0) {
-                        quickReturnView.setTranslationY(0);
+                public boolean onStartNestedScroll(
+                        final CoordinatorLayout coordinatorLayout, final View child,
+                        final View directTargetChild, final View target,
+                        final int nestedScrollAxes, final int type) {
+                    return (nestedScrollAxes & ViewCompat.SCROLL_AXIS_VERTICAL) != 0;
+                }
+
+                @Override
+                public void onNestedPreScroll(
+                        final CoordinatorLayout coordinatorLayout, final View child, final View target,
+                        final int dx, final int dy, final int[] consumed, final int type) {
+                    final int oldTranslation = (int) viewQueryHistoryList.getTranslationY();
+                    int translation = oldTranslation - dy;
+                    final int listHeight = viewQueryHistoryList.getHeight() - viewQueryHistoryList.getPaddingBottom() - viewQueryHistoryList.getPaddingTop();
+                    final int quickReturnViewHeight = quickReturnView.getHeight();
+                    final int childCount = viewQueryHistoryList.getChildCount();
+                    final int childrenHeight = childCount == 0 ? 0 : viewQueryHistoryList.getChildAt(childCount - 1).getBottom();
+                    final int emptySpace = listHeight - childrenHeight;
+                    if (translation < 0)
+                        translation = 0;
+                    else if (translation > quickReturnViewHeight)
+                        translation = quickReturnViewHeight;
+                    else if (emptySpace > 0 && translation < emptySpace) {
+                        if (emptySpace < quickReturnViewHeight)
+                            translation = emptySpace;
+                        else
+                            translation = quickReturnViewHeight;
                     }
+
+                    viewQueryHistoryList.setTranslationY(translation);
+                    quickReturnView.setTranslationY(translation - quickReturnViewHeight);
+                    consumed[1] = oldTranslation - translation;
+                }
+
+                @Override
+                public void onNestedScroll(
+                        final CoordinatorLayout coordinatorLayout,
+                        final View child, final View target,
+                        final int dxConsumed, final int dyConsumed,
+                        final int dxUnconsumed, final int dyUnconsumed,
+                        final int type, final int[] consumed) {
+                    consumed[1] = 0;
                 }
             });
+            viewQueryHistoryList.setLayoutParams(coordinatorLayoutParams);
             ViewCompat.setOnApplyWindowInsetsListener(viewQueryHistoryList, (v, windowInsets) -> {
                 final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
                 v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(),
@@ -591,33 +628,15 @@ public class DirectionsActivity extends OeffiMainActivity implements
             viewQueryMissingCapability = findViewById(R.id.directions_network_missing_capability);
 
             quickReturnView = findViewById(R.id.directions_quick_return);
-            final CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(
-                    quickReturnView.getLayoutParams().width, quickReturnView.getLayoutParams().height);
-            layoutParams.setBehavior(new CoordinatorLayout.Behavior<View>() { // QuickReturnBehavior
-                @Override
-                public boolean onStartNestedScroll(
-                        final CoordinatorLayout coordinatorLayout, final View child,
-                        final View directTargetChild, final View target,
-                        final int nestedScrollAxes, final int type) {
-                    return (nestedScrollAxes & ViewCompat.SCROLL_AXIS_VERTICAL) != 0;
-                }
-
-                @Override
-                public void onNestedScroll(
-                        final CoordinatorLayout coordinatorLayout, final View child, final View target,
-                        final int dxConsumed, final int dyConsumed, final int dxUnconsumed, final int dyUnconsumed,
-                        final int type) {
-                    final float value = child.getTranslationY() - dyConsumed;
-                    final int min = -child.getHeight();
-                    final float translationY = Floats.constrainToRange(value, min, 0);
-                    child.setTranslationY(translationY);
-                }
-            });
-            quickReturnView.setLayoutParams(layoutParams);
             quickReturnView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                final int oldHeight = oldBottom - oldTop;
                 final int height = bottom - top;
-                viewQueryHistoryList.setPadding(viewQueryHistoryList.getPaddingLeft(), height,
-                        viewQueryHistoryList.getPaddingRight(), viewQueryHistoryList.getPaddingBottom());
+                if (height == oldHeight)
+                    return;
+
+                quickReturnView.setTranslationY(0);
+                viewQueryHistoryList.setTranslationY(height);
+
                 viewQueryHistoryEmpty.setPadding(viewQueryHistoryEmpty.getPaddingLeft(), height,
                         viewQueryHistoryEmpty.getPaddingRight(), viewQueryHistoryEmpty.getPaddingBottom());
                 viewQueryMissingCapability.setPadding(viewQueryMissingCapability.getPaddingLeft(), height,
@@ -1289,7 +1308,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
     private void initLayoutTransitions() {
         final LayoutTransition lt1 = new LayoutTransition();
         lt1.enableTransitionType(LayoutTransition.CHANGING);
-        ((ViewGroup) findViewById(R.id.directions_list_layout)).setLayoutTransition(lt1);
+        ((ViewGroup) findViewById(R.id.directions_coordinator)).setLayoutTransition(lt1);
 
         final LayoutTransition lt2 = new LayoutTransition();
         lt2.enableTransitionType(LayoutTransition.CHANGING);
@@ -1304,7 +1323,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
     }
 
     private void initLayoutTransitions(final boolean expand) {
-        ((ViewGroup) findViewById(R.id.directions_list_layout)).getLayoutTransition()
+        ((ViewGroup) findViewById(R.id.directions_coordinator)).getLayoutTransition()
                 .setStartDelay(LayoutTransition.CHANGING, expand ? 0 : 300);
         ((ViewGroup) findViewById(R.id.directions_content_layout)).getLayoutTransition()
                 .setStartDelay(LayoutTransition.CHANGING, expand ? 0 : 300);

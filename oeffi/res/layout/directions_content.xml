@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:baselineAligned="false"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
         <LinearLayout
             android:id="@+id/directions_content_layout"
@@ -35,54 +35,49 @@
                 android:visibility="gone" />
 
             <androidx.coordinatorlayout.widget.CoordinatorLayout
+                android:id="@+id/directions_coordinator"
                 android:layout_width="match_parent"
                 android:layout_height="0px"
                 android:layout_weight="1">
 
-                <FrameLayout
-                    android:id="@+id/directions_list_layout"
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/directions_query_history_list"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                    android:layout_height="match_parent"
+                    android:layout_gravity="top" />
 
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@android:id/list"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:clipToPadding="false" />
+                <TextView
+                    android:id="@+id/directions_query_history_empty"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="@string/directions_query_history_empty" />
+
+                <LinearLayout
+                    android:id="@+id/directions_network_missing_capability"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/directions_query_history_empty"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:text="@string/directions_query_history_empty" />
-
-                    <LinearLayout
-                        android:id="@+id/directions_network_missing_capability"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:gravity="center"
-                        android:orientation="vertical">
+                        android:padding="8dp"
+                        android:text="@string/directions_message_missing_capability" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:gravity="center"
-                            android:padding="8dp"
-                            android:text="@string/directions_message_missing_capability" />
+                    <Button
+                        android:id="@+id/directions_network_missing_capability_button"
+                        style="@style/My.Widget.Button.Border"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/stations_list_network_settings" />
+                </LinearLayout>
 
-                        <Button
-                            android:id="@+id/directions_network_missing_capability_button"
-                            style="@style/My.Widget.Button.Border"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/stations_list_network_settings" />
-                    </LinearLayout>
-                </FrameLayout>
-
-                <ScrollView
+                <FrameLayout
                     android:id="@+id/directions_quick_return"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -91,11 +86,11 @@
                     android:elevation="@dimen/elevation_panel">
 
                     <include layout="@layout/directions_form_include" />
-                </ScrollView>
+                </FrameLayout>
             </androidx.coordinatorlayout.widget.CoordinatorLayout>
         </LinearLayout>
 
-        <include layout="@layout/map_frame" />
+        <include layout="@layout/map_frame" android:id="@+id/map_frame" />
     </LinearLayout>
 
     <include layout="@layout/navigation_drawer" />
