@@ -317,6 +317,15 @@
         ohne Garantie&lt;/b> Echtzeiten zu sein.
         Für die gelieferte Information ist das Auskunftsystem und das Verkehrsunternehmen verantwortlich.
     </string>
+
+    <string name="directions_trip_details_public_entry_tooltip_label_arrival">Ankunft</string>
+    <string name="directions_trip_details_public_entry_tooltip_label_departure">Abfahrt</string>
+    <string name="directions_trip_details_public_entry_tooltip_no_data">-</string>
+    <string name="directions_trip_details_public_entry_tooltip_delay_format">%d min</string>
+    <string name="directions_trip_details_public_entry_tooltip_event_format">&lt;b>%s&lt;/b>&lt;br>geplant: %s&lt;br>Prognose: %s&lt;br>Verspätung: %s</string>
+    <string name="directions_trip_details_public_entry_tooltip_format_one_event">&lt;b>&lt;u>%s&lt;/u>&lt;/b>&lt;br>&lt;br>%s</string>
+    <string name="directions_trip_details_public_entry_tooltip_format_two_events">&lt;b>&lt;u>%s&lt;/u>&lt;/b>&lt;br>&lt;br>%s&lt;br>&lt;br>%s</string>
+
     <string name="directions_trip_details_public_entry_accessibility">Der Abschnitt ist barrierefrei.</string>
     <string name="directions_trip_details_public_entry_bicycle_carriage">Die Fahrradmitnahme ist möglich.</string>
     <string name="directions_trip_details_time_left_minutes">Noch &lt;b>%1$d Minuten&lt;/b></string>

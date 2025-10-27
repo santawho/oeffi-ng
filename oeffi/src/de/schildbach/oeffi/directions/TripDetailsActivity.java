@@ -1769,6 +1769,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final TextView stopTimeView = row.findViewById(R.id.directions_trip_details_public_entry_stop_time);
         stopDateView.setText(null);
         stopTimeView.setText(null);
+
         if (time != null) {
             final PTDate displayTime = timeZoneSelector.getDisplay(time);
             if (collapseColumns.dateChanged(displayTime)) {
@@ -1803,6 +1804,18 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
         }
 
+        if (time != null) {
+            final View.OnClickListener onClickListener = v -> {
+                final Spanned tooltip = getTooltipForStop(stop, now.getTime());
+                new AlertDialog.Builder(this)
+                        .setMessage(tooltip)
+                        .create().show();
+            };
+            stopDateView.setOnClickListener(onClickListener);
+            stopTimeView.setOnClickListener(onClickListener);
+            stopDelayView.setOnClickListener(onClickListener);
+        }
+
         // position
         final TextView stopPositionView = row
                 .findViewById(R.id.directions_trip_details_public_entry_stop_position);
@@ -1828,6 +1841,73 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
 
         return row;
+    }
+
+    private Spanned getTooltipForStop(final Stop stop, final long now) {
+        final String locationName = stop.location.uniqueShortName();
+        final String arrivalEvent = getTooltipForStopEvent(stop,
+                getString(R.string.directions_trip_details_public_entry_tooltip_label_arrival),
+                stop.getArrivalTime(true),
+                stop.predictedArrivalTime,
+                stop.getArrivalDelay(),
+                now);
+        final String departureEvent = getTooltipForStopEvent(stop,
+                getString(R.string.directions_trip_details_public_entry_tooltip_label_departure),
+                stop.getDepartureTime(true),
+                stop.predictedDepartureTime,
+                stop.getDepartureDelay(),
+                now);
+
+        final String eventText;
+        if (arrivalEvent != null && departureEvent != null) {
+            eventText = getString(
+                    R.string.directions_trip_details_public_entry_tooltip_format_two_events,
+                    locationName, arrivalEvent, departureEvent);
+        } else {
+            final String event = arrivalEvent != null ? arrivalEvent : departureEvent;
+            if (event == null)
+                return null;
+            eventText = getString(
+                    R.string.directions_trip_details_public_entry_tooltip_format_one_event,
+                    locationName, event);
+        }
+
+        return Html.fromHtml(eventText, Html.FROM_HTML_MODE_COMPACT);
+    }
+
+    private String getTooltipForStopEvent(
+            final Stop stop, final String eventLabel,
+            final PTDate plannedTime, final PTDate predictedTime, final Long delay,
+            final long now) {
+        if (plannedTime == null && predictedTime == null)
+            return null;
+
+        final String noDataString = res.getString(R.string.directions_trip_details_public_entry_tooltip_no_data);
+        final String todayString = res.getString(R.string.time_today);
+        String plannedText = getTooltipForPTDate(plannedTime, todayString, now);
+        if (plannedText == null)
+            plannedText = noDataString;
+        String predictedText = getTooltipForPTDate(predictedTime, todayString, now);
+        final String delayText;
+        if (predictedText == null) {
+            predictedText = noDataString;
+            delayText = noDataString;
+        } else {
+            final long delayMins = delay == null ? 0 : (delay / DateUtils.MINUTE_IN_MILLIS);
+            delayText = getString(R.string.directions_trip_details_public_entry_tooltip_delay_format, delayMins);
+        }
+
+        return getString(R.string.directions_trip_details_public_entry_tooltip_event_format,
+                eventLabel, plannedText, predictedText, delayText);
+    }
+
+    private String getTooltipForPTDate(final PTDate timestamp, final String todayString, final long now) {
+        if (timestamp == null)
+            return null;
+        final PTDate displayTime = timeZoneSelector.getDisplay(timestamp);
+        final String dateText = Formats.formatDate(timeZoneSelector, now, displayTime, true, todayString);
+        final String timeText = Formats.formatTime(timeZoneSelector, displayTime);
+        return dateText + " " + timeText;
     }
 
     private View collapsedIntermediateStopsRow(final Long duration, final int numIntermediateStops, final Style style) {

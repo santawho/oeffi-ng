@@ -318,6 +318,15 @@
         not guaranteed&lt;/b> to be real times.
         The traffic information system and the transport company are responsible for the information provided.
     </string>
+
+    <string name="directions_trip_details_public_entry_tooltip_label_arrival">Arrival</string>
+    <string name="directions_trip_details_public_entry_tooltip_label_departure">Departure</string>
+    <string name="directions_trip_details_public_entry_tooltip_no_data">-</string>
+    <string name="directions_trip_details_public_entry_tooltip_delay_format">%d min</string>
+    <string name="directions_trip_details_public_entry_tooltip_event_format">&lt;b>%s&lt;/b>&lt;br>planned: %s&lt;br>predicted: %s&lt;br>delay: %s</string>
+    <string name="directions_trip_details_public_entry_tooltip_format_one_event">&lt;b>&lt;u>%s&lt;/u>&lt;/b>&lt;br>&lt;br>%s</string>
+    <string name="directions_trip_details_public_entry_tooltip_format_two_events">&lt;b>&lt;u>%s&lt;/u>&lt;/b>&lt;br>&lt;br>%s&lt;br>&lt;br>%s</string>
+
     <string name="directions_trip_details_public_entry_accessibility">Section is barrier free.</string>
     <string name="directions_trip_details_public_entry_bicycle_carriage">Bikes may be carried.</string>
     <string name="directions_trip_details_time_left_minutes">&lt;b>%1$d minutes&lt;/b> left</string>
