@@ -588,9 +588,6 @@ public abstract class OeffiActivity extends ComponentActivity {
     }
 
     protected OeffiMapView getMapView() {
-        if (mapView == null)
-            mapView = findViewById(R.id.map_view);
-
         return mapView;
     }
 
