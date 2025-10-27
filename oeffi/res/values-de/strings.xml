@@ -312,7 +312,11 @@
     <string name="directions_trip_details_bike">&lt;b>%1$d Minuten&lt;/b> %2$sFahrt mit dem Fahrrad nach %3$s</string>
     <string name="directions_trip_details_car">&lt;b>%1$d Minuten&lt;/b> %2$sFahrt mit dem Auto nach %3$s</string>
     <string name="directions_trip_details_transfer">&lt;b>%1$d Minuten&lt;/b> %2$sTransfer nach %3$s</string>
-    <string name="directions_trip_details_realtime">&lt;i>Kursiv&lt;/i> gedruckte Uhrzeiten sind Echtzeit.</string>
+    <string name="directions_trip_details_realtime">
+        &lt;b>&lt;i>Kursiv&lt;/i>&lt;/b> gedruckte Uhrzeiten sind &lt;b>prognostizierte&lt;/b> Zeiten &lt;b>
+        ohne Garantie&lt;/b> Echtzeiten zu sein.
+        Für die gelieferte Information ist das Auskunftsystem und das Verkehrsunternehmen verantwortlich.
+    </string>
     <string name="directions_trip_details_public_entry_accessibility">Der Abschnitt ist barrierefrei.</string>
     <string name="directions_trip_details_public_entry_bicycle_carriage">Die Fahrradmitnahme ist möglich.</string>
     <string name="directions_trip_details_time_left_minutes">Noch &lt;b>%1$d Minuten&lt;/b></string>

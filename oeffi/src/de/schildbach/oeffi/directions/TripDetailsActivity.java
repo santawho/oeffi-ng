@@ -59,6 +59,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
+import android.widget.Space;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
@@ -488,6 +489,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(0, 0, 0, insets.bottom);
             return windowInsets;
+        });
+        disclaimerView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+            final int height = disclaimerView.getHeight() - disclaimerView.getPaddingBottom();
+            final Space marginView = findViewById(R.id.directions_trip_details_footer_margin);
+            marginView.setMinimumHeight(height);
         });
         final TextView disclaimerSourceView = findViewById(R.id.directions_trip_details_disclaimer_source);
         updateDisclaimerSource(disclaimerSourceView, network, null);

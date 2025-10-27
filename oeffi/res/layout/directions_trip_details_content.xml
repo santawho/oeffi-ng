@@ -197,10 +197,16 @@
                                         android:drawablePadding="@dimen/text_padding_horizontal_lax"
                                         android:drawableTint="@color/fg_less_significant"
                                         android:gravity="left|center_vertical"
+                                        android:textSize="@dimen/font_size_small"
                                         android:paddingBottom="@dimen/text_padding_vertical_lax"
                                         android:paddingLeft="@dimen/text_padding_horizontal_lax"
                                         android:paddingRight="@dimen/text_padding_horizontal_lax"
                                         android:paddingTop="@dimen/text_padding_vertical_verylax" />
+
+                                    <Space
+                                        android:id="@+id/directions_trip_details_footer_margin"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content" />
                                 </LinearLayout>
                             </ScrollView>
 
