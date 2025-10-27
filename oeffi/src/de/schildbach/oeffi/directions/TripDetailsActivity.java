@@ -1058,10 +1058,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                         numIntermediateStops++;
                 }
 
+                final View collapsedIntermediateStopsRow = collapsedIntermediateStopsRow(
+                        leg.getArrivalTime().getTime() - leg.getDepartureTime().getTime(),
+                        numIntermediateStops,
+                        leg.line.style);
+                stopsView.addView(collapsedIntermediateStopsRow);
                 if (numIntermediateStops > 0) {
-                    final View collapsedIntermediateStopsRow = collapsedIntermediateStopsRow(numIntermediateStops,
-                            leg.line.style);
-                    stopsView.addView(collapsedIntermediateStopsRow);
                     collapsedIntermediateStopsRow.setOnClickListener(v -> {
                         tripRenderer.legExpandStates.put(new TripRenderer.LegKey(leg),
                                 TripRenderer.LEG_EXPAND_STATE_STOPS |
@@ -1822,15 +1824,31 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         return row;
     }
 
-    private View collapsedIntermediateStopsRow(final int numIntermediateStops, final Style style) {
+    private View collapsedIntermediateStopsRow(final Long duration, final int numIntermediateStops, final Style style) {
         final View row = inflater.inflate(R.layout.directions_trip_details_public_entry_collapsed, null);
 
         // message
+        final String durationString = duration == null ? null :
+                getString(R.string.directions_trip_details_public_entry_duration, Formats.formatTimeSpan(duration));
+        final String quantityString = numIntermediateStops == 0 ? null : res.getQuantityString(
+                R.plurals.directions_trip_details_public_entry_collapsed_intermediate_stops,
+                numIntermediateStops, numIntermediateStops);
+        final String collapsedText;
+        if (durationString != null) {
+            if (quantityString != null) {
+                collapsedText = durationString + "\n" + quantityString;
+            } else {
+                collapsedText = durationString;
+            }
+        } else if (quantityString != null) {
+            collapsedText = quantityString;
+        } else {
+            collapsedText = "-";
+        }
+
         final TextView stopNameView = row
                 .findViewById(R.id.directions_trip_details_public_entry_collapsed_message);
-        stopNameView.setText(
-                res.getQuantityString(R.plurals.directions_trip_details_public_entry_collapsed_intermediate_stops,
-                        numIntermediateStops, numIntermediateStops));
+        stopNameView.setText(collapsedText);
         stopNameView.setTextColor(colorInsignificant);
 
         // pearl

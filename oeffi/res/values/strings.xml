@@ -352,6 +352,7 @@
     <string name="directions_trip_conneval_possibly_good">Connection currently in &lt;b>%1$d minutes&lt;/b> due to delayed departure%2$s</string>
     <string name="directions_trip_conneval_good">Connection (currently) in &lt;b>%1$d minutes&lt;/b>%2$s</string>
 
+    <string name="directions_trip_details_public_entry_duration">Duration: %s</string>
     <plurals name="directions_trip_details_public_entry_collapsed_intermediate_stops">
         <item quantity="one">…%d intermediate stop…</item>
         <item quantity="other">…%d intermediate stops…</item>
