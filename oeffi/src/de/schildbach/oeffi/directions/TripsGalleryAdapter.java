@@ -212,7 +212,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
 
         durationPaint.setColor(colorSignificant);
         durationPaint.setTypeface(Typeface.DEFAULT);
-        durationPaint.setTextSize(res.getDimension(R.dimen.font_size_small));
+        durationPaint.setTextSize(res.getDimension(R.dimen.font_size_normal));
         durationPaint.setAntiAlias(true);
         durationPaint.setTextAlign(Align.CENTER);
 
