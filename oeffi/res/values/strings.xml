@@ -328,7 +328,7 @@
     <string name="directions_trip_details_public_entry_tooltip_format_two_events">&lt;b>&lt;u>%s&lt;/u>&lt;/b>&lt;br>&lt;br>%s&lt;br>&lt;br>%s</string>
 
     <string name="directions_trip_details_public_entry_accessibility">Section is barrier free.</string>
-    <string name="directions_trip_details_public_entry_bicycle_carriage">Bikes may be carried.</string>
+    <string name="directions_trip_details_public_entry_bicycle_carriage">Bikes might be carried.</string>
     <string name="directions_trip_details_time_left_minutes">&lt;b>%1$d minutes&lt;/b> left</string>
     <string name="directions_trip_details_time_left_hours">&lt;b>%1$d hours&lt;/b> left</string>
     <string name="directions_trip_details_time_left_days">&lt;b>%1$d days&lt;/b> left</string>

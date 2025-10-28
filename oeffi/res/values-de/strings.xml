@@ -326,8 +326,8 @@
     <string name="directions_trip_details_public_entry_tooltip_format_one_event">&lt;b>&lt;u>%s&lt;/u>&lt;/b>&lt;br>&lt;br>%s</string>
     <string name="directions_trip_details_public_entry_tooltip_format_two_events">&lt;b>&lt;u>%s&lt;/u>&lt;/b>&lt;br>&lt;br>%s&lt;br>&lt;br>%s</string>
 
-    <string name="directions_trip_details_public_entry_accessibility">Der Abschnitt ist barrierefrei.</string>
-    <string name="directions_trip_details_public_entry_bicycle_carriage">Die Fahrradmitnahme ist möglich.</string>
+    <string name="directions_trip_details_public_entry_accessibility">Abschnitt ist barrierefrei</string>
+    <string name="directions_trip_details_public_entry_bicycle_carriage">Fahrradmitnahme ggf. möglich</string>
     <string name="directions_trip_details_time_left_minutes">Noch &lt;b>%1$d Minuten&lt;/b></string>
     <string name="directions_trip_details_time_left_hours">Noch &lt;b>%1$d Stunden&lt;/b></string>
     <string name="directions_trip_details_time_left_days">Noch &lt;b>%1$d Tage&lt;/b></string>
