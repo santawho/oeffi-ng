@@ -77,6 +77,8 @@ public final class TripsGalleryAdapter extends BaseAdapter {
     private List<TripInfo> trips = Collections.emptyList();
     private TripsOverviewActivity.RenderConfig renderConfig;
     private boolean canScrollLater = true, canScrollEarlier = true;
+    private boolean showAccessibility, showBicycleCarriage;
+
     private long minTime = 0, maxTime = 0;
 
     private final OeffiActivity context;
@@ -260,10 +262,15 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         this.renderConfig = renderConfig;
     }
 
-    public void setTrips(final List<TripInfo> trips, final boolean canScrollLater, final boolean canScrollEarlier) {
+    public void setTrips(
+            final List<TripInfo> trips,
+            final boolean canScrollLater, final boolean canScrollEarlier,
+            final boolean showAccessibility, final boolean showBicycleCarriage) {
         this.trips = trips;
         this.canScrollLater = canScrollLater;
         this.canScrollEarlier = canScrollEarlier;
+        this.showAccessibility = showAccessibility;
+        this.showBicycleCarriage = showBicycleCarriage;
 
         notifyDataSetChanged();
     }
@@ -421,6 +428,8 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         private final Drawable bikeIcon = res.getDrawable(R.drawable.ic_directions_bike_grey600_24dp);
         private final Drawable carIcon = res.getDrawable(R.drawable.ic_local_taxi_grey600_24dp);
         private final Drawable warningIcon = res.getDrawable(R.drawable.ic_warning_amber_24dp);
+        private final Drawable wheelChairIcon = res.getDrawable(R.drawable.ic_accessible_grey600_18dp);
+        private final Drawable bicycleIcon = res.getDrawable(R.drawable.ic_directions_bike_grey600_18dp);
 
         private final int[] gradientColors = new int[2];
         private final float[] GRADIENT_POSITIONS = new float[] { 0.5f, 0.5f };
@@ -504,17 +513,41 @@ public final class TripsGalleryAdapter extends BaseAdapter {
 
             if (!trip.isTravelable()) {
                 // warning icon
-                final int warningWidth = warningIcon.getIntrinsicWidth();
-                final int warningHeight = warningIcon.getIntrinsicHeight();
-                final int warningLeft = centerX - warningWidth / 2;
+                final int iconWidth = warningIcon.getIntrinsicWidth();
+                final int iconHeight = warningIcon.getIntrinsicHeight();
+                final int iconLeft = centerX - iconWidth / 2;
                 posFromTop += paddingVertical;
                 warningIcon.setBounds(
-                        warningLeft,
+                        iconLeft,
                         posFromTop,
-                        warningLeft + warningWidth,
-                        posFromTop + warningHeight);
+                        iconLeft + iconWidth,
+                        posFromTop + iconHeight);
                 warningIcon.draw(canvas);
-                posFromTop += warningHeight;
+                posFromTop += iconHeight;
+            } else if (tripInfo.isTripFullyWheelChairAccessible && showAccessibility) {
+                final int iconWidth = wheelChairIcon.getIntrinsicWidth();
+                final int iconHeight = wheelChairIcon.getIntrinsicHeight();
+                final int iconLeft = centerX - iconWidth / 2;
+                posFromTop += paddingVertical;
+                wheelChairIcon.setBounds(
+                        iconLeft,
+                        posFromTop,
+                        iconLeft + iconWidth,
+                        posFromTop + iconHeight);
+                wheelChairIcon.draw(canvas);
+                posFromTop += iconHeight;
+            } else if (tripInfo.isTripFullyBicycleTravelable && showBicycleCarriage) {
+                final int iconWidth = bicycleIcon.getIntrinsicWidth();
+                final int iconHeight = bicycleIcon.getIntrinsicHeight();
+                final int iconLeft = centerX - iconWidth / 2;
+                posFromTop += paddingVertical;
+                bicycleIcon.setBounds(
+                        iconLeft,
+                        posFromTop,
+                        iconLeft + iconWidth,
+                        posFromTop + iconHeight);
+                bicycleIcon.draw(canvas);
+                posFromTop += iconHeight;
             }
 
             // iterate delayed public legs first and draw ghosts of planned times

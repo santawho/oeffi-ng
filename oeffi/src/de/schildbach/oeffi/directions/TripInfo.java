@@ -17,6 +17,9 @@
 
 package de.schildbach.oeffi.directions;
 
+import java.util.Set;
+
+import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Trip;
 
 public class TripInfo {
@@ -25,8 +28,35 @@ public class TripInfo {
     public boolean isEarlierOrLater;
     public boolean isAlternativelyFed;
     public Trip baseTrip;
+    public boolean isTripFullyWheelChairAccessible;
+    public boolean isTripFullyBicycleTravelable;
 
     public TripInfo(final Trip trip) {
         this.trip = trip;
+
+        setup();
+    }
+
+    private void setup() {
+        boolean tripFullyWheelChairAccessible = true;
+        boolean tripFullyBicycleTravelable = true;
+        for (Trip.Leg leg : trip.legs) {
+            if (leg instanceof Trip.Public) {
+                final Trip.Public publicLeg = (Trip.Public) leg;
+                final Line line = publicLeg.line;
+                if (line == null)
+                    continue;
+                final Set<Line.Attr> attrs = line.attrs;
+                if (attrs == null)
+                    continue;
+                if (!attrs.contains(Line.Attr.WHEEL_CHAIR_ACCESS))
+                    tripFullyWheelChairAccessible = false;
+                if (!attrs.contains(Line.Attr.BICYCLE_CARRIAGE))
+                    tripFullyBicycleTravelable = false;
+            }
+        }
+
+        isTripFullyWheelChairAccessible = tripFullyWheelChairAccessible;
+        isTripFullyBicycleTravelable = tripFullyBicycleTravelable;
     }
 }

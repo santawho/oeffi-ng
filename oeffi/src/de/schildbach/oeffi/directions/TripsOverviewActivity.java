@@ -759,6 +759,9 @@ public class TripsOverviewActivity extends OeffiActivity {
             searchMoreContext.reset();
         }
 
+        final boolean showAccessibility = !NetworkProvider.Accessibility.NEUTRAL.equals(prefsGetAccessibility());
+        final boolean showBicycleCarriage = prefsIsBicycleTravel();
+
         // remove implausible trips and adjust untravelable legs
         for (final Iterator<Trip> i = result.trips.iterator(); i.hasNext();) {
             final Trip trip = i.next();
@@ -782,8 +785,11 @@ public class TripsOverviewActivity extends OeffiActivity {
 
         if (countNew > 0) {
             // redraw
-            barView.setTrips(new ArrayList<>(trips), result.context != null && result.context.canQueryLater(),
-                    result.context != null && result.context.canQueryEarlier());
+            barView.setTrips(
+                    new ArrayList<>(trips),
+                    result.context != null && result.context.canQueryLater(),
+                    result.context != null && result.context.canQueryEarlier(),
+                    showAccessibility, showBicycleCarriage);
 
             // initial cursor positioning
             if (initial && !trips.isEmpty())
