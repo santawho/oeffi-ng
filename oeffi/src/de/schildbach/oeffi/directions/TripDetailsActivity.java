@@ -918,8 +918,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final Location destination = leg.destination;
         final String destinationName = Formats.fullLocationName(destination);
         final boolean showDestination = destinationName != null;
-        final boolean showAccessibility = leg.line.hasAttr(Line.Attr.WHEEL_CHAIR_ACCESS);
-        final boolean showBicycleCarriage = leg.line.hasAttr(Line.Attr.BICYCLE_CARRIAGE);
+        final boolean showAccessibility = leg.line.hasAttr(Line.Attr.WHEEL_CHAIR_ACCESS)
+                && !NetworkProvider.Accessibility.NEUTRAL.equals(prefsGetAccessibility());
+        final boolean showBicycleCarriage = leg.line.hasAttr(Line.Attr.BICYCLE_CARRIAGE)
+                && prefsIsBicycleTravel();
         final List<Stop> intermediateStops = leg.intermediateStops;
         boolean isRowSimulated = false;
 
