@@ -480,12 +480,14 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             int posFromTop = 0;
 
             final Long duration = trip.getPublicDuration();
-            final String durationText = duration == null ? null : Formats.formatTimeSpan(duration);
-            posFromTop += paddingVertical;
-            final FontMetrics durationPaintMetrics = durationPaint.getFontMetrics();
-            posFromTop += (int) -durationPaintMetrics.ascent;
-            canvas.drawText(durationText, centerX, posFromTop, durationPaint);
-            posFromTop += (int) durationPaintMetrics.descent;
+            if (duration != null) {
+                final String durationText = Formats.formatTimeSpan(duration);
+                posFromTop += paddingVertical;
+                final FontMetrics durationPaintMetrics = durationPaint.getFontMetrics();
+                posFromTop += (int) -durationPaintMetrics.ascent;
+                canvas.drawText(durationText, centerX, posFromTop, durationPaint);
+                posFromTop += (int) durationPaintMetrics.descent;
+            }
 
             final List<Fare> fares = trip.fares;
             if (fares != null && !fares.isEmpty()) {
