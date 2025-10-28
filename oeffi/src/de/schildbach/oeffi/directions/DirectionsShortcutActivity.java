@@ -188,8 +188,7 @@ public class DirectionsShortcutActivity extends OeffiActivity implements Locatio
                     .valueOf(prefs.getString(Constants.PREFS_KEY_WALK_SPEED, WalkSpeed.NORMAL.name()));
             final int mtt = Integer.parseInt(prefs.getString(Constants.PREFS_KEY_MIN_TRANSFER_TIME, "-1"));
             final Integer minTransferTime = mtt < 0 ? null : mtt;
-            final Accessibility accessibility = Accessibility
-                    .valueOf(prefs.getString(Constants.PREFS_KEY_ACCESSIBILITY, Accessibility.NEUTRAL.name()));
+            final Accessibility accessibility = prefsGetAccessibility();
             final Set<Product> products =  loadProductFilter();
             final TripOptions options = new TripOptions(products, optimize, walkSpeed, minTransferTime, accessibility, null);
             query(networkProvider, from, to, options);

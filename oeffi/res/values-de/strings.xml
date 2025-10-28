@@ -413,6 +413,8 @@
     <string name="directions_preferences_min_transfer_time_summary">Wie lange benötigst du zum umsteigen? Diese Einstellung wirkt sich nicht auf alle Verkehrsnetze aus.</string>
     <string name="directions_preferences_accessibility_title">Barrierefreiheit</string>
     <string name="directions_preferences_accessibility_summary">Wie barrierefrei muss die Route sein? Diese Einstellung wirkt sich nicht auf alle Verkehrsnetze aus.</string>
+    <string name="directions_preferences_bicycle_carriage_title">Reise mit Fahrrad</string>
+    <string name="directions_preferences_bicycle_carriage_summary">Zeigt nützliche Information für Reisende mit Fahrrad.</string>
 
     <!-- navigation -->
     <string name="directions_trip_navigation_action_cancel">Navigation beenden</string>

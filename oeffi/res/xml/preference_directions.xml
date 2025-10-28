@@ -29,5 +29,11 @@
         android:key="accessibility"
         android:summary="@string/directions_preferences_accessibility_summary"
         android:title="@string/directions_preferences_accessibility_title" />
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="bicycle_travel"
+        android:summary="@string/directions_preferences_bicycle_carriage_summary"
+        android:title="@string/directions_preferences_bicycle_carriage_title"
+        />
 
 </PreferenceScreen>

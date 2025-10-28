@@ -58,6 +58,7 @@ public class Constants {
     public static final String PREFS_KEY_WALK_SPEED = "walk_speed";
     public static final String PREFS_KEY_MIN_TRANSFER_TIME = "min_transfer_time";
     public static final String PREFS_KEY_ACCESSIBILITY = "accessibility";
+    public static final String PREFS_KEY_BICYCLE_TRAVEL = "bicycle_travel";
     public static final String PREFS_KEY_LAST_VERSION = "last_version";
     public static final String PREFS_KEY_SHOW_INFO = "show_hints";
     public static final String PREFS_KEY_USER_INTERFACE_MAINMENU_SHAREAPP_ENABLED = "user_interface_mainmenu_shareapp_enabled";

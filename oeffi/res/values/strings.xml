@@ -414,6 +414,8 @@
     <string name="directions_preferences_min_transfer_time_summary">How long do you need for a transfer? This does not affect all transport networks.</string>
     <string name="directions_preferences_accessibility_title">Accessibility</string>
     <string name="directions_preferences_accessibility_summary">How accessible do you need the route to be? This does not affect all transport networks.</string>
+    <string name="directions_preferences_bicycle_carriage_title">Travel with Bicycle</string>
+    <string name="directions_preferences_bicycle_carriage_summary">Show useful information for those travelling with a bicycle.</string>
 
     <!-- navigation -->
     <string name="directions_trip_navigation_action_cancel">Stop navigation</string>

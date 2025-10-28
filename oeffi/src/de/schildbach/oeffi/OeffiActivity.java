@@ -707,6 +707,10 @@ public abstract class OeffiActivity extends ComponentActivity {
         return NetworkProvider.Accessibility.valueOf(prefs.getString(Constants.PREFS_KEY_ACCESSIBILITY, NetworkProvider.Accessibility.NEUTRAL.name()));
     }
 
+    protected boolean prefsIsBicycleTravel() {
+        return prefs.getBoolean(Constants.PREFS_KEY_BICYCLE_TRAVEL, false);
+    }
+
     protected Set<Product> getNetworkDefaultProducts() {
         final NetworkProvider networkProvider = network != null ? NetworkProviderFactory.provider(network) : null;
         return networkProvider != null ? networkProvider.defaultProducts() : Product.ALL_SELECTABLE;
