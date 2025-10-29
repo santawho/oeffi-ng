@@ -499,11 +499,12 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             }
 
             final List<Fare> fares = trip.fares;
-            if (fares != null && !fares.isEmpty()) {
+            if (fares != null) {
                 // minimum adult fare
                 final Fare fare = fares.stream()
                         .filter(f -> f.type == Fare.Type.ADULT)
-                        .min((a, b) -> (int) ((a.fare - b.fare) * 1000)).get();
+                        .min((a, b) -> (int) ((a.fare - b.fare) * 1000))
+                        .orElse(null);
                 if (fare != null) {
                     final String fareText = String.format(Locale.US, "%s\u2009%.2f",
                             fare.currency.getSymbol(), fare.fare);
