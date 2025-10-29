@@ -500,15 +500,20 @@ public final class TripsGalleryAdapter extends BaseAdapter {
 
             final List<Fare> fares = trip.fares;
             if (fares != null && !fares.isEmpty()) {
-                // minimum fare
-                final Fare fare = fares.stream().min((a, b) -> (int) ((a.fare - b.fare) * 1000)).get();
-                final String fareText = String.format(Locale.US, "%s\u2009%.2f", fare.currency.getSymbol(), fare.fare);
+                // minimum adult fare
+                final Fare fare = fares.stream()
+                        .filter(f -> f.type == Fare.Type.ADULT)
+                        .min((a, b) -> (int) ((a.fare - b.fare) * 1000)).get();
+                if (fare != null) {
+                    final String fareText = String.format(Locale.US, "%s\u2009%.2f",
+                            fare.currency.getSymbol(), fare.fare);
 
-                posFromTop += paddingVertical;
-                final FontMetrics farePaintMetrics = farePaint.getFontMetrics();
-                posFromTop += (int) -farePaintMetrics.ascent;
-                canvas.drawText(fareText, centerX, posFromTop, farePaint);
-                posFromTop += (int) farePaintMetrics.descent;
+                    posFromTop += paddingVertical;
+                    final FontMetrics farePaintMetrics = farePaint.getFontMetrics();
+                    posFromTop += (int) -farePaintMetrics.ascent;
+                    canvas.drawText(fareText, centerX, posFromTop, farePaint);
+                    posFromTop += (int) farePaintMetrics.descent;
+                }
             }
 
             if (!trip.isTravelable()) {
