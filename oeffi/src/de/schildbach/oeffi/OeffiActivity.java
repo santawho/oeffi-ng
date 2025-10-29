@@ -493,7 +493,7 @@ public abstract class OeffiActivity extends ComponentActivity {
 
     @NonNull
     private String getVoiceControlOption() {
-        return prefs.getString(PREFS_KEY_VOICE_CONTROL_MODE, "false");
+        return prefs.getString(PREFS_KEY_VOICE_CONTROL_MODE, VOICE_CONTROL_OPTION_OFF);
     }
 
     private void startVoiceInput() {
