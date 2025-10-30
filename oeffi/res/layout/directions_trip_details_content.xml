@@ -141,9 +141,15 @@
                                         </LinearLayout>
                                     </LinearLayout>
 
-                                    <HorizontalScrollView
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content">
+                                    <!-- NOTE:
+                                        Since we now use horizontal scrolling for the HorizontalPager,
+                                        horizontal scrolling on the fares table seems to be an anti-pattern.
+                                        Instead, we set shrinkColumns on the very long fare name column,
+                                        which causes the column to line wrap.
+                                        -->
+                                    <!-- <HorizontalScrollView -->
+                                    <!--     android:layout_width="match_parent" -->
+                                    <!--     android:layout_height="wrap_content"> -->
                                         <TableLayout
                                             android:id="@+id/directions_trip_details_fares"
                                             android:layout_width="wrap_content"
@@ -155,8 +161,9 @@
                                             android:paddingLeft="@dimen/text_padding_horizontal_verylax"
                                             android:paddingRight="@dimen/text_padding_horizontal_verylax"
                                             android:paddingTop="@dimen/text_padding_vertical_lax"
+                                            android:shrinkColumns="1"
                                             android:stretchColumns="2" />
-                                    </HorizontalScrollView>
+                                    <!-- </HorizontalScrollView> -->
 
                                     <TextView
                                         android:id="@+id/directions_trip_details_not_feasible"
