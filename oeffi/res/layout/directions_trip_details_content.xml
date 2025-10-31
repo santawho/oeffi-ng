@@ -42,7 +42,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent">
 
-                            <ScrollView
+                            <androidx.core.widget.NestedScrollView
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:clipToPadding="false"
@@ -215,7 +215,7 @@
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content" />
                                 </LinearLayout>
-                            </ScrollView>
+                            </androidx.core.widget.NestedScrollView>
 
                             <LinearLayout
                                 android:id="@+id/directions_trip_details_disclaimer_group"
