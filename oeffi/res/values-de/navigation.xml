@@ -27,6 +27,9 @@
         <item>Immer</item>
     </string-array>
 
+    <string name="navigation_preferences_media_channel_summary">Erhöhe die Lautstärke bei Ausgabe auf dem Medienkanal, z.B. Standard für Kopfhörer</string>
+    <string name="navigation_preferences_media_channel_title">Lautstärke erhöhen</string>
+
     <string name="navigation_preferences_reduced_sounds_summary">Nutze reduzierte Töne (kürzer und geringer Lautstärke) als Navigations-Erinnerungen</string>
     <string name="navigation_preferences_reduced_sounds_title">Reduzierte Töne</string>
 

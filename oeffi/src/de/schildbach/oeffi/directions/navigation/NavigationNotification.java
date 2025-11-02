@@ -908,7 +908,7 @@ public class NavigationNotification {
 
         if (anyChanges) {
             playAlarmSoundAndVibration(-1, SOUND_ALARM, VIBRATION_PATTERN_ALARM, newSpeakTexts, onRide);
-        } else if (reminderSoundId != 0 && reminderSoundId != SOUND_REMIND_VIA_NOTIFICATION) {
+        } else if ((reminderSoundId != 0 || !newSpeakTexts.isEmpty()) && reminderSoundId != SOUND_REMIND_VIA_NOTIFICATION) {
             playAlarmSoundAndVibration(-1, reminderSoundId, VIBRATION_PATTERN_REMIND, newSpeakTexts, onRide);
         }
 

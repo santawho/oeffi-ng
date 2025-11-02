@@ -41,6 +41,13 @@
         android:key="navigation_speech_output"
         android:summary="@string/navigation_preferences_speech_output_summary"
         android:title="@string/navigation_preferences_speech_output_title" />
+    <SeekBarPreference
+        android:key="navigation_media_channel_amplification"
+        android:defaultValue="0"
+        android:min="0"
+        android:max="100"
+        android:summary="@string/navigation_preferences_media_channel_summary"
+        android:title="@string/navigation_preferences_media_channel_title" />
     <CheckBoxPreference
         android:defaultValue="false"
         android:key="navigation_reduced_sounds"

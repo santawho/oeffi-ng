@@ -44,6 +44,8 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.ResourceUri;
 
 public class NotificationSoundManager {
+    public static final String PREF_KEY_MEDIA_CHANNEL_AMPLIFICATION = "navigation_media_channel_amplification";
+
     private static NotificationSoundManager instance;
     private static final Logger log = LoggerFactory.getLogger(NotificationSoundManager.class);
 
@@ -59,6 +61,8 @@ public class NotificationSoundManager {
     private TextToSpeech textToSpeech;
     private boolean isTextToSpeechUp;
     private AudioFocusRequest currentAudioFocusRequest;
+    private int savedVolume = -1;
+
     private final ArrayList<Speakable> speakableQueue = new ArrayList<>();
 
     public static class Speakable {
@@ -85,6 +89,7 @@ public class NotificationSoundManager {
                 textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
                     @Override
                     public void onStart(final String utteranceId) {
+//                        onSoundOutputStart();
                     }
 
                     @Override
@@ -98,8 +103,8 @@ public class NotificationSoundManager {
                     }
 
                     private void onEnd(final String utteranceId, final boolean isError) {
-                        if (!textToSpeech.isSpeaking())
-                            onSpeechEnd();
+//                        if (!textToSpeech.isSpeaking())
+//                            onSoundOutputEnd();
                     }
                 });
 
@@ -135,14 +140,18 @@ public class NotificationSoundManager {
         if (vibrationPattern != null) {
             ((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(vibrationPattern, -1);
         }
-        if (soundId != 0) {
+
+        final boolean playSound = soundId != 0;
+        final boolean playSpeech = speakTexts != null && !speakTexts.isEmpty();
+
+        if (playSound) {
             final AudioAttributes audioAttributes = new AudioAttributes.Builder()
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                     .setUsage(soundUsage)
                     .build();
             final Ringtone alarmTone = RingtoneManager.getRingtone(context, ResourceUri.fromResource(context, soundId));
             alarmTone.setAudioAttributes(audioAttributes);
-            requestAudioFocus(audioAttributes);
+            requestAudioFocus(audioAttributes, playSpeech);
             log.info("sound starts playing: {} usage {}", soundId, soundUsage);
             alarmTone.play();
             while (alarmTone.isPlaying()) {
@@ -154,13 +163,21 @@ public class NotificationSoundManager {
                 }
             }
             log.info("sound has stopped: {} usage {}", soundId, soundUsage);
+        }
+
+        if (playSpeech) {
+            if (!playSound) {
+                final AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                        .setUsage(soundUsage)
+                        .build();
+                requestAudioFocus(audioAttributes, playSpeech);
+            }
             boolean isSpeaking = false;
-            if (speakTexts != null && !speakTexts.isEmpty()) {
-                final int audioStream = getAudioStreamFromUsage(soundUsage);
-                for (String text : speakTexts) {
-                    log.info("speaking: \"{}\" stream {}", text, audioStream);
-                    isSpeaking |= speak(text, audioStream);
-                }
+            final int audioStream = getAudioStreamFromUsage(soundUsage);
+            for (String text : speakTexts) {
+                log.info("speaking: \"{}\" stream {}", text, audioStream);
+                isSpeaking |= speak(text, audioStream);
             }
             while (textToSpeech.isSpeaking()) {
 //                log.info("speech is speaking");
@@ -170,23 +187,54 @@ public class NotificationSoundManager {
                     break;
                 }
             }
-            abandonAudioFocusRequest();
         }
+
+        abandonAudioFocusRequest();
     }
 
-    private void requestAudioFocus(final AudioAttributes audioAttributes) {
+    private void requestAudioFocus(final AudioAttributes audioAttributes, final boolean exclusive) {
         if (currentAudioFocusRequest != null)
             return;
 
         log.info("requesting audio focus");
         final AudioManager audioManager = getAudioManager();
         currentAudioFocusRequest =
-                new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
+                new AudioFocusRequest.Builder(
+                            exclusive
+                                ? AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE
+                                : AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
                         .setAudioAttributes(audioAttributes)
                         .setAcceptsDelayedFocusGain(false)
                         .setWillPauseWhenDucked(false)
                         .build();
-        audioManager.requestAudioFocus(currentAudioFocusRequest);
+        try {
+            audioManager.requestAudioFocus(currentAudioFocusRequest);
+        } catch (RuntimeException e) {
+            log.warn("requesting audio focus", e);
+        }
+
+        if (exclusive && audioAttributes.getUsage() == AudioAttributes.USAGE_MEDIA && savedVolume < 0) {
+            final int amplification = Application.getInstance().getSharedPreferences()
+                    .getInt(PREF_KEY_MEDIA_CHANNEL_AMPLIFICATION, 0);
+            if (amplification > 0) {
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    // ignore
+                }
+                final int volumeBeforePlaying = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+                final int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+                savedVolume = volumeBeforePlaying;
+                final int playVolume = (int) ((float) (maxVolume - volumeBeforePlaying)
+                        * (float) amplification / 100.0
+                        + (float) volumeBeforePlaying
+                        + 0.49);
+                log.info("set volume {}, saving = {}", playVolume, savedVolume);
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, playVolume, 0);
+            } else {
+                log.info("do not reduce to volume");
+            }
+        }
     }
 
     private void abandonAudioFocusRequest() {
@@ -195,7 +243,20 @@ public class NotificationSoundManager {
 
         log.info("abandoning audio focus");
         final AudioManager audioManager = getAudioManager();
-        audioManager.abandonAudioFocusRequest(currentAudioFocusRequest);
+
+        if (savedVolume >= 0) {
+            log.info("reset volume {}", savedVolume);
+            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, savedVolume, 0);
+            savedVolume = -1;
+        } else {
+            log.info("do not reset volume");
+        }
+
+        try {
+            audioManager.abandonAudioFocusRequest(currentAudioFocusRequest);
+        } catch (RuntimeException e) {
+            log.warn("abandoning audio focus", e);
+        }
         currentAudioFocusRequest = null;
     }
 
@@ -259,7 +320,8 @@ public class NotificationSoundManager {
             if (!speakSync(speakable))
                 return false;
             synchronized (speakableQueue) {
-                speakableQueue.remove(0);
+                if (!speakableQueue.isEmpty())
+                    speakableQueue.remove(0);
             }
         }
         return true;
@@ -273,9 +335,5 @@ public class NotificationSoundManager {
 
         return TextToSpeech.SUCCESS ==
                 textToSpeech.speak(speakable.text, TextToSpeech.QUEUE_ADD, params, utteranceId);
-    }
-
-    private void onSpeechEnd() {
-//        abandonAudioFocusRequest();
     }
 }

@@ -38,6 +38,9 @@
         <item>always</item>
     </string-array>
 
+    <string name="navigation_preferences_media_channel_summary">Amplify sound volume when played on media channel, e.g. default for headphones</string>
+    <string name="navigation_preferences_media_channel_title">Volume Amplification</string>
+
     <string name="navigation_preferences_reduced_sounds_summary">Play reduced sounds (shorter and lower volume) as navigation reminders</string>
     <string name="navigation_preferences_reduced_sounds_title">Reduced Sounds</string>
 
