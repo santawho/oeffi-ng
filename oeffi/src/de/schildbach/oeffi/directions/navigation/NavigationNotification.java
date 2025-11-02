@@ -1497,15 +1497,16 @@ public class NavigationNotification {
         final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
         final Stop stop = publicLeg.departureStop;
         final Position newPosition = stop.getDeparturePosition();
+        final Position oldPosition = prevPosition != null ? prevPosition : stop.plannedDeparturePosition;
         newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.DEPARTURE_POSITION_CHANGE, context.getString(
                 R.string.navigation_event_log_entry_departure_position_change,
-                platformForLogMessage(prevPosition, newPosition),
+                platformForLogMessage(oldPosition, newPosition),
                 publicLeg.line.label,
                 Formats.fullLocationName(stop.location),
                 Formats.formatTime(timeZoneSelector, stop.getDepartureTime(true)))));
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_departure_position_change,
-                platformForSpeakText(prevPosition, newPosition)));
+                platformForSpeakText(oldPosition, newPosition)));
     }
 
     private void addEventOutputArrivalPositionChange(
@@ -1514,15 +1515,16 @@ public class NavigationNotification {
         final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
         final Stop stop = publicLeg.arrivalStop;
         final Position newPosition = stop.getArrivalPosition();
+        final Position oldPosition = prevPosition != null ? prevPosition : stop.plannedArrivalPosition;
         newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.ARRIVAL_POSITION_CHANGE, context.getString(
                 R.string.navigation_event_log_entry_arrival_position_change,
-                platformForLogMessage(prevPosition, newPosition),
+                platformForLogMessage(oldPosition, newPosition),
                 publicLeg.line.label,
                 Formats.fullLocationName(stop.location),
                 Formats.formatTime(timeZoneSelector, stop.getDepartureTime(true)))));
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_arrival_position_change,
-                platformForSpeakText(prevPosition, newPosition)));
+                platformForSpeakText(oldPosition, newPosition)));
     }
 
     private void addEventOutputNextTransferCritical() {
