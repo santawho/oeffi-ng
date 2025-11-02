@@ -333,6 +333,7 @@ public class TripRenderer {
     public NotificationData notificationData;
     public Point refPoint;
     public Date refTime;
+    public boolean futureTransferCritical;
     private Boolean feasible;
 
     public TripRenderer(final TripRenderer previous, final Trip trip, final boolean isJourney, final Date now) {
@@ -426,7 +427,9 @@ public class TripRenderer {
 
     public void evaluateByTime(final Date now) {
         notificationData = new NotificationData();
+        futureTransferCritical = false;
         setNextEventClock(now);
+        boolean isCurrentOrFuture = false;
         for (int iLeg = 0; iLeg < legs.size(); ++iLeg) {
             final TripRenderer.LegContainer legC = legs.get(iLeg);
             final boolean isCurrent;
@@ -442,7 +445,10 @@ public class TripRenderer {
             if (isCurrent) {
                 currentLeg = legC;
                 notificationData.currentLegIndex = iLeg;
+                isCurrentOrFuture = true;
             }
+            if (isCurrentOrFuture && legC.transferCritical)
+                futureTransferCritical = true;
         }
         final char[] legsCriticality = new char[legs.size()];
         for (int iLeg = 0; iLeg < legs.size(); ++iLeg) {

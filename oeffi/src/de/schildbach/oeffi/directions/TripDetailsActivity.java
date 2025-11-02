@@ -102,6 +102,7 @@ import de.schildbach.oeffi.util.LocationHelper;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.ToggleImageButton;
+import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.oeffi.util.locationview.LocationTextView;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
@@ -1584,6 +1585,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         TextView depView = findViewById(R.id.navigation_next_event_departure);
         depView.setText(tripRenderer.nextEventDepartureName);
         depView.setVisibility(tripRenderer.nextEventDepartureName != null ? View.VISIBLE : View.GONE);
+
+        ViewUtils.setVisibility(findViewById(R.id.navigation_next_event_critical),
+                tripRenderer.futureTransferCritical);
     }
 
     private Spanned getLeftTimeFormatted(final Date now, final Date endTime) {

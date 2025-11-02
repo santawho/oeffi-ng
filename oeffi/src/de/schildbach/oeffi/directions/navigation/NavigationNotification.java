@@ -1216,6 +1216,9 @@ public class NavigationNotification {
         remoteViews.setTextViewText(R.id.navigation_notification_next_event_departure, tripRenderer.nextEventDepartureName);
         remoteViews.setViewVisibility(R.id.navigation_notification_next_event_departure,
                 tripRenderer.nextEventDepartureName != null ? View.VISIBLE : View.GONE);
+
+        remoteViews.setViewVisibility(R.id.navigation_notification_critical,
+                tripRenderer.futureTransferCritical ? View.VISIBLE : View.GONE);
     }
 
     private static void remoteViewsSetBackgroundColor(final RemoteViews remoteViews, int viewId, int color) {
