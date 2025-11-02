@@ -286,9 +286,6 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             timeView.setText(text);
         }
 
-        favoriteButton
-                .setChecked(selectedFavState != null && selectedFavState == FavoriteStationsProvider.TYPE_FAVORITE);
-
         final View disclaimerView = findViewById(R.id.stations_station_details_disclaimer_group);
         ViewCompat.setOnApplyWindowInsetsListener(disclaimerView, (v, windowInsets) -> {
             final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -551,10 +548,13 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         selectedLines = groupDestinationsByLine(station.getLines());
 
         selectedFavState = FavoriteStationsProvider.favState(getContentResolver(), selectedNetwork, selectedStation);
+        favoriteButton.setChecked
+                (selectedFavState != null && selectedFavState == FavoriteStationsProvider.TYPE_FAVORITE);
 
-        if (selectedStation.hasCoord())
+        if (selectedStation.hasCoord()) {
             getMapView().getController()
                     .animateTo(new GeoPoint(selectedStation.getLatAsDouble(), selectedStation.getLonAsDouble()));
+        }
 
         updateGUI();
 
