@@ -41,8 +41,8 @@ public class FavoriteUtils {
         values.put(FavoriteStationsProvider.KEY_STATION_TYPE, station.type.name());
         values.put(FavoriteStationsProvider.KEY_STATION_PLACE, station.place);
         values.put(FavoriteStationsProvider.KEY_STATION_NAME, station.name);
-        values.put(FavoriteStationsProvider.KEY_STATION_LAT, station.getLatAs1E6());
-        values.put(FavoriteStationsProvider.KEY_STATION_LON, station.getLonAs1E6());
+        values.put(FavoriteStationsProvider.KEY_STATION_LAT, station.hasCoord() ? station.getLatAs1E6() : 0);
+        values.put(FavoriteStationsProvider.KEY_STATION_LON, station.hasCoord() ? station.getLonAs1E6() : 0);
 
         final Uri rowUri = contentResolver.insert(FavoriteStationsProvider.CONTENT_URI(), values);
 

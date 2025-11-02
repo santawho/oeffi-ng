@@ -134,8 +134,11 @@ public class FavoriteStationsProvider extends ContentProvider {
         final int nameIndex = cursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_NAME);
         final int latIndex = cursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_LAT);
         final int lonIndex = cursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_LON);
+        final int lat = cursor.getInt(latIndex);
+        final int lon = cursor.getInt(lonIndex);
+        final Point coord = (lat == 0 && lon == 0) ? null : Point.from1E6(lat, lon);
         return new Location(LocationType.valueOf(cursor.getString(typeIndex)), cursor.getString(idIndex),
-                Point.from1E6(cursor.getInt(latIndex), cursor.getInt(lonIndex)), cursor.getString(placeIndex),
+                coord, cursor.getString(placeIndex),
                 cursor.getString(nameIndex));
     }
 

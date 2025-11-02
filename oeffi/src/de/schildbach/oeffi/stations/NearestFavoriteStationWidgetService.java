@@ -282,19 +282,20 @@ public class NearestFavoriteStationWidgetService extends JobService {
                 final String stationId = favCursor.getString(stationIdCol);
                 String stationPlace = favCursor.getString(stationPlaceCol);
                 String stationName = favCursor.getString(stationNameCol);
-                Point stationPoint = Point.from1E6(favCursor.getInt(stationLatCol), favCursor.getInt(stationLonCol));
+                final int lat = favCursor.getInt(stationLatCol);
+                final int lon = favCursor.getInt(stationLonCol);
+                final Point stationPoint = (lat == 0 && lon == 0) ? null : Point.from1E6(lat, lon);
 
                 try {
                     final NetworkId networkId = NetworkId.valueOf(network);
                     NetworkProviderFactory.provider(networkId); // check if existent
 
-                    if (stationPoint.getLatAsDouble() > 0 || stationPoint.getLonAsDouble() > 0) {
-                        final Favorite favorite = new Favorite(
-                                networkId,
-                                stationId, stationType, stationPlace, stationName, stationPoint,
-                                GeoUtils.distanceBetween(here, stationPoint).distanceInMeters);
-                        favorites.add(favorite);
-                    }
+                    final Favorite favorite = new Favorite(
+                            networkId,
+                            stationId, stationType, stationPlace, stationName,
+                            stationPoint,
+                            stationPoint == null ? 99999999.9f : GeoUtils.distanceBetween(here, stationPoint).distanceInMeters);
+                    favorites.add(favorite);
                 } catch (final IllegalArgumentException x) {
                     log.info("Unknown network {}, favorite {}", network, stationId);
                 }
