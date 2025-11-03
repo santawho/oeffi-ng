@@ -484,7 +484,7 @@ public class TripRenderer {
             final Trip.Public nextPublicLeg = (nextLegC != null) ? nextLegC.publicLeg : null;
             final Stop nextDepartureStop = (nextPublicLeg != null) ? nextPublicLeg.departureStop : null;
             final String depName = (nextDepartureStop == null) ? null
-                    : (walkLegC != null && walkLegC.individualLeg.type == Trip.Individual.Type.WALK)
+                    : (walkLegC != null && (walkLegC.individualLeg == null || walkLegC.individualLeg.type == Trip.Individual.Type.WALK))
                     ? nextDepartureStop.location.name
                     : Formats.fullLocationName(nextDepartureStop.location);
             final boolean depChanged = depName != null && !depName.equals(targetName);
