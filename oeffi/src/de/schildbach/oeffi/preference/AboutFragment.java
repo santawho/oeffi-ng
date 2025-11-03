@@ -38,6 +38,7 @@ public class AboutFragment extends PreferenceFragment {
     }
 
     private static final String KEY_ABOUT_VERSION = "about_version";
+    private static final String KEY_ABOUT_COPYRIGHT = "about_copyright";
     private static final String KEY_ABOUT_MARKET_APP = "about_market_app";
     private static final String KEY_ABOUT_CHANGELOG = "about_changelog";
     private static final String KEY_ABOUT_POLICY = "about_policy";
@@ -91,6 +92,9 @@ public class AboutFragment extends PreferenceFragment {
             removeOrDisablePreference(KEY_ABOUT_APP_UPDATE_CATEGORY);
         }
 
+        setupActionPreference(KEY_ABOUT_VERSION, AboutFragment.class, EnableExtrasActionHandler.class);
+        setupActionPreference(KEY_ABOUT_COPYRIGHT, AboutFragment.class, EnableExtrasActionHandler.class);
+
         final String policyUrl = application.getTranslatedString(R.string.about_privacy_policy_url);
         final Preference prefPolicy = findPreference(KEY_ABOUT_POLICY);
         prefPolicy.setSummary(policyUrl);
@@ -100,6 +104,18 @@ public class AboutFragment extends PreferenceFragment {
         final Preference prefFaq = findPreference(KEY_ABOUT_FAQ);
         prefFaq.setSummary(faqUrl);
         prefFaq.setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(faqUrl)));
+    }
+
+    public static class EnableExtrasActionHandler extends ActionHandler {
+        @Override
+        public boolean handleAction(final PreferenceActivity context, final String prefkey) {
+            if (KEY_ABOUT_VERSION.equals(prefkey))
+                ExtrasFragment.handleTick(1);
+            else if (KEY_ABOUT_COPYRIGHT.equals(prefkey))
+                ExtrasFragment.handleTick(2);
+
+            return true;
+        }
     }
 
     public static class ShareActionHandler extends ActionHandler {

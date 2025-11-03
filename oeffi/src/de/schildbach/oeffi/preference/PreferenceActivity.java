@@ -111,6 +111,8 @@ public class PreferenceActivity extends android.preference.PreferenceActivity {
     @Override
     public void onBuildHeaders(final List<Header> target) {
         loadHeadersFromResource(R.xml.preference_headers, target);
+        if (ExtrasFragment.isExtrasEnabled())
+            target.add(ExtrasFragment.getHeader());
         target.add(AboutFragment.getHeader());
     }
 
@@ -133,6 +135,7 @@ public class PreferenceActivity extends android.preference.PreferenceActivity {
                 || NavigationFragment.class.getName().equals(fragmentName)
                 || TravelAlarmFragment.class.getName().equals(fragmentName)
                 || ShortcutsFragment.class.getName().equals(fragmentName)
+                || ExtrasFragment.class.getName().equals(fragmentName)
                 || AboutFragment.class.getName().equals(fragmentName);
     }
 }

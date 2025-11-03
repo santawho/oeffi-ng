@@ -79,6 +79,10 @@
     <string name="about_participate_title">Participate</string>
     <string name="about_market_app_title">Rate or Review Öffi</string>
 
+    <!-- preferences extras -->
+    <string name="extras_title">Extras</string>
+    <string name="extras_bahnvorhersage_enabled_title">Activate Bahnvorhersage</string>
+
     <!-- network picker -->
     <string name="network_picker_firsttime_message">Because you are using Öffi for the first time, you need to pick a region that suits you well. You
 		can change this later.</string>

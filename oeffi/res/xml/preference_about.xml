@@ -6,6 +6,7 @@
         android:key="about_version"
         android:title="Version" />
     <Preference
+        android:key="about_copyright"
         android:summary="@string/about_copyright_summary"
         android:title="@string/about_copyright_title" />
     <Preference

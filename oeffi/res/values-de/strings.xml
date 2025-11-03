@@ -79,6 +79,10 @@
     <string name="about_participate_title">Mitmachen</string>
     <string name="about_market_app_title">Öffi bewerten oder rezensieren</string>
 
+    <!-- preferences extras -->
+    <string name="extras_title">Extras</string>
+    <string name="extras_bahnvorhersage_enabled_title">Bahnvorhersage aktivieren</string>
+
     <!-- network picker -->
     <string name="network_picker_firsttime_message">Da du Öffi das erste Mal nutzt, musst Du die Region wählen die am besten passt. Du kannst das später ändern.</string>
     <string name="network_picker_entry_usage">%.1f MB\ninstalliert</string>
