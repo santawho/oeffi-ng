@@ -249,7 +249,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         actionBar.addProgressButton().setOnClickListener(v -> requestReload());
 
         swipeRefresh = findViewById(R.id.trips_refresh);
-        swipeRefresh.setOnRefreshListener(() -> requestReload());
+        swipeRefresh.setOnRefreshListener(this::requestReload);
 
         barView = findViewById(R.id.trips_bar_view);
         barView.setRenderConfig(renderConfig);

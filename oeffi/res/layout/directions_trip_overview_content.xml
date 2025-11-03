@@ -7,50 +7,51 @@
 
     <include layout="@layout/action_bar" />
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/trips_refresh"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <FrameLayout
+        <de.schildbach.oeffi.util.StrictSwipeRefreshLayout
+            android:id="@+id/trips_refresh"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
             <de.schildbach.oeffi.directions.TripsGallery
-                android:id="@+id/trips_bar_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scrollbars="horizontal"
-                android:spacing="0px"
-                android:unselectedAlpha="1" />
+                    android:id="@+id/trips_bar_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scrollbars="horizontal"
+                    android:spacing="0px"
+                    android:unselectedAlpha="1" />
 
-            <FrameLayout
-                android:id="@+id/directions_trip_overview_disclaimer_group"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="@dimen/text_padding_horizontal_verylax"
-                android:layout_marginRight="@dimen/text_padding_horizontal_verylax"
-                android:layout_marginTop="@dimen/text_padding_vertical"
-                android:layout_marginBottom="@dimen/text_padding_vertical">
+        </de.schildbach.oeffi.util.StrictSwipeRefreshLayout>
 
-                <TextView
-                    android:id="@+id/trips_server_product"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom|left"
-                    android:gravity="left"
-                    android:textSize="@dimen/font_size_disclaimer"
-                    android:visibility="gone" />
+        <FrameLayout
+            android:id="@+id/directions_trip_overview_disclaimer_group"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="@dimen/text_padding_horizontal_verylax"
+            android:layout_marginRight="@dimen/text_padding_horizontal_verylax"
+            android:layout_marginTop="@dimen/text_padding_vertical"
+            android:layout_marginBottom="@dimen/text_padding_vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom|right"
-                    android:gravity="right"
-                    android:text="@string/disclaimer_responsibility_2line"
-                    android:textSize="@dimen/font_size_disclaimer" />
-            </FrameLayout>
+            <TextView
+                android:id="@+id/trips_server_product"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|left"
+                android:gravity="left"
+                android:textSize="@dimen/font_size_disclaimer"
+                android:visibility="gone" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|right"
+                android:gravity="right"
+                android:text="@string/disclaimer_responsibility_2line"
+                android:textSize="@dimen/font_size_disclaimer" />
         </FrameLayout>
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    </FrameLayout>
 
 </LinearLayout>
