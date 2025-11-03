@@ -27,7 +27,7 @@ import de.schildbach.oeffi.R;
 
 public class ExtrasFragment extends PreferenceFragment {
     public static final String KEY_EXTRAS_ENABLED = "extras_enabled";
-    public static final String KEY_EXTRAS_BAHNVORHERSAGE_ENABLED = "extras_bahnvorhersage_enabled";
+    public static final String KEY_EXTRAS_TRIPEXTRAINFO_ENABLED = "extras_tripextrainfo_enabled";
 
     private static int counter = 0;
 
@@ -63,8 +63,8 @@ public class ExtrasFragment extends PreferenceFragment {
         addPreferencesFromResource(R.xml.preference_extras);
     }
 
-    public static boolean isBahnvorhersageEnabled() {
+    public static boolean isTripExtraInfoEnabled() {
         return Application.getInstance().getSharedPreferences()
-                .getBoolean(KEY_EXTRAS_BAHNVORHERSAGE_ENABLED, false);
+                .getBoolean(KEY_EXTRAS_TRIPEXTRAINFO_ENABLED, false);
     }
 }

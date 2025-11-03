@@ -68,8 +68,6 @@ import de.schildbach.pte.dto.PTDate;
 import de.schildbach.pte.dto.Trip;
 
 public class TripNavigatorActivity extends TripDetailsActivity {
-    private static final Logger log = LoggerFactory.getLogger(TripNavigatorActivity.class);
-
     private static final long NAVIGATION_AUTO_REFRESH_INTERVAL_SECS = 110;
     public static final String INTENT_EXTRA_DELETEREQUEST = TripNavigatorActivity.class.getName() + ".deleterequest";
     public static final String INTENT_EXTRA_NEXTEVENT = TripNavigatorActivity.class.getName() + ".nextevent";
@@ -82,11 +80,11 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         if (!NavigationAlarmManager.getInstance().checkPermission(contextActivity))
             return false;
 
-        RenderConfig rc = new RenderConfig();
+        final RenderConfig rc = new RenderConfig();
         rc.isNavigation = true;
         rc.isJourney = renderConfig.isJourney;
         rc.queryTripsRequestData = renderConfig.queryTripsRequestData;
-        Intent intent = buildStartIntent(contextActivity, network, trip, rc, false, false, null, sameWindow);
+        final Intent intent = buildStartIntent(contextActivity, network, trip, rc, false, false, null, sameWindow);
         contextActivity.startActivity(intent);
         return true;
     }
@@ -159,7 +157,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         // trigger from notification refresher
         updateTriggerReceiver = new BroadcastReceiver() {
             @Override
-            public void onReceive(Context context, Intent intent) {
+            public void onReceive(final Context context, final Intent intent) {
                 if (!isPaused) {
                     nextNavigationRefreshTime = 1; // forces refresh
                     if (!doCheckAutoRefresh(false))
@@ -247,7 +245,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     }
 
     @Override
-    protected void onNewIntent(@NonNull Intent intent) {
+    protected void onNewIntent(@NonNull final Intent intent) {
         super.onNewIntent(intent);
         if (!handleDeleteNotification(intent)) {
             doCheckAutoRefresh(true);
@@ -295,10 +293,14 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults, int deviceId) {
+    public void onRequestPermissionsResult(
+            final int requestCode,
+            @NonNull final String[] permissions,
+            @NonNull final int[] grantResults,
+            final int deviceId) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults, deviceId);
         boolean granted = true;
-        for (int grantResult : grantResults) {
+        for (final int grantResult : grantResults) {
             if (grantResult != PackageManager.PERMISSION_GRANTED) {
                 granted = false;
                 break;
@@ -322,7 +324,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     private boolean doCheckAutoRefresh(final boolean doNotifcationUpdate) {
         if (isPaused) return false;
         if (nextNavigationRefreshTime < 0) return false;
-        long now = new Date().getTime();
+        final long now = new Date().getTime();
         if (now < nextNavigationRefreshTime) return false;
         refreshNavigation(doNotifcationUpdate, false);
         return true;
@@ -343,7 +345,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
         navigationRefreshRunnable = () -> {
             try {
-                Trip updatedTrip = navigator.refresh(forceRefreshAll, new Date());
+                final Trip updatedTrip = navigator.refresh(forceRefreshAll, new Date());
                 if (updatedTrip == null) {
                     handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));
                 } else {
@@ -376,7 +378,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
             final JourneyRef currentJourneyRef,
             final JourneyRef feederJourneyRef,
             final JourneyRef connectionJourneyRef,
-            QueryTripsRunnable.TripRequestData queryTripsRequestData) {
+            final QueryTripsRunnable.TripRequestData queryTripsRequestData) {
         final PTDate arrivalTime = stop.getArrivalTime();
         final TimeSpec.Absolute time = new TimeSpec.Absolute(TimeSpec.DepArr.DEPART,
                 arrivalTime != null ? arrivalTime.getTime() : stop.getDepartureTime().getTime());
@@ -477,7 +479,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         final Trip trip = aTrip != null ? aTrip : tripRenderer.trip;
         final Intent intent = getIntent();
         final NavigationNotification navigationNotification = new NavigationNotification(intent);
-        NavigationNotification.Configuration configuration = Objects.clone(navigationNotification.getConfiguration());
+        final NavigationNotification.Configuration configuration = Objects.clone(navigationNotification.getConfiguration());
         configuration.soundEnabled = soundEnabled;
         NavigationNotification.updateFromForeground(this, intent, trip, configuration,
                 () -> runOnUiThread(this::updateGUI));

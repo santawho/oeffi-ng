@@ -84,6 +84,7 @@ import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.TripAware;
+import de.schildbach.oeffi.preference.ExtrasFragment;
 import de.schildbach.oeffi.util.GoogleMapsUtils;
 import de.schildbach.oeffi.util.HorizontalPager;
 import de.schildbach.oeffi.util.KmlProducer;
@@ -125,6 +126,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -557,6 +559,24 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final int newId = viewPager.getCurrentView().getId();
             shownPageChanged(newId);
         });
+
+        if (ExtrasFragment.isTripExtraInfoEnabled())
+            backgroundHandler.post(this::loadTripDetails);
+    }
+
+    private void loadTripDetails() {
+        final NetworkProvider provider = NetworkProviderFactory.provider(network);
+        if (!provider.hasCapabilities(NetworkProvider.Capability.TRIP_DETAILS))
+            return;
+        try {
+            final Trip newTrip = provider.queryTripDetails(tripRenderer.trip);
+            runOnUiThread(() -> {
+                setupFromTrip(newTrip);
+                updateGUI();
+            });
+        } catch (final IOException e) {
+            log.error("loadTripDetails", e);
+        }
     }
 
     private void shareCalendarEntry() {

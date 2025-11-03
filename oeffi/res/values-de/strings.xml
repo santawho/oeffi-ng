@@ -81,7 +81,7 @@
 
     <!-- preferences extras -->
     <string name="extras_title">Extras</string>
-    <string name="extras_bahnvorhersage_enabled_title">Bahnvorhersage aktivieren</string>
+    <string name="extras_tripextrainfo_enabled_title">Lade Zusatzinfos für Verbindungen</string>
 
     <!-- network picker -->
     <string name="network_picker_firsttime_message">Da du Öffi das erste Mal nutzt, musst Du die Region wählen die am besten passt. Du kannst das später ändern.</string>
