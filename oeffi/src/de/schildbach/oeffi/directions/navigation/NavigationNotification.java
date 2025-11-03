@@ -124,8 +124,8 @@ public class NavigationNotification {
         if (notificationChannelCreated)
             return;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = context.getString(R.string.navigation_notification_channel_name);
-            String description = context.getString(R.string.navigation_notification_channel_description);
+            final CharSequence name = context.getString(R.string.navigation_notification_channel_name);
+            final String description = context.getString(R.string.navigation_notification_channel_description);
             final NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_HIGH);
             channel.setDescription(description);
             channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
@@ -149,7 +149,7 @@ public class NavigationNotification {
         return AudioManager.STREAM_NOTIFICATION;
     }
 
-    private static int getAudioUsageForSound(final int soundId, boolean onRide) {
+    private static int getAudioUsageForSound(final int soundId, final boolean onRide) {
         int usage = AudioAttributes.USAGE_NOTIFICATION_EVENT;
         String prefKey = null;
         final boolean useHeadsetChannel;
@@ -201,7 +201,7 @@ public class NavigationNotification {
 
     public static boolean requestPermissions(final Activity activity, final int requestCode) {
         boolean all = true;
-        for (String permission : REQUIRED_PERMISSIONS) {
+        for (final String permission : REQUIRED_PERMISSIONS) {
             if (ContextCompat.checkSelfPermission(activity, permission) != PackageManager.PERMISSION_GRANTED)
                 all = false;
         }
@@ -214,7 +214,7 @@ public class NavigationNotification {
     public static long refreshAll(final Context context) {
         final StatusBarNotification[] activeNotifications = getNotificationManager(context).getActiveNotifications();
         long minRefreshAt = Long.MAX_VALUE;
-        for (StatusBarNotification statusBarNotification : activeNotifications) {
+        for (final StatusBarNotification statusBarNotification : activeNotifications) {
             if (!statusBarNotification.getTag().startsWith(TAG_PREFIX))
                 continue;
             log.info("refresh notification with tag={} posttime={}, id={}, key={}",
@@ -245,7 +245,7 @@ public class NavigationNotification {
     public static void removeAll(final Context context) {
         final NotificationManager notificationManager = getNotificationManager(context);
         final StatusBarNotification[] activeNotifications = notificationManager.getActiveNotifications();
-        for (StatusBarNotification statusBarNotification : activeNotifications) {
+        for (final StatusBarNotification statusBarNotification : activeNotifications) {
             if (!statusBarNotification.getTag().startsWith(TAG_PREFIX))
                 continue;
             final int id = statusBarNotification.getId();
@@ -350,7 +350,7 @@ public class NavigationNotification {
     private final TripDetailsActivity.IntentData intentData;
     private TripRenderer.NotificationData lastNotified;
     private Configuration configuration;
-    private ExtraData extraData;
+    private final ExtraData extraData;
 
     public NavigationNotification(final Intent intent) {
         this(new TripDetailsActivity.IntentData(intent), null, null);
@@ -365,7 +365,7 @@ public class NavigationNotification {
         final Trip trip = aIntentData.trip;
         final String uniqueId = trip.getUniqueId();
         final StringBuilder b = new StringBuilder();
-        for (Trip.Leg leg : trip.legs) {
+        for (final Trip.Leg leg : trip.legs) {
             if (leg instanceof Trip.Public) {
                 final Trip.Public publeg = (Trip.Public) leg;
                 final JourneyRef journeyRef = publeg.journeyRef;
@@ -467,7 +467,7 @@ public class NavigationNotification {
         log.info("looking for active notifications for tag={}", notificationTag);
         StatusBarNotification latestStatusBarNotification = null;
         final StatusBarNotification[] activeNotifications = getNotificationManager(context).getActiveNotifications();
-        for (StatusBarNotification statusBarNotification : activeNotifications) {
+        for (final StatusBarNotification statusBarNotification : activeNotifications) {
             final String tag = statusBarNotification.getTag();
             if (tag == null || !tag.equals(notificationTag)) {
                 log.info("found other notification with tag={}", tag);
@@ -515,7 +515,7 @@ public class NavigationNotification {
         boolean refreshAllLegs = false;
         long nextRefreshTimeMs;
         String nextRefreshTimeReason;
-        long nextTripReloadTimeMs;
+        final long nextTripReloadTimeMs;
         final long travelAlarmAtMs;
         final boolean travelAlarmIsForDeparture;
         final boolean travelAlarmIsForJourneyStart;
@@ -637,7 +637,7 @@ public class NavigationNotification {
         boolean nextTransferCriticalChanged = false;
         boolean anyTransferCriticalChanged = false;
         int reminderSoundId = 0;
-        boolean onRide = tripRenderer.nextEventTypeIsPublic;
+        final boolean onRide = tripRenderer.nextEventTypeIsPublic;
         final long nextEventTimeLeftMs = tripRenderer.nextEventTimeLeftMs;
         final long nextEventTimeLeftTo10MinsBoundaryMs = nowTime
                 + nextEventTimeLeftMs - (nextEventTimeLeftMs / 600000) * 600000 + 2000;
@@ -850,7 +850,7 @@ public class NavigationNotification {
         if (newEventLogEntriesSize > 0) {
             int offset = newExtraData.eventLogEntries.length;
             final EventLogEntry[] entries = Arrays.copyOf(newExtraData.eventLogEntries, offset + newEventLogEntriesSize);
-            for (EventLogEntry logEntry : newEventLogEntries)
+            for (final EventLogEntry logEntry : newEventLogEntries)
                 entries[offset++] = logEntry;
             newExtraData.eventLogEntries = entries;
         }
@@ -1221,7 +1221,9 @@ public class NavigationNotification {
                 tripRenderer.futureTransferCritical ? View.VISIBLE : View.GONE);
     }
 
-    private static void remoteViewsSetBackgroundColor(final RemoteViews remoteViews, int viewId, int color) {
+    private static void remoteViewsSetBackgroundColor(
+            final RemoteViews remoteViews,
+            final int viewId, final int color) {
         remoteViews.setInt(viewId, "setBackgroundColor", color);
     }
 

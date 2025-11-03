@@ -98,7 +98,7 @@ public class TripRenderer {
             return initialLeg == null;
         }
 
-        public void setCurrentLegState(Trip.Public updatedLeg) {
+        public void setCurrentLegState(final Trip.Public updatedLeg) {
             if (initialLeg != null) {
                 publicLeg = updatedLeg;
                 setRefPoint(refPoint, refTime);
@@ -121,7 +121,7 @@ public class TripRenderer {
             final Consumer<Consumer<Stop>> evalAllStops = consumer -> {
                 consumer.accept(publicLeg.departureStop);
                 if (publicLeg.intermediateStops != null) {
-                    for (Stop intermediateStop : publicLeg.intermediateStops)
+                    for (final Stop intermediateStop : publicLeg.intermediateStops)
                         consumer.accept(intermediateStop);
                 }
                 consumer.accept(publicLeg.arrivalStop);
@@ -209,7 +209,7 @@ public class TripRenderer {
                     if (arrivalStop != endStop && intermediateStops != null) {
                         intermediateStops = new ArrayList<>();
                         boolean delayedArrival = false;
-                        for (Stop stop : publicLeg.intermediateStops) {
+                        for (final Stop stop : publicLeg.intermediateStops) {
                             PTDate predictedArrivalTime = stop.predictedArrivalTime;
                             PTDate predictedDepartureTime = stop.predictedDepartureTime;
                             final PTDate plannedArrivalTime = stop.plannedArrivalTime;
@@ -274,15 +274,15 @@ public class TripRenderer {
 
     public static class LegKey {
         private final String key;
-        public LegKey(Trip.Leg leg) {
+        public LegKey(final Trip.Leg leg) {
             key = leg.departure.id + "/" + leg.arrival.id;
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(final Object other) {
             if (this == other) return true;
             if (!(other instanceof LegKey)) return false;
-            LegKey legKey = (LegKey) other;
+            final LegKey legKey = (LegKey) other;
             return Objects.equals(key, legKey.key);
         }
 
@@ -349,7 +349,7 @@ public class TripRenderer {
         this.refTime = refTime;
         nearestPublicLeg = null;
         float minDistance = Float.MAX_VALUE;
-        for (LegContainer leg : legs) {
+        for (final LegContainer leg : legs) {
             leg.setRefPoint(refPoint, refTime);
             if (leg.nearestStop != null && leg.distanceToNearestStop < minDistance) {
                 nearestPublicLeg = leg;
@@ -435,9 +435,9 @@ public class TripRenderer {
             final boolean isCurrent;
             if (legC.publicLeg != null) {
                 final int iWalk = iLeg + 1;
-                TripRenderer.LegContainer walkLegC = (iWalk < legs.size()) ? legs.get(iWalk) : null;
+                final TripRenderer.LegContainer walkLegC = (iWalk < legs.size()) ? legs.get(iWalk) : null;
                 final int iNext = iLeg + 2;
-                TripRenderer.LegContainer nextLegC = (iNext < legs.size()) ? legs.get(iNext) : null;
+                final TripRenderer.LegContainer nextLegC = (iNext < legs.size()) ? legs.get(iNext) : null;
                 isCurrent = updatePublicLeg(legC, walkLegC, nextLegC, now);
             } else {
                 isCurrent = updateIndividualLeg(legC, iLeg == 0, now);
@@ -479,12 +479,15 @@ public class TripRenderer {
             setNextEventType(true, false);
             setPrevEventLatestTime(beginTime, plannedBeginTime);
             final boolean eventIsNow = setNextEventTimeLeft(now, endTime, plannedEndTime, 0);
-            String targetName = Formats.fullLocationName(arrivalStop.location);
+            final String targetName = Formats.fullLocationNameIfDifferentPlace(arrivalStop.location, departureStop.location);
             setNextEventTarget(targetName);
             final Trip.Public nextPublicLeg = (nextLegC != null) ? nextLegC.publicLeg : null;
             final Stop nextDepartureStop = (nextPublicLeg != null) ? nextPublicLeg.departureStop : null;
-            String depName = (nextDepartureStop != null) ? Formats.fullLocationName(nextDepartureStop.location) : null;
-            boolean depChanged = depName != null && !depName.equals(targetName);
+            final String depName = (nextDepartureStop == null) ? null
+                    : (walkLegC != null && walkLegC.individualLeg.type == Trip.Individual.Type.WALK)
+                    ? nextDepartureStop.location.name
+                    : Formats.fullLocationName(nextDepartureStop.location);
+            final boolean depChanged = depName != null && !depName.equals(targetName);
             setNextEventDeparture(depChanged ? depName : null);
             final Position arrPos = arrivalStop.getArrivalPosition();
             final Position depPos = (nextPublicLeg != null) ? nextPublicLeg.getDeparturePosition() : null;
@@ -547,7 +550,10 @@ public class TripRenderer {
                 setPrevEventLatestTime(beginTime, plannedBeginTime);
             final boolean eventIsNow = setNextEventTimeLeft(now, endTime, transferTo != null ? plannedEndTime : null, leg != null ? leg.min : 0);
             final Location targetLocation = transferTo != null ? transferTo.location : leg != null ? leg.arrival : null;
-            final String targetName = (targetLocation != null) ? Formats.fullLocationName(targetLocation) : null;
+            final String targetName = (targetLocation == null) ? null
+                    : (leg != null && leg.type == Trip.Individual.Type.WALK)
+                    ? targetLocation.name
+                    : Formats.fullLocationName(targetLocation);
             setNextEventTarget(targetName);
             final String arrName = (transferFrom != null) ? Formats.fullLocationName(transferFrom.location) : null;
             final boolean depChanged = arrName != null && !arrName.equals(targetName);
@@ -677,7 +683,7 @@ public class TripRenderer {
             nextEventEarliestTime = plannedEndTime;
         nextEventTimeLeftMs = endTime.getTime() - now.getTime();
         long leftSecs = nextEventTimeLeftMs / 1000;
-        long delaySecs = (plannedEndTime == null) ? 0 : (endTime.getTime() - plannedEndTime.getTime()) / 1000;
+        final long delaySecs = (plannedEndTime == null) ? 0 : (endTime.getTime() - plannedEndTime.getTime()) / 1000;
         leftSecs += 5;
         boolean isNegative = false;
         if (leftSecs < 0) {
@@ -752,8 +758,8 @@ public class TripRenderer {
     public boolean nextEventDeparturePosChanged;
 
     private void setNextEventPositions(
-            final Stop arrStop, final Position arrPos, boolean arrChanged,
-            final Stop depStop, final Position depPos, boolean depChanged) {
+            final Stop arrStop, final Position arrPos, final boolean arrChanged,
+            final Stop depStop, final Position depPos, final boolean depChanged) {
         nextEventArrivalStop = arrStop;
         nextEventDepartureStop = depStop;
         nextEventStopChange = (arrStop != null && depStop != null) && !arrStop.location.id.equals(depStop.location.id);
@@ -775,7 +781,8 @@ public class TripRenderer {
             nextEventTransportLine = leg.line;
             final Location dest = leg.destination;
             nextEventTransportDestinationName = dest == null ? null :
-                    Formats.makeBreakableStationName(Formats.fullLocationName(dest));
+                    Formats.makeBreakableStationName(
+                            Formats.fullLocationNameIfDifferentPlace(dest, leg.entryLocation));
         }
     }
 
@@ -833,19 +840,19 @@ public class TripRenderer {
             nextEventTransferWalkAvailable = true;
             nextEventTransferWalkTimeValue = Integer.toString(walkMins);
             final int iconId;
-            if (individualLeg == null)
+            if (individualLeg == null) {
                 iconId = R.drawable.ic_directions_walk_grey600_24dp;
-            else switch (individualLeg.type) {
-                case WALK:
-                default:
-                    iconId = R.drawable.ic_directions_walk_grey600_24dp;
-                    break;
+            } else switch (individualLeg.type) {
                 case BIKE:
                     iconId = R.drawable.ic_directions_bike_grey600_24dp;
                     break;
                 case CAR:
                 case TRANSFER:
                     iconId = R.drawable.ic_local_taxi_grey600_24dp;
+                    break;
+                case WALK:
+                default:
+                    iconId = R.drawable.ic_directions_walk_grey600_24dp;
                     break;
             }
             nextEventTransferIconId = iconId;
@@ -859,7 +866,7 @@ public class TripRenderer {
 
     public String nextEventDepartureName;
 
-    private void setNextEventDeparture(String name) {
+    private void setNextEventDeparture(final String name) {
         nextEventDepartureName = Formats.makeBreakableStationName(name);
     }
 

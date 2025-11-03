@@ -86,8 +86,9 @@
             android:id="@+id/navigation_notification_next_event_target"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/fg_trip_next_event_normal"
             android:gravity="center"
+            android:breakStrategy="balanced"
+            android:textColor="@color/fg_trip_next_event_normal"
             android:textSize="@dimen/navigation_notification_next_event_target_fontsize"/>
         <TextView
             android:id="@+id/navigation_notification_next_event_next_action"
@@ -238,8 +239,9 @@
             android:id="@+id/navigation_notification_next_event_departure"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/fg_trip_next_event_normal"
             android:gravity="center"
+            android:breakStrategy="balanced"
+            android:textColor="@color/fg_trip_next_event_normal"
             android:textSize="@dimen/navigation_notification_next_event_departure_fontsize"/>
         <LinearLayout
             android:id="@+id/navigation_notification_next_event_connection"
@@ -268,6 +270,7 @@
                 android:id="@+id/navigation_notification_next_event_connection_to"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:breakStrategy="balanced"
                 android:textColor="@color/fg_trip_next_event_normal"
                 android:textStyle="italic"
                 android:textSize="@dimen/navigation_notification_next_event_connection_to_fontsize"/>
