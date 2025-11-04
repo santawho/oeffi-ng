@@ -59,6 +59,7 @@
     <color name="bg_trip_details_time_left">#ff8080</color>
     <color name="bg_trip_details_public_future">#ffffff</color>
     <color name="bg_trip_details_individual_future">#eff8ef</color>
+    <color name="bg_trip_details_individual_transfer_critical">#f8afaf</color>
     <color name="bg_trip_overview_initial_trip">#FDE8D0</color>
     <color name="bg_trip_overview_earlierorlater_trip">#E0E0E0</color>
     <color name="bg_trip_overview_additional_trip">#E0F0FD</color>

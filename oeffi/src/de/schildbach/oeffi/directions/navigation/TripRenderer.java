@@ -39,6 +39,7 @@ import de.schildbach.pte.dto.Point;
 import de.schildbach.pte.dto.Position;
 import de.schildbach.pte.dto.Stop;
 import de.schildbach.pte.dto.PTDate;
+import de.schildbach.pte.dto.TransferDetails;
 import de.schildbach.pte.dto.Trip;
 
 public class TripRenderer {
@@ -54,6 +55,7 @@ public class TripRenderer {
         public final LegContainer transferFrom;
         public final LegContainer transferTo;
         public final boolean transferCritical;
+        public final TransferDetails transferDetails;
         public Point refPoint;
         public Date refTime;
         public Stop nearestStop;
@@ -76,6 +78,7 @@ public class TripRenderer {
             this.transferFrom = null;
             this.transferTo = null;
             this.transferCritical = false;
+            this.transferDetails = null;
         }
 
         public LegContainer(
@@ -83,13 +86,15 @@ public class TripRenderer {
                 final int legIndex,
                 final @Nullable Trip.Individual baseLeg,
                 final LegContainer transferFrom, final LegContainer transferTo,
-                final boolean transferCritical) {
+                final boolean transferCritical,
+                final TransferDetails transferDetails) {
             this.legContainerIndex = legContainerIndex;
             this.legIndex = legIndex;
             this.individualLeg = baseLeg;
             this.transferFrom = transferFrom;
             this.transferTo = transferTo;
             this.transferCritical = transferCritical;
+            this.transferDetails = transferDetails;
             this.publicLeg = null;
             this.initialLeg = null;
         }
@@ -382,6 +387,8 @@ public class TripRenderer {
 
     private void setupFromTrip(final Trip trip) {
         LegContainer prevC = null;
+        int transferDetailsIndex = -1;
+        final TransferDetails[] transferDetails = trip.transferDetails;
         for (int iLeg = 0; iLeg < trip.legs.size(); ++iLeg) {
             final Trip.Leg leg = trip.legs.get(iLeg);
             final Trip.Leg prevLeg = (iLeg > 0) ? trip.legs.get(iLeg - 1) : null;
@@ -394,12 +401,19 @@ public class TripRenderer {
                 final LegContainer transferTo = (nextLeg instanceof Trip.Public)
                         ? new LegContainer(legs.size() + 1, iNext, (Trip.Public) nextLeg)
                         : null;
-                legs.add(new LegContainer(legs.size(), iLeg, individualLeg,
-                        transferFrom, transferTo, isTransferCritical(individualLeg, transferFrom, transferTo)));
+                legs.add(new LegContainer(
+                        legs.size(), iLeg, individualLeg,
+                        transferFrom, transferTo,
+                        isTransferCritical(individualLeg, transferFrom, transferTo),
+                        transferDetails != null
+                                && transferDetailsIndex >= 0
+                                && transferDetailsIndex < transferDetails.length
+                                ? transferDetails[transferDetailsIndex] : null));
                 if (transferTo != null) {
                     setupPath(nextLeg);
                     legs.add(transferTo);
                     ++iLeg;
+                    ++transferDetailsIndex;
 
                     if (isJourney) {
                         legExpandStates.put(new LegKey(nextLeg), TripRenderer.LEG_EXPAND_STATE_STOPS | TripRenderer.LEG_EXPAND_STATE_MESSAGES);
@@ -410,11 +424,18 @@ public class TripRenderer {
                 final Trip.Public publicLeg = (Trip.Public) leg;
                 final LegContainer newC = new LegContainer(legs.size() + 1, iLeg, publicLeg);
                 if (prevC != null || iLeg == 0) {
-                    legs.add(new LegContainer(legs.size(), -1, null,
-                            prevC, newC, isTransferCritical(null, prevC, newC)));
+                    legs.add(new LegContainer(
+                            legs.size(), -1, null,
+                            prevC, newC,
+                            isTransferCritical(null, prevC, newC),
+                            transferDetails != null
+                                    && transferDetailsIndex >= 0
+                                    && transferDetailsIndex < transferDetails.length
+                                    ? transferDetails[transferDetailsIndex] : null));
                 }
                 legs.add(newC);
                 prevC = newC;
+                ++transferDetailsIndex;
 
                 if (isJourney) {
                     legExpandStates.put(new LegKey(leg), TripRenderer.LEG_EXPAND_STATE_STOPS | TripRenderer.LEG_EXPAND_STATE_MESSAGES);

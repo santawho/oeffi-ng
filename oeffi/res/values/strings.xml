@@ -359,6 +359,7 @@
 
     <!-- directions trip connection evaluation -->
     <string name="directions_trip_conneval_with_transfer">%1$s with %2$s</string>
+    <string name="directions_trip_conneval_with_transfer_probability">%1$s &lt;small>[P=%2$d%%]&lt;/small></string>
     <string name="directions_trip_conneval_missed">&lt;b>Connection &lt;u>missed&lt;/u> by %1$d minutes&lt;/b>%2$s</string>
     <string name="directions_trip_conneval_difficult_possibly_missed">&lt;b>Connection difficult despite delayed departure, only %1$d minutes&lt;/b>%2$s</string>
     <string name="directions_trip_conneval_difficult">&lt;b>Connection difficult, only %1$d minutes&lt;/b>%2$s</string>

@@ -32,6 +32,7 @@ import android.content.res.Resources;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.location.Criteria;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -68,6 +69,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.ColorUtils;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -243,7 +245,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private int colorSimulated;
     private int colorPosition, colorPositionBackground, colorPositionBackgroundChanged;
     private int colorLegPublicPastBackground, colorLegPublicNowBackground, colorLegPublicFutureBackground;
-    private int colorLegIndividualPastBackground, colorLegIndividualNowBackground, colorLegIndividualFutureBackground;
+    private int colorLegIndividualPastBackground, colorLegIndividualNowBackground,
+            colorLegIndividualFutureBackground, colorLegIndividualTransferCriticalBackground;
     private DisplayMetrics displayMetrics;
     private LocationManager locationManager;
     private BroadcastReceiver tickReceiver;
@@ -297,6 +300,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         colorLegIndividualPastBackground = res.getColor(R.color.bg_trip_details_individual_past);
         colorLegIndividualNowBackground = res.getColor(R.color.bg_trip_details_individual_now);
         colorLegIndividualFutureBackground = res.getColor(R.color.bg_trip_details_individual_future);
+        colorLegIndividualTransferCriticalBackground = res.getColor(R.color.bg_trip_details_individual_transfer_critical);
         displayMetrics = res.getDisplayMetrics();
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
@@ -569,7 +573,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         if (!provider.hasCapabilities(NetworkProvider.Capability.TRIP_DETAILS))
             return;
         try {
-            final Trip newTrip = provider.queryTripDetails(tripRenderer.trip);
+            final Trip newTrip = provider.queryTripDetails(tripRenderer.trip, null);
             runOnUiThread(() -> {
                 setupFromTrip(newTrip);
                 updateGUI();
@@ -1300,10 +1304,17 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
         }
 
-        final String text =
+        final Float feasibilityProbability = legC.transferDetails == null ? null
+                : legC.transferDetails.feasibilityProbability;
+
+        String text =
                   transferText == null ? legText
                 : legText == null ? transferText
                 : getString(R.string.directions_trip_conneval_with_transfer, transferText, legText);
+        if (text != null && feasibilityProbability != null) {
+            text = getString(R.string.directions_trip_conneval_with_transfer_probability,
+                    text, (int) ((feasibilityProbability * 100f) + 0.5f));
+        }
 
         final TextView textView = row.findViewById(R.id.directions_trip_details_individual_entry_text);
         if (text == null) {
@@ -1335,25 +1346,53 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         progressView.setVisibility(View.GONE);
         final PTDate beginTime = transferFrom != null ? transferFrom.getArrivalTime() : leg == null ? null : leg.departureTime;
         final PTDate endTime = transferTo != null ? transferTo.getDepartureTime() : leg == null ? null : leg.arrivalTime;
+        final boolean isNow;
+        final int backgroundColor;
         if (transferFrom != null && beginTime != null && now.before(beginTime)) {
             // leg is in the future
-            row.setBackgroundColor(colorLegIndividualFutureBackground);
-            return false;
+            isNow = false;
+            backgroundColor = colorLegIndividualFutureBackground;
         } else if (endTime != null && now.after(endTime)) {
             // leg is in the past
-            row.setBackgroundColor(colorLegIndividualPastBackground);
-            return false;
+            isNow = false;
+            backgroundColor = colorLegIndividualPastBackground;
+        } else {
+            // leg is now
+            isNow = true;
+            backgroundColor = colorLegIndividualNowBackground;
+            progressView.setVisibility(View.VISIBLE);
+            progressView.setOnClickListener(view -> setShowPage(R.id.navigation_next_event));
+
+            final TextView progressText = row.findViewById(R.id.directions_trip_details_individual_entry_progress_text);
+            progressText.setText(endTime == null ? "???" : getLeftTimeFormatted(now, endTime));
         }
 
-        // leg is now
-        row.setBackgroundColor(colorLegIndividualNowBackground);
-        progressView.setVisibility(View.VISIBLE);
-        progressView.setOnClickListener(view -> setShowPage(R.id.navigation_next_event));
+        if (feasibilityProbability != null && feasibilityProbability < 0.99f) {
+            final GradientDrawable drawable = new GradientDrawable();
+            drawable.setGradientType(GradientDrawable.LINEAR_GRADIENT);
+            drawable.setOrientation(GradientDrawable.Orientation.LEFT_RIGHT);
+            final int[] colors = new int[5];
+            colors[0] = colorLegIndividualTransferCriticalBackground;
+            colors[1] = ColorUtils.blendARGB(
+                    colorLegIndividualTransferCriticalBackground, backgroundColor,
+                    feasibilityProbability * 0.25f);
+            colors[2] = ColorUtils.blendARGB(
+                    colorLegIndividualTransferCriticalBackground, backgroundColor,
+                    feasibilityProbability * 0.5f);
+            colors[3] = ColorUtils.blendARGB(
+                    colorLegIndividualTransferCriticalBackground, backgroundColor,
+                    feasibilityProbability * 0.75f);
+            colors[4] = backgroundColor;
+            drawable.setColors(colors);
+            final int level = 10000 - Math.clamp((long) (feasibilityProbability * 10000f), 0, 10000);
+            drawable.setLevel(level);
+            drawable.setUseLevel(true);
+            row.setBackground(drawable);
+        } else {
+            row.setBackgroundColor(backgroundColor);
+        }
 
-        final TextView progressText = row.findViewById(R.id.directions_trip_details_individual_entry_progress_text);
-        progressText.setText(getLeftTimeFormatted(now, endTime));
-
-        return true;
+        return isNow;
     }
 
     protected void shownPageChanged(final int showId) {

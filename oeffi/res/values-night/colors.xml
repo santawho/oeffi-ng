@@ -38,9 +38,10 @@
     <color name="bg_trip_details_individual_past">#313d3d</color>
     <color name="bg_trip_details_public_now">#403822</color>
     <color name="bg_trip_details_individual_now">#665f47</color>
-    <color name="bg_trip_details_time_left">#AA5555</color>
+    <color name="bg_trip_details_time_left">#aa5555</color>
     <color name="bg_trip_details_public_future">#222222</color>
     <color name="bg_trip_details_individual_future">#2a432a</color>
+    <color name="bg_trip_details_individual_transfer_critical">#831a1a</color>
     <color name="bg_trip_overview_initial_trip">#3A2828</color>
     <color name="bg_trip_overview_earlierorlater_trip">#383838</color>
     <color name="bg_trip_overview_additional_trip">#28283A</color>
