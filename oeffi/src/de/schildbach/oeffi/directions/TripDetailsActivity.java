@@ -949,6 +949,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final boolean showBicycleCarriage = leg.line.hasAttr(Line.Attr.BICYCLE_CARRIAGE)
                 && prefsIsBicycleTravel();
         final List<Stop> intermediateStops = leg.intermediateStops;
+        final String message = leg.message != null ? leg.message : leg.line.message;
         boolean isRowSimulated = false;
 
         final LineView lineView = row.findViewById(R.id.directions_trip_details_public_entry_line);
@@ -999,10 +1000,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final Integer legExpandStates = tripRenderer.legExpandStates.get(new TripRenderer.LegKey(leg));
         final boolean isStopsExpanded = legExpandStates != null && (legExpandStates & TripRenderer.LEG_EXPAND_STATE_STOPS) != 0;
         final boolean isMessagesExpanded = legExpandStates != null && (legExpandStates & TripRenderer.LEG_EXPAND_STATE_MESSAGES) != 0;
-        expandButton.setVisibility(
-                !renderConfig.isJourney && intermediateStops != null && !intermediateStops.isEmpty()
-                        ? View.VISIBLE
-                        : View.GONE);
+        ViewUtils.setVisibility(expandButton, !renderConfig.isJourney
+                && ((intermediateStops != null && !intermediateStops.isEmpty()) || (message != null)));
         expandButton.setChecked(isStopsExpanded || isMessagesExpanded);
         expandButton.setOnClickListener(v -> {
             tripRenderer.legExpandStates.put(new TripRenderer.LegKey(leg),
@@ -1122,7 +1121,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         stopsView.setColumnCollapsed(4, collapseColumns.collapsePositionColumn);
 
         final TextView messageView = row.findViewById(R.id.directions_trip_details_public_entry_message);
-        final String message = leg.message != null ? leg.message : leg.line.message;
         if (message != null) {
             messageView.setVisibility(View.VISIBLE);
             final String displayMessage;
