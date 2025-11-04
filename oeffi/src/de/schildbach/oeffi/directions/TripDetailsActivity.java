@@ -570,7 +570,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             backgroundHandler.post(this::loadTripDetails);
     }
 
-    private void loadTripDetails() {
+    protected void loadTripDetails() {
         final NetworkProvider provider = NetworkProviderFactory.provider(network);
         if (!provider.hasCapabilities(NetworkProvider.Capability.TRIP_DETAILS))
             return;
