@@ -32,6 +32,7 @@ import android.content.res.Resources;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.location.Criteria;
 import android.location.LocationListener;
@@ -119,6 +120,7 @@ import de.schildbach.pte.dto.Position;
 import de.schildbach.pte.dto.Stop;
 import de.schildbach.pte.dto.Style;
 import de.schildbach.pte.dto.PTDate;
+import de.schildbach.pte.dto.TransferDetails;
 import de.schildbach.pte.dto.Trip;
 import de.schildbach.pte.dto.TripShare;
 
@@ -804,6 +806,21 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             i++;
         }
 
+        float totalProbability = 1f;
+        final TransferDetails[] transferDetails = tripRenderer.trip.transferDetails;
+        if (transferDetails != null) {
+            for (final TransferDetails details : transferDetails) {
+                if (details == null)
+                    continue;
+                final Float probability = details.feasibilityProbability;
+                if (probability == null)
+                    continue;
+                totalProbability *= probability;
+            }
+        }
+        setGradientBackground(findViewById(R.id.directions_trip_details_summary),
+                getColor(R.color.bg_divider), totalProbability);
+
         tripRenderer.evaluateByTime(now);
         updateNavigationInstructions();
 
@@ -1365,32 +1382,39 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             progressText.setText(endTime == null ? "???" : getLeftTimeFormatted(now, endTime));
         }
 
-        if (feasibilityProbability != null && feasibilityProbability < 0.99f) {
-            final GradientDrawable drawable = new GradientDrawable();
-            drawable.setGradientType(GradientDrawable.LINEAR_GRADIENT);
-            drawable.setOrientation(GradientDrawable.Orientation.LEFT_RIGHT);
-            final int[] colors = new int[5];
-            colors[0] = colorLegIndividualTransferCriticalBackground;
-            colors[1] = ColorUtils.blendARGB(
-                    colorLegIndividualTransferCriticalBackground, backgroundColor,
-                    feasibilityProbability * 0.25f);
-            colors[2] = ColorUtils.blendARGB(
-                    colorLegIndividualTransferCriticalBackground, backgroundColor,
-                    feasibilityProbability * 0.5f);
-            colors[3] = ColorUtils.blendARGB(
-                    colorLegIndividualTransferCriticalBackground, backgroundColor,
-                    feasibilityProbability * 0.75f);
-            colors[4] = backgroundColor;
-            drawable.setColors(colors);
-            final int level = 10000 - Math.clamp((long) (feasibilityProbability * 10000f), 0, 10000);
-            drawable.setLevel(level);
-            drawable.setUseLevel(true);
-            row.setBackground(drawable);
-        } else {
-            row.setBackgroundColor(backgroundColor);
-        }
-
+        setGradientBackground(row, backgroundColor, feasibilityProbability == null ? 1f : feasibilityProbability);
         return isNow;
+    }
+
+    protected void setGradientBackground(final View view, final int backgroundColor, final float probability) {
+        if (probability < 0.99) {
+            view.setBackground(createGradientDrawable(backgroundColor, probability));
+        } else {
+            view.setBackgroundColor(backgroundColor);
+        }
+    }
+
+    protected Drawable createGradientDrawable(final int backgroundColor, final float probability) {
+        final GradientDrawable drawable = new GradientDrawable();
+        drawable.setGradientType(GradientDrawable.LINEAR_GRADIENT);
+        drawable.setOrientation(GradientDrawable.Orientation.LEFT_RIGHT);
+        final int[] colors = new int[5];
+        colors[0] = colorLegIndividualTransferCriticalBackground;
+        colors[1] = ColorUtils.blendARGB(
+                colorLegIndividualTransferCriticalBackground, backgroundColor,
+                probability * 0.25f);
+        colors[2] = ColorUtils.blendARGB(
+                colorLegIndividualTransferCriticalBackground, backgroundColor,
+                probability * 0.5f);
+        colors[3] = ColorUtils.blendARGB(
+                colorLegIndividualTransferCriticalBackground, backgroundColor,
+                probability * 0.75f);
+        colors[4] = backgroundColor;
+        drawable.setColors(colors);
+        final int level = 10000 - Math.clamp((long) (probability * 10000f), 0, 10000);
+        drawable.setLevel(level);
+        drawable.setUseLevel(true);
+        return drawable;
     }
 
     protected void shownPageChanged(final int showId) {
