@@ -63,6 +63,9 @@
     <string name="about_copyright_title">Urheberrecht</string>
     <string name="about_copyright_summary">© 2010-2025, die Öffi-Entwickler</string>
     <string name="about_license_title">Lizenz</string>
+    <string name="about_data_provider_title">Datenlieferant</string>
+    <string name="about_data_provider_summary_pattern1">Daten werden bereitgestellt durch %1$s</string>
+    <string name="about_data_provider_summary_pattern2">\nund %1$s</string>
     <string name="about_privacy_policy_title">Datenschutz-Bestimmungen</string>
     <string name="about_source_title">Quellcode</string>
     <string name="about_forum_title">Forum / Diskussion</string>

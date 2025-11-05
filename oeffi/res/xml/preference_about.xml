@@ -18,6 +18,9 @@
             android:data="https://www.gnu.org/licenses/gpl-3.0.txt" />
     </Preference>
     <Preference
+        android:key="about_data_provider"
+        android:title="@string/about_data_provider_title" />
+    <Preference
         android:key="about_policy"
         android:summary="@string/about_privacy_policy_url"
         android:title="@string/about_privacy_policy_title">

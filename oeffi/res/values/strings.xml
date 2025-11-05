@@ -63,6 +63,9 @@
     <string name="about_copyright_title">Copyright</string>
     <string name="about_copyright_summary">© 2010-2025, the Öffi developers</string>
     <string name="about_license_title">License</string>
+    <string name="about_data_provider_title">Data Supplier</string>
+    <string name="about_data_provider_summary_pattern1">Data is supplied by %1$s</string>
+    <string name="about_data_provider_summary_pattern2">\nand %1$s</string>
     <string name="about_privacy_policy_title">Privacy Policy</string>
     <string name="about_source_title">Source code</string>
     <string name="about_forum_title">Forum / Discussions</string>

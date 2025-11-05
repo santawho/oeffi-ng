@@ -21,10 +21,17 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
+
+import java.io.IOException;
+
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.Installer;
 import de.schildbach.oeffi.util.AppInstaller;
+import de.schildbach.pte.NetworkProvider;
+import de.schildbach.pte.Provider;
+import de.schildbach.pte.TransferEvaluationProvider;
 
 import javax.annotation.Nullable;
 
@@ -39,6 +46,7 @@ public class AboutFragment extends PreferenceFragment {
 
     private static final String KEY_ABOUT_VERSION = "about_version";
     private static final String KEY_ABOUT_COPYRIGHT = "about_copyright";
+    private static final String KEY_ABOUT_DATA_PROVIDER = "about_data_provider";
     private static final String KEY_ABOUT_MARKET_APP = "about_market_app";
     private static final String KEY_ABOUT_CHANGELOG = "about_changelog";
     private static final String KEY_ABOUT_POLICY = "about_policy";
@@ -104,6 +112,30 @@ public class AboutFragment extends PreferenceFragment {
         final Preference prefFaq = findPreference(KEY_ABOUT_FAQ);
         prefFaq.setSummary(faqUrl);
         prefFaq.setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(faqUrl)));
+
+        final Preference prefDataProvider = findPreference(KEY_ABOUT_DATA_PROVIDER);
+        final StringBuilder providerText = new StringBuilder();
+        final NetworkProvider networkProvider = NetworkProviderFactory.provider(Application.getInstance().prefsGetNetworkId());
+        final Provider.Description networkProviderDescription = networkProvider.getDescription();
+        providerText.append(getString(R.string.about_data_provider_summary_pattern1, networkProviderDescription.getName()));
+        final String networkProviderDescriptionUrl = networkProviderDescription.getUrl();
+        if (networkProviderDescriptionUrl != null)
+            providerText.append(String.format("\n(%s)", networkProviderDescriptionUrl));
+        if (ExtrasFragment.isTripExtraInfoEnabled()) {
+            try {
+                final TransferEvaluationProvider transferEvaluationProvider = networkProvider.getTransferEvaluationProvider();
+                if (transferEvaluationProvider != null) {
+                    final Provider.Description transferEvaluationProviderDescription = transferEvaluationProvider.getDescription();
+                    providerText.append(getString(R.string.about_data_provider_summary_pattern2, transferEvaluationProviderDescription.getName()));
+                    final String transferEvaluationProviderDescriptionUrl = transferEvaluationProviderDescription.getUrl();
+                    if (transferEvaluationProviderDescriptionUrl != null)
+                        providerText.append(String.format("\n(%s)", transferEvaluationProviderDescriptionUrl));
+                }
+            } catch (IOException e) {
+                // ignore
+            }
+        }
+        prefDataProvider.setSummary(providerText);
     }
 
     public static class EnableExtrasActionHandler extends ActionHandler {
