@@ -47,6 +47,8 @@
     <string name="global_preferences_network_provider_summary">Verkehrsnetz wählen.</string>
     <string name="global_preferences_show_hints_title">Tipps zeigen</string>
     <string name="global_preferences_show_hints_summary">Hin und wieder einen nützlichen Tipp anzeigen.</string>
+    <string name="global_preferences_check_for_updates_title">Auf Updates prüfen</string>
+    <string name="global_preferences_check_for_updates_summary">Prüfe, ob Updates verfügbar sind, beim Starten der App.</string>
     <string name="global_preferences_location_settings_title">Standorteinstellungen</string>
     <string name="global_preferences_location_settings_summary">Einstellung der Standortbestimmung, z.B. GPS.</string>
     <string name="global_preferences_battery_optimizations_title">Akku-Leistungsoptimierung</string>

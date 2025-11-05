@@ -25,6 +25,11 @@
         android:defaultValue="location" />
     <CheckBoxPreference
         android:defaultValue="true"
+        android:key="check_for_updates"
+        android:summary="@string/global_preferences_check_for_updates_summary"
+        android:title="@string/global_preferences_check_for_updates_title" />
+    <CheckBoxPreference
+        android:defaultValue="true"
         android:key="show_hints"
         android:summary="@string/global_preferences_show_hints_summary"
         android:title="@string/global_preferences_show_hints_title" />

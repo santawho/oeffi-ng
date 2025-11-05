@@ -47,6 +47,8 @@
     <string name="global_preferences_network_provider_summary">Pick transportation network.</string>
     <string name="global_preferences_show_hints_title">Show hints</string>
     <string name="global_preferences_show_hints_summary">Show useful hints now and then.</string>
+    <string name="global_preferences_check_for_updates_title">Check for updates</string>
+    <string name="global_preferences_check_for_updates_summary">Check if updates are available, when starting the app.</string>
     <string name="global_preferences_location_settings_title">Location settings</string>
     <string name="global_preferences_location_settings_summary">Enable location providers, e.g. GPS.</string>
     <string name="global_preferences_battery_optimizations_title">Battery optimizations</string>
