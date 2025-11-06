@@ -69,6 +69,20 @@ public class DirectionsShortcutActivity extends OeffiActivity implements Locatio
     public static final String INTENT_EXTRA_PLACE = "place";
     public static final String INTENT_EXTRA_NAME = "stationname";
 
+    public static Intent fillIntent(final Intent intent, final NetworkId networkId, final Location location) {
+        intent.putExtra(INTENT_EXTRA_NETWORK, networkId.name());
+        intent.putExtra(INTENT_EXTRA_TYPE, location.type.name());
+        if (location.hasId())
+            intent.putExtra(INTENT_EXTRA_ID, location.id);
+        if (location.hasCoord()) {
+            intent.putExtra(INTENT_EXTRA_LAT, location.getLatAs1E6());
+            intent.putExtra(INTENT_EXTRA_LON, location.getLonAs1E6());
+        }
+        intent.putExtra(INTENT_EXTRA_PLACE, location.place);
+        intent.putExtra(INTENT_EXTRA_NAME, location.name);
+        return intent;
+    }
+
     private LocationHelper locationHelper;
     private ProgressDialog progressDialog;
 

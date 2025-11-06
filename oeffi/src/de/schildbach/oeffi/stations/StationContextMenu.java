@@ -98,18 +98,14 @@ public class StationContextMenu extends PopupMenu {
 
         final DialogBuilder builder = DialogBuilder.get(context);
         builder.setTitle(R.string.station_context_launcher_shortcut_title);
-        String locName = location.uniqueShortName();
-        ((EditText)view.findViewById(R.id.create_launcher_shortcut_dialog_name)).setText(locName);
-        if (location.type != LocationType.STATION) {
-            view.findViewById(R.id.create_launcher_shortcut_dialog_departures).setEnabled(false);
-        }
+        final EditText nameView = view.findViewById(R.id.create_launcher_shortcut_dialog_name);
+        nameView.setText(location.uniqueShortName());
+        final RadioButton departuresRadioButton = view.findViewById(R.id.create_launcher_shortcut_dialog_departures);
+        departuresRadioButton.setEnabled(location.type != LocationType.STATION);
         builder.setView(view);
         builder.setPositiveButton(R.string.create_launcher_shortcut_dialog_button_ok,
                 (dialog, which) -> {
-                    final boolean departuresChecked = ((RadioButton)view
-                            .findViewById(R.id.create_launcher_shortcut_dialog_departures)).isChecked();
-                    final EditText nameView = view
-                            .findViewById(R.id.create_launcher_shortcut_dialog_name);
+                    final boolean departuresChecked = departuresRadioButton.isChecked();
                     final String shortcutName = nameView.getText().toString();
                     final String shortcutId;
                     final Intent shortcutIntent;
@@ -117,7 +113,7 @@ public class StationContextMenu extends PopupMenu {
                     final int defaultNameId;
                     final Class<? extends Activity> activityClass;
                     if (departuresChecked) {
-                        shortcutId = "departures-at-" + networkId.name() + "-" + location.id;
+                        shortcutId = "departures-at-" + networkId.name() + "-" + location.id + "-" + shortcutName;
                         shortcutIntent = StationDetailsActivity.fillIntent(
                                 new Intent(Intent.ACTION_MAIN, null, context, StationDetailsActivity.class)
                                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK),
@@ -126,31 +122,21 @@ public class StationContextMenu extends PopupMenu {
                         defaultNameId = R.string.departures_shortcut_default_name;
                         activityClass = StationDetailsActivity.class;
                     } else {
-                        shortcutId = "directions-to-" + networkId.name() + "-" + location.id;
-                        shortcutIntent = new Intent(Intent.ACTION_MAIN, null, context,
-                                DirectionsShortcutActivity.class)
-                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        shortcutIntent.putExtra(DirectionsShortcutActivity.INTENT_EXTRA_NETWORK, networkId.name());
-                        shortcutIntent.putExtra(DirectionsShortcutActivity.INTENT_EXTRA_TYPE, location.type.name());
-                        if (location.hasId())
-                            shortcutIntent.putExtra(DirectionsShortcutActivity.INTENT_EXTRA_ID, location.id);
-                        if (location.hasCoord()) {
-                            shortcutIntent.putExtra(DirectionsShortcutActivity.INTENT_EXTRA_LAT,
-                                    location.getLatAs1E6());
-                            shortcutIntent.putExtra(DirectionsShortcutActivity.INTENT_EXTRA_LON,
-                                    location.getLonAs1E6());
-                        }
-                        shortcutIntent.putExtra(DirectionsShortcutActivity.INTENT_EXTRA_PLACE, location.place);
-                        shortcutIntent.putExtra(DirectionsShortcutActivity.INTENT_EXTRA_NAME, location.name);
+                        shortcutId = "directions-to-" + networkId.name() + "-" + location.id + "-" + shortcutName;
+                        shortcutIntent = DirectionsShortcutActivity.fillIntent(
+                                new Intent(Intent.ACTION_MAIN, null, context, DirectionsShortcutActivity.class)
+                                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK),
+                                networkId, location);
                         iconId = R.mipmap.ic_oeffi_directions_color_48dp;
                         defaultNameId = R.string.directions_shortcut_default_name;
                         activityClass = DirectionsActivity.class;
                     }
                     log.info("creating launcher shortcut {} to {}", shortcutId, location);
+                    final String shortLabel = !shortcutName.isEmpty() ? shortcutName : context.getString(defaultNameId);
                     ShortcutManagerCompat.requestPinShortcut(context,
                             new ShortcutInfoCompat.Builder(context, shortcutId)
                                     .setActivity(new ComponentName(context, activityClass))
-                                    .setShortLabel(shortcutName.length() > 0 ? shortcutName : context.getString(defaultNameId))
+                                    .setShortLabel(shortLabel)
                                     .setIcon(IconCompat.createWithResource(context, iconId))
                                     .setIntent(shortcutIntent).build(),
                             null);
