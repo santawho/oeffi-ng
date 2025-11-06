@@ -7,9 +7,9 @@
     <color name="fg_significant_darkdefault">#ffffff</color>
     <color name="fg_significant_inverse">#ffffff</color>
     <color name="fg_significant_inverse_darkdefault">#000000</color>
-    <color name="fg_less_significant">#777777</color>
+    <color name="fg_less_significant">#555555</color>
     <color name="fg_less_significant_darkdefault">#aaaaaa</color>
-    <color name="fg_insignificant">#bbbbbb</color>
+    <color name="fg_insignificant">#999999</color>
     <color name="fg_insignificant_darkdefault">#888888</color>
     <color name="fg_highlighted">#dd9055</color>
     <color name="fg_highlighted_darkdefault">#ff9966</color>

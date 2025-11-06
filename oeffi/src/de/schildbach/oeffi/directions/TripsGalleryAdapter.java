@@ -64,7 +64,6 @@ import de.schildbach.pte.dto.Trip.Individual;
 import de.schildbach.pte.dto.Trip.Leg;
 import de.schildbach.pte.dto.Trip.Public;
 
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -94,7 +93,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
     private final Paint publicStrokePaint = new Paint();
     private final Paint publicLabelPaint = new Paint();
     private final Paint individualFillPaint = new Paint();
-    private final Paint individualLabelPaint = new Paint();
+    // private final Paint individualLabelPaint = new Paint();
     private final Paint individualTimePaint = new Paint();
     private final Paint individualTimeDiffPaint = new Paint();
     private final Paint publicTimePaint = new Paint();
@@ -117,6 +116,8 @@ public final class TripsGalleryAdapter extends BaseAdapter {
     private static final float ROUNDED_CORNER_RADIUS = 8f;
     private static final float CIRCLE_CORNER_RADIUS = 16f;
     private final int tripWidth;
+
+    private final Drawable walkIcon, bikeIcon, carIcon, warningIcon, wheelChairIcon, bicycleIcon;
 
     public TripsGalleryAdapter(final Context context) {
         this.context = (OeffiActivity) context;
@@ -166,10 +167,10 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         individualFillPaint.setStyle(Paint.Style.FILL);
         individualFillPaint.setColor(colorIndividual);
 
-        individualLabelPaint.setColor(Color.GRAY);
-        individualLabelPaint.setTypeface(Typeface.DEFAULT);
-        individualLabelPaint.setTextSize(res.getDimension(R.dimen.font_size_xlarge));
-        individualLabelPaint.setTextAlign(Align.CENTER);
+        // individualLabelPaint.setColor(Color.GRAY);
+        // individualLabelPaint.setTypeface(Typeface.DEFAULT);
+        // individualLabelPaint.setTextSize(res.getDimension(R.dimen.font_size_xlarge));
+        // individualLabelPaint.setTextAlign(Align.CENTER);
 
         individualTimePaint.setColor(colorLessSignificant);
         individualTimePaint.setTypeface(Typeface.DEFAULT);
@@ -238,6 +239,19 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         colorEarlierOrLaterTripBackground = makeBackgroundColorFromId(R.color.bg_trip_overview_earlierorlater_trip);
         colorAdditionalTripBackground = makeBackgroundColorFromId(R.color.bg_trip_overview_additional_trip);
         colorAdditionalFeederBackground = makeBackgroundColorFromId(R.color.bg_trip_overview_additional_feeder);
+
+        walkIcon = res.getDrawable(R.drawable.ic_directions_walk_grey600_24dp);
+        bikeIcon = res.getDrawable(R.drawable.ic_directions_bike_grey600_24dp);
+        carIcon = res.getDrawable(R.drawable.ic_local_taxi_grey600_24dp);
+        warningIcon = res.getDrawable(R.drawable.ic_warning_amber_24dp);
+        wheelChairIcon = res.getDrawable(R.drawable.ic_accessible_grey600_18dp);
+        bicycleIcon = res.getDrawable(R.drawable.ic_directions_bike_grey600_18dp);
+
+        walkIcon.setTint(colorLessSignificant);
+        bikeIcon.setTint(colorLessSignificant);
+        carIcon.setTint(colorLessSignificant);
+        wheelChairIcon.setTint(colorLessSignificant);
+        bicycleIcon.setTint(colorLessSignificant);
     }
 
     private int makeBackgroundColorFromId(final int colorId) {
@@ -425,13 +439,6 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                 1);
         private final float individualBoxFraction = res
                 .getFraction(R.fraction.trips_overview_entry_individual_box_fraction, 1, 1);
-        private final Drawable walkIcon = res.getDrawable(R.drawable.ic_directions_walk_grey600_24dp);
-        private final Drawable bikeIcon = res.getDrawable(R.drawable.ic_directions_bike_grey600_24dp);
-        private final Drawable carIcon = res.getDrawable(R.drawable.ic_local_taxi_grey600_24dp);
-        private final Drawable warningIcon = res.getDrawable(R.drawable.ic_warning_amber_24dp);
-        private final Drawable wheelChairIcon = res.getDrawable(R.drawable.ic_accessible_grey600_18dp);
-        private final Drawable bicycleIcon = res.getDrawable(R.drawable.ic_directions_bike_grey600_18dp);
-
         private final int[] gradientColors = new int[2];
         private final float[] GRADIENT_POSITIONS = new float[] { 0.5f, 0.5f };
 

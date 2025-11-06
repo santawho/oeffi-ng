@@ -5,7 +5,7 @@
     <!-- foreground -->
     <color name="fg_significant">#ffffff</color>
     <color name="fg_significant_inverse">#000000</color>
-    <color name="fg_less_significant">#aaaaaa</color>
+    <color name="fg_less_significant">#cccccc</color>
     <color name="fg_insignificant">#888888</color>
     <color name="fg_highlighted">#ff9966</color>
     <color name="fg_simulated">#cc00ff</color>
@@ -28,8 +28,8 @@
     <color name="bg_action_bar_directions">#114411</color>
     <color name="bg_action_bar_appendix">#555555</color>
     <color name="bg_selected_entry">#284028</color>
-    <color name="bg_individual">#444444</color>
-    <color name="bg_delayed">#444444</color>
+    <color name="bg_individual">#666666</color>
+    <color name="bg_delayed">#666666</color>
     <color name="bg_current_time">#ffff00</color>
     <color name="bg_position">#bbbbbb</color>
     <color name="bg_position_changed">#FF8888</color>
