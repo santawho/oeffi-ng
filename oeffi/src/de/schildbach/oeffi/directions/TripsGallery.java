@@ -82,6 +82,8 @@ public class TripsGallery extends Gallery {
         }
 
         public void draw(Canvas canvas, long time, int height, int width, boolean labelRight, boolean labelUp) {
+            if (!adapter.isRangeDefined())
+                return;
             final int offset = context.getTimeZoneSelector().getOffset(time, PTDate.NETWORK_OFFSET);
             final String label = Formats.formatTime(context.getTimeZoneSelector(), time, offset);
             final float y = adapter.timeToCoord(time, height);
@@ -277,6 +279,9 @@ public class TripsGallery extends Gallery {
 
     @Override
     protected void onDraw(final Canvas canvas) {
+        if (!adapter.isRangeDefined())
+            return;
+
         final long now = System.currentTimeMillis();
         final int width = getWidth();
         final int height = getHeight();

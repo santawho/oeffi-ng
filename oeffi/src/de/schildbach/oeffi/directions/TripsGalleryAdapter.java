@@ -279,10 +279,12 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         Preconditions.checkArgument(minTime > 0);
         Preconditions.checkArgument(maxTime > minTime);
 
-        if (minTime != this.minTime || maxTime != this.maxTime) {
-            this.minTime = minTime;
-            this.maxTime = maxTime;
-        }
+        this.minTime = minTime;
+        this.maxTime = maxTime;
+    }
+
+    public boolean isRangeDefined() {
+        return maxTime > minTime;
     }
 
     public long getMinTime() {
@@ -298,8 +300,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         Preconditions.checkArgument(height > 0);
 
         final long timeDiff = maxTime - minTime;
-        if (timeDiff == 0)
-            return minTime;
+        Preconditions.checkState(timeDiff > 0);
 
         return (time - minTime) * height / (float) timeDiff;
     }
@@ -465,6 +466,8 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         @Override
         protected void onDraw(final Canvas canvas) {
             super.onDraw(canvas);
+            if (!isRangeDefined())
+                return;
 
             final Trip trip = tripInfo.trip;
             final List<Leg> legs = trip.legs;
@@ -639,7 +642,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             // then draw arr/dep times
             PTDate startTime = null;
             boolean startCancelled = false;
-            Paint startPaint = null;
+            Paint startDiffPaint = null;
             int startYabs = 0;
             Position departurePosition;
             final Public firstPublicLeg = trip.getFirstPublicLeg();
@@ -651,7 +654,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                 if (publicDepartureTime != null) {
                     startTime = publicDepartureTime;
                     startCancelled = publicDepartureCancelled;
-                    startPaint = publicTimeDiffPaint;
+                    startDiffPaint = publicTimeDiffPaint;
                     startYabs = (int) timeToCoord(publicDepartureTime.getTime(), height);
                     departurePosition = publicDepartureStop.getDeparturePosition();
                     if (departurePosition != null && !startCancelled) {
@@ -662,33 +665,30 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                             startYabs = drawPosition(canvas, centerX, startYabs, height, -1, departurePosition.toString());
                         }
                     }
-                    startYabs = drawTime(canvas, centerX, startYabs, height, true, publicTimePaint, publicDepartureCancelled,
-                            publicDepartureTime, null);
+                    startYabs = drawTime(canvas, centerX, startYabs, height, true,
+                            publicTimePaint, publicDepartureCancelled, publicDepartureTime);
                 }
             } else {
                 publicDepartureTime = null;
             }
 
             final PTDate individualDepartureTime = trip.getFirstDepartureTime();
-            if (individualDepartureTime != null) {
-                final int individualYabs = drawTime(canvas, centerX, startYabs, height,
-                        true, individualTimePaint, false, individualDepartureTime,
-                        publicDepartureTime);
-                if (individualYabs != Integer.MIN_VALUE) {
-                    startTime = individualDepartureTime;
-                    startPaint = individualTimeDiffPaint;
-                    startYabs = individualYabs;
-                }
+            if (individualDepartureTime != null && !individualDepartureTime.equals(publicDepartureTime)) {
+                startYabs = (int) timeToCoord(individualDepartureTime.getTime(), height);
+                startYabs = drawTime(canvas, centerX, startYabs, height, true,
+                        individualTimePaint, false, individualDepartureTime);
+                startTime = individualDepartureTime;
+                startDiffPaint = individualTimeDiffPaint;
             }
 
             if (startTime != null) {
                 long diff = startTime.getTime() - baseTime;
-                startYabs = drawRemaining(canvas, centerX, startYabs, height, true, startPaint, startCancelled, diff);
+                startYabs = drawRemaining(canvas, centerX, startYabs, height, true, startDiffPaint, startCancelled, diff);
             }
 
             PTDate endTime = null;
             boolean endCancelled = false;
-            Paint endPaint = null;
+            Paint endDiffPaint = null;
             int endYabs = 0;
             final Public lastPublicLeg = trip.getLastPublicLeg();
             final PTDate publicArrivalTime;
@@ -699,31 +699,28 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                 if (publicArrivalTime != null) {
                     endTime = publicArrivalTime;
                     endCancelled = publicArrivalCancelled;
-                    endPaint = publicTimeDiffPaint;
+                    endDiffPaint = publicTimeDiffPaint;
                     endYabs = (int) timeToCoord(publicArrivalTime.getTime(), height);
-                    endYabs = drawTime(canvas, centerX, endYabs, height, false, publicTimePaint, publicArrivalCancelled,
-                            publicArrivalTime, null);
+                    endYabs = drawTime(canvas, centerX, endYabs, height, false,
+                            publicTimePaint, publicArrivalCancelled, publicArrivalTime);
                 }
             } else {
                 publicArrivalTime = null;
             }
 
             final PTDate individualArrivalTime = trip.getLastArrivalTime();
-            if (individualArrivalTime != null) {
-                final int individualYabs = drawTime(canvas, centerX, endYabs, height,
-                        false, individualTimePaint, false, individualArrivalTime,
-                        publicArrivalTime);
-                if (individualYabs != Integer.MIN_VALUE) {
-                    endTime = individualArrivalTime;
-                    endPaint = individualTimeDiffPaint;
-                    endYabs = individualYabs;
-                }
+            if (individualArrivalTime != null && !individualArrivalTime.equals(publicArrivalTime)) {
+                endYabs = (int) timeToCoord(individualArrivalTime.getTime(), height);
+                endYabs = drawTime(canvas, centerX, endYabs, height, false,
+                        individualTimePaint, false, individualArrivalTime);
+                endTime = individualArrivalTime;
+                endDiffPaint = individualTimeDiffPaint;
             }
 
             if (endTime != null && referenceTime != null && referenceTime.depArr == TimeSpec.DepArr.ARRIVE) {
                 long refTime = referenceTime.timeInMillis();
                 long diff = refTime - endTime.getTime();
-                drawRemaining(canvas, centerX, endYabs, height, false, endPaint, endCancelled, diff);
+                drawRemaining(canvas, centerX, endYabs, height, false, endDiffPaint, endCancelled, diff);
             }
 
             // last, iterate all public legs
@@ -855,10 +852,9 @@ public final class TripsGalleryAdapter extends BaseAdapter {
 
         private int drawTime(
                 final Canvas canvas, final int centerX, final int aY, final int height, final boolean above,
-                final Paint paint, final boolean strikeThru, final PTDate time, final @Nullable PTDate timeKeepOut) {
+                final Paint paint, final boolean strikeThru, final PTDate time) {
             final FontMetrics metrics = paint.getFontMetrics();
 
-            final float y;
             final String str = Formats.formatTime(context.getTimeZoneSelector(), time);
             final float fontHeight = (-metrics.ascent + metrics.descent); // + 4 * density;
 
@@ -867,20 +863,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             else
                 paint.setFlags(paint.getFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
 
-            if (timeKeepOut != null) {
-                final long tKeepOut = timeKeepOut.getTime();
-                final float yKeepOut = timeToCoord(tKeepOut, height);
-                if (time.getTime() == tKeepOut)
-                    return Integer.MIN_VALUE; // don't draw anything
-
-                if (above)
-                    y = Math.min(aY, yKeepOut - fontHeight);
-                else
-                    y = Math.max(aY, yKeepOut + fontHeight);
-            } else {
-                y = aY;
-            }
-
+            final float y = aY;
             if (above) {
                 canvas.drawText(str, centerX, y - metrics.descent, paint);
                 return (int) (y - fontHeight);
