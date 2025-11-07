@@ -25,6 +25,7 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.StationsAware;
 import de.schildbach.oeffi.stations.CompassNeedleView;
 import de.schildbach.oeffi.stations.Station;
+import de.schildbach.oeffi.util.KeyWordMatcher;
 import de.schildbach.pte.dto.Product;
 
 import java.util.Date;
@@ -46,6 +47,7 @@ public class StationsAdapter extends RecyclerView.Adapter<StationViewHolder> imp
     private Float deviceBearing = null;
     private boolean showPlaces = false;
     private boolean faceDown = false;
+    private KeyWordMatcher.Query filterQuery;
 
     private final LayoutInflater inflater;
 
@@ -69,6 +71,10 @@ public class StationsAdapter extends RecyclerView.Adapter<StationViewHolder> imp
         this.baseTime = baseTime;
     }
 
+    public void setFilterQuery(final KeyWordMatcher.Query filterQuery) {
+        this.filterQuery = filterQuery;
+    }
+
     public void setDeviceLocation(final android.location.Location deviceLocation) {
         this.deviceLocation = deviceLocation;
     }
@@ -80,7 +86,6 @@ public class StationsAdapter extends RecyclerView.Adapter<StationViewHolder> imp
 
     public void setShowPlaces(final boolean showPlaces) {
         this.showPlaces = showPlaces;
-        notifyDataSetChanged();
     }
 
     @Override
@@ -110,17 +115,9 @@ public class StationsAdapter extends RecyclerView.Adapter<StationViewHolder> imp
     public void onBindViewHolder(final StationViewHolder holder, final int position) {
         checkArgument(position != RecyclerView.NO_POSITION);
         final Station station = getItem(position);
-
-        // select stations
-        holder.itemView.setActivated(stationsAware.isSelectedStation(station.location.id));
-        holder.itemView.setOnClickListener(v -> {
-            final boolean isSelected = stationsAware.isSelectedStation(station.location.id);
-            stationsAware.selectStation(isSelected ? null : station);
-        });
-
-        // populate view
+        final boolean isVisible = station.keyWordMatch(filterQuery);
         final Integer favState = stationsAware.getFavoriteState(station.location.id);
-        holder.bind(station, baseTime, productsFilter, showPlaces, favState, deviceLocation, this);
+        holder.bind(stationsAware, isVisible, station, baseTime, productsFilter, showPlaces, favState, deviceLocation, this);
     }
 
     public Float getDeviceBearing() {

@@ -18,14 +18,17 @@
 package de.schildbach.oeffi.stations;
 
 import de.schildbach.oeffi.util.GeoUtils;
+import de.schildbach.oeffi.util.KeyWordMatcher;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Departure;
+import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.LineDestination;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.Product;
 import de.schildbach.pte.dto.QueryDeparturesResult;
 
 import javax.annotation.Nullable;
+
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
@@ -36,7 +39,7 @@ public class Station {
     public final NetworkId network;
     public Location location;
     public @Nullable QueryDeparturesResult.Status departureQueryStatus = null;
-    public @Nullable List<Departure> departures = null;
+    private @Nullable List<Departure> departures = null;
     private @Nullable List<LineDestination> lines = null;
     private @Nullable Product relevantProduct = null;
     public boolean hasDistanceAndBearing = false;
@@ -44,16 +47,13 @@ public class Station {
     public float bearing;
     public @Nullable Date requestedAt = null;
     public @Nullable Date updatedAt = null;
+    private KeyWordMatcher.SearchableItem searchableItem;
+    private KeyWordMatcher.Query lastQuery;
+    private boolean matchedByQuery;
 
     public Station(final NetworkId network, final Location location) {
         this.network = network;
         this.location = checkNotNull(location);
-    }
-
-    public Station(final NetworkId network, final Location location, final List<LineDestination> lines) {
-        this.network = network;
-        this.location = checkNotNull(location);
-        setLines(lines);
     }
 
     public List<LineDestination> getLines() {
@@ -64,6 +64,46 @@ public class Station {
         this.lines = lines;
 
         relevantProduct = null;
+    }
+
+    public void setDepartures(@Nullable final List<Departure> departures) {
+        this.departures = departures;
+        searchableItem = null;
+    }
+
+    @Nullable
+    public List<Departure> getDepartures() {
+        return departures;
+    }
+
+    public boolean keyWordMatch(final KeyWordMatcher.Query query) {
+        if (query == null) {
+            matchedByQuery = true;
+            lastQuery = null;
+            return true;
+        }
+        if (searchableItem == null) {
+            searchableItem = KeyWordMatcher.createSearchableItem();
+            searchableItem.addIndexableText(location.name);
+            searchableItem.addIndexableText(location.place);
+            if (departures != null) {
+                for (final Departure departure : departures) {
+                    final Line line = departure.line;
+                    if (line != null) {
+                        final String label = line.label;
+                        if (label != null) {
+                            searchableItem.addIndexableString(label.replace(" ", ""));
+                        }
+                    }
+                }
+            }
+        }
+        if (query == lastQuery)
+            return matchedByQuery;
+
+        lastQuery = query;
+        matchedByQuery = query.matchTo(searchableItem).matches;
+        return matchedByQuery;
     }
 
     public void setDistanceAndBearing(final GeoUtils.DistanceResult distanceResult) {

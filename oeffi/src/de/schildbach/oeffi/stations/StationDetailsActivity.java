@@ -284,9 +284,9 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         final Station station = new Station(network, (Location) Objects.deserializeFromString(stationSerialized));
         this.presetJourneyRef = (JourneyRef) Objects.deserializeFromString(intent.getStringExtra(INTENT_EXTRA_JOURNEYREF));
         if (intent.hasExtra(INTENT_EXTRA_DEPARTURES)) {
-            station.departures = filterDeparturesByProducts(
+            station.setDepartures(filterDeparturesByProducts(
                     (List<Departure>) intent.getSerializableExtra(INTENT_EXTRA_DEPARTURES),
-                    loadProductFilter());
+                    loadProductFilter()));
         }
         selectStation(station);
         statusMessage(getString(R.string.stations_station_details_progress));
@@ -457,18 +457,21 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
                                     final List<Departure> departures = filterDeparturesByProducts(stationDepartures.departures, productFilter);
 
-                                    if (modeAppend && station.departures != null) {
-                                        final Set<JourneyRef> oldJourneyRefs = station.departures.stream().map(
+                                    if (modeAppend && station.getDepartures() != null) {
+                                        final Set<JourneyRef> oldJourneyRefs = station.getDepartures().stream().map(
                                                 departure -> departure.journeyRef).collect(Collectors.toSet());
                                         for (final Departure departure : departures) {
                                             if (!oldJourneyRefs.contains(departure.journeyRef))
-                                                station.departures.add(departure);
+                                                station.getDepartures().add(departure);
                                         }
                                     } else {
-                                        station.departures = departures;
+                                        station.setDepartures(departures);
                                     }
-                                    station.departures.sort((d1, d2) ->
-                                            Math.toIntExact(d1.getTime().getTime() - d2.getTime().getTime()));
+                                    final List<Departure> unsortedDepartures = station.getDepartures();
+                                    if (unsortedDepartures != null) {
+                                        unsortedDepartures.sort((d1, d2) ->
+                                                Math.toIntExact(d1.getTime().getTime() - d2.getTime().getTime()));
+                                    }
 
                                     final List<LineDestination> stationLines = station.getLines();
                                     final List<LineDestination> lines = stationDepartures.lines;
@@ -486,7 +489,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                                     if (location.equals(selectedStation) || selectedAllDepartures == null) {
                                         somethingAdded = true;
                                         newSelectedStation = location;
-                                        selectedAllDepartures = station.departures;
+                                        selectedAllDepartures = station.getDepartures();
                                         selectedLines = groupDestinationsByLine(station.getLines());
                                         selectedFilteredDepartures = null;
                                     }
@@ -567,7 +570,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             selectedCoord = selectedStation;
             nearbyButton.setVisibility(View.VISIBLE);
         }
-        selectedAllDepartures = station.departures;
+        selectedAllDepartures = station.getDepartures();
         selectedFilteredDepartures = null;
         selectedLines = groupDestinationsByLine(station.getLines());
 

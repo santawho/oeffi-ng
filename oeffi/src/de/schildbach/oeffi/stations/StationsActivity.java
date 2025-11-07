@@ -47,11 +47,14 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Process;
 import android.provider.Settings;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.text.format.DateUtils;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.ViewAnimator;
 import androidx.activity.result.ActivityResultLauncher;
@@ -77,16 +80,17 @@ import de.schildbach.oeffi.StationsAware;
 import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.directions.QueryJourneyRunnable;
 import de.schildbach.oeffi.util.GeoUtils;
+import de.schildbach.oeffi.util.KeyWordMatcher;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.network.NetworkPickerActivity;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.stations.list.JourneyClickListener;
 import de.schildbach.oeffi.stations.list.StationContextMenuItemListener;
 import de.schildbach.oeffi.stations.list.StationsAdapter;
+import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.oeffi.util.locationview.AutoCompleteLocationsHandler;
 import de.schildbach.oeffi.util.ConnectivityBroadcastReceiver;
 import de.schildbach.oeffi.util.DialogBuilder;
-import de.schildbach.oeffi.util.DividerItemDecoration;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GoogleMapsUtils;
 import de.schildbach.oeffi.util.LocationUriParser;
@@ -132,6 +136,16 @@ import java.util.Set;
 
 public class StationsActivity extends OeffiMainActivity implements StationsAware, LocationAware,
         StationContextMenuItemListener, JourneyClickListener {
+    // if this would be set to TRUE, the search function in this activity would behave
+    // like the original Öffi app, i.e. search on the network:
+    // for example "berlin" would find all stations in Berlin, but also all "Berliner Str."
+    // or "Berliner Platz" in all over the country, and then sort the result by distance
+    // to the device location. As the result set is limited in size, the desired stations
+    // near the device location may not event by included in the set, and thus never shown.
+    // Setting to FALSE brings the new behaviour, which is a local filtering by station names
+    // and line labels, i.e. you can also search for something like "U1"
+    public static final boolean DO_FILTER_BY_SEARCH_ON_NETWORK = false;
+
     public static final String INTENT_EXTRA_OPEN_FAVORITES = StationsActivity.class.getName() + ".open_favorites";
     public static final String INTENT_EXTRA_NETWORK = StationsActivity.class.getName() + ".network";
     public static final String INTENT_EXTRA_LOCATION = StationsActivity.class.getName() + ".location";
@@ -153,7 +167,9 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private Location fixedLocation;
     private boolean fixedLocationResolving;
     private Float deviceBearing = null;
+    private String filterByText;
     private String searchQuery;
+    private KeyWordMatcher.Query filterQuery;
     private boolean anyProviderEnabled = false;
     private boolean loading = true;
 
@@ -255,7 +271,36 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                 .setOnClickListener(view -> FavoriteStationsActivity.start(StationsActivity.this));
         addShowMapButtonToActionBar();
         actionBar.addButton(R.drawable.ic_search_white_24dp, R.string.stations_action_search_title)
-                .setOnClickListener(v -> onSearchRequested());
+                .setOnClickListener(v -> {
+                    if (DO_FILTER_BY_SEARCH_ON_NETWORK) {
+                        onSearchRequested();
+                    } else {
+                        findViewById(R.id.stations_search_box).setVisibility(View.VISIBLE);
+                    }
+                });
+        ViewUtils.setVisibility(findViewById(R.id.stations_search_box), false);
+        ViewUtils.setVisibility(findViewById(R.id.stations_search_text), DO_FILTER_BY_SEARCH_ON_NETWORK);
+        final EditText searchEditView = findViewById(R.id.stations_search_edit);
+        findViewById(R.id.stations_search_clear).setOnClickListener(v -> {
+            if (!DO_FILTER_BY_SEARCH_ON_NETWORK) {
+                findViewById(R.id.stations_search_box).setVisibility(View.GONE);
+                searchEditView.setText(null);
+            }
+            setListFilter(null);
+        });
+        ViewUtils.setVisibility(searchEditView, !DO_FILTER_BY_SEARCH_ON_NETWORK);
+        searchEditView.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(final CharSequence s, final int start, final int count, final int after) {}
+
+            @Override
+            public void onTextChanged(final CharSequence s, final int start, final int before, final int count) {
+                setListFilter(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(final Editable s) {}
+        });
         filterActionButton = actionBar.addButton(R.drawable.ic_filter_list_24dp, R.string.stations_filter_title);
         filterActionButton.setOnClickListener(v -> {
             final StationsFilterPopup popup = new StationsFilterPopup(StationsActivity.this, products,
@@ -456,7 +501,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         stationList = findViewById(R.id.stations_list);
         stationListLayoutManager = new LinearLayoutManager(this);
         stationList.setLayoutManager(stationListLayoutManager);
-        stationList.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
+        // stationList.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
         stationListAdapter = new StationsAdapter(this, maxDeparturesPerStation, products,
                 this, this, this);
         stationList.setAdapter(stationListAdapter);
@@ -549,7 +594,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     }
 
     private void resetContent() {
-        clearListFilter();
+        setListFilter(null);
 
         stations.clear();
         stationsMap.clear();
@@ -711,7 +756,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                         stationsMap.remove(station.location.id);
                     } else {
                         if (hadPresetTime)
-                            station.departures = null;
+                            station.setDepartures(null);
 
                         if (station.location.hasCoord())
                             station.setDistanceAndBearing(GeoUtils.distanceBetween(deviceLocation, station.location.coord));
@@ -731,35 +776,39 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     public void onBackPressed() {
         if (isNavigationOpen())
             closeNavigation();
-        else if (searchQuery != null)
-            clearListFilter();
+        else if (searchQuery != null || filterQuery != null)
+            setListFilter(null);
         else
             super.onBackPressed();
     }
 
     private void setListFilter(final String filter) {
-        searchQuery = filter;
+        filterByText = filter;
 
-        findViewById(R.id.stations_search_clear).setOnClickListener(v -> clearListFilter());
+        final boolean searchQueryModified;
+        if (DO_FILTER_BY_SEARCH_ON_NETWORK) {
+            searchQuery = filterByText;
+            searchQueryModified = true;
+            filterQuery = null;
+        } else {
+            filterQuery = filterByText == null ? null : KeyWordMatcher.createQuery(filterByText);
+            searchQueryModified = searchQuery != null;
+            searchQuery = null;
+        }
 
-        stations.clear();
-        stationsMap.clear();
-        stationListAdapter.setShowPlaces(true);
+        if (searchQueryModified) {
+            stations.clear();
+            stationsMap.clear();
+        }
+
+        stationListAdapter.setShowPlaces(searchQuery != null);
+        stationListAdapter.setFilterQuery(filterQuery);
         stationListAdapter.notifyDataSetChanged();
 
-        handler.post(initStationsRunnable);
-        updateGUI();
-    }
+        if (searchQueryModified) {
+            handler.post(initStationsRunnable);
+        }
 
-    private void clearListFilter() {
-        searchQuery = null;
-
-        stations.clear();
-        stationsMap.clear();
-        stationListAdapter.setShowPlaces(false);
-        stationListAdapter.notifyDataSetChanged();
-
-        handler.post(initStationsRunnable);
         updateGUI();
     }
 
@@ -804,9 +853,11 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         }
 
         // search box
-        findViewById(R.id.stations_search_box).setVisibility(searchQuery != null ? View.VISIBLE : View.GONE);
-        if (searchQuery != null)
-            ((TextView) findViewById(R.id.stations_search_text)).setText(searchQuery);
+        if (DO_FILTER_BY_SEARCH_ON_NETWORK) {
+            findViewById(R.id.stations_search_box).setVisibility(filterByText != null ? View.VISIBLE : View.GONE);
+            if (filterByText != null)
+                ((TextView) findViewById(R.id.stations_search_text)).setText(filterByText);
+        }
     }
 
     private boolean addFavorite(final Location location) {
@@ -919,7 +970,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
                             for (final Location location : result.locations) {
                                 if (location.type == LocationType.STATION) {
-                                    final Station station = new Station(network, location, null);
+                                    final Station station = new Station(network, location);
                                     if (deviceLocation != null)
                                         station.setDistanceAndBearing(GeoUtils.distanceBetween(referenceLocation.coord, location.coord));
                                     freshStations.add(station);
@@ -958,7 +1009,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                 favorites.put(stationId, favType);
 
                 if (favType == FavoriteStationsProvider.TYPE_FAVORITE) {
-                    final Station station = new Station(network, location, null);
+                    final Station station = new Station(network, location);
                     if (deviceLocation != null && location.hasCoord())
                         station.setDistanceAndBearing(GeoUtils.distanceBetween(deviceLocation, location.coord));
                     freshStations.add(station);
@@ -1004,8 +1055,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                         station.setDistanceAndBearing(freshStation.distance, freshStation.bearing);
                         changed = true;
                     }
-                    if (freshStation.departures != null) {
-                        station.departures = freshStation.departures;
+                    if (freshStation.getDepartures() != null) {
+                        station.setDepartures(freshStation.getDepartures());
                         changed = true;
                     }
                     if (freshStation.getLines() != null) {
@@ -1169,14 +1220,14 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                                                     while (departures.size() > maxDepartures)
                                                         departures.remove(departures.size() - 1);
 
-                                                    resultStation.departures = departures;
+                                                    resultStation.setDepartures(departures);
                                                     resultStation.departureQueryStatus = QueryDeparturesResult.Status.OK;
                                                     resultStation.updatedAt = new Date();
                                                 }
                                             }
                                         } else {
                                             // Station is existing but yields no StationDepartures
-                                            station.departures = Collections.emptyList();
+                                            station.setDepartures(Collections.emptyList());
                                             station.departureQueryStatus = QueryDeparturesResult.Status.OK;
                                             station.updatedAt = new Date();
                                         }
