@@ -55,7 +55,7 @@
     <string name="global_preferences_battery_optimizations_summary">Wenn das App-Widget keine Abfahrtszeiten laden kann, während dein Gerät im Standby ist, dann solltest du die Akku-Leistungsoptimierung für Öffi abschalten.</string>
 
     <!-- preferences shortcuts -->
-    <string name="shortcuts_preferences_title">Startbildchirm-Verknüpfungen</string>
+    <string name="shortcuts_preferences_title">Startbildschirm-Verknüpfungen</string>
     <string name="shortcuts_preferences_summary">Erstelle Verknüpfungen auf dem Startbildschirm</string>
 
     <!-- preferences about -->
