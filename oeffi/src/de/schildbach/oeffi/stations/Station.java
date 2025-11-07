@@ -86,6 +86,14 @@ public class Station {
             searchableItem = KeyWordMatcher.createSearchableItem();
             searchableItem.addIndexableText(location.name);
             searchableItem.addIndexableText(location.place);
+            if (lines != null) {
+                for (final LineDestination lineDest : lines) {
+                    final String label = lineDest.line.label;
+                    if (label != null) {
+                        searchableItem.addIndexableString(label.replace(" ", ""));
+                    }
+                }
+            }
             if (departures != null) {
                 for (final Departure departure : departures) {
                     final Line line = departure.line;

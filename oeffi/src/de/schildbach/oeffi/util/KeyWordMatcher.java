@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public final class KeyWordMatcher {
+    private static final boolean USE_OR_MATCHING = false; // false uses "AND" matching
+
     public static class SearchableItem {
         private SearchableItem() {}
 
@@ -99,20 +101,40 @@ public final class KeyWordMatcher {
         if (queryStrings.isEmpty())
             return new Match(true, 1);
 
-        boolean matches = false;
+        boolean matches;
         int score = 0;
 
-        ITEM: for (final String itemKeyWord : item.keyWords) {
-            final int itemKeyWordLength = itemKeyWord.length();
-            QUERY: for (final String queryString : queryStrings) {
-                final int queryStringLength = queryString.length();
-                if (itemKeyWord.contains(queryString)) {
-                    matches = true;
-                    score += queryStringLength;
-                    if (queryStringLength == itemKeyWordLength)
-                        score += 10;
-                    continue ITEM;
+        if (USE_OR_MATCHING) {
+            matches = false;
+            for (final String itemKeyWord : item.keyWords) {
+                final int itemKeyWordLength = itemKeyWord.length();
+                boolean itemMatches = false;
+                for (final String queryString : queryStrings) {
+                    final int queryStringLength = queryString.length();
+                    if (itemKeyWord.contains(queryString)) {
+                        itemMatches = true;
+                        score += queryStringLength;
+                        if (queryStringLength == itemKeyWordLength)
+                            score += 10;
+                    }
                 }
+                matches |= itemMatches;
+            }
+        } else {
+            matches = true;
+            for (final String queryString : queryStrings) {
+                final int queryStringLength = queryString.length();
+                boolean queryMatches = false;
+                for (final String itemKeyWord : item.keyWords) {
+                    final int itemKeyWordLength = itemKeyWord.length();
+                    if (itemKeyWord.contains(queryString)) {
+                        queryMatches = true;
+                        score += queryStringLength;
+                        if (queryStringLength == itemKeyWordLength)
+                            score += 10;
+                    }
+                }
+                matches &= queryMatches;
             }
         }
 
