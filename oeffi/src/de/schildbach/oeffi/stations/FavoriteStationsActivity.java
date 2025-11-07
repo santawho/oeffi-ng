@@ -180,11 +180,15 @@ public class FavoriteStationsActivity extends OeffiActivity
             intent.setData(uri);
             setResult(RESULT_OK, intent);
             finish();
-        } else if (station.type == LocationType.ADDRESS) {
-            new Toast(this).longToast(R.string.stations_no_departures_for_address);
-        } else {
-            StationDetailsActivity.start(FavoriteStationsActivity.this, stationNetwork, station, null, null);
+            return;
         }
+
+        if (station.type != LocationType.STATION && !station.hasCoord()) {
+            new Toast(this).longToast(R.string.stations_no_departures_for_address);
+            return;
+        }
+
+        StationDetailsActivity.start(FavoriteStationsActivity.this, stationNetwork, station, null, null);
     }
 
     public boolean onStationContextMenuItemClick(final int adapterPosition, final NetworkId stationNetwork,

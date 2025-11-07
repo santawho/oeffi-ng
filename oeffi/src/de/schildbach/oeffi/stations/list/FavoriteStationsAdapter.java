@@ -24,6 +24,8 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
@@ -47,7 +49,8 @@ public class FavoriteStationsAdapter extends RecyclerView.Adapter<FavoriteStatio
 
     private long selectedRowId = RecyclerView.NO_ID;
 
-    public FavoriteStationsAdapter(final Context context, final NetworkId network,
+    public FavoriteStationsAdapter(
+            final Context context, final NetworkId network,
             final StationClickListener clickListener,
             @Nullable final StationContextMenuItemListener contextMenuItemListener) {
         this.context = context;
@@ -102,10 +105,12 @@ public class FavoriteStationsAdapter extends RecyclerView.Adapter<FavoriteStatio
         return cursor.getLong(rowIdColumn);
     }
 
+    @NonNull
     @Override
-    public FavoriteStationViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
-        return new FavoriteStationViewHolder(inflater.inflate(R.layout.favorites_list_entry, parent, false), context,
-                clickListener, contextMenuItemListener);
+    public FavoriteStationViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
+        return new FavoriteStationViewHolder(
+                inflater.inflate(R.layout.favorites_list_entry, parent, false),
+                context, clickListener, contextMenuItemListener);
     }
 
     @Override

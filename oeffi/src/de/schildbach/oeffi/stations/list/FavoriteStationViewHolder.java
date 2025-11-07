@@ -41,8 +41,10 @@ public class FavoriteStationViewHolder extends RecyclerView.ViewHolder {
     private final TextView nameView;
     private final ImageButton contextButton;
 
-    public FavoriteStationViewHolder(final View itemView, final Context context,
-            final StationClickListener clickListener, final StationContextMenuItemListener contextMenuItemListener) {
+    public FavoriteStationViewHolder(
+            final View itemView, final Context context,
+            final StationClickListener clickListener,
+            final StationContextMenuItemListener contextMenuItemListener) {
         super(itemView);
         this.context = context;
         this.clickListener = clickListener;
@@ -54,7 +56,10 @@ public class FavoriteStationViewHolder extends RecyclerView.ViewHolder {
         contextButton = itemView.findViewById(R.id.favorites_list_entry_context_button);
     }
 
-    public void bind(final long rowId, final NetworkId network, final Location station, final boolean showNetwork,
+    public void bind(
+            final long rowId,
+            final NetworkId network, final Location station,
+            final boolean showNetwork,
             final long selectedRowId) {
         final boolean selected = rowId == selectedRowId;
         itemView.setActivated(selected);
@@ -80,25 +85,33 @@ public class FavoriteStationViewHolder extends RecyclerView.ViewHolder {
 
         if (contextMenuItemListener != null) {
             contextButton.setVisibility(View.VISIBLE);
-            contextButton.setOnClickListener(v -> {
-                final PopupMenu contextMenu = new StationContextMenu(context, v, network, station,
-                        FavoriteStationsProvider.TYPE_FAVORITE,
-                        true, false,
-                        true, station.type != LocationType.ADDRESS, true,
-                        false, false,
-                        true, false, false, false, true);
-                contextMenu.setOnMenuItemClickListener(item -> {
-                    final int position = getAdapterPosition();
-                    if (position != RecyclerView.NO_POSITION)
-                        return contextMenuItemListener.onStationContextMenuItemClick(position, network, station,
-                                null, item.getItemId());
-                    else
-                        return false;
-                });
-                contextMenu.show();
+            contextButton.setOnClickListener(v -> openContextMenu(v, network, station));
+            itemView.setOnLongClickListener(v -> {
+                openContextMenu(v, network, station);
+                return true;
             });
         } else {
             contextButton.setVisibility(View.GONE);
         }
+    }
+
+    private void openContextMenu(final View contextView, final NetworkId network, final Location station) {
+        final PopupMenu contextMenu = new StationContextMenu(
+                context, contextView,
+                network, station,
+                FavoriteStationsProvider.TYPE_FAVORITE,
+                true, false,
+                true, station.type == LocationType.STATION, true,
+                false, false,
+                true, false, false, false, true);
+        contextMenu.setOnMenuItemClickListener(item -> {
+            final int position = getAdapterPosition();
+            if (position != RecyclerView.NO_POSITION)
+                return contextMenuItemListener.onStationContextMenuItemClick(position, network, station,
+                        null, item.getItemId());
+            else
+                return false;
+        });
+        contextMenu.show();
     }
 }

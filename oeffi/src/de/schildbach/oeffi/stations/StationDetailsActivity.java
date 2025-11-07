@@ -44,6 +44,8 @@ import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.ViewAnimator;
+
+import androidx.annotation.NonNull;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -111,6 +113,11 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             final Location station, final Date presetTime,
             final List<Departure> departures,
             final boolean newTask) {
+        if (station.type != LocationType.STATION) {
+            StationsActivity.start(context, networkId, station, presetTime);
+            return;
+        }
+
         final Intent intent = StationDetailsActivity.fillIntent(
                 new Intent(context, StationDetailsActivity.class),
                 networkId, station, presetTime);
@@ -148,6 +155,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
     private NetworkId selectedNetwork;
     private Location selectedStation;
+    private Location selectedCoord;
     @Nullable
     private List<Departure> selectedAllDepartures = null;
     private List<Departure> selectedFilteredDepartures = null;
@@ -158,6 +166,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
     private MyActionBar actionBar;
     private ImageButton loadLaterButton, loadEarlierButton;
+    private ImageButton nearbyButton;
     private ToggleImageButton favoriteButton;
     private ToggleImageButton hideCancelledDeparturesButton;
     private ViewAnimator viewAnimator;
@@ -202,6 +211,12 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         actionBar.setBack(isTaskRoot() ? null : v -> finish());
         actionBar.swapTitles();
         actionBar.addProgressButton().setOnClickListener(v -> requestRefresh());
+        nearbyButton = actionBar.addButton(R.drawable.ic_radar_white_24dp, R.string.stations_station_details_action_explore_nearby_title);
+        nearbyButton.setOnClickListener(v -> {
+            if (selectedCoord != null)
+                StationsActivity.start(this, selectedNetwork, selectedCoord, presetTime);
+        });
+        nearbyButton.setVisibility(View.GONE);
         addShowMapButtonToActionBar();
         favoriteButton = actionBar.addToggleButton(R.drawable.ic_star_24dp,
                 R.string.stations_station_details_action_favorite_title);
@@ -427,12 +442,12 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                                     product(result.header));
                         }
 
-                        Set<Product> productFilter = loadProductFilter();
+                        final Set<Product> productFilter = loadProductFilter();
                         if (result.status == QueryDeparturesResult.Status.OK) {
                             boolean somethingAdded = false;
                             Location newSelectedStation = null;
                             for (final StationDepartures stationDepartures : result.stationDepartures) {
-                                Location location = stationDepartures.location;
+                                final Location location = stationDepartures.location;
                                 if (location.hasId()) {
                                     Station station = findStation(location.id);
                                     if (station == null) {
@@ -440,12 +455,12 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                                         stations.add(station);
                                     }
 
-                                    List<Departure> departures = filterDeparturesByProducts(stationDepartures.departures, productFilter);
+                                    final List<Departure> departures = filterDeparturesByProducts(stationDepartures.departures, productFilter);
 
                                     if (modeAppend && station.departures != null) {
-                                        Set<JourneyRef> oldJourneyRefs = station.departures.stream().map(
+                                        final Set<JourneyRef> oldJourneyRefs = station.departures.stream().map(
                                                 departure -> departure.journeyRef).collect(Collectors.toSet());
-                                        for (Departure departure : departures) {
+                                        for (final Departure departure : departures) {
                                             if (!oldJourneyRefs.contains(departure.journeyRef))
                                                 station.departures.add(departure);
                                         }
@@ -458,8 +473,8 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                                     final List<LineDestination> stationLines = station.getLines();
                                     final List<LineDestination> lines = stationDepartures.lines;
                                     if (modeAppend && stationLines != null && lines != null) {
-                                        Set<LineDestination> oldLineDestinations = new HashSet<>(stationLines);
-                                        for (LineDestination lineDestination : lines) {
+                                        final Set<LineDestination> oldLineDestinations = new HashSet<>(stationLines);
+                                        for (final LineDestination lineDestination : lines) {
                                             if (!oldLineDestinations.contains(lineDestination))
                                                 stationLines.add(lineDestination);
                                         }
@@ -478,8 +493,13 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                                 }
                             }
 
-                            if (newSelectedStation != null)
+                            if (newSelectedStation != null) {
                                 selectedStation = newSelectedStation;
+                                if (selectedStation.hasCoord()) {
+                                    selectedCoord = selectedStation;
+                                    nearbyButton.setVisibility(View.VISIBLE);
+                                }
+                            }
 
                             if (earlier) {
                                 nextEarlierTime = new Date(fromTime.getTime() - 30 * 60 * 1000);
@@ -487,8 +507,8 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                                 nextLaterTime = new Date(fromTime.getTime() + 30 * 60 * 1000);
                             } else {
                                 long maxTime = fromTime.getTime();
-                                for (Departure departure : selectedAllDepartures) {
-                                    long depTime = departure.plannedTime.getTime();
+                                for (final Departure departure : selectedAllDepartures) {
+                                    final long depTime = departure.plannedTime.getTime();
                                     if (depTime > maxTime)
                                         maxTime = depTime;
                                 }
@@ -543,6 +563,10 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
         selectedNetwork = station.network;
         selectedStation = station.location;
+        if (selectedStation.hasCoord()) {
+            selectedCoord = selectedStation;
+            nearbyButton.setVisibility(View.VISIBLE);
+        }
         selectedAllDepartures = station.departures;
         selectedFilteredDepartures = null;
         selectedLines = groupDestinationsByLine(station.getLines());
@@ -627,8 +651,9 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             return getItem(position).hashCode();
         }
 
+        @NonNull
         @Override
-        public RecyclerView.ViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
+        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
             if (viewType == R.layout.stations_station_details_header)
                 return new HeaderViewHolder(context,
                         inflater.inflate(R.layout.stations_station_details_header, parent, false));
@@ -638,7 +663,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         }
 
         @Override
-        public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
+        public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, final int position) {
             if (holder instanceof HeaderViewHolder) {
                 ((HeaderViewHolder) holder).bind(selectedStation, selectedLines, null, StationDetailsActivity.this);
             } else {
@@ -783,7 +808,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             final PTDate plannedTime = departure.plannedTime;
             final boolean cancelled = departure.cancelled;
 
-            PTDate time;
+            final PTDate time;
             final boolean isPredicted = predictedTime != null;
             if (predictedTime != null)
                 time = predictedTime;
@@ -837,7 +862,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             }
 
             if (departure.journeyRef != null) {
-                View.OnClickListener onClickListener = clickedView -> {
+                final View.OnClickListener onClickListener = clickedView -> {
                     context.queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
                             context, clickedView, context.queryJourneyRunnable,
                             context.handler, context.backgroundHandler,
@@ -891,7 +916,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                         msgViewMessageText.substring(0, Math.min(msgViewMessageText.length(), 60)));
                 msgView.setTextColor(context.getColor(R.color.fg_insignificant));
             };
-            Spanned html = Html.fromHtml(HtmlUtils.makeLinksClickableInHtml(displayMessage), Html.FROM_HTML_MODE_COMPACT);
+            final Spanned html = Html.fromHtml(HtmlUtils.makeLinksClickableInHtml(displayMessage), Html.FROM_HTML_MODE_COMPACT);
             msgView.setText(html);
             msgView.setMovementMethod(LinkMovementMethod.getInstance());
         }

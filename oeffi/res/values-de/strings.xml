@@ -169,6 +169,7 @@
     <!-- station details -->
     <string name="stations_station_details_action_load_later">Lade spätere Abfahrten</string>
     <string name="stations_station_details_action_load_earlier">Lade frühere Abfahrten</string>
+    <string name="stations_station_details_action_explore_nearby_title">Abfahrten in der Nähe</string>
     <string name="stations_station_details_action_favorite_title">Favorit</string>
     <string name="stations_station_details_action_cancelled_title">Entferne/zeige stornierte Abfahrten</string>
     <string name="stations_station_details_progress">Lade Abfahrtszeiten…</string>
