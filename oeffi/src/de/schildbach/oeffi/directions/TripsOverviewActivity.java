@@ -136,7 +136,6 @@ public class TripsOverviewActivity extends OeffiActivity {
     private SearchMoreContext searchMoreContext;
     private RenderConfig renderConfig;
 
-    private MyActionBar actionBar;
     private ImageButton searchMoreButton;
     private @Nullable QueryTripsContext queryTripsContextEarlier;
     private @Nullable QueryTripsContext queryTripsContextLater;
@@ -233,7 +232,7 @@ public class TripsOverviewActivity extends OeffiActivity {
             return windowInsets;
         });
 
-        actionBar = getMyActionBar();
+        final MyActionBar actionBar = getMyActionBar();
         setPrimaryColor(renderConfig.actionBarColor > 0 ? renderConfig.actionBarColor : R.color.bg_action_bar_directions_darkdefault);
         actionBar.setBack(v -> finish());
         actionBar.setCustomTitles(R.layout.directions_trip_overview_custom_title);
@@ -258,7 +257,7 @@ public class TripsOverviewActivity extends OeffiActivity {
             if (tripInfo != null) {
                 final Trip trip = tripInfo.trip;
                 if (trip.legs != null) {
-                    TripDetailsActivity.RenderConfig config = new TripDetailsActivity.RenderConfig();
+                    final TripDetailsActivity.RenderConfig config = new TripDetailsActivity.RenderConfig();
                     config.isAlternativeConnectionSearch = renderConfig.isAlternativeConnectionSearch;
                     config.queryTripsRequestData = reloadRequestData;
                     if (config.isAlternativeConnectionSearch) {
@@ -297,7 +296,7 @@ public class TripsOverviewActivity extends OeffiActivity {
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == DETAILS_NEW_NAVIGATION && resultCode == RESULT_OK) {
             // user has started another navigation
@@ -542,7 +541,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         prependNumChanges = -1;
         final NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
         final Date now = new Date();
-        for (Trip.Leg leg : renderConfig.prependTrip.legs) {
+        for (final Trip.Leg leg : renderConfig.prependTrip.legs) {
             if (leg instanceof Trip.Public) {
                 Trip.Public publicLeg = (Trip.Public) leg;
                 if (doRefresh) {
@@ -593,7 +592,7 @@ public class TripsOverviewActivity extends OeffiActivity {
                     null,
                     false);
             final List<Stop> newIntermediateStops = new LinkedList<>();
-            for (Stop intermediateStop : foundLeg.intermediateStops) {
+            for (final Stop intermediateStop : foundLeg.intermediateStops) {
                 if (prependToId.equals(intermediateStop.location.id)
                         && prependToStop.plannedArrivalTime.equals(intermediateStop.plannedArrivalTime)) {
                     break;
@@ -620,7 +619,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         if (in.trips == null)
             return in;
         final List<Trip> newTrips = new LinkedList<>();
-        for (Trip inTrip : in.trips) {
+        for (final Trip inTrip : in.trips) {
             final Trip newTrip = prependToTrip(inTrip);
             if (newTrip != null)
                 newTrips.add(newTrip);
@@ -710,7 +709,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         for (int i = 1; i < tripLegs.size(); i += 1)
             newLegs.add(tripLegs.get(i));
 
-        final Trip newTrip = new Trip(
+        return new Trip(
                 trip.loadedAt,
                 trip.getId(),
                 trip.tripRef,
@@ -720,7 +719,6 @@ public class TripsOverviewActivity extends OeffiActivity {
                 trip.fares,
                 trip.capacity,
                 newNumChanges);
-        return newTrip;
     }
 
     private int processInitialResult(
@@ -752,8 +750,8 @@ public class TripsOverviewActivity extends OeffiActivity {
             final QueryTripsResult result,
             final boolean earlier, final boolean later,
             final SearchMoreContext searchMoreContext) {
-        boolean earlierOrLater = earlier || later;
-        boolean initial = searchMoreContext.currentRound == 0 && !earlierOrLater;
+        final boolean earlierOrLater = earlier || later;
+        final boolean initial = searchMoreContext.currentRound == 0 && !earlierOrLater;
         if (initial) {
             trips.clear();
             searchMoreContext.reset();
@@ -776,12 +774,13 @@ public class TripsOverviewActivity extends OeffiActivity {
 
         // determine new trips
         int countNew = 0;
-        for (Trip trip : result.trips) {
+        for (final Trip trip : result.trips) {
             final TripInfo tripInfo = searchMoreContext.newTripInfos(trip, earlierOrLater);
             if (tripInfo != null && trips.add(tripInfo))
                 countNew += 1;
         }
-        searchMoreContext.tellNewTripsAddedAndAddMoreIfNecessary(countNew, trips);
+        if (!earlierOrLater)
+            searchMoreContext.tellNewTripsAddedAndAddMoreIfNecessary(countNew, trips);
 
         if (countNew > 0) {
             // redraw
@@ -875,7 +874,7 @@ public class TripsOverviewActivity extends OeffiActivity {
                 return null;
             }
 
-            TripInfo tripInfo = new TripInfo(trip);
+            final TripInfo tripInfo = new TripInfo(trip);
             tripInfo.isEarlierOrLater = isEarlierOrLater;
             tripInfo.addedInRound = isEarlierOrLater ? 0 : currentRound;
             return tripInfo;
@@ -899,18 +898,18 @@ public class TripsOverviewActivity extends OeffiActivity {
             attemptableTransferTimes.clear();
             long minPlanned = Long.MAX_VALUE;
             long minPredicted = Long.MAX_VALUE;
-            long limitLast = (long) lastRequestedMinTransferTime * 60000;
+            final long limitLast = (long) lastRequestedMinTransferTime * 60000;
             int n = 0;
-            for (TripInfo tripInfo : trips) {
+            for (final TripInfo tripInfo : trips) {
                 if (tripInfo.addedInRound < currentRound || tripInfo.isEarlierOrLater)
                     continue;
 
                 final Trip trip = tripInfo.trip;
                 Trip.Public prevLeg = null;
                 int publicLegIndex = 0;
-                for (Trip.Leg aLeg : trip.legs) {
+                for (final Trip.Leg aLeg : trip.legs) {
                     if (aLeg instanceof Trip.Public) {
-                        Trip.Public leg = (Trip.Public) aLeg;
+                        final Trip.Public leg = (Trip.Public) aLeg;
                         publicLegIndex += 1;
                         if (publicLegIndex == 2) {
                             final Location location = leg.departureStop.location;
@@ -960,17 +959,17 @@ public class TripsOverviewActivity extends OeffiActivity {
         }
 
         private void addForgedTripsWithTripsToStation(
-                String transferStationId,
-                List<Trip> tripsToStation,
-                NavigableSet<TripInfo> trips) {
+                final String transferStationId,
+                final List<Trip> tripsToStation,
+                final NavigableSet<TripInfo> trips) {
             final List<TripInfo> newTrips = new LinkedList<>();
-            for (TripInfo tripInfo: trips) {
+            for (final TripInfo tripInfo: trips) {
                 if (tripInfo.isEarlierOrLater)
                     continue;
 
                 final Trip baseTrip = tripInfo.trip;
                 Trip.Public prevLeg = null;
-                for (Trip.Leg aLeg: baseTrip.legs) {
+                for (final Trip.Leg aLeg: baseTrip.legs) {
                     if (!(aLeg instanceof Trip.Public))
                         continue;
 
@@ -978,7 +977,7 @@ public class TripsOverviewActivity extends OeffiActivity {
                     if (prevLeg != null) {
                         if (transferStationId.equals(leg.departureStop.location.id)) {
                             final PTDate departureTime = leg.departureStop.getDepartureTime();
-                            for (Trip feedingTrip: tripsToStation) {
+                            for (final Trip feedingTrip: tripsToStation) {
                                 final Trip.Leg lastLeg = feedingTrip.legs.get(feedingTrip.legs.size() - 1);
                                 final Trip.Public lastPublicLeg;
                                 final Trip.Individual connectingWalkLeg;
@@ -1013,17 +1012,19 @@ public class TripsOverviewActivity extends OeffiActivity {
                     prevLeg = leg;
                 }
             }
-            for (TripInfo newTrip : newTrips) {
+            for (final TripInfo newTrip : newTrips) {
                 if (!trips.contains(newTrip))
                     trips.add(newTrip);
             }
         }
 
         private Trip makeNewTripByReplacingInitialLegsFromFeedingTrip(
-                Trip baseTrip, Trip.Public firstLegToKeep, Trip feedingTrip) {
+                final Trip baseTrip,
+                final Trip.Public firstLegToKeep,
+                final Trip feedingTrip) {
             final List<Trip.Leg> legs = new LinkedList<>(feedingTrip.legs);
             boolean copy = false;
-            for (Trip.Leg baseLeg : baseTrip.legs) {
+            for (final Trip.Leg baseLeg : baseTrip.legs) {
                 if (baseLeg == firstLegToKeep)
                     copy = true;
                 if (copy)
@@ -1055,7 +1056,7 @@ public class TripsOverviewActivity extends OeffiActivity {
             public String infoText;
         }
 
-        public NextRoundInfo prepareNextRound(Context context) {
+        public NextRoundInfo prepareNextRound(final Context context) {
             currentRound += 1;
 
             if (departureBased && !firstTransferStations.isEmpty()) {
