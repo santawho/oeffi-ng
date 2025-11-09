@@ -343,6 +343,10 @@ public abstract class OeffiActivity extends ComponentActivity {
                     popupMenu.setOnMenuItemClickListener(subItem -> {
                         navigationDrawerLayout.closeDrawers();
                         final int subItemId = subItem.getItemId();
+                        if (subItemId == R.id.global_options_report_bug) {
+                            ErrorReporter.sendBugMail(application, application.packageInfo());
+                            return true;
+                        }
                         if (subItemId == R.id.global_options_clear_navigation) {
                             NavigationNotification.removeAll(OeffiActivity.this);
                             return true;
