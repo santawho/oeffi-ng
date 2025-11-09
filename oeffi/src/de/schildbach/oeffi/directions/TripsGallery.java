@@ -187,8 +187,9 @@ public class TripsGallery extends Gallery {
     public void setTrips(
             final List<TripInfo> trips,
             final boolean canScrollLater, final boolean canScrollEarlier,
-            final boolean showAccessibility, final boolean showBicycleCarriage) {
-        adapter.setTrips(trips, canScrollLater, canScrollEarlier, showAccessibility, showBicycleCarriage);
+            final boolean showAccessibility, final boolean showBicycleCarriage,
+            final int maxWalkDistance) {
+        adapter.setTrips(trips, canScrollLater, canScrollEarlier, showAccessibility, showBicycleCarriage, maxWalkDistance);
     }
 
     public void setOnScrollListener(final OnScrollListener onScrollListener) {

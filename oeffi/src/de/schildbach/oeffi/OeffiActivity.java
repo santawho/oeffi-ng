@@ -88,6 +88,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
 public abstract class OeffiActivity extends ComponentActivity {
     protected static final String INTENT_EXTRA_LINK_ARGS = OeffiActivity.class.getName() + ".link_args";
     protected static final String INTENT_EXTRA_NETWORK_NAME = OeffiActivity.class.getName() + ".network";
@@ -690,31 +692,6 @@ public abstract class OeffiActivity extends ComponentActivity {
         return Application.getInstance().prefsGetNetworkId();
     }
 
-    protected NetworkProvider.Optimize prefsGetOptimizeTrip() {
-        final String optimize = prefs.getString(Constants.PREFS_KEY_OPTIMIZE_TRIP, null);
-        if (optimize != null)
-            return NetworkProvider.Optimize.valueOf(optimize);
-        else
-            return null;
-    }
-
-    protected NetworkProvider.WalkSpeed prefsGetWalkSpeed() {
-        return NetworkProvider.WalkSpeed.valueOf(prefs.getString(Constants.PREFS_KEY_WALK_SPEED, NetworkProvider.WalkSpeed.NORMAL.name()));
-    }
-
-    protected Integer prefsGetMinTranfserTime() {
-        final int value = Integer.parseInt(prefs.getString(Constants.PREFS_KEY_MIN_TRANSFER_TIME, "-1"));
-        return value < 0 ? null : value;
-    }
-
-    protected NetworkProvider.Accessibility prefsGetAccessibility() {
-        return NetworkProvider.Accessibility.valueOf(prefs.getString(Constants.PREFS_KEY_ACCESSIBILITY, NetworkProvider.Accessibility.NEUTRAL.name()));
-    }
-
-    protected boolean prefsIsBicycleTravel() {
-        return prefs.getBoolean(Constants.PREFS_KEY_BICYCLE_TRAVEL, false);
-    }
-
     protected Set<Product> getNetworkDefaultProducts() {
         final NetworkProvider networkProvider = network != null ? NetworkProviderFactory.provider(network) : null;
         return networkProvider != null ? networkProvider.defaultProducts() : Product.ALL_SELECTABLE;
@@ -758,8 +735,20 @@ public abstract class OeffiActivity extends ComponentActivity {
 
     @NonNull
     protected TripOptions getTripOptionsFromPrefs() {
-        return new TripOptions(loadProductFilter(), prefsGetOptimizeTrip(), prefsGetWalkSpeed(),
-                prefsGetMinTranfserTime(), prefsGetAccessibility(), null);
+        return getTripOptionsFromPrefs(loadProductFilter(), null);
+    }
+
+    @NonNull
+    protected TripOptions getTripOptionsFromPrefs(
+            final @Nullable Set<Product> products,
+            final @Nullable Set<NetworkProvider.TripFlag> flags) {
+        return new TripOptions(
+                products,
+                application.prefsGetOptimizeTrip(),
+                application.prefsGetWalkSpeed(),
+                application.prefsGetMinTransferTime(),
+                application.prefsGetAccessibility(),
+                flags);
     }
 
     protected void checkChangeNetwork() {

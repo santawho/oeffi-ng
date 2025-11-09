@@ -962,9 +962,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final String destinationName = Formats.fullLocationName(destination);
         final boolean showDestination = destinationName != null;
         final boolean showAccessibility = leg.line.hasAttr(Line.Attr.WHEEL_CHAIR_ACCESS)
-                && !NetworkProvider.Accessibility.NEUTRAL.equals(prefsGetAccessibility());
+                && !NetworkProvider.Accessibility.NEUTRAL.equals(application.prefsGetAccessibility());
         final boolean showBicycleCarriage = leg.line.hasAttr(Line.Attr.BICYCLE_CARRIAGE)
-                && prefsIsBicycleTravel();
+                && application.prefsIsBicycleTravel();
         final List<Stop> intermediateStops = leg.intermediateStops;
         final String message = leg.message != null ? leg.message : leg.line.message;
         boolean isRowSimulated = false;
@@ -1232,8 +1232,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 textResId = R.string.directions_trip_details_car;
                 iconResId = R.drawable.ic_local_taxi_grey600_24dp;
             } else if (leg.type == Trip.Individual.Type.TRANSFER) {
-                textResId = R.string.directions_trip_details_transfer;
-                iconResId = R.drawable.ic_local_taxi_grey600_24dp;
+                if (leg.distance <= application.prefsGetMaxWalkDistance()) {
+                    textResId = R.string.directions_trip_details_walk;
+                    iconResId = R.drawable.ic_directions_walk_grey600_24dp;
+                } else {
+                    textResId = R.string.directions_trip_details_transfer;
+                    iconResId = R.drawable.ic_local_taxi_grey600_24dp;
+                }
             } else {
                 throw new IllegalStateException("unknown type: " + leg.type);
             }
@@ -2327,9 +2332,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     legStrResId = R.string.directions_trip_details_text_long_bike;
                 else if (individualLeg.type == Trip.Individual.Type.CAR)
                     legStrResId = R.string.directions_trip_details_text_long_car;
-                else if (individualLeg.type == Trip.Individual.Type.TRANSFER)
-                    legStrResId = R.string.directions_trip_details_text_long_transfer;
-                else
+                else if (individualLeg.type == Trip.Individual.Type.TRANSFER) {
+                    if (((Trip.Individual) leg).distance <= application.prefsGetMaxWalkDistance())
+                        legStrResId = R.string.directions_trip_details_text_long_walk;
+                    else
+                        legStrResId = R.string.directions_trip_details_text_long_transfer;
+                } else
                     throw new IllegalStateException("unknown type: " + individualLeg.type);
                 legStr = getString(legStrResId, individualLeg.min, distanceStr,
                         individualLeg.arrival.uniqueShortName());

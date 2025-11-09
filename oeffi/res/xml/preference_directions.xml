@@ -22,6 +22,12 @@
         android:key="walk_speed"
         android:summary="@string/directions_preferences_walk_speed_summary"
         android:title="@string/directions_preferences_walk_speed_title" />
+    <EditTextPreference
+        android:inputType="number"
+        android:defaultValue="2000"
+        android:key="walk_distance"
+        android:summary="@string/directions_preferences_walk_distance_summary"
+        android:title="@string/directions_preferences_walk_distance_title" />
     <ListPreference
         android:defaultValue="NEUTRAL"
         android:entries="@array/directions_accessibility"

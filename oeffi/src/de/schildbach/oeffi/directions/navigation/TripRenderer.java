@@ -30,6 +30,7 @@ import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
+import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GeoUtils;
@@ -341,7 +342,10 @@ public class TripRenderer {
     public boolean futureTransferCritical;
     private Boolean feasible;
 
-    public TripRenderer(final TripRenderer previous, final Trip trip, final boolean isJourney, final Date now) {
+    public TripRenderer(
+            final TripRenderer previous,
+            final Trip trip, final boolean isJourney,
+            final Date now) {
         this.trip = trip;
         this.isJourney = isJourney;
         this.legExpandStates = previous != null ? previous.legExpandStates : new HashMap<>();
@@ -868,8 +872,13 @@ public class TripRenderer {
                     iconId = R.drawable.ic_directions_bike_grey600_24dp;
                     break;
                 case CAR:
-                case TRANSFER:
                     iconId = R.drawable.ic_local_taxi_grey600_24dp;
+                    break;
+                case TRANSFER:
+                    if (individualLeg.distance > Application.getInstance().prefsGetMaxWalkDistance())
+                        iconId = R.drawable.ic_local_taxi_grey600_24dp;
+                    else
+                        iconId = R.drawable.ic_directions_walk_grey600_24dp;
                     break;
                 case WALK:
                 default:

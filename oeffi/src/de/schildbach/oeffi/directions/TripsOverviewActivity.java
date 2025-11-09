@@ -757,8 +757,9 @@ public class TripsOverviewActivity extends OeffiActivity {
             searchMoreContext.reset();
         }
 
-        final boolean showAccessibility = !NetworkProvider.Accessibility.NEUTRAL.equals(prefsGetAccessibility());
-        final boolean showBicycleCarriage = prefsIsBicycleTravel();
+        final boolean showAccessibility = !NetworkProvider.Accessibility.NEUTRAL.equals(application.prefsGetAccessibility());
+        final boolean showBicycleCarriage = application.prefsIsBicycleTravel();
+        final int maxWalkDistance = application.prefsGetMaxWalkDistance();
 
         // remove implausible trips and adjust untravelable legs
         for (final Iterator<Trip> i = result.trips.iterator(); i.hasNext();) {
@@ -788,7 +789,7 @@ public class TripsOverviewActivity extends OeffiActivity {
                     new ArrayList<>(trips),
                     result.context != null && result.context.canQueryLater(),
                     result.context != null && result.context.canQueryEarlier(),
-                    showAccessibility, showBicycleCarriage);
+                    showAccessibility, showBicycleCarriage, maxWalkDistance);
 
             // initial cursor positioning
             if (initial && !trips.isEmpty())

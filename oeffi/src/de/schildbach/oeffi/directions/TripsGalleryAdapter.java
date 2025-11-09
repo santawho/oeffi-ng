@@ -77,6 +77,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
     private TripsOverviewActivity.RenderConfig renderConfig;
     private boolean canScrollLater = true, canScrollEarlier = true;
     private boolean showAccessibility, showBicycleCarriage;
+    private int maxWalkDistance;
 
     private long minTime = 0, maxTime = 0;
 
@@ -279,12 +280,14 @@ public final class TripsGalleryAdapter extends BaseAdapter {
     public void setTrips(
             final List<TripInfo> trips,
             final boolean canScrollLater, final boolean canScrollEarlier,
-            final boolean showAccessibility, final boolean showBicycleCarriage) {
+            final boolean showAccessibility, final boolean showBicycleCarriage,
+            final int maxWalkDistance) {
         this.trips = trips;
         this.canScrollLater = canScrollLater;
         this.canScrollEarlier = canScrollEarlier;
         this.showAccessibility = showAccessibility;
         this.showBicycleCarriage = showBicycleCarriage;
+        this.maxWalkDistance = maxWalkDistance;
 
         notifyDataSetChanged();
     }
@@ -630,9 +633,10 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                         symbol = walkIcon;
                     else if (individualLeg.type == Individual.Type.BIKE)
                         symbol = bikeIcon;
-                    else if (individualLeg.type == Individual.Type.CAR
-                            || individualLeg.type == Individual.Type.TRANSFER)
+                    else if (individualLeg.type == Individual.Type.CAR)
                         symbol = carIcon;
+                    else if (individualLeg.type == Individual.Type.TRANSFER)
+                        symbol = individualLeg.distance > maxWalkDistance ? carIcon : walkIcon;
                     else
                         throw new IllegalStateException("unknown type: " + individualLeg.type);
                     final int symbolWidth = symbol.getIntrinsicWidth();

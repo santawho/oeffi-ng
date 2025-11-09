@@ -60,6 +60,7 @@ import de.schildbach.oeffi.util.ErrorReporter;
 import de.schildbach.oeffi.util.SpeechInput;
 import de.schildbach.oeffi.util.TimeZoneSelector;
 import de.schildbach.pte.NetworkId;
+import de.schildbach.pte.NetworkProvider;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import org.osmdroid.config.Configuration;
@@ -193,6 +194,40 @@ public class Application extends android.app.Application {
         } catch (final IllegalArgumentException x) {
             log.warn("Ignoring unkown selected network: {}", id);
             return null;
+        }
+    }
+
+    public NetworkProvider.Optimize prefsGetOptimizeTrip() {
+        final String optimize = prefs.getString(Constants.PREFS_KEY_OPTIMIZE_TRIP, null);
+        if (optimize != null)
+            return NetworkProvider.Optimize.valueOf(optimize);
+        else
+            return null;
+    }
+
+    public NetworkProvider.WalkSpeed prefsGetWalkSpeed() {
+        return NetworkProvider.WalkSpeed.valueOf(prefs.getString(Constants.PREFS_KEY_WALK_SPEED, NetworkProvider.WalkSpeed.NORMAL.name()));
+    }
+
+    public Integer prefsGetMinTransferTime() {
+        final int value = Integer.parseInt(prefs.getString(Constants.PREFS_KEY_MIN_TRANSFER_TIME, "-1"));
+        return value < 0 ? null : value;
+    }
+
+    public NetworkProvider.Accessibility prefsGetAccessibility() {
+        return NetworkProvider.Accessibility.valueOf(prefs.getString(Constants.PREFS_KEY_ACCESSIBILITY, NetworkProvider.Accessibility.NEUTRAL.name()));
+    }
+
+    public boolean prefsIsBicycleTravel() {
+        return prefs.getBoolean(Constants.PREFS_KEY_BICYCLE_TRAVEL, false);
+    }
+
+    public int prefsGetMaxWalkDistance() {
+        final String s = prefs.getString(Constants.PREFS_KEY_MAX_WALK_DISTANCE, "2000");
+        try {
+            return Integer.parseInt(s);
+        } catch (final NumberFormatException nfe) {
+            return 0;
         }
     }
 

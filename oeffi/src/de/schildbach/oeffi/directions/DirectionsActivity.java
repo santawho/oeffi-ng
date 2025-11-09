@@ -1524,8 +1524,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         if (viewBike.isChecked() && networkProvider.hasCapabilities(Capability.BIKE_OPTION))
             flags.add(TripFlag.BIKE);
 
-        final TripOptions options = new TripOptions(products, prefsGetOptimizeTrip(), prefsGetWalkSpeed(),
-                prefsGetMinTranfserTime(), prefsGetAccessibility(), flags.isEmpty() ? null : flags);
+        final TripOptions options = getTripOptionsFromPrefs(products, flags.isEmpty() ? null : flags);
         queryTripsRunnable = new MyQueryTripsRunnable(networkProvider, from, via, to, time, options) {
             @Override
             protected void onPreExecute() {

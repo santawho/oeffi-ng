@@ -420,6 +420,8 @@
     <string name="directions_preferences_optimize_trip_summary">Was ist dir am wichtigsten? Diese Einstellung wirkt sich nicht auf alle Verkehrsnetze aus.</string>
     <string name="directions_preferences_walk_speed_title">Gehgeschwindigkeit</string>
     <string name="directions_preferences_walk_speed_summary">Wie schnell kannst du laufen? Diese Einstellung wirkt sich nicht auf alle Verkehrsnetze aus.</string>
+    <string name="directions_preferences_walk_distance_title">Maximale Distanz für Fußwege</string>
+    <string name="directions_preferences_walk_distance_summary">Wie weit kannst du laufen? Diese Einstellung wirkt sich nicht auf alle Verkehrsnetze aus.</string>
     <string name="directions_preferences_min_transfer_time_title">Minimale Umsteigezeit</string>
     <string name="directions_preferences_min_transfer_time_summary">Wie lange benötigst du zum umsteigen? Diese Einstellung wirkt sich nicht auf alle Verkehrsnetze aus.</string>
     <string name="directions_preferences_accessibility_title">Barrierefreiheit</string>
