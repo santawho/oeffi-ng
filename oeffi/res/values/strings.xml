@@ -85,7 +85,8 @@
     <string name="about_market_app_title">Rate or Review Öffi</string>
 
     <!-- preferences extras -->
-    <string name="extras_title">Extras</string>
+    <string name="extras_title">Special Functions</string>
+    <string name="extras_drivermode_enabled_title">Driver Mode</string>
     <string name="extras_tripextrainfo_enabled_title">Acquire extra info for trips</string>
 
     <!-- network picker -->

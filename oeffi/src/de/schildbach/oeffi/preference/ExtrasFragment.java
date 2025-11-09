@@ -19,15 +19,16 @@ package de.schildbach.oeffi.preference;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 
 import javax.annotation.Nullable;
 
 import de.schildbach.oeffi.Application;
+import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 
 public class ExtrasFragment extends PreferenceFragment {
-    public static final String KEY_EXTRAS_ENABLED = "extras_enabled";
-    public static final String KEY_EXTRAS_TRIPEXTRAINFO_ENABLED = "extras_tripextrainfo_enabled";
+    private static final String KEY_MORE_EXTRAS_ENABLED = "more_extras_enabled";
 
     private static int counter = 0;
 
@@ -37,34 +38,31 @@ public class ExtrasFragment extends PreferenceFragment {
             if (++counter >= 8) {
                 counter = 0;
                 final SharedPreferences preferences = Application.getInstance().getSharedPreferences();
-                final boolean isExtrasEnabled = preferences.getBoolean(KEY_EXTRAS_ENABLED, false);
-                preferences.edit().putBoolean(KEY_EXTRAS_ENABLED, !isExtrasEnabled).apply();
+                final boolean isExtrasEnabled = preferences.getBoolean(KEY_MORE_EXTRAS_ENABLED, false);
+                preferences.edit().putBoolean(KEY_MORE_EXTRAS_ENABLED, !isExtrasEnabled).apply();
             }
         } else {
             counter = 0;
         }
     }
 
-    public static boolean isExtrasEnabled() {
+    public static boolean isMoreExtrasEnabled() {
         return Application.getInstance().getSharedPreferences()
-                .getBoolean(KEY_EXTRAS_ENABLED, false);
-    }
-
-    public static PreferenceActivity.Header getHeader() {
-        final PreferenceActivity.Header extrasHeader = new PreferenceActivity.Header();
-        extrasHeader.fragment = ExtrasFragment.class.getName();
-        extrasHeader.title = Application.getInstance().getString(R.string.extras_title);
-        return extrasHeader;
+                .getBoolean(KEY_MORE_EXTRAS_ENABLED, false);
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preference_extras);
-    }
 
-    public static boolean isTripExtraInfoEnabled() {
-        return Application.getInstance().getSharedPreferences()
-                .getBoolean(KEY_EXTRAS_TRIPEXTRAINFO_ENABLED, false);
+        if (!isMoreExtrasEnabled())
+            return;
+
+        final CheckBoxPreference tripExtraInfoPreference = new CheckBoxPreference(preferenceActivity);
+        tripExtraInfoPreference.setKey(Constants.KEY_EXTRAS_TRIPEXTRAINFO_ENABLED);
+        tripExtraInfoPreference.setTitle(R.string.extras_tripextrainfo_enabled_title);
+        tripExtraInfoPreference.setDefaultValue(false);
+        addPreference(tripExtraInfoPreference);
     }
 }

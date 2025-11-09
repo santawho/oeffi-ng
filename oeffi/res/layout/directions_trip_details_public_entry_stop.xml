@@ -8,42 +8,118 @@
         android:layout_height="match_parent"
         android:paddingTop="@dimen/trip_details_stop_offset" />
 
-    <TextView
+    <LinearLayout
         android:id="@+id/directions_trip_details_public_entry_stop_date"
-        android:layout_marginLeft="@dimen/text_padding_horizontal_cram"
-        android:layout_marginRight="@dimen/text_padding_horizontal_cram"
-        android:maxWidth="128dp"
-        android:textColor="@color/fg_significant"
-        android:textSize="@dimen/font_size_large" />
+        android:orientation="vertical"
+        android:paddingLeft="@dimen/text_padding_horizontal_cram"
+        android:paddingRight="@dimen/text_padding_horizontal_cram" >
+        <View
+            android:id="@+id/directions_trip_details_public_entry_stop_date_divider"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/text_padding_vertical_cram"
+            android:background="@color/bg_divider" />
+        <TextView
+            android:id="@+id/directions_trip_details_public_entry_stop_date_provided"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxWidth="128dp"
+            android:textColor="@color/fg_significant"
+            android:textSize="@dimen/font_size_large" />
+        <TextView
+            android:id="@+id/directions_trip_details_public_entry_stop_date_simulated"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxWidth="128dp"
+            android:textColor="@color/fg_simulated"
+            android:textSize="@dimen/font_size_large" />
+    </LinearLayout>
 
-    <TextView
+    <LinearLayout
         android:id="@+id/directions_trip_details_public_entry_stop_time"
-        android:layout_marginLeft="@dimen/text_padding_horizontal_cram"
-        android:textColor="@color/fg_significant"
-        android:textSize="@dimen/font_size_large" />
+        android:orientation="vertical"
+        android:paddingLeft="@dimen/text_padding_horizontal_cram" >
+        <View
+            android:id="@+id/directions_trip_details_public_entry_stop_time_divider"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/text_padding_vertical_cram"
+            android:background="@color/bg_divider"
+            android:visibility="gone" />
+        <TextView
+            android:id="@+id/directions_trip_details_public_entry_stop_time_provided"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/fg_significant"
+            android:textSize="@dimen/font_size_large" />
+        <TextView
+            android:id="@+id/directions_trip_details_public_entry_stop_time_simulated"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/fg_simulated"
+            android:textSize="@dimen/font_size_large" />
+    </LinearLayout>
 
-    <TextView
+    <LinearLayout
         android:id="@+id/directions_trip_details_public_entry_stop_delay"
-        android:layout_marginLeft="@dimen/text_padding_horizontal"
-        android:textColor="@color/fg_significant"
-        android:textSize="@dimen/font_size_large" />
+        android:orientation="vertical"
+        android:paddingLeft="@dimen/text_padding_horizontal" >
+        <View
+            android:id="@+id/directions_trip_details_public_entry_stop_delay_divider"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/text_padding_vertical_cram"
+            android:background="@color/bg_divider"
+            android:visibility="gone" />
+        <TextView
+            android:id="@+id/directions_trip_details_public_entry_stop_delay_provided"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/fg_significant"
+            android:textSize="@dimen/font_size_large" />
+        <TextView
+            android:id="@+id/directions_trip_details_public_entry_stop_delay_simulated"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/fg_simulated"
+            android:textSize="@dimen/font_size_large" />
+    </LinearLayout>
 
-    <TextView
-        android:id="@+id/directions_trip_details_public_entry_stop_position"
-        android:layout_marginLeft="@dimen/text_padding_horizontal_lax"
-        android:ellipsize="none"
-        android:gravity="center_horizontal"
-        android:includeFontPadding="false"
-        android:maxWidth="@dimen/position_max_width"
-        android:singleLine="true"
-        android:textColor="@color/fg_significant"
-        android:textSize="@dimen/font_size_large" />
+    <LinearLayout
+        android:orientation="vertical"
+        android:paddingLeft="@dimen/text_padding_horizontal_lax" >
+        <View
+            android:id="@+id/directions_trip_details_public_entry_stop_position_divider"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/text_padding_vertical_cram"
+            android:background="@color/bg_divider"
+            android:visibility="gone" />
+        <TextView
+            android:id="@+id/directions_trip_details_public_entry_stop_position"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="none"
+            android:gravity="center_horizontal"
+            android:includeFontPadding="false"
+            android:maxWidth="@dimen/position_max_width"
+            android:singleLine="true"
+            android:textColor="@color/fg_significant"
+            android:textSize="@dimen/font_size_large" />
+    </LinearLayout>
 
-    <TextView
-        android:id="@+id/directions_trip_details_public_entry_stop_name"
-        android:layout_marginLeft="@dimen/text_padding_horizontal_lax"
-        android:background="?android:attr/selectableItemBackground"
-        android:textColor="@color/fg_significant"
-        android:textSize="@dimen/font_size_large" />
+    <LinearLayout
+        android:orientation="vertical"
+        android:paddingLeft="@dimen/text_padding_horizontal_lax" >
+        <View
+            android:id="@+id/directions_trip_details_public_entry_stop_name_divider"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/text_padding_vertical_cram"
+            android:background="@color/bg_divider"
+            android:visibility="gone" />
+        <TextView
+            android:id="@+id/directions_trip_details_public_entry_stop_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?android:attr/selectableItemBackground"
+            android:textColor="@color/fg_significant"
+            android:textSize="@dimen/font_size_large" />
+    </LinearLayout>
 
 </TableRow>

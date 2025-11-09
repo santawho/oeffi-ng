@@ -15,6 +15,9 @@
         android:fragment="de.schildbach.oeffi.preference.NavigationFragment"
         android:title="@string/navigation_preferences_title" />
     <header
+        android:fragment="de.schildbach.oeffi.preference.ExtrasFragment"
+        android:title="@string/extras_title" />
+    <header
         android:fragment="de.schildbach.oeffi.preference.ShortcutsFragment"
         android:title="@string/shortcuts_preferences_title"
         android:summary="@string/shortcuts_preferences_summary"/>

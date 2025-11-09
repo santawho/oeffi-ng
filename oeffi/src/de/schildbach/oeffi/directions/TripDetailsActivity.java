@@ -87,7 +87,6 @@ import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.TripAware;
-import de.schildbach.oeffi.preference.ExtrasFragment;
 import de.schildbach.oeffi.util.GoogleMapsUtils;
 import de.schildbach.oeffi.util.HorizontalPager;
 import de.schildbach.oeffi.util.KmlProducer;
@@ -257,6 +256,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     private ViewGroup legsGroup;
     private ToggleImageButton trackButton;
+    private boolean mustEnableTrackButton;
 
     protected NetworkId network;
     protected TripRenderer tripRenderer;
@@ -391,6 +391,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             getMapView().zoomToAll();
             updateGUI();
         });
+        if (isDriverMode && renderConfig.isJourney)
+            mustEnableTrackButton = true;
 
         addShowMapButtonToActionBar();
 
@@ -566,7 +568,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             shownPageChanged(newId);
         });
 
-        if (ExtrasFragment.isTripExtraInfoEnabled())
+        if (prefs.getBoolean(Constants.KEY_EXTRAS_TRIPEXTRAINFO_ENABLED, false))
             backgroundHandler.post(this::loadTripDetails);
     }
 
@@ -619,13 +621,23 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         actionBar.setPrimaryTitle(getString(renderConfig.isJourney
                         ? R.string.journey_details_title
                         : R.string.trip_details_title));
-        if (!renderConfig.isJourney
-                // && tripRenderer.isFeasible()
+
+        View.OnClickListener navigationClickListener = null;
+        if (!renderConfig.isJourney) {
+            navigationClickListener = v -> startNavigation(tripRenderer.trip, renderConfig);
+        } else if (isDriverMode
                 && NetworkProviderFactory.provider(network).hasCapabilities(NetworkProvider.Capability.JOURNEY)) {
+            final Trip.Public journeyLeg = (Trip.Public) tripRenderer.trip.legs.get(0);
+            if (journeyLeg.exitLocation == null) {
+                navigationClickListener = v -> startNavigationForJourneyToExit(journeyLeg.arrivalStop);
+            }
+        }
+
+        if (navigationClickListener != null) {
             final ImageButton navigateButton = actionBar.addButton(
                     R.drawable.ic_navigation_white_24dp,
                     R.string.directions_trip_details_action_start_routing);
-            navigateButton.setOnClickListener(buttonView -> startNavigation(tripRenderer.trip, renderConfig));
+            navigateButton.setOnClickListener(navigationClickListener);
         }
     }
 
@@ -662,6 +674,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         isPaused = false;
         checkAutoRefresh();
         updateGUI();
+
+        if (mustEnableTrackButton) {
+            mustEnableTrackButton = false;
+            trackButton.setChecked(true);
+        }
     }
 
     @Override
@@ -956,8 +973,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final TripRenderer.LegContainer walkLegC,
             final TripRenderer.LegContainer nextLegC,
             final Date now) {
-        final boolean isSimulatedLeg = legC.simulatedPublicLeg != null;
-        final Trip.Public leg = isSimulatedLeg ? legC.simulatedPublicLeg : legC.publicLeg;
+        final Trip.Public leg = legC.publicLeg;
+        final Trip.Public simulatedLeg = legC.simulatedPublicLeg;
         final Location destination = leg.destination;
         final String destinationName = Formats.fullLocationName(destination);
         final boolean showDestination = destinationName != null;
@@ -966,6 +983,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final boolean showBicycleCarriage = leg.line.hasAttr(Line.Attr.BICYCLE_CARRIAGE)
                 && application.prefsIsBicycleTravel();
         final List<Stop> intermediateStops = leg.intermediateStops;
+        final List<Stop> intermediateSimulatedStops = simulatedLeg == null ? null : simulatedLeg.intermediateStops;
         final String message = leg.message != null ? leg.message : leg.line.message;
         boolean isRowSimulated = false;
 
@@ -1039,11 +1057,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         boolean isArrivalSection = false;
 
         boolean isHighlightedLocation = departureLocation.equals(highlightedLocation);
-        final View departureRow = stopRow(PearlView.Type.DEPARTURE, departureStop, "-", legC,
-                leg.getDepartureTime().equals(highlightedTime),
-                isHighlightedLocation, now, collapseColumns, isRowSimulated);
-        stopsView.addView(departureRow);
         isRowSimulated |= isHighlightedLocation;
+        final View departureRow = stopRow(PearlView.Type.DEPARTURE,
+                departureStop, "-", legC,
+                leg.getDepartureTime().equals(highlightedTime),
+                isHighlightedLocation, now, collapseColumns,
+                isRowSimulated && simulatedLeg != null ? simulatedLeg.departureStop : null);
+        stopsView.addView(departureRow);
 
         isArrivalSection |= departureLocation.id.equals(entryLocation.id);
 
@@ -1051,7 +1071,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         if (intermediateStops != null) {
             if (isStopsExpanded) {
-                for (final Stop stop : intermediateStops) {
+                for (int stopIndex = 0; stopIndex < intermediateStops.size(); stopIndex++) {
+                    final Stop stop = intermediateStops.get(stopIndex);
+                    final Stop simulatedStop = isRowSimulated &&
+                            intermediateSimulatedStops != null ? intermediateSimulatedStops.get(stopIndex) : null;
                     final Location stopLocation = stop.location;
                     final PTDate arrivalTime = stop.getArrivalTime();
                     final PTDate departureTime = stop.getDepartureTime();
@@ -1068,14 +1091,14 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                         final View stopRow = stopRow(hasStopTime ? PearlView.Type.INTERMEDIATE_ARRIVAL : PearlView.Type.PASSING,
                                 stop, previousPlace, legC,
                                 isArrivalTimeHighlighted || (!isLongStay && isDepartureTimeHighlighted),
-                                isHighlightedLocation, now, collapseColumns, isRowSimulated);
+                                isHighlightedLocation, now, collapseColumns, simulatedStop);
                         stopsView.addView(stopRow);
 
                         if (isLongStay) {
                             final View depRow = stopRow(PearlView.Type.DEPARTURE_FOR_INTERMEDIATE_ARRIVAL,
                                     stop, previousPlace, legC,
                                     isDepartureTimeHighlighted,
-                                    isHighlightedLocation, now, collapseColumns, isRowSimulated);
+                                    isHighlightedLocation, now, collapseColumns, simulatedStop);
                             stopsView.addView(depRow);
                         }
                     } else {
@@ -1083,14 +1106,14 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                             final View depRow = stopRow(PearlView.Type.ARRIVAL_FOR_INTERMEDIATE_DEPARTURE,
                                     stop, previousPlace, legC,
                                     isDepartureTimeHighlighted,
-                                    isHighlightedLocation, now, collapseColumns, isRowSimulated);
+                                    isHighlightedLocation, now, collapseColumns, simulatedStop);
                             stopsView.addView(depRow);
                         }
 
                         final View stopRow = stopRow(hasStopTime ? PearlView.Type.INTERMEDIATE_DEPARTURE : PearlView.Type.PASSING,
                                 stop, previousPlace, legC,
                                 isDepartureTimeHighlighted || (!isLongStay && isArrivalTimeHighlighted),
-                                isHighlightedLocation, now, collapseColumns, isRowSimulated);
+                                isHighlightedLocation, now, collapseColumns, simulatedStop);
                         stopsView.addView(stopRow);
                     }
                     isRowSimulated |= isHighlightedLocation;
@@ -1127,9 +1150,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         isArrivalSection = true;
 
         isHighlightedLocation = leg.arrivalStop.location.equals(highlightedLocation);
-        final View arrivalRow = stopRow(PearlView.Type.ARRIVAL, leg.arrivalStop, previousPlace, legC,
+        final View arrivalRow = stopRow(PearlView.Type.ARRIVAL,
+                leg.arrivalStop, previousPlace, legC,
                 leg.getArrivalTime().equals(highlightedTime),
-                isHighlightedLocation, now, collapseColumns, isRowSimulated);
+                isHighlightedLocation, now, collapseColumns,
+                isRowSimulated && simulatedLeg != null ? simulatedLeg.arrivalStop : null);
         stopsView.addView(arrivalRow);
         isRowSimulated |= isHighlightedLocation;
 
@@ -1721,14 +1746,16 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final PearlView.Type pearlType,
             final Stop stop, final String previousPlace, final TripRenderer.LegContainer legC,
             final boolean highlightTime, final boolean highlightLocation,
-            final Date now, final CollapseColumns collapseColumns, final boolean isSimulatedLeg) {
+            final Date now, final CollapseColumns collapseColumns, final Stop simulatedStop) {
         final View row = inflater.inflate(R.layout.directions_trip_details_public_entry_stop, null);
         final Trip.Public leg = legC.publicLeg;
 
         final boolean isTimePredicted;
-        final PTDate time;
+        final PTDate providedTime;
+        final PTDate simulatedTime;
         final boolean isTimeDeparture;
-        final Long delay;
+        final Long providedDelay;
+        final Long simulatedDelay;
         final boolean isCancelled;
         final boolean isPositionPredicted;
         final Position position;
@@ -1748,8 +1775,15 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 || (pearlType != PearlView.Type.ARRIVAL && stop.plannedArrivalTime == null)) {
             isTimeDeparture = true;
             isTimePredicted = stop.isDepartureTimePredicted();
-            time = stop.getDepartureTime();
-            delay = stop.getDepartureDelay();
+            providedTime = stop.getDepartureTime();
+            providedDelay = stop.getDepartureDelay();
+            if (simulatedStop != null) {
+                simulatedTime = simulatedStop.getDepartureTime();
+                simulatedDelay = simulatedStop.getDepartureDelay();
+            } else {
+                simulatedTime = null;
+                simulatedDelay = null;
+            }
             isCancelled = stop.departureCancelled;
 
             isPositionPredicted = stop.isDeparturePositionPredicted();
@@ -1762,8 +1796,15 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     && stop.plannedArrivalTime != null) {
             isTimeDeparture = false;
             isTimePredicted = stop.isArrivalTimePredicted();
-            time = stop.getArrivalTime();
-            delay = stop.getArrivalDelay();
+            providedTime = stop.getArrivalTime();
+            providedDelay = stop.getArrivalDelay();
+            if (simulatedStop != null) {
+                simulatedTime = simulatedStop.getArrivalTime();
+                simulatedDelay = simulatedStop.getArrivalDelay();
+            } else {
+                simulatedTime = null;
+                simulatedDelay = null;
+            }
             isCancelled = stop.arrivalCancelled;
 
             isPositionPredicted = stop.isArrivalPositionPredicted();
@@ -1844,11 +1885,22 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     }
                 }
             }
-            stopNameView.setOnClickListener(new StopClickListener(
+            final StopClickListener clickListener = new StopClickListener(
                     legC, stop, stopIsLegDeparture, stopIsLegArrival,
-                    leg.journeyRef, feederJourneyRef, connectionJourneyRef));
+                    leg.journeyRef, feederJourneyRef, connectionJourneyRef);
+            stopNameView.setOnClickListener(v -> clickListener.onClick(v, false));
+            stopNameView.setOnLongClickListener(v -> clickListener.onClick(v, true));
         } else {
             stopNameView.setOnClickListener(null);
+            stopNameView.setOnLongClickListener(null);
+        }
+
+        if (simulatedStop != null) {
+            row.findViewById(R.id.directions_trip_details_public_entry_stop_date_divider).setVisibility(View.VISIBLE);
+            row.findViewById(R.id.directions_trip_details_public_entry_stop_time_divider).setVisibility(View.VISIBLE);
+            row.findViewById(R.id.directions_trip_details_public_entry_stop_delay_divider).setVisibility(View.VISIBLE);
+            row.findViewById(R.id.directions_trip_details_public_entry_stop_position_divider).setVisibility(View.VISIBLE);
+            row.findViewById(R.id.directions_trip_details_public_entry_stop_name_divider).setVisibility(View.VISIBLE);
         }
 
         // pearl
@@ -1858,55 +1910,91 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         pearlView.setFontMetrics(stopNameView.getPaint().getFontMetrics());
 
         // time
-        final TextView stopDateView = row.findViewById(R.id.directions_trip_details_public_entry_stop_date);
-        final TextView stopTimeView = row.findViewById(R.id.directions_trip_details_public_entry_stop_time);
-        stopDateView.setText(null);
-        stopTimeView.setText(null);
+        final ViewGroup stopDateFrameView = row.findViewById(R.id.directions_trip_details_public_entry_stop_date);
+        final ViewGroup stopTimeFrameView = row.findViewById(R.id.directions_trip_details_public_entry_stop_time);
+        final ViewGroup stopDelayFrameView = row.findViewById(R.id.directions_trip_details_public_entry_stop_delay);
+        final TextView stopDateProvidedView = row.findViewById(R.id.directions_trip_details_public_entry_stop_date_provided);
+        final TextView stopTimeProvidedView = row.findViewById(R.id.directions_trip_details_public_entry_stop_time_provided);
+        final TextView stopDelayProvidedView = row.findViewById(R.id.directions_trip_details_public_entry_stop_delay_provided);
+        final TextView stopDateSimulatedView = row.findViewById(R.id.directions_trip_details_public_entry_stop_date_simulated);
+        final TextView stopTimeSimulatedView = row.findViewById(R.id.directions_trip_details_public_entry_stop_time_simulated);
+        final TextView stopDelaySimulatedView = row.findViewById(R.id.directions_trip_details_public_entry_stop_delay_simulated);
 
-        if (time != null) {
-            final PTDate displayTime = timeZoneSelector.getDisplay(time);
+        if (providedTime != null) {
+            final PTDate displayTime = timeZoneSelector.getDisplay(providedTime);
             if (collapseColumns.dateChanged(displayTime)) {
-                stopDateView.setText(Formats.formatDate(timeZoneSelector,
+                stopDateProvidedView.setText(Formats.formatDate(timeZoneSelector,
                         now.getTime(), displayTime, true, res.getString(R.string.time_today_abbrev)));
                 collapseColumns.collapseDateColumn = false;
             }
             final String timeText = Formats.formatTime(timeZoneSelector, displayTime);
-            stopTimeView.setText(isTimeDeparture ? timeText + "°" : timeText);
-            setStrikeThru(stopTimeView, isCancelled);
+            stopTimeProvidedView.setText(isTimeDeparture ? timeText + "°" : timeText);
+            setStrikeThru(stopTimeProvidedView, isCancelled);
+            final int stopTimeColor = highlightTime ? colorHighlighted : colorSignificant;
+            stopDateProvidedView.setTextColor(stopTimeColor);
+            stopTimeProvidedView.setTextColor(stopTimeColor);
+            final boolean stopTimeBold = highlightTime || (renderConfig.isJourney ? isEntryOrExit
+                    : (pearlType == PearlView.Type.DEPARTURE || pearlType == PearlView.Type.ARRIVAL));
+            stopDateProvidedView.setTypeface(null, (highlightTime ? Typeface.BOLD : 0) + (isTimePredicted ? Typeface.ITALIC : 0));
+            stopTimeProvidedView.setTypeface(null, (stopTimeBold ? Typeface.BOLD : 0) + (isTimePredicted ? Typeface.ITALIC : 0));
+        } else {
+            stopDateProvidedView.setText(null);
+            stopTimeProvidedView.setText(null);
         }
-        final int stopTimeColor =
-                highlightTime ? colorHighlighted
-                : isSimulatedLeg ? colorSimulated
-                : colorSignificant;
-        stopDateView.setTextColor(stopTimeColor);
-        stopTimeView.setTextColor(stopTimeColor);
-        final boolean stopTimeBold = highlightTime || (renderConfig.isJourney ? isEntryOrExit
-                : (pearlType == PearlView.Type.DEPARTURE || pearlType == PearlView.Type.ARRIVAL));
-        stopDateView.setTypeface(null, (highlightTime ? Typeface.BOLD : 0) + (isTimePredicted ? Typeface.ITALIC : 0));
-        stopTimeView.setTypeface(null, (stopTimeBold ? Typeface.BOLD : 0) + (isTimePredicted ? Typeface.ITALIC : 0));
+
+        if (simulatedTime != null) {
+            final PTDate displayTime = timeZoneSelector.getDisplay(simulatedTime);
+            if (collapseColumns.dateChanged(displayTime)) {
+                stopDateSimulatedView.setText(Formats.formatDate(timeZoneSelector,
+                        now.getTime(), displayTime, true, res.getString(R.string.time_today_abbrev)));
+                collapseColumns.collapseDateColumn = false;
+            }
+            final String timeText = Formats.formatTime(timeZoneSelector, displayTime);
+            stopTimeSimulatedView.setText(isTimeDeparture ? timeText + "°" : timeText);
+            setStrikeThru(stopTimeSimulatedView, isCancelled);
+            final int stopTimeColor = colorSimulated;
+            stopDateSimulatedView.setTextColor(stopTimeColor);
+            stopTimeSimulatedView.setTextColor(stopTimeColor);
+            final boolean stopTimeBold = highlightTime || (renderConfig.isJourney ? isEntryOrExit
+                    : (pearlType == PearlView.Type.DEPARTURE || pearlType == PearlView.Type.ARRIVAL));
+            stopDateSimulatedView.setTypeface(null, (highlightTime ? Typeface.BOLD : 0) + (isTimePredicted ? Typeface.ITALIC : 0));
+            stopTimeSimulatedView.setTypeface(null, (stopTimeBold ? Typeface.BOLD : 0) + (isTimePredicted ? Typeface.ITALIC : 0));
+        } else {
+            stopDateSimulatedView.setVisibility(View.GONE);
+            stopTimeSimulatedView.setVisibility(View.GONE);
+        }
 
         // delay
-        final TextView stopDelayView = row
-                .findViewById(R.id.directions_trip_details_public_entry_stop_delay);
-        if (delay != null) {
-            final long delayMins = delay / DateUtils.MINUTE_IN_MILLIS;
+        if (providedDelay != null) {
+            final long delayMins = providedDelay / DateUtils.MINUTE_IN_MILLIS;
             if (delayMins != 0) {
                 collapseColumns.collapseDelayColumn = false;
-                stopDelayView.setText(String.format("(%+d)", delayMins));
-                stopDelayView.setTypeface(Typeface.DEFAULT, isTimePredicted ? Typeface.ITALIC : Typeface.NORMAL);
+                stopDelayProvidedView.setText(String.format("(%+d)", delayMins));
+                stopDelayProvidedView.setTypeface(Typeface.DEFAULT, isTimePredicted ? Typeface.ITALIC : Typeface.NORMAL);
             }
         }
 
-        if (time != null) {
+        if (simulatedDelay != null) {
+            final long delayMins = simulatedDelay / DateUtils.MINUTE_IN_MILLIS;
+            if (delayMins != 0) {
+                collapseColumns.collapseDelayColumn = false;
+                stopDelaySimulatedView.setText(String.format("(%+d)", delayMins));
+                stopDelaySimulatedView.setTypeface(Typeface.DEFAULT, isTimePredicted ? Typeface.ITALIC : Typeface.NORMAL);
+            }
+        } else {
+            stopDelaySimulatedView.setVisibility(View.GONE);
+        }
+
+        if (providedTime != null || simulatedTime != null) {
             final View.OnClickListener onClickListener = v -> {
                 final Spanned tooltip = getTooltipForStop(stop, now.getTime());
                 new AlertDialog.Builder(this)
                         .setMessage(tooltip)
                         .create().show();
             };
-            stopDateView.setOnClickListener(onClickListener);
-            stopTimeView.setOnClickListener(onClickListener);
-            stopDelayView.setOnClickListener(onClickListener);
+            stopDateFrameView.setOnClickListener(onClickListener);
+            stopTimeFrameView.setOnClickListener(onClickListener);
+            stopDelayFrameView.setOnClickListener(onClickListener);
         }
 
         // position
@@ -2081,7 +2169,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
     }
 
-    private class StopClickListener implements android.view.View.OnClickListener {
+    private class StopClickListener {
         private final TripRenderer.LegContainer legC;
         private final Stop stop;
         private final boolean stopIsLegDeparture, stopIsLegArrival;
@@ -2106,7 +2194,17 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             this.connectionJourneyRef = connectionJourneyRef;
         }
 
-        public void onClick(final View v) {
+        public boolean onClick(final View v, final boolean isLongClick) {
+            if (!isLongClick && renderConfig.isJourney && isDriverMode) {
+                PTDate time = stop.getArrivalTime();
+                if (time == null)
+                    time = stop.getDepartureTime(true);
+                StationDetailsActivity.start(TripDetailsActivity.this,
+                        network, stop.location, time, null,
+                        shallShowChildActivitiesInNewTask());
+                return true;
+            }
+
             final boolean showNavigateTo;
             if (renderConfig.isJourney) {
                 final Trip.Public journeyLeg = (Trip.Public) tripRenderer.trip.legs.get(0);
@@ -2181,6 +2279,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 }
             });
             contextMenu.show();
+            return true;
         }
     }
 
@@ -2429,7 +2528,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 null,
                 null,
                 0);
-        startNavigation(journeyTrip, new RenderConfig());
+        final RenderConfig navigationRenderConfig = new RenderConfig();
+        if (isDriverMode)
+            navigationRenderConfig.isJourney = true;
+        startNavigation(journeyTrip, navigationRenderConfig);
     }
 
     private void startNavigation(final Trip trip, final RenderConfig renderConfig) {

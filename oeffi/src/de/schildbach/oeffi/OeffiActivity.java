@@ -111,6 +111,7 @@ public abstract class OeffiActivity extends ComponentActivity {
     protected String[] linkArgs;
     protected Set<Product> savedProducts;
 
+    protected boolean isDriverMode;
     protected boolean isPortrait;
     protected boolean mapIsAtBottom;
     private boolean mapEnabled = false;
@@ -193,6 +194,7 @@ public abstract class OeffiActivity extends ComponentActivity {
 
     protected void updateFromPreferences() {
         timeZoneSelector = Application.getInstance().getPreferredNetworkTimeZoneSelector(network);
+        isDriverMode = prefs.getBoolean(Constants.KEY_EXTRAS_DRIVERMODE_ENABLED, false);
     }
 
     public TimeZoneSelector getTimeZoneSelector() {

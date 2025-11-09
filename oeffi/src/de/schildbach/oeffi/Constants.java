@@ -72,6 +72,8 @@ public class Constants {
     public static final String PREFS_KEY_NAVIGATION_SPEECH_OUTPUT = "navigation_speech_output";
     public static final String PREFS_KEY_NAVIGATION_REDUCED_SOUNDS = "navigation_reduced_sounds";
     public static final String PREFS_KEY_NAVIGATION_REFRESH_BEEP = "navigation_refresh_beep";
+    public static final String KEY_EXTRAS_TRIPEXTRAINFO_ENABLED = "extras_tripextrainfo_enabled";
+    public static final String KEY_EXTRAS_DRIVERMODE_ENABLED = "extras_drivermode_enabled";
 
     public static final char CHAR_THIN_SPACE = '\u2009';
     public static final char CHAR_HAIR_SPACE = '\u200a';

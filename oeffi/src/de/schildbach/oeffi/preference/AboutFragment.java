@@ -25,6 +25,7 @@ import android.preference.Preference;
 import java.io.IOException;
 
 import de.schildbach.oeffi.Application;
+import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.Installer;
@@ -121,7 +122,7 @@ public class AboutFragment extends PreferenceFragment {
         final String networkProviderDescriptionUrl = networkProviderDescription.getUrl();
         if (networkProviderDescriptionUrl != null)
             providerText.append(String.format("\n(%s)", networkProviderDescriptionUrl));
-        if (ExtrasFragment.isTripExtraInfoEnabled()) {
+        if (prefs.getBoolean(Constants.KEY_EXTRAS_TRIPEXTRAINFO_ENABLED, false)) {
             try {
                 final TransferEvaluationProvider transferEvaluationProvider = networkProvider.getTransferEvaluationProvider();
                 if (transferEvaluationProvider != null) {

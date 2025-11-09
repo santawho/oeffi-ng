@@ -2,8 +2,10 @@ package de.schildbach.oeffi.preference;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.preference.Preference;
+import android.preference.PreferenceGroup;
 
 import java.util.Map;
 
@@ -21,11 +23,13 @@ public class PreferenceFragment extends android.preference.PreferenceFragment {
     }
 
     protected PreferenceActivity preferenceActivity;
+    protected SharedPreferences prefs;
 
     @Override
     public void onAttach(final Context context) {
         super.onAttach(context);
         preferenceActivity = (PreferenceActivity) context;
+        prefs = Application.getInstance().getSharedPreferences();
     }
 
     @Override
@@ -59,6 +63,14 @@ public class PreferenceFragment extends android.preference.PreferenceFragment {
             preference.getParent().removePreference(preference);
         else
             preference.setEnabled(false);
+    }
+
+    protected void addPreference(final Preference preference) {
+        addPreferenceToGroup(preference, getPreferenceScreen());
+    }
+
+    protected void addPreferenceToGroup(final Preference preference, final PreferenceGroup preferenceGroup) {
+        preferenceGroup.addPreference(preference);
     }
 
     protected void setupActionPreference(

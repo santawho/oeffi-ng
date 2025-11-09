@@ -210,11 +210,26 @@ public class TripRenderer {
                 final long delayAtRefPoint = refTime.getTime() - plannedTimeAtRefPoint.getTime();
                 if (delayAtRefPoint > 0) {
                     Stop departureStop = publicLeg.departureStop;
+                    boolean delayedArrival = false;
+                    if (departureStop == beginStop) {
+                        delayedArrival = true;
+                        final PTDate departureStopPlannedDepartureTime = departureStop.plannedDepartureTime;
+                        departureStop = new Stop(
+                                departureStop.location,
+                                departureStop.plannedArrivalTime, departureStop.predictedArrivalTime,
+                                departureStop.plannedArrivalPosition, departureStop.predictedArrivalPosition,
+                                departureStop.arrivalCancelled,
+                                departureStopPlannedDepartureTime,
+                                new PTDate(
+                                        departureStopPlannedDepartureTime.getTime() + delayAtRefPoint,
+                                        departureStopPlannedDepartureTime.getOffset()),
+                                departureStop.plannedDeparturePosition, departureStop.predictedDeparturePosition,
+                                departureStop.departureCancelled);
+                    }
                     Stop arrivalStop = publicLeg.arrivalStop;
                     List<Stop> intermediateStops = publicLeg.intermediateStops;
                     if (arrivalStop != endStop && intermediateStops != null) {
                         intermediateStops = new ArrayList<>();
-                        boolean delayedArrival = false;
                         for (final Stop stop : publicLeg.intermediateStops) {
                             PTDate predictedArrivalTime = stop.predictedArrivalTime;
                             PTDate predictedDepartureTime = stop.predictedDepartureTime;
