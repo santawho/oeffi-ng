@@ -362,6 +362,8 @@ public class NavigationNotification {
             final Configuration configuration,
             final TripRenderer.NotificationData lastNotified) {
         this.context = Application.getInstance();
+        if (NavigationNotification.prefs == null)
+            NavigationNotification.prefs = context.getSharedPreferences();
         this.isDriverMode = prefs.getBoolean(Constants.KEY_EXTRAS_DRIVERMODE_ENABLED, false);
         this.travelAlarmManager = new TravelAlarmManager(context);
         final Trip trip = aIntentData.trip;
@@ -414,8 +416,6 @@ public class NavigationNotification {
             this.lastNotified = lastNotified != null ? lastNotified :
                     (TripRenderer.NotificationData) Objects.deserialize(extras.getByteArray(EXTRA_LASTNOTIFIED));
         }
-        if (NavigationNotification.prefs == null)
-            NavigationNotification.prefs = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
     public NetworkId getNetwork() {
