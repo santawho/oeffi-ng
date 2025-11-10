@@ -327,6 +327,8 @@
         &lt;b>&lt;i>Kursiv&lt;/i>&lt;/b> gedruckte Uhrzeiten sind &lt;b>prognostizierte&lt;/b> Zeiten &lt;b>
         ohne Garantie&lt;/b> Echtzeiten zu sein.
         Für die gelieferte Information ist das Auskunftsystem und das Verkehrsunternehmen verantwortlich.
+        Angaben sind Ankunftzeiten, außer wenn sie mit einem °-Zeichen markiert sind, wenn es sich um Abfahrtzeiten handelt.
+        Zeiten in &lt;span style=\"color:#8800cc\">magenta&lt;/span> sind von der App durch Ortung berechnete Prognosen.
     </string>
 
     <string name="directions_trip_details_public_entry_tooltip_label_arrival">Ankunft</string>

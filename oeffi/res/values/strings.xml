@@ -328,6 +328,8 @@
         Times printed in &lt;b>&lt;i>italics&lt;/i>&lt;/b> are &lt;b>predicted&lt;/b> times &lt;b>
         not guaranteed&lt;/b> to be real times.
         The traffic information system and the transport company are responsible for the information provided.
+        Times are arrival times, except when marked with a °-sign, then they are departure times.
+        Times in &lt;span style=\"color:#8800cc\">magenta&lt;/span> are predictions computed by the app from the device location.
     </string>
 
     <string name="directions_trip_details_public_entry_tooltip_label_arrival">Arrival</string>

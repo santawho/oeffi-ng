@@ -494,7 +494,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             legsGroup.addView(row, i++);
         }
         ((TextView) findViewById(R.id.directions_trip_details_footer))
-                .setText(Html.fromHtml(getString(R.string.directions_trip_details_realtime)));
+                .setText(Html.fromHtml(getString(R.string.directions_trip_details_realtime), Html.FROM_HTML_MODE_COMPACT));
 
         final View disclaimerView = findViewById(R.id.directions_trip_details_disclaimer_group);
         ViewCompat.setOnApplyWindowInsetsListener(disclaimerView, (v, windowInsets) -> {
@@ -1721,7 +1721,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 }
             }
         }
-        return Html.fromHtml(leftText);
+        return Html.fromHtml(leftText, Html.FROM_HTML_MODE_COMPACT);
     }
 
     private static class CollapseColumns {

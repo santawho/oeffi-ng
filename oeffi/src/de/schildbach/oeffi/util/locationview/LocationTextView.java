@@ -72,7 +72,7 @@ public class LocationTextView extends TextView {
                 text.append(getContext().getString(R.string.directions_location_view_coordinate)).append(":<br/>")
                         .append(String.format(Locale.ENGLISH, "%1$.6f, %2$.6f", location.getLatAsDouble(),
                                 location.getLonAsDouble()));
-            setText(Html.fromHtml(text.toString()));
+            setText(Html.fromHtml(text.toString(), Html.FROM_HTML_MODE_COMPACT));
             setCompoundDrawablesWithIntrinsicBounds(
                     showLocationType ? LocationView.locationTypeIconRes(location.type) : 0, 0, 0, 0);
         } else {
