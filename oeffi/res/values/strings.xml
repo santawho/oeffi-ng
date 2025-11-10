@@ -86,8 +86,12 @@
 
     <!-- preferences extras -->
     <string name="extras_title">Special Functions</string>
-    <string name="extras_drivermode_enabled_title">Driver Mode</string>
     <string name="extras_tripextrainfo_enabled_title">Acquire extra info for trips</string>
+
+    <!-- preferences driver mode -->
+    <string name="extras_drivermode_title">Drivers\' Mode</string>
+    <string name="extras_drivermode_summary">Drivers\' mode optimizes the behaviour of the app for use by train/tram/bus drivers and other staff.</string>
+    <string name="extras_drivermode_enabled_title">Drivers\' mode enabled</string>
 
     <!-- network picker -->
     <string name="network_picker_firsttime_message">Because you are using Öffi for the first time, you need to pick a region that suits you well. You

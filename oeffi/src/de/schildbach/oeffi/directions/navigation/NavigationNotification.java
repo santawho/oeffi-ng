@@ -345,6 +345,7 @@ public class NavigationNotification {
     }
 
     private final Application context;
+    private boolean isDriverMode;
     private final TravelAlarmManager travelAlarmManager;
     private final String notificationTag;
     private final TripDetailsActivity.IntentData intentData;
@@ -361,6 +362,7 @@ public class NavigationNotification {
             final Configuration configuration,
             final TripRenderer.NotificationData lastNotified) {
         this.context = Application.getInstance();
+        this.isDriverMode = prefs.getBoolean(Constants.KEY_EXTRAS_DRIVERMODE_ENABLED, false);
         this.travelAlarmManager = new TravelAlarmManager(context);
         final Trip trip = aIntentData.trip;
         final String uniqueId = trip.getUniqueId();
@@ -457,9 +459,10 @@ public class NavigationNotification {
         update(trip);
         if (lastNotified != null) {
             final long refreshAt = lastNotified.refreshNotificationRequiredAt;
-            if (refreshAt > 0)
+            if (refreshAt > 0) {
                 NavigationAlarmManager.getInstance().start(refreshAt,
-                        getPendingActivityIntent(false, true, trip));
+                        getPendingActivityIntent(false, !isDriverMode, trip));
+            }
         }
     }
 
@@ -627,7 +630,7 @@ public class NavigationNotification {
         // final RemoteViews notificationLayoutExpanded = new RemoteViews(context.getPackageName(), R.layout.navigation_notification);
         // setupNotificationView(context, notificationLayoutExpanded, tripRenderer, now, newNotified);
         notificationLayout.setOnClickPendingIntent(R.id.navigation_notification_open_full,
-                getPendingActivityIntent(false, true, trip));
+                getPendingActivityIntent(false, !isDriverMode, trip));
         notificationLayout.setOnClickPendingIntent(R.id.navigation_notification_next_event,
                 getPendingActionIntent(ACTION_REFRESH, trip));
 

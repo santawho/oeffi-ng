@@ -86,8 +86,12 @@
 
     <!-- preferences extras -->
     <string name="extras_title">Sonderfunktionen</string>
-    <string name="extras_drivermode_enabled_title">Fahrermodus</string>
     <string name="extras_tripextrainfo_enabled_title">Lade Zusatzinfos für Verbindungen</string>
+
+    <!-- preferences driver mode -->
+    <string name="extras_drivermode_title">Fahrermodus</string>
+    <string name="extras_drivermode_summary">Der Fahrermodus optimiert das Verhalten der App für Zug/Tram/Bus-Fahrer und Zugbegleiter.</string>
+    <string name="extras_drivermode_enabled_title">Fahrermodus aktiviert</string>
 
     <!-- network picker -->
     <string name="network_picker_firsttime_message">Da du Öffi das erste Mal nutzt, musst Du die Region wählen die am besten passt. Du kannst das später ändern.</string>

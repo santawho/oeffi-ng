@@ -134,6 +134,7 @@ public class PreferenceActivity extends android.preference.PreferenceActivity {
                 || TravelAlarmFragment.class.getName().equals(fragmentName)
                 || ShortcutsFragment.class.getName().equals(fragmentName)
                 || ExtrasFragment.class.getName().equals(fragmentName)
+                || DriverModeFragment.class.getName().equals(fragmentName)
                 || AboutFragment.class.getName().equals(fragmentName);
     }
 }
