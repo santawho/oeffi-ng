@@ -20,6 +20,7 @@ package de.schildbach.oeffi.preference;
 import android.app.Activity;
 import android.app.ComponentCaller;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.view.MenuItem;
@@ -73,12 +74,14 @@ public class PreferenceActivity extends android.preference.PreferenceActivity {
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        final View contentView = findViewById(android.R.id.content);
-        ViewCompat.setOnApplyWindowInsetsListener(contentView, (v, windowInsets) -> {
-            final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(v.getPaddingLeft(), insets.top, v.getPaddingRight(), v.getPaddingBottom());
-            return windowInsets;
-        });
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.BAKLAVA) {
+            final View contentView = findViewById(android.R.id.content);
+            ViewCompat.setOnApplyWindowInsetsListener(contentView, (v, windowInsets) -> {
+                final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(v.getPaddingLeft(), insets.top, v.getPaddingRight(), v.getPaddingBottom());
+                return windowInsets;
+            });
+        }
         handleIntent(getIntent());
     }
 

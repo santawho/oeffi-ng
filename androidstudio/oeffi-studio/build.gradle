@@ -50,13 +50,13 @@ println "applicationId = ${CREDENTIALS.applicationId}"
 
 android {
     namespace 'de.schildbach.oeffi'
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         applicationId "de.schildbach.oeffi"
 
         minSdk 26
-        targetSdk 34
+        targetSdk 36
 //        versionCode 990000
 //        versionName "99-handmade"
         versionCode timeInt
