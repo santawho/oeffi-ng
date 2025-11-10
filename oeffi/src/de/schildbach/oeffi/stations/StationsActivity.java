@@ -173,7 +173,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private boolean anyProviderEnabled = false;
     private boolean loading = true;
 
-    private Set<Product> products = new HashSet<>(Product.ALL_SELECTABLE);
+    private final Set<Product> products = new HashSet<>(Product.ALL_SELECTABLE);
     private String accurateLocationProvider, lowPowerLocationProvider;
 
     private MyActionBar actionBar;
@@ -513,7 +513,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         });
         stationList.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            public void onScrollStateChanged(final RecyclerView recyclerView, final int newState) {
                 if (newState == RecyclerView.SCROLL_STATE_IDLE)
                     postLoadNextVisible(0);
             }
@@ -537,7 +537,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         products.clear();
         products.addAll(loadProductFilter());
 
-        Intent intent = getIntent();
+        final Intent intent = getIntent();
         handleIntent(intent);
         if (intent.getBooleanExtra(INTENT_EXTRA_OPEN_FAVORITES, false)) {
             FavoriteStationsActivity.start(this);
@@ -569,7 +569,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
             // regular refresh
             tickReceiver = new BroadcastReceiver() {
                 @Override
-                public void onReceive(Context context, Intent intent) {
+                public void onReceive(final Context context, final Intent intent) {
                     postLoadNextVisible(0);
                 }
             };
@@ -720,7 +720,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
             startBackgroundHandler();
             final AutoCompleteLocationsHandler autoCompleteLocationsHandler = new AutoCompleteLocationsHandler(
                     this, network, backgroundHandler,
-                    NetworkProviderFactory.provider(network).defaultProducts());
+                    getNetworkDefaultProducts());
             autoCompleteLocationsHandler.addJob(command.atText, null);
             final Date time = command.time == null ? null : command.time.date();
             autoCompleteLocationsHandler.start(result -> {
@@ -817,8 +817,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         updateFragments();
 
         // filter indicator
-        final boolean isActive = products.size() < Product.values().length;
-        filterActionButton.setSelected(isActive);
+        filterActionButton.setSelected(!productsAreNetworkDefault(products));
 
         final ViewAnimator viewAnimator = findViewById(R.id.stations_list_layout);
         if (network == null || !NetworkProviderFactory.provider(network).hasCapabilities(Capability.DEPARTURES)) {
@@ -911,20 +910,20 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     @Override
     protected Dialog onCreateDialog(final int id) {
         switch (id) {
-        case DIALOG_NEARBY_STATIONS_ERROR:
-            final DialogBuilder builder = DialogBuilder.warn(this, R.string.stations_nearby_stations_error_title);
-            builder.setMessage(getString(R.string.stations_nearby_stations_error_message));
-            builder.setPositiveButton(getString(R.string.stations_nearby_stations_error_continue),
-                    (dialog, _id) -> dialog.dismiss());
-            builder.setNegativeButton(getString(R.string.stations_nearby_stations_error_exit),
-                    (dialog, _id) -> {
-                        dialog.dismiss();
-                        finish();
-                    });
-            return builder.create();
+            case DIALOG_NEARBY_STATIONS_ERROR:
+                final DialogBuilder builder = DialogBuilder.warn(this, R.string.stations_nearby_stations_error_title);
+                builder.setMessage(getString(R.string.stations_nearby_stations_error_message));
+                builder.setPositiveButton(getString(R.string.stations_nearby_stations_error_continue),
+                        (dialog, _id) -> dialog.dismiss());
+                builder.setNegativeButton(getString(R.string.stations_nearby_stations_error_exit),
+                        (dialog, _id) -> {
+                            dialog.dismiss();
+                            finish();
+                        });
+                return builder.create();
+            default:
+                return super.onCreateDialog(id);
         }
-
-        return super.onCreateDialog(id);
     }
 
     private final Runnable initStationsRunnable = new Runnable() {
@@ -1526,7 +1525,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
             StationContextMenu.createLauncherShortcutDialog(StationsActivity.this, network, station).show();
             return true;
         } else if (menuItemId == R.id.station_context_infopage) {
-            String infoUrl = station.infoUrl;
+            final String infoUrl = station.infoUrl;
             if (infoUrl != null) {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(infoUrl)));
             }

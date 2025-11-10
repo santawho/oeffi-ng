@@ -196,7 +196,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
     private static class PickContact extends ActivityResultContract<Void, Uri> {
         @NonNull
         @Override
-        public Intent createIntent(@NonNull final Context context, Void unused) {
+        public Intent createIntent(@NonNull final Context context, final Void unused) {
             return new Intent(Intent.ACTION_PICK, CommonDataKinds.StructuredPostal.CONTENT_URI);
         }
 
@@ -811,7 +811,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             command = (Command) intent.getSerializableExtra(INTENT_EXTRA_COMMAND);
         }
 
-        boolean haveNonDefaultProducts = initProductToggles();
+        final boolean haveNonDefaultProducts = initProductToggles();
         expandForm(haveNonDefaultProducts || viewViaLocation.getText() != null);
 
         if (command != null) {
@@ -883,7 +883,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
                         loadTripByTripShare(tripShare, startTripDetailsActivity);
                     }
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 log.error("cannot execute link command {}", linkArgs, e);
                 DialogBuilder.warn(this, R.string.directions_alert_bad_link_title)
                         .setMessage(R.string.directions_alert_bad_link_message)
@@ -897,7 +897,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
     protected void onResume() {
         super.onResume();
 
-        boolean haveNonDefaultProducts = initProductToggles();
+        final boolean haveNonDefaultProducts = initProductToggles();
 
         // can do directions?
         final NetworkProvider networkProvider = network != null ? NetworkProviderFactory.provider(network) : null;
@@ -942,7 +942,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
         //??? viewBike.setChecked(false);
 
-        boolean haveNonDefaultProducts = initProductToggles();
+        final boolean haveNonDefaultProducts = initProductToggles();
         expandForm(haveNonDefaultProducts);
 
         queryHistoryListAdapter.close();
@@ -975,7 +975,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             final boolean checked = defaultProducts.contains(product);
             view.setChecked(checked);
         }
-        return productsAreNetworkDefault(defaultProducts);
+        return !productsAreNetworkDefault(defaultProducts);
     }
 
     private Set<Product> getProductToggles() {
@@ -985,11 +985,6 @@ public class DirectionsActivity extends OeffiMainActivity implements
                 products.add(Product.fromCode(((String) view.getTag()).charAt(0)));
         }
         return products;
-    }
-
-    private boolean productsAreNetworkDefault(final Collection<Product> products) {
-        Collection<Product> networkDefaultProducts = getNetworkDefaultProducts();
-        return products.size() != networkDefaultProducts.size() || !products.containsAll(networkDefaultProducts);
     }
 
     @Override
@@ -1147,7 +1142,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             final List<Location> locations,
             final boolean isLongHold,
             final boolean isTwoFingersTap,
-            View lastView) {
+            final View lastView) {
         final boolean doGo;
         final int numLocations = locations.size();
         if (numLocations == 0) {
@@ -1208,7 +1203,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
     public void onSingleLocationContextOperation(
             final Location location,
             final boolean isLongHold,
-            View selectedView) {
+            final View selectedView) {
         final PopupMenu contextMenu = new PopupMenu(this, selectedView);
         contextMenu.setGravity(Gravity.RIGHT);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
@@ -1398,7 +1393,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         viewToLocation.setLocation(to);
         viewViaLocation.setLocation(via);
         quickReturnView.setTranslationY(0); // show
-        expandForm(productsAreNetworkDefault(getProductToggles()) || via != null);
+        expandForm(!productsAreNetworkDefault(getProductToggles()) || via != null);
     }
 
     private void handleShowSavedTrip(final byte[] serializedTrip) {
@@ -1639,7 +1634,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         protected abstract void onResultFailed(final QueryTripsResult result, TripRequestData reloadRequestData);
 
         @Override
-        protected void onResult(final QueryTripsResult result, TripRequestData reloadRequestData) {
+        protected void onResult(final QueryTripsResult result, final TripRequestData reloadRequestData) {
             if (result.status == QueryTripsResult.Status.OK) {
                 log.debug("Got {}", result.toShortString());
                 onResultOk(result, reloadRequestData);

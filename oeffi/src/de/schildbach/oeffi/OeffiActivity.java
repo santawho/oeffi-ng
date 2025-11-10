@@ -84,6 +84,7 @@ import de.schildbach.pte.dto.TripOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -145,7 +146,7 @@ public abstract class OeffiActivity extends ComponentActivity {
             if (networkName != null) {
                 try {
                     network = NetworkId.valueOf(networkName);
-                } catch (IllegalArgumentException e) {
+                } catch (final IllegalArgumentException iae) {
                     log.warn("ignoring bad network from intent: {}", networkName);
                 }
             }
@@ -271,7 +272,7 @@ public abstract class OeffiActivity extends ComponentActivity {
 
             @Override
             public boolean onMenuItemSelected(final MenuItem item) {
-                int itemId = item.getItemId();
+                final int itemId = item.getItemId();
                 if (itemId == R.id.global_options_stations_favorites) {
                     if (OeffiActivity.this instanceof StationsActivity) {
                         FavoriteStationsActivity.start(OeffiActivity.this);
@@ -652,7 +653,7 @@ public abstract class OeffiActivity extends ComponentActivity {
 
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            android.location.Location location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+            final android.location.Location location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
             if (location != null)
                 mapView.animateToLocation(location.getLatitude(), location.getLongitude());
         }
@@ -699,11 +700,16 @@ public abstract class OeffiActivity extends ComponentActivity {
         return networkProvider != null ? networkProvider.defaultProducts() : Product.ALL_SELECTABLE;
     }
 
+    protected boolean productsAreNetworkDefault(final Collection<Product> products) {
+        final Collection<Product> networkDefaultProducts = getNetworkDefaultProducts();
+        return products.size() == networkDefaultProducts.size() && products.containsAll(networkDefaultProducts);
+    }
+
     protected Set<Product> loadProductFilter() {
         final Set<Product> networkDefaultProducts = getNetworkDefaultProducts();
         final Set<Product> keepProducts;
         final String networkSpecificKey = Constants.PREFS_KEY_PRODUCT_FILTER + "_" + network;
-        String value = prefs.getString(networkSpecificKey, null);
+        final String value = prefs.getString(networkSpecificKey, null);
         if (value != null) {
             keepProducts = Product.ALL_SELECTABLE;
         } else {
@@ -727,8 +733,8 @@ public abstract class OeffiActivity extends ComponentActivity {
         final StringBuilder p = new StringBuilder();
         for (final Product product : products)
             p.append(product.code);
-        String value = p.toString();
-        String networkSpecificKey = Constants.PREFS_KEY_PRODUCT_FILTER + "_" + network;
+        final String value = p.toString();
+        final String networkSpecificKey = Constants.PREFS_KEY_PRODUCT_FILTER + "_" + network;
         prefs.edit()
                 .putString(Constants.PREFS_KEY_PRODUCT_FILTER, value)
                 .putString(networkSpecificKey, value)
@@ -765,7 +771,7 @@ public abstract class OeffiActivity extends ComponentActivity {
             savedProducts = loadProductFilter();
             haveChanges = true;
         } else {
-            Set<Product> newProducts = loadProductFilter();
+            final Set<Product> newProducts = loadProductFilter();
             if (newProducts.size() != savedProducts.size()) {
                 haveChanges = true;
             } else {
