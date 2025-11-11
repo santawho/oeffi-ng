@@ -112,7 +112,6 @@ import de.schildbach.pte.dto.StationDepartures;
 import de.schildbach.pte.dto.SuggestLocationsResult;
 import de.schildbach.pte.dto.PTDate;
 import okhttp3.HttpUrl;
-import org.osmdroid.util.GeoPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1377,8 +1376,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         else if (!stations.isEmpty())
             getMapView().zoomToStations(stations);
         else if (station == null && deviceLocation != null)
-            getMapView().getController()
-                    .animateTo(new GeoPoint(deviceLocation.getLatAsDouble(), deviceLocation.getLonAsDouble()));
+            getMapView().animateToLocation(deviceLocation.getLatAsDouble(), deviceLocation.getLonAsDouble());
 
         postLoadNextVisible(0);
     }

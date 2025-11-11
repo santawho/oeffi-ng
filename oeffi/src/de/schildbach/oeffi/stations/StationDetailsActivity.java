@@ -79,7 +79,6 @@ import de.schildbach.pte.dto.QueryDeparturesResult;
 import de.schildbach.pte.dto.StationDepartures;
 import de.schildbach.pte.dto.PTDate;
 
-import org.osmdroid.util.GeoPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -579,8 +578,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 (selectedFavState != null && selectedFavState == FavoriteStationsProvider.TYPE_FAVORITE);
 
         if (selectedStation.hasCoord()) {
-            getMapView().getController()
-                    .animateTo(new GeoPoint(selectedStation.getLatAsDouble(), selectedStation.getLonAsDouble()));
+            getMapView().animateToLocation(selectedStation.getLatAsDouble(), selectedStation.getLonAsDouble());
         }
 
         updateGUI();

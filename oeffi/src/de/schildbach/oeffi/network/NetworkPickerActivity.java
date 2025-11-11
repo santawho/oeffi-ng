@@ -49,7 +49,6 @@ import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.LocationAware;
 import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiActivity;
-import de.schildbach.oeffi.OeffiMapView;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.network.list.NetworkClickListener;
 import de.schildbach.oeffi.network.list.NetworkContextMenuItemListener;

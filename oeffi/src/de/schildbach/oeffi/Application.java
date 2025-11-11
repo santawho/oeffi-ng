@@ -52,6 +52,7 @@ import com.google.common.base.Stopwatch;
 import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.directions.QueryHistoryProvider;
 import de.schildbach.oeffi.directions.navigation.NavigationNotification;
+import de.schildbach.oeffi.mapview.OeffiMapView;
 import de.schildbach.oeffi.plans.PlansPickerActivity;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
 import de.schildbach.oeffi.stations.StationsActivity;
@@ -63,8 +64,6 @@ import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
-import org.osmdroid.config.Configuration;
-import org.osmdroid.config.IConfigurationProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -270,7 +269,7 @@ public class Application extends android.app.Application {
         builder.addNetworkInterceptor(interceptor);
         okHttpClient = builder.build();
 
-        initMaps();
+        OeffiMapView.init();
 
         speechInput = new OeffiSpeechInput(this);
 
@@ -398,12 +397,6 @@ public class Application extends android.app.Application {
         log.addAppender(fileAppender);
         log.addAppender(logcatAppender);
         log.setLevel(Level.DEBUG);
-    }
-
-    private void initMaps() {
-        final IConfigurationProvider config = Configuration.getInstance();
-        config.setOsmdroidBasePath(new File(getCacheDir(), "org.osmdroid"));
-        config.setUserAgentValue(getPackageName());
     }
 
     private void migrateSelectedNetwork(final String fromName, final NetworkId to) {

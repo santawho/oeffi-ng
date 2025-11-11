@@ -17,6 +17,7 @@ loggingInterceptor = "5.2.1"
 msgpackCore = "0.9.10"
 okhttp = "5.2.1"
 osmdroidAndroid = "6.1.20"
+maplibreGl = "11.11.0"
 recyclerview = "1.4.0"
 slf4jApi = "2.0.17"
 supportV13 = "28.0.0"
@@ -42,6 +43,7 @@ msgpack-core = { module = "org.msgpack:msgpack-core", version.ref = "msgpackCore
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 okhttp3-logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "loggingInterceptor" }
 osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroidAndroid" }
+maplibre-gl = { module = 'org.maplibre.gl:android-sdk', version.ref = "maplibreGl" }
 preferencex = { group = "androidx.preference", name = "preference", version.ref = "preferencex" }
 preference-v7 = { module = "com.android.support:preference-v7", version.ref = "preferenceV7" }
 preference-v14 = { module = "com.android.support:preference-v14", version.ref = "preferenceV14" }

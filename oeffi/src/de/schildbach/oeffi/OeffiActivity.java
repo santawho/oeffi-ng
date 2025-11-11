@@ -60,6 +60,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.directions.navigation.NavigationNotification;
+import de.schildbach.oeffi.mapview.OeffiMapView;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.network.NetworkResources;
 import de.schildbach.oeffi.plans.PlansPickerActivity;
@@ -206,6 +207,8 @@ public abstract class OeffiActivity extends ComponentActivity {
     protected void onStart() {
         updateFromPreferences();
         super.onStart();
+        if (mapView != null)
+            mapView.onStart();
     }
 
     @Override
@@ -228,6 +231,20 @@ public abstract class OeffiActivity extends ComponentActivity {
         if (mapView != null)
             mapView.onPause();
         super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mapView != null)
+            mapView.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mapView != null)
+            mapView.onDestroy();
     }
 
     private void hideNavigation() {
@@ -659,7 +676,7 @@ public abstract class OeffiActivity extends ComponentActivity {
         }
 
         final TextView mapDisclaimerView = mapFrame.findViewById(R.id.map_disclaimer);
-        mapDisclaimerView.setText(mapView.getTileProvider().getTileSource().getCopyrightNotice());
+        mapDisclaimerView.setText(mapView.getCopyrightNotice());
         ViewCompat.setOnApplyWindowInsetsListener(mapDisclaimerView, (v, windowInsets) -> {
             final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(0, 0, 0, insets.bottom);

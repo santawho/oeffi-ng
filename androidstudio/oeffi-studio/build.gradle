@@ -171,6 +171,7 @@ dependencies {
     implementation libs.okhttp3.logging.interceptor
     implementation libs.guava
     implementation libs.osmdroid.android
+    implementation libs.maplibre.gl
     //noinspection GradleDependency
     implementation libs.slf4j.api
     implementation libs.logback.android

@@ -21,7 +21,6 @@ import android.Manifest;
 import android.animation.LayoutTransition;
 import android.app.Activity;
 import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.content.BroadcastReceiver;
@@ -31,8 +30,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Canvas;
-import android.location.Address;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
@@ -48,7 +45,6 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
@@ -75,8 +71,8 @@ import com.google.common.base.Throwables;
 import de.schildbach.oeffi.FromViaToAware;
 import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiMainActivity;
-import de.schildbach.oeffi.OeffiMapView;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.mapview.OeffiMapView;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.util.TimeSpec.DepArr;
 import de.schildbach.oeffi.directions.list.QueryHistoryAdapter;
@@ -97,7 +93,6 @@ import de.schildbach.oeffi.util.ConnectivityBroadcastReceiver;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.DividerItemDecoration;
 import de.schildbach.oeffi.util.Formats;
-import de.schildbach.oeffi.util.GeocoderThread;
 import de.schildbach.oeffi.util.GoogleMapsUtils;
 import de.schildbach.oeffi.util.LocationUriParser;
 import de.schildbach.oeffi.util.Objects;
@@ -124,10 +119,6 @@ import okhttp3.HttpUrl;
 
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessageUnpacker;
-import org.osmdroid.api.IGeoPoint;
-import org.osmdroid.api.IMapController;
-import org.osmdroid.views.MapView;
-import org.osmdroid.views.overlay.Overlay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -664,62 +655,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             locationSelector.setup(this, prefs);
             locationSelector.setNetwork(network);
 
-            getMapView().getOverlays().add(new Overlay() {
-                private Location pinLocation;
-                private View pinView;
-
-                @Override
-                public void draw(final Canvas canvas, final MapView mapView, final boolean shadow) {
-                    if (pinView != null)
-                        pinView.requestLayout();
-                }
-
-                @Override
-                public boolean onSingleTapConfirmed(final MotionEvent e, final MapView mapView) {
-                    final IGeoPoint p = mapView.getProjection().fromPixels((int) e.getX(), (int) e.getY());
-                    pinLocation = Location.coord(Point.fromDouble(p.getLatitude(), p.getLongitude()));
-
-                    final View view = getLayoutInflater().inflate(R.layout.directions_map_pin, null);
-                    final LocationTextView locationView = view
-                            .findViewById(R.id.directions_map_pin_location);
-                    final View buttonGroup = view.findViewById(R.id.directions_map_pin_buttons);
-                    buttonGroup.findViewById(R.id.directions_map_pin_button_from).setOnClickListener(v -> {
-                        viewFromLocation.setLocation(pinLocation);
-                        mapView.removeAllViews();
-                    });
-                    buttonGroup.findViewById(R.id.directions_map_pin_button_to).setOnClickListener(v -> {
-                        viewToLocation.setLocation(pinLocation);
-                        mapView.removeAllViews();
-                    });
-                    locationView.setLocation(pinLocation);
-                    locationView.setShowLocationType(false);
-
-                    // exchange view for the pin
-                    if (pinView != null)
-                        mapView.removeView(pinView);
-                    pinView = view;
-                    mapView.addView(pinView, new MapView.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT, p, MapView.LayoutParams.BOTTOM_CENTER, 0, 0));
-
-                    new GeocoderThread(DirectionsActivity.this, p.getLatitude(), p.getLongitude(),
-                            new GeocoderThread.Callback() {
-                                public void onGeocoderResult(final Address address) {
-                                    pinLocation = GeocoderThread.addressToLocation(address);
-                                    locationView.setLocation(pinLocation);
-                                    locationView.setShowLocationType(false);
-                                }
-
-                                public void onGeocoderFail(final Exception exception) {
-                                    log.info("Problem in geocoder: {}", exception.getMessage());
-                                }
-                            });
-
-                    final IMapController controller = mapView.getController();
-                    controller.animateTo(p);
-
-                    return false;
-                }
-            });
+            getMapView().setDirectionsOverlay(viewFromLocation, viewToLocation);
         }
 
         boolean autoProvidedFrom = false;
@@ -1268,7 +1204,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
     private void updateMap() {
         final OeffiMapView mapView = getMapView();
-        mapView.removeAllViews();
+        mapView.removeAllContent();
         mapView.setFromViaToAware(new FromViaToAware() {
             public Point getFrom() {
                 final Location from = viewFromLocation.getLocation();

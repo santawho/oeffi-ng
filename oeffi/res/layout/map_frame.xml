@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:elevation="@dimen/elevation_map">
 
-    <de.schildbach.oeffi.OeffiMapView
+    <de.schildbach.oeffi.mapview.OeffiMapView
         android:id="@+id/map_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
