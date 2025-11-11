@@ -1238,7 +1238,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     protected boolean updateIndividualLeg(final View row, final TripRenderer.LegContainer legC, final Date now) {
         final Trip.Individual leg = legC.individualLeg;
         String legText = null;
-        final int iconResId;
+        int iconResId;
         int requiredSecs = 0;
         final ImageButton mapView = row.findViewById(R.id.directions_trip_details_individual_entry_map);
         mapView.setVisibility(View.GONE);
@@ -1275,8 +1275,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
         } else if (legC.transferFrom != null) {
             // no time walk after some public transport
-//            iconResId = R.drawable.ic_directions_walk_grey600_24dp;
-            iconResId = 0;
+            iconResId = R.drawable.ic_directions_walk_grey600_24dp;
         } else {
             // walk before anything
             iconResId = 0;
@@ -1285,6 +1284,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         String transferText = null;
         String timeText = null;
         boolean timeIsCritical = false;
+        boolean isSamePlatform = false;
         final Stop transferFrom = legC.transferFrom != null ? legC.transferFrom.publicLeg.arrivalStop : null;
         final Stop transferTo = legC.transferTo != null ? legC.transferTo.publicLeg.departureStop : null;
         if (transferFrom == null) {
@@ -1292,6 +1292,14 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         } else if (transferTo == null) {
             // walk at the end
         } else {
+            final boolean isWalkIcon;
+            isSamePlatform = Stop.isSamePlatform(transferFrom, transferTo);
+            if (isSamePlatform) {
+                isWalkIcon = false;
+                iconResId = R.drawable.ic_directions_stay_grey600_24dp;
+            } else {
+                isWalkIcon = iconResId == R.drawable.ic_directions_walk_grey600_24dp;
+            }
             final long arrMinTime = transferFrom.plannedArrivalTime.getTime();
             final long arrMaxTime = transferFrom.predictedArrivalTime != null ? transferFrom.predictedArrivalTime.getTime() : arrMinTime;
             final long arrDelaySecs = (arrMaxTime - arrMinTime) / 1000;
@@ -1320,6 +1328,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 timeIsCritical = true;
                 transferText = getString(R.string.directions_trip_conneval_missed, (-diffMaxSecs) / 60, timeExplainText);
                 timeText = Long.toString(-((-diffMaxSecs + 30) / 60));
+                if (isWalkIcon)
+                    iconResId = R.drawable.ic_directions_walk_sprint_grey600_24dp;
             } else {
                 final long diffMaxMins = diffMaxSecs / 60;
                 if (leftMaxSecs < 0) {
@@ -1329,6 +1339,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     } else {
                         transferText = getString(R.string.directions_trip_conneval_difficult, diffMaxMins, timeExplainText);
                     }
+                    if (isWalkIcon || isSamePlatform)
+                        iconResId = R.drawable.ic_directions_walk_sprint_grey600_24dp;
                 } else if (leftMaxSecs < 180) {
                     timeIsCritical = true;
                     if (leftMinSecs < 0) {
@@ -1336,6 +1348,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     } else {
                         transferText = getString(R.string.directions_trip_conneval_endangered, diffMaxMins, timeExplainText);
                     }
+                    if (isWalkIcon)
+                        iconResId = R.drawable.ic_directions_walk_run_grey600_24dp;
                 } else if (leftMinSecs < 0) {
                     timeIsCritical = true;
                     transferText = getString(R.string.directions_trip_conneval_possibly_difficult, diffMaxMins, timeExplainText);
@@ -1356,9 +1370,14 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                   transferText == null ? legText
                 : legText == null ? transferText
                 : getString(R.string.directions_trip_conneval_with_transfer, transferText, legText);
-        if (text != null && feasibilityProbability != null) {
-            text = getString(R.string.directions_trip_conneval_with_transfer_probability,
-                    text, (int) ((feasibilityProbability * 100f) + 0.5f));
+        if (text != null) {
+            if (isSamePlatform)
+                text = getString(R.string.directions_trip_conneval_same_platform, text);
+
+            if (feasibilityProbability != null) {
+                text = getString(R.string.directions_trip_conneval_with_transfer_probability,
+                        text, (int) ((feasibilityProbability * 100f) + 0.5f));
+            }
         }
 
         final TextView textView = row.findViewById(R.id.directions_trip_details_individual_entry_text);
@@ -1575,14 +1594,19 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final ImageView positionsWalkIcon = findViewById(R.id.navigation_next_event_positions_walk_icon);
             final View positionsFromWalkArrow = findViewById(R.id.navigation_next_event_positions_from_walk_arrow);
             final View positionsToWalkArrow = findViewById(R.id.navigation_next_event_positions_to_walk_arrow);
+            final int iconId = tripRenderer.nextEventTransferIconId;
             if (tripRenderer.nextEventStopChange) {
-                final int iconId = tripRenderer.nextEventTransferIconId;
                 positionsWalkIcon.setImageDrawable(res.getDrawable(iconId != 0 ? iconId : R.drawable.ic_directions_walk_grey600_24dp));
                 positionsWalkIcon.setVisibility(View.VISIBLE);
                 positionsFromWalkArrow.setVisibility(View.VISIBLE);
                 positionsToWalkArrow.setVisibility(View.VISIBLE);
             } else {
-                positionsWalkIcon.setVisibility(View.GONE);
+                if (iconId == 0) {
+                    positionsWalkIcon.setVisibility(View.GONE);
+                } else {
+                    positionsWalkIcon.setImageDrawable(res.getDrawable(iconId));
+                    positionsWalkIcon.setVisibility(View.VISIBLE);
+                }
                 if (tripRenderer.nextEventDeparturePosName != null) {
                     positionsToWalkArrow.setVisibility(View.VISIBLE);
                     positionsFromWalkArrow.setVisibility(View.GONE);

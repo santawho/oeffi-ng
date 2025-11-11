@@ -831,6 +831,7 @@ public class TripRenderer {
     public String nextEventTransferLeftTimeValue;
     public String nextEventTransferLeftTimeFromNowValue;
     public boolean nextEventTransferLeftTimeCritical;
+    public boolean nextEventTransferLeftTimeExtremelyCritical;
     public String nextEventTransferExplain;
     public boolean nextEventTransferWalkAvailable;
     public String nextEventTransferWalkTimeValue;
@@ -847,15 +848,19 @@ public class TripRenderer {
         final Trip.Individual individualLeg = walkLegC.individualLeg;
         final int walkMins = individualLeg != null ? individualLeg.min : 0;
 
+        final boolean isSamePlatform;
         if (!forWalkLeg && walkLegC.transferFrom != null && walkLegC.transferTo != null) {
             nextEventTransferAvailable = true;
             final Stop arrivalStop = walkLegC.transferFrom.publicLeg.arrivalStop;
             final Stop departureStop = walkLegC.transferTo.publicLeg.departureStop;
+            isSamePlatform = Stop.isSamePlatform(arrivalStop, departureStop);
             final PTDate arrTime = arrivalStop.getArrivalTime();
             final PTDate depTime = departureStop.getDepartureTime();
             final long leftMins = (depTime.getTime() - arrTime.getTime()) / 60000 - 1;
             nextEventTransferLeftTimeValue = Long.toString(leftMins);
-            nextEventTransferLeftTimeCritical = leftMins - walkMins < TRANSFER_CRITICAL_MINUTES;
+            final long leftWaitMins = leftMins - walkMins;
+            nextEventTransferLeftTimeCritical = leftWaitMins < TRANSFER_CRITICAL_MINUTES;
+            nextEventTransferLeftTimeExtremelyCritical = leftWaitMins <= 0;
 
             final long leftMinsFromNow = (depTime.getTime() - now.getTime()) / 60000;
             if (leftMinsFromNow <= 15)
@@ -874,12 +879,13 @@ public class TripRenderer {
             }
         } else {
             nextEventTransferAvailable = false;
+            isSamePlatform = false;
         }
 
+        int iconId;
         if (walkMins > 0) {
             nextEventTransferWalkAvailable = true;
             nextEventTransferWalkTimeValue = Integer.toString(walkMins);
-            final int iconId;
             if (individualLeg == null) {
                 iconId = R.drawable.ic_directions_walk_grey600_24dp;
             } else switch (individualLeg.type) {
@@ -900,13 +906,21 @@ public class TripRenderer {
                     iconId = R.drawable.ic_directions_walk_grey600_24dp;
                     break;
             }
-            nextEventTransferIconId = iconId;
-
         } else {
             nextEventTransferWalkAvailable = false;
             nextEventTransferWalkTimeValue = null;
-            nextEventTransferIconId = 0;
+            iconId = R.drawable.ic_directions_walk_grey600_24dp;
         }
+
+        if (iconId == R.drawable.ic_directions_walk_grey600_24dp) {
+            if (nextEventTransferLeftTimeExtremelyCritical)
+                iconId = R.drawable.ic_directions_walk_sprint_grey600_24dp;
+            else if (isSamePlatform)
+                iconId = R.drawable.ic_directions_walk_run_grey600_24dp;
+            else if (nextEventTransferLeftTimeCritical)
+                iconId = R.drawable.ic_directions_walk_run_grey600_24dp;
+        }
+        nextEventTransferIconId = iconId;
     }
 
     public String nextEventDepartureName;

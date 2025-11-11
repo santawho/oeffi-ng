@@ -381,6 +381,7 @@
     <string name="directions_trip_conneval_possibly_endangered">&lt;b>Anschluss nur durch verspätete Abfahrt nicht gefährdet, aktuell in %1$d Minuten&lt;/b>%2$s</string>
     <string name="directions_trip_conneval_possibly_good">Anschluss aktuell in &lt;b>%1$d Minuten&lt;/b>%2$s durch verspätete Abfahrt</string>
     <string name="directions_trip_conneval_good">Anschluss (aktuell) in &lt;b>%1$d Minuten&lt;/b>%2$s</string>
+    <string name="directions_trip_conneval_same_platform">%1$s am selben Steig</string>
 
     <string name="directions_trip_details_public_entry_duration">Dauer: %s</string>
     <plurals name="directions_trip_details_public_entry_collapsed_intermediate_stops">

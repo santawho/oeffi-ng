@@ -118,7 +118,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
     private static final float CIRCLE_CORNER_RADIUS = 16f;
     private final int tripWidth;
 
-    private final Drawable walkIcon, bikeIcon, carIcon, warningIcon, wheelChairIcon, bicycleIcon;
+    private final Drawable walkIcon, stayIcon, bikeIcon, carIcon, warningIcon, wheelChairIcon, bicycleIcon;
 
     public TripsGalleryAdapter(final Context context) {
         this.context = (OeffiActivity) context;
@@ -242,6 +242,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         colorAdditionalFeederBackground = makeBackgroundColorFromId(R.color.bg_trip_overview_additional_feeder);
 
         walkIcon = res.getDrawable(R.drawable.ic_directions_walk_grey600_24dp);
+        stayIcon = res.getDrawable(R.drawable.ic_directions_stay_grey600_24dp);
         bikeIcon = res.getDrawable(R.drawable.ic_directions_bike_grey600_24dp);
         carIcon = res.getDrawable(R.drawable.ic_local_taxi_grey600_24dp);
         warningIcon = res.getDrawable(R.drawable.ic_warning_amber_24dp);
@@ -249,6 +250,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         bicycleIcon = res.getDrawable(R.drawable.ic_directions_bike_grey600_18dp);
 
         walkIcon.setTint(colorLessSignificant);
+        stayIcon.setTint(colorLessSignificant);
         bikeIcon.setTint(colorLessSignificant);
         carIcon.setTint(colorLessSignificant);
         wheelChairIcon.setTint(colorLessSignificant);
@@ -612,15 +614,21 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             }
 
             // then iterate all individual legs
+            Public prevPublicLeg = null;
             final int nLegs = legs.size();
             for (int iLeg = 0; iLeg < nLegs; iLeg++) {
                 final Leg leg = legs.get(iLeg);
-                if (leg instanceof Individual) {
+                if (leg instanceof Public) {
+                    prevPublicLeg = (Public) leg;
+                } if (leg instanceof Individual) {
                     final Individual individualLeg = (Individual) leg;
                     final long tDeparture = individualLeg.departureTime.getTime();
                     final float yDeparture = timeToCoord(tDeparture, height);
                     final long tArrival = individualLeg.arrivalTime.getTime();
                     final float yArrival = timeToCoord(tArrival, height);
+
+                    final Public nextPublicLeg = (iLeg + 1 < nLegs) ? (Public) legs.get(iLeg + 1) : null;
+                    final boolean isSamePlatform = Public.isSamePlatform(prevPublicLeg, nextPublicLeg);
 
                     // box
                     final float left = width * (1f - individualBoxFraction) / 2f;
@@ -630,13 +638,14 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                     // symbol
                     final Drawable symbol;
                     if (individualLeg.type == Individual.Type.WALK)
-                        symbol = walkIcon;
+                        symbol = isSamePlatform ? stayIcon : walkIcon;
                     else if (individualLeg.type == Individual.Type.BIKE)
                         symbol = bikeIcon;
                     else if (individualLeg.type == Individual.Type.CAR)
                         symbol = carIcon;
                     else if (individualLeg.type == Individual.Type.TRANSFER)
-                        symbol = individualLeg.distance > maxWalkDistance ? carIcon : walkIcon;
+                        symbol = individualLeg.distance > maxWalkDistance ? carIcon
+                                : isSamePlatform ? stayIcon : walkIcon;
                     else
                         throw new IllegalStateException("unknown type: " + individualLeg.type);
                     final int symbolWidth = symbol.getIntrinsicWidth();
