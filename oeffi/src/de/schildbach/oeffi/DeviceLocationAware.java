@@ -20,7 +20,7 @@ package de.schildbach.oeffi;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.Point;
 
-public interface LocationAware {
+public interface DeviceLocationAware {
     Point getDeviceLocation();
 
     Location getReferenceLocation();

@@ -59,7 +59,7 @@ import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.AreaAware;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.FromViaToAware;
-import de.schildbach.oeffi.LocationAware;
+import de.schildbach.oeffi.DeviceLocationAware;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.StationsAware;
 import de.schildbach.oeffi.TripAware;
@@ -107,10 +107,16 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
     private FromViaToAware fromViaToAware = null;
     private TripAware tripAware = null;
     private StationsAware stationsAware = null;
-    private LocationAware locationAware = null;
+    private DeviceLocationAware locationAware = null;
     private AreaAware areaAware = null;
     private boolean firstLocation = true;
-    private boolean zoomLocked = true;
+    private enum ZOOM_LOCK {
+        NOT_LOCKED,
+        LOCKED_TO_ALL,
+        LOCKED_TO_STATIONS,
+    };
+    private ZOOM_LOCK zoomLock = ZOOM_LOCK.LOCKED_TO_ALL;
+    private List<Location> zoomStations;
 
     private final int AREA_FILL_COLOR = Color.parseColor("#22000000");
     private final Animation zoomControlsAnimation;
@@ -186,7 +192,7 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
         invalidate();
     }
 
-    public void setLocationAware(final LocationAware locationAware) {
+    public void setDeviceLocationAware(final DeviceLocationAware locationAware) {
         this.locationAware = locationAware;
         invalidate();
     }
@@ -220,7 +226,7 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
         if (!ViewUtils.isVisible(this))
             return;
 
-        zoomLocked = true;
+        zoomLock = ZOOM_LOCK.LOCKED_TO_ALL;
 
         final boolean hasLegSelection = tripAware != null && tripAware.hasSelection();
         final List<IGeoPoint> points = new LinkedList<>();
@@ -277,17 +283,19 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
         }
     }
 
-    public void zoomToStations(final List<Station> stations) {
+    public void zoomToStations(final List<Location> stationLocations) {
         if (!ViewUtils.isVisible(this))
             return;
 
-        if (stations.isEmpty())
+        if (stationLocations.isEmpty())
             return;
+
+        zoomLock = ZOOM_LOCK.LOCKED_TO_STATIONS;
+        zoomStations = stationLocations;
 
         // show at most 16 stations
         final List<GeoPoint> points = new LinkedList<>();
-        for (final Station station : stations) {
-            final Location location = station.location;
+        for (final Location location : stationLocations) {
             if (location.hasCoord()) {
                 points.add(new GeoPoint(location.getLatAsDouble(), location.getLonAsDouble()));
                 if (points.size() >= 16)
@@ -314,15 +322,17 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
 
     @Override
     protected void onSizeChanged(final int w, final int h, final int oldw, final int oldh) {
-        if (zoomLocked)
+        if (zoomLock == ZOOM_LOCK.LOCKED_TO_ALL)
             zoomToAll();
+        else if (zoomLock == ZOOM_LOCK.LOCKED_TO_STATIONS)
+            zoomToStations(zoomStations);
 
         super.onSizeChanged(w, h, oldw, oldh);
     }
 
     @Override
     public boolean onTouchEvent(final MotionEvent ev) {
-        zoomLocked = false;
+        zoomLock = ZOOM_LOCK.NOT_LOCKED;
         if (zoomControls != null)
             showZoomControls();
 

@@ -82,7 +82,7 @@ import com.google.common.base.Supplier;
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.DeviceAdmin;
-import de.schildbach.oeffi.LocationAware;
+import de.schildbach.oeffi.DeviceLocationAware;
 import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
@@ -142,7 +142,7 @@ import java.util.TimeZone;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class TripDetailsActivity extends OeffiActivity implements LocationListener, LocationAware  {
+public class TripDetailsActivity extends OeffiActivity implements LocationListener, DeviceLocationAware {
     public static class RenderConfig implements Serializable {
         private static final long serialVersionUID = 6006525041994219717L;
 
@@ -385,7 +385,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 locationManager.removeUpdates(TripDetailsActivity.this);
                 updateDeviceLocationDependencies(null, null);
 
-                getMapView().setLocationAware(null);
+                getMapView().setDeviceLocationAware(null);
             }
 
             getMapView().zoomToAll();
@@ -660,8 +660,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         };
         registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
 
-        updateGUI();
         updateFragments();
+        updateGUI();
     }
 
     protected boolean checkAutoRefresh() {
@@ -741,7 +741,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             updateDeviceLocationDependencies(lastKnownLocation == null
                     || (lastKnownLocation.getLatitude() == 0 && lastKnownLocation.getLongitude() == 0)
                     ? null : LocationHelper.locationToPoint(lastKnownLocation), new Date());
-            getMapView().setLocationAware(TripDetailsActivity.this);
+            getMapView().setDeviceLocationAware(TripDetailsActivity.this);
         }
     }
 
@@ -774,7 +774,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         final String newProvider = requestLocationUpdates();
         if (newProvider == null)
-            getMapView().setLocationAware(null);
+            getMapView().setDeviceLocationAware(null);
     }
 
     public void onStatusChanged(final String provider, final int status, final Bundle extras) {
@@ -1006,7 +1006,36 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         if (destination != null) {
             destinationView.setVisibility(View.VISIBLE);
             destinationView.setText(Constants.DESTINATION_ARROW_PREFIX + Formats.makeBreakableStationName(destinationName));
-            destinationView.setOnClickListener(destination.hasId() ? new LocationClickListener(destination, leg.getArrivalTime()) : null);
+            if (destination.hasId()) {
+                destinationView.setOnLongClickListener(v -> {
+                    final PopupMenu contextMenu = new StationContextMenu(TripDetailsActivity.this, v, network, destination, null,
+                            false, false, true,
+                            true, true,
+                            false, false,
+                            false, false, false,
+                            renderConfig.isJourney && ((Trip.Public) tripRenderer.trip.legs.get(0)).exitLocation == null,
+                            false);
+                    contextMenu.setOnMenuItemClickListener(item -> {
+                        final int itemId = item.getItemId();
+                        if (itemId == R.id.station_context_show_departures) {
+                            StationDetailsActivity.start(TripDetailsActivity.this, network, destination, leg.getArrivalTime(), null,
+                                    shallShowChildActivitiesInNewTask());
+                            return true;
+                        } else if (itemId == R.id.station_context_nearby_departures) {
+                            StationsActivity.start(TripDetailsActivity.this, network, destination, leg.getArrivalTime());
+                            return true;
+                        } else if (itemId == R.id.station_map_context_maps_internal) {
+                            setMapVisible(true);
+                            getMapView().zoomToStations(List.of(destination));
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    });
+                    contextMenu.show();
+                    return true;
+                });
+            }
         } else {
             destinationView.setVisibility(View.GONE);
         }
@@ -1271,7 +1300,21 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
             if (leg.arrival.hasCoord()) {
                 mapView.setVisibility(View.VISIBLE);
-                mapView.setOnClickListener(new MapClickListener(leg.arrival));
+                mapView.setOnClickListener(v -> {
+                    setMapVisible(true);
+                    getMapView().zoomToStations(List.of(leg.arrival));
+                });
+                mapView.setOnLongClickListener(v -> {
+                    final PopupMenu popupMenu = new PopupMenu(TripDetailsActivity.this, v);
+                    StationContextMenu.prepareMapMenu(TripDetailsActivity.this, popupMenu.getMenu(), network, leg.arrival);
+                    popupMenu.setOnMenuItemClickListener(item -> {
+                        setMapVisible(true);
+                        getMapView().zoomToStations(List.of(leg.arrival));
+                        return true;
+                    });
+                    popupMenu.show();
+                    return true;
+                });
             }
         } else if (legC.transferFrom != null) {
             // no time walk after some public transport
@@ -2159,40 +2202,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             view.setPaintFlags(view.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
     }
 
-    private class LocationClickListener implements android.view.View.OnClickListener {
-        private final Location location;
-        private final Date time;
-
-        public LocationClickListener(final Location location, final Date time) {
-            this.location = location;
-            this.time = time;
-        }
-
-        public void onClick(final View v) {
-            final PopupMenu contextMenu = new StationContextMenu(TripDetailsActivity.this, v, network, location, null,
-                    false, false, true,
-                    true, true,
-                    false, false,
-                    false, false, false,
-                    renderConfig.isJourney && ((Trip.Public) tripRenderer.trip.legs.get(0)).exitLocation == null,
-                    false);
-            contextMenu.setOnMenuItemClickListener(item -> {
-                final int itemId = item.getItemId();
-                if (itemId == R.id.station_context_show_departures) {
-                    StationDetailsActivity.start(TripDetailsActivity.this, network, location, time, null,
-                            shallShowChildActivitiesInNewTask());
-                    return true;
-                } else if (itemId == R.id.station_context_nearby_departures) {
-                    StationsActivity.start(TripDetailsActivity.this, network, location, time);
-                    return true;
-                } else {
-                    return false;
-                }
-            });
-            contextMenu.show();
-        }
-    }
-
     private class StopClickListener {
         private final TripRenderer.LegContainer legC;
         private final Stop stop;
@@ -2298,6 +2307,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     return onStationContextMenuItemClicked(menuItemId, legC, stop);
                 } else if (menuItemId == R.id.station_context_set_arrival_travel_alarm) {
                     return onStationContextMenuItemClicked(menuItemId, legC, stop);
+                } else if (menuItemId == R.id.station_map_context_maps_internal) {
+                    setMapVisible(true);
+                    getMapView().zoomToStations(List.of(stop.location));
+                    return true;
                 } else {
                     return false;
                 }
@@ -2326,20 +2339,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         if (lastPublicLeg == null)
             return null;
         return lastPublicLeg.arrivalStop.location;
-    }
-
-    private class MapClickListener implements android.view.View.OnClickListener {
-        private final Location location;
-
-        public MapClickListener(final Location location) {
-            this.location = location;
-        }
-
-        public void onClick(final View v) {
-            final PopupMenu popupMenu = new PopupMenu(TripDetailsActivity.this, v);
-            StationContextMenu.prepareMapMenu(TripDetailsActivity.this, popupMenu.getMenu(), network, location);
-            popupMenu.show();
-        }
     }
 
     private Intent shareTripShort() {

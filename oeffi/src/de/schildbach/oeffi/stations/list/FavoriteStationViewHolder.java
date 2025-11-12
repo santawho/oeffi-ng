@@ -100,17 +100,17 @@ public class FavoriteStationViewHolder extends RecyclerView.ViewHolder {
                 context, contextView,
                 network, station,
                 FavoriteStationsProvider.TYPE_FAVORITE,
-                true, false,
-                true, station.type == LocationType.STATION, true,
+                true, false, true,
+                station.type == LocationType.STATION, true,
                 false, false,
                 true, false, false, false, true);
         contextMenu.setOnMenuItemClickListener(item -> {
             final int position = getAdapterPosition();
-            if (position != RecyclerView.NO_POSITION)
+            if (position != RecyclerView.NO_POSITION) {
                 return contextMenuItemListener.onStationContextMenuItemClick(position, network, station,
                         null, item.getItemId());
-            else
-                return false;
+            }
+            return false;
         });
         contextMenu.show();
     }

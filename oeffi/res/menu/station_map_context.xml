@@ -3,8 +3,16 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/station_map_context_maps"
+        android:id="@+id/station_map_context_maps_internal"
         android:orderInCategory="1"
-        android:title="@string/map_dialog_maps" />
+        android:title="@string/map_dialog_maps_internal"
+        android:icon="@drawable/ic_map_black_24dp"
+        android:iconTint="#757575" />
+    <item
+        android:id="@+id/station_map_context_maps_external"
+        android:orderInCategory="1"
+        android:title="@string/map_dialog_maps_external"
+        android:icon="@drawable/ic_open_ext_black_24dp"
+        android:iconTint="#757575" />
 
 </menu>

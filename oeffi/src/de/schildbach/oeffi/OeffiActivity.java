@@ -715,14 +715,21 @@ public abstract class OeffiActivity extends ComponentActivity {
 
     protected void addShowMapButtonToActionBar() {
         if (mapIsAtBottom && getResources().getBoolean(R.bool.layout_map_show_toggleable)) {
-            getMyActionBar().addButton(R.drawable.ic_map_white_24dp, R.string.directions_trip_details_action_showmap_title)
-                    .setOnClickListener(v -> {
-                        mapEnabled = !mapEnabled;
-                        updateFragments();
-                        if (mapEnabled)
-                            handler.post(this::onMapSetVisible);
-                    });
+            getMyActionBar()
+                    .addButton(R.drawable.ic_map_white_24dp, R.string.directions_trip_details_action_showmap_title)
+                    .setOnClickListener(v -> setMapVisible(!mapEnabled));
         }
+    }
+
+    protected void setMapVisible(final boolean visible) {
+        if (visible == mapEnabled)
+            return;
+        mapEnabled = visible;
+        if (mapFrame == null)
+            return;
+        updateFragments();
+        if (mapEnabled)
+            handler.post(this::onMapSetVisible);
     }
 
     protected boolean isMapEnabled() {

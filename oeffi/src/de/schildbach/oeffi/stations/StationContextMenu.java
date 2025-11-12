@@ -58,7 +58,8 @@ public class StationContextMenu extends PopupMenu {
     private static final Logger log = LoggerFactory.getLogger(StationContextMenu.class);
 
     public StationContextMenu(
-            final Context context, final View anchor, final NetworkId network, final Location station,
+            final Context context, final View anchor,
+            final NetworkId network, final Location station,
             final Integer favState, final boolean showFavorite, final boolean showIgnore, final boolean showMap,
             final boolean showDepartures, final boolean showNearbyDepartures,
             final boolean showTravelAlarmDeparture, final boolean showTravelAlarmArrival,
@@ -145,10 +146,12 @@ public class StationContextMenu extends PopupMenu {
         return builder.create();
     }
 
-    public static void prepareMapMenu(final Context context, final Menu menu, final NetworkId network,
-            final Location location) {
+    public static void prepareMapMenu(
+            final Context context, final Menu menu,
+            final NetworkId network, final Location location) {
         new MenuInflater(context).inflate(R.menu.station_map_context, menu);
-        final MenuItem mapsItem = menu.findItem(R.id.station_map_context_maps);
+        final MenuItem mapsItemInternal = menu.findItem(R.id.station_map_context_maps_internal);
+        final MenuItem mapsItemExternal = menu.findItem(R.id.station_map_context_maps_external);
 
         if (location.hasCoord()) {
             final double lat = location.getLatAsDouble();
@@ -158,13 +161,16 @@ public class StationContextMenu extends PopupMenu {
             final Intent mapsIntent = new Intent(Intent.ACTION_VIEW,
                     Uri.parse(String.format(Locale.ENGLISH, "geo:%.6f,%.6f?q=%.6f,%.6f%s", lat, lon, lat, lon,
                             name != null ? '(' + URLEncoder.encode(name.replaceAll("[()]", "")) + ')' : "")));
-            mapsItem.setOnMenuItemClickListener(item -> {
+            mapsItemExternal.setOnMenuItemClickListener(item -> {
                 context.startActivity(mapsIntent);
                 return true;
             });
-            mapsItem.setVisible(true);
+
+            mapsItemInternal.setVisible(true);
+            mapsItemExternal.setVisible(true);
         } else {
-            mapsItem.setVisible(false);
+            mapsItemInternal.setVisible(false);
+            mapsItemExternal.setVisible(false);
         }
 
         final ContentResolver contentResolver = context.getContentResolver();

@@ -46,7 +46,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.AreaAware;
 import de.schildbach.oeffi.Constants;
-import de.schildbach.oeffi.LocationAware;
+import de.schildbach.oeffi.DeviceLocationAware;
 import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
@@ -161,7 +161,7 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
                                 return myArea;
                             }
                         });
-                        getMapView().setLocationAware(new LocationAware() {
+                        getMapView().setDeviceLocationAware(new DeviceLocationAware() {
                             final Location referenceLocation = area != null && area.length == 1
                                     ? Location.coord(area[0]) : null;
 

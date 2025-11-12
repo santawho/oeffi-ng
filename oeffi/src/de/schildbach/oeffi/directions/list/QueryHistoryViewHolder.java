@@ -20,6 +20,7 @@ package de.schildbach.oeffi.directions.list;
 import android.content.Context;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.widget.Button;
@@ -62,7 +63,9 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
     private boolean hasSavedTrip;
     private PopupMenu contextMenu;
 
-    public QueryHistoryViewHolder(final View itemView, final OeffiActivity context, final NetworkId network) {
+    public QueryHistoryViewHolder(
+            final View itemView, final OeffiActivity context,
+            final NetworkId network) {
         super(itemView);
         this.context = context;
         this.network = network;
@@ -144,9 +147,11 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
             fromMenu.findItem(R.id.directions_query_history_location_context_add_favorite)
                     .setVisible(from.type == LocationType.STATION && (fromFavState == null
                             || fromFavState != FavoriteStationsProvider.TYPE_FAVORITE));
-            final SubMenu mapMenu = fromMenu.findItem(R.id.directions_query_history_location_context_map)
-                    .getSubMenu();
-            StationContextMenu.prepareMapMenu(context, mapMenu, network, from);
+            final MenuItem mapMenuItem = fromMenu.findItem(R.id.directions_query_history_location_context_map);
+            if (from.hasCoord())
+                StationContextMenu.prepareMapMenu(context, mapMenuItem.getSubMenu(), network, from);
+            else
+                mapMenuItem.setVisible(false);
         } else {
             fromMenu = null;
         }
@@ -159,9 +164,11 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
             toMenu.findItem(R.id.directions_query_history_location_context_add_favorite)
                     .setVisible(to.type == LocationType.STATION
                             && (toFavState == null || toFavState != FavoriteStationsProvider.TYPE_FAVORITE));
-            final SubMenu mapMenu = toMenu.findItem(R.id.directions_query_history_location_context_map)
-                    .getSubMenu();
-            StationContextMenu.prepareMapMenu(context, mapMenu, network, to);
+            final MenuItem mapMenuItem = toMenu.findItem(R.id.directions_query_history_location_context_map);
+            if (to.hasCoord())
+                StationContextMenu.prepareMapMenu(context, mapMenuItem.getSubMenu(), network, to);
+            else
+                mapMenuItem.setVisible(false);
         } else {
             toMenu = null;
         }

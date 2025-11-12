@@ -217,6 +217,9 @@ public class FavoriteStationsActivity extends OeffiActivity
         } else if (menuItemId == R.id.station_context_launcher_shortcut) {
             StationContextMenu.createLauncherShortcutDialog(FavoriteStationsActivity.this, network, station).show();
             return true;
+        } else if (menuItemId == R.id.station_map_context_maps_internal) {
+            // no map on this activity, sorry
+            return true;
         } else {
             return false;
         }

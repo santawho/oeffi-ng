@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="map_dialog_maps">External map</string>
+    <string name="map_dialog_maps_internal">Internal map</string>
+    <string name="map_dialog_maps_external">External map</string>
 
 </resources>

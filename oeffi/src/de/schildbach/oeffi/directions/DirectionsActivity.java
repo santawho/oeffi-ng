@@ -860,9 +860,9 @@ public class DirectionsActivity extends OeffiMainActivity implements
         expandForm(haveNonDefaultProducts || viewViaLocation.getLocation() != null);
 
         setActionBarSecondaryTitleFromNetwork();
+        updateFragments();
         updateGUI();
         updateMap();
-        updateFragments();
     }
 
     @Override
@@ -1318,6 +1318,10 @@ public class DirectionsActivity extends OeffiMainActivity implements
         } else if (menuItemId == R.id.directions_query_history_location_context_launcher_shortcut
                 && menuItemLocation != null) {
             StationContextMenu.createLauncherShortcutDialog(DirectionsActivity.this, network, menuItemLocation).show();
+            return true;
+        } else if (menuItemId == R.id.station_map_context_maps_internal && menuItemLocation != null) {
+            setMapVisible(true);
+            getMapView().zoomToStations(List.of(menuItemLocation));
             return true;
         } else {
             return false;

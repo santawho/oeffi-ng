@@ -27,6 +27,8 @@ import android.os.Handler;
 import android.provider.BaseColumns;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import de.schildbach.oeffi.OeffiActivity;
@@ -188,9 +190,11 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<QueryHistoryViewHo
         return cursor.getLong(rowIdColumn);
     }
 
+    @NonNull
     @Override
-    public QueryHistoryViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
-        return new QueryHistoryViewHolder(inflater.inflate(R.layout.directions_query_history_entry, parent, false),
+    public QueryHistoryViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
+        return new QueryHistoryViewHolder(
+                inflater.inflate(R.layout.directions_query_history_entry, parent, false),
                 context, network);
     }
 

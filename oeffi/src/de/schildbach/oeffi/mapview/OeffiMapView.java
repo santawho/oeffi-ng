@@ -26,12 +26,13 @@ import java.util.List;
 
 import de.schildbach.oeffi.AreaAware;
 import de.schildbach.oeffi.FromViaToAware;
-import de.schildbach.oeffi.LocationAware;
+import de.schildbach.oeffi.DeviceLocationAware;
 import de.schildbach.oeffi.StationsAware;
 import de.schildbach.oeffi.TripAware;
 import de.schildbach.oeffi.stations.Station;
 import de.schildbach.oeffi.util.ZoomControls;
 import de.schildbach.oeffi.util.locationview.LocationView;
+import de.schildbach.pte.dto.Location;
 
 public class OeffiMapView extends FrameLayout {
     public static Provider provider = new OsmDroidOeffiMapView.Provider();
@@ -49,10 +50,10 @@ public class OeffiMapView extends FrameLayout {
         void onPause();
         void onStop();
         void onDestroy();
-        void invalidate();
+        void setVisibility(int visibility);
         void removeAllContent();
         void animateToLocation(final double latitude, final double longitude);
-        void setLocationAware(final LocationAware locationAware);
+        void setDeviceLocationAware(final DeviceLocationAware locationAware);
         void zoomToAll();
         void setDirectionsOverlay(
                 final LocationView viewFromLocation,
@@ -60,7 +61,7 @@ public class OeffiMapView extends FrameLayout {
         void setTripAware(final TripAware tripAware);
         void setAreaAware(final AreaAware areaAware);
         void setStationsAware(final StationsAware stationsAware);
-        void zoomToStations(final List<Station> stations);
+        void zoomToStations(final List<Location> stationLocations);
         void setFromViaToAware(final FromViaToAware fromViaToAware);
         void setZoomControls(final ZoomControls zoom);
     }
@@ -89,6 +90,12 @@ public class OeffiMapView extends FrameLayout {
         final View mapView = viewImplementation.getView();
         mapView.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         this.addView(mapView);
+    }
+
+    @Override
+    public void setVisibility(final int visibility) {
+        super.setVisibility(visibility);
+        viewImplementation.setVisibility(visibility);
     }
 
     public String getCopyrightNotice() {
@@ -123,8 +130,8 @@ public class OeffiMapView extends FrameLayout {
         viewImplementation.animateToLocation(latitude, longitude);
     }
 
-    public void setLocationAware(final LocationAware locationAware) {
-        viewImplementation.setLocationAware(locationAware);
+    public void setDeviceLocationAware(final DeviceLocationAware locationAware) {
+        viewImplementation.setDeviceLocationAware(locationAware);
     }
 
     public void zoomToAll() {
@@ -149,8 +156,8 @@ public class OeffiMapView extends FrameLayout {
         viewImplementation.setStationsAware(stationsAware);
     }
 
-    public void zoomToStations(final List<Station> stations) {
-        viewImplementation.zoomToStations(stations);
+    public void zoomToStations(final List<Location> stationLocations) {
+        viewImplementation.zoomToStations(stationLocations);
     }
 
     public void setFromViaToAware(final FromViaToAware fromViaToAware) {

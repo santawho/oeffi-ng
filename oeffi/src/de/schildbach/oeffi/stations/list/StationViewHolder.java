@@ -475,11 +475,11 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
                 false, false, true);
         contextMenu.setOnMenuItemClickListener(item -> {
             final int position = getAdapterPosition();
-            if (position != RecyclerView.NO_POSITION)
+            if (position != RecyclerView.NO_POSITION) {
                 return contextMenuItemListener.onStationContextMenuItemClick(position, station.network,
                         station.location, station.getDepartures(), item.getItemId());
-            else
-                return false;
+            }
+            return false;
         });
         contextMenu.show();
     }

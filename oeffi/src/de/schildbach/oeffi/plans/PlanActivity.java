@@ -38,6 +38,8 @@ import android.widget.ViewAnimator;
 import androidx.activity.ComponentActivity;
 import androidx.activity.EdgeToEdge;
 import androidx.activity.SystemBarStyle;
+import androidx.annotation.NonNull;
+
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -102,18 +104,15 @@ public class PlanActivity extends ComponentActivity {
         context.startActivity(intent(context, planId, selectedStationId));
     }
 
-    private Application application;
-
     private ViewAnimator viewAnimator;
     private ScrollImageView plan;
     private View bubble;
     private TextView bubbleName;
     private LineView bubbleLinesView;
     private ZoomControls zoom;
-    private TiledImageDrawable drawable;
     @Nullable
     private Station selection = null;
-    private List<Station> stations = new LinkedList<>();
+    private final List<Station> stations = new LinkedList<>();
 
     private final Handler handler = new Handler();
     private HandlerThread backgroundThread;
@@ -125,7 +124,7 @@ public class PlanActivity extends ComponentActivity {
     protected void onCreate(final Bundle savedInstanceState) {
         EdgeToEdge.enable(this, Constants.STATUS_BAR_STYLE, NAVIGATION_BAR_STYLE);
         super.onCreate(savedInstanceState);
-        this.application = (Application) getApplication();
+        final Application application = (Application) getApplication();
 
         // background thread
         backgroundThread = new HandlerThread("queryDeparturesThread", Process.THREAD_PRIORITY_BACKGROUND);
@@ -240,7 +239,8 @@ public class PlanActivity extends ComponentActivity {
     }
 
     @Override
-    public void onNewIntent(final Intent intent) {
+    public void onNewIntent(@NonNull final Intent intent) {
+        super.onNewIntent(intent);
         final String query = intent.getStringExtra(SearchManager.QUERY);
 
         if (query != null && !stations.isEmpty()) {
@@ -366,7 +366,7 @@ public class PlanActivity extends ComponentActivity {
             final Bitmap swBitmap = Bitmap.createBitmap(bitmap, 0, halfHeight, halfWidth, height - halfHeight);
             final Bitmap seBitmap = Bitmap.createBitmap(bitmap, halfWidth, halfHeight, width - halfWidth,
                     height - halfHeight);
-            drawable = new TiledImageDrawable(nwBitmap, neBitmap, swBitmap, seBitmap);
+            final TiledImageDrawable drawable = new TiledImageDrawable(nwBitmap, neBitmap, swBitmap, seBitmap);
 
             plan.setImageDrawable(drawable);
 

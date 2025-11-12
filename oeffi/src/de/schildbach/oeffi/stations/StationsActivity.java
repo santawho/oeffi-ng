@@ -72,7 +72,7 @@ import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
 import com.google.common.primitives.Ints;
 import de.schildbach.oeffi.Constants;
-import de.schildbach.oeffi.LocationAware;
+import de.schildbach.oeffi.DeviceLocationAware;
 import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiMainActivity;
 import de.schildbach.oeffi.R;
@@ -132,8 +132,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-public class StationsActivity extends OeffiMainActivity implements StationsAware, LocationAware,
+public class StationsActivity extends OeffiMainActivity implements StationsAware, DeviceLocationAware,
         StationContextMenuItemListener, JourneyClickListener {
     // if this would be set to TRUE, the search function in this activity would behave
     // like the original Öffi app, i.e. search on the network:
@@ -362,7 +363,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         missingCapabilityButton.setOnClickListener(selectNetworkListener);
 
         getMapView().setStationsAware(this);
-        getMapView().setLocationAware(this);
+        getMapView().setDeviceLocationAware(this);
 
         connectivityWarningView = findViewById(R.id.stations_connectivity_warning_box);
         final View disclaimerView = findViewById(R.id.stations_disclaimer_group);
@@ -1097,7 +1098,9 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         }
 
         if (added) {
-            handler.postDelayed(() -> getMapView().zoomToStations(stations), 500);
+            handler.postDelayed(() -> getMapView().zoomToStations(
+                    stations.stream().map(station -> station.location).collect(Collectors.toList())),
+                    500);
         }
 
         updateGUI();
@@ -1372,9 +1375,9 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
         // scroll map
         if (station != null && station.location.hasCoord())
-            getMapView().zoomToStations(Arrays.asList(station));
+            getMapView().zoomToStations(List.of(station.location));
         else if (!stations.isEmpty())
-            getMapView().zoomToStations(stations);
+            getMapView().zoomToStations(stations.stream().map(s -> s.location).collect(Collectors.toList()));
         else if (station == null && deviceLocation != null)
             getMapView().animateToLocation(deviceLocation.getLatAsDouble(), deviceLocation.getLonAsDouble());
 
@@ -1527,6 +1530,11 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
             if (infoUrl != null) {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(infoUrl)));
             }
+            return true;
+        } else if (menuItemId == R.id.station_map_context_maps_internal) {
+            setMapVisible(true);
+            if (station != null && station.hasCoord())
+                getMapView().zoomToStations(List.of(station));
             return true;
         } else {
             return false;
