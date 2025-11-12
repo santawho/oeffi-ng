@@ -1,59 +1,60 @@
 package de.schildbach.oeffi.mapview;
 
-import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
-import android.location.Address;
-import android.util.AttributeSet;
-import android.util.TypedValue;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.TextView;
+// WIP ...
+// requires "implementation libs.maplibre.gl" in build.gradle
 
-import org.maplibre.android.maps.MapView;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-
-import de.schildbach.oeffi.Application;
-import de.schildbach.oeffi.AreaAware;
-import de.schildbach.oeffi.Constants;
-import de.schildbach.oeffi.FromViaToAware;
-import de.schildbach.oeffi.LocationAware;
-import de.schildbach.oeffi.R;
-import de.schildbach.oeffi.StationsAware;
-import de.schildbach.oeffi.TripAware;
-import de.schildbach.oeffi.stations.LineView;
-import de.schildbach.oeffi.stations.Station;
-import de.schildbach.oeffi.util.GeoUtils;
-import de.schildbach.oeffi.util.GeocoderThread;
-import de.schildbach.oeffi.util.ViewUtils;
-import de.schildbach.oeffi.util.ZoomControls;
-import de.schildbach.oeffi.util.locationview.LocationTextView;
-import de.schildbach.oeffi.util.locationview.LocationView;
-import de.schildbach.pte.dto.Location;
-import de.schildbach.pte.dto.Point;
-import de.schildbach.pte.dto.Product;
-import de.schildbach.pte.dto.Trip;
-
+//import android.content.Context;
+//import android.content.res.Resources;
+//import android.graphics.Canvas;
+//import android.graphics.Color;
+//import android.graphics.Paint;
+//import android.graphics.Path;
+//import android.graphics.Typeface;
+//import android.graphics.drawable.Drawable;
+//import android.location.Address;
+//import android.util.AttributeSet;
+//import android.util.TypedValue;
+//import android.view.LayoutInflater;
+//import android.view.MotionEvent;
+//import android.view.View;
+//import android.view.ViewGroup;
+//import android.view.animation.Animation;
+//import android.view.animation.AnimationUtils;
+//import android.widget.TextView;
+//
+//import org.maplibre.android.maps.MapView;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
+//
+//import java.io.File;
+//import java.util.ArrayList;
+//import java.util.Arrays;
+//import java.util.LinkedList;
+//import java.util.List;
+//
+//import de.schildbach.oeffi.Application;
+//import de.schildbach.oeffi.AreaAware;
+//import de.schildbach.oeffi.Constants;
+//import de.schildbach.oeffi.FromViaToAware;
+//import de.schildbach.oeffi.LocationAware;
+//import de.schildbach.oeffi.R;
+//import de.schildbach.oeffi.StationsAware;
+//import de.schildbach.oeffi.TripAware;
+//import de.schildbach.oeffi.stations.LineView;
+//import de.schildbach.oeffi.stations.Station;
+//import de.schildbach.oeffi.util.GeoUtils;
+//import de.schildbach.oeffi.util.GeocoderThread;
+//import de.schildbach.oeffi.util.ViewUtils;
+//import de.schildbach.oeffi.util.ZoomControls;
+//import de.schildbach.oeffi.util.locationview.LocationTextView;
+//import de.schildbach.oeffi.util.locationview.LocationView;
+//import de.schildbach.pte.dto.Location;
+//import de.schildbach.pte.dto.Point;
+//import de.schildbach.pte.dto.Product;
+//import de.schildbach.pte.dto.Trip;
+//
 //public class MapLibreOeffiMapView extends MapView implements OeffiMapView.Implementation{
 //    private static final Logger log = LoggerFactory.getLogger(MapLibreOeffiMapView.class);
-//
-//    private static final String PREF_KEY_MAP_TILE_RESOLUTION = "user_interface_map_tile_resolution";
 //
 //    public static class Provider implements OeffiMapView.Provider {
 //        @Override
