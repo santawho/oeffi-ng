@@ -957,11 +957,11 @@ public class DirectionsActivity extends OeffiMainActivity implements
     }
 
     @Override
-    public void onBackPressed() {
+    public void onBackPressedEvent() {
         if (isNavigationOpen())
             closeNavigation();
         else
-            super.onBackPressed();
+            super.onBackPressedEvent();
     }
 
     private void requestFocusFirst() {

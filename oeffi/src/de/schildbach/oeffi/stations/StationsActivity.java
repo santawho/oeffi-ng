@@ -772,13 +772,13 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     }
 
     @Override
-    public void onBackPressed() {
+    public void onBackPressedEvent() {
         if (isNavigationOpen())
             closeNavigation();
         else if (searchQuery != null || filterQuery != null)
             setListFilter(null);
         else
-            super.onBackPressed();
+            super.onBackPressedEvent();
     }
 
     private void setListFilter(final String filter) {

@@ -221,11 +221,11 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
     @SuppressLint("MissingSuperCall")
     @Override
-    public void onBackPressed() {
+    public void onBackPressedEvent() {
         if (isShowingNextEvent())
             setShowPage(R.id.directions_trip_details_list_frame);
         else
-            moveTaskToBack(true); // super.onBackPressed();
+            moveTaskToBack(true); // super.onBackPressedEvent();
     }
 
     @Override

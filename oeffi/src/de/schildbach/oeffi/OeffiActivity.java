@@ -20,6 +20,7 @@ package de.schildbach.oeffi;
 import android.Manifest;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorSet;
+import android.annotation.SuppressLint;
 import android.app.ActivityManager.TaskDescription;
 import android.content.Context;
 import android.content.Intent;
@@ -45,6 +46,8 @@ import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.window.OnBackInvokedDispatcher;
+
 import androidx.activity.ComponentActivity;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -160,6 +163,8 @@ public abstract class OeffiActivity extends ComponentActivity {
         EdgeToEdge.enable(this, Constants.STATUS_BAR_STYLE);
         updateFromPreferences();
         super.onCreate(savedInstanceState);
+
+        setupBackPressedHandler();
     }
 
     @Override
@@ -589,11 +594,27 @@ public abstract class OeffiActivity extends ComponentActivity {
             navigationDrawerLayout.closeDrawer(Gravity.LEFT);
     }
 
+    private void setupBackPressedHandler() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
+            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                    OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+                    this::onBackPressedEvent);
+        }
+    }
+
+    @SuppressLint({"MissingSuperCall", "GestureBackNavigation"})
     @Override
-    public void onBackPressed() {
-        super.onBackPressed();
+    public final void onBackPressed() {
+        // this is now only called for SDK <= 35
+        // for 36 (BAKLAVA) and above, see setupBackPressedHandler() above
+        onBackPressedEvent();
+    }
+
+    public void onBackPressedEvent() {
         if (!isMainActivity() && isTaskRoot())
             finishAndRemoveTask();
+        else
+            finish();
     }
 
     public boolean isMainActivity() {

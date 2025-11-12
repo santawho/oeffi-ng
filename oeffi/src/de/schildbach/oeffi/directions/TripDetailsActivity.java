@@ -714,11 +714,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     @Override
-    public void onBackPressed() {
+    public void onBackPressedEvent() {
         if (isShowingNextEvent())
             setShowPage(R.id.directions_trip_details_list_frame);
         else
-            super.onBackPressed();
+            super.onBackPressedEvent();
     }
 
     protected boolean isShowingNextEvent() {

@@ -230,13 +230,13 @@ public class PlansPickerActivity extends OeffiMainActivity implements LocationHe
     }
 
     @Override
-    public void onBackPressed() {
+    public void onBackPressedEvent() {
         if (isNavigationOpen())
             closeNavigation();
         else if (filter != null)
             clearListFilter();
         else
-            super.onBackPressed();
+            super.onBackPressedEvent();
     }
 
     private void setListFilter(final String filter) {
