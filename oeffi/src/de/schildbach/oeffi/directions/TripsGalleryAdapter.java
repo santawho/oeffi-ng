@@ -627,8 +627,8 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                     final long tArrival = individualLeg.arrivalTime.getTime();
                     final float yArrival = timeToCoord(tArrival, height);
 
-                    final Public nextPublicLeg = (iLeg + 1 < nLegs) ? (Public) legs.get(iLeg + 1) : null;
-                    final boolean isSamePlatform = Public.isSamePlatform(prevPublicLeg, nextPublicLeg);
+                    final Leg nextLeg = (iLeg + 1 < nLegs) ? legs.get(iLeg + 1) : null;
+                    final boolean isSamePlatform = nextLeg instanceof Public && Public.isSamePlatform(prevPublicLeg, (Public) nextLeg);
 
                     // box
                     final float left = width * (1f - individualBoxFraction) / 2f;
