@@ -17,7 +17,8 @@
             android:id="@+id/directions_trip_details_public_entry_stop_date_divider"
             android:layout_width="match_parent"
             android:layout_height="@dimen/text_padding_vertical_cram"
-            android:background="@color/bg_divider" />
+            android:background="@color/bg_divider"
+            android:visibility="gone" />
         <TextView
             android:id="@+id/directions_trip_details_public_entry_stop_date_provided"
             android:layout_width="match_parent"
