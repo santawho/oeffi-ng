@@ -910,9 +910,17 @@ public class NavigationNotification {
         getNotificationManager(context).notify(notificationTag, 0, notification);
 
         if (anyChanges) {
-            playAlarmSoundAndVibration(-1, SOUND_ALARM, VIBRATION_PATTERN_ALARM, newSpeakTexts, onRide);
+            playAlarmSoundAndVibration(-1,
+                    SOUND_ALARM,
+                    VIBRATION_PATTERN_ALARM,
+                    newSpeakTexts,
+                    onRide);
         } else if ((reminderSoundId != 0 || !newSpeakTexts.isEmpty()) && reminderSoundId != SOUND_REMIND_VIA_NOTIFICATION) {
-            playAlarmSoundAndVibration(-1, reminderSoundId, VIBRATION_PATTERN_REMIND, newSpeakTexts, onRide);
+            playAlarmSoundAndVibration(-1,
+                    reminderSoundId,
+                    reminderSoundId == 0 ? null : VIBRATION_PATTERN_REMIND,
+                    newSpeakTexts,
+                    onRide);
         }
 
         lastNotified = newNotified;
