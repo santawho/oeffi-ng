@@ -2,4 +2,5 @@
 <resources>
     <bool name="flags_show_twitter">true</bool>
     <bool name="flags_show_navigation_drawer_footer">true</bool>
+    <bool name="flags_no_update_check">false</bool>
 </resources>

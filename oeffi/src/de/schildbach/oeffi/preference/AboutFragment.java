@@ -54,6 +54,7 @@ public class AboutFragment extends PreferenceFragment {
     private static final String KEY_ABOUT_FAQ = "about_faq";
     private static final String KEY_ABOUT_APP_UPDATE_CATEGORY = "about_update_category";
     private static final String KEY_ABOUT_DOWNLOAD_APK = "about_download_apk";
+    private static final String KEY_ABOUT_CHECK_UPDATE = "about_check_update";
     private static final String KEY_ABOUT_UPDATE = "about_update";
     private static final String KEY_ABOUT_SHARE = "about_share";
     private static final String KEY_ABOUT_SHOW_QR = "about_show_qr";
@@ -88,11 +89,13 @@ public class AboutFragment extends PreferenceFragment {
         }
 
         if (AppInstaller.isApkUrlAvailable()) {
+            setupActionPreference(KEY_ABOUT_CHECK_UPDATE, AboutFragment.class, CheckUpdateHandler.class);
             setupActionPreference(KEY_ABOUT_UPDATE, AboutFragment.class, InstallHandler.class);
             setupActionPreference(KEY_ABOUT_DOWNLOAD_APK, AboutFragment.class, DownloadApkHandler.class);
             setupActionPreference(KEY_ABOUT_SHARE, AboutFragment.class, ShareActionHandler.class);
             setupActionPreference(KEY_ABOUT_SHOW_QR, AboutFragment.class, ShowQrActionHandler.class);
         } else {
+            removeOrDisablePreference(KEY_ABOUT_CHECK_UPDATE);
             removeOrDisablePreference(KEY_ABOUT_UPDATE);
             removeOrDisablePreference(KEY_ABOUT_DOWNLOAD_APK);
             removeOrDisablePreference(KEY_ABOUT_SHARE);
@@ -164,6 +167,15 @@ public class AboutFragment extends PreferenceFragment {
         public boolean handleAction(final PreferenceActivity context, final String prefkey) {
             Application.getInstance().showImageDialog(context, R.drawable.qr_update,
                     dialog -> dismissParentingActivity(context));
+            return false;
+        }
+    }
+
+    public static class CheckUpdateHandler extends ActionHandler {
+        @Override
+        boolean handleAction(final PreferenceActivity context, final String prefkey) {
+            new AppInstaller(context, aBoolean -> dismissParentingActivity(context))
+                    .checkForUpdate(true);
             return false;
         }
     }

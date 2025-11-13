@@ -73,6 +73,8 @@
     <string name="about_changelog_summary">https://oeffi.schildbach.de/changelog_de.html</string>
     <string name="about_faq_title">FAQ - häufig gestellte Fragen</string>
     <string name="about_update_and_share_title">Update und Teilen</string>
+    <string name="about_check_update_title">Nach Updates suchen</string>
+    <string name="about_check_update_summary">Prüfe, ob ein Update dieser App verfügbar ist</string>
     <string name="about_update_title">Update</string>
     <string name="about_update_summary">Herunterladen und installieren der aktuellen Version</string>
     <string name="about_download_apk_title">APK herunterladen</string>
@@ -484,6 +486,8 @@
     <string name="alert_crash_report_positive">Senden</string>
     <string name="alert_crash_report_download">Herunterladen</string>
     <string name="alert_crash_report_negative">Schließen</string>
+    <string name="alert_update_not_available_title">Kein Update verfügbar</string>
+    <string name="alert_update_not_available_message">Du hast bereits die neueste Version.</string>
     <string name="alert_update_available_title">Update verfügbar</string>
     <string name="alert_update_available_message">Ein Update dieser Anwendung ist verfügbar. Möchtest Du es jetzt herunterladen und installieren?</string>
     <string name="alert_update_available_button_yes">Jetzt herunterladen und installieren</string>

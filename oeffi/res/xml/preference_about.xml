@@ -48,6 +48,11 @@
         android:key="about_update_category"
         android:title="@string/about_update_and_share_title">
         <Preference
+            android:key="about_check_update"
+            android:summary="@string/about_check_update_summary"
+            android:title="@string/about_check_update_title">
+        </Preference>
+        <Preference
             android:key="about_update"
             android:summary="@string/about_update_summary"
             android:title="@string/about_update_title">

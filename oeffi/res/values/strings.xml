@@ -73,6 +73,8 @@
     <string name="about_changelog_summary">https://oeffi.schildbach.de/changelog.html</string>
     <string name="about_faq_title">FAQ</string>
     <string name="about_update_and_share_title">Update and Share</string>
+    <string name="about_check_update_title">Check for Updates</string>
+    <string name="about_check_update_summary">Check if an update of this app is available</string>
     <string name="about_update_title">Update</string>
     <string name="about_update_summary">Download and install latest version</string>
     <string name="about_download_apk_title">Download APK</string>
@@ -485,6 +487,8 @@
     <string name="alert_crash_report_positive">Send</string>
     <string name="alert_crash_report_download">Download</string>
     <string name="alert_crash_report_negative">Dismiss</string>
+    <string name="alert_update_not_available_title">No update available</string>
+    <string name="alert_update_not_available_message">You already have the latest version.</string>
     <string name="alert_update_available_title">Update available</string>
     <string name="alert_update_available_message">An update of this application is available. Do you want to download and install it now?</string>
     <string name="alert_update_available_button_yes">Download and install now</string>

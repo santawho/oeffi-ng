@@ -128,6 +128,7 @@ android {
 
             resValue "string", "app_name", "Öffi NG${CREDENTIALS.editionName ? " ${CREDENTIALS.editionName}" : ''} Debug"
             resValue "string", "app_url_path_prefix", "/@apps/oeffi-ng${CREDENTIALS.editionName ? "-${CREDENTIALS.editionName}" : ''}-debug/"
+            resValue "bool", "flags_no_update_check", "true"
         }
         preview {
 //            minifyEnabled true

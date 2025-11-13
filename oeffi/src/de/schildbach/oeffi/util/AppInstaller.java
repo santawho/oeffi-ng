@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 
 import com.google.common.util.concurrent.FutureCallback;
@@ -20,6 +21,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
@@ -33,6 +35,11 @@ import okhttp3.Response;
 
 public class AppInstaller {
     private static final Logger log = LoggerFactory.getLogger(AppInstaller.class);
+
+    public static final String KEY_CHECK_FOR_UPDATES = "check_for_updates";
+    public static final String KEY_UPDATE_CHECKED_TIMESTAMP = "update_checked_timestamp";
+    public static final long UPDATE_CHECK_INHIBIT_PERIOD_MS = TimeUnit.HOURS.toMillis(12);
+
     private final Activity context;
     final Consumer<Boolean> doneListener;
 
@@ -42,7 +49,8 @@ public class AppInstaller {
     }
 
     public static String getApkUrl() {
-        final String apkUrl = "https://github.com/santawho/oeffi-ng/releases/latest/download/oeffi-ng.apk";
+        final Application application = Application.getInstance();
+        final String apkUrl = application.getString(R.string.about_update_apk_url);
         log.info("apk url = {}", apkUrl);
         return apkUrl;
     }
@@ -136,15 +144,28 @@ public class AppInstaller {
         done(true);
     }
 
-    public void checkForUpdate() {
+    public void checkForUpdate(final boolean force) {
         if (!isApkUrlAvailable())
             return;
 
         final Application application = Application.getInstance();
+        final SharedPreferences preferences = application.getSharedPreferences();
+        if (!force) {
+            if (!preferences.getBoolean(KEY_CHECK_FOR_UPDATES, true))
+                return; // inhibited by user preference
+            final boolean b = application.getResources().getBoolean(R.bool.flags_no_update_check);
+            if (application.getResources().getBoolean(R.bool.flags_no_update_check)
+                    && !preferences.getBoolean(KEY_CHECK_FOR_UPDATES, false))
+                return; // inhibited by build and not forced by user preference
+            final long updateCheckedAt = preferences.getLong(KEY_UPDATE_CHECKED_TIMESTAMP, 0);
+            if (System.currentTimeMillis() < updateCheckedAt + UPDATE_CHECK_INHIBIT_PERIOD_MS)
+                return;
+        }
+
         final String manifestUrl = application.getString(R.string.about_update_manifest_url);
         final String modifiedStr = application.getString(R.string.about_update_modified);
         new Thread(() -> {
-            try (Response response = new OkHttpClient().newCall(
+            try (final Response response = new OkHttpClient().newCall(
                     new Request.Builder().url(manifestUrl).head().build()).execute()) {
                 final int code = response.code();
                 if (code != 200) {
@@ -153,12 +174,14 @@ public class AppInstaller {
                 }
                 final String lastModifiedStr = response.header("Last-Modified");
                 if (lastModifiedStr != null) {
+                    preferences.edit().putLong(KEY_UPDATE_CHECKED_TIMESTAMP, System.currentTimeMillis()).apply();
+
                     final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
                     final Date thisModified = dateFormat.parse(modifiedStr);
                     final Date lastModified = dateFormat.parse(lastModifiedStr);
                     final boolean isNewVersionAvailable = lastModified != null && lastModified.after(thisModified);
-                    if (isNewVersionAvailable) {
-                        context.runOnUiThread(() -> {
+                    context.runOnUiThread(() -> {
+                        if (isNewVersionAvailable) {
                             if (hasExternalInstaller()) {
                                 new AlertDialog.Builder(context)
                                         .setTitle(R.string.alert_update_available_title)
@@ -175,11 +198,17 @@ public class AppInstaller {
                                         .setNeutralButton(R.string.alert_update_available_button_download_only, (dialog, which) -> {
                                             showExternalDownloader();
                                         })
-                                        .setNegativeButton(R.string.alert_update_available_button_no, null)
+                                        .setNegativeButton(R.string.alert_update_available_button_no, (d, i) -> done(false))
                                         .create().show();
                             }
-                        });
-                    }
+                        } else if (force) {
+                            new AlertDialog.Builder(context)
+                                    .setTitle(R.string.alert_update_not_available_title)
+                                    .setMessage(R.string.alert_update_not_available_message)
+                                    .setPositiveButton(android.R.string.ok, (d, i) -> done(false))
+                                    .create().show();
+                        }
+                    });
                 }
             } catch (IOException | ParseException e) {
                 log.error("cannot HEAD {}: {}", manifestUrl, e.getMessage());

@@ -106,9 +106,9 @@ public abstract class OeffiMainActivity extends OeffiActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (stillCheckForUpdate && prefs.getBoolean("check_for_updates", true)) {
+        if (stillCheckForUpdate) {
             stillCheckForUpdate = false;
-            new AppInstaller(this, null).checkForUpdate();
+            new AppInstaller(this, null).checkForUpdate(false);
         }
     }
 
