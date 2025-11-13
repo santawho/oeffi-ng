@@ -11,6 +11,7 @@
         android:summary="@string/user_interface_darkmode_switch_summary" />
 
     <Preference
+        android:enabled="false"
         android:key="user_interface_accessibility_settings"
         android:title="@string/user_interface_accessibility_settings_title"
         android:summary="@string/user_interface_accessibility_settings_summary" >
