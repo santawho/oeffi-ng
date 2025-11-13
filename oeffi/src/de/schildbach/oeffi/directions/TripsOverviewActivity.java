@@ -701,7 +701,8 @@ public class TripsOverviewActivity extends OeffiActivity {
                     contLeg.journeyRef,
                     contLeg.loadedAt));
         } else {
-            newLegs.add(lastPrependLeg);
+            if (lastPrependLeg != null)
+                newLegs.add(lastPrependLeg);
             newLegs.add(firstContinuationLeg);
             newNumChanges += 1;
         }
