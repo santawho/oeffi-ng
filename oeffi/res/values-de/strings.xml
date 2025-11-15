@@ -120,7 +120,7 @@
     <string name="stations_list_entry_interval">(ca. alle %d min)</string>
     <string name="stations_list_acquiring_location">Ermittle Standort…</string>
     <string name="stations_list_cannot_acquire_location">Kann Standort nicht ermitteln.</string>
-    <string name="stations_list_cannot_acquire_location_hint">Bitte versuch mindestens einen Standortdienst einzuschalten.</string>
+    <string name="stations_list_cannot_acquire_location_hint">Bitte versuch mindestens einen Standortdienst einzuschalten und prüfe die App-Berechtigungen.</string>
     <string name="stations_list_location_settings">Standorteinstellungen</string>
     <string name="stations_list_querying_nearby">Suche nach nahegelegenen Haltestellen…</string>
     <string name="stations_list_matching">Suche nach Übereinstimmungen…</string>

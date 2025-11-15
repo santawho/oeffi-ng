@@ -677,7 +677,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         if (mustEnableTrackButton) {
             mustEnableTrackButton = false;
-            trackButton.setChecked(true);
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                trackButton.setChecked(true);
+            } else {
+                new Toast(this).toast(R.string.stations_location_permission_missing);
+            }
         }
     }
 

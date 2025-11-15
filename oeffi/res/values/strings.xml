@@ -121,7 +121,7 @@
     <string name="stations_list_entry_interval">(approx. %d min interval)</string>
     <string name="stations_list_acquiring_location">Acquiring location…</string>
     <string name="stations_list_cannot_acquire_location">Cannot acquire device location.</string>
-    <string name="stations_list_cannot_acquire_location_hint">Try enabling at least one location provider.</string>
+    <string name="stations_list_cannot_acquire_location_hint">Try enabling at least one location provider and check the app permissions.</string>
     <string name="stations_list_location_settings">Location settings</string>
     <string name="stations_list_querying_nearby">Searching nearby stations…</string>
     <string name="stations_list_matching">Matching…</string>
