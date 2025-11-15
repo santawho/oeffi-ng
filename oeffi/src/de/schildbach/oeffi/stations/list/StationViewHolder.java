@@ -24,6 +24,7 @@ import android.graphics.Typeface;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.format.DateUtils;
+import android.text.method.LinkMovementMethod;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -409,6 +410,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
                         HtmlUtils.makeLinksClickableInHtml("<b>" + index + ".</b> " + message),
                         Html.FROM_HTML_MODE_COMPACT);
                 messageView.setText(html);
+                messageView.setMovementMethod(LinkMovementMethod.getInstance());
                 messageView.setTextColor(colorSignificant);
                 messagesViewGroup.addView(messageView);
             }
