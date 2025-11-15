@@ -822,7 +822,7 @@ public class TripRenderer {
             final Location dest = leg.destination;
             nextEventTransportDestinationName = dest == null ? null :
                     Formats.makeBreakableStationName(
-                            Formats.fullLocationNameIfDifferentPlace(dest, leg.entryLocation));
+                            Formats.fullLocationNameIfDifferentPlace(dest, leg.departure));
         }
     }
 
