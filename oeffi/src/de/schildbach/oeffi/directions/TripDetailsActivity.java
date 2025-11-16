@@ -74,6 +74,7 @@ import androidx.core.graphics.ColorUtils;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.Lifecycle;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.common.base.MoreObjects;
@@ -803,7 +804,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 : R.id.directions_trip_details_content_frame);
     }
 
-    protected void updateGUI() {
+    protected boolean updateGUI() {
+        if (!getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
+            return false;
         final Date now = new Date();
         updateHighlightedTime(now);
         updateDevInfo();
@@ -869,7 +872,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             findViewById(R.id.navigation_next_event).setVisibility(View.VISIBLE);
         }
 
-        viewPager.setCurrentView(showId, true);
+        // delay setting the horizontal scrolling page after the layout has been done
+        viewPager.post(() -> viewPager.setCurrentView(showId, true));
+        return true;
     }
 
     private void updateHighlightedTime(final Date now) {
@@ -1522,6 +1527,45 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             showScreenIdWhenUnlocked = showId;
             showScreenIdWhenLocked = R.id.navigation_next_event;
         }
+    }
+
+    public enum Page {
+        ITINERARY(1, R.id.directions_trip_details_list_frame),
+        NEXT_EVENT(2, R.id.navigation_next_event),
+        EVENT_LOG(3, R.id.navigation_event_log);
+
+        public final int pageNum;
+        public final int resId;
+
+        Page(final int pageNum, final int resId) {
+            this.pageNum = pageNum;
+            this.resId = resId;
+        }
+
+        public static Page getPageForNum(final int pageNum) {
+            if (pageNum <= 0)
+                return null;
+            for (final Page page : values()) {
+                if (page.pageNum == pageNum)
+                    return page;
+            }
+            return null;
+        }
+
+        static Page getPageForResId(final int resId) {
+            if (resId == 0)
+                return null;
+            for (final Page page : values()) {
+                if (page.resId == resId)
+                    return page;
+            }
+            return null;
+        }
+    }
+
+    protected void setShowPage(final Page page) {
+        if (page != null)
+            setShowPage(page.resId);
     }
 
     protected void setShowPage(final int showId) {

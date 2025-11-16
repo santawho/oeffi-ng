@@ -461,7 +461,9 @@ public class NavigationNotification {
             final long refreshAt = lastNotified.refreshNotificationRequiredAt;
             if (refreshAt > 0) {
                 NavigationAlarmManager.getInstance().start(refreshAt,
-                        getPendingActivityIntent(false, !isDriverMode, trip));
+                        getPendingActivityIntent(false,
+                                isDriverMode ? TripDetailsActivity.Page.ITINERARY : TripDetailsActivity.Page.NEXT_EVENT,
+                                trip));
             }
         }
     }
@@ -630,7 +632,7 @@ public class NavigationNotification {
         // final RemoteViews notificationLayoutExpanded = new RemoteViews(context.getPackageName(), R.layout.navigation_notification);
         // setupNotificationView(context, notificationLayoutExpanded, tripRenderer, now, newNotified);
         notificationLayout.setOnClickPendingIntent(R.id.navigation_notification_open_full,
-                getPendingActivityIntent(false, !isDriverMode, trip));
+                getPendingActivityIntent(false, null, trip));
         notificationLayout.setOnClickPendingIntent(R.id.navigation_notification_next_event,
                 getPendingActionIntent(ACTION_REFRESH, trip));
 
@@ -888,11 +890,11 @@ public class NavigationNotification {
                 .setTimeoutAfter(duration)
                 .setExtras(extras)
                 .addAction(R.drawable.ic_clear_white_24dp, context.getString(R.string.navigation_opennav_shownextevent),
-                        getPendingActivityIntent(false, true, trip))
+                        getPendingActivityIntent(false, TripDetailsActivity.Page.NEXT_EVENT, trip))
                 .addAction(R.drawable.ic_navigation_white_24dp, context.getString(R.string.navigation_opennav_showtrip),
-                        getPendingActivityIntent(false, false, trip))
+                        getPendingActivityIntent(false, TripDetailsActivity.Page.ITINERARY, trip))
                 .addAction(R.drawable.ic_clear_white_24dp, context.getString(R.string.navigation_stopnav_stop),
-                        getPendingActivityIntent(true, false, trip));
+                        getPendingActivityIntent(true, TripDetailsActivity.Page.ITINERARY, trip));
 
         if (anyChanges) {
             notificationBuilder.setSilent(true);
@@ -950,13 +952,13 @@ public class NavigationNotification {
     }
 
     private PendingIntent getPendingActivityIntent(
-            final boolean deleteRequest, final boolean showNextEvent,
+            final boolean deleteRequest, final TripDetailsActivity.Page setShowPage,
             final Trip trip) {
         final Intent intent = TripNavigatorActivity.buildStartIntent(
                 context, intentData.network, trip, intentData.renderConfig,
-                deleteRequest, showNextEvent, null, false);
+                deleteRequest, setShowPage, null, false);
         return PendingIntent.getActivity(context,
-                (deleteRequest ? 1 : 0) + (showNextEvent ? 2 : 0),
+                (deleteRequest ? 1 : 0) + (setShowPage == null ? 0 : (setShowPage.pageNum << 1)),
                 intent, PendingIntent.FLAG_IMMUTABLE);
     }
 

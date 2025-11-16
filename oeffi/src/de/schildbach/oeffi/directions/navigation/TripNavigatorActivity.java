@@ -84,7 +84,8 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         rc.isNavigation = true;
         rc.isJourney = renderConfig.isJourney;
         rc.queryTripsRequestData = renderConfig.queryTripsRequestData;
-        final Intent intent = buildStartIntent(contextActivity, network, trip, rc, false, false, null, sameWindow);
+        final Intent intent = buildStartIntent(contextActivity, network, trip, rc,
+                false, Page.ITINERARY, null, sameWindow);
         contextActivity.startActivity(intent);
         return true;
     }
@@ -92,13 +93,14 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     protected static Intent buildStartIntent(
             final Context context,
             final NetworkId network, final Trip trip, final RenderConfig renderConfig,
-            final boolean deleteRequest, final boolean showNextEvent,
+            final boolean deleteRequest, final Page setShowPage,
             final String playAlarmNotificationTag,
             final boolean sameWindow) {
         renderConfig.isNavigation = true;
         final Intent intent = TripDetailsActivity.buildStartIntent(TripNavigatorActivity.class, context, network, trip, renderConfig);
         intent.putExtra(INTENT_EXTRA_DELETEREQUEST, deleteRequest);
-        intent.putExtra(INTENT_EXTRA_NEXTEVENT, showNextEvent);
+        if (setShowPage != null)
+            intent.putExtra(INTENT_EXTRA_NEXTEVENT, setShowPage.pageNum);
         if (playAlarmNotificationTag != null)
             intent.putExtra(INTENT_EXTRA_PLAYALARM, playAlarmNotificationTag);
         intent.addFlags(
@@ -255,8 +257,9 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     }
 
     private void handleSwitchToNextEvent(final Intent intent) {
-        final boolean showNextEvent = intent.getBooleanExtra(INTENT_EXTRA_NEXTEVENT, false);
-        setShowPage(showNextEvent ? R.id.navigation_next_event : R.id.directions_trip_details_list_frame);
+        final int setShowPageNum = intent.getIntExtra(INTENT_EXTRA_NEXTEVENT, -1);
+        if (setShowPageNum >= 0)
+            setShowPage(Page.getPageForNum(setShowPageNum));
     }
 
     private boolean handleDeleteNotification(final Intent intent) {
@@ -502,10 +505,12 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     private NavigationNotification guiUpdateNavigationNotification;
 
     @Override
-    protected void updateGUI() {
+    protected boolean updateGUI() {
         guiUpdateNavigationNotification = new NavigationNotification(getIntent());
-        super.updateGUI();
+        if (!super.updateGUI())
+            return false;
         updateEventLog();
+        return true;
     }
 
     @Override
