@@ -91,6 +91,7 @@ import de.schildbach.oeffi.TripAware;
 import de.schildbach.oeffi.util.GoogleMapsUtils;
 import de.schildbach.oeffi.util.HorizontalPager;
 import de.schildbach.oeffi.util.KmlProducer;
+import de.schildbach.oeffi.util.PopupHelper;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.util.TimeSpec.DepArr;
 import de.schildbach.oeffi.directions.navigation.TripRenderer;
@@ -1276,6 +1277,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     @SuppressLint("DefaultLocale")
     protected boolean updateIndividualLeg(final View row, final TripRenderer.LegContainer legC, final Date now) {
         final Trip.Individual leg = legC.individualLeg;
+        final Stop transferFrom = legC.transferFrom != null ? legC.transferFrom.publicLeg.arrivalStop : null;
+        final Stop transferTo = legC.transferTo != null ? legC.transferTo.publicLeg.departureStop : null;
         String legText = null;
         int iconResId;
         int requiredSecs = 0;
@@ -1307,25 +1310,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 throw new IllegalStateException("unknown type: " + leg.type);
             }
             legText = getString(textResId, leg.min, distanceStr, Formats.makeBreakableStationName(leg.arrival.uniqueShortName()));
-
-            if (leg.arrival.hasCoord()) {
-                mapView.setVisibility(View.VISIBLE);
-                mapView.setOnClickListener(v -> {
-                    setMapVisible(true);
-                    getMapView().zoomToStations(List.of(leg.arrival));
-                });
-                mapView.setOnLongClickListener(v -> {
-                    final PopupMenu popupMenu = new PopupMenu(TripDetailsActivity.this, v);
-                    StationContextMenu.prepareMapMenu(TripDetailsActivity.this, popupMenu.getMenu(), network, leg.arrival);
-                    popupMenu.setOnMenuItemClickListener(item -> {
-                        setMapVisible(true);
-                        getMapView().zoomToStations(List.of(leg.arrival));
-                        return true;
-                    });
-                    popupMenu.show();
-                    return true;
-                });
-            }
         } else if (legC.transferFrom != null) {
             // no time walk after some public transport
             iconResId = R.drawable.ic_directions_walk_grey600_24dp;
@@ -1334,12 +1318,40 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             iconResId = 0;
         }
 
+        final Location transferFromLocation = transferFrom == null ? null : transferFrom.location;
+        final Location transferToLocation = transferTo == null ? null : transferTo.location;
+        if (transferFromLocation != null || transferToLocation != null) {
+            final List<Location> mapBoundingLocations = new ArrayList<>();
+            if (transferFromLocation != null && transferFromLocation.hasCoord())
+                mapBoundingLocations.add(transferFromLocation);
+            if (transferToLocation != null && transferToLocation.hasCoord())
+                mapBoundingLocations.add(transferToLocation);
+            mapView.setVisibility(View.VISIBLE);
+            mapView.setOnClickListener(v -> {
+                setMapVisible(true);
+                getMapView().zoomToStations(mapBoundingLocations);
+            });
+            final View.OnLongClickListener onLongClickListener = v -> {
+                final PopupMenu popupMenu = new PopupMenu(TripDetailsActivity.this, v);
+                StationContextMenu.prepareMapMenu(TripDetailsActivity.this, popupMenu.getMenu(),
+                        network, transferToLocation != null ? transferToLocation : transferFromLocation);
+                popupMenu.setOnMenuItemClickListener(item -> {
+                    setMapVisible(true);
+                    getMapView().zoomToStations(mapBoundingLocations);
+                    return true;
+                });
+                PopupHelper.setForceShowIcon(popupMenu);
+                popupMenu.show();
+                return true;
+            };
+            mapView.setOnLongClickListener(onLongClickListener);
+            row.setOnLongClickListener(onLongClickListener);
+        }
+
         String transferText = null;
         String timeText = null;
         boolean timeIsCritical = false;
         boolean isSamePlatform = false;
-        final Stop transferFrom = legC.transferFrom != null ? legC.transferFrom.publicLeg.arrivalStop : null;
-        final Stop transferTo = legC.transferTo != null ? legC.transferTo.publicLeg.departureStop : null;
         if (transferFrom == null) {
             // walk at the beginning
         } else if (transferTo == null) {

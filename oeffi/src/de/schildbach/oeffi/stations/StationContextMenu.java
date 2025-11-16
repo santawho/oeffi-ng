@@ -152,6 +152,18 @@ public class StationContextMenu extends PopupMenu {
         new MenuInflater(context).inflate(R.menu.station_map_context, menu);
         final MenuItem mapsItemInternal = menu.findItem(R.id.station_map_context_maps_internal);
         final MenuItem mapsItemExternal = menu.findItem(R.id.station_map_context_maps_external);
+        final MenuItem mapsItemInfoUrl = menu.findItem(R.id.station_map_context_info_url);
+
+        final String infoUrl = location.infoUrl;
+        if (infoUrl != null) {
+            mapsItemInfoUrl.setVisible(true);
+            mapsItemInfoUrl.setOnMenuItemClickListener(item -> {
+                context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(infoUrl)));
+                return true;
+            });
+        } else {
+            mapsItemInfoUrl.setVisible(false);
+        }
 
         if (location.hasCoord()) {
             final double lat = location.getLatAsDouble();

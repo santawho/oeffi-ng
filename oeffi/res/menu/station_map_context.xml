@@ -14,5 +14,11 @@
         android:title="@string/map_dialog_maps_external"
         android:icon="@drawable/ic_open_ext_black_24dp"
         android:iconTint="#757575" />
+    <item
+        android:id="@+id/station_map_context_info_url"
+        android:orderInCategory="1"
+        android:title="@string/station_context_infopage_title"
+        android:icon="@drawable/ic_info_grey600_24dp"
+        android:iconTint="#757575" />
 
 </menu>
