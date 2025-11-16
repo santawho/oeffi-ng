@@ -218,17 +218,17 @@ public class DirectionsActivity extends OeffiMainActivity implements
     private final ActivityResultLauncher<Void> pickContactFromLauncher =
             registerForActivityResult(new PickContact(), contentUri -> {
                 if (contentUri != null)
-                    resultPickContact(contentUri, viewFromLocation);
+                    resultPickContact(contentUri, viewFromLocation, null);
             });
     private final ActivityResultLauncher<Void> pickContactViaLauncher =
             registerForActivityResult(new PickContact(), contentUri -> {
                 if (contentUri != null)
-                    resultPickContact(contentUri, viewViaLocation);
+                    resultPickContact(contentUri, viewViaLocation, null);
             });
     private final ActivityResultLauncher<Void> pickContactToLauncher =
             registerForActivityResult(new PickContact(), contentUri -> {
                 if (contentUri != null)
-                    resultPickContact(contentUri, viewToLocation);
+                    resultPickContact(contentUri, viewToLocation, this::handleAutoGo);
             });
     private final ActivityResultLauncher<NetworkId> pickStationFromLauncher =
             registerForActivityResult(new FavoriteStationsActivity.PickFavoriteStation(), contentUri -> {
@@ -751,9 +751,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         expandForm(haveNonDefaultProducts || viewViaLocation.getText() != null);
 
         if (command != null) {
-            final AutoCompleteLocationsHandler autoCompleteLocationsHandler = new AutoCompleteLocationsHandler(
-                    this, network, backgroundHandler,
-                    getProductToggles());
+            final AutoCompleteLocationsHandler autoCompleteLocationsHandler = createAutoCompleteLocationsHandler();
             autoCompleteLocationsHandler.addJob(command.fromText, viewFromLocation);
             autoCompleteLocationsHandler.addJob(command.toText, viewToLocation);
             autoCompleteLocationsHandler.addJob(command.viaText, viewViaLocation);
@@ -896,6 +894,11 @@ public class DirectionsActivity extends OeffiMainActivity implements
         viewViaLocation.setAdapter(new AutoCompleteLocationAdapter(viewViaLocation, network));
         viewToLocation.setAdapter(new AutoCompleteLocationAdapter(viewToLocation, network));
         resetLocationViewsBehaviour();
+    }
+
+    private AutoCompleteLocationsHandler createAutoCompleteLocationsHandler() {
+        return new AutoCompleteLocationsHandler(this, network, backgroundHandler,
+                getProductToggles());
     }
 
     private void resetLocationViewsBehaviour() {
@@ -1494,14 +1497,22 @@ public class DirectionsActivity extends OeffiMainActivity implements
         backgroundHandler.post(queryTripsRunnable);
     }
 
-    private void resultPickContact(final Uri contentUri, final LocationView targetLocationView) {
+    private void resultPickContact(final Uri contentUri, final LocationView targetLocationView, final Runnable onSuccess) {
         final Cursor c = managedQuery(contentUri, null, null, null, null);
         if (c.moveToFirst()) {
             final String data = c
-                    .getString(c.getColumnIndexOrThrow(CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS));
-            final Location location = new Location(LocationType.ADDRESS, null, null, data.replace("\n", " "));
-            targetLocationView.setLocation(location);
-            log.info("Picked {} from contacts", location);
+                    .getString(c.getColumnIndexOrThrow(CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS))
+                    .replace("\n", " ");
+            log.info("Picked from contacts: {}", data);
+            // old code: targetLocationView.setLocation(new Location(LocationType.ADDRESS, null, null, data));
+            final AutoCompleteLocationsHandler autoCompleteLocationsHandler = createAutoCompleteLocationsHandler();
+            autoCompleteLocationsHandler.addJob(data, targetLocationView);
+            autoCompleteLocationsHandler.start(result -> {
+                if (result.success) {
+                    if (onSuccess != null)
+                        onSuccess.run();
+                }
+            });
             requestFocusFirst();
         }
     }

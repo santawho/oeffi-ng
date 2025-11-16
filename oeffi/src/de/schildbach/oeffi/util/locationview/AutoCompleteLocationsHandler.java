@@ -94,7 +94,7 @@ public class AutoCompleteLocationsHandler {
         int numLocationsChecked = 0;
         int bestMatchNumProducts = 0;
         Location bestMatchLocation = null;
-        for (Location location : locations) {
+        for (final Location location : locations) {
             final Set<Product> locationProducts = location.products;
             if (locationProducts == null) {
                 // no products, then this location was maybe loaded from the history database
@@ -103,11 +103,11 @@ public class AutoCompleteLocationsHandler {
                 break;
             }
             int numMatches = 0;
-            for (Product preferredProduct : preferredProducts) {
+            for (final Product preferredProduct : preferredProducts) {
                 if (locationProducts.contains(preferredProduct))
                     numMatches += 1;
             }
-            if (numMatches > bestMatchNumProducts) {
+            if (bestMatchLocation == null || numMatches > bestMatchNumProducts) {
                 bestMatchLocation = location;
                 bestMatchNumProducts = numMatches;
             }
@@ -133,7 +133,7 @@ public class AutoCompleteLocationsHandler {
                 });
         progressDialog.setCanceledOnTouchOutside(false);
 
-        for (Runnable job : jobs)
+        for (final Runnable job : jobs)
             handler.post(job);
     }
 
