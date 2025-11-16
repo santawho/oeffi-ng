@@ -2,6 +2,9 @@ package de.schildbach.oeffi.util.locationview;
 
 import android.database.Cursor;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.util.AbstractSet;
 import java.util.ArrayList;
@@ -22,6 +25,8 @@ import de.schildbach.pte.dto.Point;
 import de.schildbach.pte.dto.SuggestLocationsResult;
 
 public class LocationSuggestionsCollector {
+    private static final Logger log = LoggerFactory.getLogger(LocationSuggestionsCollector.class);
+
     public static List<Location> collectSuggestions(
             final CharSequence constraint,
             final AbstractSet<LocationType> suggestedLocationTypes,
@@ -49,6 +54,9 @@ public class LocationSuggestionsCollector {
                             .appendQueryParameter(QueryHistoryProvider.QUERY_PARAM_Q, constraintStr)
                             .build(),
                     null, null, null, QueryHistoryProvider.KEY_LAST_QUERIED + " DESC");
+
+            if (cursor == null)
+                return results;
 
             final int fromTypeC = cursor.getColumnIndexOrThrow(QueryHistoryProvider.KEY_FROM_TYPE);
             final int fromIdC = cursor.getColumnIndexOrThrow(QueryHistoryProvider.KEY_FROM_ID);
@@ -110,7 +118,7 @@ public class LocationSuggestionsCollector {
                         .suggestLocations(constraint, suggestedLocationTypes, maxLocations);
                 if (suggestLocationsResult.status == SuggestLocationsResult.Status.OK) {
                     final List<Location> foundLocations = suggestLocationsResult.getLocations();
-                    for (Location location : foundLocations) {
+                    for (final Location location : foundLocations) {
                         if (!results.contains(location))
                             results.add(location);
                     }
@@ -118,7 +126,7 @@ public class LocationSuggestionsCollector {
             }
 
             final List<Location> filteredResults = new ArrayList<>();
-            for (Location location : results) {
+            for (final Location location : results) {
                 boolean use = false;
                 switch (location.type) {
                     case STATION: use = selectStations; break;
@@ -133,8 +141,8 @@ public class LocationSuggestionsCollector {
                 return filteredResults;
 
             return results;
-        } catch (final IOException x) {
-            x.printStackTrace();
+        } catch (final IOException ioe) {
+            log.error("collectSuggestions failed", ioe);
             return null;
         }
     }
