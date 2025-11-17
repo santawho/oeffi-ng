@@ -53,8 +53,11 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.DatePicker;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.TimePicker;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -1022,7 +1025,14 @@ public class DirectionsActivity extends OeffiMainActivity implements
             calendar.set(Calendar.DAY_OF_MONTH, day1);
             time = new TimeSpec.Absolute(time.depArr, calendar.getTimeInMillis());
             updateGUI();
-        }, year, month, day).show();
+        }, year, month, day) {
+            @Override
+            public void onDateChanged(@NonNull final DatePicker view, final int year, final int month, final int dayOfMonth) {
+                super.onDateChanged(view, year, month, dayOfMonth);
+                onClick(this, BUTTON_POSITIVE);
+                dismiss();
+            }
+        }.show();
     };
 
     private final OnClickListener timeClickListener = v -> {
@@ -1035,7 +1045,16 @@ public class DirectionsActivity extends OeffiMainActivity implements
             calendar.set(Calendar.MINUTE, minute1);
             time = new TimeSpec.Absolute(time.depArr, calendar.getTimeInMillis());
             updateGUI();
-        }, hour, minute, DateFormat.is24HourFormat(DirectionsActivity.this)).show();
+        }, hour, minute, DateFormat.is24HourFormat(DirectionsActivity.this)) {
+            @Override
+            public void onTimeChanged(final TimePicker view, final int newHourOfDay, final int newMinute) {
+                super.onTimeChanged(view, newHourOfDay, newMinute);
+                if (newMinute != minute) {
+                    onClick(this, BUTTON_POSITIVE);
+                    dismiss();
+                }
+            }
+        }.show();
     };
 
     private Calendar getTimePickerCalendar() {
