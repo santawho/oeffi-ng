@@ -34,9 +34,6 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,7 +42,6 @@ import java.util.List;
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.ColorHash;
-import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.pte.NetworkId;
@@ -58,8 +54,6 @@ public class LocationSelector extends LinearLayout implements
         void onLocationSequenceSelected(List<Location> locations, boolean isLongHold, final boolean isTwoFingersTap, View lastView);
         void onSingleLocationContextOperation(Location location, boolean isLongHold, View selectedView);
     }
-
-    private static final Logger log = LoggerFactory.getLogger(LocationSelector.class);
 
     private static final ColorHash colorHashLightMode = new ColorHash(
             Arrays.asList(0.25, 0.32, 0.39, 0.45, 0.49), // available lightness values
@@ -168,7 +162,7 @@ public class LocationSelector extends LinearLayout implements
         numColumns = DEFAULT_NUM_COLUMNS;
         try {
             longHoldTime = Long.parseLong(prefs.getString(PREFS_LONGHOLDTIME, Long.toString(DEFAULT_LONG_HOLD_TIME)));
-        } catch (Exception e) {
+        } catch (final Exception e) {
             longHoldTime = DEFAULT_LONG_HOLD_TIME;
         }
         useLongHoldMenu = prefs.getBoolean(PREFS_LONGHOLDMENU, true);
@@ -273,7 +267,7 @@ public class LocationSelector extends LinearLayout implements
         if (!stateIsChanged)
             return;
         final List<ItemData> itemDatas = new ArrayList<>();
-        for (Item item : availableItems) {
+        for (final Item item : availableItems) {
             if (item.itemData != null)
                 itemDatas.add(item.itemData);
         }
@@ -287,7 +281,7 @@ public class LocationSelector extends LinearLayout implements
     private Item getItemByLocation(final Location location) {
         if (location == null)
             return null;
-        for (Item item : availableItems) {
+        for (final Item item : availableItems) {
             final ItemData itemData = item.itemData;
             if (itemData != null) {
                 final Location itemLocation = itemData.location;
@@ -327,7 +321,7 @@ public class LocationSelector extends LinearLayout implements
         if (!isEnabled || location == null)
             return;
         Item oldestItem = null;
-        for (Item item : availableItems) {
+        for (final Item item : availableItems) {
             final ItemData itemData = item.itemData;
             if (itemData != null) {
                 final Location itemLocation = itemData.location;
@@ -361,7 +355,7 @@ public class LocationSelector extends LinearLayout implements
     public void removeLocation(final Location location) {
         if (!isEnabled)
             return;
-        for (Item item : availableItems) {
+        for (final Item item : availableItems) {
             final ItemData itemData = item.itemData;
             if (itemData != null) {
                 final Location itemLocation = itemData.location;
@@ -380,7 +374,7 @@ public class LocationSelector extends LinearLayout implements
         if (!isEnabled)
             return;
 
-        for (Item item : selectedItems) {
+        for (final Item item : selectedItems) {
             setItemBackground(item, BG_UNSELECTED);
         }
 
@@ -399,7 +393,6 @@ public class LocationSelector extends LinearLayout implements
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(final MotionEvent event) {
-//        log.debug(event.toString());
         final int action = event.getActionMasked();
         final float touchX = event.getX();
         final float touchY = event.getY();
@@ -465,7 +458,7 @@ public class LocationSelector extends LinearLayout implements
                     }
                 } else {
                     final List<Location> locations = new ArrayList<>();
-                    for (Item item : selectedItems) {
+                    for (final Item item : selectedItems) {
                         final Location location = item.itemData.location;
                         if (location != null)
                             locations.add(location);
@@ -508,7 +501,7 @@ public class LocationSelector extends LinearLayout implements
             } else {
                 if (prevItem != null && currItem.itemIndex != prevItem.itemIndex) {
                     timeEntered = now;
-                    for (Item item : selectedItems) {
+                    for (final Item item : selectedItems) {
                         if (item.itemIndex == currItem.itemIndex)
                             return true;
                     }
@@ -608,7 +601,7 @@ public class LocationSelector extends LinearLayout implements
         return item;
     }
 
-    private void setItemBackground(final Item item, int backgroundDrawableId) {
+    private void setItemBackground(final Item item, final int backgroundDrawableId) {
         item.textView.setBackground(getContext().getDrawable(backgroundDrawableId));
     }
 
@@ -618,7 +611,6 @@ public class LocationSelector extends LinearLayout implements
             final ColorHash colorHash = darkMode ? colorHashDarkMode : colorHashLightMode;
             textView.setText(Html.fromHtml(Formats.makeBreakableStationName(stationName), Html.FROM_HTML_MODE_COMPACT));
             final int color = isColorized ? colorHash.toARGB(stationName) : getResources().getColor(R.color.fg_significant);
-//            log.debug("\"{}\"  -->  #{}", stationName, String.format("%08x", color));
             textView.setTextColor(color);
             textView.setEnabled(true);
         } else {
