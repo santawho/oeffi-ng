@@ -28,7 +28,7 @@
 
     <string name="user_interface_category_directions_title">Verbindungen</string>
     <string name="user_interface_directions_time_and_go_bottom_enabled_title">Eingabe der Zeit und \"Los\" unten</string>
-    <string name="user_interface_directions_time_and_go_bottom_enabled_summary">Use old style. Show the time input and Go-button at the bottom. (erfordert Neustart)</string>
+    <string name="user_interface_directions_time_and_go_bottom_enabled_summary">Verwende das alte Aussehen. Zeigt die Eingabe der Zeit und den Los-Button unterhalb an. (erfordert Neustart)</string>
     <string name="user_interface_directions_autogo_enabled_title">Automatisches \"Los\"</string>
     <string name="user_interface_directions_autogo_enabled_summary">Starte die Verbindungssuche automatisch, wenn Start and Ziel eingegeben wurden</string>
 
