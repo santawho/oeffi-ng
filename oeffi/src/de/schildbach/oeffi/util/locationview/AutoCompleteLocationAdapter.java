@@ -110,7 +110,7 @@ public class AutoCompleteLocationAdapter extends BaseAdapter implements Filterab
     public void onFilterButtonClicked(final View clickedView) {
         final ImageButton filterButton = (ImageButton) clickedView;
         final int filterButtonId = filterButton.getId();
-        boolean filterOn;
+        final boolean filterOn;
         if (filterButtonId == R.id.location_view_filter_station) {
             filterOn = filterStations = !filterStations;
         } else if (filterButtonId == R.id.location_view_filter_address) {
