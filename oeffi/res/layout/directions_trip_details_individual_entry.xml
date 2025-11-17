@@ -18,7 +18,6 @@
             android:layout_marginTop="@dimen/text_padding_vertical_lax"
             android:layout_marginBottom="@dimen/text_padding_vertical_lax"
             android:paddingStart="@dimen/text_padding_horizontal_lax"
-            android:paddingEnd="@dimen/text_padding_horizontal_lax"
             android:orientation="vertical">
             <TextView
                 android:id="@+id/directions_trip_details_individual_entry_time_text"
@@ -42,8 +41,8 @@
             android:layout_gravity="center_vertical"
             android:layout_marginTop="@dimen/text_padding_vertical_lax"
             android:layout_marginBottom="@dimen/text_padding_vertical_lax"
-            android:paddingStart="0dp"
-            android:paddingEnd="@dimen/text_padding_horizontal_lax"/>
+            android:paddingStart="@dimen/text_padding_horizontal_lax"
+            android:tint="#757575" />
 
         <TextView
             android:id="@+id/directions_trip_details_individual_entry_text"
@@ -52,6 +51,7 @@
             android:layout_marginTop="@dimen/text_padding_vertical_lax"
             android:layout_marginBottom="@dimen/text_padding_vertical_lax"
             android:layout_weight="1"
+            android:paddingStart="@dimen/text_padding_horizontal_lax"
             android:textSize="@dimen/font_size_large" />
 
         <ImageButton

@@ -1315,7 +1315,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             iconResId = R.drawable.ic_directions_walk_grey600_24dp;
         } else {
             // walk before anything
-            iconResId = 0;
+            iconResId = R.drawable.ic_stopwatch_black_24;
         }
 
         final Location transferFromLocation = transferFrom == null ? null : transferFrom.location;
@@ -1354,6 +1354,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         boolean isSamePlatform = false;
         if (transferFrom == null) {
             // walk at the beginning
+            transferText = getString(R.string.directions_trip_details_start_at,
+                    Formats.makeBreakableStationName(transferTo.location.uniqueShortName()));
         } else if (transferTo == null) {
             // walk at the end
         } else {
@@ -1432,9 +1434,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 : legC.transferDetails.feasibilityProbability;
 
         String text =
-                  transferText == null ? legText
-                : legText == null ? transferText
-                : getString(R.string.directions_trip_conneval_with_transfer, transferText, legText);
+                transferText == null
+                        ? legText
+                        : legText == null
+                        ? transferText
+                        : getString(R.string.directions_trip_conneval_with_transfer, transferText, legText);
         if (text != null) {
             if (isSamePlatform)
                 text = getString(R.string.directions_trip_conneval_same_platform, text);
@@ -1454,12 +1458,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
 
         final ImageView iconView = row.findViewById(R.id.directions_trip_details_individual_entry_icon);
-        if (iconResId == 0) {
-            iconView.setVisibility(View.GONE);
-        } else {
-            iconView.setVisibility(View.VISIBLE);
-            iconView.setImageDrawable(getDrawable(iconResId));
-        }
+        iconView.setImageDrawable(getDrawable(iconResId));
 
         final View timeView = row.findViewById(R.id.directions_trip_details_individual_entry_time);
         if (timeText == null) {

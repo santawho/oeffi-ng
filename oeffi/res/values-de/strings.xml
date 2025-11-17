@@ -322,6 +322,7 @@
 
     <!-- directions trip details -->
     <string name="directions_trip_details_not_travelable">Nicht durchführbar</string>
+    <string name="directions_trip_details_start_at">Beginn der Reise in &lt;b>%1$s&lt;/b></string>
     <string name="directions_trip_details_finished">Beendet</string>
     <string name="directions_trip_details_duration">Dauer %s</string>
     <string name="directions_trip_details_num_changes">%d Umst.</string>
