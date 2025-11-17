@@ -269,9 +269,11 @@ public class TripRenderer {
                 arrivalStop = new Stop(
                         arrivalStop.location,
                         arrivalStopPlannedArrivalTime,
-                        new PTDate(
-                                arrivalStopPlannedArrivalTime.getTime() + delayAtRefPoint,
-                                arrivalStopPlannedArrivalTime.getOffset()),
+                        delayedArrival
+                                ? new PTDate(
+                                    arrivalStopPlannedArrivalTime.getTime() + delayAtRefPoint,
+                                    arrivalStopPlannedArrivalTime.getOffset())
+                                : arrivalStop.predictedArrivalTime,
                         arrivalStop.plannedArrivalPosition, arrivalStop.predictedArrivalPosition,
                         arrivalStop.arrivalCancelled,
                         arrivalStop.plannedDepartureTime, arrivalStop.predictedDepartureTime,

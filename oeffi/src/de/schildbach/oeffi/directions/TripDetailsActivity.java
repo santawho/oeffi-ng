@@ -2054,7 +2054,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             } else if (isShowCompactTimes) {
                 if (Math.abs(simulatedTime.getTime() - providedTime.getTime()) <= 175000) {
                     isShowSimulatedLine = false;
-                    stopTimeColor = R.color.fg_simulated;
+                    stopTimeColor = colorSimulated;
                 } else {
                     isShowSimulatedLine = true;
                 }
