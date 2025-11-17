@@ -85,7 +85,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         rc.isJourney = renderConfig.isJourney;
         rc.queryTripsRequestData = renderConfig.queryTripsRequestData;
         final Intent intent = buildStartIntent(contextActivity, network, trip, rc,
-                false, Page.ITINERARY, null, sameWindow);
+                false, Page.NEXT_EVENT, null, sameWindow);
         contextActivity.startActivity(intent);
         return true;
     }
