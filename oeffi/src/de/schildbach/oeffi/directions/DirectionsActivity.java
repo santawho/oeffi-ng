@@ -540,7 +540,11 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
             viewBike = findViewById(R.id.directions_option_bike);
 
-            viewTimeDepArr = findViewById(R.id.directions_time_dep_arr);
+            final boolean timeAndGoAtBottom = prefs.getBoolean("user_interface_directions_time_and_go_bottom_enabled", false);
+            final ViewGroup timeAndGo = findViewById(timeAndGoAtBottom ? R.id.time_and_go_bottom : R.id.time_and_go_top);
+            timeAndGo.setVisibility(View.VISIBLE);
+
+            viewTimeDepArr = timeAndGo.findViewById(R.id.directions_time_dep_arr);
             viewTimeDepArr.setOnClickListener(v -> {
                 final DialogBuilder builder = DialogBuilder.get(DirectionsActivity.this);
                 builder.setTitle(R.string.directions_set_time_prompt);
@@ -566,10 +570,10 @@ public class DirectionsActivity extends OeffiMainActivity implements
                 builder.show();
             });
 
-            viewTime1 = findViewById(R.id.directions_time_1);
-            viewTime2 = findViewById(R.id.directions_time_2);
+            viewTime1 = timeAndGo.findViewById(R.id.directions_time_1);
+            viewTime2 = timeAndGo.findViewById(R.id.directions_time_2);
 
-            viewGo = findViewById(R.id.directions_go);
+            viewGo = timeAndGo.findViewById(R.id.directions_go);
             viewGo.setOnClickListener(v -> handleGo());
 
             viewQueryHistoryList = findViewById(R.id.directions_query_history_list);

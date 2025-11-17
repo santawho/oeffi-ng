@@ -32,6 +32,8 @@
     <string name="user_interface_results_noprovidercolors_enabled_summary">Use default colors for lines instead of network specific colors</string>
 
     <string name="user_interface_category_directions_title">Directions</string>
+    <string name="user_interface_directions_time_and_go_bottom_enabled_title">Time input and \"Go\" at bottom</string>
+    <string name="user_interface_directions_time_and_go_bottom_enabled_summary">Use old style. Show the time input and Go-button at the bottom. (requires restart)</string>
     <string name="user_interface_directions_autogo_enabled_title">Automatic \"Go\"</string>
     <string name="user_interface_directions_autogo_enabled_summary">Start directions search automatically when origin and destination have been entered</string>
 

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+
+    <HorizontalScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fillViewport="true"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true"
+            android:baselineAligned="true">
+
+            <Button
+                android:id="@+id/directions_time_dep_arr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/directions_time_arr_dep_description"
+                android:paddingLeft="@dimen/text_padding_horizontal_lax"
+                android:paddingRight="@dimen/text_padding_horizontal_lax"
+                android:singleLine="true" />
+
+            <Button
+                android:id="@+id/directions_time_1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/text_padding_horizontal_lax"
+                android:paddingRight="@dimen/text_padding_horizontal_lax"
+                android:singleLine="true" />
+
+            <Button
+                android:id="@+id/directions_time_2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/text_padding_horizontal_lax"
+                android:paddingRight="@dimen/text_padding_horizontal_lax"
+                android:singleLine="true" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <!-- stretch dummy -->
+    <Space
+        android:layout_width="0px"
+        android:layout_height="wrap_content"
+        android:layout_weight="1" />
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingVertical="@dimen/text_padding_vertical_cram"
+        android:paddingHorizontal="@dimen/text_padding_horizontal_cram">
+        <Button
+            android:id="@+id/directions_go"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:background="@drawable/btn_go"
+            android:textColor="#ffffff"
+            android:ellipsize="none"
+            android:minWidth="96dp"
+            android:paddingHorizontal="@dimen/text_padding_horizontal_cram"
+            android:singleLine="true"
+            android:text="@string/directions_go"
+            android:textSize="@dimen/font_size_xlarge"
+            android:textStyle="bold" />
+    </FrameLayout>
+</LinearLayout>

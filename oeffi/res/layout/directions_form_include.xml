@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:id="@+id/directions_form"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:divider="?android:attr/listDivider"
-    android:orientation="vertical"
     android:showDividers="middle">
+
+    <include layout="@layout/directions_form_time_and_go_include"
+        android:id="@+id/time_and_go_top"
+        android:visibility="gone" />
 
     <LinearLayout
         android:id="@+id/directions_form_location_group"
@@ -143,66 +147,9 @@
         android:text="@string/directions_option_bike"
         android:visibility="gone" />
 
-    <HorizontalScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fillViewport="true"
-        android:scrollbars="none">
-
-        <LinearLayout
-            style="?android:attr/buttonBarStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:animateLayoutChanges="true"
-            android:baselineAligned="true"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/directions_time_dep_arr"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/directions_time_arr_dep_description"
-                android:paddingLeft="@dimen/text_padding_horizontal_lax"
-                android:paddingRight="@dimen/text_padding_horizontal_lax"
-                android:singleLine="true" />
-
-            <Button
-                android:id="@+id/directions_time_1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="@dimen/text_padding_horizontal_lax"
-                android:paddingRight="@dimen/text_padding_horizontal_lax"
-                android:singleLine="true" />
-
-            <Button
-                android:id="@+id/directions_time_2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="@dimen/text_padding_horizontal_lax"
-                android:paddingRight="@dimen/text_padding_horizontal_lax"
-                android:singleLine="true" />
-
-            <!-- stretch dummy -->
-
-            <Space
-                android:layout_width="0px"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
-
-            <Button
-                android:id="@+id/directions_go"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:ellipsize="none"
-                android:minWidth="96dp"
-                android:paddingLeft="@dimen/text_padding_horizontal_lax"
-                android:paddingRight="@dimen/text_padding_horizontal_lax"
-                android:singleLine="true"
-                android:text="@string/directions_go"
-                android:textStyle="bold" />
-        </LinearLayout>
-    </HorizontalScrollView>
+    <include layout="@layout/directions_form_time_and_go_include"
+        android:id="@+id/time_and_go_bottom"
+        android:visibility="gone" />
 
     <de.schildbach.oeffi.directions.LocationSelector
         android:id="@+id/directions_location_selector"
