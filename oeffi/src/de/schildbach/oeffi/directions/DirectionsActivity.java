@@ -425,6 +425,8 @@ public class DirectionsActivity extends OeffiMainActivity implements
                     final DepArr depArr = DepArr.valueOf(parts[0]);
                     if (parts[1].equals("AT")) {
                         time = new TimeSpec.Absolute(depArr, time.timeInMillis());
+                        // and immediately ask for date and then time
+                        dateClicked();
                     } else if (parts[1].equals("IN")) {
                         if (parts.length > 2) {
                             time = new TimeSpec.Relative(depArr,
@@ -439,6 +441,20 @@ public class DirectionsActivity extends OeffiMainActivity implements
                     updateGUI();
                 });
                 builder.show();
+            });
+            viewTimeDepArr.setOnLongClickListener(v -> {
+                final boolean isSetToNow = time instanceof TimeSpec.Relative && ((TimeSpec.Relative) time).diffMs == 0;
+                if (isSetToNow) {
+                    // set to depart at ...
+                    time = new TimeSpec.Absolute(DepArr.DEPART, time.timeInMillis());
+                    //  ... and ask for time
+                    timeClicked();
+                } else {
+                    // revert to depart now
+                    time = new TimeSpec.Relative(DepArr.DEPART, 0);
+                }
+                updateGUI();
+                return true;
             });
 
             viewTime1 = timeAndGo.findViewById(R.id.directions_time_1);
@@ -894,10 +910,10 @@ public class DirectionsActivity extends OeffiMainActivity implements
             final long now = System.currentTimeMillis();
             final PTDate ptDatetime = PTDate.withUnknownLocationSpecificOffset(((TimeSpec.Absolute) time).timeMs);
             viewTime1.setVisibility(View.VISIBLE);
-            viewTime1.setOnClickListener(dateClickListener);
+            viewTime1.setOnClickListener(v -> dateClicked());
             viewTime1.setText(Formats.formatDate(timeZoneSelector, now, ptDatetime));
             viewTime2.setVisibility(View.VISIBLE);
-            viewTime2.setOnClickListener(timeClickListener);
+            viewTime2.setOnClickListener(v -> timeClicked());
             viewTime2.setText(Formats.formatTime(timeZoneSelector, ptDatetime));
         } else if (time instanceof TimeSpec.Relative) {
             final long diff = ((TimeSpec.Relative) time).diffMs;
@@ -909,7 +925,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         }
     }
 
-    private final OnClickListener dateClickListener = v -> {
+    private void dateClicked() {
         final Calendar calendar = getTimePickerCalendar();
         final int year = calendar.get(Calendar.YEAR);
         final int month = calendar.get(Calendar.MONTH);
@@ -921,6 +937,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             calendar.set(Calendar.DAY_OF_MONTH, day1);
             time = new TimeSpec.Absolute(time.depArr, calendar.getTimeInMillis());
             updateGUI();
+            timeClicked();
         }, year, month, day) {
             @Override
             public void onDateChanged(@NonNull final DatePicker view, final int year, final int month, final int dayOfMonth) {
@@ -931,7 +948,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         }.show();
     };
 
-    private final OnClickListener timeClickListener = v -> {
+    private void timeClicked() {
         final Calendar calendar = getTimePickerCalendar();
         final int hour = calendar.get(Calendar.HOUR_OF_DAY);
         final int minute = calendar.get(Calendar.MINUTE);
@@ -939,7 +956,13 @@ public class DirectionsActivity extends OeffiMainActivity implements
         new TimePickerDialog(DirectionsActivity.this, 0, (view, hour1, minute1) -> {
             calendar.set(Calendar.HOUR_OF_DAY, hour1);
             calendar.set(Calendar.MINUTE, minute1);
-            time = new TimeSpec.Absolute(time.depArr, calendar.getTimeInMillis());
+            long timeInMillis = calendar.getTimeInMillis();
+            if (timeInMillis - System.currentTimeMillis() < -3601000l) {
+                // time for today would be more than 1 hour in the past
+                // so it seems the user wants tomorrow, add 24h
+                timeInMillis += 24 * 3600000l;
+            }
+            time = new TimeSpec.Absolute(time.depArr, timeInMillis);
             updateGUI();
         }, hour, minute, DateFormat.is24HourFormat(DirectionsActivity.this)) {
             @Override
