@@ -47,6 +47,7 @@ import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GeocoderThread;
 import de.schildbach.oeffi.util.LocationHelper;
 import de.schildbach.oeffi.util.PopupHelper;
+import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.pte.LocationSearchProviderId;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
@@ -211,6 +212,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
                 locationType = LocationType.ANY;
                 id = null;
                 hint = null;
+                location = null;
                 updateAppearance();
 
                 locationHelper.stop();
@@ -437,15 +439,10 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         modeButton.setImageDrawable(res.getDrawable(drawableId));
 
         if (getText() == null) {
-            if (contextMenuItemClickListener == null) {
-                menuButton.setVisibility(View.GONE);
-            } else {
-                menuButton.setVisibility(View.VISIBLE);
-            }
+            ViewUtils.setVisibility(menuButton, contextMenuItemClickListener != null);
             clearButton.setVisibility(View.GONE);
         } else {
             menuButton.setVisibility(View.GONE);
-            clearButton.setVisibility(View.VISIBLE);
             clearButton.setVisibility(View.VISIBLE);
         }
 
