@@ -22,6 +22,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Process;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ViewAnimator;
@@ -40,16 +43,17 @@ import de.schildbach.oeffi.util.locationview.LocationView;
 import de.schildbach.oeffi.stations.list.FavoriteStationsAdapter;
 import de.schildbach.oeffi.stations.list.StationClickListener;
 import de.schildbach.oeffi.stations.list.StationContextMenuItemListener;
-import de.schildbach.oeffi.util.locationview.AutoCompleteLocationAdapter;
 import de.schildbach.oeffi.util.DividerItemDecoration;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Departure;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
+import de.schildbach.pte.dto.Product;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -85,6 +89,37 @@ public class FavoriteStationsActivity extends OeffiActivity
     private RecyclerView listView;
     private LocationView viewNewLocation;
     private FavoriteStationsAdapter adapter;
+    private HandlerThread backgroundThread;
+    private Handler backgroundHandler;
+
+    final LocationView.Listener locationListener = new LocationView.Listener() {
+        @Override
+        public NetworkId getNetwork() {
+            return network;
+        }
+
+        @Override
+        public Set<Product> getPreferredProducts() {
+            return getNetworkDefaultProducts();
+        }
+
+        @Override
+        public Handler getHandler() {
+            return backgroundHandler;
+        }
+
+        @Override
+        public void changed(final LocationView view) {
+            final Location location = viewNewLocation.getLocation();
+            if (location == null || location.coord == null)
+                return;
+
+            viewNewLocation.setVisibility(View.GONE);
+            viewNewLocation.reset();
+            onNewStationAdded(location);
+            updateGUI();
+        }
+    };
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -96,6 +131,10 @@ public class FavoriteStationsActivity extends OeffiActivity
             network = prefsGetNetworkId();
         else
             shouldReturnResult = true; // TODO a bit hacky
+
+        backgroundThread = new HandlerThread("FavoriteStations", Process.THREAD_PRIORITY_BACKGROUND);
+        backgroundThread.start();
+        backgroundHandler = new Handler(backgroundThread.getLooper());
 
         setContentView(R.layout.favorites_content);
         final View contentView = findViewById(android.R.id.content);
@@ -128,17 +167,13 @@ public class FavoriteStationsActivity extends OeffiActivity
         viewNewLocation = findViewById(R.id.favorites_new);
         viewNewLocation.setVisibility(View.GONE);
         viewNewLocation.setHint(R.string.stations_favorite_stations_add_location_hint);
-        viewNewLocation.setAdapter(new AutoCompleteLocationAdapter(viewNewLocation, network));
+        viewNewLocation.setListener(locationListener);
         viewNewLocation.setImeOptions(EditorInfo.IME_ACTION_GO);
         viewNewLocation.setOnEditorActionListener((v, actionId, event) -> {
             final Location location = viewNewLocation.getLocation();
             if (location == null || location.coord == null)
                 return false;
-
-            viewNewLocation.setVisibility(View.GONE);
-            viewNewLocation.reset();
-            onNewStationAdded(location);
-            updateGUI();
+            locationListener.changed(viewNewLocation);
             return true;
         });
 
@@ -149,6 +184,12 @@ public class FavoriteStationsActivity extends OeffiActivity
     protected void onResume() {
         super.onResume();
         resetAdapter();
+    }
+
+    @Override
+    protected void onDestroy() {
+        backgroundThread.getLooper().quit();
+        super.onDestroy();
     }
 
     private void resetAdapter() {

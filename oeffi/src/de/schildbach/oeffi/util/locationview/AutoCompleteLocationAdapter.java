@@ -128,6 +128,10 @@ public class AutoCompleteLocationAdapter extends BaseAdapter implements Filterab
         this.searchProviderId = searchProviderId;
     }
 
+    public LocationSearchProviderId getAlternateSearchProviderId() {
+        return searchProviderId;
+    }
+
     public class LocationFilter extends Filter {
         @Override
         protected FilterResults performFiltering(final CharSequence constraint) {

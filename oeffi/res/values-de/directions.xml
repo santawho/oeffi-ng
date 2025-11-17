@@ -5,6 +5,7 @@
     <string name="directions_location_context_contact">Adresse aus Kontakt</string>
     <string name="directions_location_context_favorite_station">Haltestellen-Favorit</string>
     <string name="directions_location_context_alternate_search">Alternative Suche verwenden</string>
+    <string name="directions_location_context_using_alternate_search">… mit %1$s</string>
     <string name="directions_products_prompt">Verkehrsmittel auswählen</string>
 
     <string-array name="directions_products">

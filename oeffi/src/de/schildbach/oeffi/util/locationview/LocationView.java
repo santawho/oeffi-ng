@@ -17,60 +17,88 @@
 
 package de.schildbach.oeffi.util.locationview;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Parcelable;
+import android.provider.ContactsContract;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView.OnEditorActionListener;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContract;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+
 import com.google.common.base.Strings;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.schildbach.oeffi.Constants;
+import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.network.LocationSearchProviderFactory;
+import de.schildbach.oeffi.stations.FavoriteStationsActivity;
+import de.schildbach.oeffi.stations.FavoriteStationsProvider;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GeocoderThread;
 import de.schildbach.oeffi.util.LocationHelper;
 import de.schildbach.oeffi.util.PopupHelper;
-import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.pte.LocationSearchProviderId;
+import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.Point;
+import de.schildbach.pte.dto.Product;
 
 import javax.annotation.Nullable;
 import java.util.Locale;
+import java.util.Set;
 
 public class LocationView extends LinearLayout implements LocationHelper.Callback {
     private static final Logger log = LoggerFactory.getLogger(LocationView.class);
 
     public interface Listener {
+        NetworkId getNetwork();
+        Set<Product> getPreferredProducts();
+        Handler getHandler();
         void changed(LocationView view);
     }
 
     private final Resources res;
     private final LocationHelper locationHelper;
 
-    private PopupMenu.OnMenuItemClickListener contextMenuItemClickListener;
     private Listener listener;
 
     private AutoCompleteTextView textView;
+    private ViewGroup typeButtons;
     private ImageButton menuButton;
+    private ImageButton contactButton;
+    private ImageButton currentLocationButton;
+    private ImageButton favoriteStationButton;
+    private ImageButton alternateSearchButton;
     private ImageButton clearButton;
     private ImageButton modeButton;
     private AutoCompleteLocationAdapter autoCompleteLocationAdapter;
@@ -109,12 +137,26 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         this.stationAsAddressEnabled = stationAsAddressEnabled;
     }
 
+    public void toggleAlternateSearchProviderNominatim() {
+        final LocationSearchProviderId currentProvider = autoCompleteLocationAdapter.getAlternateSearchProviderId();
+        setAlternateSearchProvider(currentProvider != LocationSearchProviderId.Nominamtim
+                ? LocationSearchProviderId.Nominamtim : null);
+    }
+
     public void setAlternateSearchProvider(final LocationSearchProviderId searchProviderId) {
         if (autoCompleteLocationAdapter != null)
             autoCompleteLocationAdapter.setAlternateSearchProvider(searchProviderId);
+
+        if (searchProviderId == null) {
+            hint = null;
+        } else {
+            final String name = LocationSearchProviderFactory.provider(searchProviderId).getDescription().getName();
+            hint = getContext().getString(R.string.directions_location_context_using_alternate_search, name);
+        }
+        updateAppearance();
     }
 
-    public void clearAlternateSearchProvider() {
+    public void resetBehaviour() {
         setAlternateSearchProvider(null);
     }
 
@@ -220,14 +262,37 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         };
         textView.addTextChangedListener(textChangedListener);
 
+        typeButtons = findViewById(R.id.location_view_type_buttons);
         menuButton = findViewById(R.id.location_view_menu_button);
+        contactButton = findViewById(R.id.location_view_contact_button);
+        alternateSearchButton = findViewById(R.id.location_view_alternate_search_button);
+        favoriteStationButton = findViewById(R.id.location_view_favorite_station_button);
+        currentLocationButton = findViewById(R.id.location_view_current_location_button);
         menuButton.setOnClickListener((view) -> {
             final PopupMenu popupMenu = new PopupMenu(getContext(), view);
             popupMenu.inflate(R.menu.directions_location_context);
             PopupHelper.setForceShowIcon(popupMenu);
-            popupMenu.setOnMenuItemClickListener(contextMenuItemClickListener);
+            popupMenu.setOnMenuItemClickListener(item -> {
+                final int itemId = item.getItemId();
+                if (itemId == R.id.directions_location_current_location)
+                    setToCurrentLocation();
+                else if (itemId == R.id.directions_location_contact)
+                    selectFromContacts();
+                else if (itemId == R.id.directions_location_favorite_station)
+                    selectFromFavoriteStation();
+                else if (itemId == R.id.directions_location_alternate_search)
+                    toggleAlternateSearchProviderNominatim();
+                else
+                    return false;
+                return true;
+            });
             popupMenu.show();
         });
+        contactButton.setOnClickListener(v -> selectFromContacts());
+        favoriteStationButton.setOnClickListener(v -> selectFromFavoriteStation());
+        currentLocationButton.setOnClickListener(v -> setToCurrentLocation());
+        alternateSearchButton.setOnClickListener(v -> toggleAlternateSearchProviderNominatim());
+
 
         clearButton = findViewById(R.id.location_view_clear_button);
         clearButton.setOnClickListener((view) -> {
@@ -247,6 +312,77 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         setEnabled(isEnabled());
     }
 
+    private final ActivityResultLauncher<String> requestLocationPermissionLauncher =
+            getActivity().registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
+                if (granted)
+                    acquireLocation();
+            });
+    private static class PickContact extends ActivityResultContract<Void, Uri> {
+        @NonNull
+        @Override
+        public Intent createIntent(@NonNull final Context context, final Void unused) {
+            return new Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_URI);
+        }
+
+        @Override
+        public Uri parseResult(final int resultCode, @Nullable final Intent intent) {
+            if (resultCode == Activity.RESULT_OK && intent != null)
+                return intent.getData();
+            else
+                return null;
+        }
+    }
+    private final ActivityResultLauncher<Void> pickContactLauncher =
+            getActivity().registerForActivityResult(new PickContact(), contentUri -> {
+                if (contentUri == null)
+                    return;
+                final Cursor c = getActivity().managedQuery(contentUri, null, null, null, null);
+                if (c.moveToFirst()) {
+                    final String data = c
+                            .getString(c.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS))
+                            .replace("\n", " ");
+                    log.info("Picked from contacts: {}", data);
+                    // old code: targetLocationView.setLocation(new Location(LocationType.ADDRESS, null, null, data));
+                    final AutoCompleteLocationsHandler autoCompleteLocationsHandler = new AutoCompleteLocationsHandler(
+                            getActivity(),
+                            listener.getNetwork(), listener.getHandler(), listener.getPreferredProducts());
+                    autoCompleteLocationsHandler.addJob(data, this);
+                    autoCompleteLocationsHandler.start(result -> {
+                        if (result.success)
+                            fireChanged();
+                    });
+                }
+            });
+    private final ActivityResultLauncher<NetworkId> pickStationLauncher =
+            getActivity().registerForActivityResult(new FavoriteStationsActivity.PickFavoriteStation(), contentUri -> {
+                if (contentUri == null)
+                    return;
+                final Cursor c = getActivity().managedQuery(contentUri, null, null, null, null);
+                if (c.moveToFirst()) {
+                    final Location location = FavoriteStationsProvider.getLocation(c);
+                    log.info("Picked {} from station favorites", location);
+                    setLocation(location);
+                }
+            });
+
+    private void setToCurrentLocation() {
+        if (ContextCompat.checkSelfPermission(getContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+            acquireLocation();
+        else
+            requestLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+    }
+
+    private void selectFromContacts() {
+        pickContactLauncher.launch(null);
+    }
+
+    private void selectFromFavoriteStation() {
+        final NetworkId network = listener.getNetwork();
+        if (network != null)
+            pickStationLauncher.launch(network);
+    }
+
     @Override
     public void setEnabled(final boolean enabled) {
         super.setEnabled(enabled);
@@ -256,6 +392,14 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         }
         if (menuButton != null)
             menuButton.setEnabled(enabled);
+        if (contactButton != null)
+            contactButton.setEnabled(enabled);
+        if (alternateSearchButton != null)
+            alternateSearchButton.setEnabled(enabled);
+        if (favoriteStationButton != null)
+            favoriteStationButton.setEnabled(enabled);
+        if (currentLocationButton != null)
+            currentLocationButton.setEnabled(enabled);
         if (clearButton != null)
             clearButton.setEnabled(enabled);
     }
@@ -279,13 +423,9 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         updateAppearance();
     }
 
-    public void setAdapter(final AutoCompleteLocationAdapter autoCompleteAdapter) {
+    private void setAdapter(final AutoCompleteLocationAdapter autoCompleteAdapter) {
         this.autoCompleteLocationAdapter = autoCompleteAdapter;
         textView.setAdapter(autoCompleteAdapter);
-    }
-
-    public AutoCompleteLocationAdapter getAutoCompleteLocationAdapter() {
-        return autoCompleteLocationAdapter;
     }
 
     public void setImeOptions(final int imeOptions) {
@@ -296,12 +436,9 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         textView.setOnEditorActionListener(onEditorActionListener);
     }
 
-    public void setContextMenuItemClickListener(final PopupMenu.OnMenuItemClickListener contextMenuItemClickListener) {
-        this.contextMenuItemClickListener = contextMenuItemClickListener;
-    }
-
     public void setListener(final Listener listener) {
         this.listener = listener;
+        setAdapter(new AutoCompleteLocationAdapter(this, listener.getNetwork()));
     }
 
     public void acquireLocation() {
@@ -349,7 +486,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         setText(null);
         hint = null;
         autoCompleteLocationAdapter.resetFilters();
-        clearAlternateSearchProvider();
+        resetBehaviour();
         updateAppearance();
         fireChanged();
 
@@ -439,10 +576,10 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         modeButton.setImageDrawable(res.getDrawable(drawableId));
 
         if (getText() == null) {
-            ViewUtils.setVisibility(menuButton, contextMenuItemClickListener != null);
+            typeButtons.setVisibility(View.VISIBLE);
             clearButton.setVisibility(View.GONE);
         } else {
-            menuButton.setVisibility(View.GONE);
+            typeButtons.setVisibility(View.GONE);
             clearButton.setVisibility(View.VISIBLE);
         }
 
@@ -525,7 +662,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
             throw new IllegalStateException("cannot handle: " + locationType);
     }
 
-    public Activity getActivity() {
-        return (Activity) getContext();
+    public OeffiActivity getActivity() {
+        return (OeffiActivity) getContext();
     }
 }

@@ -6,6 +6,7 @@
     <string name="directions_location_context_contact">Contact address</string>
     <string name="directions_location_context_favorite_station">Favorite station</string>
     <string name="directions_location_context_alternate_search">Use alternate search</string>
+    <string name="directions_location_context_using_alternate_search">… using %1$s</string>
     <string name="directions_products_prompt">Pick means of transport</string>
 
     <string-array name="directions_products">

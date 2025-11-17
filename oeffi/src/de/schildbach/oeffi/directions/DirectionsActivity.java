@@ -17,9 +17,7 @@
 
 package de.schildbach.oeffi.directions;
 
-import android.Manifest;
 import android.animation.LayoutTransition;
-import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
@@ -28,8 +26,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
@@ -37,14 +33,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
-import android.provider.ContactsContract.CommonDataKinds;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.view.KeyEvent;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
@@ -58,12 +52,8 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContract;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -83,14 +73,12 @@ import de.schildbach.oeffi.directions.list.QueryHistoryClickListener;
 import de.schildbach.oeffi.directions.list.QueryHistoryContextMenuItemListener;
 import de.schildbach.oeffi.network.NetworkPickerActivity;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
-import de.schildbach.oeffi.stations.FavoriteStationsActivity;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
 import de.schildbach.oeffi.stations.FavoriteUtils;
 import de.schildbach.oeffi.stations.StationContextMenu;
 import de.schildbach.oeffi.stations.StationDetailsActivity;
 import de.schildbach.oeffi.stations.StationsActivity;
 import de.schildbach.oeffi.util.ViewUtils;
-import de.schildbach.oeffi.util.locationview.AutoCompleteLocationAdapter;
 import de.schildbach.oeffi.util.locationview.AutoCompleteLocationsHandler;
 import de.schildbach.oeffi.util.ConnectivityBroadcastReceiver;
 import de.schildbach.oeffi.util.DialogBuilder;
@@ -103,7 +91,6 @@ import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.oeffi.util.locationview.LocationTextView;
 import de.schildbach.oeffi.util.locationview.LocationView;
-import de.schildbach.pte.LocationSearchProviderId;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.NetworkProvider.Capability;
@@ -187,68 +174,6 @@ public class DirectionsActivity extends OeffiMainActivity implements
     private static final String INTENT_EXTRA_COMMAND = DirectionsActivity.class.getName() + ".command";
     private static final String INTENT_EXTRA_RENDERCONFIG = DirectionsActivity.class.getName() + ".config";
 
-    private static class PickContact extends ActivityResultContract<Void, Uri> {
-        @NonNull
-        @Override
-        public Intent createIntent(@NonNull final Context context, final Void unused) {
-            return new Intent(Intent.ACTION_PICK, CommonDataKinds.StructuredPostal.CONTENT_URI);
-        }
-
-        @Override
-        public Uri parseResult(final int resultCode, @Nullable final Intent intent) {
-            if (resultCode == Activity.RESULT_OK && intent != null)
-                return intent.getData();
-            else
-                return null;
-        }
-    }
-
-    private final ActivityResultLauncher<String> requestLocationPermissionFromLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
-                if (granted)
-                    viewFromLocation.acquireLocation();
-            });
-    private final ActivityResultLauncher<String> requestLocationPermissionViaLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
-                if (granted)
-                    viewViaLocation.acquireLocation();
-            });
-    private final ActivityResultLauncher<String> requestLocationPermissionToLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
-                if (granted)
-                    viewToLocation.acquireLocation();
-            });
-    private final ActivityResultLauncher<Void> pickContactFromLauncher =
-            registerForActivityResult(new PickContact(), contentUri -> {
-                if (contentUri != null)
-                    resultPickContact(contentUri, viewFromLocation, null);
-            });
-    private final ActivityResultLauncher<Void> pickContactViaLauncher =
-            registerForActivityResult(new PickContact(), contentUri -> {
-                if (contentUri != null)
-                    resultPickContact(contentUri, viewViaLocation, null);
-            });
-    private final ActivityResultLauncher<Void> pickContactToLauncher =
-            registerForActivityResult(new PickContact(), contentUri -> {
-                if (contentUri != null)
-                    resultPickContact(contentUri, viewToLocation, this::handleAutoGo);
-            });
-    private final ActivityResultLauncher<NetworkId> pickStationFromLauncher =
-            registerForActivityResult(new FavoriteStationsActivity.PickFavoriteStation(), contentUri -> {
-                if (contentUri != null)
-                    resultPickStation(contentUri, viewFromLocation);
-            });
-    private final ActivityResultLauncher<NetworkId> pickStationViaLauncher =
-            registerForActivityResult(new FavoriteStationsActivity.PickFavoriteStation(), contentUri -> {
-                if (contentUri != null)
-                    resultPickStation(contentUri, viewViaLocation);
-            });
-    private final ActivityResultLauncher<NetworkId> pickStationToLauncher =
-            registerForActivityResult(new FavoriteStationsActivity.PickFavoriteStation(), contentUri -> {
-                if (contentUri != null)
-                    resultPickStation(contentUri, viewToLocation);
-            });
-
     public static Location EMPTY_LOCATION = new Location(LocationType.ANY, null, null, null, null);
 
     private static boolean isEmptyLocation(final Location location) {
@@ -303,45 +228,6 @@ public class DirectionsActivity extends OeffiMainActivity implements
             return new Intent(context, DirectionsActivity.class);
         }
         return null;
-    }
-
-    private class LocationContextMenuItemClickListener implements PopupMenu.OnMenuItemClickListener {
-        private final LocationView locationView;
-        private final ActivityResultLauncher<String> requestLocationPermissionLauncher;
-        private final ActivityResultLauncher<Void> pickContactLauncher;
-        private final ActivityResultLauncher<NetworkId> pickStationLauncher;
-
-        public LocationContextMenuItemClickListener(final LocationView locationView,
-                final ActivityResultLauncher<String> requestLocationPermissionLauncher,
-                final ActivityResultLauncher<Void> pickContactLauncher, final ActivityResultLauncher<NetworkId> pickStationLauncher) {
-            this.locationView = locationView;
-            this.requestLocationPermissionLauncher = requestLocationPermissionLauncher;
-            this.pickContactLauncher = pickContactLauncher;
-            this.pickStationLauncher = pickStationLauncher;
-        }
-
-        public boolean onMenuItemClick(final MenuItem item) {
-            if (item.getItemId() == R.id.directions_location_current_location) {
-                if (ContextCompat.checkSelfPermission(DirectionsActivity.this,
-                        Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-                    locationView.acquireLocation();
-                else
-                    requestLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
-                return true;
-            } else if (item.getItemId() == R.id.directions_location_contact) {
-                pickContactLauncher.launch(null);
-                return true;
-            } else if (item.getItemId() == R.id.directions_location_favorite_station) {
-                if (network != null)
-                    pickStationLauncher.launch(network);
-                return true;
-            } else if (item.getItemId() == R.id.directions_location_alternate_search) {
-                locationView.setAlternateSearchProvider(LocationSearchProviderId.Nominamtim);
-                return true;
-            } else {
-                return false;
-            }
-        }
     }
 
     @Override
@@ -452,26 +338,13 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
             initLayoutTransitions();
 
-            final LocationView.Listener locationChangeListener = (view) -> {
-                updateMap();
-                queryHistoryListAdapter.clearSelectedEntry();
-                requestFocusFirst();
-            };
-
             viewFromLocation = findViewById(R.id.directions_from);
-            viewFromLocation.setListener(locationChangeListener);
-            viewFromLocation.setContextMenuItemClickListener(new LocationContextMenuItemClickListener(viewFromLocation,
-                    requestLocationPermissionFromLauncher, pickContactFromLauncher, pickStationFromLauncher));
             viewFromLocation.setEnabled(!renderConfig.isAlternativeConnectionSearch);
             viewFromLocation.setStationAsAddressEnabled(true);
 
             viewViaLocation = findViewById(R.id.directions_via);
-            viewViaLocation.setListener(locationChangeListener);
-            viewViaLocation.setContextMenuItemClickListener(new LocationContextMenuItemClickListener(viewViaLocation,
-                    requestLocationPermissionViaLauncher, pickContactViaLauncher, pickStationViaLauncher));
 
             viewToLocation = findViewById(R.id.directions_to);
-            viewToLocation.setListener(locationChangeListener);
             viewToLocation.setOnEditorActionListener((v, actionId, event) -> {
                 if (event == null || event.getAction() == KeyEvent.ACTION_DOWN) {
                     if (actionId == EditorInfo.IME_ACTION_GO) {
@@ -484,11 +357,9 @@ public class DirectionsActivity extends OeffiMainActivity implements
                 }
                 return false;
             });
-            viewToLocation.setContextMenuItemClickListener(new LocationContextMenuItemClickListener(viewToLocation,
-                    requestLocationPermissionToLauncher, pickContactToLauncher, pickStationToLauncher));
             viewToLocation.setStationAsAddressEnabled(true);
 
-            setupAutoCompleteLocationAdapters();
+            setupLocationViews();
 
             viewProducts = findViewById(R.id.directions_products);
             viewProductToggles.clear();
@@ -758,7 +629,9 @@ public class DirectionsActivity extends OeffiMainActivity implements
         expandForm(haveNonDefaultProducts || viewViaLocation.getText() != null);
 
         if (command != null) {
-            final AutoCompleteLocationsHandler autoCompleteLocationsHandler = createAutoCompleteLocationsHandler();
+            final AutoCompleteLocationsHandler autoCompleteLocationsHandler =
+                    new AutoCompleteLocationsHandler(this,
+                            network, backgroundHandler, getProductToggles());
             autoCompleteLocationsHandler.addJob(command.fromText, viewFromLocation);
             autoCompleteLocationsHandler.addJob(command.toText, viewToLocation);
             autoCompleteLocationsHandler.addJob(command.viaText, viewViaLocation);
@@ -872,11 +745,8 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
     @Override
     protected void onChangeNetwork(final NetworkId network) {
-        setupAutoCompleteLocationAdapters();
+        setupLocationViews();
 
-        // viewFromLocation.reset();
-        // viewViaLocation.reset();
-        // viewToLocation.reset();
         viewFromLocation.convertToGeoLocation(true, true);
         viewViaLocation.convertToGeoLocation(true, true);
         viewToLocation.convertToGeoLocation(true, true);
@@ -896,22 +766,42 @@ public class DirectionsActivity extends OeffiMainActivity implements
         setActionBarSecondaryTitleFromNetwork();
     }
 
-    private void setupAutoCompleteLocationAdapters() {
-        viewFromLocation.setAdapter(new AutoCompleteLocationAdapter(viewFromLocation, network));
-        viewViaLocation.setAdapter(new AutoCompleteLocationAdapter(viewViaLocation, network));
-        viewToLocation.setAdapter(new AutoCompleteLocationAdapter(viewToLocation, network));
+    final LocationView.Listener locationListener = new LocationView.Listener() {
+        @Override
+        public NetworkId getNetwork() {
+            return network;
+        }
+
+        @Override
+        public Set<Product> getPreferredProducts() {
+            return getProductToggles();
+        }
+
+        @Override
+        public Handler getHandler() {
+            return backgroundHandler;
+        }
+
+        @Override
+        public void changed(final LocationView view) {
+            updateMap();
+            queryHistoryListAdapter.clearSelectedEntry();
+            requestFocusFirst();
+        }
+    };
+
+    private void setupLocationViews() {
+        viewFromLocation.setListener(locationListener);
+        viewViaLocation.setListener(locationListener);
+        viewToLocation.setListener(locationListener);
+
         resetLocationViewsBehaviour();
     }
 
-    private AutoCompleteLocationsHandler createAutoCompleteLocationsHandler() {
-        return new AutoCompleteLocationsHandler(this, network, backgroundHandler,
-                getProductToggles());
-    }
-
     private void resetLocationViewsBehaviour() {
-        viewFromLocation.clearAlternateSearchProvider();
-        viewViaLocation.clearAlternateSearchProvider();
-        viewToLocation.clearAlternateSearchProvider();
+        viewFromLocation.resetBehaviour();
+        viewViaLocation.resetBehaviour();
+        viewToLocation.resetBehaviour();
     }
 
     private boolean initProductToggles() {
@@ -1538,36 +1428,6 @@ public class DirectionsActivity extends OeffiMainActivity implements
             }
         };
         backgroundHandler.post(queryTripsRunnable);
-    }
-
-    private void resultPickContact(final Uri contentUri, final LocationView targetLocationView, final Runnable onSuccess) {
-        final Cursor c = managedQuery(contentUri, null, null, null, null);
-        if (c.moveToFirst()) {
-            final String data = c
-                    .getString(c.getColumnIndexOrThrow(CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS))
-                    .replace("\n", " ");
-            log.info("Picked from contacts: {}", data);
-            // old code: targetLocationView.setLocation(new Location(LocationType.ADDRESS, null, null, data));
-            final AutoCompleteLocationsHandler autoCompleteLocationsHandler = createAutoCompleteLocationsHandler();
-            autoCompleteLocationsHandler.addJob(data, targetLocationView);
-            autoCompleteLocationsHandler.start(result -> {
-                if (result.success) {
-                    if (onSuccess != null)
-                        onSuccess.run();
-                }
-            });
-            requestFocusFirst();
-        }
-    }
-
-    private void resultPickStation(final Uri contentUri, final LocationView targetLocationView) {
-        final Cursor c = managedQuery(contentUri, null, null, null, null);
-        if (c.moveToFirst()) {
-            final Location location = FavoriteStationsProvider.getLocation(c);
-            targetLocationView.setLocation(location);
-            log.info("Picked {} from station favorites", location);
-            requestFocusFirst();
-        }
     }
 
     private class AmbiguousLocationAdapter extends ArrayAdapter<Location> {

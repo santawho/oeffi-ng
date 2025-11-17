@@ -28,15 +28,63 @@
         android:paddingVertical="@dimen/text_padding_vertical_verylax"
         />
 
-    <ImageButton
-        android:id="@+id/location_view_menu_button"
+    <LinearLayout
+        android:orientation="horizontal"
+        android:id="@+id/location_view_type_buttons"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:paddingHorizontal="@dimen/text_padding_horizontal_lax"
-        android:paddingVertical="@dimen/text_padding_vertical_verylax"
-        android:contentDescription="@string/directions_location_view_menu_description"
-        android:src="@drawable/ic_more_vert_grey600_24dp"/>
+        android:layout_height="wrap_content" >
+
+        <ImageButton
+            android:id="@+id/location_view_current_location_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:paddingLeft="@dimen/text_padding_horizontal_lax"
+            android:paddingRight="@dimen/text_padding_horizontal_lax"
+            android:paddingVertical="@dimen/text_padding_vertical_verylax"
+            android:contentDescription="@string/directions_location_context_current_location"
+            android:src="@drawable/ic_gps_fixed_grey600_24dp"/>
+
+        <ImageButton
+            android:id="@+id/location_view_contact_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:paddingRight="@dimen/text_padding_horizontal_lax"
+            android:paddingVertical="@dimen/text_padding_vertical_verylax"
+            android:contentDescription="@string/directions_location_context_contact"
+            android:src="@drawable/ic_contacts_grey600_24dp"/>
+
+        <ImageButton
+            android:id="@+id/location_view_favorite_station_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:paddingRight="@dimen/text_padding_horizontal_lax"
+            android:paddingVertical="@dimen/text_padding_vertical_verylax"
+            android:contentDescription="@string/directions_location_context_favorite_station"
+            android:src="@drawable/ic_star_grey600_24dp"/>
+
+        <ImageButton
+            android:id="@+id/location_view_alternate_search_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:paddingRight="@dimen/text_padding_horizontal_lax"
+            android:paddingVertical="@dimen/text_padding_vertical_verylax"
+            android:contentDescription="@string/directions_location_context_alternate_search"
+            android:src="@drawable/ic_search_grey600_24dp"/>
+
+        <ImageButton
+            android:id="@+id/location_view_menu_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:paddingRight="@dimen/text_padding_horizontal_lax"
+            android:paddingVertical="@dimen/text_padding_vertical_verylax"
+            android:contentDescription="@string/directions_location_view_menu_description"
+            android:src="@drawable/ic_more_vert_grey600_24dp"/>
+    </LinearLayout>
 
     <ImageButton
         android:id="@+id/location_view_clear_button"
