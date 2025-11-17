@@ -29,7 +29,6 @@ import de.schildbach.oeffi.FromViaToAware;
 import de.schildbach.oeffi.DeviceLocationAware;
 import de.schildbach.oeffi.StationsAware;
 import de.schildbach.oeffi.TripAware;
-import de.schildbach.oeffi.stations.Station;
 import de.schildbach.oeffi.util.ZoomControls;
 import de.schildbach.oeffi.util.locationview.LocationView;
 import de.schildbach.pte.dto.Location;
@@ -164,7 +163,7 @@ public class OeffiMapView extends FrameLayout {
         viewImplementation.setFromViaToAware(fromViaToAware);
     }
 
-    public void setZoomControls(final ZoomControls zoom) {
-        viewImplementation.setZoomControls(zoom);
+    public void setZoomControls(final ZoomControls zoomControls) {
+        viewImplementation.setZoomControls(zoomControls);
     }
 }

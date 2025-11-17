@@ -23,6 +23,14 @@
         android:textSize="@dimen/font_size_disclaimer"
         android:textColor="@color/fg_significant_on_light" />
 
+    <ImageButton
+        android:id="@+id/map_close"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="top|right"
+        android:layout_margin="8dp"
+        android:background="@drawable/map_close" />
+
     <de.schildbach.oeffi.util.ZoomControls
         android:id="@+id/map_zoom"
         android:layout_width="wrap_content"

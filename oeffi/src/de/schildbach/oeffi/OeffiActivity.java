@@ -42,6 +42,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.Switch;
@@ -711,6 +712,9 @@ public abstract class OeffiActivity extends ComponentActivity {
             return windowInsets;
         });
         mapView.setZoomControls(zoom);
+
+        final ImageButton mapClose = mapFrame.findViewById(R.id.map_close);
+        mapClose.setOnClickListener(v -> setMapVisible(false));
     }
 
     protected void addShowMapButtonToActionBar() {

@@ -316,8 +316,10 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
     }
 
     private void showZoomControls() {
-        zoomControls.clearAnimation();
-        zoomControls.startAnimation(zoomControlsAnimation);
+        if (zoomControls != null) {
+            zoomControls.clearAnimation();
+            zoomControls.startAnimation(zoomControlsAnimation);
+        }
     }
 
     @Override
@@ -333,8 +335,7 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
     @Override
     public boolean onTouchEvent(final MotionEvent ev) {
         zoomLock = ZOOM_LOCK.NOT_LOCKED;
-        if (zoomControls != null)
-            showZoomControls();
+        showZoomControls();
 
         return super.onTouchEvent(ev);
     }
