@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableRow
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <Space />
+
+    <View
+        android:layout_span="5"
+        android:id="@+id/directions_trip_details_public_entry_stop_date_divider"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/text_padding_vertical_cram"
+        android:background="@color/bg_divider"
+        android:visibility="gone" />
+
+</TableRow>

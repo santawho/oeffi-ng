@@ -13,12 +13,6 @@
         android:orientation="vertical"
         android:paddingLeft="@dimen/text_padding_horizontal_cram"
         android:paddingRight="@dimen/text_padding_horizontal_cram" >
-        <View
-            android:id="@+id/directions_trip_details_public_entry_stop_date_divider"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/text_padding_vertical_cram"
-            android:background="@color/bg_divider"
-            android:visibility="gone" />
         <TextView
             android:id="@+id/directions_trip_details_public_entry_stop_date_provided"
             android:layout_width="match_parent"
@@ -39,12 +33,6 @@
         android:id="@+id/directions_trip_details_public_entry_stop_time"
         android:orientation="vertical"
         android:paddingLeft="@dimen/text_padding_horizontal_cram" >
-        <View
-            android:id="@+id/directions_trip_details_public_entry_stop_time_divider"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/text_padding_vertical_cram"
-            android:background="@color/bg_divider"
-            android:visibility="gone" />
         <TextView
             android:id="@+id/directions_trip_details_public_entry_stop_time_provided"
             android:layout_width="match_parent"
@@ -63,12 +51,6 @@
         android:id="@+id/directions_trip_details_public_entry_stop_delay"
         android:orientation="vertical"
         android:paddingLeft="@dimen/text_padding_horizontal" >
-        <View
-            android:id="@+id/directions_trip_details_public_entry_stop_delay_divider"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/text_padding_vertical_cram"
-            android:background="@color/bg_divider"
-            android:visibility="gone" />
         <TextView
             android:id="@+id/directions_trip_details_public_entry_stop_delay_provided"
             android:layout_width="match_parent"
@@ -86,12 +68,6 @@
     <LinearLayout
         android:orientation="vertical"
         android:paddingLeft="@dimen/text_padding_horizontal_lax" >
-        <View
-            android:id="@+id/directions_trip_details_public_entry_stop_position_divider"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/text_padding_vertical_cram"
-            android:background="@color/bg_divider"
-            android:visibility="gone" />
         <TextView
             android:id="@+id/directions_trip_details_public_entry_stop_position"
             android:layout_width="match_parent"
@@ -108,12 +84,6 @@
     <LinearLayout
         android:orientation="vertical"
         android:paddingLeft="@dimen/text_padding_horizontal_lax" >
-        <View
-            android:id="@+id/directions_trip_details_public_entry_stop_name_divider"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/text_padding_vertical_cram"
-            android:background="@color/bg_divider"
-            android:visibility="gone" />
         <TextView
             android:id="@+id/directions_trip_details_public_entry_stop_name"
             android:layout_width="match_parent"

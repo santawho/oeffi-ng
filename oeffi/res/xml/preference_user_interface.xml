@@ -47,6 +47,12 @@
             android:title="@string/user_interface_directions_autogo_enabled_title"
             android:summary="@string/user_interface_directions_autogo_enabled_summary" />
 
+        <CheckBoxPreference
+            android:key="user_interface_directions_compact_times_enabled"
+            android:defaultValue="false"
+            android:title="@string/user_interface_directions_compact_times_enabled_title"
+            android:summary="@string/user_interface_directions_compact_times_enabled_summary" />
+
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/user_interface_category_map_title">

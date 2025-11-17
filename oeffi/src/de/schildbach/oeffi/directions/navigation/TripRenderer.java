@@ -208,87 +208,87 @@ public class TripRenderer {
                 }
 
                 final long delayAtRefPoint = refTime.getTime() - plannedTimeAtRefPoint.getTime();
-                if (delayAtRefPoint > 0) {
-                    Stop departureStop = publicLeg.departureStop;
-                    boolean delayedArrival = false;
-                    if (departureStop == beginStop) {
-                        delayedArrival = true;
-                        final PTDate departureStopPlannedDepartureTime = departureStop.plannedDepartureTime;
-                        departureStop = new Stop(
-                                departureStop.location,
-                                departureStop.plannedArrivalTime, departureStop.predictedArrivalTime,
-                                departureStop.plannedArrivalPosition, departureStop.predictedArrivalPosition,
-                                departureStop.arrivalCancelled,
-                                departureStopPlannedDepartureTime,
-                                new PTDate(
-                                        departureStopPlannedDepartureTime.getTime() + delayAtRefPoint,
-                                        departureStopPlannedDepartureTime.getOffset()),
-                                departureStop.plannedDeparturePosition, departureStop.predictedDeparturePosition,
-                                departureStop.departureCancelled);
-                    }
-                    Stop arrivalStop = publicLeg.arrivalStop;
-                    List<Stop> intermediateStops = publicLeg.intermediateStops;
-                    if (arrivalStop != endStop && intermediateStops != null) {
-                        intermediateStops = new ArrayList<>();
-                        for (final Stop stop : publicLeg.intermediateStops) {
-                            PTDate predictedArrivalTime = stop.predictedArrivalTime;
-                            PTDate predictedDepartureTime = stop.predictedDepartureTime;
-                            final PTDate plannedArrivalTime = stop.plannedArrivalTime;
-                            final PTDate plannedDepartureTime = stop.plannedDepartureTime;
-                            final boolean delayedDeparture;
-                            if (plannedArrivalTime != null && plannedDepartureTime != null) {
-                                if (delayedArrival) {
-                                    predictedArrivalTime = new PTDate(plannedArrivalTime.getTime() + delayAtRefPoint, plannedArrivalTime.getOffset());
-                                    final long stopIntervalLength = plannedDepartureTime.getTime() - plannedArrivalTime.getTime();
-                                    delayedDeparture = stopIntervalLength < 4 * 60000;
-                                    if (delayedDeparture)
-                                        predictedDepartureTime = new PTDate(plannedDepartureTime.getTime() + delayAtRefPoint, plannedDepartureTime.getOffset());
-                                } else {
-                                    delayedDeparture = false;
-                                }
-                            } else {
-                                delayedDeparture = true;
-                            }
-                            intermediateStops.add(new Stop(
-                                    stop.location,
-                                    plannedArrivalTime,
-                                    predictedArrivalTime,
-                                    stop.plannedArrivalPosition, stop.predictedArrivalPosition,
-                                    stop.arrivalCancelled,
-                                    plannedDepartureTime,
-                                    predictedDepartureTime,
-                                    stop.plannedDeparturePosition, stop.predictedDeparturePosition,
-                                    stop.departureCancelled));
-                            if (!delayedDeparture)
-                                delayedArrival = false;
-                            if (stop == beginStop)
-                                delayedArrival = true;
-                        }
-                    }
-                    final PTDate arrivalStopPlannedArrivalTime = arrivalStop.plannedArrivalTime;
-                    arrivalStop = new Stop(
-                            arrivalStop.location,
-                            arrivalStopPlannedArrivalTime,
+//            if (delayAtRefPoint > 0) {
+                Stop departureStop = publicLeg.departureStop;
+                boolean delayedArrival = false;
+                if (departureStop == beginStop) {
+                    delayedArrival = true;
+                    final PTDate departureStopPlannedDepartureTime = departureStop.plannedDepartureTime;
+                    departureStop = new Stop(
+                            departureStop.location,
+                            departureStop.plannedArrivalTime, departureStop.predictedArrivalTime,
+                            departureStop.plannedArrivalPosition, departureStop.predictedArrivalPosition,
+                            departureStop.arrivalCancelled,
+                            departureStopPlannedDepartureTime,
                             new PTDate(
-                                    arrivalStopPlannedArrivalTime.getTime() + delayAtRefPoint,
-                                    arrivalStopPlannedArrivalTime.getOffset()),
-                            arrivalStop.plannedArrivalPosition, arrivalStop.predictedArrivalPosition,
-                            arrivalStop.arrivalCancelled,
-                            arrivalStop.plannedDepartureTime, arrivalStop.predictedDepartureTime,
-                            arrivalStop.plannedDeparturePosition, arrivalStop.predictedDeparturePosition,
-                            arrivalStop.departureCancelled);
-
-                    simulatedPublicLeg = new Trip.Public(
-                            publicLeg.line,
-                            publicLeg.destination,
-                            departureStop,
-                            arrivalStop,
-                            intermediateStops,
-                            publicLeg.path,
-                            publicLeg.message,
-                            publicLeg.journeyRef,
-                            refTime);
+                                    departureStopPlannedDepartureTime.getTime() + delayAtRefPoint,
+                                    departureStopPlannedDepartureTime.getOffset()),
+                            departureStop.plannedDeparturePosition, departureStop.predictedDeparturePosition,
+                            departureStop.departureCancelled);
                 }
+                Stop arrivalStop = publicLeg.arrivalStop;
+                List<Stop> intermediateStops = publicLeg.intermediateStops;
+                if (arrivalStop != endStop && intermediateStops != null) {
+                    intermediateStops = new ArrayList<>();
+                    for (final Stop stop : publicLeg.intermediateStops) {
+                        PTDate predictedArrivalTime = stop.predictedArrivalTime;
+                        PTDate predictedDepartureTime = stop.predictedDepartureTime;
+                        final PTDate plannedArrivalTime = stop.plannedArrivalTime;
+                        final PTDate plannedDepartureTime = stop.plannedDepartureTime;
+                        final boolean delayedDeparture;
+                        if (plannedArrivalTime != null && plannedDepartureTime != null) {
+                            if (delayedArrival) {
+                                predictedArrivalTime = new PTDate(plannedArrivalTime.getTime() + delayAtRefPoint, plannedArrivalTime.getOffset());
+                                final long stopIntervalLength = plannedDepartureTime.getTime() - plannedArrivalTime.getTime();
+                                delayedDeparture = stopIntervalLength < 4 * 60000;
+                                if (delayedDeparture)
+                                    predictedDepartureTime = new PTDate(plannedDepartureTime.getTime() + delayAtRefPoint, plannedDepartureTime.getOffset());
+                            } else {
+                                delayedDeparture = false;
+                            }
+                        } else {
+                            delayedDeparture = true;
+                        }
+                        intermediateStops.add(new Stop(
+                                stop.location,
+                                plannedArrivalTime,
+                                predictedArrivalTime,
+                                stop.plannedArrivalPosition, stop.predictedArrivalPosition,
+                                stop.arrivalCancelled,
+                                plannedDepartureTime,
+                                predictedDepartureTime,
+                                stop.plannedDeparturePosition, stop.predictedDeparturePosition,
+                                stop.departureCancelled));
+                        if (!delayedDeparture)
+                            delayedArrival = false;
+                        if (stop == beginStop)
+                            delayedArrival = true;
+                    }
+                }
+                final PTDate arrivalStopPlannedArrivalTime = arrivalStop.plannedArrivalTime;
+                arrivalStop = new Stop(
+                        arrivalStop.location,
+                        arrivalStopPlannedArrivalTime,
+                        new PTDate(
+                                arrivalStopPlannedArrivalTime.getTime() + delayAtRefPoint,
+                                arrivalStopPlannedArrivalTime.getOffset()),
+                        arrivalStop.plannedArrivalPosition, arrivalStop.predictedArrivalPosition,
+                        arrivalStop.arrivalCancelled,
+                        arrivalStop.plannedDepartureTime, arrivalStop.predictedDepartureTime,
+                        arrivalStop.plannedDeparturePosition, arrivalStop.predictedDeparturePosition,
+                        arrivalStop.departureCancelled);
+
+                simulatedPublicLeg = new Trip.Public(
+                        publicLeg.line,
+                        publicLeg.destination,
+                        departureStop,
+                        arrivalStop,
+                        intermediateStops,
+                        publicLeg.path,
+                        publicLeg.message,
+                        publicLeg.journeyRef,
+                        refTime);
+//            }
             }
         }
     }

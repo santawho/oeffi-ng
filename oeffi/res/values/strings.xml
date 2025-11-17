@@ -343,7 +343,7 @@
     <string name="directions_trip_details_public_entry_tooltip_label_departure">Departure</string>
     <string name="directions_trip_details_public_entry_tooltip_no_data">-</string>
     <string name="directions_trip_details_public_entry_tooltip_delay_format">%d min</string>
-    <string name="directions_trip_details_public_entry_tooltip_event_format">&lt;b>%s&lt;/b>&lt;br>planned: %s&lt;br>predicted: %s&lt;br>delay: %s</string>
+    <string name="directions_trip_details_public_entry_tooltip_event_format">&lt;b>%s&lt;/b>&lt;br>planned: %s&lt;br>predicted: %s&lt;br>delay: %s&lt;br>simulated: %s&lt;br>sim. delay: %s</string>
     <string name="directions_trip_details_public_entry_tooltip_format_one_event">&lt;b>&lt;u>%s&lt;/u>&lt;/b>&lt;br>&lt;br>%s</string>
     <string name="directions_trip_details_public_entry_tooltip_format_two_events">&lt;b>&lt;u>%s&lt;/u>&lt;/b>&lt;br>&lt;br>%s&lt;br>&lt;br>%s</string>
 

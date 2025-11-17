@@ -36,6 +36,8 @@
     <string name="user_interface_directions_time_and_go_bottom_enabled_summary">Use old style. Show the time input and Go-button at the bottom. (requires restart)</string>
     <string name="user_interface_directions_autogo_enabled_title">Automatic \"Go\"</string>
     <string name="user_interface_directions_autogo_enabled_summary">Start directions search automatically when origin and destination have been entered</string>
+    <string name="user_interface_directions_compact_times_enabled_title">Compact times</string>
+    <string name="user_interface_directions_compact_times_enabled_summary">Show predicted times (from location and from network) in one row if identical</string>
 
     <string name="user_interface_category_map_title">Maps</string>
     <string name="user_interface_map_tile_resolution_title">Map resolution</string>
