@@ -977,6 +977,8 @@ public class DirectionsActivity extends OeffiMainActivity implements
     private void requestFocusFirst() {
         if (!saneLocation(viewFromLocation.getLocation(), true))
             viewFromLocation.requestFocus();
+        else if (ViewUtils.isVisible(viewViaLocation) && !saneLocation(viewViaLocation.getLocation(), true))
+            viewViaLocation.requestFocus();
         else if (!saneLocation(viewToLocation.getLocation(), true))
             viewToLocation.requestFocus();
         else
@@ -1107,6 +1109,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             final View lastView) {
         final boolean doGo;
         final int numLocations = locations.size();
+        View nextFocus = null;
         if (numLocations == 0) {
             doGo = false;
         } else if (numLocations == 1) {
@@ -1120,6 +1123,20 @@ public class DirectionsActivity extends OeffiMainActivity implements
                     viewFromLocation.setLocation(location);
                 }
                 doGo = false;
+            } else if (viewFromLocation.hasFocus()) {
+                viewFromLocation.setLocation(location);
+                if (ViewUtils.isVisible(viewViaLocation))
+                    nextFocus = viewViaLocation;
+                else
+                    nextFocus = viewToLocation;
+                doGo = false;
+            } else if (viewViaLocation.hasFocus()) {
+                viewViaLocation.setLocation(location);
+                nextFocus = viewToLocation;
+                doGo = false;
+            } else if (viewToLocation.hasFocus()) {
+                viewToLocation.setLocation(location);
+                doGo = isHandleAutoGoEnabled();
             } else if (isLongHold) {
                 if (viewViaLocation.getVisibility() == View.VISIBLE
                         && viewViaLocation.getLocation() == null
@@ -1154,6 +1171,9 @@ public class DirectionsActivity extends OeffiMainActivity implements
             viewToLocation.setLocation(locations.get(numLocations - 1));
             doGo = !isLongHold;
         }
+
+        if (nextFocus != null)
+            nextFocus.requestFocus();
 
         if (doGo)
             handleGo();
