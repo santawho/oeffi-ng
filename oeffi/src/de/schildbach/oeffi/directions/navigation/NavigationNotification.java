@@ -1344,7 +1344,7 @@ public class NavigationNotification {
                 formatTimeSpan(plannedTime, predictedTime))));
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_transfer_start,
-                lineName,
+                makeSpeakableLineName(lineName),
                 locationName,
                 platformForSpeakText(stop.plannedDeparturePosition, stop.getDeparturePosition()),
                 timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime()),
@@ -1393,7 +1393,7 @@ public class NavigationNotification {
                 formatTimeSpan(plannedTime, predictedTime))));
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_public_leg_start,
-                lineName,
+                makeSpeakableLineName(lineName),
                 locationName,
                 platformForSpeakText(stop.plannedArrivalPosition, stop.getArrivalPosition()),
                 timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime()),
@@ -1467,7 +1467,7 @@ public class NavigationNotification {
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_transfer_end_reminder,
                 remainingTimeForSpeakText(timeLeftMs),
-                lineName,
+                makeSpeakableLineName(lineName),
                 platformForSpeakText(stop.plannedDeparturePosition, stop.getDeparturePosition()),
                 timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime())));
     }
@@ -1571,4 +1571,26 @@ public class NavigationNotification {
         final long minutes = (millis / 1000 + 30) / 60;
         return (isNegative ? "-" : "") + Long.toString(minutes) + " " + context.getString(R.string.time_minutes);
     }
+
+    private String makeSpeakableLineName(final String lineName) {
+        if (lineName == null || lineName.length() <= 1)
+            return lineName;
+        final StringBuilder builder = new StringBuilder();
+        char prevChar = lineName.charAt(0);
+        builder.append(prevChar);
+        for (int pos = 1; pos < lineName.length(); ++pos) {
+            final char ch = lineName.charAt(pos);
+            if (Character.isAlphabetic(ch)) {
+                if (!Character.isSpaceChar(prevChar))
+                    builder.append(Character.isAlphabetic(prevChar) ? '-' : ' ');
+            } else {
+                if (!Character.isSpaceChar(ch) && Character.isAlphabetic(prevChar))
+                    builder.append(' ');
+            }
+            builder.append(ch);
+            prevChar = ch;
+        }
+        return builder.toString();
+    }
+
 }
