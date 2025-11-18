@@ -34,16 +34,16 @@ import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.service.notification.StatusBarNotification;
-import android.text.Html;
 import android.view.View;
 import android.widget.RemoteViews;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -141,8 +141,9 @@ public class NavigationNotification {
         notificationChannelCreated = true;
     }
 
-    private static NotificationManager getNotificationManager(final Context context) {
-        return (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+    private static NotificationManagerCompat getNotificationManager(final Context context) {
+        // return (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        return NotificationManagerCompat.from(context);
     }
 
     private static int getAudioStreamForSound(final int soundId) {
@@ -212,7 +213,8 @@ public class NavigationNotification {
     }
 
     public static long refreshAll(final Context context) {
-        final StatusBarNotification[] activeNotifications = getNotificationManager(context).getActiveNotifications();
+        final @NonNull List<StatusBarNotification> activeNotifications =
+                getNotificationManager(context).getActiveNotifications();
         long minRefreshAt = Long.MAX_VALUE;
         for (final StatusBarNotification statusBarNotification : activeNotifications) {
             if (!statusBarNotification.getTag().startsWith(TAG_PREFIX))
@@ -243,8 +245,9 @@ public class NavigationNotification {
     }
 
     public static void removeAll(final Context context) {
-        final NotificationManager notificationManager = getNotificationManager(context);
-        final StatusBarNotification[] activeNotifications = notificationManager.getActiveNotifications();
+        final NotificationManagerCompat notificationManager = getNotificationManager(context);
+        final @NonNull List<StatusBarNotification> activeNotifications =
+                notificationManager.getActiveNotifications();
         for (final StatusBarNotification statusBarNotification : activeNotifications) {
             if (!statusBarNotification.getTag().startsWith(TAG_PREFIX))
                 continue;
@@ -471,7 +474,8 @@ public class NavigationNotification {
     private Notification getActiveNotification() {
         log.info("looking for active notifications for tag={}", notificationTag);
         StatusBarNotification latestStatusBarNotification = null;
-        final StatusBarNotification[] activeNotifications = getNotificationManager(context).getActiveNotifications();
+        final @NonNull List<StatusBarNotification> activeNotifications =
+                getNotificationManager(context).getActiveNotifications();
         for (final StatusBarNotification statusBarNotification : activeNotifications) {
             final String tag = statusBarNotification.getTag();
             if (tag == null || !tag.equals(notificationTag)) {
@@ -909,7 +913,10 @@ public class NavigationNotification {
 
         final Notification notification = notificationBuilder.build();
         log.info("set notification with tag={}", notificationTag);
-        getNotificationManager(context).notify(notificationTag, 0, notification);
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+                == PackageManager.PERMISSION_GRANTED) {
+            getNotificationManager(context).notify(notificationTag, 0, notification);
+        }
 
         if (anyChanges) {
             playAlarmSoundAndVibration(-1,
