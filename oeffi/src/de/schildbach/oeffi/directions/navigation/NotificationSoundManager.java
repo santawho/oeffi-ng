@@ -17,7 +17,12 @@
 
 package de.schildbach.oeffi.directions.navigation;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.media.AudioAttributes;
 import android.media.AudioDeviceInfo;
 import android.media.AudioFocusRequest;
@@ -29,8 +34,10 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
 import android.os.Vibrator;
+import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
+import android.text.TextUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,8 +63,8 @@ public class NotificationSoundManager {
         return instance;
     }
 
-    private HandlerThread backgroundThread;
-    private Handler backgroundHandler;
+    private final HandlerThread backgroundThread;
+    private final Handler backgroundHandler;
     private TextToSpeech textToSpeech;
     private boolean isTextToSpeechUp;
     private AudioFocusRequest currentAudioFocusRequest;
@@ -75,6 +82,24 @@ public class NotificationSoundManager {
         }
     }
 
+    public static void logAvailableTextToSpeechServices() {
+        final Application application = Application.getInstance();
+        final PackageManager packageManager = application.getPackageManager();
+        final List<ResolveInfo> resolveInfos = packageManager
+                .queryIntentServices(new Intent(TextToSpeech.Engine.INTENT_ACTION_TTS_SERVICE), 0);
+        String defaultEngine = Settings.Secure.getString(application.getContentResolver(), Settings.Secure.TTS_DEFAULT_SYNTH);
+        if (defaultEngine == null && !resolveInfos.isEmpty())
+            defaultEngine = resolveInfos.get(0).serviceInfo.name;
+        for (final ResolveInfo resolveInfo : resolveInfos) {
+            final ServiceInfo serviceInfo = resolveInfo.serviceInfo;
+            final ComponentName componentName = new ComponentName(serviceInfo.packageName, serviceInfo.name);
+            final CharSequence label = serviceInfo.loadLabel(packageManager);
+            final String engineName = TextUtils.isEmpty(label) ? serviceInfo.name : label.toString();
+            final boolean isDefault = serviceInfo.name.equals(defaultEngine);
+            Application.log.info((isDefault ? "default" : "available") + " TTS service: '" + engineName + "', " + componentName.flattenToString());
+        }
+    }
+
     private NotificationSoundManager() {
         backgroundThread = new HandlerThread("NavAlarmThread", Process.THREAD_PRIORITY_BACKGROUND);
         backgroundThread.start();
@@ -85,7 +110,7 @@ public class NotificationSoundManager {
             if (isTextToSpeechUp) {
                 final String localeName = Application.getInstance().getString(R.string.locale);
                 final Locale locale = new Locale(localeName);
-                final int result = textToSpeech.setLanguage(locale);
+                textToSpeech.setLanguage(locale);
                 textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
                     @Override
                     public void onStart(final String utteranceId) {
@@ -158,7 +183,7 @@ public class NotificationSoundManager {
 //                log.info("sound is playing");
                 try {
                     Thread.sleep(100);
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException ie) {
                     break;
                 }
             }
@@ -175,7 +200,7 @@ public class NotificationSoundManager {
             }
             boolean isSpeaking = false;
             final int audioStream = getAudioStreamFromUsage(soundUsage);
-            for (String text : speakTexts) {
+            for (final String text : speakTexts) {
                 log.info("speaking: \"{}\" stream {}", text, audioStream);
                 isSpeaking |= speak(text, audioStream);
             }
@@ -183,7 +208,7 @@ public class NotificationSoundManager {
 //                log.info("speech is speaking");
                 try {
                     Thread.sleep(100);
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException ie) {
                     break;
                 }
             }
@@ -209,8 +234,8 @@ public class NotificationSoundManager {
                         .build();
         try {
             audioManager.requestAudioFocus(currentAudioFocusRequest);
-        } catch (RuntimeException e) {
-            log.warn("requesting audio focus", e);
+        } catch (final RuntimeException rte) {
+            log.warn("requesting audio focus", rte);
         }
 
         if (exclusive && audioAttributes.getUsage() == AudioAttributes.USAGE_MEDIA && savedVolume < 0) {
@@ -219,7 +244,7 @@ public class NotificationSoundManager {
             if (amplification > 0) {
                 try {
                     Thread.sleep(200);
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException rte) {
                     // ignore
                 }
                 final int volumeBeforePlaying = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
@@ -254,8 +279,8 @@ public class NotificationSoundManager {
 
         try {
             audioManager.abandonAudioFocusRequest(currentAudioFocusRequest);
-        } catch (RuntimeException e) {
-            log.warn("abandoning audio focus", e);
+        } catch (final RuntimeException rte) {
+            log.warn("abandoning audio focus", rte);
         }
         currentAudioFocusRequest = null;
     }
@@ -276,7 +301,7 @@ public class NotificationSoundManager {
 
     public boolean isHeadsetConnected() {
         final AudioDeviceInfo[] devices = getAudioManager().getDevices(AudioManager.GET_DEVICES_OUTPUTS);
-        for (AudioDeviceInfo device : devices) {
+        for (final AudioDeviceInfo device : devices) {
             final int deviceType = device.getType();
             switch (deviceType) {
                 case AudioDeviceInfo.TYPE_HEARING_AID:
@@ -310,7 +335,7 @@ public class NotificationSoundManager {
 
     private boolean speakQueue() {
         for (;;) {
-            Speakable speakable;
+            final Speakable speakable;
             synchronized (speakableQueue) {
                 if (speakableQueue.isEmpty())
                     break;

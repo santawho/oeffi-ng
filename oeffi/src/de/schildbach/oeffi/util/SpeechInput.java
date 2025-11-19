@@ -19,14 +19,20 @@ package de.schildbach.oeffi.util;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.speech.RecognitionListener;
+import android.speech.RecognitionService;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
+import android.text.TextUtils;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -41,6 +47,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import de.schildbach.oeffi.Application;
 
 public class SpeechInput {
     public interface ResultListener {
@@ -94,7 +102,7 @@ public class SpeechInput {
                 numberWords = getNumberWords(getFallbackLanguage());
             final StringBuilder builder = new StringBuilder();
             builder.append("(([0-9]+)");
-            for (String numberWord : numberWords)
+            for (final String numberWord : numberWords)
                 builder.append(String.format("|(%s)", numberWord));
             builder.append(")");
             return builder.toString();
@@ -122,15 +130,15 @@ public class SpeechInput {
             }
             if (patterns == null)
                 return false;
-            for (Pattern pattern : patterns) {
+            for (final Pattern pattern : patterns) {
                 final Matcher matcher = pattern.matcher(spokenSentence);
                 if (matcher.find()) {
                     final Map<String, String> fields = new HashMap<>();
-                    for (String fieldName : fieldNames) {
+                    for (final String fieldName : fieldNames) {
                         try {
                             final String value = matcher.group(fieldName);
                             fields.put(fieldName, value);
-                        } catch (IllegalArgumentException e) {
+                        } catch (final IllegalArgumentException iae) {
                             // do not populate that field
                         }
                     }
@@ -152,6 +160,23 @@ public class SpeechInput {
     public <CmdDef extends CommandDefinition<?>> CmdDef addCommand(final CmdDef commandDefinition) {
         addResultListener(commandDefinition);
         return commandDefinition;
+    }
+
+    public static void logAvailableSpeechRecognitionServices() {
+        final Application application = Application.getInstance();
+        final String defaultEngine = Settings.Secure.getString(application.getContentResolver(), "voice_recognition_service");
+        final PackageManager packageManager = application.getPackageManager();
+        final List<ResolveInfo> resolveInfos = packageManager
+                .queryIntentServices(new Intent(RecognitionService.SERVICE_INTERFACE), PackageManager.ResolveInfoFlags.of(0));
+        for (final ResolveInfo resolveInfo : resolveInfos) {
+            final ServiceInfo serviceInfo = resolveInfo.serviceInfo;
+            final ComponentName componentName = new ComponentName(serviceInfo.packageName, serviceInfo.name);
+            final CharSequence label = serviceInfo.loadLabel(packageManager);
+            final String engineName = TextUtils.isEmpty(label) ? serviceInfo.name : label.toString();
+            final boolean isDefault = componentName.flattenToString().equals(defaultEngine);
+            Application.log.info((isDefault ? "default" : "available") + " voice recognition service: '" + engineName + "', " + componentName.flattenToString());
+        }
+//        final ComponentName defaultSpeechService = ComponentName.unflattenFromString(serviceComponent);
     }
 
     public SpeechInput(final Context context) {
@@ -190,13 +215,13 @@ public class SpeechInput {
         return null;
     }
 
-    protected Integer getNumberFromWord(final String numberWord, String language) {
+    protected Integer getNumberFromWord(final String numberWord, final String language) {
         if (numberWord == null || numberWord.isEmpty())
             return null;
         if (Character.isDigit(numberWord.charAt(0))) {
             try {
                 return Integer.parseInt(numberWord);
-            } catch (NumberFormatException nfe) {
+            } catch (final NumberFormatException nfe) {
                 return null;
             }
         }
@@ -327,7 +352,7 @@ public class SpeechInput {
 
     public boolean dispatchSpokenSentence(final String spokenSentence) {
         log.debug("speech input: {}", spokenSentence);
-        for (ResultListener resultListener : resultListeners) {
+        for (final ResultListener resultListener : resultListeners) {
             if (resultListener.onSpeechInputResult(activityContext, spokenSentence)) {
                 return true;
             }

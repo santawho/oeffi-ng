@@ -52,6 +52,7 @@ import com.google.common.base.Stopwatch;
 import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.directions.QueryHistoryProvider;
 import de.schildbach.oeffi.directions.navigation.NavigationNotification;
+import de.schildbach.oeffi.directions.navigation.NotificationSoundManager;
 import de.schildbach.oeffi.mapview.OeffiMapView;
 import de.schildbach.oeffi.plans.PlansPickerActivity;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
@@ -248,6 +249,9 @@ public class Application extends android.app.Application {
         this.appName = getString(R.string.app_name);
         log.info("=== Starting app version {} ({})", packageInfo.versionName, packageInfo.versionCode);
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        NotificationSoundManager.logAvailableTextToSpeechServices();
+        SpeechInput.logAvailableSpeechRecognitionServices();
 
         createShortcuts();
 
