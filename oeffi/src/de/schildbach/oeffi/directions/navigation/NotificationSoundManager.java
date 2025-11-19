@@ -89,13 +89,13 @@ public class NotificationSoundManager {
                 .queryIntentServices(new Intent(TextToSpeech.Engine.INTENT_ACTION_TTS_SERVICE), 0);
         String defaultEngine = Settings.Secure.getString(application.getContentResolver(), Settings.Secure.TTS_DEFAULT_SYNTH);
         if (defaultEngine == null && !resolveInfos.isEmpty())
-            defaultEngine = resolveInfos.get(0).serviceInfo.name;
+            defaultEngine = resolveInfos.get(0).serviceInfo.packageName;
         for (final ResolveInfo resolveInfo : resolveInfos) {
             final ServiceInfo serviceInfo = resolveInfo.serviceInfo;
             final ComponentName componentName = new ComponentName(serviceInfo.packageName, serviceInfo.name);
             final CharSequence label = serviceInfo.loadLabel(packageManager);
             final String engineName = TextUtils.isEmpty(label) ? serviceInfo.name : label.toString();
-            final boolean isDefault = serviceInfo.name.equals(defaultEngine);
+            final boolean isDefault = serviceInfo.packageName.equals(defaultEngine);
             Application.log.info((isDefault ? "default" : "available") + " TTS service: '" + engineName + "', " + componentName.flattenToString());
         }
     }

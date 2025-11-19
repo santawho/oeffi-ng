@@ -167,7 +167,7 @@ public class SpeechInput {
         final String defaultEngine = Settings.Secure.getString(application.getContentResolver(), "voice_recognition_service");
         final PackageManager packageManager = application.getPackageManager();
         final List<ResolveInfo> resolveInfos = packageManager
-                .queryIntentServices(new Intent(RecognitionService.SERVICE_INTERFACE), PackageManager.ResolveInfoFlags.of(0));
+                .queryIntentServices(new Intent(RecognitionService.SERVICE_INTERFACE), 0);
         for (final ResolveInfo resolveInfo : resolveInfos) {
             final ServiceInfo serviceInfo = resolveInfo.serviceInfo;
             final ComponentName componentName = new ComponentName(serviceInfo.packageName, serviceInfo.name);
