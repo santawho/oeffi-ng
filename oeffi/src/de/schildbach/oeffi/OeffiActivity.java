@@ -714,7 +714,10 @@ public abstract class OeffiActivity extends ComponentActivity {
         mapView.setZoomControls(zoom);
 
         final ImageButton mapClose = mapFrame.findViewById(R.id.map_close);
-        mapClose.setOnClickListener(v -> setMapVisible(false));
+        if (isPortrait)
+            mapClose.setOnClickListener(v -> setMapVisible(false));
+        else
+            mapClose.setVisibility(View.GONE);
     }
 
     protected void addShowMapButtonToActionBar() {
