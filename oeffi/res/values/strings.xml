@@ -323,6 +323,7 @@
 
     <!-- directions trip details -->
     <string name="directions_trip_details_not_travelable">Not feasible</string>
+    <string name="directions_trip_details_start">Start trip</string>
     <string name="directions_trip_details_start_at">Start trip at &lt;b>%1$s&lt;/b></string>
     <string name="directions_trip_details_finished">Finished</string>
     <string name="directions_trip_details_duration">Duration %s</string>

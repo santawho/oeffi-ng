@@ -1359,8 +1359,14 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         boolean isSamePlatform = false;
         if (transferFrom == null) {
             // walk at the beginning
-            transferText = getString(R.string.directions_trip_details_start_at,
-                    Formats.makeBreakableStationName(transferTo.location.uniqueShortName()));
+            if (legText == null) {
+                if (transferTo == null) {
+                    legText = getString(R.string.directions_trip_details_start_at);
+                } else {
+                    legText = getString(R.string.directions_trip_details_start_at,
+                            Formats.makeBreakableStationName(transferTo.location.uniqueShortName()));
+                }
+            }
         } else if (transferTo == null) {
             // walk at the end
         } else {
