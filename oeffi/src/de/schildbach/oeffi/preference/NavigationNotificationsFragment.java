@@ -28,6 +28,9 @@ public class NavigationNotificationsFragment extends PreferenceFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preference_navigation_notifications);
-//        setupDynamicSummary("travelalarm_time_ratio", R.string.travelalarm_time_ratio_summary);
+        setupDynamicSummary("navigation_notification_changes_show_when", R.string.navigation_notifications_show_when_summary);
+        setupDynamicSummary("navigation_notification_changes_remove_when", R.string.navigation_notifications_remove_when_summary);
+        setupDynamicSummary("navigation_notification_directions_show_when", R.string.navigation_notifications_show_when_summary);
+        setupDynamicSummary("navigation_notification_directions_remove_when", R.string.navigation_notifications_remove_when_summary);
     }
 }

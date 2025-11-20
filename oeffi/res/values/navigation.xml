@@ -64,6 +64,11 @@
 
     <string name="navigation_notification_channel_name">Navigation</string>
     <string name="navigation_notification_channel_description">Navigation instructions</string>
+    <string name="navigation_notification_channel_changes_name">Navigation Changes</string>
+    <string name="navigation_notification_channel_changes_description">Warn about important changes</string>
+    <string name="navigation_notification_channel_directions_name">Navigation Directions</string>
+    <string name="navigation_notification_channel_directions_description">Show upcoming steps</string>
+
     <string name="navigation_notification_subtext">to %1$s</string>
     <string name="navigation_stopnav_title">Navigation Cancellation</string>
     <string name="navigation_stopnav_text">Do you really want to stop this navigation?</string>
@@ -108,6 +113,46 @@
 
     <string name="navigation_notifications_preferences_title">Event Notifications</string>
     <string name="navigation_notifications_preferences_summary">Settings for showing notifications about events, e.g. on a smart watch</string>
+    <string name="navigation_notifications_changes_category_title">Navigation Changes</string>
+    <string name="navigation_notifications_directions_category_title">Navigation Directions</string>
+    <string name="navigation_notifications_show_when_title">Show notifications when …</string>
+    <string name="navigation_notifications_show_when_summary">Determine when event notifications shall be issued. [%s]</string>
+    <string-array name="navigation_notifications_show_when">
+        <item>never (feature is off)</item>
+        <item>when display is locked</item>
+        <item>when display is off</item>
+        <item>always</item>
+    </string-array>
+    <string-array name="navigation_notifications_show_when_values">
+        <item>never</item>
+        <item>when-locked</item>
+        <item>when-off</item>
+        <item>always</item>
+    </string-array>
+    <string name="navigation_notifications_remove_when_title">Remove notifications when …</string>
+    <string name="navigation_notifications_remove_when_summary">Determine when event notifications shall be removed. [%s]</string>
+    <string-array name="navigation_notifications_remove_when">
+        <item>never (you must delete each of them)</item>
+        <item>when display is unlocked</item>
+        <item>when display is turned on</item>
+        <item>after 2 seconds</item>
+        <item>after 5 seconds</item>
+        <item>after 10 seconds</item>
+        <item>after 30 seconds</item>
+        <item>after 1 minute</item>
+    </string-array>
+    <string-array name="navigation_notifications_remove_when_values">
+        <item>never</item>
+        <item>when-unlocked</item>
+        <item>when-on</item>
+        <item>2</item>
+        <item>5</item>
+        <item>10</item>
+        <item>30</item>
+        <item>60</item>
+    </string-array>
+    <string name="navigation_notifications_remind_2_minutes_title">Show reminder 2 minutes before</string>
+    <string name="navigation_notifications_remind_6_minutes_title">Show reminder 6 minutes before</string>
 
     <string name="navigation_event_log_heading">Events</string>
     <string name="navigation_event_log_no_entries">No entries yet.</string>
@@ -152,5 +197,28 @@
     <string name="navigation_event_speak_arrival_delay_change">the delay of the next arrival has changed: %1$s</string>
     <string name="navigation_event_speak_departure_position_change">the platform of the next departure has changed: %1$s</string>
     <string name="navigation_event_speak_arrival_position_change">the platform of the next arrival has changed: %1$s</string>
+
+    <string name="navigation_event_notify_notime_left_front_format">now</string>
+    <string name="navigation_event_notify_time_left_front_format">%1$s min -&gt;</string>
+    <string name="navigation_event_notify_notime_left_end_format">NOW</string>
+    <string name="navigation_event_notify_time_left_end_format">remain %1$s min</string>
+    <string name="navigation_event_notify_changes_title">*** Öffi NG ***</string>
+    <string name="navigation_event_notify_directions_title">Öffi NG</string>
+    <string name="navigation_event_notify_position_unchanged_format">platf %1$s</string>
+    <string name="navigation_event_notify_position_changed_format">platf %1$s (was %2$s)</string>
+    <string name="navigation_event_notify_nav_start">Navigation begins</string>
+    <string name="navigation_event_notify_nav_restart">Navigation restarting</string>
+    <string name="navigation_event_notify_nav_end">Navigation finished</string>
+    <string name="navigation_event_notify_public_leg_start">Take %1$s to %2$s, %3$s, sched %4$s, est %5$s, %6$s</string>
+    <string name="navigation_event_notify_public_leg_end_reminder">%1$s arrival at %2$s, %3$s, est %4$s, %5$s</string>
+    <string name="navigation_event_notify_transfer_start">Go to depart. %1$s at %2$s, %3$s, sched %4$s, est %5$s, %6$s</string>
+    <string name="navigation_event_notify_transfer_end_reminder">%1$s depart. %2$s at %3$s, est %4$s, %5$s</string>
+    <string name="navigation_event_notify_final_transfer_start">finally go to %1$s</string>
+    <string name="navigation_event_notify_departure_delay_change">Delayed depart. %1$s at %2$s: %3$s, est %4$s</string>
+    <string name="navigation_event_notify_arrival_delay_change">Delayed arrival %1$s at %2$s: %3$s, est %4$s</string>
+    <string name="navigation_event_notify_departure_position_change">New platform %1$s depart. %2$s at %3$s, sched %4$s</string>
+    <string name="navigation_event_notify_arrival_position_change">New platform %1$s arrival %2$s at %3$s, sched %4$s</string>
+    <string name="navigation_event_notify_next_transfer_critical">The next transfer is critical</string>
+    <string name="navigation_event_notify_any_transfer_critical">Some transfers are critical</string>
 
 </resources>

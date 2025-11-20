@@ -187,7 +187,7 @@ public class NavigationAlarmManager {
     }
 
     private void refresh() {
-        refreshAt = NavigationNotification.refreshAll(getContext());
+        refreshAt = NavigationNotification.refreshAllGuides(getContext());
         log.info("refresh alarm: next notification refresh of all at {}", LOG_TIME_FORMAT.format(refreshAt));
         final long minNext = new Date().getTime() + MIN_PERIOD_MS;
         log.info("refresh alarm: not earlier than at {}", LOG_TIME_FORMAT.format(minNext));

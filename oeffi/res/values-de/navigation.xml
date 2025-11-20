@@ -53,6 +53,11 @@
 
     <string name="navigation_notification_channel_name">Navigation</string>
     <string name="navigation_notification_channel_description">Navigationsanweisungen</string>
+    <string name="navigation_notification_channel_changes_name">Navigations-Änderungen</string>
+    <string name="navigation_notification_channel_changes_description">Warne bei wichtigen Änderungen</string>
+    <string name="navigation_notification_channel_directions_name">Navigations-Hinweise</string>
+    <string name="navigation_notification_channel_directions_description">Zeige die nächsten Schritte</string>
+
     <string name="navigation_notification_subtext">nach %1$s</string>
     <string name="navigation_stopnav_title">Navigation abbrechen</string>
     <string name="navigation_stopnav_text">Möchtest Du diese Navigation wirklich beenden?</string>
@@ -97,6 +102,30 @@
 
     <string name="navigation_notifications_preferences_title">Ereignis-Benachrichtigungen</string>
     <string name="navigation_notifications_preferences_summary">Einstellungen zur Anzeige von Benachrichtigungen zu Ereignissen, z.B. auch auf einer Smart-Watch</string>
+    <string name="navigation_notifications_changes_category_title">Navigations-Änderungen</string>
+    <string name="navigation_notifications_directions_category_title">Navigations-Hinweise</string>
+    <string name="navigation_notifications_show_when_title">Zeige Benachrichtigungen wenn …</string>
+    <string name="navigation_notifications_show_when_summary">Lege fest, wann Ereignis-Benachrichtigungen angezeigt werden sollen. [%s]</string>
+    <string-array name="navigation_notifications_show_when">
+        <item>niemals (Funktion ist abgeschaltet)</item>
+        <item>wenn Bildschirm gesperrt</item>
+        <item>wenn Bildschirm aus ist</item>
+        <item>immer</item>
+    </string-array>
+    <string name="navigation_notifications_remove_when_title">Entferne Benachrichtigungen wenn …</string>
+    <string name="navigation_notifications_remove_when_summary">Lege fest, wann Ereignis-Benachrichtigungen entfernt werden sollen. [%s]</string>
+    <string-array name="navigation_notifications_remove_when">
+        <item>niemals (Du musst jede selbst löschen)</item>
+        <item>when Bildschirm entsperrt wird</item>
+        <item>when Bildschirm eingeschaltet wird</item>
+        <item>nach 2 Sekunden</item>
+        <item>nach 5 Sekunden</item>
+        <item>nach 10 Sekunden</item>
+        <item>nach 30 Sekunden</item>
+        <item>nach 1 Minute</item>
+    </string-array>
+    <string name="navigation_notifications_remind_2_minutes_title">Erinnerung 2 Minuten vorher</string>
+    <string name="navigation_notifications_remind_6_minutes_title">Erinnerung 6 Minuten vorher</string>
 
     <string name="navigation_event_log_heading">Ereignisse</string>
     <string name="navigation_event_log_no_entries">Noch keine Einträge.</string>
@@ -141,5 +170,28 @@
     <string name="navigation_event_speak_arrival_delay_change">die Verspätung der nächsten Ankunft hat sich geändert: %1$s</string>
     <string name="navigation_event_speak_departure_position_change">der Steig der nächsten Abfahrt hat sich geändert: %1$s</string>
     <string name="navigation_event_speak_arrival_position_change">der Steig der nächsten Ankunft hat sich geändert: %1$s</string>
+
+    <string name="navigation_event_notify_notime_left_front_format">jetzt</string>
+    <string name="navigation_event_notify_time_left_front_format">%1$s min -&gt;</string>
+    <string name="navigation_event_notify_notime_left_end_format">JETZT</string>
+    <string name="navigation_event_notify_time_left_end_format">noch %1$s min</string>
+    <string name="navigation_event_notify_changes_title">*** Öffi NG ***</string>
+    <string name="navigation_event_notify_directions_title">Öffi NG</string>
+    <string name="navigation_event_notify_position_unchanged_format">Steig %1$s</string>
+    <string name="navigation_event_notify_position_changed_format">Steig %1$s (war %2$s)</string>
+    <string name="navigation_event_notify_nav_start">Navigation beginnt</string>
+    <string name="navigation_event_notify_nav_restart">Navigation startet neu</string>
+    <string name="navigation_event_notify_nav_end">Navigation beendet</string>
+    <string name="navigation_event_notify_public_leg_start">Fahre mit %1$s nach %2$s, %3$s, plan %4$s, prog %5$s, %6$s</string>
+    <string name="navigation_event_notify_public_leg_end_reminder">%1$s Ankunft in %2$s, %3$s, prog %4$s, %5$s</string>
+    <string name="navigation_event_notify_transfer_start">Gehe zu Abf. %1$s in %2$s, %3$s, plan %4$s, prog %5$s, %6$s</string>
+    <string name="navigation_event_notify_transfer_end_reminder">%1$s Abfahrt %2$s an %3$s, prog %4$s, %5$s</string>
+    <string name="navigation_event_notify_final_transfer_start">schließlich gehe nach %1$s</string>
+    <string name="navigation_event_notify_departure_delay_change">Versp. Abfahrt %1$s in %2$s: %3$s, prog %4$s</string>
+    <string name="navigation_event_notify_arrival_delay_change">Versp. Ankunft %1$s in %2$s: %3$s, prog %4$s</string>
+    <string name="navigation_event_notify_departure_position_change">Neuer Steig %1$s Abfahrt %2$s in %3$s, plan %4$s</string>
+    <string name="navigation_event_notify_arrival_position_change">Neuer Steig %1$s Ankunft %2$s in %3$s, plan %4$s</string>
+    <string name="navigation_event_notify_next_transfer_critical">Der nächste Umstieg is kritisch</string>
+    <string name="navigation_event_notify_any_transfer_critical">Einige Umstiege sind kritisch</string>
 
 </resources>

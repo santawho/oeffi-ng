@@ -376,7 +376,7 @@ public abstract class OeffiActivity extends ComponentActivity {
                             return true;
                         }
                         if (subItemId == R.id.global_options_clear_navigation) {
-                            NavigationNotification.removeAll(OeffiActivity.this);
+                            NavigationNotification.removeAllGuides(OeffiActivity.this);
                             return true;
                         }
                         if (subItemId == R.id.global_options_show_log) {

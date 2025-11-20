@@ -5,4 +5,54 @@
     <Preference
         android:summary="@string/navigation_notifications_preferences_summary" />
 
+    <PreferenceCategory android:title="@string/navigation_notifications_changes_category_title" >
+
+        <ListPreference
+            android:defaultValue="never"
+            android:entries="@array/navigation_notifications_show_when"
+            android:entryValues="@array/navigation_notifications_show_when_values"
+            android:key="navigation_notification_changes_show_when"
+            android:summary="@string/navigation_notifications_show_when_summary"
+            android:title="@string/navigation_notifications_show_when_title" />
+
+        <ListPreference
+            android:defaultValue="never"
+            android:entries="@array/navigation_notifications_remove_when"
+            android:entryValues="@array/navigation_notifications_remove_when_values"
+            android:key="navigation_notification_changes_remove_when"
+            android:summary="@string/navigation_notifications_remove_when_summary"
+            android:title="@string/navigation_notifications_remove_when_title" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/navigation_notifications_directions_category_title" >
+
+        <ListPreference
+            android:defaultValue="never"
+            android:entries="@array/navigation_notifications_show_when"
+            android:entryValues="@array/navigation_notifications_show_when_values"
+            android:key="navigation_notification_directions_show_when"
+            android:summary="@string/navigation_notifications_show_when_summary"
+            android:title="@string/navigation_notifications_show_when_title" />
+
+        <ListPreference
+            android:defaultValue="never"
+            android:entries="@array/navigation_notifications_remove_when"
+            android:entryValues="@array/navigation_notifications_remove_when_values"
+            android:key="navigation_notification_directions_remove_when"
+            android:summary="@string/navigation_notifications_remove_when_summary"
+            android:title="@string/navigation_notifications_remove_when_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="navigation_notifications_remind_2_minutes"
+            android:title="@string/navigation_notifications_remind_2_minutes_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="navigation_notifications_remind_6_minutes"
+            android:title="@string/navigation_notifications_remind_6_minutes_title" />
+
+    </PreferenceCategory>
+
 </PreferenceScreen>

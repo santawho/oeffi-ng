@@ -20,6 +20,7 @@ package de.schildbach.oeffi.directions.navigation;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -27,6 +28,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.AudioAttributes;
@@ -34,6 +36,7 @@ import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.service.notification.StatusBarNotification;
 import android.view.View;
 import android.widget.RemoteViews;
@@ -75,15 +78,33 @@ import de.schildbach.pte.dto.Stop;
 import de.schildbach.pte.dto.Trip;
 
 public class NavigationNotification {
+    public static final String PREFS_KEY_NAVIGATION_SOUND_CHANNEL_RIDE = "navigation_sound_channel_ride";
+    public static final String PREFS_KEY_NAVIGATION_SOUND_CHANNEL_TRANSFER = "navigation_sound_channel_transfer";
+    public static final String PREFS_KEY_NAVIGATION_SOUND_CHANNEL_HEADSET = "navigation_sound_channel_headset";
+    public static final String PREFS_KEY_NAVIGATION_USE_SOUND_CHANNEL_HEADSET = "navigation_use_sound_channel_headset";
+    public static final String PREFS_KEY_NAVIGATION_SPEECH_OUTPUT = "navigation_speech_output";
+    public static final String PREFS_KEY_NAVIGATION_REDUCED_SOUNDS = "navigation_reduced_sounds";
+    public static final String PREFS_KEY_NAVIGATION_REFRESH_BEEP = "navigation_refresh_beep";
+    public static final String PREFS_KEY_NOTIFICATIONS_CHANGES_SHOW_WHEN = "navigation_notification_changes_show_when";
+    public static final String PREFS_KEY_NOTIFICATIONS_CHANGES_REMOVE_WHEN = "navigation_notification_changes_remove_when";
+    public static final String PREFS_KEY_NOTIFICATIONS_DIRECTIONS_SHOW_WHEN = "navigation_notification_directions_show_when";
+    public static final String PREFS_KEY_NOTIFICATIONS_DIRECTIONS_REMOVE_WHEN = "navigation_notification_directions_remove_when";
+    public static final String PREFS_KEY_NOTIFICATIONS_REMIND_2_MINUTES = "navigation_notifications_remind_2_minutes";
+    public static final String PREFS_KEY_NOTIFICATIONS_REMIND_6_MINUTES = "navigation_notifications_remind_6_minutes";
+    public static final String NOTIFICATION_GROUP_EVENTS = "events";
+    public static final String NOTIFICATION_GROUP_GUIDES = "guides";
+
     private static final int SOUND_ALARM = R.raw.nav_alarm;
     private static final int SOUND_REMIND_VIA_NOTIFICATION = -1;
     private static final int SOUND_REMIND_NORMAL = R.raw.nav_remind_down;
     private static final int SOUND_REMIND_IMPORTANT = R.raw.nav_remind_downup;
     private static final int SOUND_REMIND_NEXTLEG = R.raw.nav_remind_up;
+    private static String notificationTitleForChanges;
+    private static String notificationTitleForDirections;
 
     private static int getActualSound(final int soundId) {
         int newId = soundId;
-        if (prefs.getBoolean(Constants.PREFS_KEY_NAVIGATION_REDUCED_SOUNDS, false)) {
+        if (prefs.getBoolean(PREFS_KEY_NAVIGATION_REDUCED_SOUNDS, false)) {
             if (soundId == SOUND_ALARM)
                 newId = R.raw.nav_lowvolume_alarm;
             else if (soundId == SOUND_REMIND_NORMAL)
@@ -96,8 +117,13 @@ public class NavigationNotification {
         return newId;
     }
 
-    private static final String CHANNEL_ID = "navigation";
-    private static final String TAG_PREFIX = NavigationNotification.class.getName() + ":";
+    private static final String CHANNEL_ID_GUIDE = "navigation";
+    private static final String CHANNEL_ID_CHANGES = "navigation-changes";
+    private static final String CHANNEL_ID_DIRECTIONS = "navigation-directions";
+    private static final String TAG_PREFIX_COMMON = NavigationNotification.class.getName() + ":";
+    private static final String TAG_PREFIX_GUIDE = TAG_PREFIX_COMMON + "guide:";
+    private static final String TAG_PREFIX_CHANGES = TAG_PREFIX_COMMON + "changes:";
+    private static final String TAG_PREFIX_DIRECTIONS = TAG_PREFIX_COMMON + "directions:";
 
     private static final long KEEP_NOTIFICATION_FOR_MINUTES = 30;
     private static final long REMINDER_FIRST_MS = 6 * 60 * 1000;
@@ -115,30 +141,71 @@ public class NavigationNotification {
 
     private static final Logger log = LoggerFactory.getLogger(NavigationNotification.class);
 
-    private static boolean notificationChannelCreated;
+    private static boolean notificationChannelsCreated;
 
     private static SharedPreferences prefs;
 
-    public static void createNotificationChannel(final Context context) {
+    public static void createNotificationChannels(final Context context) {
         TravelAlarmManager.createNotificationChannel(context);
-        if (notificationChannelCreated)
+        if (notificationChannelsCreated)
             return;
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            final CharSequence name = context.getString(R.string.navigation_notification_channel_name);
-            final String description = context.getString(R.string.navigation_notification_channel_description);
-            final NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_HIGH);
-            channel.setDescription(description);
-            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-//            channel.enableVibration(true);
-            channel.setVibrationPattern(VIBRATION_PATTERN_REMIND);
-            if (SOUND_REMIND_VIA_NOTIFICATION >= 0) {
-                final int usage = getAudioUsageForSound(SOUND_REMIND_VIA_NOTIFICATION, false);
-                channel.setSound(ResourceUri.fromResource(context, SOUND_REMIND_VIA_NOTIFICATION),
-                        new AudioAttributes.Builder().setUsage(usage).build());
-            }
-            getNotificationManager(context).createNotificationChannel(channel);
+            createInstructionsChannel(context);
+            createChangesChannel(context);
+            createDirectionsChannel(context);
         }
-        notificationChannelCreated = true;
+
+        notificationTitleForChanges = context.getString(R.string.navigation_event_notify_changes_title);
+        notificationTitleForDirections = context.getString(R.string.navigation_event_notify_directions_title);
+
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_SCREEN_ON); // screen being turned on
+        intentFilter.addAction(Intent.ACTION_USER_PRESENT); // screen beig unlocked
+        context.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(final Context context, final Intent intent) {
+                onDeviceWakingUp(context);
+            }
+        }, intentFilter);
+
+        notificationChannelsCreated = true;
+    }
+
+    private static void createInstructionsChannel(final Context context) {
+        final CharSequence name = context.getString(R.string.navigation_notification_channel_name);
+        final String description = context.getString(R.string.navigation_notification_channel_description);
+        final NotificationChannel channel = new NotificationChannel(CHANNEL_ID_GUIDE, name, NotificationManager.IMPORTANCE_HIGH);
+        channel.setDescription(description);
+        channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+        // channel.enableVibration(true);
+        channel.setVibrationPattern(VIBRATION_PATTERN_REMIND);
+        if (SOUND_REMIND_VIA_NOTIFICATION >= 0) {
+            final int usage = getAudioUsageForSound(SOUND_REMIND_VIA_NOTIFICATION, false);
+            channel.setSound(ResourceUri.fromResource(context, SOUND_REMIND_VIA_NOTIFICATION),
+                    new AudioAttributes.Builder().setUsage(usage).build());
+        }
+        getNotificationManager(context).createNotificationChannel(channel);
+    }
+
+    private static void createChangesChannel(final Context context) {
+        final CharSequence name = context.getString(R.string.navigation_notification_channel_changes_name);
+        final String description = context.getString(R.string.navigation_notification_channel_changes_description);
+        final NotificationChannel channel = new NotificationChannel(CHANNEL_ID_CHANGES, name, NotificationManager.IMPORTANCE_HIGH);
+        channel.setDescription(description);
+        channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+        // channel.setGroup(EVENT_NOTIFICATION_GROUP);
+        getNotificationManager(context).createNotificationChannel(channel);
+    }
+
+    private static void createDirectionsChannel(final Context context) {
+        final CharSequence name = context.getString(R.string.navigation_notification_channel_directions_name);
+        final String description = context.getString(R.string.navigation_notification_channel_directions_description);
+        final NotificationChannel channel = new NotificationChannel(CHANNEL_ID_DIRECTIONS, name, NotificationManager.IMPORTANCE_DEFAULT);
+        channel.setDescription(description);
+        channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+        // channel.setGroup(EVENT_NOTIFICATION_GROUP);
+        getNotificationManager(context).createNotificationChannel(channel);
     }
 
     private static NotificationManagerCompat getNotificationManager(final Context context) {
@@ -154,31 +221,31 @@ public class NavigationNotification {
         int usage = AudioAttributes.USAGE_NOTIFICATION_EVENT;
         String prefKey = null;
         final boolean useHeadsetChannel;
-        if (NavigationNotification.prefs.getBoolean(Constants.PREFS_KEY_NAVIGATION_USE_SOUND_CHANNEL_HEADSET, true)) {
+        if (NavigationNotification.prefs.getBoolean(PREFS_KEY_NAVIGATION_USE_SOUND_CHANNEL_HEADSET, true)) {
             useHeadsetChannel = NotificationSoundManager.getInstance().isHeadsetConnected();
         } else {
             useHeadsetChannel = false;
         }
         if (useHeadsetChannel) {
-            prefKey = Constants.PREFS_KEY_NAVIGATION_SOUND_CHANNEL_HEADSET;
+            prefKey = PREFS_KEY_NAVIGATION_SOUND_CHANNEL_HEADSET;
         } else if (soundId == SOUND_REMIND_NORMAL
             || soundId == SOUND_REMIND_IMPORTANT
             || soundId == SOUND_ALARM) {
             prefKey = onRide
-                    ? Constants.PREFS_KEY_NAVIGATION_SOUND_CHANNEL_RIDE
-                    : Constants.PREFS_KEY_NAVIGATION_SOUND_CHANNEL_TRANSFER;
+                    ? PREFS_KEY_NAVIGATION_SOUND_CHANNEL_RIDE
+                    : PREFS_KEY_NAVIGATION_SOUND_CHANNEL_TRANSFER;
         } else if (soundId == SOUND_REMIND_NEXTLEG) {
-            prefKey = Constants.PREFS_KEY_NAVIGATION_SOUND_CHANNEL_RIDE;
+            prefKey = PREFS_KEY_NAVIGATION_SOUND_CHANNEL_RIDE;
         }
         if (prefKey != null) {
             switch (prefKey) {
-                case Constants.PREFS_KEY_NAVIGATION_SOUND_CHANNEL_HEADSET:
+                case PREFS_KEY_NAVIGATION_SOUND_CHANNEL_HEADSET:
                     usage = AudioAttributes.USAGE_MEDIA;
                     break;
-                case Constants.PREFS_KEY_NAVIGATION_SOUND_CHANNEL_RIDE:
+                case PREFS_KEY_NAVIGATION_SOUND_CHANNEL_RIDE:
                     usage = AudioAttributes.USAGE_NOTIFICATION_EVENT;
                     break;
-                case Constants.PREFS_KEY_NAVIGATION_SOUND_CHANNEL_TRANSFER:
+                case PREFS_KEY_NAVIGATION_SOUND_CHANNEL_TRANSFER:
                     usage = AudioAttributes.USAGE_ALARM;
                     break;
             }
@@ -212,12 +279,12 @@ public class NavigationNotification {
         return false;
     }
 
-    public static long refreshAll(final Context context) {
-        final @NonNull List<StatusBarNotification> activeNotifications =
+    public static long refreshAllGuides(final Context context) {
+        final List<StatusBarNotification> activeNotifications =
                 getNotificationManager(context).getActiveNotifications();
         long minRefreshAt = Long.MAX_VALUE;
         for (final StatusBarNotification statusBarNotification : activeNotifications) {
-            if (!statusBarNotification.getTag().startsWith(TAG_PREFIX))
+            if (!statusBarNotification.getTag().startsWith(TAG_PREFIX_GUIDE))
                 continue;
             log.info("refresh notification with tag={} posttime={}, id={}, key={}",
                     statusBarNotification.getTag(),
@@ -244,15 +311,15 @@ public class NavigationNotification {
         return minRefreshAt;
     }
 
-    public static void removeAll(final Context context) {
+    public static void removeAllGuides(final Context context) {
         final NotificationManagerCompat notificationManager = getNotificationManager(context);
-        final @NonNull List<StatusBarNotification> activeNotifications =
+        final List<StatusBarNotification> activeNotifications =
                 notificationManager.getActiveNotifications();
         for (final StatusBarNotification statusBarNotification : activeNotifications) {
-            if (!statusBarNotification.getTag().startsWith(TAG_PREFIX))
+            final String tag = statusBarNotification.getTag();
+            if (!tag.startsWith(TAG_PREFIX_GUIDE))
                 continue;
             final int id = statusBarNotification.getId();
-            final String tag = statusBarNotification.getTag();
             notificationManager.cancel(tag, id);
         }
     }
@@ -261,6 +328,174 @@ public class NavigationNotification {
         NavigationAlarmManager.runOnHandlerThread(() -> {
             new NavigationNotification(intent).remove();
         });
+    }
+
+    private static final String S_ISSUE_NEVER = "never";
+    private static final String S_ISSUE_WHEN_LOCKED = "when-locked";
+    private static final String S_ISSUE_WHEN_OFF = "when-off";
+    private static final String S_ISSUE_ALWAYS = "always";
+    private static final int I_ISSUE_NEVER = 0;
+    private static final int I_ISSUE_ALWAYS = -1;
+    private static final int I_ISSUE_WHEN_LOCKED = -2;
+    private static final int I_ISSUE_WHEN_OFF = -3;
+
+    private static int getIssueConfig(final String prefKey) {
+        final String value = prefs.getString(prefKey, S_ISSUE_NEVER);
+        if (S_ISSUE_WHEN_LOCKED.equals(value))
+            return I_ISSUE_WHEN_LOCKED;
+        if (S_ISSUE_WHEN_OFF.equals(value))
+            return I_ISSUE_WHEN_OFF;
+        if (S_ISSUE_ALWAYS.equals(value))
+            return I_ISSUE_ALWAYS;
+        return I_ISSUE_NEVER;
+    }
+
+    private static final String S_REMOVE_NEVER = "never";
+    private static final String S_REMOVE_WHEN_UNLOCKED = "when-unlocked";
+    private static final String S_REMOVE_WHEN_ON = "when-on";
+    private static final int I_REMOVE_NEVER = 0;
+    private static final int I_REMOVE_WHEN_UNLOCKED = -1;
+    private static final int I_REMOVE_WHEN_ON = -2;
+
+    private static int getRemoveConfig(final String prefKey) {
+        if (prefs == null)
+            return I_REMOVE_NEVER;
+        final String value = prefs.getString(prefKey, S_REMOVE_NEVER);
+        if (Character.isDigit(value.charAt(0)))
+            return Integer.parseInt(value) * 1000;
+        if (S_REMOVE_WHEN_UNLOCKED.equals(value))
+            return I_REMOVE_WHEN_UNLOCKED;
+        if (S_REMOVE_WHEN_ON.equals(value))
+            return I_REMOVE_WHEN_ON;
+        return I_REMOVE_NEVER;
+    }
+
+    private static void onDeviceWakingUp(final Context context) {
+        // the screen has just either been turned on or unlocked
+        final boolean isScreenOn = ((PowerManager) context.getSystemService(Context.POWER_SERVICE)).isInteractive();
+        final boolean isUnlocked = !((KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE)).inKeyguardRestrictedInputMode();
+        log.info("device waking up, the screen now is {} {}", isScreenOn ? "on" : "off", isUnlocked ? "unlocked" : "locked");
+
+        final int removeChangesWhen = getRemoveConfig(PREFS_KEY_NOTIFICATIONS_CHANGES_REMOVE_WHEN);
+        final int removeDirectionsWhen = getRemoveConfig(PREFS_KEY_NOTIFICATIONS_DIRECTIONS_REMOVE_WHEN);
+
+        final long now = System.currentTimeMillis();
+        final NotificationManagerCompat notificationManager = getNotificationManager(context);
+        final List<StatusBarNotification> activeNotifications =
+                notificationManager.getActiveNotifications();
+        for (final StatusBarNotification statusBarNotification : activeNotifications) {
+            final String tag = statusBarNotification.getTag();
+            final int removeWhen;
+
+            if (tag.startsWith(TAG_PREFIX_CHANGES))
+                removeWhen = removeChangesWhen;
+            else if (tag.startsWith(TAG_PREFIX_DIRECTIONS))
+                removeWhen = removeDirectionsWhen;
+            else
+                continue;
+
+            if (removeWhen > 0) {
+                if (now - statusBarNotification.getPostTime() < removeWhen)
+                    continue;
+            } else if (removeWhen == I_REMOVE_WHEN_UNLOCKED) {
+                if (!isUnlocked)
+                    continue;
+            } else if (removeWhen == I_REMOVE_WHEN_ON) {
+                if (!isScreenOn)
+                    continue;
+            } else {
+                continue;
+            }
+            final int id = statusBarNotification.getId();
+            notificationManager.cancel(tag, id);
+        }
+    }
+
+    private static class EventNotificationData {
+        final boolean isChangeEvent;
+        final String title;
+        final String message;
+
+        EventNotificationData(
+                final boolean isChangeEvent,
+                final String title,
+                final String message) {
+            this.isChangeEvent = isChangeEvent;
+            this.title = title;
+            this.message = message;
+        }
+
+        static EventNotificationData changeEvent(final String message) {
+            return new EventNotificationData(true, notificationTitleForChanges, message);
+        }
+
+        static EventNotificationData directionsEvent(final String message) {
+            return new EventNotificationData(false, notificationTitleForDirections, message);
+        }
+    }
+
+    private static int uniqueCounter;
+
+    private void postEventNotifications(final List<EventNotificationData> dataList) {
+        final boolean isScreenOff = !((PowerManager) context.getSystemService(Context.POWER_SERVICE)).isInteractive();
+        final boolean isLocked = ((KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE)).inKeyguardRestrictedInputMode();
+
+        for (final EventNotificationData data : dataList) {
+            final boolean isChangeEvent = data.isChangeEvent;
+            final int showWhen = getIssueConfig(isChangeEvent
+                    ? PREFS_KEY_NOTIFICATIONS_CHANGES_SHOW_WHEN
+                    : PREFS_KEY_NOTIFICATIONS_DIRECTIONS_SHOW_WHEN);
+            boolean doShow;
+            if (showWhen == I_ISSUE_ALWAYS)
+                doShow = true;
+            else if (showWhen == I_ISSUE_WHEN_LOCKED)
+                doShow = isLocked;
+            else if (showWhen == I_ISSUE_WHEN_OFF)
+                doShow = isScreenOff;
+            else
+                doShow = false;
+
+            final int removeWhen = getRemoveConfig(isChangeEvent
+                    ? PREFS_KEY_NOTIFICATIONS_CHANGES_REMOVE_WHEN
+                    : PREFS_KEY_NOTIFICATIONS_DIRECTIONS_REMOVE_WHEN);
+
+            if (removeWhen == I_REMOVE_WHEN_ON) {
+                if (!isScreenOff)
+                    doShow = false;
+            } else if (removeWhen == I_REMOVE_WHEN_UNLOCKED) {
+                if (!isLocked)
+                    doShow = false;
+            }
+
+            log.info("{}posting a {} notification, the screen now is {} {}",
+                    doShow ? "" : "not ",
+                    isChangeEvent ? "change" : "direction",
+                    isScreenOff ? "off" : "on",
+                    isLocked ? "locked" : "unlocked");
+
+            if (!doShow)
+                continue;
+
+            final long now = System.currentTimeMillis();
+            final long uniqueId = (now / 1000) * 10 + uniqueCounter;
+            if (++uniqueCounter >= 10)
+                uniqueCounter = 0;
+            final String tag = (isChangeEvent ? TAG_PREFIX_CHANGES : TAG_PREFIX_DIRECTIONS) + uniqueId;
+
+            final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context,
+                    isChangeEvent ? CHANNEL_ID_CHANGES : CHANNEL_ID_DIRECTIONS)
+                    .setSmallIcon(R.drawable.ic_oeffi_directions_grey600_36dp)
+                    .setCategory(NotificationCompat.CATEGORY_EVENT)
+                    .setGroup(NOTIFICATION_GROUP_EVENTS)
+                    .setContentTitle(data.title)
+                    .setContentText(data.message)
+                    .setShowWhen(true)
+                    .setUsesChronometer(true)
+                    // .setAutoCancel(true)
+                    .setTimeoutAfter(removeWhen > 0 ? removeWhen : 0)
+                    .setSilent(true);
+            getNotificationManager(context).notify(tag, 0, notificationBuilder.build());
+        }
     }
 
     public static final class Configuration implements Serializable {
@@ -348,7 +583,7 @@ public class NavigationNotification {
     }
 
     private final Application context;
-    private boolean isDriverMode;
+    private final boolean isDriverMode;
     private final TravelAlarmManager travelAlarmManager;
     private final String notificationTag;
     private final TripDetailsActivity.IntentData intentData;
@@ -397,7 +632,7 @@ public class NavigationNotification {
             }
         }
         log.info("NOTIFICATION for TRIP: {}", b);
-        notificationTag = TAG_PREFIX + uniqueId;
+        notificationTag = TAG_PREFIX_GUIDE + uniqueId;
         final Bundle extras = getActiveNotificationExtras();
         if (extras == null) {
             this.intentData = aIntentData;
@@ -507,6 +742,7 @@ public class NavigationNotification {
 
     List<EventLogEntry> newEventLogEntries;
     List<String> newSpeakTexts;
+    List<EventNotificationData> newEventNotifications;
 
     @SuppressLint("ScheduleExactAlarm")
     private boolean update(final Trip aTrip) {
@@ -516,6 +752,7 @@ public class NavigationNotification {
         log.info("updating with {} trip updated at {}", aTrip != null ? "new" : "old", NavigationAlarmManager.LOG_TIME_FORMAT.format(tripUpdatedAtDate));
         this.newEventLogEntries = new ArrayList<>();
         this.newSpeakTexts = new ArrayList<>();
+        this.newEventNotifications = new ArrayList<>();
         // addEventOutputMessage(newEventLogEntries, "updating");
         final long tripUpdatedAt = tripUpdatedAtDate.getTime();
         final Date now = new Date();
@@ -866,8 +1103,9 @@ public class NavigationNotification {
 
         extras.putByteArray(EXTRA_DATA, Objects.serialize(newExtraData));
 
-        final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, CHANNEL_ID)
+        final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, CHANNEL_ID_GUIDE)
                 .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setGroup(notificationTag)
 //                .setSmallIcon(R.drawable.ic_oeffi_directions)
 //                .setSmallIcon(R.drawable.ic_oeffi_directions,1)
                 .setSmallIcon(R.drawable.ic_oeffi_directions_grey600_36dp)
@@ -918,6 +1156,8 @@ public class NavigationNotification {
             getNotificationManager(context).notify(notificationTag, 0, notification);
         }
 
+        postEventNotifications(newEventNotifications);
+
         if (anyChanges) {
             playAlarmSoundAndVibration(-1,
                     SOUND_ALARM,
@@ -947,7 +1187,7 @@ public class NavigationNotification {
         final NotificationSoundManager soundManager = NotificationSoundManager.getInstance();
         boolean doSpeech = false;
         if (configuration.soundEnabled) {
-            final String when = NavigationNotification.prefs.getString(Constants.PREFS_KEY_NAVIGATION_SPEECH_OUTPUT, "never");
+            final String when = NavigationNotification.prefs.getString(PREFS_KEY_NAVIGATION_SPEECH_OUTPUT, "never");
             if ("always".equals(when) || ("headphones".equals(when) && soundManager.isHeadsetConnected()))
                 doSpeech = true;
         };
@@ -1021,7 +1261,7 @@ public class NavigationNotification {
             if (newTrip != null) {
                 final boolean alarmPlayed = update(newTrip);
                 context.sendBroadcast(new Intent(ACTION_UPDATE_TRIGGER));
-                if (!alarmPlayed && prefs.getBoolean(Constants.PREFS_KEY_NAVIGATION_REFRESH_BEEP, true)) {
+                if (!alarmPlayed && prefs.getBoolean(PREFS_KEY_NAVIGATION_REFRESH_BEEP, true)) {
                     playAlarmSoundAndVibration(AudioAttributes.USAGE_NOTIFICATION, R.raw.nav_refresh_beep, null, null, false);
                 }
             } else {
@@ -1276,6 +1516,14 @@ public class NavigationNotification {
         return context.getString(R.string.navigation_event_speak_position_changed_format, newText, prevText);
     }
 
+    private String platformForNotificationMessage(final Position prevPosition, final Position newPosition) {
+        final String prevText = prevPosition == null ? "?" : prevPosition.toString();
+        final String newText = newPosition == null ? "?" : newPosition.toString();
+        if (prevText.equals(newText))
+            return context.getString(R.string.navigation_event_notify_position_unchanged_format, newText);
+        return context.getString(R.string.navigation_event_notify_position_changed_format, newText, prevText);
+    }
+
     private String timesForSpeakText(final String plannedTime, final String estimatedTime, final long delayMillis) {
         if (plannedTime == null) {
             if (estimatedTime == null)
@@ -1302,6 +1550,20 @@ public class NavigationNotification {
                 Long.toString((remainingMillis + 10000) / 60000));
     }
 
+    private String remainingTimeForNotificationText(final long remainingMillis) {
+        if (remainingMillis < 50000)
+            return context.getString(R.string.navigation_event_notify_notime_left_front_format);
+        return context.getString(R.string.navigation_event_notify_time_left_front_format,
+                Long.toString((remainingMillis + 10000) / 60000));
+    }
+
+    private String remainingTimeForNotificationAtEnd(final long remainingMillis) {
+        if (remainingMillis < 50000)
+            return context.getString(R.string.navigation_event_notify_notime_left_end_format);
+        return context.getString(R.string.navigation_event_notify_time_left_end_format,
+                Long.toString((remainingMillis + 10000) / 60000));
+    }
+
     private void addEventLogMessage(final String text) {
         newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.MESSAGE, context.getString(
                 R.string.navigation_event_log_entry_message,
@@ -1313,6 +1575,8 @@ public class NavigationNotification {
                 R.string.navigation_event_log_entry_nav_start)));
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_nav_start));
+        newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
+                R.string.navigation_event_notify_nav_start)));
     }
 
     private void addEventOutputNavigationRestarted() {
@@ -1320,6 +1584,8 @@ public class NavigationNotification {
                 R.string.navigation_event_log_entry_nav_restart)));
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_nav_restart));
+        newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
+                R.string.navigation_event_notify_nav_restart)));
     }
 
     private void addEventOutputNavigationEnded() {
@@ -1327,6 +1593,8 @@ public class NavigationNotification {
                 R.string.navigation_event_log_entry_nav_end)));
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_nav_end));
+        newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
+                R.string.navigation_event_notify_nav_end)));
     }
 
     @SuppressLint("StringFormatInvalid")
@@ -1356,6 +1624,15 @@ public class NavigationNotification {
                 platformForSpeakText(stop.plannedDeparturePosition, stop.getDeparturePosition()),
                 timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime()),
                 remainingTimeForSpeakTextAtEnd(timeLeftMs)));
+        newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
+                R.string.navigation_event_notify_transfer_start,
+                lineName,
+                locationName,
+                platformForNotificationMessage(stop.plannedDeparturePosition, stop.getDeparturePosition()),
+                plannedTimeString,
+                predictedTimeString,
+                formatTimeSpan(plannedTime, predictedTime),
+                remainingTimeForNotificationAtEnd(timeLeftMs))));
     }
 
     private void addEventOutputFinalTransferStart(
@@ -1367,6 +1644,9 @@ public class NavigationNotification {
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_final_transfer_start,
                 locationName));
+        newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
+                R.string.navigation_event_notify_final_transfer_start,
+                locationName)));
     }
 
     private void addEventOutputFinalTransferEndReminder(
@@ -1405,6 +1685,15 @@ public class NavigationNotification {
                 platformForSpeakText(stop.plannedArrivalPosition, stop.getArrivalPosition()),
                 timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime()),
                 remainingTimeForSpeakTextAtEnd(timeLeftMs)));
+        newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
+                R.string.navigation_event_notify_public_leg_start,
+                lineName,
+                locationName,
+                platformForNotificationMessage(stop.plannedArrivalPosition, stop.getArrivalPosition()),
+                plannedTimeString,
+                predictedTimeString,
+                formatTimeSpan(plannedTime, predictedTime),
+                remainingTimeForNotificationAtEnd(timeLeftMs))));
     }
 
     private void addEventOutputReminder(
@@ -1426,6 +1715,13 @@ public class NavigationNotification {
                 addEventOutputFinalTransferEndReminder(nextEventTimeLeftMs, trip.to);
             }
         }
+    }
+
+    private boolean notifyReminder(final long timeLeftMs) {
+        return prefs.getBoolean(timeLeftMs < 4 * 60000
+                        ? PREFS_KEY_NOTIFICATIONS_REMIND_2_MINUTES
+                        : PREFS_KEY_NOTIFICATIONS_REMIND_6_MINUTES,
+                true);
     }
 
     private void addEventOutputPublicLegEndReminder(
@@ -1451,6 +1747,15 @@ public class NavigationNotification {
                 locationName,
                 platformForSpeakText(stop.plannedDeparturePosition, stop.getDeparturePosition()),
                 timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime())));
+        if (notifyReminder(timeLeftMs)) {
+            newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
+                    R.string.navigation_event_notify_public_leg_end_reminder,
+                    remainingTimeForNotificationText(timeLeftMs),
+                    locationName,
+                    platformForNotificationMessage(stop.plannedArrivalPosition, stop.getArrivalPosition()),
+                    predictedTimeString,
+                    formatTimeSpan(plannedTime, predictedTime))));
+        }
     }
 
     private void addEventOutputTransferEndReminder(
@@ -1477,6 +1782,15 @@ public class NavigationNotification {
                 makeSpeakableLineName(lineName),
                 platformForSpeakText(stop.plannedDeparturePosition, stop.getDeparturePosition()),
                 timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime())));
+        if (notifyReminder(timeLeftMs)) {
+            newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
+                    R.string.navigation_event_notify_transfer_end_reminder,
+                    remainingTimeForNotificationText(timeLeftMs),
+                    lineName,
+                    platformForNotificationMessage(stop.plannedDeparturePosition, stop.getDeparturePosition()),
+                    predictedTimeString,
+                    formatTimeSpan(plannedTime, predictedTime))));
+        }
     }
 
     private void addEventOutputDepartureDelayChange(final Trip.Public publicLeg) {
@@ -1495,6 +1809,12 @@ public class NavigationNotification {
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_departure_delay_change,
                 timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime())));
+        newEventNotifications.add(EventNotificationData.changeEvent(context.getString(
+                R.string.navigation_event_notify_departure_delay_change,
+                publicLeg.line.label,
+                Formats.fullLocationName(stop.location),
+                formatTimeSpan(plannedTime, predictedTime),
+                predictedTimeString)));
     }
 
     private void addEventOutputArrivalDelayChange(
@@ -1514,6 +1834,12 @@ public class NavigationNotification {
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_arrival_delay_change,
                 timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime())));
+        newEventNotifications.add(EventNotificationData.changeEvent(context.getString(
+                R.string.navigation_event_notify_arrival_delay_change,
+                publicLeg.line.label,
+                Formats.fullLocationName(stop.location),
+                formatTimeSpan(plannedTime, predictedTime),
+                predictedTimeString)));
     }
 
     private void addEventOutputDeparturePositionChange(
@@ -1532,6 +1858,12 @@ public class NavigationNotification {
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_departure_position_change,
                 platformForSpeakText(oldPosition, newPosition)));
+        newEventNotifications.add(EventNotificationData.changeEvent(context.getString(
+                R.string.navigation_event_notify_departure_position_change,
+                platformForNotificationMessage(oldPosition, newPosition),
+                publicLeg.line.label,
+                Formats.fullLocationName(stop.location),
+                Formats.formatTime(timeZoneSelector, stop.getDepartureTime(true)))));
     }
 
     private void addEventOutputArrivalPositionChange(
@@ -1546,10 +1878,16 @@ public class NavigationNotification {
                 platformForLogMessage(oldPosition, newPosition),
                 publicLeg.line.label,
                 Formats.fullLocationName(stop.location),
-                Formats.formatTime(timeZoneSelector, stop.getDepartureTime(true)))));
+                Formats.formatTime(timeZoneSelector, stop.getArrivalTime(true)))));
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_arrival_position_change,
                 platformForSpeakText(oldPosition, newPosition)));
+        newEventNotifications.add(EventNotificationData.changeEvent(context.getString(
+                R.string.navigation_event_notify_arrival_position_change,
+                platformForNotificationMessage(oldPosition, newPosition),
+                publicLeg.line.label,
+                Formats.fullLocationName(stop.location),
+                Formats.formatTime(timeZoneSelector, stop.getArrivalTime(true)))));
     }
 
     private void addEventOutputNextTransferCritical() {
@@ -1557,6 +1895,8 @@ public class NavigationNotification {
                 R.string.navigation_event_log_entry_next_transfer_critical)));
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_next_transfer_critical));
+        newEventNotifications.add(EventNotificationData.changeEvent(context.getString(
+                R.string.navigation_event_notify_next_transfer_critical)));
     }
 
     private void addEventOutputAnyTransferCritical() {
@@ -1564,19 +1904,25 @@ public class NavigationNotification {
                 R.string.navigation_event_log_entry_any_transfer_critical)));
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_any_transfer_critical));
+        newEventNotifications.add(EventNotificationData.changeEvent(context.getString(
+                R.string.navigation_event_notify_any_transfer_critical)));
     }
 
     private String formatTimeSpan(final Date earlier, final Date later) {
-        return formatTimeSpan(later.getTime() - earlier.getTime());
+        return formatTimeSpan(later.getTime() - earlier.getTime(), "+");
     }
 
     private String formatTimeSpan(final long timeDiffMs) {
+        return formatTimeSpan(timeDiffMs, "");
+    }
+
+    private String formatTimeSpan(final long timeDiffMs, final String positivePrefix) {
         long millis = timeDiffMs;
         final boolean isNegative = millis < 0;
         if (isNegative)
             millis = -millis;
         final long minutes = (millis / 1000 + 30) / 60;
-        return (isNegative ? "-" : "") + Long.toString(minutes) + " " + context.getString(R.string.time_minutes);
+        return (isNegative ? "-" : positivePrefix) + Long.toString(minutes) + " " + context.getString(R.string.time_minutes);
     }
 
     private String makeSpeakableLineName(final String lineName) {
