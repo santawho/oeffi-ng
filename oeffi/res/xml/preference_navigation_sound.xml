@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/navigation_preferences_title" >
+
+    <Preference
+        android:summary="@string/navigation_sound_preferences_summary" />
+
+    <ListPreference
+        android:defaultValue="USAGE_NOTIFICATION_EVENT"
+        android:entries="@array/navigation_sound_channel"
+        android:entryValues="@array/navigation_sound_channel_values"
+        android:key="navigation_sound_channel_ride"
+        android:summary="@string/navigation_preferences_sound_channel_ride_summary"
+        android:title="@string/navigation_preferences_sound_channel_ride_title" />
+    <ListPreference
+        android:defaultValue="USAGE_ALARM"
+        android:entries="@array/navigation_sound_channel"
+        android:entryValues="@array/navigation_sound_channel_values"
+        android:key="navigation_sound_channel_transfer"
+        android:summary="@string/navigation_preferences_sound_channel_transfer_summary"
+        android:title="@string/navigation_preferences_sound_channel_transfer_title" />
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="navigation_use_sound_channel_headset"
+        android:summary="@string/navigation_preferences_use_sound_channel_headset_summary"
+        android:title="@string/navigation_preferences_use_sound_channel_headset_title" />
+    <ListPreference
+        android:defaultValue="USAGE_MEDIA"
+        android:entries="@array/navigation_sound_channel"
+        android:entryValues="@array/navigation_sound_channel_values"
+        android:key="navigation_sound_channel_headset"
+        android:summary="@string/navigation_preferences_sound_channel_headset_summary"
+        android:title="@string/navigation_preferences_sound_channel_headset_title" />
+    <ListPreference
+        android:defaultValue="headphones"
+        android:entries="@array/navigation_speech_output"
+        android:entryValues="@array/navigation_speech_output_values"
+        android:key="navigation_speech_output"
+        android:summary="@string/navigation_preferences_speech_output_summary"
+        android:title="@string/navigation_preferences_speech_output_title" />
+    <SeekBarPreference
+        android:key="navigation_media_channel_amplification"
+        android:defaultValue="0"
+        android:min="0"
+        android:max="100"
+        android:summary="@string/navigation_preferences_media_channel_summary"
+        android:title="@string/navigation_preferences_media_channel_title" />
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="navigation_reduced_sounds"
+        android:summary="@string/navigation_preferences_reduced_sounds_summary"
+        android:title="@string/navigation_preferences_reduced_sounds_title" />
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="navigation_refresh_beep"
+        android:summary="@string/navigation_preferences_refresh_beep_summary"
+        android:title="@string/navigation_preferences_refresh_beep_title" />
+
+</PreferenceScreen>

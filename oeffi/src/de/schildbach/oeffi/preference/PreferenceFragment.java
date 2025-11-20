@@ -22,6 +22,14 @@ public class PreferenceFragment extends android.preference.PreferenceFragment {
         }
     }
 
+    public static boolean isSuperClassOf(final String fragmentClassName) {
+        try {
+            return PreferenceFragment.class.isAssignableFrom(Class.forName(fragmentClassName));
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
     protected PreferenceActivity preferenceActivity;
     protected SharedPreferences prefs;
 

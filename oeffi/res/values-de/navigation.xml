@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="navigation_preferences_title">Navigation</string>
-    <string name="navigation_travelalarm_preferences_title">Reisewecker</string>
+
+    <string name="navigation_sound_preferences_title">Navigations-Sounds</string>
+    <string name="navigation_sound_preferences_summary">Einstellungen zur Tonausgabe während der Navigation</string>
 
     <string name="navigation_preferences_sound_channel_ride_summary">Audio Kanal, auf dem Navigations-Erinnerungen während einer Fahrt (im Zug, Bus) gespielt werden. [%s]</string>
     <string name="navigation_preferences_sound_channel_ride_title">Audio Kanal während Fahrt</string>
@@ -73,6 +75,7 @@
     <string name="navigation_travelalarm_notification_arrival_message">Ankunft in %1$s nach Plan um %2$s, heute vsl. um %3$s / noch %4$s %5$s</string>
     <string name="navigation_travelalarm_popup_button_dismiss_alarm">Alarm beenden</string>
 
+    <string name="navigation_travelalarm_preferences_title">Reisewecker</string>
     <string name="navigation_travelalarm_preferences_summary">Einstellungen zum Reisewecker</string>
     <string name="travelalarm_time_ratio_title">Gewichtung der geschätzten Zeit</string>
     <string name="travelalarm_time_ratio_summary">Die Gewichtung von geschätzter und geplanter Zeit beim Berechnen der Alarmzeit (empfohlen = 33%%) [%s%%]</string>
@@ -91,6 +94,9 @@
     <string name="travelalarm_departure_time_default_summary">Standardzeit in Minuten, auf die ein Alarm bei der Abfahrt an einem Umstieg gesetzt wird (0=aus). [%s]</string>
     <string name="travelalarm_departure_lead_time_title">Abfahrt-Vorlaufzeit</string>
     <string name="travelalarm_departure_lead_time_summary">Aktiviere den Alarm automatisch nur, wenn die Zeit vor dem Alarm vom Beginn des Umstiegs mindestens diese Anzahl Minuten ist. [%s]</string>
+
+    <string name="navigation_notifications_preferences_title">Ereignis-Benachrichtigungen</string>
+    <string name="navigation_notifications_preferences_summary">Einstellungen zur Anzeige von Benachrichtigungen zu Ereignissen, z.B. auch auf einer Smart-Watch</string>
 
     <string name="navigation_event_log_heading">Ereignisse</string>
     <string name="navigation_event_log_no_entries">Noch keine Einträge.</string>

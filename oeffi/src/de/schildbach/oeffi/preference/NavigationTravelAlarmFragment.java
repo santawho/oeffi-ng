@@ -23,11 +23,11 @@ import javax.annotation.Nullable;
 
 import de.schildbach.oeffi.R;
 
-public class TravelAlarmFragment extends PreferenceFragment {
+public class NavigationTravelAlarmFragment extends PreferenceFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        addPreferencesFromResource(R.xml.preference_travelalarm);
+        addPreferencesFromResource(R.xml.preference_navigation_travelalarm);
         setupDynamicSummary("travelalarm_time_ratio", R.string.travelalarm_time_ratio_summary);
         setupDynamicSummary("travelalarm_start_time_default", R.string.travelalarm_start_time_default_summary);
         setupDynamicSummary("travelalarm_start_lead_time", R.string.travelalarm_start_lead_time_summary);

@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="navigation_preferences_title">Navigation</string>
-    <string name="navigation_travelalarm_preferences_title">Travel Alarm</string>
+
+    <string name="navigation_sound_preferences_title">Navigation Sounds</string>
+    <string name="navigation_sound_preferences_summary">Settings regarding sounds played during navigation</string>
 
     <string name="navigation_preferences_sound_channel_ride_summary">Audio channel to play navigation reminders while being on a train, bus, etc. [%s]</string>
     <string name="navigation_preferences_sound_channel_ride_title">Audio Channel on Ride</string>
@@ -84,6 +86,7 @@
     <string name="navigation_travelalarm_notification_arrival_message">Arrival at %1$s scheduled at %2$s, today approx. at %3$s / %4$s %5$s from now</string>
     <string name="navigation_travelalarm_popup_button_dismiss_alarm">Stop Alarm</string>
 
+    <string name="navigation_travelalarm_preferences_title">Travel Alarm</string>
     <string name="navigation_travelalarm_preferences_summary">Settings regarding the travel alarm</string>
     <string name="travelalarm_time_ratio_title">Weighting of estimated time</string>
     <string name="travelalarm_time_ratio_summary">The weighting between estimated and scheduled time for computing the alarm time (recommended = 33%%) [%s%%]</string>
@@ -102,6 +105,9 @@
     <string name="travelalarm_departure_time_default_summary">Default time in minutes for alarm to be set at the departure of a changeover (0=off). [%s]</string>
     <string name="travelalarm_departure_lead_time_title">Departure lead time</string>
     <string name="travelalarm_departure_lead_time_summary">Activate alarm automatically only, when time before alarm from arrival at the changeover is at least this number of minutes. [%s]</string>
+
+    <string name="navigation_notifications_preferences_title">Event Notifications</string>
+    <string name="navigation_notifications_preferences_summary">Settings for showing notifications about events, e.g. on a smart watch</string>
 
     <string name="navigation_event_log_heading">Events</string>
     <string name="navigation_event_log_no_entries">No entries yet.</string>
