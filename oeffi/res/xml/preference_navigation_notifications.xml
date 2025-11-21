@@ -12,6 +12,11 @@
         android:summary="@string/navigation_notifications_scenarios_summary"
         android:title="@string/navigation_notifications_scenarios_title" />
 
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="navigation_notifications_enabled"
+        android:title="@string/navigation_notifications_enabled_title" />
+
     <PreferenceCategory android:title="@string/navigation_notifications_changes_category_title" >
 
         <ListPreference

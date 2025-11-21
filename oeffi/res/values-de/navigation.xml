@@ -102,6 +102,7 @@
 
     <string name="navigation_notifications_preferences_title">Ereignis-Benachrichtigungen</string>
     <string name="navigation_notifications_preferences_summary">Einstellungen zur Anzeige von Benachrichtigungen zu Ereignissen, z.B. auch auf einer Smart-Watch</string>
+    <string name="navigation_notifications_enabled_title">Verwende Ereignis-Benachrichtigungen</string>
     <string name="navigation_notifications_scenarios_title">Wähle dein Szenario …</string>
     <string name="navigation_notifications_scenarios_summary">Setze alle Einstellungen durch Wahl eines vordefierten Szenarios</string>
     <string-array name="navigation_notifications_scenarios">

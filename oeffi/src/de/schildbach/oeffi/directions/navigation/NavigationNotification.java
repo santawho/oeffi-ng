@@ -85,6 +85,7 @@ public class NavigationNotification {
     public static final String PREFS_KEY_NAVIGATION_SPEECH_OUTPUT = "navigation_speech_output";
     public static final String PREFS_KEY_NAVIGATION_REDUCED_SOUNDS = "navigation_reduced_sounds";
     public static final String PREFS_KEY_NAVIGATION_REFRESH_BEEP = "navigation_refresh_beep";
+    public static final String PREFS_KEY_NOTIFICATIONS_ENABLED = "navigation_notifications_enabled";
     public static final String PREFS_KEY_NOTIFICATIONS_CHANGES_SHOW_WHEN = "navigation_notification_changes_show_when";
     public static final String PREFS_KEY_NOTIFICATIONS_CHANGES_REMOVE_WHEN = "navigation_notification_changes_remove_when";
     public static final String PREFS_KEY_NOTIFICATIONS_DIRECTIONS_SHOW_WHEN = "navigation_notification_directions_show_when";
@@ -146,6 +147,8 @@ public class NavigationNotification {
     private static SharedPreferences prefs;
 
     public static void createNotificationChannels(final Context context) {
+        prefs = Application.getInstance().getSharedPreferences();
+
         TravelAlarmManager.createNotificationChannel(context);
         if (notificationChannelsCreated)
             return;
@@ -376,6 +379,14 @@ public class NavigationNotification {
         final boolean isUnlocked = !((KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE)).inKeyguardRestrictedInputMode();
         log.info("device waking up, the screen now is {} {}", isScreenOn ? "on" : "off", isUnlocked ? "unlocked" : "locked");
 
+        if (prefs.getBoolean(PREFS_KEY_NOTIFICATIONS_ENABLED, false))
+            cleanupEventNotifications(context, isScreenOn, isUnlocked);
+    }
+
+    private static void cleanupEventNotifications(
+            final Context context,
+            final boolean isScreenOn,
+            final boolean isUnlocked) {
         final int removeChangesWhen = getRemoveConfig(PREFS_KEY_NOTIFICATIONS_CHANGES_REMOVE_WHEN);
         final int removeDirectionsWhen = getRemoveConfig(PREFS_KEY_NOTIFICATIONS_DIRECTIONS_REMOVE_WHEN);
 
@@ -494,7 +505,10 @@ public class NavigationNotification {
                     // .setAutoCancel(true)
                     .setTimeoutAfter(removeWhen > 0 ? removeWhen : 0)
                     .setSilent(true);
-            getNotificationManager(context).notify(tag, 0, notificationBuilder.build());
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+                    == PackageManager.PERMISSION_GRANTED) {
+                getNotificationManager(context).notify(tag, 0, notificationBuilder.build());
+            }
         }
     }
 
@@ -583,6 +597,7 @@ public class NavigationNotification {
     }
 
     private final Application context;
+    private final boolean isEventNotificationsEnabled;
     private final boolean isDriverMode;
     private final TravelAlarmManager travelAlarmManager;
     private final String notificationTag;
@@ -600,9 +615,8 @@ public class NavigationNotification {
             final Configuration configuration,
             final TripRenderer.NotificationData lastNotified) {
         this.context = Application.getInstance();
-        if (NavigationNotification.prefs == null)
-            NavigationNotification.prefs = context.getSharedPreferences();
         this.isDriverMode = prefs.getBoolean(Constants.KEY_EXTRAS_DRIVERMODE_ENABLED, false);
+        this.isEventNotificationsEnabled = prefs.getBoolean(PREFS_KEY_NOTIFICATIONS_ENABLED, false);
         this.travelAlarmManager = new TravelAlarmManager(context);
         final Trip trip = aIntentData.trip;
         final String uniqueId = trip.getUniqueId();
@@ -1575,8 +1589,10 @@ public class NavigationNotification {
                 R.string.navigation_event_log_entry_nav_start)));
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_nav_start));
-        newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
-                R.string.navigation_event_notify_nav_start)));
+        if (isEventNotificationsEnabled) {
+            newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
+                    R.string.navigation_event_notify_nav_start)));
+        }
     }
 
     private void addEventOutputNavigationRestarted() {
@@ -1584,8 +1600,10 @@ public class NavigationNotification {
                 R.string.navigation_event_log_entry_nav_restart)));
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_nav_restart));
-        newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
-                R.string.navigation_event_notify_nav_restart)));
+        if (isEventNotificationsEnabled) {
+            newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
+                    R.string.navigation_event_notify_nav_restart)));
+        }
     }
 
     private void addEventOutputNavigationEnded() {
@@ -1593,8 +1611,10 @@ public class NavigationNotification {
                 R.string.navigation_event_log_entry_nav_end)));
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_nav_end));
-        newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
-                R.string.navigation_event_notify_nav_end)));
+        if (isEventNotificationsEnabled) {
+            newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
+                    R.string.navigation_event_notify_nav_end)));
+        }
     }
 
     @SuppressLint("StringFormatInvalid")
@@ -1624,15 +1644,17 @@ public class NavigationNotification {
                 platformForSpeakText(stop.plannedDeparturePosition, stop.getDeparturePosition()),
                 timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime()),
                 remainingTimeForSpeakTextAtEnd(timeLeftMs)));
-        newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
-                R.string.navigation_event_notify_transfer_start,
-                lineName,
-                locationName,
-                platformForNotificationMessage(stop.plannedDeparturePosition, stop.getDeparturePosition()),
-                plannedTimeString,
-                predictedTimeString,
-                formatTimeSpan(plannedTime, predictedTime),
-                remainingTimeForNotificationAtEnd(timeLeftMs))));
+        if (isEventNotificationsEnabled) {
+            newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
+                    R.string.navigation_event_notify_transfer_start,
+                    lineName,
+                    locationName,
+                    platformForNotificationMessage(stop.plannedDeparturePosition, stop.getDeparturePosition()),
+                    plannedTimeString,
+                    predictedTimeString,
+                    formatTimeSpan(plannedTime, predictedTime),
+                    remainingTimeForNotificationAtEnd(timeLeftMs))));
+        }
     }
 
     private void addEventOutputFinalTransferStart(
@@ -1644,9 +1666,11 @@ public class NavigationNotification {
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_final_transfer_start,
                 locationName));
-        newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
-                R.string.navigation_event_notify_final_transfer_start,
-                locationName)));
+        if (isEventNotificationsEnabled) {
+            newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
+                    R.string.navigation_event_notify_final_transfer_start,
+                    locationName)));
+        }
     }
 
     private void addEventOutputFinalTransferEndReminder(
@@ -1685,15 +1709,17 @@ public class NavigationNotification {
                 platformForSpeakText(stop.plannedArrivalPosition, stop.getArrivalPosition()),
                 timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime()),
                 remainingTimeForSpeakTextAtEnd(timeLeftMs)));
-        newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
-                R.string.navigation_event_notify_public_leg_start,
-                lineName,
-                locationName,
-                platformForNotificationMessage(stop.plannedArrivalPosition, stop.getArrivalPosition()),
-                plannedTimeString,
-                predictedTimeString,
-                formatTimeSpan(plannedTime, predictedTime),
-                remainingTimeForNotificationAtEnd(timeLeftMs))));
+        if (isEventNotificationsEnabled) {
+            newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
+                    R.string.navigation_event_notify_public_leg_start,
+                    lineName,
+                    locationName,
+                    platformForNotificationMessage(stop.plannedArrivalPosition, stop.getArrivalPosition()),
+                    plannedTimeString,
+                    predictedTimeString,
+                    formatTimeSpan(plannedTime, predictedTime),
+                    remainingTimeForNotificationAtEnd(timeLeftMs))));
+        }
     }
 
     private void addEventOutputReminder(
@@ -1718,6 +1744,8 @@ public class NavigationNotification {
     }
 
     private boolean notifyReminder(final long timeLeftMs) {
+        if (!isEventNotificationsEnabled)
+            return false;
         return prefs.getBoolean(timeLeftMs < 4 * 60000
                         ? PREFS_KEY_NOTIFICATIONS_REMIND_2_MINUTES
                         : PREFS_KEY_NOTIFICATIONS_REMIND_6_MINUTES,
@@ -1809,12 +1837,14 @@ public class NavigationNotification {
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_departure_delay_change,
                 timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime())));
-        newEventNotifications.add(EventNotificationData.changeEvent(context.getString(
-                R.string.navigation_event_notify_departure_delay_change,
-                publicLeg.line.label,
-                Formats.fullLocationName(stop.location),
-                formatTimeSpan(plannedTime, predictedTime),
-                predictedTimeString)));
+        if (isEventNotificationsEnabled) {
+            newEventNotifications.add(EventNotificationData.changeEvent(context.getString(
+                    R.string.navigation_event_notify_departure_delay_change,
+                    publicLeg.line.label,
+                    Formats.fullLocationName(stop.location),
+                    formatTimeSpan(plannedTime, predictedTime),
+                    predictedTimeString)));
+        }
     }
 
     private void addEventOutputArrivalDelayChange(
@@ -1834,12 +1864,14 @@ public class NavigationNotification {
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_arrival_delay_change,
                 timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime())));
-        newEventNotifications.add(EventNotificationData.changeEvent(context.getString(
-                R.string.navigation_event_notify_arrival_delay_change,
-                publicLeg.line.label,
-                Formats.fullLocationName(stop.location),
-                formatTimeSpan(plannedTime, predictedTime),
-                predictedTimeString)));
+        if (isEventNotificationsEnabled) {
+            newEventNotifications.add(EventNotificationData.changeEvent(context.getString(
+                    R.string.navigation_event_notify_arrival_delay_change,
+                    publicLeg.line.label,
+                    Formats.fullLocationName(stop.location),
+                    formatTimeSpan(plannedTime, predictedTime),
+                    predictedTimeString)));
+        }
     }
 
     private void addEventOutputDeparturePositionChange(
@@ -1858,12 +1890,14 @@ public class NavigationNotification {
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_departure_position_change,
                 platformForSpeakText(oldPosition, newPosition)));
-        newEventNotifications.add(EventNotificationData.changeEvent(context.getString(
-                R.string.navigation_event_notify_departure_position_change,
-                platformForNotificationMessage(oldPosition, newPosition),
-                publicLeg.line.label,
-                Formats.fullLocationName(stop.location),
-                Formats.formatTime(timeZoneSelector, stop.getDepartureTime(true)))));
+        if (isEventNotificationsEnabled) {
+            newEventNotifications.add(EventNotificationData.changeEvent(context.getString(
+                    R.string.navigation_event_notify_departure_position_change,
+                    platformForNotificationMessage(oldPosition, newPosition),
+                    publicLeg.line.label,
+                    Formats.fullLocationName(stop.location),
+                    Formats.formatTime(timeZoneSelector, stop.getDepartureTime(true)))));
+        }
     }
 
     private void addEventOutputArrivalPositionChange(
@@ -1882,12 +1916,14 @@ public class NavigationNotification {
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_arrival_position_change,
                 platformForSpeakText(oldPosition, newPosition)));
-        newEventNotifications.add(EventNotificationData.changeEvent(context.getString(
-                R.string.navigation_event_notify_arrival_position_change,
-                platformForNotificationMessage(oldPosition, newPosition),
-                publicLeg.line.label,
-                Formats.fullLocationName(stop.location),
-                Formats.formatTime(timeZoneSelector, stop.getArrivalTime(true)))));
+        if (isEventNotificationsEnabled) {
+            newEventNotifications.add(EventNotificationData.changeEvent(context.getString(
+                    R.string.navigation_event_notify_arrival_position_change,
+                    platformForNotificationMessage(oldPosition, newPosition),
+                    publicLeg.line.label,
+                    Formats.fullLocationName(stop.location),
+                    Formats.formatTime(timeZoneSelector, stop.getArrivalTime(true)))));
+        }
     }
 
     private void addEventOutputNextTransferCritical() {
@@ -1895,8 +1931,10 @@ public class NavigationNotification {
                 R.string.navigation_event_log_entry_next_transfer_critical)));
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_next_transfer_critical));
-        newEventNotifications.add(EventNotificationData.changeEvent(context.getString(
-                R.string.navigation_event_notify_next_transfer_critical)));
+        if (isEventNotificationsEnabled) {
+            newEventNotifications.add(EventNotificationData.changeEvent(context.getString(
+                    R.string.navigation_event_notify_next_transfer_critical)));
+        }
     }
 
     private void addEventOutputAnyTransferCritical() {
@@ -1904,8 +1942,10 @@ public class NavigationNotification {
                 R.string.navigation_event_log_entry_any_transfer_critical)));
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_any_transfer_critical));
-        newEventNotifications.add(EventNotificationData.changeEvent(context.getString(
-                R.string.navigation_event_notify_any_transfer_critical)));
+        if (isEventNotificationsEnabled) {
+            newEventNotifications.add(EventNotificationData.changeEvent(context.getString(
+                    R.string.navigation_event_notify_any_transfer_critical)));
+        }
     }
 
     private String formatTimeSpan(final Date earlier, final Date later) {
