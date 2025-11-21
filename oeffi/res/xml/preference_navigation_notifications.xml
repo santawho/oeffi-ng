@@ -5,6 +5,13 @@
     <Preference
         android:summary="@string/navigation_notifications_preferences_summary" />
 
+    <de.schildbach.oeffi.preference.ScenarioSelectorPreference
+        android:entries="@array/navigation_notifications_scenarios"
+        android:entryValues="@array/navigation_notifications_scenario_values"
+        android:key="navigation_notification_scenario"
+        android:summary="@string/navigation_notifications_scenarios_summary"
+        android:title="@string/navigation_notifications_scenarios_title" />
+
     <PreferenceCategory android:title="@string/navigation_notifications_changes_category_title" >
 
         <ListPreference
