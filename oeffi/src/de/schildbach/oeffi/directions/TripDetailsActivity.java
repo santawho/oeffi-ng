@@ -595,7 +595,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         backgroundHandler.post(() -> {
             try {
                 final Intent intent = scheduleTripIntent(tripRenderer.trip, true);
-                runOnUiThread(() -> startActivity(intent));
+                if (intent != null)
+                    runOnUiThread(() -> startActivity(intent));
             } catch (final ActivityNotFoundException x) {
                 new Toast(this).longToast(R.string.directions_trip_details_action_calendar_notfound);
             }
@@ -2465,8 +2466,17 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     private Intent scheduleTripIntent(final Trip trip, final boolean withLink) {
+        Integer calendarId = null;
+//        if (CalendarHelper.hasCalendarPermissions(this)) {
+//            calendarId = CalendarHelper.findCalendarForName(this, "Reisen");
+//        } else if (CalendarHelper.requestCalendarPermissions(this)) {
+//            return null;
+//        }
+
         final Intent intent = new Intent(Intent.ACTION_INSERT);
         intent.setData(CalendarContract.Events.CONTENT_URI);
+        if (calendarId != null)
+            intent.putExtra(CalendarContract.Events.CALENDAR_ID, calendarId.intValue());
         intent.putExtra(CalendarContract.Events.TITLE, getString(R.string.directions_trip_details_text_long_title,
                 trip.from.uniqueShortName(), trip.to.uniqueShortName()));
         intent.putExtra(CalendarContract.Events.DESCRIPTION, tripToLongText(trip, withLink));
