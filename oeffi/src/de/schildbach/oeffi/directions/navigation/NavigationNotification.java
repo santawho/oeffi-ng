@@ -1411,14 +1411,14 @@ public class NavigationNotification {
             final int id_navigation_notification_next_event_positions_to_walk_arrow = isBigPositions
                     ? R.id.navigation_notification_next_event_positions_to_walk_arrow_big
                     : R.id.navigation_notification_next_event_positions_to_walk_arrow_small;
+            final int iconId = tripRenderer.nextEventTransferIconId;
             if (tripRenderer.nextEventStopChange) {
-                final int iconId = tripRenderer.nextEventTransferIconId;
                 remoteViews.setImageViewResource(id_navigation_notification_next_event_positions_walk_icon,
                         iconId != 0 ? iconId : R.drawable.ic_directions_walk_grey600_24dp);
                 remoteViews.setViewVisibility(id_navigation_notification_next_event_positions_walk_icon, View.VISIBLE);
                 remoteViews.setViewVisibility(id_navigation_notification_next_event_positions_from_walk_arrow, View.VISIBLE);
                 remoteViews.setViewVisibility(id_navigation_notification_next_event_positions_to_walk_arrow, View.VISIBLE);
-            } else {
+            } else if (iconId == 0) {
                 remoteViews.setViewVisibility(id_navigation_notification_next_event_positions_walk_icon, View.GONE);
                 if (tripRenderer.nextEventDeparturePosName != null) {
                     remoteViews.setViewVisibility(id_navigation_notification_next_event_positions_to_walk_arrow, View.VISIBLE);
@@ -1428,6 +1428,13 @@ public class NavigationNotification {
                     remoteViews.setViewVisibility(id_navigation_notification_next_event_positions_from_walk_arrow,
                             tripRenderer.nextEventArrivalPosName != null ? View.VISIBLE : View.GONE);
                 }
+            } else {
+                remoteViews.setImageViewResource(id_navigation_notification_next_event_positions_walk_icon, iconId);
+                remoteViews.setViewVisibility(id_navigation_notification_next_event_positions_walk_icon, View.VISIBLE);
+                remoteViews.setViewVisibility(id_navigation_notification_next_event_positions_to_walk_arrow,
+                        tripRenderer.nextEventDeparturePosName != null ? View.VISIBLE : View.GONE);
+                remoteViews.setViewVisibility(id_navigation_notification_next_event_positions_from_walk_arrow,
+                        tripRenderer.nextEventArrivalPosName != null ? View.VISIBLE : View.GONE);
             }
         }
 

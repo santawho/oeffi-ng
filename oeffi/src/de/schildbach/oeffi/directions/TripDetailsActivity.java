@@ -1714,20 +1714,20 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 positionsWalkIcon.setVisibility(View.VISIBLE);
                 positionsFromWalkArrow.setVisibility(View.VISIBLE);
                 positionsToWalkArrow.setVisibility(View.VISIBLE);
-            } else {
-                if (iconId == 0) {
-                    positionsWalkIcon.setVisibility(View.GONE);
-                } else {
-                    positionsWalkIcon.setImageDrawable(res.getDrawable(iconId));
-                    positionsWalkIcon.setVisibility(View.VISIBLE);
-                }
+            } else if (iconId == 0) {
+                positionsWalkIcon.setVisibility(View.GONE);
                 if (tripRenderer.nextEventDeparturePosName != null) {
                     positionsToWalkArrow.setVisibility(View.VISIBLE);
                     positionsFromWalkArrow.setVisibility(View.GONE);
                 } else {
                     positionsToWalkArrow.setVisibility(View.GONE);
-                    positionsFromWalkArrow.setVisibility(tripRenderer.nextEventArrivalPosName != null ? View.VISIBLE : View.GONE);
+                    ViewUtils.setVisibility(positionsFromWalkArrow, tripRenderer.nextEventArrivalPosName != null);
                 }
+            } else {
+                positionsWalkIcon.setImageDrawable(res.getDrawable(iconId));
+                positionsWalkIcon.setVisibility(View.VISIBLE);
+                ViewUtils.setVisibility(positionsToWalkArrow, tripRenderer.nextEventDeparturePosName != null);
+                ViewUtils.setVisibility(positionsFromWalkArrow, tripRenderer.nextEventArrivalPosName != null);
             }
 
             final LinearLayout fromLayout = findViewById(R.id.navigation_next_event_positions_from_layout);
