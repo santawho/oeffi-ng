@@ -222,9 +222,9 @@
     <string name="directions_location_view_menu_description">mehr</string>
     <string name="directions_location_view_clear_description">löschen</string>
     <string name="directions_location_view_mode_description">Typ wechseln</string>
-    <string name="directions_from">Start der Verbindung</string>
-    <string name="directions_via">Zwischenhalt</string>
-    <string name="directions_to">Endpunkt</string>
+    <string name="directions_from">Von …</string>
+    <string name="directions_via">Über …</string>
+    <string name="directions_to">Nach …</string>
     <string name="directions_option_bike">Fahrradmitnahme</string>
     <string name="directions_time_arr_dep_description">Abfahrt/Ankunft</string>
     <string name="directions_time_dep">ab ↦</string>
@@ -284,7 +284,7 @@
     <!-- location selector -->
     <string name="directions_location_selector_context_pin_title">Anheften</string>
     <string name="directions_location_selector_context_unpin_title">Anheftung entfernen</string>
-    <string name="directions_location_selector_context_set_from_title">Als Abgang</string>
+    <string name="directions_location_selector_context_set_from_title">Als Start</string>
     <string name="directions_location_selector_context_set_to_title">Als Ziel</string>
     <string name="directions_location_selector_context_set_via_title">Als Via</string>
     <string name="directions_location_selector_context_delete_title">Löschen</string>
