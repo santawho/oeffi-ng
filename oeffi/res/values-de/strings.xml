@@ -57,6 +57,10 @@
     <!-- preferences shortcuts -->
     <string name="shortcuts_preferences_title">Startbildschirm-Verknüpfungen</string>
     <string name="shortcuts_preferences_summary">Erstelle Verknüpfungen auf dem Startbildschirm</string>
+    <string name="shortcuts_nearby_stations_assistant_title">Setze \"Nahegelegene Haltestellen\" als Assistenten-App</string>
+    <string name="shortcuts_nearby_stations_assistant_already_set_message">\"Nahegelegene Haltestellen\" ist bereits als Assistenten-App setzbar. Möchtest Du es vielleicht entfernen?</string>
+    <string name="shortcuts_nearby_stations_assistant_already_set_remove_button">Entfernen</string>
+    <string name="shortcuts_nearby_stations_assistant_already_set_again_button">Nochmal wählen</string>
 
     <!-- preferences about -->
     <string name="about_title">Über %1$s</string>

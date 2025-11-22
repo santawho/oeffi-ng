@@ -24,6 +24,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -90,6 +91,7 @@ public class Application extends android.app.Application {
         return instance.getPackageName();
     }
 
+    private String commonPackageName;
     private PackageInfo packageInfo;
     private OkHttpClient okHttpClient;
     private File logFile;
@@ -234,6 +236,7 @@ public class Application extends android.app.Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        commonPackageName = getClass().getPackage().getName();
 
         systemTimeZoneSelector = new TimeZoneSelector(this);
         initLogging();
@@ -410,6 +413,26 @@ public class Application extends android.app.Application {
 
     public PackageInfo packageInfo() {
         return packageInfo;
+    }
+
+    private ComponentName getComponentName(final String componentName) {
+        return new ComponentName(this,
+                componentName.startsWith(".") ? commonPackageName + componentName : componentName);
+    }
+
+    public boolean isComponentEnabled(final String componentName, final boolean defaultValue) {
+        final int setting = getPackageManager().getComponentEnabledSetting(getComponentName(componentName));
+        if (setting == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT)
+            return defaultValue;
+        return setting == PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+    }
+
+    public void setComponentEnabled(final String componentName, final boolean enabled) {
+        getPackageManager().setComponentEnabledSetting(getComponentName(componentName),
+                enabled
+                        ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                        : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                PackageManager.DONT_KILL_APP);
     }
 
     public OkHttpClient okHttpClient() {

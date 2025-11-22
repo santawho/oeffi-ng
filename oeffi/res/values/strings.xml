@@ -57,6 +57,10 @@
     <!-- preferences shortcuts -->
     <string name="shortcuts_preferences_title">Homescreen Shortcuts</string>
     <string name="shortcuts_preferences_summary">Create shortcuts on homescreen</string>
+    <string name="shortcuts_nearby_stations_assistant_title">Set \"Nearby Stations\" as assistant app</string>
+    <string name="shortcuts_nearby_stations_assistant_already_set_message">\"Nearby Stations\" is already settable as assistant app. Do you probably want to remove this setting?</string>
+    <string name="shortcuts_nearby_stations_assistant_already_set_remove_button">Remove</string>
+    <string name="shortcuts_nearby_stations_assistant_already_set_again_button">Choose again</string>
 
     <!-- preferences about -->
     <string name="about_title">About %1$s</string>

@@ -22,6 +22,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.Settings;
 
 import androidx.core.content.pm.ShortcutInfoCompat;
 import androidx.core.content.pm.ShortcutManagerCompat;
@@ -29,16 +30,19 @@ import androidx.core.graphics.drawable.IconCompat;
 
 import javax.annotation.Nullable;
 
+import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.plans.PlansPickerActivity;
 import de.schildbach.oeffi.stations.StationsActivity;
+import de.schildbach.oeffi.util.DialogBuilder;
 
 public class ShortcutsFragment extends PreferenceFragment {
 
     public static final String KEY_SHORTCUTS_DIRECTIONS = "shortcuts_directions";
     public static final String KEY_SHORTCUTS_STATIONS = "shortcuts_stations";
     public static final String KEY_SHORTCUTS_PLANS = "shortcuts_plans";
+    public static final String KEY_SHORTCUTS_NEARBY_STATIONS_ASSISTANT = "shortcuts_nearby_stations_assistant";
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -48,6 +52,7 @@ public class ShortcutsFragment extends PreferenceFragment {
         setupActionPreference(KEY_SHORTCUTS_DIRECTIONS, DirectionsShortcutActionHandler.class);
         setupActionPreference(KEY_SHORTCUTS_STATIONS, StationsShortcutActionHandler.class);
         setupActionPreference(KEY_SHORTCUTS_PLANS, PlansShortcutActionHandler.class);
+        setupActionPreference(KEY_SHORTCUTS_NEARBY_STATIONS_ASSISTANT, NearbyStationsAssistantActionHandler.class);
     }
 
     public static class DirectionsShortcutActionHandler extends ActionHandler {
@@ -79,6 +84,43 @@ public class ShortcutsFragment extends PreferenceFragment {
                     PlansPickerActivity.class,
                     R.string.plans_icon_label,
                     R.mipmap.ic_oeffi_ng_plans_color_48dp);
+            return true;
+        }
+    }
+
+    public static class NearbyStationsAssistantActionHandler extends ActionHandler {
+
+        public static final String COMPONENT_NAME_ASSIST_NEARBY_STATIONS = ".ASSIST.NEARBY_STATIONS";
+
+        @Override
+        public boolean handleAction(final PreferenceActivity context, final String prefkey) {
+            // enable activity alias having the ACTION_ASSIST intent filter
+            final Application application = Application.getInstance();
+            final boolean isEnabled = application.isComponentEnabled(COMPONENT_NAME_ASSIST_NEARBY_STATIONS, false);
+            if (isEnabled) {
+                DialogBuilder.get(context)
+                        .setMessage(R.string.shortcuts_nearby_stations_assistant_already_set_message)
+                        .setPositiveButton(R.string.shortcuts_nearby_stations_assistant_already_set_again_button,
+                                (dialog, which) -> {
+                                    // show system settings to choose default assistant app again
+                                    context.startActivity(new Intent(Settings.ACTION_VOICE_INPUT_SETTINGS));
+                                    context.finish();
+                                })
+                        .setNegativeButton(R.string.shortcuts_nearby_stations_assistant_already_set_remove_button,
+                                (dialog, which) -> {
+                                    application.setComponentEnabled(COMPONENT_NAME_ASSIST_NEARBY_STATIONS, false);
+                                    // show system settings to choose another default assistant app
+                                    context.startActivity(new Intent(Settings.ACTION_VOICE_INPUT_SETTINGS));
+                                    context.finish();
+                                })
+                        .setCancelable(false)
+                        .create().show();
+                return false;
+            } else {
+                application.setComponentEnabled(COMPONENT_NAME_ASSIST_NEARBY_STATIONS, true);
+                // show system settings to choose new default assistant app
+                context.startActivity(new Intent(Settings.ACTION_VOICE_INPUT_SETTINGS));
+            }
             return true;
         }
     }

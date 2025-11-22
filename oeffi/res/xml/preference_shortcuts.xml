@@ -14,5 +14,9 @@
         android:key="shortcuts_plans"
         android:title="@string/plans_activity_title">
     </Preference>
+    <Preference
+        android:key="shortcuts_nearby_stations_assistant"
+        android:title="@string/shortcuts_nearby_stations_assistant_title">
+    </Preference>
 
 </PreferenceScreen>
