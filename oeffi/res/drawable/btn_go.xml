@@ -15,7 +15,7 @@
     <item >
         <shape android:shape="rectangle"  >
             <corners android:radius="@dimen/text_padding_horizontal_lax" />
-            <solid android:color="#ff6040"/>
+            <solid android:color="#AB4C38"/>
         </shape>
     </item>
 </selector>
