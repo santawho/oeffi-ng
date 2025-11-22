@@ -191,9 +191,9 @@
     <string name="navigation_event_notify_nav_start">Navigation beginnt</string>
     <string name="navigation_event_notify_nav_restart">Navigation startet neu</string>
     <string name="navigation_event_notify_nav_end">Navigation beendet</string>
-    <string name="navigation_event_notify_public_leg_start">Fahre mit %1$s nach %2$s, %3$s, plan %4$s, prog %5$s, %6$s</string>
+    <string name="navigation_event_notify_public_leg_start">Fahre mit %1$s nach %2$s, %3$s, plan %4$s, prog %5$s, %6$s, %7$s</string>
     <string name="navigation_event_notify_public_leg_end_reminder">%1$s Ankunft in %2$s, %3$s, prog %4$s, %5$s</string>
-    <string name="navigation_event_notify_transfer_start">Gehe zu Abf. %1$s in %2$s, %3$s, plan %4$s, prog %5$s, %6$s</string>
+    <string name="navigation_event_notify_transfer_start">Gehe zu Abf. %1$s in %2$s, %3$s, plan %4$s, prog %5$s, %6$s, %7$s</string>
     <string name="navigation_event_notify_transfer_end_reminder">%1$s Abfahrt %2$s an %3$s, prog %4$s, %5$s</string>
     <string name="navigation_event_notify_final_transfer_start">schließlich gehe nach %1$s</string>
     <string name="navigation_event_notify_departure_delay_change">Versp. Abfahrt %1$s in %2$s: %3$s, prog %4$s</string>

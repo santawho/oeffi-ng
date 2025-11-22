@@ -224,9 +224,9 @@
     <string name="navigation_event_notify_nav_start">Navigation begins</string>
     <string name="navigation_event_notify_nav_restart">Navigation restarting</string>
     <string name="navigation_event_notify_nav_end">Navigation finished</string>
-    <string name="navigation_event_notify_public_leg_start">Take %1$s to %2$s, %3$s, sched %4$s, est %5$s, %6$s</string>
+    <string name="navigation_event_notify_public_leg_start">Take %1$s to %2$s, %3$s, sched %4$s, est %5$s, %6$s, %7$s</string>
     <string name="navigation_event_notify_public_leg_end_reminder">%1$s arrival at %2$s, %3$s, est %4$s, %5$s</string>
-    <string name="navigation_event_notify_transfer_start">Go to depart. %1$s at %2$s, %3$s, sched %4$s, est %5$s, %6$s</string>
+    <string name="navigation_event_notify_transfer_start">Go to depart. %1$s at %2$s, %3$s, sched %4$s, est %5$s, %6$s, %7$s</string>
     <string name="navigation_event_notify_transfer_end_reminder">%1$s depart. %2$s at %3$s, est %4$s, %5$s</string>
     <string name="navigation_event_notify_final_transfer_start">finally go to %1$s</string>
     <string name="navigation_event_notify_departure_delay_change">Delayed depart. %1$s at %2$s: %3$s, est %4$s</string>
