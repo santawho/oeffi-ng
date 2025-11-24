@@ -1,4 +1,8 @@
-v13.0.11-v13.0.15
+v13.0.17
+
+* Remove regions: Chicago (USA), Austin (USA)
+
+v13.0.11-v13.0.16
 
 * Add region again: Poland (PKP)
 

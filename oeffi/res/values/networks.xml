@@ -129,10 +129,6 @@
     <string name="network_dub_comment">local</string>
     <string name="network_bart_label">San Francisco</string>
     <string name="network_bart_comment">local and regional</string>
-    <string name="network_rtachicago_label">Chicago</string>
-    <string name="network_rtachicago_comment">local and regional</string>
-    <string name="network_cmta_label">Austin, Texas</string>
-    <string name="network_cmta_comment">local and regional</string>
     <string name="network_sydney_label">Sydney</string>
     <string name="network_sydney_comment">local and regional</string>
     <string name="network_met_label">Melbourne</string>

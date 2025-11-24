@@ -287,30 +287,6 @@ public class Application extends android.app.Application {
         for (final File file : getFilesDir().listFiles(filter))
             file.delete();
 
-        // 2023-01-09: migrate VMS to use VVO
-        final String VMS = "VMS";
-        migrateSelectedNetwork(VMS, NetworkId.VVO);
-        FavoriteStationsProvider.migrateFavoriteStations(this, VMS, NetworkId.VVO);
-        QueryHistoryProvider.migrateQueryHistory(this, VMS, NetworkId.VVO);
-
-        // 2023-11-05: migrate TFI to use RT
-        final String TFI = "TFI";
-        migrateSelectedNetwork(TFI, NetworkId.RT);
-        FavoriteStationsProvider.deleteFavoriteStations(this, TFI);
-        QueryHistoryProvider.deleteQueryHistory(this, TFI);
-
-        // 2023-11-16: migrate AVV to use AVV_AUGSBURG
-        final String AVV = "AVV";
-        migrateSelectedNetwork(AVV, NetworkId.AVV_AUGSBURG);
-        FavoriteStationsProvider.deleteFavoriteStations(this, AVV);
-        QueryHistoryProvider.deleteQueryHistory(this, AVV);
-
-        // 2023-12-17: migrate SNCB to use RT
-        final String SNCB = "SNCB";
-        migrateSelectedNetwork(SNCB, NetworkId.RT);
-        FavoriteStationsProvider.deleteFavoriteStations(this, SNCB);
-        QueryHistoryProvider.deleteQueryHistory(this, SNCB);
-
         // 2024-04-27: EFA-ID migration of MVV
         FavoriteStationsProvider.migrateFavoriteStationIds(this, NetworkId.MVV, "0", "10000", 91000000);
         QueryHistoryProvider.migrateQueryHistoryIds(this, NetworkId.MVV, "0", "10000", 91000000);
@@ -350,6 +326,18 @@ public class Application extends android.app.Application {
         migrateSelectedNetwork(NICARAGUA, NetworkId.RT);
         FavoriteStationsProvider.deleteFavoriteStations(this, NICARAGUA);
         QueryHistoryProvider.deleteQueryHistory(this, NICARAGUA);
+
+        // 2025-11-18: migrate CMTA to use BART
+        final String CMTA = "CMTA";
+        migrateSelectedNetwork(CMTA, NetworkId.BART);
+        FavoriteStationsProvider.deleteFavoriteStations(this, CMTA);
+        QueryHistoryProvider.deleteQueryHistory(this, CMTA);
+
+        // 2025-11-18: migrate RTACHICAGO to use BART
+        final String RTACHICAGO = "RTACHICAGO";
+        migrateSelectedNetwork(RTACHICAGO, NetworkId.BART);
+        FavoriteStationsProvider.deleteFavoriteStations(this, RTACHICAGO);
+        QueryHistoryProvider.deleteQueryHistory(this, RTACHICAGO);
 
         log.info("Migrations took {}", watch);
     }

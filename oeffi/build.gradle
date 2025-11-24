@@ -36,7 +36,7 @@ dependencies {
 
 android {
     compileSdkVersion 'android-34'
-    buildToolsVersion '35.0.0'
+    buildToolsVersion '36.1.0'
 
     defaultConfig {
         generatedDensities = ['hdpi', 'xhdpi']
