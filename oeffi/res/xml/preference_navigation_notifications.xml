@@ -56,12 +56,12 @@
             android:title="@string/navigation_notifications_remove_when_title" />
 
         <CheckBoxPreference
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:key="navigation_notifications_remind_2_minutes"
             android:title="@string/navigation_notifications_remind_2_minutes_title" />
 
         <CheckBoxPreference
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:key="navigation_notifications_remind_6_minutes"
             android:title="@string/navigation_notifications_remind_6_minutes_title" />
 

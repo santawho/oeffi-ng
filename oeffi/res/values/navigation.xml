@@ -115,18 +115,20 @@
     <string name="navigation_notifications_preferences_summary">Settings for showing notifications about events, e.g. on a smart watch</string>
     <string name="navigation_notifications_enabled_title">Use event notifications</string>
     <string name="navigation_notifications_scenarios_title">Choose your scenario …</string>
-    <string name="navigation_notifications_scenarios_summary">Set all preferences by choosing from predefined scenarios</string>
+    <string name="navigation_notifications_scenarios_summary">Set all preferences by choosing from predefined scenarios. [%s]</string>
     <string-array name="navigation_notifications_scenarios">
         <item>do not show event notifications</item>
         <item>show all notifications on smart watch</item>
         <item>show all notifications on smart watch, only when display is off</item>
         <item>show all notifications at all times</item>
+        <item>user defined settings</item>
     </string-array>
     <string-array name="navigation_notifications_scenario_values">
-        <item>navigation_notifications_enabled=Bfalse;navigation_notification_changes_show_when=Snever;navigation_notification_changes_remove_when=Snever;navigation_notification_directions_show_when=Snever;navigation_notification_directions_remove_when=Snever;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_6_minutes=Btrue</item>
+        <item>navigation_notifications_enabled=Bfalse;navigation_notification_changes_show_when=Snever;navigation_notification_changes_remove_when=Snever;navigation_notification_directions_show_when=Snever;navigation_notification_directions_remove_when=Snever</item>
         <item>navigation_notifications_enabled=Btrue;navigation_notification_changes_show_when=Salways;navigation_notification_changes_remove_when=S2;navigation_notification_directions_show_when=Salways;navigation_notification_directions_remove_when=S2;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_6_minutes=Btrue</item>
         <item>navigation_notifications_enabled=Btrue;navigation_notification_changes_show_when=Swhen-off;navigation_notification_changes_remove_when=S2;navigation_notification_directions_show_when=Swhen-off;navigation_notification_directions_remove_when=S2;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_6_minutes=Btrue</item>
         <item>navigation_notifications_enabled=Btrue;navigation_notification_changes_show_when=Salways;navigation_notification_changes_remove_when=Snever;navigation_notification_directions_show_when=Salways;navigation_notification_directions_remove_when=Snever;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_6_minutes=Btrue</item>
+        <item/>
     </string-array>
     <string name="navigation_notifications_changes_category_title">Navigation Changes</string>
     <string name="navigation_notifications_directions_category_title">Navigation Directions</string>

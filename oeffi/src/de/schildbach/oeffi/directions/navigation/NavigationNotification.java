@@ -1756,7 +1756,7 @@ public class NavigationNotification {
         return prefs.getBoolean(timeLeftMs < 4 * 60000
                         ? PREFS_KEY_NOTIFICATIONS_REMIND_2_MINUTES
                         : PREFS_KEY_NOTIFICATIONS_REMIND_6_MINUTES,
-                true);
+                false);
     }
 
     private void addEventOutputPublicLegEndReminder(

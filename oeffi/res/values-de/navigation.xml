@@ -104,12 +104,13 @@
     <string name="navigation_notifications_preferences_summary">Einstellungen zur Anzeige von Benachrichtigungen zu Ereignissen, z.B. auch auf einer Smart-Watch</string>
     <string name="navigation_notifications_enabled_title">Verwende Ereignis-Benachrichtigungen</string>
     <string name="navigation_notifications_scenarios_title">Wähle dein Szenario …</string>
-    <string name="navigation_notifications_scenarios_summary">Setze alle Einstellungen durch Wahl eines vordefierten Szenarios</string>
+    <string name="navigation_notifications_scenarios_summary">Setze alle Einstellungen durch Wahl eines vordefierten Szenarios. [%s]</string>
     <string-array name="navigation_notifications_scenarios">
         <item>zeige keine Benachrichtigungen</item>
         <item>zeige alle Benachrichtigungen auf der Smart-Watch</item>
         <item>zeige alle Benachrichtigungen auf der Smart-Watch, nur wenn der Bildschirm aus ist</item>
         <item>zeige alle Benachrichtigungen zu jeder Zeit</item>
+        <item>benutzerdefinierte Einstellungen</item>
     </string-array>
     <string name="navigation_notifications_changes_category_title">Navigations-Änderungen</string>
     <string name="navigation_notifications_directions_category_title">Navigations-Hinweise</string>
