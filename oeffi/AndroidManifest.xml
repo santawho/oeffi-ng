@@ -97,8 +97,13 @@
 
         <activity
             android:name=".preference.PreferenceActivity"
+            android:exported="true"
             android:theme="@style/My.Theme.Preference"
-            android:label="@string/global_options_preferences_title" />
+            android:label="@string/global_options_preferences_title">
+            <intent-filter>
+                <action android:name="android.intent.action.APPLICATION_PREFERENCES" />
+            </intent-filter>
+        </activity>
 
         <activity
             android:name=".network.NetworkPickerActivity"
