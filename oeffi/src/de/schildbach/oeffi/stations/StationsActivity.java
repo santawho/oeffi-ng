@@ -65,6 +65,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -499,7 +500,23 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                     }
                 });
         stationList = findViewById(R.id.stations_list);
-        stationListLayoutManager = new LinearLayoutManager(this);
+        stationListLayoutManager = new LinearLayoutManager(this) {
+            // override the layout manger, so that scrolling to the top of an item is always preferred
+            @Override
+            public void smoothScrollToPosition(final RecyclerView recyclerView, final RecyclerView.State state, final int position) {
+                // this is like the method from super.smoothScrollToPosition() ...
+                final LinearSmoothScroller linearSmoothScroller =
+                        new LinearSmoothScroller(recyclerView.getContext()) {
+                            @Override
+                            protected int getVerticalSnapPreference() {
+                                // ... but with this override
+                                return SNAP_TO_START;
+                            }
+                        };
+                linearSmoothScroller.setTargetPosition(position);
+                startSmoothScroll(linearSmoothScroller);
+            }
+        };
         stationList.setLayoutManager(stationListLayoutManager);
         // stationList.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
         stationListAdapter = new StationsAdapter(this, maxDeparturesPerStation, products,
