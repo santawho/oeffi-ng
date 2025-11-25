@@ -162,9 +162,9 @@ public class QueryHistoryProvider extends ContentProvider {
             historyUri = contentResolver.insert(baseUri, values);
 
             final Application application = Application.getInstance();
-            final int maxHistoryEntries = application.getSharedPreferences()
-                    .getInt(Constants.PREFS_KEY_MAX_HISTORY_ENTRIES,
-                            application.getResources().getInteger(R.integer.default_max_history_entries));
+            final int maxHistoryEntries = Integer.parseInt(application.getSharedPreferences()
+                    .getString(Constants.PREFS_KEY_MAX_HISTORY_ENTRIES, Integer.toString(
+                            application.getResources().getInteger(R.integer.default_max_history_entries))));
             final Cursor deleteCursor = contentResolver.query(baseUri, null,
                     QueryHistoryProvider.KEY_FAVORITE + "= 0", null,
                     KEY_LAST_QUERIED + " DESC");
