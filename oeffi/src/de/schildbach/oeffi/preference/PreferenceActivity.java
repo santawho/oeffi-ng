@@ -76,13 +76,17 @@ public class PreferenceActivity extends android.preference.PreferenceActivity {
         super.onCreate(savedInstanceState);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.BAKLAVA) {
             final View contentView = findViewById(android.R.id.content);
+            final int paddingLeft = contentView.getPaddingLeft();
+            final int paddingTop = contentView.getPaddingTop();
+            final int paddingRight = contentView.getPaddingRight();
+            final int paddingBottom = contentView.getPaddingBottom();
             ViewCompat.setOnApplyWindowInsetsListener(contentView, (v, windowInsets) -> {
                 final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
                 v.setPadding(
-                        v.getPaddingLeft() + insets.left,
-                        v.getPaddingTop() + insets.top,
-                        v.getPaddingRight() + insets.right,
-                        v.getPaddingBottom() + insets.bottom);
+                        paddingLeft + insets.left,
+                        paddingTop + insets.top,
+                        paddingRight + insets.right,
+                        paddingBottom + insets.bottom);
                 return windowInsets;
             });
         }
