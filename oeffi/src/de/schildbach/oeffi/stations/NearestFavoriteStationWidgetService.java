@@ -333,8 +333,11 @@ public class NearestFavoriteStationWidgetService extends JobService {
                     final String stationName = favorite.location.name;
 
                     try {
-                        final QueryDeparturesResult result = networkProvider.queryDepartures(stationId, new Date(), 100,
-                                false);
+                        final QueryDeparturesResult result = networkProvider.queryDepartures(
+                                stationId,
+                                new Date(),
+                                100,
+                                true);
                         setResult(appWidgetId, networkId, result, favorite, timeFormat);
                         appWidgetManager.updateAppWidget(appWidgetId, views);
                     } catch (final ConnectException x) {
@@ -382,15 +385,17 @@ public class NearestFavoriteStationWidgetService extends JobService {
 
         if (result.status == QueryDeparturesResult.Status.OK) {
             setMessage(getString(R.string.nearest_favorite_station_widget_no_departures));
+
             final StationDepartures stationDepartures = result.findStationDepartures(stationId);
-            if (stationDepartures != null) {
-                if (stationDepartures.location.name != null)
-                    views.setTextViewText(R.id.station_widget_header, stationDepartures.location.name);
+            if (stationDepartures != null && stationDepartures.location.name != null)
+                views.setTextViewText(R.id.station_widget_header, stationDepartures.location.name);
 
-                final List<Departure> departures = stationDepartures.getNonCancelledDepartures();
+            final List<Departure> departures = new ArrayList<>();
+            for (final StationDepartures stationDeparture : result.stationDepartures)
+                departures.addAll(stationDeparture.getNonCancelledDepartures());
 
-                if (!departures.isEmpty())
-                    setDeparturesList(departures, appWidgetId, networkId, favorite.location);
+            if (!departures.isEmpty()) {
+                setDeparturesList(departures, appWidgetId, networkId, favorite.location);
                 log.info("Got {} departures for favorite {}", departures.size(), stationId);
             } else {
                 log.info("Got no station departures for favorite {}", stationId);
