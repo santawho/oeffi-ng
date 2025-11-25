@@ -921,6 +921,19 @@ public class DirectionsActivity extends OeffiMainActivity implements
             viewTime1.setText(diff == 0 ? getString(R.string.time_now)
                     : getString(R.string.directions_time_relative, Formats.formatTimeDiff(this, diff)));
             viewTime1.setOnClickListener(diffClickListener);
+            viewTime1.setOnLongClickListener(v -> {
+                if (time instanceof TimeSpec.Relative) {
+                    // set to depart at ...
+                    time = new TimeSpec.Absolute(DepArr.DEPART, time.timeInMillis());
+                    //  ... and ask for time
+                    timeClicked();
+                } else {
+                    // revert to depart now
+                    time = new TimeSpec.Relative(DepArr.DEPART, 0);
+                }
+                updateGUI();
+                return true;
+            });
             viewTime2.setVisibility(View.GONE);
         }
     }
@@ -1002,7 +1015,10 @@ public class DirectionsActivity extends OeffiMainActivity implements
                 final int mins = relativeTimeValues[which];
                 time = new TimeSpec.Relative(mins * DateUtils.MINUTE_IN_MILLIS);
             } else {
+                // set to depart at ...
                 time = new TimeSpec.Absolute(DepArr.DEPART, time.timeInMillis());
+                //  ... and ask for time
+                timeClicked();
             }
             updateGUI();
         });
