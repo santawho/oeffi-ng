@@ -28,6 +28,7 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
+import de.schildbach.oeffi.R;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
@@ -160,10 +161,15 @@ public class QueryHistoryProvider extends ContentProvider {
             final Uri baseUri = QueryHistoryProvider.CONTENT_URI().buildUpon().appendPath(network.name()).build();
             historyUri = contentResolver.insert(baseUri, values);
 
-            final Cursor deleteCursor = contentResolver.query(baseUri, null, null, null,
-                    KEY_FAVORITE + " DESC, " + KEY_LAST_QUERIED + " DESC");
+            final Application application = Application.getInstance();
+            final int maxHistoryEntries = application.getSharedPreferences()
+                    .getInt(Constants.PREFS_KEY_MAX_HISTORY_ENTRIES,
+                            application.getResources().getInteger(R.integer.default_max_history_entries));
+            final Cursor deleteCursor = contentResolver.query(baseUri, null,
+                    QueryHistoryProvider.KEY_FAVORITE + "= 0", null,
+                    KEY_LAST_QUERIED + " DESC");
             if (deleteCursor != null) {
-                if (deleteCursor.moveToPosition(Constants.MAX_HISTORY_ENTRIES - 1)) {
+                if (deleteCursor.moveToPosition(maxHistoryEntries - 1)) {
                     while (deleteCursor.moveToNext()) {
                         final Uri deleteUri = baseUri.buildUpon()
                                 .appendPath(String.valueOf(deleteCursor

@@ -87,5 +87,6 @@
     <bool name="layout_navigation_drawer_footer_show">false</bool>
 
     <integer name="max_departures_per_station">5</integer>
+    <integer name="default_max_history_entries">50</integer>
 
 </resources>

@@ -53,6 +53,14 @@
             android:title="@string/user_interface_directions_compact_times_enabled_title"
             android:summary="@string/user_interface_directions_compact_times_enabled_summary" />
 
+        <EditTextPreference
+            android:key="max_history_entries"
+            android:singleLine="true"
+            android:inputType="number"
+            android:defaultValue="@integer/default_max_history_entries"
+            android:title="@string/user_interface_max_history_entries_title"
+            android:summary="@string/user_interface_max_history_entries_summary" />
+
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/user_interface_category_map_title">
@@ -114,16 +122,6 @@
             android:defaultValue="true"
             android:title="@string/user_interface_location_selector_longholdmenu_title"
             android:summary="@string/user_interface_location_selector_longholdmenu_summary" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory android:title="@string/user_interface_developer_options_category_title">
-
-        <CheckBoxPreference
-            android:key="user_interface_developer_options_show_extra_infos_enabled"
-            android:defaultValue="false"
-            android:title="@string/user_interface_developer_options_show_extra_infos_enabled_title"
-            android:summary="@string/user_interface_developer_options_show_extra_infos_enabled_summary" />
 
     </PreferenceCategory>
 

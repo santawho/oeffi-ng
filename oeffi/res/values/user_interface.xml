@@ -38,6 +38,8 @@
     <string name="user_interface_directions_autogo_enabled_summary">Start directions search automatically when origin and destination have been entered</string>
     <string name="user_interface_directions_compact_times_enabled_title">Compact times</string>
     <string name="user_interface_directions_compact_times_enabled_summary">Show predicted times (from location and from network) in one row if identical</string>
+    <string name="user_interface_max_history_entries_title">History size</string>
+    <string name="user_interface_max_history_entries_summary">Maximum number of history entries to keep. [%s]</string>
 
     <string name="user_interface_category_map_title">Maps</string>
     <string name="user_interface_map_tile_resolution_title">Map resolution</string>
@@ -117,10 +119,6 @@
     <string name="user_interface_voice_control_is_enabled">Listening for your command…</string>
     <string name="user_interface_voice_control_not_enabled">Voice control is disabled!</string>
     <string name="user_interface_voice_control_error">Voice control error. (%s)</string>
-
-    <string name="user_interface_developer_options_category_title">Developer Options</string>
-    <string name="user_interface_developer_options_show_extra_infos_enabled_title">Activate developer options</string>
-    <string name="user_interface_developer_options_show_extra_infos_enabled_summary">Activate certain elements to aid in the development process.</string>
 
     <string name="common_preferred_timezone_title">Timezone</string>
     <string name="common_preferred_timezone_summary">Preferred source of timezone. [%s]</string>

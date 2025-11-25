@@ -40,7 +40,6 @@ public class Constants {
     public static final long LOCATION_BACKGROUND_UPDATE_TIMEOUT_MS = 5 * DateUtils.MINUTE_IN_MILLIS;
     public static final long STALE_UPDATE_MS = 2 * DateUtils.MINUTE_IN_MILLIS;
     public static final int MAX_NUMBER_OF_STOPS = 150;
-    public static final int MAX_HISTORY_ENTRIES = 50;
     public static final float BEARING_ACCURACY_THRESHOLD = 0.5f;
     public static final double MAP_MIN_ZOOM_LEVEL = 3.0;
     public static final double MAP_MAX_ZOOM_LEVEL = 18.0;
@@ -53,6 +52,7 @@ public class Constants {
     public static final String PREFS_KEY_PREFERRED_TIMEZONE = "common_preferred_timezone";
     public static final String PREFS_KEY_NETWORK_PROVIDER = "network_provider";
     public static final String PREFS_KEY_LAST_NETWORK_PROVIDERS = "last_network_providers";
+    public static final String PREFS_KEY_MAX_HISTORY_ENTRIES = "max_history_entries";
     public static final String PREFS_KEY_PRODUCT_FILTER = "product_filter";
     public static final String PREFS_KEY_OPTIMIZE_TRIP = "optimize_trip";
     public static final String PREFS_KEY_WALK_SPEED = "walk_speed";

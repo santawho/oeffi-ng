@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <CheckBoxPreference
+        android:key="user_interface_developer_options_show_extra_infos_enabled"
+        android:defaultValue="false"
+        android:title="@string/developer_options_show_extra_infos_enabled_title"
+        android:summary="@string/developer_options_show_extra_infos_enabled_summary" />
+
+</PreferenceScreen>

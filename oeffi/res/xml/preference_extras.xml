@@ -6,4 +6,8 @@
         android:fragment="de.schildbach.oeffi.preference.DriverModeFragment"
         android:title="@string/extras_drivermode_title" />
 
+    <PreferenceScreen
+        android:fragment="de.schildbach.oeffi.preference.DeveloperOptionsFragment"
+        android:title="@string/developer_options_title" />
+
 </PreferenceScreen>

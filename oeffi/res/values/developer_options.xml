@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="developer_options_title">Developer Options</string>
+    <string name="developer_options_show_extra_infos_enabled_title">Activate developer options</string>
+    <string name="developer_options_show_extra_infos_enabled_summary">Activate certain elements to aid in the development process.</string>
+
+</resources>
