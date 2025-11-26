@@ -384,14 +384,28 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                     private float lastDX = 0;
                     private int lastDirection = 0;
 
-                    private final Drawable drawableStar = getResources()
-                            .getDrawable(R.drawable.ic_star_border_black_24dp);
-                    private final Drawable drawableClear = getResources().getDrawable(R.drawable.ic_clear_black_24dp);
-                    private final Drawable drawableBlock = getResources().getDrawable(R.drawable.ic_block_black_24dp);
-                    private final int starMargin = getResources()
-                            .getDimensionPixelOffset(R.dimen.text_padding_horizontal_lax);
-                    private final int actionTriggerThreshold = Ints.max(drawableStar.getIntrinsicWidth(),
-                            drawableClear.getIntrinsicWidth(), drawableBlock.getIntrinsicWidth()) + starMargin * 2;
+                    private final Drawable drawableStar;
+                    private final Drawable drawableClear;
+                    private final Drawable drawableBlock;
+                    private final int starMargin;
+                    private final int actionTriggerThreshold;
+
+                    {
+                        final Resources resources = getResources();
+                        drawableStar = resources.getDrawable(R.drawable.ic_star_border_black_24dp);
+                        drawableClear = resources.getDrawable(R.drawable.ic_clear_black_24dp);
+                        drawableBlock = resources.getDrawable(R.drawable.ic_block_black_24dp);
+
+                        final int fgColor = resources.getColor(R.color.fg_significant);
+                        drawableStar.setTint(fgColor);
+                        drawableClear.setTint(fgColor);
+                        drawableBlock.setTint(fgColor);
+                        starMargin = resources.getDimensionPixelOffset(R.dimen.text_padding_horizontal_lax);
+                        actionTriggerThreshold = starMargin * 2 + Ints.max(
+                                drawableStar.getIntrinsicWidth(),
+                                drawableClear.getIntrinsicWidth(),
+                                drawableBlock.getIntrinsicWidth());
+                    }
 
                     @Override
                     public boolean isItemViewSwipeEnabled() {
