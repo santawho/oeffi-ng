@@ -60,7 +60,9 @@ public class StationContextMenu extends PopupMenu {
     public StationContextMenu(
             final Context context, final View anchor,
             final NetworkId network, final Location station,
-            final Integer favState, final boolean showFavorite, final boolean showIgnore, final boolean showMap,
+            final Integer favState,
+            final boolean showFavorite, final boolean showIgnore, final boolean showRename,
+            final boolean showMap,
             final boolean showDepartures, final boolean showNearbyDepartures,
             final boolean showTravelAlarmDeparture, final boolean showTravelAlarmArrival,
             final boolean showDirections, final boolean showDirectionsVia, final boolean showAlternativeDirections,
@@ -71,6 +73,7 @@ public class StationContextMenu extends PopupMenu {
         final boolean isFavorite = favState != null && favState == FavoriteStationsProvider.TYPE_FAVORITE;
         final boolean isIgnored = favState != null && favState == FavoriteStationsProvider.TYPE_IGNORE;
         menu.findItem(R.id.station_context_add_favorite).setVisible(showFavorite && !isFavorite);
+        menu.findItem(R.id.station_context_rename_favorite).setVisible(showRename && isFavorite);
         menu.findItem(R.id.station_context_remove_favorite).setVisible(showFavorite && isFavorite);
         menu.findItem(R.id.station_context_add_ignore).setVisible(showIgnore && !isIgnored);
         menu.findItem(R.id.station_context_remove_ignore).setVisible(showIgnore && isIgnored);

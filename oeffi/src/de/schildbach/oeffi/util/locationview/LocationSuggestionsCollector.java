@@ -98,24 +98,36 @@ public class LocationSuggestionsCollector {
         final int lonC = cursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_LON);
         final int placeC = cursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_PLACE);
         final int nameC = cursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_NAME);
+        final int nickNameC = cursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_NICKNAME);
 
         final String lowerCaseConstraint = constraint.toLowerCase(Constants.DEFAULT_LOCALE);
 
         while (cursor.moveToNext()) {
-            final String fromName = cursor.getString(nameC);
-            if (fromName.toLowerCase(Constants.DEFAULT_LOCALE).contains(lowerCaseConstraint)) {
+            final String name = cursor.getString(nameC);
+            final String place = cursor.getString(placeC);
+            final String nickName = cursor.getString(nickNameC);
+            if (namePartMatches(name, lowerCaseConstraint)
+                    || namePartMatches(place, lowerCaseConstraint)
+                    || namePartMatches(nickName, lowerCaseConstraint)) {
                 final LocationType type = LocationType.valueOf(cursor.getString(typeC));
                 final String id = cursor.getString(idC);
                 final int lat = cursor.getInt(latC);
                 final int lon = cursor.getInt(lonC);
                 final Point coord = lat != 0 || lon != 0 ? Point.from1E6(lat, lon) : null;
-                final String place = cursor.getString(placeC);
-                final Location location = new Location(type, id, coord, place, fromName);
+                final Location location;
+                if (nickName != null)
+                    location = new Location(type, id, coord, null, nickName);
+                else
+                    location = new Location(type, id, coord, place, name);
                 if (!results.contains(location))
                     results.add(location);
             }
         }
         cursor.close();
+    }
+
+    private static boolean namePartMatches(final String namePart, final String lowerCaseConstraint) {
+        return namePart != null && namePart.toLowerCase(Constants.DEFAULT_LOCALE).contains(lowerCaseConstraint);
     }
 
     private static void loadResultsFromQueryHistory(

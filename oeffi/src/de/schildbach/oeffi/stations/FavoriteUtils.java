@@ -41,6 +41,7 @@ public class FavoriteUtils {
         values.put(FavoriteStationsProvider.KEY_STATION_TYPE, station.type.name());
         values.put(FavoriteStationsProvider.KEY_STATION_PLACE, station.place);
         values.put(FavoriteStationsProvider.KEY_STATION_NAME, station.name);
+        // nickname: do not set, save as null !!
         values.put(FavoriteStationsProvider.KEY_STATION_LAT, station.hasCoord() ? station.getLatAs1E6() : 0);
         values.put(FavoriteStationsProvider.KEY_STATION_LON, station.hasCoord() ? station.getLonAs1E6() : 0);
 
@@ -66,7 +67,7 @@ public class FavoriteUtils {
 
         final Map<Location, Integer> favorites = new HashMap<>(c.getCount());
         while (c.moveToNext())
-            favorites.put(FavoriteStationsProvider.getLocation(c), c.getInt(typeIndex));
+            favorites.put(FavoriteStationsProvider.getLocation(c).getNick(), c.getInt(typeIndex));
 
         c.close();
         return favorites;

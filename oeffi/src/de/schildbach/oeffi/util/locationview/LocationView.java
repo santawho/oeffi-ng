@@ -359,7 +359,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
                     return;
                 final Cursor c = getActivity().managedQuery(contentUri, null, null, null, null);
                 if (c.moveToFirst()) {
-                    final Location location = FavoriteStationsProvider.getLocation(c);
+                    final Location location = FavoriteStationsProvider.getLocation(c).getNick();
                     log.info("Picked {} from station favorites", location);
                     setLocation(location);
                 }

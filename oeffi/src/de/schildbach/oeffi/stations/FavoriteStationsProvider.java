@@ -53,6 +53,7 @@ public class FavoriteStationsProvider extends ContentProvider {
     public static final String KEY_STATION_NAME = "station_name";
     public static final String KEY_STATION_LAT = "station_lat";
     public static final String KEY_STATION_LON = "station_lon";
+    public static final String KEY_STATION_NICKNAME = "station_nickname";
 
     public static final int TYPE_FAVORITE = 1;
     public static final int TYPE_IGNORE = 2;
@@ -79,19 +80,18 @@ public class FavoriteStationsProvider extends ContentProvider {
             return ContentUris.withAppendedId(CONTENT_URI(), rowId);
     }
 
-    @Override
-    public int update(final Uri uri, final ContentValues values, final String selection, final String[] selectionArgs) {
-        throw new UnsupportedOperationException();
+    private static class Where {
+        String clause;
+        String[] args;
     }
 
-    @Override
-    public int delete(final Uri uri, final String selection, final String[] selectionArgs) {
+    private Where whereClause(final Uri uri, final String selection, final String[] selectionArgs) {
         final List<String> pathSegments = uri.getPathSegments();
 
         String whereClause = null;
-        List<String> whereArgs = new ArrayList<>();
+        final List<String> whereArgs = new ArrayList<>();
 
-        if (pathSegments.size() >= 1) {
+        if (!pathSegments.isEmpty()) {
             whereClause = KEY_ROWID + "=?";
             whereArgs.add(pathSegments.get(0));
         }
@@ -101,8 +101,27 @@ public class FavoriteStationsProvider extends ContentProvider {
             whereArgs.addAll(Arrays.asList(selectionArgs));
         }
 
-        final int count = helper.getWritableDatabase().delete(DATABASE_TABLE, whereClause,
-                whereArgs.toArray(new String[0]));
+        final Where where = new Where();
+        where.clause = whereClause;
+        where.args = whereArgs.toArray(new String[0]);
+        return where;
+    }
+
+    @Override
+    public int update(final Uri uri, final ContentValues values, final String selection, final String[] selectionArgs) {
+        final Where where = whereClause(uri, selection, selectionArgs);
+        final int count = helper.getWritableDatabase().update(DATABASE_TABLE, values, where.clause, where.args);
+
+        if (count > 0)
+            getContext().getContentResolver().notifyChange(uri, null);
+
+        return count;
+    }
+
+    @Override
+    public int delete(final Uri uri, final String selection, final String[] selectionArgs) {
+        final Where where = whereClause(uri, selection, selectionArgs);
+        final int count = helper.getWritableDatabase().delete(DATABASE_TABLE, where.clause, where.args);
 
         if (count > 0)
             getContext().getContentResolver().notifyChange(uri, null);
@@ -127,19 +146,42 @@ public class FavoriteStationsProvider extends ContentProvider {
         return cursor;
     }
 
-    public static Location getLocation(final Cursor cursor) {
+    public static class LocationRepresentations {
+        private final Location raw;
+        private final Location nick;
+
+        private LocationRepresentations(final LocationType type, final String id, final Point coord, final String place, final String name, final String nickName) {
+            raw = new Location(type, id, coord, place, name);
+            nick = nickName == null ? null : new Location(type, id, coord, null, nickName);
+        }
+
+        public Location getRaw() {
+            return raw;
+        }
+
+        public Location getNick() {
+            return nick != null ? nick : raw;
+        }
+    }
+
+    public static LocationRepresentations getLocation(final Cursor cursor) {
         final int idIndex = cursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_ID);
         final int typeIndex = cursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_TYPE);
         final int placeIndex = cursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_PLACE);
         final int nameIndex = cursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_NAME);
         final int latIndex = cursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_LAT);
         final int lonIndex = cursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_LON);
+        final int nickNameIndex = cursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_NICKNAME);
         final int lat = cursor.getInt(latIndex);
         final int lon = cursor.getInt(lonIndex);
         final Point coord = (lat == 0 && lon == 0) ? null : Point.from1E6(lat, lon);
-        return new Location(LocationType.valueOf(cursor.getString(typeIndex)), cursor.getString(idIndex),
-                coord, cursor.getString(placeIndex),
-                cursor.getString(nameIndex));
+        return new LocationRepresentations(
+                LocationType.valueOf(cursor.getString(typeIndex)),
+                cursor.getString(idIndex),
+                coord,
+                cursor.getString(placeIndex),
+                cursor.getString(nameIndex),
+                cursor.getString(nickNameIndex));
     }
 
     public static Integer favState(final ContentResolver contentResolver, final NetworkId network,
@@ -245,7 +287,7 @@ public class FavoriteStationsProvider extends ContentProvider {
 
     private static class Helper extends SQLiteOpenHelper {
         private static final String DATABASE_NAME = "station_favorites";
-        private static final int DATABASE_VERSION = 6;
+        private static final int DATABASE_VERSION = 7;
 
         private static final String DATABASE_CREATE = "CREATE TABLE " + DATABASE_TABLE + " (" //
                 + KEY_ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT, " //
@@ -257,6 +299,7 @@ public class FavoriteStationsProvider extends ContentProvider {
                 + KEY_STATION_NAME + " TEXT, " //
                 + KEY_STATION_LAT + " INT NOT NULL DEFAULT 0, " //
                 + KEY_STATION_LON + " INT NOT NULL DEFAULT 0, " //
+                + KEY_STATION_NICKNAME + " TEXT, " //
                 + "UNIQUE (" + KEY_STATION_NETWORK + "," + KEY_STATION_ID + "));";
         private static final String DATABASE_COLUMN_LIST = KEY_ROWID + "," + KEY_TYPE + "," + KEY_STATION_NETWORK + ","
                 + KEY_STATION_ID + "," + KEY_STATION_TYPE + "," + KEY_STATION_PLACE + "," + KEY_STATION_NAME + ","
@@ -306,6 +349,9 @@ public class FavoriteStationsProvider extends ContentProvider {
             } else if (oldVersion == 5) {
                 db.execSQL(
                         "ALTER TABLE " + DATABASE_TABLE + " ADD COLUMN " + KEY_STATION_TYPE + " TEXT DEFAULT '" + LocationType.STATION.name() + "'");
+            } else if (oldVersion == 6) {
+                db.execSQL(
+                        "ALTER TABLE " + DATABASE_TABLE + " ADD COLUMN " + KEY_STATION_NICKNAME + " TEXT");
             } else {
                 throw new UnsupportedOperationException("old=" + oldVersion);
             }

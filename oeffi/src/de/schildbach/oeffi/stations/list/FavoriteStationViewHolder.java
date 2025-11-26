@@ -100,7 +100,7 @@ public class FavoriteStationViewHolder extends RecyclerView.ViewHolder {
                 context, contextView,
                 network, station,
                 FavoriteStationsProvider.TYPE_FAVORITE,
-                true, false, true,
+                true, false, true, true,
                 station.type == LocationType.STATION, true,
                 false, false,
                 true, false, false, false, true);

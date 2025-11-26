@@ -150,6 +150,7 @@
 
     <!-- station context menu -->
     <string name="station_context_add_favorite_title">Zu Favoriten hinzufügen</string>
+    <string name="station_context_rename_favorite_title">Favorit umbenennen</string>
     <string name="station_context_remove_favorite_title">Aus Favoriten entfernen</string>
     <string name="station_context_add_ignore_title">Ignorieren</string>
     <string name="station_context_remove_ignore_title">Wieder sichtbar machen</string>
@@ -201,6 +202,7 @@
     <string name="stations_favorite_stations_no_content_message">Du hast bislang keine Haltestelle im eingestellten Verkehrsnetz favorisiert.</string>
     <string name="stations_favorite_stations_add_title">Neuen Haltestelle-Favorit hinzufügen</string>
     <string name="stations_favorite_stations_add_location_hint">Neuer Haltestellen-Favorit</string>
+    <string name="stations_favorite_stations_rename_title">Neuer Name für %1$s</string>
 
     <!-- stations widget -->
     <string name="nearest_favorite_station_widget_label">Abfahrtszeiten von nahegelegener favorisierter Haltestelle</string>

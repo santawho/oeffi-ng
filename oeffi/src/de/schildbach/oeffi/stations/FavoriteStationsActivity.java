@@ -240,6 +240,11 @@ public class FavoriteStationsActivity extends OeffiActivity
         } else if (menuItemId == R.id.station_context_nearby_departures) {
             StationsActivity.start(FavoriteStationsActivity.this, stationNetwork, station, null);
             return true;
+        } else if (menuItemId == R.id.station_context_rename_favorite) {
+            adapter.renameEntry(adapterPosition);
+            updateGUI();
+            NearestFavoriteStationWidgetService.scheduleImmediate(this); // refresh app-widget
+            return true;
         } else if (menuItemId == R.id.station_context_remove_favorite) {
             adapter.removeEntry(adapterPosition);
             updateGUI();

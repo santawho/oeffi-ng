@@ -44,6 +44,9 @@
         android:id="@+id/station_context_add_favorite"
         android:title="@string/station_context_add_favorite_title" />
     <item
+        android:id="@+id/station_context_rename_favorite"
+        android:title="@string/station_context_rename_favorite_title" />
+    <item
         android:id="@+id/station_context_remove_favorite"
         android:title="@string/station_context_remove_favorite_title" />
     <item

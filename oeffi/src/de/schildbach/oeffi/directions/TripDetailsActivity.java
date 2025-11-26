@@ -1026,7 +1026,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             if (destination.hasId()) {
                 destinationView.setOnLongClickListener(v -> {
                     final PopupMenu contextMenu = new StationContextMenu(TripDetailsActivity.this, v, network, destination, null,
-                            false, false, true,
+                            false, false, false, true,
                             true, true,
                             false, false,
                             false, false, false,
@@ -2360,7 +2360,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final boolean showTravelAlarm = isShowTravelAlarm();
             final PopupMenu contextMenu = new StationContextMenu(
                     TripDetailsActivity.this, v, network, stop.location,
-                    null, false, false, true,
+                    null, false, false, false,true,
                     true, true,
                     showTravelAlarm && stopIsLegDeparture, showTravelAlarm && stopIsLegArrival,
                     true, true,

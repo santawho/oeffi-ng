@@ -17,13 +17,17 @@
 
 package de.schildbach.oeffi.stations.list;
 
+import android.app.AlertDialog;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.BaseColumns;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -78,6 +82,39 @@ public class FavoriteStationsAdapter extends RecyclerView.Adapter<FavoriteStatio
         setHasStableIds(true);
     }
 
+    public void renameEntry(final int position) {
+        cursor.moveToPosition(position);
+        final int nameCol = cursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_NAME);
+        final int placeCol = cursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_PLACE);
+        final int nickNameCol = cursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_NICKNAME);
+        final String name = cursor.getString(nameCol);
+        final String place = cursor.getString(placeCol);
+        final String nickName = cursor.getString(nickNameCol);
+        final Uri uri = Uri.withAppendedPath(FavoriteStationsProvider.CONTENT_URI(), String.valueOf(getItemId(position)));
+
+        final EditText editText = new EditText(context);
+        editText.setInputType(InputType.TYPE_CLASS_TEXT);
+        final String defaultName = place == null ? name : name + ", " + place;
+        editText.setText(nickName != null ? nickName : defaultName);
+        editText.setHint(defaultName);
+        new AlertDialog.Builder(context)
+                .setTitle(context.getString(R.string.stations_favorite_stations_rename_title, defaultName))
+                .setView(editText)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    final String newNickName = editText.getText().toString();
+                    final ContentValues values = new ContentValues();
+                    if (newNickName.isEmpty())
+                        values.putNull(FavoriteStationsProvider.KEY_STATION_NICKNAME);
+                    else
+                        values.put(FavoriteStationsProvider.KEY_STATION_NICKNAME, newNickName);
+                    contentResolver.update(uri, values, null, null);
+                    notifyItemRemoved(position);
+                    cursor.requery();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .create().show();
+    }
+
     public void removeEntry(final int position) {
         final Uri uri = Uri.withAppendedPath(FavoriteStationsProvider.CONTENT_URI(), String.valueOf(getItemId(position)));
         contentResolver.delete(uri, null, null);
@@ -118,7 +155,7 @@ public class FavoriteStationsAdapter extends RecyclerView.Adapter<FavoriteStatio
         cursor.moveToPosition(position);
         final long rowId = cursor.getLong(rowIdColumn);
         final NetworkId network = NetworkId.valueOf(cursor.getString(networkColumn));
-        final Location station = FavoriteStationsProvider.getLocation(cursor);
+        final Location station = FavoriteStationsProvider.getLocation(cursor).getNick();
         holder.bind(rowId, network, station, showNetwork, selectedRowId);
     }
 }

@@ -151,6 +151,7 @@
 
     <!-- station context menu -->
     <string name="station_context_add_favorite_title">Add To Favorites</string>
+    <string name="station_context_rename_favorite_title">Rename Favorite</string>
     <string name="station_context_remove_favorite_title">Remove From Favorites</string>
     <string name="station_context_add_ignore_title">Ignore</string>
     <string name="station_context_remove_ignore_title">Make visible again</string>
@@ -202,6 +203,7 @@
     <string name="stations_favorite_stations_no_content_message">You have not favourited any stations on the selected transportation network.</string>
     <string name="stations_favorite_stations_add_title">Add new favorite station</string>
     <string name="stations_favorite_stations_add_location_hint">New favorite station</string>
+    <string name="stations_favorite_stations_rename_title">New name for %1$s</string>
 
     <!-- stations widget -->
     <string name="nearest_favorite_station_widget_label">Departure times of nearest favorite station</string>

@@ -473,7 +473,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
 
     private void onContextClick(final View contextView, final Station station, final Integer favState) {
         final PopupMenu contextMenu = new StationContextMenu(context, contextView, station.network, station.location,
-                favState, true, true, true,
+                favState, true, true, false, true,
                 true, false,
                 false, false,
                 true, false,
