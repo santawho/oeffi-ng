@@ -31,6 +31,12 @@
             android:title="@string/user_interface_results_noprovidercolors_enabled_title"
             android:summary="@string/user_interface_results_noprovidercolors_enabled_summary" />
 
+        <CheckBoxPreference
+            android:key="user_interface_results_preferpredefinedcolors_enabled"
+            android:defaultValue="false"
+            android:title="@string/user_interface_results_preferpredefinedcolors_enabled_title"
+            android:summary="@string/user_interface_results_preferpredefinedcolors_enabled_summary" />
+
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/user_interface_category_directions_title">

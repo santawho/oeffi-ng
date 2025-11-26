@@ -17,6 +17,8 @@
 
 package de.schildbach.oeffi.network;
 
+import android.content.SharedPreferences;
+
 import com.google.common.base.Charsets;
 import com.google.common.io.BaseEncoding;
 
@@ -89,8 +91,11 @@ public final class NetworkProviderFactory {
     private static final byte[] VRS_CLIENT_CERTIFICATE = VRS_CLIENT_CERTIFICATE_2025_11_05_by_AS;
 
     public static synchronized NetworkProvider provider(final NetworkId networkId) {
-        Standard.setDoNotUseSpecialLineStyles(Application.getInstance().getSharedPreferences()
+        final SharedPreferences preferences = Application.getInstance().getSharedPreferences();
+        Standard.setDoNotUseSpecialLineStyles(preferences
                 .getBoolean(Constants.PREFS_KEY_USER_INTERFACE_NOPROVIDERCOLORS_ENABLED, false));
+        Standard.setPreferPredefinedLineStyles(preferences
+                .getBoolean(Constants.PREFS_KEY_USER_INTERFACE_PREFERPREDEFINEDCOLORS_ENABLED, false));
 
         final NetworkProvider cachedNetworkProvider = providerCache.get(networkId);
         if (cachedNetworkProvider != null)

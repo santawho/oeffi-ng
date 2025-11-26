@@ -25,6 +25,8 @@
     <string name="user_interface_category_results_title">Ergebnisanzeige</string>
     <string name="user_interface_results_noprovidercolors_enabled_title">Nutze Standard-Farben</string>
     <string name="user_interface_results_noprovidercolors_enabled_summary">Nutze Standard-Linienfarben statt der spezifischen des Netzwerks</string>
+    <string name="user_interface_results_preferpredefinedcolors_enabled_title">Bevorzuge vordefinierte Farben</string>
+    <string name="user_interface_results_preferpredefinedcolors_enabled_summary">Benutze software-definierte Linienfarben, auch wenn das Netzwerk spezifische Farben liefert</string>
 
     <string name="user_interface_category_directions_title">Verbindungen</string>
     <string name="user_interface_directions_time_and_go_bottom_enabled_title">Eingabe der Zeit und \"Los\" unten</string>
