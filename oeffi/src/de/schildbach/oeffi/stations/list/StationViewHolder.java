@@ -168,7 +168,8 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
 
         // name/place
         final boolean showPlace = forceShowPlace || isActivated;
-        nameView.setText(showPlace ? station.location.place : station.location.uniqueShortName());
+        final String name = Formats.makeBreakableStationName(showPlace ? station.location.place : station.location.uniqueShortName());
+        nameView.setText(name);
         nameView.setTypeface(showPlace ? Typeface.DEFAULT : Typeface.DEFAULT_BOLD);
         nameView.setTextColor(colorSignificant);
         name2View.setVisibility(showPlace ? View.VISIBLE : View.GONE);
@@ -286,9 +287,11 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
                                 destinationView.setVisibility(View.VISIBLE);
                                 final Location destination = lineDestination.destination;
                                 if (destination != null) {
-                                    final String destinationName = Formats.fullLocationNameIfDifferentPlace(destination, station.location);
-                                    destinationView.setText(destinationName != null
-                                            ? Constants.DESTINATION_ARROW_PREFIX + destinationName : null);
+                                    final String destinationName = Formats.makeBreakableStationName(
+                                            Formats.fullLocationNameIfDifferentPlace(destination, station.location));
+                                    final String text = destinationName == null ? null :
+                                            Constants.DESTINATION_ARROW_PREFIX + destinationName;
+                                    destinationView.setText(text);
                                 } else {
                                     destinationView.setText(null);
                                 }

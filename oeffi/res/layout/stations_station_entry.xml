@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
@@ -51,13 +52,14 @@
                         android:textColor="#ff8c00"
                         tools:ignore="HardcodedText" />
 
-                    <TextView
+                    <de.schildbach.oeffi.util.OverflowTextView
                         android:id="@+id/station_entry_name"
+                        app:overflow_id="@id/station_entry_name_overflow"
                         android:layout_width="0px"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:ellipsize="middle"
-                        android:singleLine="true" />
+                        android:breakStrategy="high_quality" />
 
                     <de.schildbach.oeffi.stations.LineView
                         android:id="@+id/station_entry_lines"
@@ -86,6 +88,16 @@
                         android:layout_width="28dp"
                         android:layout_height="0px" />
                 </LinearLayout>
+
+                <!-- overflow row -->
+
+                <TextView
+                    android:id="@+id/station_entry_name_overflow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="middle"
+                    android:singleLine="true"
+                    android:textStyle="bold" />
 
                 <!-- second row -->
 
