@@ -83,11 +83,11 @@ public class LocationSuggestionsCollector {
             final NetworkId network,
             final List<Location> results) {
         final Cursor cursor = Application.getInstance().getContentResolver().query(
-                FavoriteStationsProvider.CONTENT_URI().buildUpon()
-                        .appendQueryParameter(FavoriteStationsProvider.KEY_TYPE, String.valueOf(FavoriteStationsProvider.TYPE_FAVORITE))
-                        .appendQueryParameter(FavoriteStationsProvider.KEY_STATION_NETWORK, network.name())
-                        .build(),
-                null, null, null, null);
+                FavoriteStationsProvider.CONTENT_URI(), null,
+                FavoriteStationsProvider.KEY_TYPE + "=? AND "
+                        + FavoriteStationsProvider.KEY_STATION_NETWORK + "=?",
+                new String[] { String.valueOf(FavoriteStationsProvider.TYPE_FAVORITE), network.name() },
+                null);
 
         if (cursor == null)
             return;
