@@ -248,25 +248,38 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
     private static void send(final Application application, final String subject, final CharSequence report) {
         final File logDir = new File(application.getFilesDir(), "log");
         final ArrayList<Uri> attachments = new ArrayList<>();
+//        attachments.add(null); // place holder for the body in EXTRA_TEXT array
 
-        if (logDir.exists())
-            for (final File logFile : logDir.listFiles())
-                if (logFile.isFile() && logFile.length() > 0)
-                    attachments.add(application.getSharedFileContentUri(logFile));
+        if (logDir.exists()) {
+            final File[] files = logDir.listFiles();
+            if (files != null) {
+                for (final File logFile : files) {
+                    if (logFile.isFile() && logFile.length() > 0)
+                        attachments.add(application.getSharedFileContentUri(logFile));
+                }
+            }
+        }
 
         final Intent intent;
-        if (attachments.size() == 0) {
+        final int attachmentsSize = attachments.size();
+        if (attachmentsSize <= 1) {
+            // no attachment
             intent = new Intent(Intent.ACTION_SEND);
             intent.setType("message/rfc822");
+            intent.putExtra(Intent.EXTRA_TEXT, report.toString());
         } else {
             intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
             intent.setType("text/plain");
+//            final ArrayList<CharSequence> texts = new ArrayList<>(attachmentsSize);
+//            texts.add(report);
+//            for (int i=1; i<attachmentsSize; ++i) texts.add(null);
+//            intent.putCharSequenceArrayListExtra(Intent.EXTRA_TEXT, texts);
+            intent.putExtra(Intent.EXTRA_TEXT, report.toString());
             intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, attachments);
         }
 
         final String mailAddress = application.getString(R.string.error_reporter_mail_address);
         intent.putExtra(Intent.EXTRA_EMAIL, new String[] {mailAddress});
-        intent.putExtra(Intent.EXTRA_TEXT, report.toString());
         intent.putExtra(Intent.EXTRA_SUBJECT, subject);
 
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
