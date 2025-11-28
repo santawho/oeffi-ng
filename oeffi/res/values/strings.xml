@@ -204,6 +204,7 @@
     <string name="stations_favorite_stations_add_title">Add new favorite station</string>
     <string name="stations_favorite_stations_add_location_hint">New favorite station</string>
     <string name="stations_favorite_stations_rename_title">New name for %1$s</string>
+    <string name="stations_favorite_stations_rename_reset">Remove name</string>
 
     <!-- stations widget -->
     <string name="nearest_favorite_station_widget_label">Departure times of nearest favorite station</string>

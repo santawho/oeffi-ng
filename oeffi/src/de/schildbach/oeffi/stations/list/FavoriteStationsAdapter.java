@@ -50,6 +50,7 @@ public class FavoriteStationsAdapter extends RecyclerView.Adapter<FavoriteStatio
     private final Cursor cursor;
     private final int rowIdColumn;
     private final int networkColumn;
+    private final int nicknameColumn;
 
     private long selectedRowId = RecyclerView.NO_ID;
 
@@ -78,6 +79,7 @@ public class FavoriteStationsAdapter extends RecyclerView.Adapter<FavoriteStatio
                                 + "," + FavoriteStationsProvider.KEY_STATION_NAME);
         rowIdColumn = cursor.getColumnIndexOrThrow(BaseColumns._ID);
         networkColumn = cursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_NETWORK);
+        nicknameColumn = cursor.getColumnIndexOrThrow(FavoriteStationsProvider.KEY_STATION_NICKNAME);
 
         setHasStableIds(true);
     }
@@ -108,7 +110,14 @@ public class FavoriteStationsAdapter extends RecyclerView.Adapter<FavoriteStatio
                     else
                         values.put(FavoriteStationsProvider.KEY_STATION_NICKNAME, newNickName);
                     contentResolver.update(uri, values, null, null);
-                    notifyItemRemoved(position);
+                    notifyItemChanged(position);
+                    cursor.requery();
+                })
+                .setNeutralButton(R.string.stations_favorite_stations_rename_reset, (dialog, which) -> {
+                    final ContentValues values = new ContentValues();
+                    values.putNull(FavoriteStationsProvider.KEY_STATION_NICKNAME);
+                    contentResolver.update(uri, values, null, null);
+                    notifyItemChanged(position);
                     cursor.requery();
                 })
                 .setNegativeButton(android.R.string.cancel, null)
@@ -155,7 +164,8 @@ public class FavoriteStationsAdapter extends RecyclerView.Adapter<FavoriteStatio
         cursor.moveToPosition(position);
         final long rowId = cursor.getLong(rowIdColumn);
         final NetworkId network = NetworkId.valueOf(cursor.getString(networkColumn));
-        final Location station = FavoriteStationsProvider.getLocation(cursor).getNick();
-        holder.bind(rowId, network, station, showNetwork, selectedRowId);
+        final String nickname = cursor.getString(nicknameColumn);
+        final Location station = FavoriteStationsProvider.getLocation(cursor).getRaw();
+        holder.bind(rowId, network, station, nickname, showNetwork, selectedRowId);
     }
 }

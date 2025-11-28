@@ -21,19 +21,29 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.provider.BaseColumns;
+
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
-import de.schildbach.pte.dto.LocationType;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static com.google.common.base.Preconditions.checkArgument;
 
 public class FavoriteUtils {
     public static Uri persist(final ContentResolver contentResolver, final int type, final NetworkId networkId,
             final Location station) {
         // checkArgument(station.type == LocationType.STATION, "not a station: %s", station);
+        final Cursor cursor = contentResolver.query(FavoriteStationsProvider.CONTENT_URI(), null,
+                FavoriteStationsProvider.KEY_STATION_NETWORK + "=? AND "
+                        + FavoriteStationsProvider.KEY_STATION_ID + "=?",
+                new String[]{ networkId.name(), station.id },
+                null);
+        if (cursor.moveToFirst()) {
+            // exists, leave as is
+            final long rowId = cursor.getLong(cursor.getColumnIndexOrThrow(BaseColumns._ID));
+            return Uri.withAppendedPath(FavoriteStationsProvider.CONTENT_URI(), String.valueOf(rowId));
+        }
+
         final ContentValues values = new ContentValues();
         values.put(FavoriteStationsProvider.KEY_TYPE, type);
         values.put(FavoriteStationsProvider.KEY_STATION_NETWORK, networkId.name());
@@ -44,10 +54,7 @@ public class FavoriteUtils {
         // nickname: do not set, save as null !!
         values.put(FavoriteStationsProvider.KEY_STATION_LAT, station.hasCoord() ? station.getLatAs1E6() : 0);
         values.put(FavoriteStationsProvider.KEY_STATION_LON, station.hasCoord() ? station.getLonAs1E6() : 0);
-
-        final Uri rowUri = contentResolver.insert(FavoriteStationsProvider.CONTENT_URI(), values);
-
-        return rowUri;
+        return contentResolver.insert(FavoriteStationsProvider.CONTENT_URI(), values);
     }
 
     public static int delete(final ContentResolver contentResolver, final NetworkId networkId, final String stationId) {

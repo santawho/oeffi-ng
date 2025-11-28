@@ -203,6 +203,7 @@
     <string name="stations_favorite_stations_add_title">Neuen Haltestelle-Favorit hinzufügen</string>
     <string name="stations_favorite_stations_add_location_hint">Neuer Haltestellen-Favorit</string>
     <string name="stations_favorite_stations_rename_title">Neuer Name für %1$s</string>
+    <string name="stations_favorite_stations_rename_reset">Name entfernen</string>
 
     <!-- stations widget -->
     <string name="nearest_favorite_station_widget_label">Abfahrtszeiten von nahegelegener favorisierter Haltestelle</string>

@@ -36,6 +36,7 @@ public class FavoriteStationViewHolder extends RecyclerView.ViewHolder {
     private final Context context;
     private final StationClickListener clickListener;
     private final StationContextMenuItemListener contextMenuItemListener;
+    private final TextView nicknameView;
     private final TextView networkView;
     private final TextView placeView;
     private final TextView nameView;
@@ -53,14 +54,15 @@ public class FavoriteStationViewHolder extends RecyclerView.ViewHolder {
         networkView = itemView.findViewById(R.id.favorites_list_entry_network);
         placeView = itemView.findViewById(R.id.favorites_list_entry_place);
         nameView = itemView.findViewById(R.id.favorites_list_entry_name);
+        nicknameView = itemView.findViewById(R.id.favorites_list_entry_nickname);
         contextButton = itemView.findViewById(R.id.favorites_list_entry_context_button);
     }
 
     public void bind(
             final long rowId,
-            final NetworkId network, final Location station,
-            final boolean showNetwork,
-            final long selectedRowId) {
+            final NetworkId network,
+            final Location station, final String nickname,
+            final boolean showNetwork, final long selectedRowId) {
         final boolean selected = rowId == selectedRowId;
         itemView.setActivated(selected);
         itemView.setOnClickListener(v -> {
@@ -82,6 +84,13 @@ public class FavoriteStationViewHolder extends RecyclerView.ViewHolder {
 
         placeView.setText(station.place);
         nameView.setText(station.name);
+
+        if (nickname != null) {
+            nicknameView.setVisibility(View.VISIBLE);
+            nicknameView.setText(nickname);
+        } else {
+            nicknameView.setVisibility(View.GONE);
+        }
 
         if (contextMenuItemListener != null) {
             contextButton.setVisibility(View.VISIBLE);

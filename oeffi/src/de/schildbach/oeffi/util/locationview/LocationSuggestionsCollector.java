@@ -116,7 +116,7 @@ public class LocationSuggestionsCollector {
                 final Point coord = lat != 0 || lon != 0 ? Point.from1E6(lat, lon) : null;
                 final Location location;
                 if (nickName != null)
-                    location = new Location(type, id, coord, null, nickName);
+                    location = new Location(type, id, coord, null, "★ " + nickName);
                 else
                     location = new Location(type, id, coord, place, name);
                 if (!results.contains(location))

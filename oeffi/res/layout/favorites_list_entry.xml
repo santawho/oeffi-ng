@@ -19,15 +19,24 @@
         android:paddingTop="@dimen/text_padding_vertical_verylax">
 
         <TextView
+            android:id="@+id/favorites_list_entry_nickname"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/font_size_large"
+            android:textStyle="bold"
+            android:textColor="@color/fg_highlighted"
+            android:layout_marginBottom="@dimen/text_padding_vertical_cram" />
+
+        <TextView
             android:id="@+id/favorites_list_entry_network"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/text_padding_vertical_cram" />
 
         <TextView
             android:id="@+id/favorites_list_entry_place"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/text_padding_vertical_cram" />
+            android:layout_height="wrap_content" />
 
         <TextView
             android:id="@+id/favorites_list_entry_name"
