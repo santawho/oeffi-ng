@@ -858,16 +858,16 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         final int showId;
         if (currentLeg == null) {
+            // showScreenIdWhenUnlocked = R.id.directions_trip_details_list_frame;
+            showScreenIdWhenLocked = R.id.navigation_next_event;
             // showId = R.id.directions_trip_details_list_frame;
             if (DeviceAdmin.isScreenLocked()) {
-                showId = R.id.directions_trip_details_list_frame;
+                showId = R.id.navigation_next_event;
             } else {
                 showId = showScreenIdWhenUnlocked;
             }
-            // showScreenIdWhenUnlocked = R.id.directions_trip_details_list_frame;
-            showScreenIdWhenLocked = R.id.directions_trip_details_list_frame;
             findViewById(R.id.directions_trip_details_finished).setVisibility(View.VISIBLE);
-            findViewById(R.id.navigation_next_event).setVisibility(View.GONE);
+//            findViewById(R.id.navigation_next_event).setVisibility(View.GONE);
         } else {
             if (DeviceAdmin.isScreenLocked()) {
                 showId = showScreenIdWhenLocked;
@@ -876,7 +876,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 showScreenIdWhenLocked = R.id.navigation_next_event;
             }
             findViewById(R.id.directions_trip_details_finished).setVisibility(View.GONE);
-            findViewById(R.id.navigation_next_event).setVisibility(View.VISIBLE);
+//            findViewById(R.id.navigation_next_event).setVisibility(View.VISIBLE);
         }
 
         // delay setting the horizontal scrolling page after the layout has been done
@@ -1638,12 +1638,19 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             nextAction.setVisibility(View.GONE);
         }
 
+        final View timeView = findViewById(R.id.navigation_next_event_time);
         final TextView valueView = findViewById(R.id.navigation_next_event_time_value);
+        final View finishedView = findViewById(R.id.navigation_next_event_finished);
         final Chronometer valueChronoView = findViewById(R.id.navigation_next_event_time_chronometer);
         valueChronoView.stop();
         final String valueStr = tripRenderer.nextEventTimeLeftValue;
         final String chronoFormat = tripRenderer.nextEventTimeLeftChronometerFormat;
-        if (valueStr != null) {
+        if (valueStr == null) {
+            timeView.setVisibility(View.GONE);
+            finishedView.setVisibility(View.VISIBLE);
+        } else {
+            timeView.setVisibility(View.VISIBLE);
+            finishedView.setVisibility(View.GONE);
             if (chronoFormat != null) {
                 valueChronoView.setVisibility(View.VISIBLE);
                 valueView.setVisibility(View.GONE);

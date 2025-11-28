@@ -60,6 +60,7 @@
     <dimen name="navigation_next_event_time_fontsize">90sp</dimen>
     <dimen name="navigation_next_event_time_fontsize_decor">48sp</dimen>
     <dimen name="navigation_next_event_time_fontsize_explain">32sp</dimen>
+    <dimen name="navigation_next_event_finished_fontsize">60sp</dimen>
     <dimen name="navigation_next_event_target_fontsize">36sp</dimen>
     <dimen name="navigation_next_event_position_from_fontsize">36sp</dimen>
     <dimen name="navigation_next_event_position_to_fontsize">48sp</dimen>
