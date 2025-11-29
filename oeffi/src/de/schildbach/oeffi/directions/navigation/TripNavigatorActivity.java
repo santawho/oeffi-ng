@@ -141,9 +141,9 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         eventLogListView = findViewById(R.id.navigation_event_log_list);
         eventLogLatestView.setTextSize(getResources().getDimension(R.dimen.font_size_large));
 
-        swipeRefreshForTripList.setOnRefreshListener(this::refreshNavigation);
+        swipeRefreshForTripList.setOnRefreshListener(this::refreshNavigationByUserCommand);
         swipeRefreshForTripList.setEnabled(true);
-        swipeRefreshForNextEvent.setOnRefreshListener(this::refreshNavigation);
+        swipeRefreshForNextEvent.setOnRefreshListener(this::refreshNavigationByUserCommand);
         swipeRefreshForNextEvent.setEnabled(true);
 
         final Intent intent = getIntent();
@@ -199,7 +199,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
                         ? R.color.bg_action_alternative_directions
                         : R.color.bg_action_bar_navigation);
         actionBar.setPrimaryTitle(getString(R.string.navigation_details_title));
-        actionBar.addProgressButton().setOnClickListener(buttonView -> refreshNavigation());
+        actionBar.addProgressButton().setOnClickListener(buttonView -> refreshNavigationByUserCommand());
     }
 
     @Override
@@ -238,7 +238,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
                 if (NavigationNotification.requestPermissions(this, 1)) {
                     final boolean doNotificationUpdate = !isStartupComplete;
                     final boolean forceRefreshAll = !isStartupComplete;
-                    refreshNavigation(doNotificationUpdate, forceRefreshAll);
+                    refreshNavigation(doNotificationUpdate, forceRefreshAll, false);
                 } else {
                     permissionRequestRunning = true;
                 }
@@ -329,15 +329,21 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         if (nextNavigationRefreshTime < 0) return false;
         final long now = new Date().getTime();
         if (now < nextNavigationRefreshTime) return false;
-        refreshNavigation(doNotifcationUpdate, false);
+        refreshNavigation(doNotifcationUpdate, false, false);
         return true;
     }
 
-    private void refreshNavigation() {
-        refreshNavigation(true, true);
+    private void refreshNavigationByUserCommand() {
+        refreshNavigation(
+                true,
+                true,
+                isTripDetailsLoadingEnabled());
     }
 
-    private void refreshNavigation(final boolean doNotificationUpdate, final boolean forceRefreshAll) {
+    private void refreshNavigation(
+            final boolean doNotificationUpdate,
+            final boolean forceRefreshAll,
+            final boolean refreshTripDetails) {
         if (navigationRefreshRunnable != null)
             return;
 
@@ -357,6 +363,8 @@ public class TripNavigatorActivity extends TripDetailsActivity {
                         updateNotification(updatedTrip);
                     }
                     runOnUiThread(() -> onTripUpdated(updatedTrip));
+                    if (refreshTripDetails)
+                        handler.postDelayed(this::loadTripDetails, 500);
                 }
             } catch (IOException e) {
                 handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));

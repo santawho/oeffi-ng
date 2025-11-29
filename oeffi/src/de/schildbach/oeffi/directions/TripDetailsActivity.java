@@ -572,8 +572,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             shownPageChanged(newId);
         });
 
-        if (prefs.getBoolean(Constants.KEY_EXTRAS_TRIPEXTRAINFO_ENABLED, false))
+        if (isTripDetailsLoadingEnabled())
             backgroundHandler.post(this::loadTripDetails);
+    }
+
+    protected boolean isTripDetailsLoadingEnabled() {
+        return prefs.getBoolean(Constants.KEY_EXTRAS_TRIPEXTRAINFO_ENABLED, false);
     }
 
     protected void loadTripDetails() {
