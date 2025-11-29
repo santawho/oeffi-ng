@@ -771,6 +771,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         private final TextView delayView;
         private final LineView lineView;
         private final TextView destinationView;
+        private final TextView destinationOverflowView;
         private final TextView positionView;
         private final TextView capacity1stView;
         private final TextView capacity2ndView;
@@ -788,6 +789,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             delayView = itemView.findViewById(R.id.stations_station_entry_delay);
             lineView = itemView.findViewById(R.id.stations_station_entry_line);
             destinationView = itemView.findViewById(R.id.stations_station_entry_destination);
+            destinationOverflowView = itemView.findViewById(R.id.stations_station_entry_destination_overflow);
             positionView = itemView.findViewById(R.id.stations_station_entry_position);
             capacity1stView = itemView.findViewById(R.id.stations_station_entry_capacity_1st_class);
             capacity2ndView = itemView.findViewById(R.id.stations_station_entry_capacity_2nd_class);
@@ -858,6 +860,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 itemView.setOnClickListener(destination.id == null ? null : v ->
                         start(context, network, destination, null, null));
                 setStrikeThru(destinationView, cancelled);
+                setStrikeThru(destinationOverflowView, cancelled);
             } else {
                 destinationView.setText(null);
                 itemView.setOnClickListener(null);
