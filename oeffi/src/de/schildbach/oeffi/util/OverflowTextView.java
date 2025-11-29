@@ -70,12 +70,19 @@ public class OverflowTextView extends TextView {
         a.recycle();
     }
 
+    private CharSequence text;
+
+    @Override
+    public void setText(final CharSequence text, final BufferType type) {
+        this.text = text;
+        super.setText(text, type);
+    }
+
     @Override
     protected void onMeasure(final int widthMeasureSpec, final int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         final int lineCount = getLineCount();
         if (lineCount > 1) {
-            final CharSequence text = getText();
             final int endFirstLine = getLayout().getLineVisibleEnd(0);
             final int startSecondLine = getLayout().getLineStart(1);
             int posNonAlpha = -1;
@@ -103,7 +110,7 @@ public class OverflowTextView extends TextView {
                 firstLine = text.subSequence(0, endFirstLine);
                 remainingText = text.subSequence(startSecondLine, text.length());
             }
-            setText(firstLine);
+            super.setText(firstLine, BufferType.NORMAL);
             final TextView overflowView = getOverflowView();
             overflowView.setText(remainingText);
             overflowView.setVisibility(View.VISIBLE);
