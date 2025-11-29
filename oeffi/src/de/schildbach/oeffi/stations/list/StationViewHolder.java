@@ -51,6 +51,7 @@ import de.schildbach.pte.dto.Departure;
 import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.LineDestination;
 import de.schildbach.pte.dto.Location;
+import de.schildbach.pte.dto.Position;
 import de.schildbach.pte.dto.Product;
 import de.schildbach.pte.dto.QueryDeparturesResult;
 import de.schildbach.pte.dto.PTDate;
@@ -269,6 +270,8 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
                                         .findViewById(R.id.departure_entry_time);
                                 departureViewHolder.delay = departureView
                                         .findViewById(R.id.departure_entry_delay);
+                                departureViewHolder.position = departureView
+                                        .findViewById(R.id.departure_entry_position);
                                 departureView.setTag(departureViewHolder);
 
                                 departuresViewGroup.addView(departureView);
@@ -374,6 +377,16 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
                             delayView.setTypeface(Typeface.DEFAULT, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
                             delayView.setTextColor(isStale ? colorLessSignificant : (isGhosted ? colorSignificant :
                                     colorHighlighted));
+
+                            // position
+                            final TextView positionView = departureViewHolder.position;
+                            final Position position = departure.position;
+                            if (position != null) {
+                                positionView.setVisibility(View.VISIBLE);
+                                positionView.setText(position.toString());
+                            } else {
+                                positionView.setVisibility(View.GONE);
+                            }
 
                             if (++iDeparture == maxDeparturesPerGroup)
                                 break;
@@ -495,5 +508,6 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
         public View messageIndex;
         public TextView time;
         public TextView delay;
+        public TextView position;
     }
 }
