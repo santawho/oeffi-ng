@@ -31,6 +31,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginRight="@dimen/text_padding_horizontal_lax"
                 android:layout_weight="1"
+                android:ellipsize="none"
                 android:breakStrategy="high_quality" />
 
             <TextView
@@ -72,7 +73,9 @@
             android:id="@+id/departure_entry_destination_overflow"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/text_padding_horizontal" />
+            android:layout_marginLeft="@dimen/text_padding_horizontal"
+            android:ellipsize="none"
+            android:breakStrategy="high_quality" />
 
     </LinearLayout>
 </LinearLayout>

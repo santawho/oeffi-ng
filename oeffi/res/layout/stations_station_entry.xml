@@ -58,7 +58,7 @@
                         android:layout_width="0px"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:ellipsize="middle"
+                        android:ellipsize="none"
                         android:breakStrategy="high_quality" />
 
                     <de.schildbach.oeffi.stations.LineView
@@ -95,7 +95,8 @@
                     android:id="@+id/station_entry_name_overflow"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:ellipsize="middle"
+                    android:ellipsize="none"
+                    android:breakStrategy="high_quality"
                     android:singleLine="true"
                     android:textStyle="bold" />
 
