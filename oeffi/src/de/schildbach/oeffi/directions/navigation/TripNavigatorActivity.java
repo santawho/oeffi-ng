@@ -479,6 +479,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
                 null,
                 time,
                 overviewConfig,
+                true,
                 Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         return true;
     }

@@ -252,12 +252,12 @@ public class FavoriteStationsActivity extends OeffiActivity
             return true;
         } else if (menuItemId == R.id.station_context_directions_from) {
             DirectionsActivity.start(FavoriteStationsActivity.this,
-                    station, null, null, null, null,
+                    station, null, null, null, null, false,
                     Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             return true;
         } else if (menuItemId == R.id.station_context_directions_to) {
             DirectionsActivity.start(FavoriteStationsActivity.this,
-                    null, station, null, null, null,
+                    null, station, null, null, null, false,
                     Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             return true;
         } else if (menuItemId == R.id.station_context_launcher_shortcut) {

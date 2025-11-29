@@ -171,6 +171,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
     private static final String INTENT_EXTRA_TO_LOCATION = DirectionsActivity.class.getName() + ".to_location";
     private static final String INTENT_EXTRA_VIA_LOCATION = DirectionsActivity.class.getName() + ".via_location";
     private static final String INTENT_EXTRA_TIME_SPEC = DirectionsActivity.class.getName() + ".time_spec";
+    private static final String INTENT_EXTRA_AUTOGO = DirectionsActivity.class.getName() + ".autogo";
     private static final String INTENT_EXTRA_COMMAND = DirectionsActivity.class.getName() + ".command";
     private static final String INTENT_EXTRA_RENDERCONFIG = DirectionsActivity.class.getName() + ".config";
 
@@ -187,6 +188,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             @Nullable final Location viaLocation,
             @Nullable final TimeSpec timeSpec,
             @Nullable final TripsOverviewActivity.RenderConfig renderConfig,
+            final boolean autoGo,
             final int intentFlags) {
         final Intent intent = new Intent(context, DirectionsActivity.class).addFlags(intentFlags);
         if (fromLocation != null)
@@ -199,6 +201,8 @@ public class DirectionsActivity extends OeffiMainActivity implements
             intent.putExtra(DirectionsActivity.INTENT_EXTRA_TIME_SPEC, timeSpec);
         if (renderConfig != null)
             intent.putExtra(INTENT_EXTRA_RENDERCONFIG, renderConfig);
+        if (autoGo)
+            intent.putExtra(INTENT_EXTRA_AUTOGO, true);
         context.startActivity(intent);
     }
 
@@ -554,6 +558,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
         boolean autoProvidedFrom = false;
         boolean autoProvidedTo = false;
+        boolean autoGo = false;
 
         final ComponentName intentComponentName = intent.getComponent();
         final String intentClassName = intentComponentName.getClassName();
@@ -618,6 +623,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
                     autoProvidedFrom = true;
                 }
             }
+
             if (intent.hasExtra(INTENT_EXTRA_TO_LOCATION)) {
                 final Location location = (Location) intent.getSerializableExtra(INTENT_EXTRA_TO_LOCATION);
                 if (isEmptyLocation(location)) {
@@ -627,6 +633,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
                     autoProvidedTo = true;
                 }
             }
+
             if (intent.hasExtra(INTENT_EXTRA_VIA_LOCATION)) {
                 final Location location = (Location) intent.getSerializableExtra(INTENT_EXTRA_VIA_LOCATION);
                 if (isEmptyLocation(location)) {
@@ -635,9 +642,11 @@ public class DirectionsActivity extends OeffiMainActivity implements
                     viewViaLocation.setLocation(location);
                 }
             }
+
             if (intent.hasExtra(INTENT_EXTRA_TIME_SPEC))
                 time = (TimeSpec) intent.getSerializableExtra(INTENT_EXTRA_TIME_SPEC);
 
+            autoGo = intent.getBooleanExtra(INTENT_EXTRA_AUTOGO, false);
             command = (Command) intent.getSerializableExtra(INTENT_EXTRA_COMMAND);
         }
 
@@ -676,7 +685,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             requestFocusFirst();
         }
 
-        if (autoProvidedFrom && autoProvidedTo) {
+        if (autoGo && autoProvidedFrom && autoProvidedTo) {
             handleAutoGo();
         }
     }

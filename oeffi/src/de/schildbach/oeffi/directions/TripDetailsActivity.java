@@ -2760,10 +2760,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 stop.location,
                 renderConfig.isJourney
                         ? ((Trip.Public) tripRenderer.trip.legs.get(0)).exitLocation
-                        : DirectionsActivity.EMPTY_LOCATION, // tripRenderer.trip.to,
+                        : tripRenderer.trip.to, // DirectionsActivity.EMPTY_LOCATION,
                 renderConfig.isJourney ? DirectionsActivity.EMPTY_LOCATION : null,
                 time,
                 getOverviewConfig(stop, isLegDeparture, currentJourneyRef, feederJourneyRef, connectionJourneyRef, time),
+                false,
                 Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         return true;
     }
@@ -2797,6 +2798,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 null,
                 time,
                 null,
+                false,
                 Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         return true;
     }
@@ -2830,6 +2832,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 stop.location,
                 time,
                 null,
+                false,
                 Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         return true;
     }
