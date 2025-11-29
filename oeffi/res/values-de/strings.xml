@@ -332,7 +332,7 @@
     <string name="directions_trip_details_start">Beginn der Reise</string>
     <string name="directions_trip_details_start_at">Beginn der Reise in &lt;b>%1$s&lt;/b></string>
     <string name="directions_trip_details_finished">Beendet</string>
-    <string name="directions_trip_details_duration">Dauer %s</string>
+    <string name="directions_trip_details_duration">Dauer: %s</string>
     <string name="directions_trip_details_num_changes">%d Umst.</string>
     <string name="directions_trip_details_walk">&lt;b>%1$d Minuten&lt;/b> %2$sFußweg nach %3$s</string>
     <string name="directions_trip_details_bike">&lt;b>%1$d Minuten&lt;/b> %2$sFahrt mit dem Fahrrad nach %3$s</string>

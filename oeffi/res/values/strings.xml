@@ -333,7 +333,7 @@
     <string name="directions_trip_details_start">Start trip</string>
     <string name="directions_trip_details_start_at">Start trip at &lt;b>%1$s&lt;/b></string>
     <string name="directions_trip_details_finished">Finished</string>
-    <string name="directions_trip_details_duration">Duration %s</string>
+    <string name="directions_trip_details_duration">Duration: %s</string>
     <string name="directions_trip_details_num_changes">%d ch.</string>
     <string name="directions_trip_details_walk">walk of &lt;b>%1$d minutes&lt;/b> %2$sto %3$s</string>
     <string name="directions_trip_details_bike">bike ride of &lt;b>%1$d minutes&lt;/b> %2$sto %3$s</string>

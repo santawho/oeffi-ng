@@ -338,9 +338,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         actionBar = getMyActionBar();
         actionBar.setBack(isTaskRoot() ? null : v -> goBack());
 
-        final Long duration = tripRenderer.trip.getPublicDuration();
-        final String durationText = duration == null ? null :
-                getString(R.string.directions_trip_details_duration, Formats.formatTimeSpan(duration));
+        final long duration = tripRenderer.trip.getDuration();
+        final Long publicDuration = tripRenderer.trip.getPublicDuration();
+        final String durationFormatted = (publicDuration == null || publicDuration == duration)
+                ? Formats.formatTimeSpan(duration)
+                : Formats.formatTimeSpan(duration)
+                    + " / " + Formats.formatTimeSpan(publicDuration);
+        final String durationText = getString(R.string.directions_trip_details_duration, durationFormatted);
         final int numChanges = tripRenderer.trip.numChanges == null ? 0 : tripRenderer.trip.numChanges;
         final String numChangesText = numChanges <= 0 ? null :
                 getString(R.string.directions_trip_details_num_changes, numChanges);
