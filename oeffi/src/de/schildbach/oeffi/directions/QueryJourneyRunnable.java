@@ -229,7 +229,7 @@ public class QueryJourneyRunnable implements Runnable {
         } else if (result.status == QueryJourneyResult.Status.OK) {
             log.debug("Got {}", result.toShortString());
 
-            Trip.Public journeyLeg = result.journeyLeg;
+            final Trip.Public journeyLeg = result.journeyLeg;
             journeyLeg.setEntryAndExit(entryLocation, exitLocation);
             TripDetailsActivity.start(parentActivity, networkProvider.id(), journeyLeg, new Date());
         } else if (result.status == QueryJourneyResult.Status.SERVICE_DOWN) {

@@ -444,7 +444,7 @@ public class TripRenderer {
             } else if (leg instanceof Trip.Public) {
                 final Trip.Public publicLeg = (Trip.Public) leg;
                 final LegContainer newC = new LegContainer(legs.size() + 1, iLeg, publicLeg);
-                if (prevC != null || iLeg == 0) {
+                if (prevC != null || iLeg == 0 && !isJourney) {
                     legs.add(new LegContainer(
                             legs.size(), -1, null,
                             prevC, newC,
