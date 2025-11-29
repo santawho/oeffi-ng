@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/list_entry_background"
@@ -13,85 +15,122 @@
     android:paddingTop="@dimen/text_padding_vertical_verylax">
 
     <!-- first row -->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
 
-    <TextView
-        android:id="@+id/stations_station_entry_time_rel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true" />
+        <de.schildbach.oeffi.stations.LineView
+            android:id="@+id/stations_station_entry_line"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@id/stations_station_entry_time_rel"
+            android:maxWidth="96dp" />
 
-    <TextView
-        android:id="@+id/stations_station_entry_delay"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@id/stations_station_entry_time_rel"
-        android:layout_toLeftOf="@id/stations_station_entry_time_rel"
-        android:textColor="#f00" />
+        <de.schildbach.oeffi.util.OverflowTextView
+            android:id="@+id/stations_station_entry_destination"
+            app:overflow_id="@id/stations_station_entry_destination_overflow"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_alignBaseline="@id/stations_station_entry_time_rel"
+            android:ellipsize="none"
+            android:breakStrategy="high_quality"
+            android:paddingLeft="@dimen/text_padding_horizontal"
+            android:paddingRight="@dimen/text_padding_horizontal"
+            android:singleLine="false" />
 
-    <de.schildbach.oeffi.stations.LineView
-        android:id="@+id/stations_station_entry_line"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@id/stations_station_entry_time_rel"
-        android:maxWidth="96dp" />
+        <TextView
+            android:id="@+id/stations_station_entry_position"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@id/stations_station_entry_time_rel"
+            android:layout_marginRight="@dimen/text_padding_horizontal_lax"
+            android:ellipsize="none"
+            android:gravity="center_horizontal"
+            android:paddingHorizontal="@dimen/text_padding_horizontal"
+            android:background="@color/bg_position"
+            android:textColor="@color/fg_position"
+            android:textStyle="bold"
+            android:singleLine="true" />
 
-    <TextView
-        android:id="@+id/stations_station_entry_destination"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@id/stations_station_entry_time_rel"
-        android:layout_toLeftOf="@id/stations_station_entry_delay"
-        android:layout_toRightOf="@id/stations_station_entry_line"
-        android:ellipsize="middle"
-        android:paddingLeft="@dimen/text_padding_horizontal"
-        android:paddingRight="@dimen/text_padding_horizontal"
-        android:singleLine="true" />
+        <TextView
+            android:id="@+id/stations_station_entry_delay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@id/stations_station_entry_time_rel"
+            android:textColor="#f00" />
+
+        <TextView
+            android:id="@+id/stations_station_entry_time_rel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
 
     <!-- second row -->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
 
-    <TextView
-        android:id="@+id/stations_station_entry_time_abs"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/stations_station_entry_time_rel" />
+        <TextView
+            android:id="@+id/stations_station_entry_destination_overflow"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginLeft="40dp"
+            android:layout_alignBaseline="@id/stations_station_entry_time_abs"
+            android:paddingHorizontal="@dimen/text_padding_horizontal"
+            android:ellipsize="none"
+            android:breakStrategy="high_quality" />
 
-    <TextView
-        android:id="@+id/stations_station_entry_position"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@id/stations_station_entry_time_abs"
-        android:layout_toRightOf="@id/stations_station_entry_line"
-        android:paddingLeft="@dimen/text_padding_horizontal" />
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.01" />
 
-    <TextView
-        android:id="@+id/stations_station_entry_capacity_2nd_class"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@id/stations_station_entry_time_abs"
-        android:layout_marginRight="8dp"
-        android:layout_toLeftOf="@id/stations_station_entry_time_abs"
-        android:singleLine="true"
-        android:text="2." />
+        <TextView
+            android:id="@+id/stations_station_entry_capacity_1st_class"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@id/stations_station_entry_time_abs"
+            android:layout_toLeftOf="@id/stations_station_entry_capacity_2nd_class"
+            android:singleLine="true"
+            android:text="1." />
 
-    <TextView
-        android:id="@+id/stations_station_entry_capacity_1st_class"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@id/stations_station_entry_time_abs"
-        android:layout_toLeftOf="@id/stations_station_entry_capacity_2nd_class"
-        android:singleLine="true"
-        android:text="1." />
+        <TextView
+            android:id="@+id/stations_station_entry_capacity_2nd_class"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@id/stations_station_entry_time_abs"
+            android:layout_marginRight="8dp"
+            android:layout_toLeftOf="@id/stations_station_entry_time_abs"
+            android:singleLine="true"
+            android:text="2." />
+
+        <TextView
+            android:id="@+id/stations_station_entry_time_abs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true" />
+
+    </LinearLayout>
 
     <!-- third row -->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
 
-    <TextView
-        android:id="@+id/stations_station_entry_msg"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/stations_station_entry_time_abs"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:textSize="10sp" />
+        <TextView
+            android:id="@+id/stations_station_entry_msg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:textSize="10sp" />
 
-</RelativeLayout>
+    </LinearLayout>
+
+</LinearLayout>

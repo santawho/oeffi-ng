@@ -74,6 +74,7 @@ import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.LineDestination;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
+import de.schildbach.pte.dto.Position;
 import de.schildbach.pte.dto.Product;
 import de.schildbach.pte.dto.QueryDeparturesResult;
 import de.schildbach.pte.dto.StationDepartures;
@@ -875,11 +876,13 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 destinationView.setOnClickListener(onClickListener);
             }
 
-            positionView.setText(departure.position != null ?
-                    Constants.DESTINATION_ARROW_INVISIBLE_PREFIX +
-                            Formats.formatPosition(context, departure.position, departure.line) :
-                    null);
-            setStrikeThru(positionView, cancelled);
+            final Position position = departure.position;
+            if (position != null) {
+                positionView.setText(position.toString());
+                setStrikeThru(positionView, cancelled);
+            } else {
+                positionView.setText(null);
+            }
 
             // capacity
             final int[] capacity = departure.capacity;
