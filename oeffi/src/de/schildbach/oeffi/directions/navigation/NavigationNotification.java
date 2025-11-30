@@ -55,7 +55,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
@@ -74,6 +76,7 @@ import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.PTDate;
 import de.schildbach.pte.dto.Position;
+import de.schildbach.pte.dto.Product;
 import de.schildbach.pte.dto.Stop;
 import de.schildbach.pte.dto.Trip;
 
@@ -500,6 +503,7 @@ public class NavigationNotification {
                     .setGroup(NOTIFICATION_GROUP_EVENTS)
                     .setContentTitle(data.title)
                     .setContentText(data.message)
+                    .setStyle(new NotificationCompat.BigTextStyle().bigText(data.message))
                     .setShowWhen(true)
                     .setUsesChronometer(true)
                     // .setAutoCancel(true)
@@ -1632,13 +1636,13 @@ public class NavigationNotification {
         final Stop stop = publicLeg.departureStop;
         final PTDate predictedTime = stop.getDepartureTime(false);
         final PTDate plannedTime = stop.getDepartureTime(true);
-        final String lineName = publicLeg.line.label;
+        final Line line = publicLeg.line;
         final String locationName = Formats.fullLocationName(publicLeg.departure);
         final String plannedTimeString = Formats.formatTime(timeZoneSelector, plannedTime);
         final String predictedTimeString = Formats.formatTime(timeZoneSelector, predictedTime);
         newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.PUBLIC_LEG_START, context.getString(
                 R.string.navigation_event_log_entry_transfer_start,
-                lineName,
+                line.label,
                 locationName,
                 platformForLogMessage(stop.plannedDeparturePosition, stop.getDeparturePosition()),
                 plannedTimeString,
@@ -1646,7 +1650,7 @@ public class NavigationNotification {
                 formatTimeSpan(plannedTime, predictedTime))));
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_transfer_start,
-                makeSpeakableLineName(lineName),
+                makeSpeakableLineName(line, publicLeg.destination, stop.location),
                 locationName,
                 platformForSpeakText(stop.plannedDeparturePosition, stop.getDeparturePosition()),
                 timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime()),
@@ -1654,7 +1658,7 @@ public class NavigationNotification {
         if (isEventNotificationsEnabled) {
             newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
                     R.string.navigation_event_notify_transfer_start,
-                    lineName,
+                    makeNotificationLineName(line, publicLeg.destination, stop.location),
                     locationName,
                     platformForNotificationMessage(stop.plannedDeparturePosition, stop.getDeparturePosition()),
                     plannedTimeString,
@@ -1697,13 +1701,13 @@ public class NavigationNotification {
         final Stop stop = publicLeg.arrivalStop;
         final PTDate predictedTime = stop.getArrivalTime(false);
         final PTDate plannedTime = stop.getArrivalTime(true);
-        final String lineName = publicLeg.line.label;
+        final Line line = publicLeg.line;
         final String locationName = Formats.fullLocationName(publicLeg.arrival);
         final String plannedTimeString = Formats.formatTime(timeZoneSelector, plannedTime);
         final String predictedTimeString = Formats.formatTime(timeZoneSelector, predictedTime);
         newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.PUBLIC_LEG_END, context.getString(
                 R.string.navigation_event_log_entry_public_leg_start,
-                lineName,
+                line.label,
                 locationName,
                 platformForLogMessage(stop.plannedArrivalPosition, stop.getArrivalPosition()),
                 plannedTimeString,
@@ -1711,7 +1715,7 @@ public class NavigationNotification {
                 formatTimeSpan(plannedTime, predictedTime))));
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_public_leg_start,
-                makeSpeakableLineName(lineName),
+                makeSpeakableLineName(line, publicLeg.destination, publicLeg.departureStop.location),
                 locationName,
                 platformForSpeakText(stop.plannedArrivalPosition, stop.getArrivalPosition()),
                 timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime()),
@@ -1719,7 +1723,7 @@ public class NavigationNotification {
         if (isEventNotificationsEnabled) {
             newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
                     R.string.navigation_event_notify_public_leg_start,
-                    lineName,
+                    makeNotificationLineName(line, publicLeg.destination, publicLeg.departureStop.location),
                     locationName,
                     platformForNotificationMessage(stop.plannedArrivalPosition, stop.getArrivalPosition()),
                     plannedTimeString,
@@ -1797,31 +1801,31 @@ public class NavigationNotification {
             final long timeLeftMs,
             final Trip.Public toPublicLeg) {
         final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
-        final Stop stop = toPublicLeg == null ? null : toPublicLeg.departureStop;
-        final PTDate predictedTime = stop == null ? null : stop.getDepartureTime(false);
-        final PTDate plannedTime = stop == null ? null : stop.getDepartureTime(true);
-        final String lineName = toPublicLeg.line.label;
+        final Stop stop = toPublicLeg.departureStop;
+        final PTDate predictedTime = stop.getDepartureTime(false);
+        final PTDate plannedTime = stop.getDepartureTime(true);
+        final Line line = toPublicLeg.line;
         final String plannedTimeString = Formats.formatTime(timeZoneSelector, plannedTime);
         final String predictedTimeString = Formats.formatTime(timeZoneSelector, predictedTime);
         newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.TRANSFER_END_REMINDER, context.getString(
                 R.string.navigation_event_log_entry_transfer_end_reminder,
                 formatTimeSpan(timeLeftMs),
                 platformForLogMessage(stop.plannedDeparturePosition, stop.getDeparturePosition()),
-                lineName,
+                line.label,
                 plannedTimeString,
                 predictedTimeString,
                 formatTimeSpan(plannedTime, predictedTime))));
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_transfer_end_reminder,
                 remainingTimeForSpeakText(timeLeftMs),
-                makeSpeakableLineName(lineName),
+                makeSpeakableLineName(line, toPublicLeg.destination, stop.location),
                 platformForSpeakText(stop.plannedDeparturePosition, stop.getDeparturePosition()),
                 timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime())));
         if (notifyReminder(timeLeftMs)) {
             newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
                     R.string.navigation_event_notify_transfer_end_reminder,
                     remainingTimeForNotificationText(timeLeftMs),
-                    lineName,
+                    makeNotificationLineName(line, toPublicLeg.destination, stop.location),
                     platformForNotificationMessage(stop.plannedDeparturePosition, stop.getDeparturePosition()),
                     predictedTimeString,
                     formatTimeSpan(plannedTime, predictedTime))));
@@ -1831,13 +1835,14 @@ public class NavigationNotification {
     private void addEventOutputDepartureDelayChange(final Trip.Public publicLeg) {
         final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
         final Stop stop = publicLeg.departureStop;
+        final Line line = publicLeg.line;
         final PTDate predictedTime = stop.getDepartureTime(false);
         final PTDate plannedTime = stop.getDepartureTime(true);
         final String plannedTimeString = Formats.formatTime(timeZoneSelector, plannedTime);
         final String predictedTimeString = Formats.formatTime(timeZoneSelector, predictedTime);
         newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.DEPARTURE_DELAY_CHANGE, context.getString(
                 R.string.navigation_event_log_entry_departure_delay_change,
-                publicLeg.line.label,
+                line.label,
                 Formats.fullLocationName(stop.location),
                 formatTimeSpan(plannedTime, predictedTime),
                 predictedTimeString)));
@@ -1847,7 +1852,7 @@ public class NavigationNotification {
         if (isEventNotificationsEnabled) {
             newEventNotifications.add(EventNotificationData.changeEvent(context.getString(
                     R.string.navigation_event_notify_departure_delay_change,
-                    publicLeg.line.label,
+                    makeNotificationLineName(line, publicLeg.destination, stop.location),
                     Formats.fullLocationName(stop.location),
                     formatTimeSpan(plannedTime, predictedTime),
                     predictedTimeString)));
@@ -1858,13 +1863,14 @@ public class NavigationNotification {
             final Trip.Public publicLeg) {
         final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
         final Stop stop = publicLeg.arrivalStop;
+        final Line line = publicLeg.line;
         final PTDate predictedTime = stop.getArrivalTime(false);
         final PTDate plannedTime = stop.getArrivalTime(true);
         final String plannedTimeString = Formats.formatTime(timeZoneSelector, plannedTime);
         final String predictedTimeString = Formats.formatTime(timeZoneSelector, predictedTime);
         newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.ARRIVAL_DELAY_CHANGE, context.getString(
                 R.string.navigation_event_log_entry_arrival_delay_change,
-                publicLeg.line.label,
+                line.label,
                 Formats.fullLocationName(stop.location),
                 formatTimeSpan(plannedTime, predictedTime),
                 predictedTimeString)));
@@ -1874,7 +1880,7 @@ public class NavigationNotification {
         if (isEventNotificationsEnabled) {
             newEventNotifications.add(EventNotificationData.changeEvent(context.getString(
                     R.string.navigation_event_notify_arrival_delay_change,
-                    publicLeg.line.label,
+                    makeNotificationLineName(line, publicLeg.destination, publicLeg.departureStop.location),
                     Formats.fullLocationName(stop.location),
                     formatTimeSpan(plannedTime, predictedTime),
                     predictedTimeString)));
@@ -1886,12 +1892,13 @@ public class NavigationNotification {
             final Position prevPosition) {
         final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
         final Stop stop = publicLeg.departureStop;
+        final Line line = publicLeg.line;
         final Position newPosition = stop.getDeparturePosition();
         final Position oldPosition = prevPosition != null ? prevPosition : stop.plannedDeparturePosition;
         newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.DEPARTURE_POSITION_CHANGE, context.getString(
                 R.string.navigation_event_log_entry_departure_position_change,
                 platformForLogMessage(oldPosition, newPosition),
-                publicLeg.line.label,
+                line.label,
                 Formats.fullLocationName(stop.location),
                 Formats.formatTime(timeZoneSelector, stop.getDepartureTime(true)))));
         newSpeakTexts.add(context.getString(
@@ -1901,7 +1908,7 @@ public class NavigationNotification {
             newEventNotifications.add(EventNotificationData.changeEvent(context.getString(
                     R.string.navigation_event_notify_departure_position_change,
                     platformForNotificationMessage(oldPosition, newPosition),
-                    publicLeg.line.label,
+                    makeNotificationLineName(line, publicLeg.destination, stop.location),
                     Formats.fullLocationName(stop.location),
                     Formats.formatTime(timeZoneSelector, stop.getDepartureTime(true)))));
         }
@@ -1927,7 +1934,7 @@ public class NavigationNotification {
             newEventNotifications.add(EventNotificationData.changeEvent(context.getString(
                     R.string.navigation_event_notify_arrival_position_change,
                     platformForNotificationMessage(oldPosition, newPosition),
-                    publicLeg.line.label,
+                    makeNotificationLineName(publicLeg.line, publicLeg.destination, publicLeg.departureStop.location),
                     Formats.fullLocationName(stop.location),
                     Formats.formatTime(timeZoneSelector, stop.getArrivalTime(true)))));
         }
@@ -1972,7 +1979,38 @@ public class NavigationNotification {
         return (isNegative ? "-" : positivePrefix) + Long.toString(minutes) + " " + context.getString(R.string.time_minutes);
     }
 
-    private String makeSpeakableLineName(final String lineName) {
+    private static Map<Product, String> notificationProducts;
+
+    private String makeNotificationLineName(final Line line, final Location destination, final Location refLocation) {
+        if (notificationProducts == null) {
+            notificationProducts = new HashMap<>();
+            notificationProducts.put(Product.SUBWAY, context.getString(R.string.navigation_event_notify_product_subway));
+            notificationProducts.put(Product.TRAM, context.getString(R.string.navigation_event_notify_product_tram));
+            notificationProducts.put(Product.BUS, context.getString(R.string.navigation_event_notify_product_bus));
+            notificationProducts.put(Product.FERRY, context.getString(R.string.navigation_event_notify_product_ferry));
+            notificationProducts.put(Product.CABLECAR, context.getString(R.string.navigation_event_notify_product_cablecar));
+            notificationProducts.put(Product.ON_DEMAND, context.getString(R.string.navigation_event_notify_product_ondemand));
+            notificationProducts.put(Product.REPLACEMENT_SERVICE, context.getString(R.string.navigation_event_notify_product_replacement));
+        }
+        final String notificationDestination = Formats.fullLocationNameIfDifferentPlace(destination, refLocation);
+        final String notificationProduct = notificationProducts.get(line.product);
+        return (notificationProduct == null ? "" : notificationProduct + " ") + line.label + "->" + notificationDestination;
+    }
+
+    private static Map<Product, String> speakableProducts;
+
+    private String makeSpeakableLineName(final Line line, final Location destination, final Location refLocation) {
+        if (speakableProducts == null) {
+            speakableProducts = new HashMap<>();
+            speakableProducts.put(Product.SUBWAY, context.getString(R.string.navigation_event_speak_product_subway));
+            speakableProducts.put(Product.TRAM, context.getString(R.string.navigation_event_speak_product_tram));
+            speakableProducts.put(Product.BUS, context.getString(R.string.navigation_event_speak_product_bus));
+            speakableProducts.put(Product.FERRY, context.getString(R.string.navigation_event_speak_product_ferry));
+            speakableProducts.put(Product.CABLECAR, context.getString(R.string.navigation_event_speak_product_cablecar));
+            speakableProducts.put(Product.ON_DEMAND, context.getString(R.string.navigation_event_speak_product_ondemand));
+            speakableProducts.put(Product.REPLACEMENT_SERVICE, context.getString(R.string.navigation_event_speak_product_replacement));
+        }
+        final String lineName = line.label;
         if (lineName == null || lineName.length() <= 1)
             return lineName;
         final StringBuilder builder = new StringBuilder();
@@ -1990,7 +2028,13 @@ public class NavigationNotification {
             builder.append(ch);
             prevChar = ch;
         }
-        return builder.toString();
+        final String speakableLineName = builder.toString();
+        final String speakableDestination = Formats.fullLocationNameIfDifferentPlace(destination, refLocation);
+        final String speakableProduct = speakableProducts.get(line.product);
+        return context.getString(R.string.navigation_event_speak_linename,
+                speakableProduct == null ? "" : speakableProduct + " ",
+                speakableLineName,
+                speakableDestination);
     }
 
 }
