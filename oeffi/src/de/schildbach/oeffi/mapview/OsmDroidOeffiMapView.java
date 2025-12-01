@@ -202,6 +202,11 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
         invalidate();
     }
 
+    public void setStationsOverlay(
+            final LocationView viewCenterLocation) {
+        getOverlays().add(new StationsOsmdroidOverlay(viewCenterLocation));
+    }
+
     public void setDirectionsOverlay(
             final LocationView viewFromLocation,
             final LocationView viewToLocation) {
@@ -699,9 +704,13 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
 
         @Override
         public boolean onSingleTapConfirmed(final MotionEvent e, final MapView mapView) {
-            final IGeoPoint p = mapView.getProjection().fromPixels((int) e.getX(), (int) e.getY());
-            final double tappedLat = p.getLatitude();
-            final double tappedLon = p.getLongitude();
+            final Projection projection = mapView.getProjection();
+            final IGeoPoint geoPoint = projection.fromPixels((int) e.getX(), (int) e.getY());
+            final double tappedLat = geoPoint.getLatitude();
+            final double tappedLon = geoPoint.getLongitude();
+            final IGeoPoint northEast = projection.getNorthEast();
+            final IGeoPoint southWest = projection.getSouthWest();
+            final double mapDiagonal = GeoUtils.distanceBetween(northEast.getLatitude(), northEast.getLongitude(), southWest.getLatitude(), southWest.getLongitude()).distanceInMeters;
             boolean consumed = false;
 
             if (tripAware != null) {
@@ -731,11 +740,14 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
                 Station tappedStation = null;
                 float tappedStationDistance = 0;
 
+                final double allowedDistance = mapDiagonal / 20.0;
                 for (final Station station : stationsAware.getStations()) {
                     final float distance = GeoUtils.distanceBetween(tappedLat, tappedLon, station.location.coord).distanceInMeters;
-                    if (tappedStation == null || distance < tappedStationDistance) {
-                        tappedStation = station;
-                        tappedStationDistance = distance;
+                    if (distance < allowedDistance) {
+                        if (tappedStation == null || distance < tappedStationDistance) {
+                            tappedStation = station;
+                            tappedStationDistance = distance;
+                        }
                     }
                 }
 
@@ -765,9 +777,55 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
         }
     }
 
+    public class StationsOsmdroidOverlay extends Overlay {
+        final LocationView viewCenterLocation;
+        private View pinView;
+
+        public StationsOsmdroidOverlay(
+                final LocationView viewCenterLocation) {
+            this.viewCenterLocation = viewCenterLocation;
+        }
+
+        @Override
+        public void draw(final Canvas canvas, final MapView mapView, final boolean shadow) {
+            if (pinView != null)
+                pinView.requestLayout();
+        }
+
+        @Override
+        public boolean onSingleTapConfirmed(final MotionEvent e, final MapView mapView) {
+            final IGeoPoint geoPoint = mapView.getProjection().fromPixels((int) e.getX(), (int) e.getY());
+            final Location pinLocation = Location.coord(Point.fromDouble(geoPoint.getLatitude(), geoPoint.getLongitude()));
+
+            final View view = LayoutInflater.from(getContext()).inflate(R.layout.stations_map_pin, null);
+            final LocationTextView locationView = view
+                    .findViewById(R.id.stations_map_pin_location);
+            final View buttonGroup = view.findViewById(R.id.stations_map_pin_buttons);
+            buttonGroup.findViewById(R.id.stations_map_pin_button_center).setOnClickListener(v -> {
+                viewCenterLocation.setLocation(pinLocation);
+                mapView.removeAllViews();
+            });
+            locationView.setLocation(pinLocation);
+            locationView.setShowLocationType(false);
+
+            // exchange view for the pin
+            if (pinView != null)
+                mapView.removeView(pinView);
+            pinView = view;
+            mapView.addView(pinView, new MapView.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT, geoPoint, MapView.LayoutParams.BOTTOM_CENTER, 0, 0));
+
+            startGeocoder(geoPoint, locationView);
+
+            final IMapController controller = mapView.getController();
+            controller.animateTo(geoPoint);
+
+            return false;
+        }
+    }
+
     public class DirectionsOsmdroidOverlay extends Overlay {
         final LocationView viewFromLocation, viewToLocation;
-        private Location pinLocation;
         private View pinView;
 
         public DirectionsOsmdroidOverlay(
@@ -784,8 +842,8 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
 
         @Override
         public boolean onSingleTapConfirmed(final MotionEvent e, final MapView mapView) {
-            final IGeoPoint p = mapView.getProjection().fromPixels((int) e.getX(), (int) e.getY());
-            pinLocation = Location.coord(Point.fromDouble(p.getLatitude(), p.getLongitude()));
+            final IGeoPoint geoPoint = mapView.getProjection().fromPixels((int) e.getX(), (int) e.getY());
+            final Location pinLocation = Location.coord(Point.fromDouble(geoPoint.getLatitude(), geoPoint.getLongitude()));
 
             final View view = LayoutInflater.from(getContext()).inflate(R.layout.directions_map_pin, null);
             final LocationTextView locationView = view
@@ -807,25 +865,29 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
                 mapView.removeView(pinView);
             pinView = view;
             mapView.addView(pinView, new MapView.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT, p, MapView.LayoutParams.BOTTOM_CENTER, 0, 0));
+                    ViewGroup.LayoutParams.WRAP_CONTENT, geoPoint, MapView.LayoutParams.BOTTOM_CENTER, 0, 0));
 
-            new GeocoderThread(getContext(), p.getLatitude(), p.getLongitude(),
-                    new GeocoderThread.Callback() {
-                        public void onGeocoderResult(final Address address) {
-                            pinLocation = GeocoderThread.addressToLocation(address);
-                            locationView.setLocation(pinLocation);
-                            locationView.setShowLocationType(false);
-                        }
-
-                        public void onGeocoderFail(final Exception exception) {
-                            log.info("Problem in geocoder: {}", exception.getMessage());
-                        }
-                    });
+            startGeocoder(geoPoint, locationView);
 
             final IMapController controller = mapView.getController();
-            controller.animateTo(p);
+            controller.animateTo(geoPoint);
 
             return false;
         }
+    }
+
+    private void startGeocoder(final IGeoPoint geoPoint, final LocationTextView locationView) {
+        new GeocoderThread(getContext(), geoPoint.getLatitude(), geoPoint.getLongitude(),
+                new GeocoderThread.Callback() {
+                    public void onGeocoderResult(final Address address) {
+                        final Location pinLocation = GeocoderThread.addressToLocation(address);
+                        locationView.setLocation(pinLocation);
+                        locationView.setShowLocationType(false);
+                    }
+
+                    public void onGeocoderFail(final Exception exception) {
+                        log.info("Problem in geocoder: {}", exception.getMessage());
+                    }
+                });
     }
 }

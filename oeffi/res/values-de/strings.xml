@@ -142,6 +142,9 @@
     <string name="stations_connectivity_warning">Offline-Modus: Dein Gerät ist nicht verbunden.\nDaher werden keine Abfahrtszeiten angezeigt.</string>
     <string name="stations_no_departures_for_address">Für eine Adresse können keine Abfahrten angezeigt werden.</string>
 
+    <!-- stations map -->
+    <string name="stations_map_pin_button_center">Hier suchen</string>
+
     <!-- nearby stations error dialog -->
     <string name="stations_nearby_stations_error_title">Problem beim Laden der nahegelegenen Haltestellen</string>
     <string name="stations_nearby_stations_error_message">Das Gerät muss mit dem Internet verbunden sein. Möchtest du fortfahren?</string>
