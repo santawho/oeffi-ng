@@ -39,6 +39,7 @@ import android.view.KeyEvent;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
@@ -48,6 +49,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
+import android.widget.FrameLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -987,13 +989,51 @@ public class DirectionsActivity extends OeffiMainActivity implements
             time = new TimeSpec.Absolute(time.depArr, timeInMillis);
             updateGUI();
         }, hour, minute, DateFormat.is24HourFormat(DirectionsActivity.this)) {
+            private boolean fingerIsDown;
+            private boolean isMinuteChanged;
+
+            private void fireOk() {
+                onClick(this, BUTTON_POSITIVE);
+                dismiss();
+            }
+
             @Override
             public void onTimeChanged(final TimePicker view, final int newHourOfDay, final int newMinute) {
                 super.onTimeChanged(view, newHourOfDay, newMinute);
                 if (newMinute != minute) {
-                    onClick(this, BUTTON_POSITIVE);
-                    dismiss();
+                    isMinuteChanged = true;
+                    if (!fingerIsDown)
+                        fireOk();
                 }
+            }
+
+            @Override
+            public void setView(final View timePickerView) {
+                // need to wrap the time picker into another frame view
+                // to be able to intercept the touch events
+                // which is only possible by overloading onInterceptTouchEvent()
+                // which requires a new class!
+                super.setView(new FrameLayout(timePickerView.getContext()) {
+                    {
+                        addView(timePickerView);
+                    }
+
+                    @Override
+                    public boolean onInterceptTouchEvent(final MotionEvent ev) {
+                        final int action = ev.getAction();
+                        switch (action) {
+                            case MotionEvent.ACTION_DOWN:
+                                fingerIsDown = true;
+                                break;
+                            case MotionEvent.ACTION_UP:
+                                fingerIsDown = false;
+                                if (isMinuteChanged)
+                                    fireOk();
+                                break;
+                        }
+                        return super.onInterceptTouchEvent(ev);
+                    }
+                });
             }
         }.show();
     };
