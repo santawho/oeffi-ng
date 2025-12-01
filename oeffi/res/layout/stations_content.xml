@@ -100,37 +100,42 @@
                                 android:tint="@color/fg_significant" />
                         </LinearLayout>
 
-                        <LinearLayout
-                            android:id="@+id/stations_location_box"
+                        <de.schildbach.oeffi.util.locationview.LocationView
+                            android:id="@+id/stations_location"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@color/bg_action_bar_appendix"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal"
-                            android:visibility="gone">
+                            android:layout_height="wrap_content" />
 
-                            <TextView
-                                android:id="@+id/stations_location_text"
-                                android:layout_width="0px"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:drawableLeft="@drawable/ic_location_searching_grey600_24dp"
-                                android:drawablePadding="@dimen/text_padding_horizontal"
-                                android:gravity="left|center_vertical"
-                                android:paddingBottom="@dimen/text_padding_vertical"
-                                android:paddingLeft="@dimen/text_padding_horizontal_lax"
-                                android:paddingTop="@dimen/text_padding_vertical"
-                                android:singleLine="true"
-                                android:textSize="@dimen/font_size_large"
-                                android:textStyle="bold" />
+<!--                        <LinearLayout-->
+<!--                            android:id="@+id/stations_location_box"-->
+<!--                            android:layout_width="match_parent"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:background="@color/bg_action_bar_appendix"-->
+<!--                            android:gravity="center_vertical"-->
+<!--                            android:orientation="horizontal"-->
+<!--                            android:visibility="gone">-->
 
-                            <ImageButton
-                                android:id="@+id/stations_location_clear"
-                                android:layout_width="36dp"
-                                android:layout_height="match_parent"
-                                android:gravity="right|center_vertical"
-                                android:src="@drawable/ic_clear_black_24dp" />
-                        </LinearLayout>
+<!--                            <TextView-->
+<!--                                android:id="@+id/stations_location_text"-->
+<!--                                android:layout_width="0px"-->
+<!--                                android:layout_height="wrap_content"-->
+<!--                                android:layout_weight="1"-->
+<!--                                android:drawableLeft="@drawable/ic_location_searching_grey600_24dp"-->
+<!--                                android:drawablePadding="@dimen/text_padding_horizontal"-->
+<!--                                android:gravity="left|center_vertical"-->
+<!--                                android:paddingBottom="@dimen/text_padding_vertical"-->
+<!--                                android:paddingLeft="@dimen/text_padding_horizontal_lax"-->
+<!--                                android:paddingTop="@dimen/text_padding_vertical"-->
+<!--                                android:singleLine="true"-->
+<!--                                android:textSize="@dimen/font_size_large"-->
+<!--                                android:textStyle="bold" />-->
+
+<!--                            <ImageButton-->
+<!--                                android:id="@+id/stations_location_clear"-->
+<!--                                android:layout_width="36dp"-->
+<!--                                android:layout_height="match_parent"-->
+<!--                                android:gravity="right|center_vertical"-->
+<!--                                android:src="@drawable/ic_clear_black_24dp" />-->
+<!--                        </LinearLayout>-->
 
                         <ViewAnimator
                             android:id="@+id/stations_list_layout"

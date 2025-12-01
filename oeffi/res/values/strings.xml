@@ -143,6 +143,9 @@
     <string name="stations_connectivity_warning">Offline mode: Your device is not connected.\nThus, departure times will not be shown.</string>
     <string name="stations_no_departures_for_address">Cannot show departures for an address.</string>
 
+    <!-- stations map -->
+    <string name="stations_map_pin_button_center">Search here</string>
+
     <!-- nearby stations error dialog -->
     <string name="stations_nearby_stations_error_title">Problem loading nearby stations data</string>
     <string name="stations_nearby_stations_error_message">Make sure your phone is connected to the Internet. Do you want to continue?</string>
