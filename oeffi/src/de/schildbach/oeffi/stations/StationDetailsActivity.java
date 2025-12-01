@@ -879,12 +879,17 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 destinationView.setOnClickListener(onClickListener);
             }
 
-            final Position position = departure.position;
+            final Position position = departure.getPosition();
             if (position != null) {
+                positionView.setVisibility(View.VISIBLE);
                 positionView.setText(position.toString());
+                positionView.setBackgroundColor(getColor(
+                        position.equals(departure.plannedPosition)
+                                ? R.color.bg_position
+                                : R.color.bg_position_changed));
                 setStrikeThru(positionView, cancelled);
             } else {
-                positionView.setText(null);
+                positionView.setVisibility(View.GONE);
             }
 
             // capacity

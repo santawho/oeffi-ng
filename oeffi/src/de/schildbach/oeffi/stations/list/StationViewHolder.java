@@ -380,10 +380,14 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
 
                             // position
                             final TextView positionView = departureViewHolder.position;
-                            final Position position = departure.position;
+                            final Position position = departure.getPosition();
                             if (position != null) {
                                 positionView.setVisibility(View.VISIBLE);
                                 positionView.setText(position.toString());
+                                positionView.setBackgroundColor(context.getColor(
+                                        position.equals(departure.plannedPosition)
+                                                ? R.color.bg_position
+                                                : R.color.bg_position_changed));
                             } else {
                                 positionView.setVisibility(View.GONE);
                             }

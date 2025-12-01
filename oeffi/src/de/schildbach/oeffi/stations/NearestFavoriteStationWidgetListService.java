@@ -59,33 +59,41 @@ public class NearestFavoriteStationWidgetListService extends RemoteViewsService 
             this.departures = (List<Departure>) Objects.deserialize(intent.getByteArrayExtra(INTENT_EXTRA_DEPARTURES));
         }
 
+        @Override
         public void onCreate() {
         }
 
+        @Override
         public void onDestroy() {
         }
 
+        @Override
         public void onDataSetChanged() {
         }
 
+        @Override
         public int getCount() {
             return departures.size();
         }
 
+        @Override
         public boolean hasStableIds() {
             return false;
         }
 
+        @Override
         public long getItemId(final int position) {
             return position;
         }
 
+        @Override
         public int getViewTypeCount() {
             return 1;
         }
 
-        public RemoteViews getViewAt(final int position) {
-            final Departure departure = departures.get(position);
+        @Override
+        public RemoteViews getViewAt(final int viewPosition) {
+            final Departure departure = departures.get(viewPosition);
 
             final RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.station_widget_entry);
             views.setOnClickFillInIntent(R.id.station_widget_entry, new Intent()
@@ -114,11 +122,17 @@ public class NearestFavoriteStationWidgetListService extends RemoteViewsService 
                     departure.message != null ? View.VISIBLE : View.GONE);
 
             // position
-            final Position departurePosition = departure.position;
-            views.setViewVisibility(R.id.station_widget_entry_position,
-                    departurePosition != null ? View.VISIBLE : View.GONE);
-            views.setTextViewText(R.id.station_widget_entry_position,
-                    departurePosition != null ? departurePosition.toString() : null);
+            final Position position = departure.getPosition();
+            if (position != null) {
+                views.setViewVisibility(R.id.station_widget_entry_position, View.VISIBLE);
+                views.setTextViewText(R.id.station_widget_entry_position, position.toString());
+                views.setInt(R.id.station_widget_entry_position, "setBackgroundResource",
+                        position.equals(departure.plannedPosition)
+                                ? R.color.bg_position_darkdefault
+                                : R.color.bg_position_changed);
+            } else {
+                views.setViewVisibility(R.id.station_widget_entry_position, View.GONE);
+            }
 
             // delay
             final PTDate predictedTime = departure.predictedTime;
@@ -150,6 +164,7 @@ public class NearestFavoriteStationWidgetListService extends RemoteViewsService 
             return views;
         }
 
+        @Override
         public RemoteViews getLoadingView() {
             return new RemoteViews(context.getPackageName(), R.layout.station_widget_entry_loading);
         }
