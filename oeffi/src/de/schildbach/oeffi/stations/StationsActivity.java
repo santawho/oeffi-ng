@@ -96,6 +96,7 @@ import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GoogleMapsUtils;
 import de.schildbach.oeffi.util.LocationUriParser;
 import de.schildbach.oeffi.util.Toast;
+import de.schildbach.oeffi.util.locationview.LocationView;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.NetworkProvider.Capability;
@@ -120,7 +121,6 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -185,6 +185,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private TextView disclaimerSourceView;
     private View filterActionButton;
     private ViewGroup locationProvidersView;
+    private LocationView viewLocation;
     private SwipeRefreshLayout swipeRefresh;
 
     private QueryJourneyRunnable queryJourneyRunnable;
@@ -195,6 +196,44 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private BroadcastReceiver tickReceiver;
 
     private int maxDeparturesPerStation;
+
+    final LocationView.Listener locationViewListener = new LocationView.Listener() {
+        @Override
+        public NetworkId getNetwork() {
+            return network;
+        }
+
+        @Override
+        public Set<Product> getPreferredProducts() {
+            return getNetworkDefaultProducts();
+        }
+
+        @Override
+        public Handler getHandler() {
+            return backgroundHandler;
+        }
+
+        @Override
+        public void changed(final LocationView view) {
+            fixedLocation = viewLocation.getLocation();
+            if (fixedLocation != null) {
+                onFixedLocationSet();
+            } else {
+                setToDeviceLocation();
+            }
+            updateGUI();
+        }
+    };
+
+    private void setupLocationViews() {
+        viewLocation.setListener(locationViewListener);
+
+        resetLocationViewsBehaviour();
+    }
+
+    private void resetLocationViewsBehaviour() {
+        viewLocation.resetBehaviour();
+    }
 
     private static final int DIALOG_NEARBY_STATIONS_ERROR = 1;
 
@@ -363,8 +402,12 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         final Button missingCapabilityButton = findViewById(R.id.stations_network_missing_capability_button);
         missingCapabilityButton.setOnClickListener(selectNetworkListener);
 
+        viewLocation = findViewById(R.id.stations_location);
+        setupLocationViews();
+
         getMapView().setStationsAware(this);
         getMapView().setDeviceLocationAware(this);
+        getMapView().setStationsOverlay(viewLocation);
 
         connectivityWarningView = findViewById(R.id.stations_connectivity_warning_box);
         final View disclaimerView = findViewById(R.id.stations_disclaimer_group);
@@ -640,6 +683,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
     @Override
     protected void onChangeNetwork(final NetworkId network) {
+        setupLocationViews();
+
         resetContent();
 
         updateDisclaimerSource(disclaimerSourceView, network, null);
@@ -762,45 +807,52 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     }
 
     private void setFixedLocation(final Location location) {
-        fixedLocation = location;
+        viewLocation.setLocation(location);
+    }
+
+    private void onFixedLocationSet() {
         fixedLocationResolving = false;
 
         if (fixedLocation != null && fixedLocation.hasCoord())
             getMapView().animateToLocation(fixedLocation.getLatAsDouble(), fixedLocation.getLonAsDouble());
 
-        findViewById(R.id.stations_location_clear).setOnClickListener(v -> {
-            fixedLocation = null;
-            final boolean hadPresetTime = presetTime != null;
-            presetTime = null;
-            stationListAdapter.setBaseTime(presetTime);
-
-            if (deviceLocation != null) {
-                getMapView().animateToLocation(deviceLocation.getLatAsDouble(), deviceLocation.getLonAsDouble());
-
-                // remove non-favorites and re-calculate distances
-                for (final Iterator<Station> i = stations.iterator(); i.hasNext();) {
-                    final Station station = i.next();
-
-                    final Integer favState = favorites.get(station.location.id);
-                    if (favState == null || favState != FavoriteStationsProvider.TYPE_FAVORITE) {
-                        i.remove();
-                        stationsMap.remove(station.location.id);
-                    } else {
-                        if (hadPresetTime)
-                            station.setDepartures(null);
-
-                        if (station.location.hasCoord())
-                            station.setDistanceAndBearing(GeoUtils.distanceBetween(deviceLocation, station.location.coord));
-                    }
-                }
-            }
-
-            stationListAdapter.notifyDataSetChanged();
-            handler.post(initStationsRunnable);
-            updateGUI();
-        });
+        viewLocation.setVisibility(View.VISIBLE);
+        // findViewById(R.id.stations_location_clear).setOnClickListener(v -> setToDeviceLocation());
 
         handler.post(initStationsRunnable);
+    }
+
+    private void setToDeviceLocation() {
+        viewLocation.setVisibility(View.GONE);
+        fixedLocation = null;
+        final boolean hadPresetTime = presetTime != null;
+        presetTime = null;
+        stationListAdapter.setBaseTime(presetTime);
+
+        if (deviceLocation != null) {
+            getMapView().animateToLocation(deviceLocation.getLatAsDouble(), deviceLocation.getLonAsDouble());
+
+            // remove non-favorites and re-calculate distances
+            for (final Iterator<Station> i = stations.iterator(); i.hasNext(); ) {
+                final Station station = i.next();
+
+                final Integer favState = favorites.get(station.location.id);
+                if (favState == null || favState != FavoriteStationsProvider.TYPE_FAVORITE) {
+                    i.remove();
+                    stationsMap.remove(station.location.id);
+                } else {
+                    if (hadPresetTime)
+                        station.setDepartures(null);
+
+                    if (station.location.hasCoord())
+                        station.setDistanceAndBearing(GeoUtils.distanceBetween(deviceLocation, station.location.coord));
+                }
+            }
+        }
+
+        stationListAdapter.notifyDataSetChanged();
+        handler.post(initStationsRunnable);
+        updateGUI();
     }
 
     @Override
@@ -873,14 +925,14 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         }
 
         // location box
-        findViewById(R.id.stations_location_box).setVisibility(fixedLocation != null ? View.VISIBLE : View.GONE);
-        if (fixedLocation != null) {
-            final String locationName = fixedLocation.name != null ? fixedLocation.uniqueShortName()
-                    : String.format(Locale.ENGLISH, "%.6f, %.6f", fixedLocation.getLatAsDouble(), fixedLocation.getLonAsDouble());
-            final String text = presetTime == null ? locationName
-                    : String.format("%s @ %s", locationName, Formats.formatTime(timeZoneSelector, presetTime, PTDate.NETWORK_OFFSET));
-            ((TextView) findViewById(R.id.stations_location_text)).setText(text);
-        }
+//        findViewById(R.id.stations_location_box).setVisibility(fixedLocation != null ? View.VISIBLE : View.GONE);
+//        if (fixedLocation != null) {
+//            final String locationName = fixedLocation.name != null ? fixedLocation.uniqueShortName()
+//                    : String.format(Locale.ENGLISH, "%.6f, %.6f", fixedLocation.getLatAsDouble(), fixedLocation.getLonAsDouble());
+//            final String text = presetTime == null ? locationName
+//                    : String.format("%s @ %s", locationName, Formats.formatTime(timeZoneSelector, presetTime, PTDate.NETWORK_OFFSET));
+//            ((TextView) findViewById(R.id.stations_location_text)).setText(text);
+//        }
 
         // search box
         if (DO_FILTER_BY_SEARCH_ON_NETWORK) {

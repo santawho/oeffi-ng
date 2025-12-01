@@ -54,6 +54,8 @@ public class OeffiMapView extends FrameLayout {
         void animateToLocation(final double latitude, final double longitude);
         void setDeviceLocationAware(final DeviceLocationAware locationAware);
         void zoomToAll();
+        void setStationsOverlay(
+                final LocationView viewCenterLocation);
         void setDirectionsOverlay(
                 final LocationView viewFromLocation,
                 final LocationView viewToLocation);
@@ -135,6 +137,11 @@ public class OeffiMapView extends FrameLayout {
 
     public void zoomToAll() {
         viewImplementation.zoomToAll();
+    }
+
+    public void setStationsOverlay(
+            final LocationView viewCenterLocation) {
+        viewImplementation.setStationsOverlay(viewCenterLocation);
     }
 
     public void setDirectionsOverlay(
