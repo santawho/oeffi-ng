@@ -435,16 +435,17 @@
 
     <!-- directions preferences -->
     <string name="directions_preferences_title">Verbindungen</string>
+    <string name="directions_preferences_summary">Diese Einstellungen wirken sich nicht auf alle Verkehrsnetze in der gleichen Weise aus.</string>
     <string name="directions_preferences_optimize_trip_title">Optimierung</string>
-    <string name="directions_preferences_optimize_trip_summary">Was ist dir am wichtigsten? Diese Einstellung wirkt sich nicht auf alle Verkehrsnetze aus.</string>
+    <string name="directions_preferences_optimize_trip_summary">Was ist dir am wichtigsten?</string>
     <string name="directions_preferences_walk_speed_title">Gehgeschwindigkeit</string>
-    <string name="directions_preferences_walk_speed_summary">Wie schnell kannst du laufen? Diese Einstellung wirkt sich nicht auf alle Verkehrsnetze aus.</string>
+    <string name="directions_preferences_walk_speed_summary">Wie schnell kannst du laufen?</string>
     <string name="directions_preferences_walk_distance_title">Maximale Distanz für Fußwege</string>
-    <string name="directions_preferences_walk_distance_summary">Wie weit kannst du laufen? Diese Einstellung wirkt sich nicht auf alle Verkehrsnetze aus.</string>
+    <string name="directions_preferences_walk_distance_summary">Wie weit kannst du laufen?</string>
     <string name="directions_preferences_min_transfer_time_title">Minimale Umsteigezeit</string>
-    <string name="directions_preferences_min_transfer_time_summary">Wie lange benötigst du zum umsteigen? Diese Einstellung wirkt sich nicht auf alle Verkehrsnetze aus.</string>
+    <string name="directions_preferences_min_transfer_time_summary">Wie lange benötigst du zum umsteigen?</string>
     <string name="directions_preferences_accessibility_title">Barrierefreiheit</string>
-    <string name="directions_preferences_accessibility_summary">Wie barrierefrei muss die Route sein? Diese Einstellung wirkt sich nicht auf alle Verkehrsnetze aus.</string>
+    <string name="directions_preferences_accessibility_summary">Wie barrierefrei muss die Route sein?</string>
     <string name="directions_preferences_bicycle_carriage_title">Reise mit Fahrrad</string>
     <string name="directions_preferences_bicycle_carriage_summary">Zeigt nützliche Information für Reisende mit Fahrrad.</string>
 

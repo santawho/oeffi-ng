@@ -436,16 +436,17 @@
 
     <!-- directions preferences -->
     <string name="directions_preferences_title">Directions</string>
+    <string name="directions_preferences_summary">These settings do not affect all transport networks in the same way.</string>
     <string name="directions_preferences_optimize_trip_title">Optimize</string>
-    <string name="directions_preferences_optimize_trip_summary">What\'s most important to you? This does not affect all transport networks.</string>
+    <string name="directions_preferences_optimize_trip_summary">What\'s most important to you?</string>
     <string name="directions_preferences_walk_speed_title">Walk speed</string>
-    <string name="directions_preferences_walk_speed_summary">How fast can you walk? This does not affect all transport networks.</string>
+    <string name="directions_preferences_walk_speed_summary">How fast can you walk?</string>
     <string name="directions_preferences_walk_distance_title">Maximum walk distance</string>
-    <string name="directions_preferences_walk_distance_summary">How far can you walk? This does not affect all transport networks.</string>
+    <string name="directions_preferences_walk_distance_summary">How far can you walk?</string>
     <string name="directions_preferences_min_transfer_time_title">Minimum transfer time</string>
-    <string name="directions_preferences_min_transfer_time_summary">How long do you need for a transfer? This does not affect all transport networks.</string>
+    <string name="directions_preferences_min_transfer_time_summary">How long do you need for a transfer?</string>
     <string name="directions_preferences_accessibility_title">Accessibility</string>
-    <string name="directions_preferences_accessibility_summary">How accessible do you need the route to be? This does not affect all transport networks.</string>
+    <string name="directions_preferences_accessibility_summary">How accessible do you need the route to be?</string>
     <string name="directions_preferences_bicycle_carriage_title">Travel with Bicycle</string>
     <string name="directions_preferences_bicycle_carriage_summary">Show useful information for those travelling with a bicycle.</string>
 

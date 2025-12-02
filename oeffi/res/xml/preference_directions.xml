@@ -2,6 +2,9 @@
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <Preference
+        android:summary="@string/directions_preferences_summary" />
+
     <ListPreference
         android:entries="@array/directions_optimize_trip"
         android:entryValues="@array/directions_optimize_trip_values"
