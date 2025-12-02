@@ -162,6 +162,7 @@
     <string name="navigation_event_speak_time_left_front_format">%1$s min bis</string>
     <string name="navigation_event_speak_notime_left_end_format">keine verbleibende Zeit mehr</string>
     <string name="navigation_event_speak_time_left_end_format">noch %1$s min</string>
+    <string name="navigation_event_speak_time_left_end_negative_format">das war vor %1$s min</string>
     <string name="navigation_event_speak_times_nodelay_format">um %1$s</string>
     <string name="navigation_event_speak_times_delayed_format">verspätet um %3$s min, erwartet um %2$s</string>
     <string name="navigation_event_speak_position_unchanged_format">an Steig %1$s</string>
@@ -176,8 +177,8 @@
     <string name="navigation_event_speak_public_leg_end_reminder">%1$s Ankunft in %2$s, %3$s, %4$s</string>
     <string name="navigation_event_speak_next_transfer_critical">Der nächste Umstieg is kritisch</string>
     <string name="navigation_event_speak_any_transfer_critical">Einige Umstiege sind kritisch</string>
-    <string name="navigation_event_speak_departure_delay_change">die Verspätung der nächsten Abfahrt hat sich geändert: %1$s</string>
-    <string name="navigation_event_speak_arrival_delay_change">die Verspätung der nächsten Ankunft hat sich geändert: %1$s</string>
+    <string name="navigation_event_speak_departure_delay_change">die Verspätung der nächsten Abfahrt hat sich geändert: %1$s, %2$s</string>
+    <string name="navigation_event_speak_arrival_delay_change">die Verspätung der nächsten Ankunft hat sich geändert: %1$s, %2$s</string>
     <string name="navigation_event_speak_departure_position_change">der Steig der nächsten Abfahrt hat sich geändert: %1$s</string>
     <string name="navigation_event_speak_arrival_position_change">der Steig der nächsten Ankunft hat sich geändert: %1$s</string>
     <string name="navigation_event_speak_linename">%1$s%2$s Richtung %3$s</string>
@@ -193,6 +194,7 @@
     <string name="navigation_event_notify_time_left_front_format">%1$s min -&gt;</string>
     <string name="navigation_event_notify_notime_left_end_format">JETZT</string>
     <string name="navigation_event_notify_time_left_end_format">noch %1$s min</string>
+    <string name="navigation_event_notify_time_left_end_negative_format">vor %1$s min</string>
     <string name="navigation_event_notify_changes_title">*** Öffi NG ***</string>
     <string name="navigation_event_notify_directions_title">Öffi NG</string>
     <string name="navigation_event_notify_position_unchanged_format">Steig %1$s</string>
@@ -205,8 +207,8 @@
     <string name="navigation_event_notify_transfer_start">Gehe nach %2$s zur Abf. %1$s, %3$s, plan %4$s, prog %5$s, %6$s, %7$s</string>
     <string name="navigation_event_notify_transfer_end_reminder">%1$s Abfahrt %2$s an %3$s, prog %4$s, %5$s</string>
     <string name="navigation_event_notify_final_transfer_start">schließlich gehe nach %1$s</string>
-    <string name="navigation_event_notify_departure_delay_change">Versp. Abfahrt %1$s in %2$s: %3$s, prog %4$s</string>
-    <string name="navigation_event_notify_arrival_delay_change">Versp. Ankunft %1$s in %2$s: %3$s, prog %4$s</string>
+    <string name="navigation_event_notify_departure_delay_change">Versp. Abfahrt %1$s in %2$s: %3$s, prog %4$s, %5$s</string>
+    <string name="navigation_event_notify_arrival_delay_change">Versp. Ankunft %1$s in %2$s: %3$s, prog %4$s, %5$s</string>
     <string name="navigation_event_notify_departure_position_change">Neuer Steig %1$s Abfahrt %2$s in %3$s, plan %4$s</string>
     <string name="navigation_event_notify_arrival_position_change">Neuer Steig %1$s Ankunft %2$s in %3$s, plan %4$s</string>
     <string name="navigation_event_notify_next_transfer_critical">Der nächste Umstieg is kritisch</string>

@@ -898,8 +898,6 @@ public class NavigationNotification {
         final TripRenderer.NotificationData newNotified = tripRenderer.notificationData;
         boolean timeChanged = false;
         boolean posChanged = false;
-        boolean nextTransferCriticalChanged = false;
-        boolean anyTransferCriticalChanged = false;
         int reminderSoundId = 0;
         final boolean onRide = tripRenderer.nextEventTypeIsPublic;
         final long nextEventTimeLeftMs = tripRenderer.nextEventTimeLeftMs;
@@ -976,11 +974,7 @@ public class NavigationNotification {
                 newNotified.eventTime = lastNotified.eventTime;
             }
         }
-        if (newNotified.nextTransferCritical != lastNotified.nextTransferCritical) {
-            log.info("transferCritical switching to {}", newNotified.nextTransferCritical);
-            nextTransferCriticalChanged = newNotified.nextTransferCritical;
-            addEventOutputNextTransferCritical();
-        }
+        int numTransferCriticalChanged = 0;
         if (!newNotified.transfersCritical.equals(lastNotified.transfersCritical)) {
             final String lastTransfersCritical = lastNotified.transfersCritical;
             final String nextTransfersCritical = newNotified.transfersCritical;
@@ -990,7 +984,7 @@ public class NavigationNotification {
                 for (int i = 0; i < length; i += 1) {
                     final char next = nextTransfersCritical.charAt(i);
                     if (next != '-') {
-                        anyTransferCriticalChanged = true;
+                        numTransferCriticalChanged += 1;
                         break;
                     }
                 }
@@ -998,15 +992,23 @@ public class NavigationNotification {
                 for (int i = 0; i < length; i += 1) {
                     final char next = nextTransfersCritical.charAt(i);
                     if (next != '-' && next != lastTransfersCritical.charAt(i)) {
-                        anyTransferCriticalChanged = true;
+                        numTransferCriticalChanged += 1;
                         break;
                     }
                 }
             }
         }
-        if (anyTransferCriticalChanged) {
-            addEventOutputAnyTransferCritical();
+        boolean nextTransferCriticalChanged = false;
+        if (newNotified.nextTransferCritical != lastNotified.nextTransferCritical) {
+            log.info("transferCritical switching to {}", newNotified.nextTransferCritical);
+            nextTransferCriticalChanged = newNotified.nextTransferCritical;
         }
+        if (numTransferCriticalChanged > 0) {
+            if (!nextTransferCriticalChanged || numTransferCriticalChanged > 1)
+                addEventOutputAnyTransferCritical();
+        }
+        if (nextTransferCriticalChanged)
+            addEventOutputNextTransferCritical();
         newNotified.playedTravelAlarmId = lastNotified.playedTravelAlarmId;
         if (travelAlarmAtMs > 0) {
             if (travelAlarmAtMs <= nowTime) {
@@ -1074,9 +1076,9 @@ public class NavigationNotification {
             }
         }
 
-        final boolean anyChanges = timeChanged || posChanged || nextTransferCriticalChanged || anyTransferCriticalChanged;
-        log.info("timeChanged={}, posChanged={} nextTransferCriticalChanged={} anyTransferCriticalChanged={} reminderSoundId={}",
-                timeChanged, posChanged, nextTransferCriticalChanged, anyTransferCriticalChanged, reminderSoundId);
+        final boolean anyChanges = timeChanged || posChanged || nextTransferCriticalChanged || numTransferCriticalChanged > 0;
+        log.info("timeChanged={}, posChanged={} nextTransferCriticalChanged={} numTransferCriticalChanged={} reminderSoundId={}",
+                timeChanged, posChanged, nextTransferCriticalChanged, numTransferCriticalChanged, reminderSoundId);
 
         if (nextTripReloadTimeMs > 0 && nextTripReloadTimeMs < nextRefreshTimeMs) {
             nextRefreshTimeReason = String.format("#10, nextRefreshTimeMs=%d, nextTripReloadTimeMs=%d", nextRefreshTimeMs, nextTripReloadTimeMs);
@@ -1562,6 +1564,9 @@ public class NavigationNotification {
     }
 
     private String remainingTimeForSpeakTextAtEnd(final long remainingMillis) {
+        if (remainingMillis < -50000)
+            return context.getString(R.string.navigation_event_speak_time_left_end_negative_format,
+                    Long.toString((-remainingMillis + 10000) / 60000));
         if (remainingMillis < 50000)
             return context.getString(R.string.navigation_event_speak_notime_left_end_format);
         return context.getString(R.string.navigation_event_speak_time_left_end_format,
@@ -1583,6 +1588,9 @@ public class NavigationNotification {
     }
 
     private String remainingTimeForNotificationAtEnd(final long remainingMillis) {
+        if (remainingMillis < -50000)
+            return context.getString(R.string.navigation_event_notify_time_left_end_negative_format,
+                    Long.toString((-remainingMillis + 10000) / 60000));
         if (remainingMillis < 50000)
             return context.getString(R.string.navigation_event_notify_notime_left_end_format);
         return context.getString(R.string.navigation_event_notify_time_left_end_format,
@@ -1840,6 +1848,7 @@ public class NavigationNotification {
         final PTDate plannedTime = stop.getDepartureTime(true);
         final String plannedTimeString = Formats.formatTime(timeZoneSelector, plannedTime);
         final String predictedTimeString = Formats.formatTime(timeZoneSelector, predictedTime);
+        final long timeLeftMs = predictedTime.getTime() - System.currentTimeMillis();
         newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.DEPARTURE_DELAY_CHANGE, context.getString(
                 R.string.navigation_event_log_entry_departure_delay_change,
                 line.label,
@@ -1848,14 +1857,16 @@ public class NavigationNotification {
                 predictedTimeString)));
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_departure_delay_change,
-                timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime())));
+                timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime()),
+                remainingTimeForSpeakTextAtEnd(timeLeftMs)));
         if (isEventNotificationsEnabled) {
             newEventNotifications.add(EventNotificationData.changeEvent(context.getString(
                     R.string.navigation_event_notify_departure_delay_change,
                     makeNotificationLineName(line, publicLeg.destination, stop.location),
                     Formats.fullLocationName(stop.location),
                     formatTimeSpan(plannedTime, predictedTime),
-                    predictedTimeString)));
+                    predictedTimeString,
+                    remainingTimeForNotificationAtEnd(timeLeftMs))));
         }
     }
 
@@ -1868,6 +1879,7 @@ public class NavigationNotification {
         final PTDate plannedTime = stop.getArrivalTime(true);
         final String plannedTimeString = Formats.formatTime(timeZoneSelector, plannedTime);
         final String predictedTimeString = Formats.formatTime(timeZoneSelector, predictedTime);
+        final long timeLeftMs = predictedTime.getTime() - System.currentTimeMillis();
         newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.ARRIVAL_DELAY_CHANGE, context.getString(
                 R.string.navigation_event_log_entry_arrival_delay_change,
                 line.label,
@@ -1876,14 +1888,16 @@ public class NavigationNotification {
                 predictedTimeString)));
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_arrival_delay_change,
-                timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime())));
+                timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime()),
+                remainingTimeForSpeakTextAtEnd(timeLeftMs)));
         if (isEventNotificationsEnabled) {
             newEventNotifications.add(EventNotificationData.changeEvent(context.getString(
                     R.string.navigation_event_notify_arrival_delay_change,
                     makeNotificationLineName(line, publicLeg.destination, publicLeg.departureStop.location),
                     Formats.fullLocationName(stop.location),
                     formatTimeSpan(plannedTime, predictedTime),
-                    predictedTimeString)));
+                    predictedTimeString,
+                    remainingTimeForNotificationAtEnd(timeLeftMs))));
         }
     }
 

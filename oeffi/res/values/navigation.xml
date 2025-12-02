@@ -196,6 +196,7 @@
     <string name="navigation_event_speak_time_left_front_format">%1$s min until</string>
     <string name="navigation_event_speak_notime_left_end_format">no time remaining</string>
     <string name="navigation_event_speak_time_left_end_format">%1$s min remaining</string>
+    <string name="navigation_event_speak_time_left_end_negative_format">that was %1$s min ago</string>
     <string name="navigation_event_speak_times_nodelay_format">at %1$s</string>
     <string name="navigation_event_speak_times_delayed_format">delayed by %3$s min, estimated at %2$s</string>
     <string name="navigation_event_speak_position_unchanged_format">on platform %1$s</string>
@@ -210,8 +211,8 @@
     <string name="navigation_event_speak_public_leg_end_reminder">%1$s arrival at %2$s, %3$s, %4$s</string>
     <string name="navigation_event_speak_next_transfer_critical">the next transfer is critical</string>
     <string name="navigation_event_speak_any_transfer_critical">some transfers are critical</string>
-    <string name="navigation_event_speak_departure_delay_change">the delay of the next departure has changed: %1$s</string>
-    <string name="navigation_event_speak_arrival_delay_change">the delay of the next arrival has changed: %1$s</string>
+    <string name="navigation_event_speak_departure_delay_change">the delay of the next departure has changed: %1$s, %2$s</string>
+    <string name="navigation_event_speak_arrival_delay_change">the delay of the next arrival has changed: %1$s, %2$s</string>
     <string name="navigation_event_speak_departure_position_change">the platform of the next departure has changed: %1$s</string>
     <string name="navigation_event_speak_arrival_position_change">the platform of the next arrival has changed: %1$s</string>
     <string name="navigation_event_speak_linename">%1$s%2$s towards %3$s</string>
@@ -227,6 +228,7 @@
     <string name="navigation_event_notify_time_left_front_format">%1$s min -&gt;</string>
     <string name="navigation_event_notify_notime_left_end_format">NOW</string>
     <string name="navigation_event_notify_time_left_end_format">remain %1$s min</string>
+    <string name="navigation_event_notify_time_left_end_negative_format">missed %1$s min</string>
     <string name="navigation_event_notify_changes_title">*** Öffi NG ***</string>
     <string name="navigation_event_notify_directions_title">Öffi NG</string>
     <string name="navigation_event_notify_position_unchanged_format">platf %1$s</string>
@@ -239,8 +241,8 @@
     <string name="navigation_event_notify_transfer_start">Go to %2$s for depart. %1$s, %3$s, sched %4$s, est %5$s, %6$s, %7$s</string>
     <string name="navigation_event_notify_transfer_end_reminder">%1$s depart. %2$s at %3$s, est %4$s, %5$s</string>
     <string name="navigation_event_notify_final_transfer_start">finally go to %1$s</string>
-    <string name="navigation_event_notify_departure_delay_change">Delayed depart. %1$s at %2$s: %3$s, est %4$s</string>
-    <string name="navigation_event_notify_arrival_delay_change">Delayed arrival %1$s at %2$s: %3$s, est %4$s</string>
+    <string name="navigation_event_notify_departure_delay_change">Delayed depart. %1$s at %2$s: %3$s, est %4$s, %5$s</string>
+    <string name="navigation_event_notify_arrival_delay_change">Delayed arrival %1$s at %2$s: %3$s, est %4$s, %5$s</string>
     <string name="navigation_event_notify_departure_position_change">New platform %1$s depart. %2$s at %3$s, sched %4$s</string>
     <string name="navigation_event_notify_arrival_position_change">New platform %1$s arrival %2$s at %3$s, sched %4$s</string>
     <string name="navigation_event_notify_next_transfer_critical">The next transfer is critical</string>
