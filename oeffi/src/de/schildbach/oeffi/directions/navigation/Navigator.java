@@ -81,7 +81,7 @@ public class Navigator {
                 latestTrip.fares,
                 latestTrip.capacity,
                 latestTrip.numChanges);
-        currentTrip.transferDetails = latestTrip.transferDetails;
+        // currentTrip.transferDetails = latestTrip.transferDetails; -- do not keep transfer details, they are outdated
         currentTrip.updatedAt = now;
 
         return currentTrip;

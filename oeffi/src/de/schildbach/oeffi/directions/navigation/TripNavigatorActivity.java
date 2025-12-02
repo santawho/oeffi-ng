@@ -44,9 +44,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.util.Date;
 
@@ -354,17 +351,18 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
         navigationRefreshRunnable = () -> {
             try {
-                final Trip updatedTrip = navigator.refresh(forceRefreshAll, new Date());
+                Trip updatedTrip = navigator.refresh(forceRefreshAll, new Date());
                 if (updatedTrip == null) {
                     handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));
                 } else {
+                    if (refreshTripDetails)
+                        updatedTrip = loadTripDetails(updatedTrip);
                     if (doNotificationUpdate) {
                         isStartupComplete = true;
                         updateNotification(updatedTrip);
                     }
-                    runOnUiThread(() -> onTripUpdated(updatedTrip));
-                    if (refreshTripDetails)
-                        handler.postDelayed(this::loadTripDetails, 500);
+                    final Trip finalUpdatedTrip = updatedTrip;
+                    runOnUiThread(() -> onTripUpdated(finalUpdatedTrip));
                 }
             } catch (IOException e) {
                 handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));

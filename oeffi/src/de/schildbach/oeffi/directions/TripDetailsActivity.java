@@ -576,26 +576,30 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             shownPageChanged(newId);
         });
 
-        if (isTripDetailsLoadingEnabled())
-            backgroundHandler.post(this::loadTripDetails);
+        if (isTripDetailsLoadingEnabled()) {
+            backgroundHandler.post(() -> {
+                final Trip newTrip = loadTripDetails(tripRenderer.trip);
+                runOnUiThread(() -> {
+                    setupFromTrip(newTrip);
+                    updateGUI();
+                });
+            });
+        }
     }
 
     protected boolean isTripDetailsLoadingEnabled() {
         return prefs.getBoolean(Constants.KEY_EXTRAS_TRIPEXTRAINFO_ENABLED, false);
     }
 
-    protected void loadTripDetails() {
+    protected Trip loadTripDetails(final Trip trip) {
         final NetworkProvider provider = NetworkProviderFactory.provider(network);
         if (!provider.hasCapabilities(NetworkProvider.Capability.TRIP_DETAILS))
-            return;
+            return trip;
         try {
-            final Trip newTrip = provider.queryTripDetails(tripRenderer.trip, null);
-            runOnUiThread(() -> {
-                setupFromTrip(newTrip);
-                updateGUI();
-            });
+            return provider.queryTripDetails(tripRenderer.trip, null);
         } catch (final IOException e) {
             log.error("loadTripDetails", e);
+            return trip;
         }
     }
 
