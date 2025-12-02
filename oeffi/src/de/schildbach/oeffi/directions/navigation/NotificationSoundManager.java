@@ -191,18 +191,29 @@ public class NotificationSoundManager {
         }
 
         if (playSpeech) {
-            if (!playSound) {
-                final AudioAttributes audioAttributes = new AudioAttributes.Builder()
-                        .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-                        .setUsage(soundUsage)
-                        .build();
-                requestAudioFocus(audioAttributes, playSpeech);
-            }
+            final AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                    .setUsage(soundUsage)
+                    .build();
+            requestAudioFocus(audioAttributes, playSpeech);
             boolean isSpeaking = false;
+            final long timeStart = System.currentTimeMillis();
             final int audioStream = getAudioStreamFromUsage(soundUsage);
             for (final String text : speakTexts) {
                 log.info("speaking: \"{}\" stream {}", text, audioStream);
                 isSpeaking |= speak(text, audioStream);
+            }
+            if (!isSpeaking)
+                log.warn("no speech queued");
+            if (!textToSpeech.isSpeaking()) {
+                log.warn("speech engine reports 'not speaking', sleeping, then retrying");
+                try {
+                    Thread.sleep(1000);
+                } catch (final InterruptedException ie) {
+                    // ignore
+                }
+                if (!textToSpeech.isSpeaking())
+                    log.warn("speech engine still reports 'not speaking'");
             }
             while (textToSpeech.isSpeaking()) {
 //                log.info("speech is speaking");
@@ -212,14 +223,18 @@ public class NotificationSoundManager {
                     break;
                 }
             }
+            final long duration = System.currentTimeMillis() - timeStart;
+            log.info("speech finished, duration {} msec", duration);
         }
 
         abandonAudioFocusRequest();
     }
 
     private void requestAudioFocus(final AudioAttributes audioAttributes, final boolean exclusive) {
-        if (currentAudioFocusRequest != null)
+        if (currentAudioFocusRequest != null) {
+            log.info("not requesting audio focus - still holding");
             return;
+        }
 
         log.info("requesting audio focus");
         final AudioManager audioManager = getAudioManager();
@@ -236,35 +251,43 @@ public class NotificationSoundManager {
             audioManager.requestAudioFocus(currentAudioFocusRequest);
         } catch (final RuntimeException rte) {
             log.warn("requesting audio focus", rte);
+            currentAudioFocusRequest = null;
         }
 
-        if (exclusive && audioAttributes.getUsage() == AudioAttributes.USAGE_MEDIA && savedVolume < 0) {
-            final int amplification = Application.getInstance().getSharedPreferences()
-                    .getInt(PREF_KEY_MEDIA_CHANNEL_AMPLIFICATION, 0);
-            if (amplification > 0) {
-                try {
-                    Thread.sleep(200);
-                } catch (final InterruptedException rte) {
-                    // ignore
+        if (exclusive && audioAttributes.getUsage() == AudioAttributes.USAGE_MEDIA) {
+            log.info("playing exclusive on media channel");
+            if (savedVolume < 0) {
+                final int amplification = Application.getInstance().getSharedPreferences()
+                        .getInt(PREF_KEY_MEDIA_CHANNEL_AMPLIFICATION, 0);
+                if (amplification > 0) {
+                    try {
+                        Thread.sleep(200);
+                    } catch (final InterruptedException rte) {
+                        // ignore
+                    }
+                    final int volumeBeforePlaying = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+                    final int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+                    savedVolume = volumeBeforePlaying;
+                    final int playVolume = (int) ((float) (maxVolume - volumeBeforePlaying)
+                            * (float) amplification / 100.0
+                            + (float) volumeBeforePlaying
+                            + 0.49);
+                    log.info("set volume {}, saving = {}", playVolume, savedVolume);
+                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, playVolume, 0);
+                } else {
+                    log.info("do not set volume, ammplification={}", amplification);
                 }
-                final int volumeBeforePlaying = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-                final int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-                savedVolume = volumeBeforePlaying;
-                final int playVolume = (int) ((float) (maxVolume - volumeBeforePlaying)
-                        * (float) amplification / 100.0
-                        + (float) volumeBeforePlaying
-                        + 0.49);
-                log.info("set volume {}, saving = {}", playVolume, savedVolume);
-                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, playVolume, 0);
             } else {
-                log.info("do not reduce to volume");
+                log.info("do not set volume, previous still in progress");
             }
         }
     }
 
     private void abandonAudioFocusRequest() {
-        if (currentAudioFocusRequest == null)
+        if (currentAudioFocusRequest == null) {
+            log.info("not abandoning audio focus - already released");
             return;
+        }
 
         log.info("abandoning audio focus");
         final AudioManager audioManager = getAudioManager();
