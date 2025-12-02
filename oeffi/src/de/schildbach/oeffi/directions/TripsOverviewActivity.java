@@ -713,7 +713,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         return new Trip(
                 trip.loadedAt,
                 trip.getId(),
-                trip.tripRef,
+                null,
                 trip.from,
                 trip.to,
                 newLegs,
