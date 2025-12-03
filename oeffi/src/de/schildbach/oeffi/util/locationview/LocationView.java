@@ -446,7 +446,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
             final Criteria criteria = new Criteria();
             criteria.setPowerRequirement(Criteria.POWER_MEDIUM);
             criteria.setAccuracy(Criteria.ACCURACY_COARSE);
-            locationHelper.startLocation(criteria, false, Constants.LOCATION_FOREGROUND_UPDATE_TIMEOUT_MS);
+            locationHelper.startLocation(criteria, true, Constants.LOCATION_FOREGROUND_UPDATE_TIMEOUT_MS);
         }
     }
 

@@ -1345,7 +1345,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             return true;
         } else if (menuItemId == R.id.station_map_context_maps_internal && menuItemLocation != null) {
             setMapVisible(true);
-            getMapView().zoomToStations(List.of(menuItemLocation));
+            getMapView().zoomToStations(List.of(menuItemLocation), 0);
             return true;
         } else {
             return false;

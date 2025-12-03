@@ -62,7 +62,9 @@ public class OeffiMapView extends FrameLayout {
         void setTripAware(final TripAware tripAware);
         void setAreaAware(final AreaAware areaAware);
         void setStationsAware(final StationsAware stationsAware);
-        void zoomToStations(final List<Location> stationLocations);
+        void zoomToStations(
+                final List<Location> stationLocations,
+                final int maxStations);
         void setFromViaToAware(final FromViaToAware fromViaToAware);
         void setZoomControls(final ZoomControls zoom);
     }
@@ -162,8 +164,8 @@ public class OeffiMapView extends FrameLayout {
         viewImplementation.setStationsAware(stationsAware);
     }
 
-    public void zoomToStations(final List<Location> stationLocations) {
-        viewImplementation.zoomToStations(stationLocations);
+    public void zoomToStations(final List<Location> stationLocations, final int maxStations) {
+        viewImplementation.zoomToStations(stationLocations, maxStations);
     }
 
     public void setFromViaToAware(final FromViaToAware fromViaToAware) {

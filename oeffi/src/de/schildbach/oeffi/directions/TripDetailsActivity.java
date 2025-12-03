@@ -1055,7 +1055,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                             return true;
                         } else if (itemId == R.id.station_map_context_maps_internal) {
                             setMapVisible(true);
-                            getMapView().zoomToStations(List.of(destination));
+                            getMapView().zoomToStations(List.of(destination), 0);
                             return true;
                         } else {
                             return false;
@@ -1347,7 +1347,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             mapView.setVisibility(View.VISIBLE);
             mapView.setOnClickListener(v -> {
                 setMapVisible(true);
-                getMapView().zoomToStations(mapBoundingLocations);
+                getMapView().zoomToStations(mapBoundingLocations, 0);
             });
             final View.OnLongClickListener onLongClickListener = v -> {
                 final PopupMenu popupMenu = new PopupMenu(TripDetailsActivity.this, v);
@@ -1355,7 +1355,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                         network, transferToLocation != null ? transferToLocation : transferFromLocation);
                 popupMenu.setOnMenuItemClickListener(item -> {
                     setMapVisible(true);
-                    getMapView().zoomToStations(mapBoundingLocations);
+                    getMapView().zoomToStations(mapBoundingLocations, 0);
                     return true;
                 });
                 PopupHelper.setForceShowIcon(popupMenu);
@@ -2434,7 +2434,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     return onStationContextMenuItemClicked(menuItemId, legC, stop);
                 } else if (menuItemId == R.id.station_map_context_maps_internal) {
                     setMapVisible(true);
-                    getMapView().zoomToStations(List.of(stop.location));
+                    getMapView().zoomToStations(List.of(stop.location), 0);
                     return true;
                 } else {
                     return false;

@@ -80,6 +80,7 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.StationsAware;
 import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.directions.QueryJourneyRunnable;
+import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GeoUtils;
 import de.schildbach.oeffi.util.KeyWordMatcher;
 import de.schildbach.oeffi.util.TimeSpec;
@@ -92,7 +93,6 @@ import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.oeffi.util.locationview.AutoCompleteLocationsHandler;
 import de.schildbach.oeffi.util.ConnectivityBroadcastReceiver;
 import de.schildbach.oeffi.util.DialogBuilder;
-import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GoogleMapsUtils;
 import de.schildbach.oeffi.util.LocationUriParser;
 import de.schildbach.oeffi.util.Toast;
@@ -107,12 +107,12 @@ import de.schildbach.pte.dto.LineDestination;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.NearbyLocationsResult;
+import de.schildbach.pte.dto.PTDate;
 import de.schildbach.pte.dto.Point;
 import de.schildbach.pte.dto.Product;
 import de.schildbach.pte.dto.QueryDeparturesResult;
 import de.schildbach.pte.dto.StationDepartures;
 import de.schildbach.pte.dto.SuggestLocationsResult;
-import de.schildbach.pte.dto.PTDate;
 import okhttp3.HttpUrl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -215,13 +215,9 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
         @Override
         public void changed(final LocationView view) {
-            fixedLocation = viewLocation.getLocation();
-            if (fixedLocation != null) {
-                onFixedLocationSet();
-            } else {
-                setToDeviceLocation();
-            }
-            updateGUI();
+            final Location location = viewLocation.getLocation();
+            if (location != null)
+                setLocationByUser(location);
         }
     };
 
@@ -403,6 +399,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         missingCapabilityButton.setOnClickListener(selectNetworkListener);
 
         viewLocation = findViewById(R.id.stations_location);
+        viewLocation.setHint(R.string.stations_location_hint);
         setupLocationViews();
 
         getMapView().setStationsAware(this);
@@ -762,16 +759,14 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         final Uri intentUri = intent.getData();
         final String intentExtraText = intent.getStringExtra(Intent.EXTRA_TEXT);
         final Location presetLocation = (Location) intent.getSerializableExtra(INTENT_EXTRA_LOCATION);
-        presetTime = (Date) intent.getSerializableExtra(INTENT_EXTRA_TIME);
-        stationListAdapter.setBaseTime(presetTime);
+        final Date presetTime = (Date) intent.getSerializableExtra(INTENT_EXTRA_TIME);
 
         final String networkName = intent.getStringExtra(INTENT_EXTRA_NETWORK);
         if (networkName != null)
             this.network = NetworkId.valueOf(networkName);
 
-        if (presetLocation != null) {
-            setFixedLocation(presetLocation);
-        }
+        if (presetLocation != null)
+            setFixedLocation(presetLocation, presetTime);
 
         if (Intent.ACTION_SEND.equals(intentAction) && intentExtraText != null
                 && intentExtraText.startsWith(GoogleMapsUtils.GMAPS_SHORT_LOCATION_URL_PREFIX)) {
@@ -781,13 +776,13 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
             backgroundHandler.post(() -> {
                 final Location location = GoogleMapsUtils.resolveLocationUrl(intentExtraText);
                 runOnUiThread(() -> {
-                    setFixedLocation(location);
+                    setFixedLocation(location, presetTime);
                     updateGUI();
                 });
             });
         } else if (intentUri != null) {
             final Location[] locations = LocationUriParser.parseLocations(intentUri.toString());
-            setFixedLocation(locations != null && locations.length >= 1 ? locations[0] : null);
+            setFixedLocation(locations != null && locations.length >= 1 ? locations[0] : null, presetTime);
         } else {
             command = (Command) intent.getSerializableExtra(INTENT_EXTRA_COMMAND);
         }
@@ -806,52 +801,49 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         }
     }
 
-    private void setFixedLocation(final Location location) {
+    private void setFixedLocation(final Location location, final Date presetTime) {
         viewLocation.setLocation(location);
+        this.presetTime = presetTime;
+        stationListAdapter.setBaseTime(presetTime);
     }
 
-    private void onFixedLocationSet() {
+    private void setLocationByUser(final Location location) {
+        fixedLocation = location;
         fixedLocationResolving = false;
 
-        if (fixedLocation != null && fixedLocation.hasCoord())
-            getMapView().animateToLocation(fixedLocation.getLatAsDouble(), fixedLocation.getLonAsDouble());
-
-        viewLocation.setVisibility(View.VISIBLE);
-        // findViewById(R.id.stations_location_clear).setOnClickListener(v -> setToDeviceLocation());
-
-        handler.post(initStationsRunnable);
-    }
-
-    private void setToDeviceLocation() {
-        viewLocation.setVisibility(View.GONE);
-        fixedLocation = null;
+        // clear the time preset
         final boolean hadPresetTime = presetTime != null;
         presetTime = null;
-        stationListAdapter.setBaseTime(presetTime);
+        stationListAdapter.setBaseTime(null);
 
-        if (deviceLocation != null) {
-            getMapView().animateToLocation(deviceLocation.getLatAsDouble(), deviceLocation.getLonAsDouble());
+        // remove non-favorites and re-calculate distances
+        for (final Iterator<Station> i = stations.iterator(); i.hasNext(); ) {
+            final Station station = i.next();
 
-            // remove non-favorites and re-calculate distances
-            for (final Iterator<Station> i = stations.iterator(); i.hasNext(); ) {
-                final Station station = i.next();
+            final Integer favState = favorites.get(station.location.id);
+            if (favState != null && favState == FavoriteStationsProvider.TYPE_FAVORITE) {
+                if (hadPresetTime)
+                    station.setDepartures(null);
 
-                final Integer favState = favorites.get(station.location.id);
-                if (favState == null || favState != FavoriteStationsProvider.TYPE_FAVORITE) {
-                    i.remove();
-                    stationsMap.remove(station.location.id);
-                } else {
-                    if (hadPresetTime)
-                        station.setDepartures(null);
-
-                    if (station.location.hasCoord())
-                        station.setDistanceAndBearing(GeoUtils.distanceBetween(deviceLocation, station.location.coord));
-                }
+                if (station.location.hasCoord())
+                    station.setDistanceAndBearing(GeoUtils.distanceBetween(deviceLocation, station.location.coord));
+            } else {
+                i.remove();
+                stationsMap.remove(station.location.id);
             }
         }
 
         stationListAdapter.notifyDataSetChanged();
         handler.post(initStationsRunnable);
+
+        if (fixedLocation != null) {
+            if (fixedLocation.hasCoord())
+                getMapView().animateToLocation(fixedLocation.getLatAsDouble(), fixedLocation.getLonAsDouble());
+        } else {
+            if (deviceLocation != null)
+                getMapView().animateToLocation(deviceLocation.getLatAsDouble(), deviceLocation.getLonAsDouble());
+        }
+
         updateGUI();
     }
 
@@ -925,14 +917,13 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         }
 
         // location box
-//        findViewById(R.id.stations_location_box).setVisibility(fixedLocation != null ? View.VISIBLE : View.GONE);
-//        if (fixedLocation != null) {
-//            final String locationName = fixedLocation.name != null ? fixedLocation.uniqueShortName()
-//                    : String.format(Locale.ENGLISH, "%.6f, %.6f", fixedLocation.getLatAsDouble(), fixedLocation.getLonAsDouble());
-//            final String text = presetTime == null ? locationName
-//                    : String.format("%s @ %s", locationName, Formats.formatTime(timeZoneSelector, presetTime, PTDate.NETWORK_OFFSET));
-//            ((TextView) findViewById(R.id.stations_location_text)).setText(text);
-//        }
+        if (presetTime != null && fixedLocation != null) {
+            final String locationName = fixedLocation.name != null ? fixedLocation.uniqueShortName()
+                    : String.format(Locale.ENGLISH, "%.6f, %.6f", fixedLocation.getLatAsDouble(), fixedLocation.getLonAsDouble());
+            final String text = presetTime == null ? locationName
+                    : String.format("%s @ %s", locationName, Formats.formatTime(timeZoneSelector, presetTime, PTDate.NETWORK_OFFSET));
+            viewLocation.setText(text);
+        }
 
         // search box
         if (DO_FILTER_BY_SEARCH_ON_NETWORK) {
@@ -1182,8 +1173,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
         if (added) {
             handler.postDelayed(() -> getMapView().zoomToStations(
-                    stations.stream().map(station -> station.location).collect(Collectors.toList())),
-                    500);
+                    stations.stream().map(station -> station.location).collect(Collectors.toList()),
+                    0),500);
         }
 
         updateGUI();
@@ -1448,19 +1439,21 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         selectedStation = station;
         stationListAdapter.notifyDataSetChanged();
 
-        // scroll list into view
-        for (int position = 0; position < stations.size(); position++) {
-            if (stations.get(position).equals(station)) {
-                stationList.smoothScrollToPosition(position);
-                break;
+        if (selectedStation != null) {
+            // scroll list into view
+            for (int position = 0; position < stations.size(); position++) {
+                if (stations.get(position).equals(station)) {
+                    stationList.smoothScrollToPosition(position);
+                    break;
+                }
             }
         }
 
         // scroll map
         if (station != null && station.location.hasCoord())
-            getMapView().zoomToStations(List.of(station.location));
+            getMapView().zoomToStations(List.of(station.location), 0);
         else if (!stations.isEmpty())
-            getMapView().zoomToStations(stations.stream().map(s -> s.location).collect(Collectors.toList()));
+            getMapView().zoomToStations(stations.stream().map(s -> s.location).collect(Collectors.toList()), 0);
         else if (station == null && deviceLocation != null)
             getMapView().animateToLocation(deviceLocation.getLatAsDouble(), deviceLocation.getLonAsDouble());
 
@@ -1617,7 +1610,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         } else if (menuItemId == R.id.station_map_context_maps_internal) {
             setMapVisible(true);
             if (station != null && station.hasCoord())
-                getMapView().zoomToStations(List.of(station));
+                getMapView().zoomToStations(List.of(station), 0);
             return true;
         } else {
             return false;
