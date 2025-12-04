@@ -404,7 +404,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         addShowMapButtonToActionBar();
 
-        final boolean isShareCalendarVisible = !renderConfig.isNavigation && !renderConfig.isAlternativeConnectionSearch;
+        final boolean isShareCalendarVisible = true;
+        final boolean isShareCalendarWithLink = !renderConfig.isNavigation && !renderConfig.isAlternativeConnectionSearch;
 
         actionBar.addButton(R.drawable.ic_share_white_24dp, R.string.directions_trip_details_action_share_title)
                 .setOnClickListener(v -> {
@@ -461,7 +462,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                         } else if (itemId == R.id.directions_trip_details_action_open_external_maps_app) {
                             intentSupplier = () -> showKmlInExternalMapsApp();
                         } else if (itemId == R.id.directions_trip_details_action_add_to_calendar) {
-                            shareCalendarEntry();
+                            shareCalendarEntry(isShareCalendarWithLink);
                             return true;
                         } else {
                             return false;
@@ -603,10 +604,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
     }
 
-    private void shareCalendarEntry() {
+    private void shareCalendarEntry(final boolean withLink) {
         backgroundHandler.post(() -> {
             try {
-                final Intent intent = scheduleTripIntent(tripRenderer.trip, true);
+                final Intent intent = getSendTripToCalendarIntent(tripRenderer.trip, withLink);
                 if (intent != null)
                     runOnUiThread(() -> startActivity(intent));
             } catch (final ActivityNotFoundException x) {
@@ -2485,7 +2486,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                         : R.string.directions_trip_details_action_share_long_title));
     }
 
-    private Intent scheduleTripIntent(final Trip trip, final boolean withLink) {
+    private Intent getSendTripToCalendarIntent(final Trip trip, final boolean withLink) {
         Integer calendarId = null;
 //        if (CalendarHelper.hasCalendarPermissions(this)) {
 //            calendarId = CalendarHelper.findCalendarForName(this, "Reisen");
