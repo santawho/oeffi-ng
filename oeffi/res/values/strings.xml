@@ -252,8 +252,8 @@
     <string name="directions_message_unknown_location">Unknown origin or destination</string>
     <string name="directions_message_too_close">Origin and destination are too close to each other</string>
     <string name="directions_message_unresolvable_address">Could not determine stations for desired address</string>
-    <string name="directions_message_no_trips">For your query there could not be found any connection</string>
-    <string name="directions_message_invalid_date">Your query date needs to be inside the timetable period</string>
+    <string name="directions_message_no_trips">No connections found for query</string>
+    <string name="directions_message_invalid_date">Query date needs to be inside the timetable period</string>
     <string name="directions_message_ambiguous_location">Location is ambiguous</string>
     <string name="directions_query_progress">Getting directions…</string>
     <string name="directions_message_missing_capability">The selected transportation network cannot do directions.\nConsider selecting another network.</string>
