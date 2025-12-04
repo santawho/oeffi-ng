@@ -142,8 +142,7 @@ public final class NetworkProviderFactory {
         else if (networkId.equals(NetworkId.BVG))
             return new BvgProvider("{\"aid\":\"1Rxs112shyHLatUX4fofnmdxK\",\"type\":\"AID\"}");
         else if (networkId.equals(NetworkId.VBB))
-            return new VbbProvider("{\"type\":\"AID\",\"aid\":\"hafas-vbb-apps\"}",
-                    "RCTJM2fFxFfxxQfI".getBytes(Charsets.UTF_8));
+            return new VbbProvider("{\"type\":\"AID\",\"aid\":\"hafas-vbb-apps\"}");
         else if (networkId.equals(NetworkId.NVV))
             return new NvvProvider("{\"type\":\"AID\",\"aid\":\"Kt8eNOH7qjVeSxNA\"}");
         else if (networkId.equals(NetworkId.BAYERN))
@@ -151,8 +150,7 @@ public final class NetworkProviderFactory {
         else if (networkId.equals(NetworkId.MVV))
             return new MvvProvider();
         else if (networkId.equals(NetworkId.INVG))
-            return new InvgProvider("{\"type\":\"AID\",\"aid\":\"GITvwi3BGOmTQ2a5\"}",
-                    "ERxotxpwFT7uYRsI".getBytes(Charsets.UTF_8));
+            return new InvgProvider("{\"type\":\"AID\",\"aid\":\"GITvwi3BGOmTQ2a5\"}");
         else if (networkId.equals(NetworkId.AVV_AUGSBURG))
             return new AvvAugsburgProvider("{\"type\":\"AID\",\"aid\":\"jK91AVVZU77xY5oH\"}");
         else if (networkId.equals(NetworkId.VGN))
@@ -168,8 +166,7 @@ public final class NetworkProviderFactory {
         else if (networkId.equals(NetworkId.BSVAG))
             return new BsvagProvider();
         else if (networkId.equals(NetworkId.VBN))
-            return new VbnProvider("{\"aid\":\"rnOHBWhesvc7gFkd\",\"type\":\"AID\"}",
-                    "SP31mBufSyCLmNxp".getBytes(Charsets.UTF_8));
+            return new VbnProvider("{\"aid\":\"rnOHBWhesvc7gFkd\",\"type\":\"AID\"}");
         else if (networkId.equals(NetworkId.NASA))
             return new NasaProvider("{\"type\":\"AID\",\"aid\":\"nasa-apps\"}");
         else if (networkId.equals(NetworkId.RMV))
