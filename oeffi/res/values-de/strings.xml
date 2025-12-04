@@ -178,7 +178,8 @@
     <string name="stations_filter_title">Produkt-Filter</string>
 
     <!-- search stations -->
-    <string name="stations_action_search_title">Haltestellen-Suche</string>
+    <string name="stations_action_search_title">Haltestellen filtern</string>
+    <string name="stations_filter_hint">Filtern nach Name, Linie …</string>
     <string name="stations_searchable_hint">Suche Namen oder Nummer</string>
     <string name="stations_search_list_empty">Keine Haltestellen gefunden</string>
 

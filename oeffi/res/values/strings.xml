@@ -178,8 +178,9 @@
     <!-- stations filter -->
     <string name="stations_filter_title">Product filter</string>
 
-    <!-- search stations -->
-    <string name="stations_action_search_title">Search station</string>
+    <!-- search/filter stations -->
+    <string name="stations_action_search_title">Filter stations</string>
+    <string name="stations_filter_hint">Filter by name, line …</string>
     <string name="stations_searchable_hint">Search name or number</string>
     <string name="stations_search_list_empty">No stations found</string>
 
