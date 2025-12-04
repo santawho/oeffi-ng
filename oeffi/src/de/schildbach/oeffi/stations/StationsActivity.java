@@ -574,7 +574,9 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         stationList.setLayoutManager(stationListLayoutManager);
         // stationList.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
         stationListAdapter = new StationsAdapter(this, maxDeparturesPerStation, products,
-                this, this, this);
+                this,
+                NetworkProviderFactory.provider(network).hasCapabilities(NetworkProvider.Capability.JOURNEY) ? this : null,
+                this);
         stationList.setAdapter(stationListAdapter);
         ViewCompat.setOnApplyWindowInsetsListener(stationList, (v, windowInsets) -> {
             final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());

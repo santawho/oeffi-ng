@@ -334,6 +334,7 @@ public class NearestFavoriteStationWidgetService extends JobService {
                     final NetworkProvider networkProvider = NetworkProviderFactory.provider(networkId);
                     final String stationId = favorite.location.id;
                     final String stationName = favorite.location.name;
+                    final boolean canShowJourneys = networkProvider.hasCapabilities(NetworkProvider.Capability.JOURNEY);
 
                     try {
                         final QueryDeparturesResult result = networkProvider.queryDepartures(
@@ -341,7 +342,7 @@ public class NearestFavoriteStationWidgetService extends JobService {
                                 new Date(),
                                 100,
                                 true);
-                        setResult(appWidgetId, networkId, result, favorite, timeFormat);
+                        setResult(appWidgetId, networkId, result, favorite, timeFormat, canShowJourneys);
                         appWidgetManager.updateAppWidget(appWidgetId, views);
                     } catch (final ConnectException x) {
                         setHeader(appWidgetId, stationName);
@@ -379,7 +380,8 @@ public class NearestFavoriteStationWidgetService extends JobService {
     private void setResult(
             final int appWidgetId, final NetworkId networkId,
             final QueryDeparturesResult result, final Favorite favorite,
-            final java.text.DateFormat timeFormat) {
+            final java.text.DateFormat timeFormat,
+            final boolean canShowJourneys) {
         views.setTextViewText(R.id.station_widget_lastupdated,
                 getString(R.string.nearest_favorite_station_widget_lastupdated, timeFormat.format(new Date())));
 
@@ -398,7 +400,7 @@ public class NearestFavoriteStationWidgetService extends JobService {
                 departures.addAll(stationDeparture.getNonCancelledDepartures());
 
             if (!departures.isEmpty()) {
-                setDeparturesList(departures, appWidgetId, networkId, favorite.location);
+                setDeparturesList(departures, appWidgetId, networkId, favorite.location, canShowJourneys);
                 log.info("Got {} departures for favorite {}", departures.size(), stationId);
             } else {
                 log.info("Got no station departures for favorite {}", stationId);
@@ -411,18 +413,13 @@ public class NearestFavoriteStationWidgetService extends JobService {
 
     private void setDeparturesList(
             final List<Departure> departures, final int appWidgetId,
-            final NetworkId networkId, final de.schildbach.pte.dto.Location location) {
+            final NetworkId networkId, final de.schildbach.pte.dto.Location location,
+            final boolean canShowJourneys) {
         views.setViewVisibility(R.id.station_widget_message, View.GONE);
         views.setViewVisibility(R.id.station_widget_departures, View.VISIBLE);
 
-        final Intent intent = new Intent(this, NearestFavoriteStationWidgetListService.class);
-        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
-        intent.putExtra(NearestFavoriteStationWidgetListService.INTENT_EXTRA_DEPARTURES,
-                Objects.serialize((Serializable) departures));
-        intent.putExtra(NearestFavoriteStationWidgetListService.INTENT_EXTRA_DEPARTURES + ".hash",
-                departures.hashCode());
-        intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
-        views.setRemoteAdapter(R.id.station_widget_departures, intent);
+        views.setRemoteAdapter(R.id.station_widget_departures,
+                NearestFavoriteStationWidgetListService.getStartIntent(this, appWidgetId, departures, canShowJourneys));
 
         views.setOnClickPendingIntent(R.id.station_widget_content, clickIntent(appWidgetId));
 

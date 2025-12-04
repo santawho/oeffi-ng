@@ -17,9 +17,11 @@
 
 package de.schildbach.oeffi.stations;
 
+import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.format.DateFormat;
@@ -37,11 +39,29 @@ import de.schildbach.pte.dto.Position;
 import de.schildbach.pte.dto.Style;
 import de.schildbach.pte.dto.PTDate;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Locale;
 
 public class NearestFavoriteStationWidgetListService extends RemoteViewsService {
     public static final String INTENT_EXTRA_DEPARTURES = RemoteViewsFactory.class.getName() + ".departures";
+    public static final String INTENT_EXTRA_CANSHOWJOURNEYS = RemoteViewsFactory.class.getName() + ".canShowJourneys";
+
+    public static Intent getStartIntent(
+            final Context context,
+            final int appWidgetId,
+            final List<Departure> departures,
+            final boolean canShowJourneys) {
+        final Intent intent = new Intent(context, NearestFavoriteStationWidgetListService.class);
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+        intent.putExtra(INTENT_EXTRA_DEPARTURES,
+                Objects.serialize((Serializable) departures));
+        intent.putExtra(INTENT_EXTRA_DEPARTURES + ".hash",
+                departures.hashCode());
+        intent.putExtra(INTENT_EXTRA_CANSHOWJOURNEYS, canShowJourneys);
+        intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
+        return intent;
+    }
 
     @Override
     public RemoteViewsFactory onGetViewFactory(final Intent intent) {
@@ -52,11 +72,13 @@ public class NearestFavoriteStationWidgetListService extends RemoteViewsService 
         private final Context context;
         private final java.text.DateFormat timeFormat;
         private final List<Departure> departures;
+        private final boolean canShowJourneys;
 
         public RemoteViewsFactory(final Context context, final Intent intent) {
             this.context = context;
             this.timeFormat = DateFormat.getTimeFormat(context);
             this.departures = (List<Departure>) Objects.deserialize(intent.getByteArrayExtra(INTENT_EXTRA_DEPARTURES));
+            this.canShowJourneys = intent.getBooleanExtra(INTENT_EXTRA_CANSHOWJOURNEYS, false);
         }
 
         @Override
@@ -96,8 +118,11 @@ public class NearestFavoriteStationWidgetListService extends RemoteViewsService 
             final Departure departure = departures.get(viewPosition);
 
             final RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.station_widget_entry);
-            views.setOnClickFillInIntent(R.id.station_widget_entry, new Intent()
-                    .putExtra(StationDetailsActivity.INTENT_EXTRA_JOURNEYREF, Objects.serializeToString(departure.journeyRef)));
+
+            if (canShowJourneys) {
+                views.setOnClickFillInIntent(R.id.station_widget_entry, new Intent()
+                        .putExtra(StationDetailsActivity.INTENT_EXTRA_JOURNEYREF, Objects.serializeToString(departure.journeyRef)));
+            }
 
             // line
             final Line line = departure.line;

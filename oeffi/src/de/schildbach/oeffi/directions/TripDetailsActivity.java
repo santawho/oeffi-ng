@@ -1075,7 +1075,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final View bicycleCarriageView = row.findViewById(R.id.directions_trip_details_public_entry_bicycle_carriage);
         bicycleCarriageView.setVisibility(showBicycleCarriage ? View.VISIBLE : View.GONE);
 
-        if (!renderConfig.isJourney && leg.journeyRef != null) {
+        if (!renderConfig.isJourney && leg.journeyRef != null
+                && NetworkProviderFactory.provider(network).hasCapabilities(NetworkProvider.Capability.JOURNEY)) {
             final View.OnClickListener onClickListener = clickedView -> {
                 queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
                         this, clickedView, queryJourneyRunnable,

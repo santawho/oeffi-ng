@@ -313,7 +313,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
                                 lineView.setLine(lineDestination.line); // Padding only
                                 destinationView.setVisibility(View.INVISIBLE);
                             }
-                            if (departure.journeyRef != null) {
+                            if (departure.journeyRef != null && journeyClickListener != null) {
                                 View.OnClickListener onClickListener = clickedView ->
                                         journeyClickListener.onJourneyClick(
                                                 clickedView, departure.journeyRef, station.location);

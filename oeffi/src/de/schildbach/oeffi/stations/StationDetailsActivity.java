@@ -866,7 +866,8 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 itemView.setOnClickListener(null);
             }
 
-            if (departure.journeyRef != null) {
+            if (departure.journeyRef != null
+                    && NetworkProviderFactory.provider(network).hasCapabilities(NetworkProvider.Capability.JOURNEY)) {
                 final View.OnClickListener onClickListener = clickedView -> {
                     context.queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
                             context, clickedView, context.queryJourneyRunnable,
