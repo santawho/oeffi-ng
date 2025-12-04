@@ -34,7 +34,6 @@ import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
-import com.google.common.base.Joiner;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.StationsAware;
@@ -62,8 +61,11 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class StationViewHolder extends RecyclerView.ViewHolder {
     public final View itemFrameView;
@@ -329,8 +331,9 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
                                 final String indexText;
 
                                 if (isActivated) {
-                                    final String message = Joiner.on('\n').skipNulls().join(departure.message,
-                                            departure.line.message);
+                                    final String message = Stream.of(departure.message, departure.line.message)
+                                            .filter(Objects::nonNull)
+                                            .collect(Collectors.joining("\n"));
                                     final int index = messages.indexOf(message);
                                     if (index == -1) {
                                         messages.add(message);

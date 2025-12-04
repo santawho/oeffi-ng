@@ -49,7 +49,7 @@ RUN --mount=target=/home/builder/android-sdk,type=cache,uid=1000,gid=1000,sharin
     fi && \
     /usr/bin/gradle --project-dir project/ --no-build-cache --no-daemon --no-parallel clean :oeffi:assembleRelease && \
     if [ -e /dev/fuse ] ; \
-      then /bin/fusermount -u project && /bin/rmdir project && /bin/mv project.u project ; \
+      then /usr/bin/sleep 1 && /bin/fusermount -u project && /bin/rmdir project && /bin/mv project.u project ; \
     fi
 
 # export build output

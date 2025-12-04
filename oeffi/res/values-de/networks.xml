@@ -35,8 +35,10 @@
     <string name="network_bvg_comment">Berlin, Lokal- und Regionalverkehr</string>
     <string name="network_vbb_label">Verkehrsverbund Berlin-Brandenburg</string>
     <string name="network_vbb_comment">Brandenburg &amp; Berlin, Lokal- und Regionalverkehr</string>
-    <string name="network_nvv_label">Hessen (Frankfurt/Rhein-Main, Kassel, …)</string>
+    <string name="network_nvv_label">Hessen (Kassel, …)</string>
     <string name="network_nvv_comment">Lokal- und Regionalverkehr</string>
+    <string name="network_rmv_label">Rhein-Main (Frankfurt, Wiesbaden, Darmstadt, …)</string>
+    <string name="network_rmv_comment">Lokal- und Regionalverkehr</string>
     <string name="network_bayern_label">Bayern (Würzburg, Regensburg, …)</string>
     <string name="network_bayern_comment">Lokal- und Regionalverkehr</string>
     <string name="network_mvv_label">München</string>
@@ -61,8 +63,6 @@
     <string name="network_vbn_comment">Lokal- und Regionalverkehr</string>
     <string name="network_nasa_label">Leipzig, Halle &amp; Sachsen-Anhalt</string>
     <string name="network_nasa_comment">Lokal- und Regionalverkehr</string>
-    <string name="network_rmv_label">Rhein-Main (Frankfurt, …)</string>
-    <string name="network_rmv_comment">Lokal- und Regionalverkehr</string>
     <string name="network_vmt_label">Erfurt, Jena &amp; Mittelthüringen</string>
     <string name="network_vmt_comment">Lokal- und Regionalverkehr</string>
     <string name="network_vvo_label">Sachsen</string>
@@ -77,6 +77,8 @@
     <string name="network_mvg_comment">Lokal- und Regionalverkehr</string>
     <string name="network_vrn_label">Rheinland-Pfalz, Rhein-Neckar &amp; Baden-Württemberg</string>
     <string name="network_vrn_comment">Lokal- und Regionalverkehr</string>
+    <string name="network_vgs_label">Saarbrücken &amp; Saarland</string>
+    <string name="network_vgs_comment">Lokal- und Regionalverkehr</string>
     <string name="network_vvs_label">Stuttgart</string>
     <string name="network_vvs_comment">Lokal- und Regionalverkehr</string>
     <string name="network_ding_label">Ulm</string>
@@ -87,8 +89,6 @@
     <string name="network_nvbw_comment">Lokal- und Regionalverkehr</string>
     <string name="network_vvv_label">Plauen &amp; Vogtland</string>
     <string name="network_vvv_comment">Lokal- und Regionalverkehr</string>
-    <string name="network_vgs_label">Saarbrücken &amp; Saarland</string>
-    <string name="network_vgs_comment">Nicht verfügbar, weil der saarVV darum gebeten hat, nicht in Öffi enthalten zu sein. Du kannst stattdessen die Deutsche Bahn verwenden, das funktioniert für das Saarland auch gut.</string>
     <string name="network_oebb_label">ÖBB-Personenverkehr AG</string>
     <string name="network_oebb_comment">Österreich, Fern- und Regionalverkehr (z.B. Wien, Graz, Linz, Salzburg, Innsbruck)</string>
     <string name="network_wien_label">Wien</string>

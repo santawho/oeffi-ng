@@ -53,7 +53,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.google.common.base.Joiner;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiActivity;
@@ -97,6 +96,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -906,7 +906,9 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
             // message
             msgViewMessageText = (departure.message == null && departure.line.message == null) ? null
-                : Joiner.on('\n').skipNulls().join(departure.message, departure.line.message);
+                : Stream.of(departure.message, departure.line.message)
+                    .filter(java.util.Objects::nonNull)
+                    .collect(Collectors.joining("\n"));
             msgViewExpanded = false;
             renderMsgView();
         }

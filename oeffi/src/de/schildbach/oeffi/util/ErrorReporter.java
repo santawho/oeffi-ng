@@ -35,9 +35,6 @@ import android.os.Looper;
 import android.os.StatFs;
 import androidx.core.app.ActivityManagerCompat;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Strings;
-
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.URLs;
@@ -65,6 +62,8 @@ import java.util.Formatter;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ErrorReporter implements Thread.UncaughtExceptionHandler {
     private static final String STACKTRACE_FILENAME = ".stacktrace";
@@ -187,8 +186,7 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
         report.append("Phone Model: " + Build.MODEL + "\n");
         report.append("Android Version: " + Build.VERSION.RELEASE + "\n");
         report.append("Android security patch level: ").append(Build.VERSION.SECURITY_PATCH).append("\n");
-        report.append("ABIs: ").append(Joiner.on(", ").skipNulls().join(Strings.emptyToNull(Build.CPU_ABI),
-                Strings.emptyToNull(Build.CPU_ABI2))).append("\n");
+        report.append("ABIs: ").append(Stream.of(Build.SUPPORTED_ABIS).collect(Collectors.joining(", "))).append("\n");
         report.append("Board: " + Build.BOARD + "\n");
         report.append("Brand: " + Build.BRAND + "\n");
         report.append("Device: " + Build.DEVICE + "\n");

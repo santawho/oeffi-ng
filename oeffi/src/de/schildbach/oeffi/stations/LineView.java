@@ -34,7 +34,6 @@ import android.text.SpannableStringBuilder;
 import android.text.style.ReplacementSpan;
 import android.util.AttributeSet;
 import android.widget.TextView;
-import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import de.schildbach.oeffi.R;
 import de.schildbach.pte.Standard;
@@ -53,6 +52,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class LineView extends TextView {
     private final boolean hideIfEmpty;
@@ -179,8 +181,10 @@ public class LineView extends TextView {
                 final Context context = getContext();
                 final int productResId = getResources().getIdentifier(
                         "product_" + Character.toLowerCase(line.productCode()), "string", context.getPackageName());
-                final String sheet = Joiner.on('\n').skipNulls().join(line.name,
-                        productResId != 0 ? context.getString(productResId) : null, line.network);
+                final String sheet = Stream.of(line.name, productResId != 0 ? context.getString(productResId) : null,
+                                line.network)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.joining("\n"));
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                     if (Strings.emptyToNull(sheet) != null)
                         setTooltipText(sheet);

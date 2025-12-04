@@ -22,7 +22,6 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.os.Handler;
 import android.os.Looper;
-import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
@@ -33,6 +32,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -119,11 +121,10 @@ public class GeocoderThread extends Thread {
         final Location location;
         if (Strings.emptyToNull(address.getFeatureName()) != null && Strings.emptyToNull(address.getLocality()) != null
                 && Strings.emptyToNull(address.getPostalCode()) != null) {
-            final Joiner joiner = Joiner.on(' ').skipNulls();
             final String thoroughfare = Strings.emptyToNull(address.getThoroughfare());
             location = new Location(LocationType.ADDRESS, null, coord,
-                    joiner.join(address.getPostalCode(), address.getLocality()),
-                    joiner.join(thoroughfare, address.getFeatureName()));
+                    Stream.of(address.getPostalCode(), address.getLocality()).filter(Objects::nonNull).collect(Collectors.joining(" ")),
+                    Stream.of(thoroughfare, address.getFeatureName()).filter(Objects::nonNull).collect(Collectors.joining(" ")));
         } else if (maxAddressLineIndex >= 2 && Strings.emptyToNull(address.getAddressLine(2)) != null) {
             location = new Location(LocationType.ADDRESS, null, coord, address.getAddressLine(1),
                     address.getAddressLine(0));

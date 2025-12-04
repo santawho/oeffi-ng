@@ -25,7 +25,8 @@ MVV|de-DE|Bayern;München
 INVG|de-DE|Ingolstadt
 VGN|de-DE|Nürnberg;Fürth;Erlangen
 VVM|de-DE|Schwaben;Mittelschwaben;Krumbach;Günzburg;Memmingen
-NVV|de-DE|Hessen;Frankfurt am Main;Kassel
+NVV|de-DE|Hessen;Kassel
+RMV|de-DE|Rhein-Main;Frankfurt;Wiesbaden;Darmstadt;Fulda
 VMV|de-DE|Mecklenburg-Vorpommern;Schwerin
 SH|de-DE|Schleswig-Holstein;Kiel;Lübeck;Hamburg
 GVH|de-DE|Niedersachsen;Hannover;Hamburg
@@ -33,19 +34,18 @@ BSVAG|de-DE|Braunschweig;Wolfsburg
 VBN|de-DE|Niedersachsen;Hamburg;Bremen;Bremerhaven;Oldenburg (Oldenburg);Osnabrück;Göttingen;Rostock
 VVO|de-DE|Sachsen;Dresden;Mittelsachsen;Chemnitz
 NASA|de-DE|Sachsen;Leipzig;Sachsen-Anhalt;Magdeburg;Halle
-RMV|de-DE|Rhein-Main;Frankfurt;Wiesbaden;Darmstadt;Fulda
 VMT|de-DE|Thüringen;Mittelthüringen;Erfurt;Jena;Gera;Weimar;Gotha
 VRR|de-DE|Nordrhein-Westfalen;Essen;Dortmund;Düsseldorf;Münster;Paderborn;Höxter;Bielefeld
 VRS|de-DE|Köln;Bonn
 AVV_AACHEN|de-DE|Aachen
 MVG|de-DE|Märkischer Kreis;Lüdenscheid
 VRN|de-DE|Baden-Württemberg;Rheinland-Pfalz;Mannheim;Mainz;Trier
+VGS|de-DE|Saarland;Saarbrücken
 VVS|de-DE|Baden-Württemberg;Stuttgart
 DING|de-DE|Baden-Württemberg;Ulm;Neu-Ulm
 KVV|de-DE|Baden-Württemberg;Karlsruhe
 NVBW|de-DE|Baden-Württemberg;Konstanz;Basel;Basel-Stadt;Reutlingen;Rottweil;Tübingen;Sigmaringen;Freiburg im Breisgau;Elsass;Bas-Rhin;Straßburg
 VVV|de-DE|Vogtland;Plauen
-VGS|de-DE|Saarland;Saarbrücken|disabled
 
 # AT
 OEBB|de-AT|AT

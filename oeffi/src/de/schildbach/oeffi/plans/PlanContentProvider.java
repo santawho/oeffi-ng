@@ -25,7 +25,6 @@ import android.database.CursorWrapper;
 import android.database.MatrixCursor;
 import android.net.Uri;
 import android.provider.BaseColumns;
-import com.google.common.base.Objects;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.FutureCallback;
@@ -61,6 +60,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -310,8 +310,8 @@ public class PlanContentProvider extends ContentProvider {
                     if ((planIdFilter == null || planIdFilter.equals(planId))
                             && (networkFilter == null || networkFilter.equals(network))
                             && (localIdFilter == null || localIdFilter.equals(localId))) {
-                        final long rowId = network != null && localId != null ? Objects.hashCode(network, localId)
-                                : Objects.hashCode(label);
+                        final long rowId = network != null && localId != null ? Objects.hash(network, localId)
+                                : Objects.hash(label);
                         final int x, y;
                         if (i.hasNext()) {
                             x = (int) Math.round(Double.parseDouble(i.next()) / xScaleFactor) + xOffset;

@@ -34,8 +34,10 @@
     <string name="network_bvg_comment">Berlin, local and regional</string>
     <string name="network_vbb_label">Verkehrsverbund Berlin-Brandenburg</string>
     <string name="network_vbb_comment">Brandenburg &amp; Berlin, local and regional</string>
-    <string name="network_nvv_label">Hesse (Frankfurt/Rhine-Main, Kassel, …)</string>
+    <string name="network_nvv_label">Hesse (Kassel, …)</string>
     <string name="network_nvv_comment">local and regional</string>
+    <string name="network_rmv_label">Rhine-Main (Frankfurt, Wiesbaden, Darmstadt, …)</string>
+    <string name="network_rmv_comment">local and regional</string>
     <string name="network_bayern_label">Bavaria (Würzburg, Regensburg, …)</string>
     <string name="network_bayern_comment">local and regional</string>
     <string name="network_mvv_label">Munich</string>
@@ -60,8 +62,6 @@
     <string name="network_vbn_comment">local and regional</string>
     <string name="network_nasa_label">Leipzig, Halle &amp; Saxony-Anhalt</string>
     <string name="network_nasa_comment">local and regional</string>
-    <string name="network_rmv_label">Rhein-Main (Frankfurt, …)</string>
-    <string name="network_rmv_comment">local and regional</string>
     <string name="network_vmt_label">Erfurt, Jena &amp; Central Thuringia</string>
     <string name="network_vmt_comment">local and regional</string>
     <string name="network_vvo_label">Saxony</string>
@@ -76,6 +76,8 @@
     <string name="network_mvg_comment">local and regional</string>
     <string name="network_vrn_label">Rhineland-Palatinate, Rhine-Neckar &amp; Baden-Württemberg</string>
     <string name="network_vrn_comment">local and regional</string>
+    <string name="network_vgs_label">Saarbrücken &amp; Saarland</string>
+    <string name="network_vgs_comment">local and regional</string>
     <string name="network_vvs_label">Stuttgart</string>
     <string name="network_vvs_comment">local and regional</string>
     <string name="network_ding_label">Ulm</string>
@@ -86,13 +88,11 @@
     <string name="network_nvbw_comment">local and regional</string>
     <string name="network_vvv_label">Plauen &amp; Vogtland</string>
     <string name="network_vvv_comment">local and regional</string>
-    <string name="network_vgs_label">Saarbrücken &amp; Saarland</string>
-    <string name="network_vgs_comment">Not available, because the saarVV explicitly desires not to be included in Offi. You can select the Deutsche Bahn instead, it works well for the Saarland too.</string>
     <string name="network_oebb_label">ÖBB-Personenverkehr AG</string>
     <string name="network_oebb_comment">Austria, long-distance and regional (e.g. Vienna, Graz, Linz, Salzburg, Innsbruck)</string>
     <string name="network_wien_label">Vienna</string>
     <string name="network_wien_comment">local only, but real-time</string>
-    <string name="network_wien_license">CC BY 3.0 AT</string>
+    <string name="network_wien_license" translatable="false">CC BY 3.0 AT</string>
     <string name="network_vor_label">Lower Austria &amp; Burgenland</string>
     <string name="network_vor_comment">Not available, because the VOR doesn\'t offer a free API any more. You can select the ÖBB instead, it works well for Lower Austria and the Burgenland too.</string>
     <string name="network_ooevv_label">Upper Austria</string>
