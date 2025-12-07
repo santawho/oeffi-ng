@@ -383,9 +383,13 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         }
     }
 
-    private static List<Departure> filterDeparturesByProducts(final Collection<Departure> departures, final Collection<Product> filter) {
+    private static List<Departure> filterDeparturesByProducts(
+            final Collection<Departure> departures,
+            final Collection<Product> filter) {
         return departures.stream()
-                .filter(departure -> filter.contains(departure.line.product))
+                .filter(departure ->
+                        departure.line.product == null
+                                || filter.contains(departure.line.product))
                 .collect(Collectors.toList());
     }
 
