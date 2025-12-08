@@ -69,7 +69,7 @@ import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.ResourceUri;
 import de.schildbach.oeffi.util.TimeZoneSelector;
-import de.schildbach.pte.DbWebProvider;
+import de.schildbach.pte.DbProvider;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.Line;
@@ -631,11 +631,11 @@ public class NavigationNotification {
                 final JourneyRef journeyRef = publeg.journeyRef;
                 if (journeyRef == null) {
                     b.append("null");
-                } else if (journeyRef instanceof DbWebProvider.DbWebJourneyRef) {
-                    final DbWebProvider.DbWebJourneyRef dbWebJourneyRef = (DbWebProvider.DbWebJourneyRef) journeyRef;
+                } else if (journeyRef instanceof DbProvider.DbJourneyRef) {
+                    final DbProvider.DbJourneyRef dbJourneyRef = (DbProvider.DbJourneyRef) journeyRef;
                     b.append(",j=");
-                    b.append(dbWebJourneyRef.journeyId);
-                    final Line line = dbWebJourneyRef.line;
+                    b.append(dbJourneyRef.journeyId);
+                    final Line line = dbJourneyRef.line;
                     b.append(",n=");
                     b.append(line.network);
                     b.append(",p=");
