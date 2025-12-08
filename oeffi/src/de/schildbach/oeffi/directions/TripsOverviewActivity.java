@@ -638,6 +638,7 @@ public class TripsOverviewActivity extends OeffiActivity {
     }
 
     private Trip prependToTrip(final Trip trip) {
+        final NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
         final Trip.Public firstPublicLeg = trip.getFirstPublicLeg();
         if (firstPublicLeg == null)
             return null;
@@ -713,7 +714,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         return new Trip(
                 trip.loadedAt,
                 trip.getId(),
-                null,
+                networkProvider.createTripRefFromPreviousTripWithNewLegs(trip, newLegs),
                 trip.from,
                 trip.to,
                 newLegs,
@@ -1036,7 +1037,7 @@ public class TripsOverviewActivity extends OeffiActivity {
             return new Trip(
                     baseTrip.loadedAt,
                     null,
-                    null,
+                    provider.createTripRefFromPreviousTripWithNewLegs(feedingTrip, legs),
                     feedingTrip.from,
                     baseTrip.to,
                     legs,
