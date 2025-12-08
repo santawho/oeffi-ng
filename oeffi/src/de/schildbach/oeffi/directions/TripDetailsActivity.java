@@ -405,7 +405,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         addShowMapButtonToActionBar();
 
         final boolean isShareCalendarVisible = true;
-        final boolean isShareCalendarWithLink = !renderConfig.isNavigation && !renderConfig.isAlternativeConnectionSearch;
+        final boolean isShareCalendarWithLink = true; // !renderConfig.isNavigation && !renderConfig.isAlternativeConnectionSearch;
 
         actionBar.addButton(R.drawable.ic_share_white_24dp, R.string.directions_trip_details_action_share_title)
                 .setOnClickListener(v -> {
