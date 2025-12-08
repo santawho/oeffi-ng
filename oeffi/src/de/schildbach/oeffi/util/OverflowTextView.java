@@ -20,6 +20,7 @@ package de.schildbach.oeffi.util;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
@@ -28,6 +29,8 @@ import android.view.ViewParent;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+
+import java.util.function.Consumer;
 
 import de.schildbach.oeffi.R;
 
@@ -73,9 +76,51 @@ public class OverflowTextView extends TextView {
     private CharSequence text;
 
     @Override
+    public void setVisibility(final int visibility) {
+        super.setVisibility(visibility);
+        doOnOverflowView(ovView -> ovView.setVisibility(visibility));
+    }
+
+    @Override
     public void setText(final CharSequence text, final BufferType type) {
         this.text = text;
         super.setText(text, type);
+    }
+
+    @Override
+    public void setTypeface(@Nullable final Typeface tf) {
+        super.setTypeface(tf);
+        doOnOverflowView(ovView -> ovView.setTypeface(tf));
+    }
+
+    @Override
+    public void setTextColor(final int color) {
+        super.setTextColor(color);
+        doOnOverflowView(ovView -> ovView.setTextColor(color));
+    }
+
+    @Override
+    public void setClickable(final boolean clickable) {
+        super.setClickable(clickable);
+        doOnOverflowView(ovView -> ovView.setClickable(clickable));
+    }
+
+    @Override
+    public void setOnClickListener(@Nullable final OnClickListener listener) {
+        super.setOnClickListener(listener);
+        doOnOverflowView(ovView -> ovView.setOnClickListener(listener));
+    }
+
+    @Override
+    public void setLongClickable(final boolean longClickable) {
+        super.setLongClickable(longClickable);
+        doOnOverflowView(ovView -> ovView.setLongClickable(longClickable));
+    }
+
+    @Override
+    public void setOnLongClickListener(@Nullable final OnLongClickListener listener) {
+        super.setOnLongClickListener(listener);
+        doOnOverflowView(ovView -> ovView.setOnLongClickListener(listener));
     }
 
     @Override
@@ -124,7 +169,7 @@ public class OverflowTextView extends TextView {
     private TextView overflowView;
 
     private TextView getOverflowView() {
-        if (overflowView == null) {
+        if (overflowView == null && overflowViewId > 0) {
             ViewParent parent = getParent();
             while (parent != null) {
                 if (parent instanceof ViewGroup) {
@@ -138,5 +183,11 @@ public class OverflowTextView extends TextView {
                 throw new RuntimeException("overflow view not found");
         }
         return overflowView;
+    }
+
+    private void doOnOverflowView(final Consumer<TextView> func) {
+        final TextView ovView = getOverflowView();
+        if (ovView != null)
+            func.accept(ovView);
     }
 }

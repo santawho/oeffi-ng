@@ -64,6 +64,7 @@ import de.schildbach.oeffi.util.DividerItemDecoration;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.HtmlUtils;
 import de.schildbach.oeffi.util.Objects;
+import de.schildbach.oeffi.util.OverflowTextView;
 import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
@@ -774,7 +775,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         private final TextView timeAbsView;
         private final TextView delayView;
         private final LineView lineView;
-        private final TextView destinationView;
+        private final OverflowTextView destinationView;
         private final TextView destinationOverflowView;
         private final TextView positionView;
         private final TextView capacity1stView;

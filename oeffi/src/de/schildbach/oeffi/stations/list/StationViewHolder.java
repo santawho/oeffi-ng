@@ -45,6 +45,7 @@ import de.schildbach.oeffi.stations.Station;
 import de.schildbach.oeffi.stations.StationContextMenu;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.HtmlUtils;
+import de.schildbach.oeffi.util.OverflowTextView;
 import de.schildbach.pte.Standard;
 import de.schildbach.pte.dto.Departure;
 import de.schildbach.pte.dto.Line;
@@ -71,7 +72,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
     public final View itemFrameView;
     public final View hideableFrameView;
     public final View favoriteView;
-    public final TextView nameView;
+    public final OverflowTextView nameView;
     public final TextView name2View;
     public final LineView linesView;
     public final TextView distanceView;
@@ -282,7 +283,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
 
                             // line & destination
                             final LineView lineView = departureViewHolder.line;
-                            final TextView destinationView = departureViewHolder.destination;
+                            final OverflowTextView destinationView = departureViewHolder.destination;
                             final LineDestination lineDestination = departureGroup.getKey();
                             if (iDeparture == 0) {
                                 lineView.setVisibility(View.VISIBLE);
@@ -321,6 +322,10 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
                                 lineView.setOnClickListener(onClickListener);
                                 destinationView.setClickable(true);
                                 destinationView.setOnClickListener(onClickListener);
+                                destinationView.setOnLongClickListener(v -> {
+                                    onContextClick(v, station, favState);
+                                    return true;
+                                });
                             }
 
                             // message index
@@ -511,7 +516,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
 
     private static class DepartureViewHolder {
         public LineView line;
-        public TextView destination;
+        public OverflowTextView destination;
         public View messageIndex;
         public TextView time;
         public TextView delay;
