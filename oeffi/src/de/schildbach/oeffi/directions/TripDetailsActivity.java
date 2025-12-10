@@ -345,8 +345,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 : Formats.formatTimeSpan(duration)
                     + " / " + Formats.formatTimeSpan(publicDuration);
         final String durationText = getString(R.string.directions_trip_details_duration, durationFormatted);
-        final int numChanges = tripRenderer.trip.numChanges == null ? 0 : tripRenderer.trip.numChanges;
-        final String numChangesText = numChanges <= 0 ? null :
+        final Integer numChanges = tripRenderer.trip.getNumChanges();
+        final String numChangesText = numChanges == null || numChanges <= 0 ? null :
                 getString(R.string.directions_trip_details_num_changes, numChanges);
 
         ((TextView)findViewById(R.id.directions_trip_details_duration)).setText(durationText);

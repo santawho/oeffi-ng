@@ -179,7 +179,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         return ComparisonChain.start() //
                 .compare(trip1.getFirstDepartureTime(), trip2.getFirstDepartureTime()) //
                 .compare(trip1.getLastArrivalTime(), trip2.getLastArrivalTime()) //
-                .compare(trip1.numChanges, trip2.numChanges, Ordering.natural().nullsLast()) //
+                .compare(trip1.getNumChanges(), trip2.getNumChanges(), Ordering.natural().nullsLast()) //
                 // trips with equal duration and change-overs, ...
                 // make sure they are different, otherwise one of them would be dropped ...
                 .compare(id1, id2) // ... and ensure same order every time (IDs are never equal)
@@ -664,8 +664,9 @@ public class TripsOverviewActivity extends OeffiActivity {
         final List<Trip.Leg> tripLegs = trip.legs;
         final Trip.Leg firstContinuationLeg = tripLegs.get(0);
 
-        int newNumChanges = prependNumChanges + trip.numChanges;
-        if (firstPublicLeg.journeyRef.equals(renderConfig.feederJourneyRef)
+        final Integer prevNumChanges = trip.getNumChanges();
+        int newNumChanges = prependNumChanges + (prevNumChanges == null ? 0 : prevNumChanges);
+        if (firstPublicLeg.journeyRef != null && firstPublicLeg.journeyRef.equals(renderConfig.feederJourneyRef)
                 && firstContinuationLeg instanceof Trip.Public
                 && lastPrependLeg instanceof Trip.Public) {
             // continue with same journey, then combine both legs into one
@@ -1034,6 +1035,15 @@ public class TripsOverviewActivity extends OeffiActivity {
                     legs.add(baseLeg);
             }
 
+            final Integer feedingTripNumChanges = feedingTrip.getNumChanges();
+            final Integer baseTripNumChanges = baseTrip.getNumChanges();
+            final Integer numChanges;
+            if (feedingTripNumChanges == null) // only individual leg(s)
+                numChanges = baseTripNumChanges;
+            else if (baseTripNumChanges == null)
+                numChanges = feedingTripNumChanges;
+            else
+                numChanges = feedingTripNumChanges + 1 + baseTripNumChanges;
             return new Trip(
                     baseTrip.loadedAt,
                     null,
@@ -1042,7 +1052,7 @@ public class TripsOverviewActivity extends OeffiActivity {
                     baseTrip.to,
                     legs,
                     null, null,
-                    feedingTrip.numChanges + 1 + baseTrip.numChanges);
+                    numChanges);
         }
 
         public boolean searchMorePossible() {
