@@ -716,7 +716,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                             publicTimePaint, publicArrivalCancelled, publicArrivalTime);
                     if (isArrivalBased) {
                         final long diff = refTime - publicArrivalTime.getTime();
-                        drawRemaining(canvas, centerX, endYabs, height, false, publicTimeDiffPaint, endCancelled, diff);
+                        endYabs = drawRemaining(canvas, centerX, endYabs, height, false, publicTimeDiffPaint, endCancelled, diff);
                     }
                 }
             } else {
@@ -732,7 +732,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                         individualTimePaint, false, individualArrivalTime);
                 if (isArrivalBased) {
                     final long diff = refTime - individualArrivalTime.getTime();
-                    drawRemaining(canvas, centerX, endYabs, height, false, individualTimeDiffPaint, endCancelled, diff);
+                    endYabs = drawRemaining(canvas, centerX, endYabs, height, false, individualTimeDiffPaint, endCancelled, diff);
                 }
             }
 
@@ -840,16 +840,16 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                         }
                     }
 
-                    if (referenceTime.depArr == TimeSpec.DepArr.DEPART) {
-                        if (!departureCancelled) {
-                            startYabs = (int) legBox.top;
-                            departurePosition = departureStop.getDeparturePosition();
-                            if (departurePosition != null) {
-                                final long minutesFromNow = (tDeparture - now) / 60000;
-                                if (minutesFromNow > -10 && minutesFromNow < 30) {
-                                    startYabs = drawPosition(canvas, centerX, startYabs, height, -1, departurePosition.toString());
-                                }
+                    if (!departureCancelled) {
+                        startYabs = (int) legBox.top;
+                        departurePosition = departureStop.getDeparturePosition();
+                        if (departurePosition != null) {
+                            final long minutesFromNow = (tDeparture - now) / 60000;
+                            if (minutesFromNow > -10 && minutesFromNow < 30) {
+                                startYabs = drawPosition(canvas, centerX, startYabs, height, -1, departurePosition.toString());
                             }
+                        }
+                        if (referenceTime.depArr == TimeSpec.DepArr.DEPART) {
                             if (publicLeg != firstPublicLeg) {
                                 final long millisFromRequestedTime = tDeparture - baseTime;
                                 final long minutesFromRequestedTime = millisFromRequestedTime / 60000;
@@ -866,9 +866,9 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         private int drawTime(
                 final Canvas canvas, final int centerX, final int aY, final int height, final boolean above,
                 final Paint paint, final boolean strikeThru, final PTDate time) {
-            final FontMetrics metrics = paint.getFontMetrics();
-
             final String str = Formats.formatTime(context.getTimeZoneSelector(), time);
+
+            final FontMetrics metrics = paint.getFontMetrics();
             final float fontHeight = (-metrics.ascent + metrics.descent); // + 4 * density;
 
             if (strikeThru)
