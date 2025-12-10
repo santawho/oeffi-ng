@@ -1205,6 +1205,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     });
                 }
             }
+        } else {
+            final View collapsedIntermediateStopsRow = collapsedIntermediateStopsRow(
+                    leg.getArrivalTime().getTime() - leg.getDepartureTime().getTime(),
+                    0, leg.line.style);
+            stopsView.addView(collapsedIntermediateStopsRow);
         }
 
         isArrivalSection = true;
