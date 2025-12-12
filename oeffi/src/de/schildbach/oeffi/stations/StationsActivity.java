@@ -70,7 +70,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.common.collect.ComparisonChain;
-import com.google.common.collect.Ordering;
 import com.google.common.primitives.Ints;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.DeviceLocationAware;
@@ -1214,30 +1213,13 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
     private static void sortStations(final List<Station> stations) {
         Collections.sort(stations, (station1, station2) -> {
-            ComparisonChain chain = ComparisonChain.start();
-
-            // order by distance
-            chain = chain.compareTrueFirst(station1.hasDistanceAndBearing, station2.hasDistanceAndBearing)
-                    .compare(station1.distance, station2.distance);
-
-            // order by lines
-            final List<LineDestination> lines1 = station1.getLines();
-            final List<LineDestination> lines2 = station2.getLines();
-            final List<LineDestination> lineDestinations1 = lines1 != null ? lines1
-                    : Collections.emptyList();
-            final List<LineDestination> lineDestinations2 = lines2 != null ? lines2
-                    : Collections.emptyList();
-            final int length1 = lineDestinations1.size();
-            final int length2 = lineDestinations2.size();
-            final int length = Math.max(length1, length2);
-
-            for (int i = 0; i < length; i++) {
-                final Line line1 = i < length1 ? lineDestinations1.get(i).line : null;
-                final Line line2 = i < length2 ? lineDestinations2.get(i).line : null;
-                chain = chain.compare(line1, line2, Ordering.natural().nullsLast());
-            }
-
-            return chain.result();
+            return ComparisonChain.start()
+                    // order by distance
+                    .compareTrueFirst(station1.hasDistanceAndBearing, station2.hasDistanceAndBearing)
+                    .compare(station1.distance, station2.distance)
+                    // order by product
+                    .compare(station1.getRelevantProduct(), station2.getRelevantProduct())
+                    .result();
         });
     }
 
