@@ -189,6 +189,8 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
     private HandlerThread backgroundThread;
     private Handler backgroundHandler;
 
+    private boolean showJourneyMessages = true;
+
     private static final Logger log = LoggerFactory.getLogger(StationDetailsActivity.class);
 
     @Override
@@ -375,6 +377,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
     }
 
     private void updateGUI() {
+        showJourneyMessages = prefs.getBoolean("user_interface_station_departures_show_journey_messages", true);
         final List<Departure> selectedDepartures = this.getFilteredDepartures();
         if (selectedDepartures != null && !selectedDepartures.isEmpty()) {
             viewAnimator.setDisplayedChild(0);
@@ -920,7 +923,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         }
 
         private void renderMsgView() {
-            if (msgViewMessageText == null) {
+            if (!showJourneyMessages || msgViewMessageText == null) {
                 msgView.setVisibility(View.GONE);
                 msgView.setText(null);
                 return;

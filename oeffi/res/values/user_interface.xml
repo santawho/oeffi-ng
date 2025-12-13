@@ -33,6 +33,10 @@
     <string name="user_interface_results_preferpredefinedcolors_enabled_title">Prefer pre-defined colors</string>
     <string name="user_interface_results_preferpredefinedcolors_enabled_summary">Use software defined colors, even when network provides specific colors for lines</string>
 
+    <string name="user_interface_category_station_departures_title">Station Departures</string>
+    <string name="user_interface_station_departures_show_journey_messages_title">Show journey messages</string>
+    <string name="user_interface_station_departures_show_journey_messages_summary">When deactivated, hide messages for each journey</string>
+
     <string name="user_interface_category_directions_title">Directions</string>
     <string name="user_interface_directions_time_and_go_bottom_enabled_title">Time input and \"Go\" at bottom</string>
     <string name="user_interface_directions_time_and_go_bottom_enabled_summary">Use old style. Show the time input and Go-button at the bottom. (requires restart)</string>

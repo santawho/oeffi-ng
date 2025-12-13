@@ -28,6 +28,10 @@
     <string name="user_interface_results_preferpredefinedcolors_enabled_title">Bevorzuge vordefinierte Farben</string>
     <string name="user_interface_results_preferpredefinedcolors_enabled_summary">Benutze software-definierte Linienfarben, auch wenn das Netzwerk spezifische Farben liefert</string>
 
+    <string name="user_interface_category_station_departures_title">Stations-Abfahrten</string>
+    <string name="user_interface_station_departures_show_journey_messages_title">Zeige Fahrt-Meldungen</string>
+    <string name="user_interface_station_departures_show_journey_messages_summary">Wenn deaktiviert, verstecke Meldungen für die einzelnen Fahrten</string>
+
     <string name="user_interface_category_directions_title">Verbindungen</string>
     <string name="user_interface_directions_time_and_go_bottom_enabled_title">Eingabe der Zeit und \"Los\" unten</string>
     <string name="user_interface_directions_time_and_go_bottom_enabled_summary">Verwende das alte Aussehen. Zeigt die Eingabe der Zeit und den Los-Button unterhalb an. (erfordert Neustart)</string>

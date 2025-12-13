@@ -39,6 +39,16 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/user_interface_category_station_departures_title">
+
+        <CheckBoxPreference
+            android:key="user_interface_station_departures_show_journey_messages"
+            android:defaultValue="true"
+            android:title="@string/user_interface_station_departures_show_journey_messages_title"
+            android:summary="@string/user_interface_station_departures_show_journey_messages_summary" />
+
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/user_interface_category_directions_title">
 
         <CheckBoxPreference
