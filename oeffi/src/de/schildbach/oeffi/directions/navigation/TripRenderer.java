@@ -331,7 +331,7 @@ public class TripRenderer {
         public long refreshNotificationRequiredAt;
         public long refreshTripRequiredAt;
         public int currentLegIndex;
-        public boolean isArrival;
+        public boolean isTransfer;
         public Date eventTime;
         public int publicArrivalLegIndex;
         public int publicDepartureLegIndex;
@@ -558,7 +558,7 @@ public class TripRenderer {
 
             notificationData.publicArrivalLegIndex = legC.legIndex;
             notificationData.publicDepartureLegIndex = nextPublicLeg != null ? nextLegC.legIndex: -1;
-            notificationData.isArrival = true;
+            notificationData.isTransfer = false;
             notificationData.eventTime = endTime;
             notificationData.plannedEventTime = plannedEndTime;
             notificationData.departurePosition = depPos;
@@ -628,7 +628,7 @@ public class TripRenderer {
 
             notificationData.publicArrivalLegIndex = legC.transferFrom != null ? legC.transferFrom.legIndex : -1;
             notificationData.publicDepartureLegIndex = legC.transferTo != null ? legC.transferTo.legIndex : -1;
-            notificationData.isArrival = false;
+            notificationData.isTransfer = true;
             notificationData.eventTime = endTime;
             notificationData.plannedEventTime = plannedEndTime;
             notificationData.departurePosition = depPos;

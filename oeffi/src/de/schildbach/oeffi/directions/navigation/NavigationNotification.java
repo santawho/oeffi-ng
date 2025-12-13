@@ -921,24 +921,20 @@ public class NavigationNotification {
             if (newNotified.currentLegIndex < 0)
                 addEventOutputNavigationEnded();
             lastNotified.leftTimeReminded = Long.MAX_VALUE;
-            lastNotified.eventTime = newNotified.plannedEventTime;
-            if (newNotified.publicDepartureLegIndex != lastNotified.publicDepartureLegIndex) {
-                if (!newNotified.isArrival) {
-                    if (newNotified.publicDepartureLegIndex >= 0)
-                        addEventOutputTransferStart(nextEventTimeLeftMs, (Trip.Public) trip.legs.get(newNotified.publicDepartureLegIndex));
-                    else
-                        addEventOutputFinalTransferStart(trip.to);
+            lastNotified.eventTime = newNotified.eventTime; // was .plannedEventTime but next announcement tells the change anyways
+            if (newNotified.isTransfer) {
+                if (newNotified.publicDepartureLegIndex >= 0) {
+                    addEventOutputTransferStart(nextEventTimeLeftMs, (Trip.Public) trip.legs.get(newNotified.publicDepartureLegIndex));
+                    lastNotified.departurePosition = newNotified.plannedDeparturePosition;
+                } else {
+                    addEventOutputFinalTransferStart(trip.to);
                 }
-                lastNotified.departurePosition = newNotified.plannedDeparturePosition;
-            }
-            if (newNotified.publicArrivalLegIndex != lastNotified.publicArrivalLegIndex) {
+            } else {
                 if (newNotified.publicArrivalLegIndex >= 0) {
-                    if (newNotified.isArrival)
-                        addEventOutputPublicLegStart(nextEventTimeLeftMs, (Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
-                    else
-                        addEventOutputFinalTransferStart(trip.to);
+                    addEventOutputPublicLegStart(nextEventTimeLeftMs, (Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
+                    lastNotified.nextTransferCritical = false;
+                    lastNotified.departurePosition = newNotified.plannedDeparturePosition;
                 }
-                lastNotified.nextTransferCritical = false;
             }
         }
         if (newNotified.departurePosition != null && !newNotified.departurePosition.equals(lastNotified.departurePosition)) {
@@ -962,12 +958,12 @@ public class NavigationNotification {
             }
             if (timeChanged) {
                 log.info("time changed: leftSecs={}, diffSecs={}, accepting new time", leftSecs, diffSecs);
-                if (newNotified.isArrival) {
-                    if (newNotified.publicArrivalLegIndex >= 0)
-                        addEventOutputArrivalDelayChange((Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
-                } else {
+                if (newNotified.isTransfer) {
                     if (newNotified.publicDepartureLegIndex >= 0)
                         addEventOutputDepartureDelayChange((Trip.Public) trip.legs.get(newNotified.publicDepartureLegIndex));
+                } else {
+                    if (newNotified.publicArrivalLegIndex >= 0)
+                        addEventOutputArrivalDelayChange((Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
                 }
             } else {
                 log.info("time not changed: leftSecs={}, diffSecs={}, keeping new time", leftSecs, diffSecs);
@@ -1530,17 +1526,30 @@ public class NavigationNotification {
     }
 
     @SuppressLint("StringFormatMatches")
-    private String platformForSpeakText(final Position prevPosition, final Position newPosition) {
+    private String platformForSpeakText(final boolean sayTo, final Position prevPosition, final Position newPosition) {
         final String prevText = prevPosition == null ? null : prevPosition.toString();
         final String newText = newPosition == null ? null : newPosition.toString();
         if (prevPosition == null) {
             if (newPosition == null)
                 return "";
-            return context.getString(R.string.navigation_event_speak_position_unchanged_format, newText);
+            return context.getString(
+                    sayTo
+                        ? R.string.navigation_event_speak_position_to_unchanged_format
+                        : R.string.navigation_event_speak_position_on_unchanged_format,
+                    newText);
         }
-        if (newPosition == null || prevText.equals(newText))
-            return context.getString(R.string.navigation_event_speak_position_unchanged_format, prevText);
-        return context.getString(R.string.navigation_event_speak_position_changed_format, newText, prevText);
+        if (newPosition == null || prevText.equals(newText)) {
+            return context.getString(
+                    sayTo
+                        ? R.string.navigation_event_speak_position_to_unchanged_format
+                        : R.string.navigation_event_speak_position_on_unchanged_format,
+                    prevText);
+        }
+        return context.getString(
+                sayTo
+                        ? R.string.navigation_event_speak_position_to_changed_format
+                        : R.string.navigation_event_speak_position_on_changed_format,
+                newText, prevText);
     }
 
     private String platformForNotificationMessage(final Position prevPosition, final Position newPosition) {
@@ -1660,7 +1669,7 @@ public class NavigationNotification {
                 R.string.navigation_event_speak_transfer_start,
                 makeSpeakableLineName(line, publicLeg.destination, stop.location),
                 locationName,
-                platformForSpeakText(stop.plannedDeparturePosition, stop.getDeparturePosition()),
+                platformForSpeakText(false, stop.plannedDeparturePosition, stop.getDeparturePosition()),
                 timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime()),
                 remainingTimeForSpeakTextAtEnd(timeLeftMs)));
         if (isEventNotificationsEnabled) {
@@ -1673,6 +1682,60 @@ public class NavigationNotification {
                     predictedTimeString,
                     formatTimeSpan(plannedTime, predictedTime),
                     remainingTimeForNotificationAtEnd(timeLeftMs))));
+        }
+    }
+
+    private void addEventOutputNextTransferPreview(
+            final Trip.Public departureLeg,
+            final Trip.Public arrivalLeg) {
+        final Location departureLocation = departureLeg.departure;
+        final Location arrivalLocation = arrivalLeg == null ? null : arrivalLeg.arrival;
+        final boolean sameLocation = departureLocation.equals(arrivalLocation);
+        final Location originLocation = arrivalLeg == null ? null : arrivalLeg.departure;
+        final Position departurePosition = departureLeg.getDeparturePosition();
+        final String arrivalLocationName = Formats.fullLocationNameIfDifferentPlace(arrivalLocation, originLocation);
+        final String departureLocationName = Formats.fullLocationNameIfDifferentPlace(departureLocation, arrivalLocation);
+        if (sameLocation) {
+            if (departurePosition != null) {
+                newSpeakTexts.add(context.getString(
+                        R.string.navigation_event_speak_transfer_preview_same_location,
+                        arrivalLocationName,
+                        departureLocationName,
+                        platformForSpeakText(true, departureLeg.departureStop.plannedDeparturePosition, departurePosition)));
+                if (isEventNotificationsEnabled) {
+                    newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
+                            R.string.navigation_event_notify_transfer_preview_same_location,
+                            arrivalLocationName,
+                            departureLocationName,
+                            platformForNotificationMessage(departureLeg.departureStop.plannedDeparturePosition, departurePosition))));
+                }
+            }
+        } else {
+            if (departurePosition != null) {
+                newSpeakTexts.add(context.getString(
+                        R.string.navigation_event_speak_transfer_preview_different_location,
+                        arrivalLocationName,
+                        departureLocationName,
+                        platformForSpeakText(true, departureLeg.departureStop.plannedDeparturePosition, departurePosition)));
+                if (isEventNotificationsEnabled) {
+                    newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
+                            R.string.navigation_event_notify_transfer_preview_different_location,
+                            arrivalLocationName,
+                            departureLocationName,
+                            platformForNotificationMessage(departureLeg.departureStop.plannedDeparturePosition, departurePosition))));
+                }
+            } else {
+                newSpeakTexts.add(context.getString(
+                        R.string.navigation_event_speak_transfer_preview_different_location_no_position,
+                        arrivalLocationName,
+                        departureLocationName));
+                if (isEventNotificationsEnabled) {
+                    newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
+                            R.string.navigation_event_notify_transfer_preview_different_location_no_position,
+                            arrivalLocationName,
+                            departureLocationName)));
+                }
+            }
         }
     }
 
@@ -1725,7 +1788,7 @@ public class NavigationNotification {
                 R.string.navigation_event_speak_public_leg_start,
                 makeSpeakableLineName(line, publicLeg.destination, publicLeg.departureStop.location),
                 locationName,
-                platformForSpeakText(stop.plannedArrivalPosition, stop.getArrivalPosition()),
+                platformForSpeakText(false, stop.plannedArrivalPosition, stop.getArrivalPosition()),
                 timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime()),
                 remainingTimeForSpeakTextAtEnd(timeLeftMs)));
         if (isEventNotificationsEnabled) {
@@ -1745,19 +1808,22 @@ public class NavigationNotification {
             final long nextEventTimeLeftMs,
             final TripRenderer.NotificationData newNotified,
             final Trip trip) {
-        if (newNotified.isArrival) {
-            if (newNotified.publicArrivalLegIndex >= 0) {
-                addEventOutputPublicLegEndReminder(
-                        nextEventTimeLeftMs,
-                        (Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
-            }
-        } else {
+        if (newNotified.isTransfer) {
             if (newNotified.publicDepartureLegIndex >= 0) {
                 addEventOutputTransferEndReminder(
                         nextEventTimeLeftMs,
                         (Trip.Public) trip.legs.get(newNotified.publicDepartureLegIndex));
             } else {
                 addEventOutputFinalTransferEndReminder(nextEventTimeLeftMs, trip.to);
+            }
+        } else {
+            if (newNotified.publicArrivalLegIndex >= 0) {
+                addEventOutputPublicLegEndReminder(
+                        nextEventTimeLeftMs,
+                        (Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
+                addEventOutputNextTransferPreview(
+                        (Trip.Public) trip.legs.get(newNotified.publicDepartureLegIndex),
+                        (Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
             }
         }
     }
@@ -1792,7 +1858,7 @@ public class NavigationNotification {
                 R.string.navigation_event_speak_public_leg_end_reminder,
                 remainingTimeForSpeakText(timeLeftMs),
                 locationName,
-                platformForSpeakText(stop.plannedDeparturePosition, stop.getDeparturePosition()),
+                platformForSpeakText(false, stop.plannedDeparturePosition, stop.getDeparturePosition()),
                 timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime())));
         if (notifyReminder(timeLeftMs)) {
             newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
@@ -1827,7 +1893,7 @@ public class NavigationNotification {
                 R.string.navigation_event_speak_transfer_end_reminder,
                 remainingTimeForSpeakText(timeLeftMs),
                 makeSpeakableLineName(line, toPublicLeg.destination, stop.location),
-                platformForSpeakText(stop.plannedDeparturePosition, stop.getDeparturePosition()),
+                platformForSpeakText(false, stop.plannedDeparturePosition, stop.getDeparturePosition()),
                 timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime())));
         if (notifyReminder(timeLeftMs)) {
             newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
@@ -1917,7 +1983,7 @@ public class NavigationNotification {
                 Formats.formatTime(timeZoneSelector, stop.getDepartureTime(true)))));
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_departure_position_change,
-                platformForSpeakText(oldPosition, newPosition)));
+                platformForSpeakText(false, oldPosition, newPosition)));
         if (isEventNotificationsEnabled) {
             newEventNotifications.add(EventNotificationData.changeEvent(context.getString(
                     R.string.navigation_event_notify_departure_position_change,
@@ -1943,7 +2009,7 @@ public class NavigationNotification {
                 Formats.formatTime(timeZoneSelector, stop.getArrivalTime(true)))));
         newSpeakTexts.add(context.getString(
                 R.string.navigation_event_speak_arrival_position_change,
-                platformForSpeakText(oldPosition, newPosition)));
+                platformForSpeakText(false, oldPosition, newPosition)));
         if (isEventNotificationsEnabled) {
             newEventNotifications.add(EventNotificationData.changeEvent(context.getString(
                     R.string.navigation_event_notify_arrival_position_change,
