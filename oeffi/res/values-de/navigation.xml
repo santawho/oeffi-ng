@@ -146,6 +146,7 @@
     <string name="navigation_event_log_entry_nav_start">Navigation beginnt</string>
     <string name="navigation_event_log_entry_nav_restart">Navigation beginnt erneut</string>
     <string name="navigation_event_log_entry_nav_end">Navigation beendet</string>
+    <string name="navigation_event_log_entry_services_cancelled">Fahrtausfälle entlang der Route</string>
     <string name="navigation_event_log_entry_public_leg_start">&lt;b>Fahrt bis Ankunft&lt;/b> %1$s in %2$s, %3$s, geplant %4$s, erwartet %5$s, Verspätung %6$s</string>
     <string name="navigation_event_log_entry_public_leg_end">&lt;b>Ankunft&lt;/b> in %21s</string>
     <string name="navigation_event_log_entry_public_leg_end_reminder">&lt;b>Demnächst Ankunft&lt;/b> in %1$s in %2$s, %3$s, erwartet %4$s, Verspätung %5$s</string>
@@ -174,6 +175,7 @@
     <string name="navigation_event_speak_nav_start">Navigation beginnt</string>
     <string name="navigation_event_speak_nav_restart">Navigation startet neu</string>
     <string name="navigation_event_speak_nav_end">Navigation beendet</string>
+    <string name="navigation_event_speak_services_cancelled">Warnung! Warnung! Warnung! Es gibt Fahrtausfälle entlang der Route.</string>
     <string name="navigation_event_speak_transfer_start">gehe nach %2$s zur Abfahrt von %1$s, %3$s, %4$s, %5$s</string>
     <string name="navigation_event_speak_transfer_end_reminder">%1$s Abfahrt von %2$s, %3$s, %4$s</string>
     <string name="navigation_event_speak_transfer_preview_same_location">Gehe dort zu %3$s</string>
@@ -210,6 +212,7 @@
     <string name="navigation_event_notify_nav_start">Navigation beginnt</string>
     <string name="navigation_event_notify_nav_restart">Navigation startet neu</string>
     <string name="navigation_event_notify_nav_end">Navigation beendet</string>
+    <string name="navigation_event_notify_services_cancelled">FAHRTAUSFÄLLE entlang der Route</string>
     <string name="navigation_event_notify_public_leg_start">Fahre mit %1$s nach %2$s, %3$s, plan %4$s, prog %5$s, %6$s, %7$s</string>
     <string name="navigation_event_notify_public_leg_end">Ankunft in %1$s</string>
     <string name="navigation_event_notify_public_leg_end_reminder">%1$s Ankunft in %2$s, %3$s, prog %4$s, %5$s</string>

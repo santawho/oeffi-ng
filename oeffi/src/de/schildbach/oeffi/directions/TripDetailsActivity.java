@@ -1864,7 +1864,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         depView.setVisibility(tripRenderer.nextEventDepartureName != null ? View.VISIBLE : View.GONE);
 
         ViewUtils.setVisibility(findViewById(R.id.navigation_next_event_critical),
-                tripRenderer.futureTransferCritical);
+                tripRenderer.futureTransferCritical || tripRenderer.servicesCancelled);
     }
 
     private Spanned getLeftTimeFormatted(final Date now, final Date endTime) {

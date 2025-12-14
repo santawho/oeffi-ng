@@ -573,6 +573,7 @@ public class NavigationNotification {
         public enum Type {
             MESSAGE,
             START_STOP,
+            SERVICES_CANCELLED,
             PUBLIC_LEG_START,
             PUBLIC_LEG_END,
             PUBLIC_LEG_END_REMINDER,
@@ -902,6 +903,7 @@ public class NavigationNotification {
         final TripRenderer.NotificationData newNotified = tripRenderer.notificationData;
         boolean timeChanged = false;
         boolean posChanged = false;
+        boolean anyImportantIssues = false;
         int reminderSoundId = 0;
         final boolean onRide = tripRenderer.nextEventTypeIsPublic;
         final long nextEventTimeLeftMs = tripRenderer.nextEventTimeLeftMs;
@@ -911,10 +913,16 @@ public class NavigationNotification {
             nextRefreshTimeReason = String.format("#7, nextRefreshTimeMs=%d, nextEventTimeLeftTo10MinsBoundaryMs=%d", nextRefreshTimeMs, nextEventTimeLeftTo10MinsBoundaryMs);
             nextRefreshTimeMs = nextEventTimeLeftTo10MinsBoundaryMs;
         }
+        if (lastNotified == null) {
+            log.info("first notification !!");
+            addEventOutputNavigationStarted();
+        }
+        if (newNotified.servicesCancelled) {
+            addEventOutputServicesCancelled(lastNotified != null && lastNotified.servicesCancelled);
+            anyImportantIssues = true;
+        }
         if (lastNotified == null || newNotified.currentLegIndex != lastNotified.currentLegIndex) {
             if (lastNotified == null) {
-                log.info("first notification !!");
-                addEventOutputNavigationStarted();
                 lastNotified = new TripRenderer.NotificationData();
             } else {
                 log.info("switching leg from {} to {}", lastNotified.currentLegIndex, newNotified.currentLegIndex);
@@ -1079,7 +1087,7 @@ public class NavigationNotification {
             }
         }
 
-        final boolean anyChanges = timeChanged || posChanged || nextTransferCriticalChanged || numTransferCriticalChanged > 0;
+        anyImportantIssues |= timeChanged || posChanged || nextTransferCriticalChanged || numTransferCriticalChanged > 0;
         log.info("timeChanged={}, posChanged={} nextTransferCriticalChanged={} numTransferCriticalChanged={} reminderSoundId={}",
                 timeChanged, posChanged, nextTransferCriticalChanged, numTransferCriticalChanged, reminderSoundId);
 
@@ -1161,7 +1169,7 @@ public class NavigationNotification {
                 .addAction(R.drawable.ic_clear_white_24dp, context.getString(R.string.navigation_stopnav_stop),
                         getPendingActivityIntent(true, TripDetailsActivity.Page.ITINERARY, trip));
 
-        if (anyChanges) {
+        if (anyImportantIssues) {
             notificationBuilder.setSilent(true);
         } else if (reminderSoundId == SOUND_REMIND_VIA_NOTIFICATION) {
             notificationBuilder
@@ -1181,7 +1189,7 @@ public class NavigationNotification {
 
         postEventNotifications(newEventNotifications);
 
-        if (anyChanges) {
+        if (anyImportantIssues) {
             playAlarmSoundAndVibration(-1,
                     SOUND_ALARM,
                     VIBRATION_PATTERN_ALARM,
@@ -1196,7 +1204,7 @@ public class NavigationNotification {
         }
 
         lastNotified = newNotified;
-        return anyChanges || reminderSoundId != 0;
+        return anyImportantIssues || reminderSoundId != 0;
     }
 
     private void playAlarmSoundAndVibration(
@@ -1508,7 +1516,8 @@ public class NavigationNotification {
                 tripRenderer.nextEventDepartureName != null ? View.VISIBLE : View.GONE);
 
         remoteViews.setViewVisibility(R.id.navigation_notification_critical,
-                tripRenderer.futureTransferCritical ? View.VISIBLE : View.GONE);
+                tripRenderer.futureTransferCritical || tripRenderer.servicesCancelled
+                        ? View.VISIBLE : View.GONE);
     }
 
     private static void remoteViewsSetBackgroundColor(
@@ -1649,6 +1658,19 @@ public class NavigationNotification {
         if (isEventNotificationsEnabled) {
             newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
                     R.string.navigation_event_notify_nav_end)));
+        }
+    }
+
+    private void addEventOutputServicesCancelled(final boolean alreadyNotified) {
+        if (!alreadyNotified) {
+            newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.SERVICES_CANCELLED, context.getString(
+                    R.string.navigation_event_log_entry_services_cancelled)));
+        }
+        newSpeakTexts.add(context.getString(
+                R.string.navigation_event_speak_services_cancelled));
+        if (isEventNotificationsEnabled) {
+            newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
+                    R.string.navigation_event_notify_services_cancelled)));
         }
     }
 

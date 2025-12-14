@@ -802,6 +802,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
                 case ARRIVAL_POSITION_CHANGE:
                 case DEPARTURE_POSITION_CHANGE:
                 case TRANSFER_CRITICAL:
+                case SERVICES_CANCELLED:
                     textColorId = R.color.fg_trip_next_event_important;
                     break;
                 case MESSAGE:

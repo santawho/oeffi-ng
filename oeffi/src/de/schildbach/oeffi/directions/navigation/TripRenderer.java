@@ -56,6 +56,7 @@ public class TripRenderer {
         public final LegContainer transferFrom;
         public final LegContainer transferTo;
         public final boolean transferCritical;
+        public final boolean serviceCancelled;
         public final TransferDetails transferDetails;
         public Point refPoint;
         public Date refTime;
@@ -80,6 +81,9 @@ public class TripRenderer {
             this.transferTo = null;
             this.transferCritical = false;
             this.transferDetails = null;
+            this.serviceCancelled = baseLeg != null
+                    && (baseLeg.arrivalStop.arrivalCancelled
+                    || baseLeg.departureStop.departureCancelled);
         }
 
         public LegContainer(
@@ -98,6 +102,9 @@ public class TripRenderer {
             this.transferDetails = transferDetails;
             this.publicLeg = null;
             this.initialLeg = null;
+            this.serviceCancelled =
+                    (transferFrom != null && transferFrom.serviceCancelled)
+                    || (transferTo != null && transferTo.serviceCancelled);
         }
 
         public boolean isTransfer() {
@@ -339,6 +346,7 @@ public class TripRenderer {
         public Position departurePosition;
         public Position plannedDeparturePosition;
         public long leftTimeReminded;
+        public boolean servicesCancelled;
         public boolean nextTransferCritical;
         public String transfersCritical;
         public long playedTravelAlarmId;
@@ -357,6 +365,7 @@ public class TripRenderer {
     public Point refPoint;
     public Date refTime;
     public boolean futureTransferCritical;
+    public boolean servicesCancelled;
     private Boolean feasible;
 
     public TripRenderer(
@@ -470,6 +479,7 @@ public class TripRenderer {
     public void evaluateByTime(final Date now) {
         notificationData = new NotificationData();
         futureTransferCritical = false;
+        servicesCancelled = false;
         setNextEventClock(now);
         boolean isCurrentOrFuture = false;
         for (int iLeg = 0; iLeg < legs.size(); ++iLeg) {
@@ -481,6 +491,7 @@ public class TripRenderer {
                 final int iNext = iLeg + 2;
                 final TripRenderer.LegContainer nextLegC = (iNext < legs.size()) ? legs.get(iNext) : null;
                 isCurrent = updatePublicLeg(legC, walkLegC, nextLegC, now);
+                servicesCancelled |= legC.serviceCancelled;
             } else {
                 isCurrent = updateIndividualLeg(legC, iLeg == 0, now);
             }
@@ -498,6 +509,7 @@ public class TripRenderer {
             legsCriticality[iLeg] = legC.transferCritical ? '*' : '-';
         }
         notificationData.transfersCritical = new String(legsCriticality);
+        notificationData.servicesCancelled = servicesCancelled;
     }
 
     private boolean updatePublicLeg(
