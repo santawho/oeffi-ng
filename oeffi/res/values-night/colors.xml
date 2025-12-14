@@ -16,8 +16,8 @@
     <color name="fg_trip_next_event_less_important">#cccccc</color>
 
     <!-- background -->
-    <color name="bg_level0">#222222</color>
-    <color name="bg_level1">#333333</color>
+    <color name="bg_level0">#000000</color> <!-- <color name="bg_level0">#222222</color>-->
+    <color name="bg_level1">#111111</color> <!-- <color name="bg_level1">#333333</color>-->
     <color name="bg_selected">#666666</color>
     <color name="bg_divider">#444444</color>
     <color name="bg_divider_highlight">#666666</color>
