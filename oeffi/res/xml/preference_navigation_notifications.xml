@@ -21,6 +21,7 @@
 
         <ListPreference
             android:defaultValue="never"
+            android:dependency="navigation_notifications_enabled"
             android:entries="@array/navigation_notifications_show_when"
             android:entryValues="@array/navigation_notifications_show_when_values"
             android:key="navigation_notification_changes_show_when"
@@ -29,6 +30,7 @@
 
         <ListPreference
             android:defaultValue="never"
+            android:dependency="navigation_notifications_enabled"
             android:entries="@array/navigation_notifications_remove_when"
             android:entryValues="@array/navigation_notifications_remove_when_values"
             android:key="navigation_notification_changes_remove_when"
@@ -41,6 +43,7 @@
 
         <ListPreference
             android:defaultValue="never"
+            android:dependency="navigation_notifications_enabled"
             android:entries="@array/navigation_notifications_show_when"
             android:entryValues="@array/navigation_notifications_show_when_values"
             android:key="navigation_notification_directions_show_when"
@@ -49,6 +52,7 @@
 
         <ListPreference
             android:defaultValue="never"
+            android:dependency="navigation_notifications_enabled"
             android:entries="@array/navigation_notifications_remove_when"
             android:entryValues="@array/navigation_notifications_remove_when_values"
             android:key="navigation_notification_directions_remove_when"
@@ -57,13 +61,27 @@
 
         <CheckBoxPreference
             android:defaultValue="false"
+            android:dependency="navigation_notifications_enabled"
             android:key="navigation_notifications_remind_2_minutes"
             android:title="@string/navigation_notifications_remind_2_minutes_title" />
 
         <CheckBoxPreference
             android:defaultValue="false"
+            android:key="navigation_notifications_remind_2_minutes_preview"
+            android:dependency="navigation_notifications_remind_2_minutes"
+            android:title="@string/navigation_notifications_remind_preview_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:dependency="navigation_notifications_enabled"
             android:key="navigation_notifications_remind_6_minutes"
             android:title="@string/navigation_notifications_remind_6_minutes_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="navigation_notifications_remind_6_minutes_preview"
+            android:dependency="navigation_notifications_remind_6_minutes"
+            android:title="@string/navigation_notifications_remind_preview_title" />
 
     </PreferenceCategory>
 

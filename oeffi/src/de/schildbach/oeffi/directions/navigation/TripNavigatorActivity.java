@@ -788,6 +788,8 @@ public class TripNavigatorActivity extends TripDetailsActivity {
             switch (eventLogEntry.type) {
                 case PUBLIC_LEG_START:
                 case PUBLIC_LEG_END:
+                case TRANSFER_LEG_START:
+                case TRANSFER_LEG_END:
                 case FINAL_TRANSFER:
                     textColorId = R.color.fg_significant;
                     break;

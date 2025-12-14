@@ -170,6 +170,7 @@
     </string-array>
     <string name="navigation_notifications_remind_2_minutes_title">Show reminder 2 minutes before</string>
     <string name="navigation_notifications_remind_6_minutes_title">Show reminder 6 minutes before</string>
+    <string name="navigation_notifications_remind_preview_title">… and preview for transfer</string>
 
     <string name="navigation_event_log_heading">Events</string>
     <string name="navigation_event_log_no_entries">No entries yet.</string>
@@ -180,6 +181,7 @@
     <string name="navigation_event_log_entry_nav_restart">Navigation restarting</string>
     <string name="navigation_event_log_entry_nav_end">Navigation ended</string>
     <string name="navigation_event_log_entry_public_leg_start">&lt;b>Travel to arrival&lt;/b> of %1$s at %2$s, %3$s, scheduled %4$s, estimated %5$s, delay %6$s</string>
+    <string name="navigation_event_log_entry_public_leg_end">&lt;b>Arrival&lt;/b> at %21s</string>
     <string name="navigation_event_log_entry_public_leg_end_reminder">&lt;b>Approaching arrival&lt;/b> at %1$s in %2$s, %3$s, estimated %4$s, delay %5$s</string>
     <string name="navigation_event_log_entry_transfer_start">&lt;b>Transfer to departure&lt;/b> of %1$s at %2$s, %3$s, scheduled %4$s, estimated %5$s, delay %6$s</string>
     <string name="navigation_event_log_entry_transfer_end_reminder">&lt;b>%1$s left for transfer&lt;/b> to %2$s, service %3$s, scheduled %4$s, estimated %5$s, delay %6$s</string>
@@ -201,18 +203,19 @@
     <string name="navigation_event_speak_times_delayed_format">delayed by %3$s min, estimated at %2$s</string>
     <string name="navigation_event_speak_position_on_unchanged_format">on platform %1$s</string>
     <string name="navigation_event_speak_position_on_changed_format">on changed platform %1$s</string>
-    <string name="navigation_event_speak_position_to_unchanged_format">to platform %1$s</string>
-    <string name="navigation_event_speak_position_to_changed_format">to changed platform %1$s</string>
+    <string name="navigation_event_speak_position_no_on_unchanged_format">platform %1$s</string>
+    <string name="navigation_event_speak_position_no_on_changed_format">to changed platform %1$s</string>
     <string name="navigation_event_speak_nav_start">navigation begins</string>
     <string name="navigation_event_speak_nav_restart">navigation restarting</string>
     <string name="navigation_event_speak_nav_end">navigation finished</string>
     <string name="navigation_event_speak_transfer_start">go to %2$s for departure of %1$s, %3$s, %4$s, %5$s</string>
     <string name="navigation_event_speak_transfer_end_reminder">%1$s departure of %2$s, %3$s, %4$s</string>
-    <string name="navigation_event_speak_transfer_preview_same_location">There go %3$s</string>
-    <string name="navigation_event_speak_transfer_preview_different_location">There go to %2$s, %3$s</string>
-    <string name="navigation_event_speak_transfer_preview_different_location_no_position">There go to %2$s</string>
+    <string name="navigation_event_speak_transfer_preview_same_location">There go to %3$s</string>
+    <string name="navigation_event_speak_transfer_preview_different_location">From there go to %2$s, to %3$s</string>
+    <string name="navigation_event_speak_transfer_preview_different_location_no_position">From there go to %2$s</string>
     <string name="navigation_event_speak_final_transfer_start">finally go to %1$s</string>
     <string name="navigation_event_speak_public_leg_start">travel by %1$s to %2$s, arrival %4$s, %5$s</string>
+    <string name="navigation_event_speak_public_leg_end">arrival at %1$s</string>
     <string name="navigation_event_speak_public_leg_end_reminder">%1$s arrival at %2$s, %3$s, %4$s</string>
     <string name="navigation_event_speak_next_transfer_critical">the next transfer is critical</string>
     <string name="navigation_event_speak_any_transfer_critical">some transfers are critical</string>
@@ -242,6 +245,7 @@
     <string name="navigation_event_notify_nav_restart">Navigation restarting</string>
     <string name="navigation_event_notify_nav_end">Navigation finished</string>
     <string name="navigation_event_notify_public_leg_start">Take %1$s to %2$s, %3$s, sched %4$s, est %5$s, %6$s, %7$s</string>
+    <string name="navigation_event_notify_public_leg_end">Arrival at %1$s</string>
     <string name="navigation_event_notify_public_leg_end_reminder">%1$s arrival at %2$s, %3$s, est %4$s, %5$s</string>
     <string name="navigation_event_notify_transfer_start">Go to %2$s for depart. %1$s, %3$s, sched %4$s, est %5$s, %6$s, %7$s</string>
     <string name="navigation_event_notify_transfer_end_reminder">%1$s depart. %2$s at %3$s, est %4$s, %5$s</string>
