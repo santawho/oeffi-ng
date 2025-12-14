@@ -66,6 +66,7 @@ import de.schildbach.oeffi.util.HtmlUtils;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.OverflowTextView;
 import de.schildbach.oeffi.util.ToggleImageButton;
+import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.Departure;
@@ -570,24 +571,23 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
     }
 
     public void selectStation(final Station station) {
-        final boolean changed = !station.location.equals(selectedStation);
+        if (station == null)
+            return;
 
+        final boolean changed = !station.location.equals(selectedStation);
         selectedNetwork = station.network;
         selectedStation = station.location;
-        if (selectedStation.hasCoord()) {
-            selectedCoord = selectedStation;
-            nearbyButton.setVisibility(View.VISIBLE);
-        }
+        selectedCoord = selectedStation.hasCoord() ? selectedStation : null;
         selectedAllDepartures = station.getDepartures();
-        selectedFilteredDepartures = null;
         selectedLines = groupDestinationsByLine(station.getLines());
-
         selectedFavState = FavoriteStationsProvider.favState(getContentResolver(), selectedNetwork, selectedStation);
-        favoriteButton.setChecked
-                (selectedFavState != null && selectedFavState == FavoriteStationsProvider.TYPE_FAVORITE);
+        selectedFilteredDepartures = null;
 
-        if (selectedStation.hasCoord()) {
-            getMapView().animateToLocation(selectedStation.getLatAsDouble(), selectedStation.getLonAsDouble());
+        ViewUtils.setVisibility(nearbyButton, selectedCoord != null);
+        favoriteButton.setChecked(selectedFavState != null && selectedFavState == FavoriteStationsProvider.TYPE_FAVORITE);
+
+        if (selectedCoord != null) {
+            getMapView().animateToLocation(selectedCoord.getLatAsDouble(), selectedCoord.getLonAsDouble());
         }
 
         updateGUI();
