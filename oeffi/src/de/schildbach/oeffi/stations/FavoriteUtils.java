@@ -32,7 +32,8 @@ import java.util.Map;
 public class FavoriteUtils {
     public static Uri persist(final ContentResolver contentResolver, final int type, final NetworkId networkId,
             final Location station) {
-        // checkArgument(station.type == LocationType.STATION, "not a station: %s", station);
+        // checkArgument(station.type == LocationType.STATION, () ->
+        //         "not a station: " + station);
         final Cursor cursor = contentResolver.query(FavoriteStationsProvider.CONTENT_URI(), null,
                 FavoriteStationsProvider.KEY_STATION_NETWORK + "=? AND "
                         + FavoriteStationsProvider.KEY_STATION_ID + "=?",

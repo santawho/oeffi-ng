@@ -100,8 +100,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static de.schildbach.pte.util.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
 
 public class StationDetailsActivity extends OeffiActivity implements StationsAware {
     public static final String INTENT_EXTRA_NETWORK = StationDetailsActivity.class.getName() + ".network";
@@ -143,7 +143,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             final Location station,
             final Date presetTime) {
         checkArgument(station.type == LocationType.STATION);
-        checkNotNull(networkId);
+        requireNonNull(networkId);
         intent.putExtra(StationDetailsActivity.INTENT_EXTRA_NETWORK, networkId.name());
         intent.putExtra(StationDetailsActivity.INTENT_EXTRA_STATION, Objects.serializeToString(station));
         if (presetTime != null)
@@ -282,7 +282,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
         final Intent intent = getIntent();
         final String networkName = intent.getStringExtra(INTENT_EXTRA_NETWORK);
-        final NetworkId network = NetworkId.valueOf(checkNotNull(networkName));
+        final NetworkId network = NetworkId.valueOf(requireNonNull(networkName));
         this.presetTime = (Date) intent.getSerializableExtra(INTENT_EXTRA_PRESETTIME);
         final String stationSerialized = intent.getStringExtra(INTENT_EXTRA_STATION);
         final Station station = new Station(network, (Location) Objects.deserializeFromString(stationSerialized));
@@ -651,7 +651,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         public Departure getItem(final int position) {
             if (position == 0)
                 return null;
-            return checkNotNull(getFilteredDepartures()).get(position - 1);
+            return requireNonNull(getFilteredDepartures()).get(position - 1);
         }
 
         @Override

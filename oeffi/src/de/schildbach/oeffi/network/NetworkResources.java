@@ -24,7 +24,7 @@ import android.graphics.drawable.Drawable;
 import javax.annotation.Nullable;
 import java.util.Locale;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import de.schildbach.pte.NetworkId;
 
@@ -40,7 +40,7 @@ public class NetworkResources {
             final @Nullable String comment, final @Nullable String license, final boolean cooperation) {
         this.icon = icon;
         this.isLogo = isLogo;
-        this.label = checkNotNull(label);
+        this.label = requireNonNull(label);
         this.comment = comment;
         this.license = license;
         this.cooperation = cooperation;

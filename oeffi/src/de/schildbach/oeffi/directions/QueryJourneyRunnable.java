@@ -28,9 +28,6 @@ import android.text.SpannableStringBuilder;
 import android.text.style.StyleSpan;
 import android.view.View;
 
-import com.google.common.base.Throwables;
-import com.google.common.util.concurrent.Uninterruptibles;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -176,7 +173,7 @@ public class QueryJourneyRunnable implements Runnable {
                     }
                 }
 
-                Uninterruptibles.sleepUninterruptibly(tries, TimeUnit.SECONDS);
+                try { TimeUnit.SECONDS.sleep(tries); } catch (InterruptedException ix) {}
 
                 // try again
                 continue;
@@ -286,8 +283,7 @@ public class QueryJourneyRunnable implements Runnable {
     protected void onSSLException(final SSLException x) {
         final DialogBuilder builder = DialogBuilder.warn(parentActivity,
                 R.string.directions_alert_ssl_exception_title);
-        builder.setMessage(parentActivity.getString(R.string.directions_alert_ssl_exception_message,
-                Throwables.getRootCause(x).toString()));
+        builder.setMessage(parentActivity.getString(R.string.directions_alert_ssl_exception_message, x.getMessage()));
         builder.setNeutralButton(R.string.directions_alert_ssl_exception_button_dismiss, null);
         builder.show();
     }

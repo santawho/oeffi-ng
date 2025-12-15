@@ -55,7 +55,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 public class FavoriteStationsActivity extends OeffiActivity
         implements StationClickListener, StationContextMenuItemListener {
@@ -70,7 +70,7 @@ public class FavoriteStationsActivity extends OeffiActivity
         @Override
         public Intent createIntent(final Context context, final NetworkId network) {
             final Intent intent = new Intent(context, FavoriteStationsActivity.class);
-            intent.putExtra(INTENT_EXTRA_NETWORK, checkNotNull(network));
+            intent.putExtra(INTENT_EXTRA_NETWORK, requireNonNull(network));
             return intent;
         }
 

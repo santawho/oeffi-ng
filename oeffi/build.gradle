@@ -25,7 +25,6 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:3.12.13'
     //noinspection GradleDependency
     implementation 'com.squareup.okhttp3:logging-interceptor:3.12.13'
-    implementation 'com.google.guava:guava:33.5.0-android'
     implementation 'org.osmdroid:osmdroid-android:6.1.20'
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
     //noinspection GradleDependency
@@ -37,10 +36,6 @@ dependencies {
 android {
     compileSdkVersion 'android-34'
     buildToolsVersion '36.1.0'
-
-    defaultConfig {
-        generatedDensities = ['hdpi', 'xhdpi']
-    }
 
     buildTypes {
         all {
@@ -80,9 +75,12 @@ android {
         exclude 'META-INF/proguard/**'
         exclude 'META-INF/services/**'
         exclude 'META-INF/*.kotlin_module'
+        exclude 'META-INF/kotlin-project-structure-metadata.json'
         exclude 'META-INF/**/coroutines.pro'
         exclude 'DebugProbesKt.bin'
         exclude 'kotlin/**'
+        exclude 'commonMain/default/**'
+        exclude 'nonJvmMain/default/**'
     }
 }
 

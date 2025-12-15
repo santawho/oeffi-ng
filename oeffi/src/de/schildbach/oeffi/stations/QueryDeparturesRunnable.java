@@ -18,7 +18,6 @@
 package de.schildbach.oeffi.stations;
 
 import android.os.Handler;
-import com.google.common.util.concurrent.Uninterruptibles;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.pte.NetworkProvider;
@@ -107,7 +106,7 @@ public abstract class QueryDeparturesRunnable implements Runnable {
                     break;
                 }
 
-                Uninterruptibles.sleepUninterruptibly(tries, TimeUnit.SECONDS);
+                try { TimeUnit.SECONDS.sleep(tries); } catch (InterruptedException ix) {}
 
                 // try again
                 continue;

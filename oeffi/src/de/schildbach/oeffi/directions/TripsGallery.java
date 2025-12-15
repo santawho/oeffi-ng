@@ -32,7 +32,6 @@ import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Gallery;
-import com.google.common.math.LongMath;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -226,20 +225,20 @@ public class TripsGallery extends Gallery {
             }
 
             // snap to current time
-            if (minTime == 0 || (currentTime > minTime - DateUtils.MINUTE_IN_MILLIS * 30 && currentTime < minTime))
+            if (minTime == Long.MAX_VALUE || (currentTime > minTime - DateUtils.MINUTE_IN_MILLIS * 30 && currentTime < minTime))
                 minTime = currentTime;
             else if (maxTime == 0 || (currentTime < maxTime + DateUtils.MINUTE_IN_MILLIS * 30 && currentTime > maxTime))
                 maxTime = currentTime;
 
             // padding
-            final long timeDiff = LongMath.checkedSubtract(maxTime, minTime);
+            final long timeDiff = maxTime - minTime;
             long timePadding = timeDiff / 12;
             if (timeDiff < DateUtils.MINUTE_IN_MILLIS * 30) // zoom limit
                 timePadding = (DateUtils.MINUTE_IN_MILLIS * 30 - timeDiff) / 2;
             if (timePadding < DateUtils.MINUTE_IN_MILLIS) // minimum padding
                 timePadding = DateUtils.MINUTE_IN_MILLIS;
-            minTime = LongMath.checkedSubtract(minTime, timePadding);
-            maxTime = LongMath.checkedAdd(maxTime, timePadding);
+            minTime = minTime - timePadding;
+            maxTime = maxTime + timePadding;
 
             // animate
             final long currentMinTime = adapter.getMinTime();
@@ -251,10 +250,10 @@ public class TripsGallery extends Gallery {
 
                 if (Math.abs(diffMin) > DateUtils.SECOND_IN_MILLIS * 10
                         || Math.abs(diffMax) > DateUtils.SECOND_IN_MILLIS * 10) {
-                    minTime = currentMinTime + diffMin / 3;
-                    maxTime = currentMaxTime + diffMax / 3;
+                    minTime = currentMinTime + diffMin / 5;
+                    maxTime = currentMaxTime + diffMax / 5;
 
-                    handler.postDelayed(this, 25); // 40 fps
+                    handler.postDelayed(this, 20); // 50 fps
                 }
             }
 

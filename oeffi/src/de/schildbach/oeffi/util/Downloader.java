@@ -17,9 +17,6 @@
 
 package de.schildbach.oeffi.util;
 
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
-import com.google.common.util.concurrent.Striped;
 import de.schildbach.oeffi.util.bzip2.BZip2CompressorInputStream;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -44,13 +41,15 @@ import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.util.Date;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 
-import static com.google.common.base.Preconditions.checkState;
+import static de.schildbach.pte.util.Preconditions.checkState;
 
 public class Downloader {
     private final File cacheDir;
-    private final Striped<Semaphore> semaphores = Striped.semaphore(8, 1);
+    private final ConcurrentHashMap<File, Semaphore> semaphores = new ConcurrentHashMap<>();
 
     private static final Random random = new Random();
     private static final Logger log = LoggerFactory.getLogger(Downloader.class);
@@ -63,20 +62,20 @@ public class Downloader {
         this.cacheDir = cacheDir;
     }
 
-    public ListenableFuture<Integer> download(final OkHttpClient okHttpClient, final HttpUrl remoteUrl,
-            final File targetFile) {
+    public CompletableFuture<Integer> download(final OkHttpClient okHttpClient, final HttpUrl remoteUrl,
+                                                      final File targetFile) {
         return download(okHttpClient, remoteUrl, targetFile, false, null);
     }
 
-    public ListenableFuture<Integer> download(final OkHttpClient okHttpClient, final HttpUrl remoteUrl,
+    public CompletableFuture<Integer> download(final OkHttpClient okHttpClient, final HttpUrl remoteUrl,
             final File targetFile, final boolean unzip) {
         return download(okHttpClient, remoteUrl, targetFile, unzip, null);
     }
 
-    public ListenableFuture<Integer> download(final OkHttpClient okHttpClient, final HttpUrl remoteUrl,
+    public CompletableFuture<Integer> download(final OkHttpClient okHttpClient, final HttpUrl remoteUrl,
             final File targetFile, final boolean unzip, @Nullable final ProgressCallback progressCallback) {
-        final SettableFuture<Integer> future = SettableFuture.create();
-        final Semaphore semaphore = semaphores.get(targetFile);
+        final CompletableFuture<Integer> future = new CompletableFuture<>();
+        final Semaphore semaphore = semaphores.computeIfAbsent(targetFile, file -> new Semaphore(1));
         if (semaphore.tryAcquire()) {
             final Headers meta = targetFile.exists() ? loadMeta(targetFile) : null;
             final Request.Builder request = new Request.Builder();
@@ -85,7 +84,7 @@ public class Downloader {
                 final Date expires = meta.getDate("Expires");
                 if (expires != null && System.currentTimeMillis() < expires.getTime()) {
                     log.info("Download '{}' skipped; using cached copy.", remoteUrl);
-                    future.set(HttpURLConnection.HTTP_NOT_MODIFIED);
+                    future.complete(HttpURLConnection.HTTP_NOT_MODIFIED);
                     semaphore.release();
                     return future;
                 }
@@ -126,15 +125,16 @@ public class Downloader {
                             saveMeta(targetFile, response.headers());
                             tempFile.renameTo(targetFile); // Atomic operation
                             log.info("Download '{}' successful; {} content bytes read.", call.request().url(), count);
+                            future.complete(status);
                         } else if (status == HttpURLConnection.HTTP_NOT_MODIFIED) {
                             log.info("Download '{}' skipped; nothing changed.", call.request().url());
                             saveMeta(targetFile, response.headers());
+                            future.complete(status);
                         } else {
                             log.info("Download '{}' failed: {} {}", call.request().url(), status, response.message());
-                            future.setException(new IOException(String.format(
+                            future.completeExceptionally(new IOException(String.format(
                                     "download %s failed, status %d", call.request().url(), status)));
                         }
-                        future.set(status);
                         semaphore.release();
                     } finally {
                         tempFile.delete();
@@ -143,13 +143,13 @@ public class Downloader {
 
                 public void onFailure(final Call call, final IOException e) {
                     log.info("Downloading {} failed: {}", call.request().url(), e.getMessage());
-                    future.setException(e);
+                    future.completeExceptionally(e);
                     semaphore.release();
                 }
             });
         } else {
             log.info("Download '{}' skipped; already in progress.", remoteUrl);
-            future.set(HttpURLConnection.HTTP_CONFLICT);
+            future.complete(HttpURLConnection.HTTP_CONFLICT);
         }
         return future;
     }

@@ -26,7 +26,7 @@ import android.util.AttributeSet;
 import android.view.Surface;
 import android.view.View;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static de.schildbach.pte.util.Preconditions.checkArgument;
 
 public final class CompassNeedleView extends View {
     public interface Callback {

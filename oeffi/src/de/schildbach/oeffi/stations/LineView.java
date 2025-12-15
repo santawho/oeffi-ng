@@ -34,7 +34,6 @@ import android.text.SpannableStringBuilder;
 import android.text.style.ReplacementSpan;
 import android.util.AttributeSet;
 import android.widget.TextView;
-import com.google.common.base.Strings;
 import de.schildbach.oeffi.R;
 import de.schildbach.pte.Standard;
 import de.schildbach.pte.dto.Line;
@@ -186,7 +185,7 @@ public class LineView extends TextView {
                         .filter(Objects::nonNull)
                         .collect(Collectors.joining("\n"));
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                    if (Strings.emptyToNull(sheet) != null)
+                    if (!sheet.isEmpty())
                         setTooltipText(sheet);
                     else
                         setTooltipText(null);

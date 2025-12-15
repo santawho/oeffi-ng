@@ -44,9 +44,6 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiMainActivity;
@@ -60,16 +57,15 @@ import de.schildbach.oeffi.util.DividerItemDecoration;
 import de.schildbach.oeffi.util.Downloader;
 import de.schildbach.oeffi.util.LocationHelper;
 import de.schildbach.oeffi.util.Toast;
-import de.schildbach.oeffi.util.UiThreadExecutor;
 import de.schildbach.pte.dto.Point;
 import okhttp3.Cache;
 import okhttp3.HttpUrl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.net.HttpURLConnection;
+import java.util.concurrent.CompletableFuture;
 
 public class PlansPickerActivity extends OeffiMainActivity implements LocationHelper.Callback, PlanClickListener,
         PlanContextMenuItemListener {
@@ -305,7 +301,7 @@ public class PlansPickerActivity extends OeffiMainActivity implements LocationHe
             final Downloader downloader = new Downloader(getCacheDir());
             final HttpUrl remoteUrl = plan.url != null ? plan.url
                     : URLs.getPlansBaseUrl().newBuilder().addEncodedPathSegment(planFilename).build();
-            final ListenableFuture<Integer> download = downloader.download(application.okHttpClient(), remoteUrl,
+            final CompletableFuture<Integer> download = downloader.download(application.okHttpClient(), remoteUrl,
                     planFile, false, (contentRead, contentLength) -> runOnUiThread(() -> {
                         final RecyclerView.ViewHolder holder = listView.findViewHolderForItemId(plan.rowId);
                         if (holder != null) {
@@ -316,31 +312,30 @@ public class PlansPickerActivity extends OeffiMainActivity implements LocationHe
                         }
                     }));
             actionBar.startProgress();
-            Futures.addCallback(download, new FutureCallback<Integer>() {
-                public void onSuccess(final @Nullable Integer status) {
-                    if (status == HttpURLConnection.HTTP_OK) {
-                        PlanActivity.start(PlansPickerActivity.this, plan.planId, null);
-                        final RecyclerView.ViewHolder holder = listView.findViewHolderForItemId(plan.rowId);
-                        if (holder != null) {
-                            final int position = holder.getAdapterPosition();
-                            if (position != RecyclerView.NO_POSITION) {
-                                listAdapter.setProgressPermille(position, 1000);
-                                listAdapter.setLoaded(position, true);
+            download.whenComplete((status, t) -> {
+                runOnUiThread(() -> {
+                    if (t == null) {
+                        if (status == HttpURLConnection.HTTP_OK) {
+                            PlanActivity.start(PlansPickerActivity.this, plan.planId, null);
+                            final RecyclerView.ViewHolder holder = listView.findViewHolderForItemId(plan.rowId);
+                            if (holder != null) {
+                                final int position = holder.getAdapterPosition();
+                                if (position != RecyclerView.NO_POSITION) {
+                                    listAdapter.setProgressPermille(position, 1000);
+                                    listAdapter.setLoaded(position, true);
+                                }
                             }
+                        } else if (status == HttpURLConnection.HTTP_NOT_FOUND) {
+                            new Toast(PlansPickerActivity.this).longToast(R.string.alert_network_file_not_found);
+                        } else if (status == HttpURLConnection.HTTP_FORBIDDEN) {
+                            new Toast(PlansPickerActivity.this).longToast(R.string.alert_network_forbidden);
                         }
-                    } else if (status == HttpURLConnection.HTTP_NOT_FOUND) {
-                        new Toast(PlansPickerActivity.this).longToast(R.string.alert_network_file_not_found);
-                    } else if (status == HttpURLConnection.HTTP_FORBIDDEN) {
-                        new Toast(PlansPickerActivity.this).longToast(R.string.alert_network_forbidden);
+                    } else {
+                        new Toast(PlansPickerActivity.this).longToast(R.string.alert_network_connection_unavailable);
                     }
                     actionBar.stopProgress();
-                }
-
-                public void onFailure(final Throwable t) {
-                    new Toast(PlansPickerActivity.this).longToast(R.string.alert_network_connection_unavailable);
-                    actionBar.stopProgress();
-                }
-            }, new UiThreadExecutor());
+                });
+            });
         }
     }
 }

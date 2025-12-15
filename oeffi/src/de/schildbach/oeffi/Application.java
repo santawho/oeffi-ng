@@ -48,7 +48,6 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
-import com.google.common.base.Stopwatch;
 
 import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.directions.QueryHistoryProvider;
@@ -280,8 +279,6 @@ public class Application extends android.app.Application {
 
         speechInput = new OeffiSpeechInput(this);
 
-        final Stopwatch watch = Stopwatch.createStarted();
-
         // 2020-11-22: delete unused downloaded station databases
         final FilenameFilter filter = (dir, name) -> name.endsWith(".db") || name.endsWith(".db.meta");
         for (final File file : getFilesDir().listFiles(filter))
@@ -338,8 +335,6 @@ public class Application extends android.app.Application {
         migrateSelectedNetwork(RTACHICAGO, NetworkId.BART);
         FavoriteStationsProvider.deleteFavoriteStations(this, RTACHICAGO);
         QueryHistoryProvider.deleteQueryHistory(this, RTACHICAGO);
-
-        log.info("Migrations took {}", watch);
     }
 
     public String getAppName() {

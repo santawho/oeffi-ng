@@ -42,7 +42,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.BaseAdapter;
-import com.google.common.base.Preconditions;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,6 +68,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static de.schildbach.pte.util.Preconditions.checkArgument;
 
 public final class TripsGalleryAdapter extends BaseAdapter {
     private static final Logger log = LoggerFactory.getLogger(TripsGallery.class);
@@ -295,8 +296,8 @@ public final class TripsGalleryAdapter extends BaseAdapter {
     }
 
     public void setMinMaxTimes(final long minTime, final long maxTime) {
-        Preconditions.checkArgument(minTime > 0);
-        Preconditions.checkArgument(maxTime > minTime);
+        checkArgument(minTime > 0);
+        checkArgument(maxTime > minTime);
 
         this.minTime = minTime;
         this.maxTime = maxTime;
@@ -315,11 +316,11 @@ public final class TripsGalleryAdapter extends BaseAdapter {
     }
 
     public float timeToCoord(final long time, final int height) {
-        Preconditions.checkArgument(time > 0);
-        Preconditions.checkArgument(height > 0);
+        checkArgument(time > 0);
+        checkArgument(height > 0);
 
         final long timeDiff = maxTime - minTime;
-        Preconditions.checkState(timeDiff > 0);
+        checkArgument(timeDiff > 0);
 
         return (time - minTime) * height / (float) timeDiff;
     }

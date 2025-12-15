@@ -17,10 +17,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -92,15 +94,10 @@ public class AppInstaller {
             if (localFile.exists())
                 localFile.delete();
             final Downloader downloader = new Downloader(application.getCacheDir());
-            final ListenableFuture<Integer> download = downloader.download(application.okHttpClient(),
+            final CompletableFuture<Integer> download = downloader.download(application.okHttpClient(),
                     remoteUrl, localFile);
-            Futures.addCallback(download, new FutureCallback<Integer>() {
-                public void onSuccess(final @Nullable Integer status) {
-                    progressDialog.dismiss();
-                    installApk(localFile);
-                }
-
-                public void onFailure(final Throwable t) {
+            download.whenComplete((status, t) -> {
+                if (t != null) {
                     progressDialog.dismiss();
                     log.error("download {} failed", remoteUrl, t);
                     new AlertDialog.Builder(context)
@@ -109,8 +106,11 @@ public class AppInstaller {
                             .setPositiveButton(android.R.string.ok, null)
                             .setOnDismissListener(dialog -> done(false))
                             .create().show();
+                } else if (status == HttpURLConnection.HTTP_OK) {
+                    progressDialog.dismiss();
+                    installApk(localFile);
                 }
-            }, new UiThreadExecutor());
+            });
             progressDialog.setMessage(application.getString(R.string.app_installer_download_progress_message));
             progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             progressDialog.setCancelable(false);

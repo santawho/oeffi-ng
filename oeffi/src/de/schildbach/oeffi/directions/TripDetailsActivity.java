@@ -77,9 +77,6 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.Lifecycle;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Supplier;
-
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.DeviceAdmin;
@@ -140,9 +137,11 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.TimeZone;
+import java.util.function.Supplier;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 public class TripDetailsActivity extends OeffiActivity implements LocationListener, DeviceLocationAware {
     public static class RenderConfig implements Serializable {
@@ -232,9 +231,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final Class<? extends TripDetailsActivity> activityClass, final Context context,
             final NetworkId network, final Trip trip, final RenderConfig renderConfig) {
         final Intent intent = new Intent(context, activityClass);
-        intent.putExtra(INTENT_EXTRA_NETWORK, checkNotNull(network));
-        intent.putExtra(INTENT_EXTRA_TRIP, checkNotNull(trip));
-        intent.putExtra(INTENT_EXTRA_RENDERCONFIG, checkNotNull(renderConfig));
+        intent.putExtra(INTENT_EXTRA_NETWORK, requireNonNull(network));
+        intent.putExtra(INTENT_EXTRA_TRIP, requireNonNull(trip));
+        intent.putExtra(INTENT_EXTRA_RENDERCONFIG, requireNonNull(renderConfig));
         return intent;
     }
 
@@ -983,7 +982,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             else if (fare.units == null && fare.unitName == null)
                 unitView.setText(null);
             else
-                unitView.setText(String.format("(%s)", MoreObjects.firstNonNull(fare.units, fare.unitName)));
+                unitView.setText(String.format("(%s)", Optional.ofNullable(fare.units).orElse(fare.unitName)));
             faresTable.addView(fareRow, i++);
         }
 

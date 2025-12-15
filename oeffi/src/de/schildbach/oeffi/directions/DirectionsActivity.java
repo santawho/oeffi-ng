@@ -61,7 +61,6 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.google.common.base.Throwables;
 
 import de.schildbach.oeffi.FromViaToAware;
 import de.schildbach.oeffi.MyActionBar;
@@ -1659,8 +1658,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         protected void onSSLException(final SSLException x) {
             final DialogBuilder builder = DialogBuilder.warn(DirectionsActivity.this,
                     R.string.directions_alert_ssl_exception_title);
-            builder.setMessage(getString(R.string.directions_alert_ssl_exception_message,
-                    Throwables.getRootCause(x).toString()));
+            builder.setMessage(getString(R.string.directions_alert_ssl_exception_message, x.getMessage()));
             builder.setNeutralButton(R.string.directions_alert_ssl_exception_button_dismiss, null);
             builder.show();
         }

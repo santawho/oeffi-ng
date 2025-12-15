@@ -26,7 +26,7 @@ import de.schildbach.oeffi.R;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 public class MultiDrawable extends AnimationDrawable {
     private final Resources res;
@@ -52,6 +52,6 @@ public class MultiDrawable extends AnimationDrawable {
     }
 
     public void selectDrawableByResId(final int resId) {
-        selectDrawable(checkNotNull(drawableIndexes.get(resId), "unknown resId"));
+        selectDrawable(requireNonNull(drawableIndexes.get(resId), "unknown resId"));
     }
 }

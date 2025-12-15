@@ -17,7 +17,7 @@
 
 package de.schildbach.oeffi.directions.navigation;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -303,7 +303,7 @@ public class TravelAlarmManager {
             final Trip trip = navigationNotification.getTrip();
 
             legIndex = legContainer.legIndex;
-            publicLeg = checkNotNull(legContainer.publicLeg);
+            publicLeg = requireNonNull(legContainer.publicLeg);
             if (alarmIsForDeparture) {
                 final Trip.Leg firstLeg = trip.legs.isEmpty() ? null : trip.legs.get(0);
                 if (firstLeg instanceof Trip.Individual) {

@@ -18,7 +18,6 @@
 package de.schildbach.oeffi.network;
 
 import android.os.Handler;
-import com.google.common.util.concurrent.Uninterruptibles;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.Point;
@@ -73,7 +72,7 @@ public abstract class GetAreaRunnable implements Runnable {
                     }
                 }
 
-                Uninterruptibles.sleepUninterruptibly(tries, TimeUnit.SECONDS);
+                try { TimeUnit.SECONDS.sleep(tries); } catch (InterruptedException ix) {}
 
                 // try again
                 continue;

@@ -38,9 +38,6 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.google.common.collect.ComparisonChain;
-import com.google.common.collect.Ordering;
-import com.google.common.util.concurrent.Uninterruptibles;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiActivity;
@@ -80,6 +77,7 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -90,7 +88,7 @@ import java.util.NavigableSet;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 public class TripsOverviewActivity extends OeffiActivity {
     private static final int DETAILS_NEW_NAVIGATION = 4711;
@@ -122,13 +120,13 @@ public class TripsOverviewActivity extends OeffiActivity {
         final Intent intent = new Intent(context, TripsOverviewActivity.class);
         if (result.queryUri != null)
             intent.setData(Uri.parse(result.queryUri));
-        intent.putExtra(INTENT_EXTRA_NETWORK, checkNotNull(network));
+        intent.putExtra(INTENT_EXTRA_NETWORK, requireNonNull(network));
         intent.putExtra(INTENT_EXTRA_RESULT, result);
         intent.putExtra(INTENT_EXTRA_ARR_DEP, depArr == TimeSpec.DepArr.DEPART);
         if (historyUri != null)
             intent.putExtra(INTENT_EXTRA_HISTORY_URI, historyUri.toString());
         intent.putExtra(INTENT_EXTRA_RELOAD_REQUEST_DATA, reloadRequestData);
-        intent.putExtra(INTENT_EXTRA_RENDERCONFIG, checkNotNull(renderConfig));
+        intent.putExtra(INTENT_EXTRA_RENDERCONFIG, requireNonNull(renderConfig));
         context.startActivity(intent);
     }
 
@@ -176,14 +174,13 @@ public class TripsOverviewActivity extends OeffiActivity {
             }
         }
 
-        return ComparisonChain.start() //
-                .compare(trip1.getFirstDepartureTime(), trip2.getFirstDepartureTime()) //
-                .compare(trip1.getLastArrivalTime(), trip2.getLastArrivalTime()) //
-                .compare(trip1.getNumChanges(), trip2.getNumChanges(), Ordering.natural().nullsLast()) //
+        return Comparator.comparing(Trip::getFirstDepartureTime)
+                .thenComparing(Trip::getLastArrivalTime)
+                .thenComparing(Trip::getNumChanges, Comparator.nullsLast(Integer::compareTo))
                 // trips with equal duration and change-overs, ...
                 // make sure they are different, otherwise one of them would be dropped ...
-                .compare(id1, id2) // ... and ensure same order every time (IDs are never equal)
-                .result();
+                .thenComparing(Trip::getUniqueId) // ... and ensure same order every time (IDs are never equal)
+                .compare(trip1, trip2);
     });
 
     private boolean queryMoreTripsEnabled = false;
@@ -505,7 +502,7 @@ public class TripsOverviewActivity extends OeffiActivity {
                         break;
                     }
 
-                    Uninterruptibles.sleepUninterruptibly(tries, TimeUnit.SECONDS);
+                    try { TimeUnit.SECONDS.sleep(tries); } catch (InterruptedException ix) {}
 
                     // try again
                     continue;

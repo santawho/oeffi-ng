@@ -17,25 +17,16 @@
 
 package de.schildbach.oeffi;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
-import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.format.DateUtils;
-
-import com.google.common.base.Charsets;
-import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 
 import de.schildbach.oeffi.network.NetworkPickerActivity;
 import de.schildbach.oeffi.network.NetworkResources;
@@ -43,32 +34,32 @@ import de.schildbach.oeffi.util.AppInstaller;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.Downloader;
 import de.schildbach.oeffi.util.Installer;
-import de.schildbach.oeffi.util.UiThreadExecutor;
 import de.schildbach.pte.NetworkId;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class OeffiMainActivity extends OeffiActivity {
     private static boolean stillCheckForUpdate = true;
@@ -146,16 +137,13 @@ public abstract class OeffiMainActivity extends OeffiActivity {
         remoteUrl.addQueryParameter("task", taskName());
         final File localFile = new File(getFilesDir(), "messages.txt");
         final Downloader downloader = new Downloader(getCacheDir());
-        final ListenableFuture<Integer> download = downloader.download(application.okHttpClient(), remoteUrl.build(),
+        final CompletableFuture<Integer> download = downloader.download(application.okHttpClient(), remoteUrl.build(),
                 localFile);
-        Futures.addCallback(download, new FutureCallback<Integer>() {
-            public void onSuccess(final @Nullable Integer status) {
-                processMessages(network);
+        download.whenComplete((status, t) -> {
+            if (t == null) {
+                runOnUiThread(() -> processMessages(network));
             }
-
-            public void onFailure(final Throwable t) {
-            }
-        }, new UiThreadExecutor());
+        });
     }
 
     private void processMessages(final NetworkId network) {
@@ -164,7 +152,7 @@ public abstract class OeffiMainActivity extends OeffiActivity {
         final File indexFile = new File(getFilesDir(), "messages.txt");
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(
                 indexFile.exists() ? new FileInputStream(indexFile) : getAssets().open("messages.txt"),
-                Charsets.UTF_8))) {
+                StandardCharsets.UTF_8))) {
             while (true) {
                 line = reader.readLine();
                 if (line == null)
@@ -188,19 +176,19 @@ public abstract class OeffiMainActivity extends OeffiActivity {
     private final Pattern PATTERN_KEY_VALUE = Pattern.compile("([\\w-]+):(.*)");
 
     private boolean processMessageLine(final NetworkId network, final String line) throws ParseException {
-        final Iterator<String> fieldIterator = Splitter.on('|').trimResults().split(line).iterator();
+        final Iterator<String> fieldIterator = Stream.of(line.split("\\|")).map(s -> !s.trim().isEmpty() ? s.trim() : null).iterator();
         final String id = fieldIterator.next();
         final String conditions = fieldIterator.next();
-        final String repeat = Strings.emptyToNull(fieldIterator.next());
+        final String repeat = fieldIterator.next();
         final String action = fieldIterator.next();
 
         // check conditions
-        if (!Strings.isNullOrEmpty(conditions)) {
-            final Map<String, String> conditionsMap = Splitter.on(Pattern.compile("\\s+")).trimResults()
-                    .withKeyValueSeparator(":").split(conditions);
-            for (final Map.Entry<String, String> conditionEntry : conditionsMap.entrySet()) {
-                final String name = conditionEntry.getKey();
-                final String value = conditionEntry.getValue();
+        if (conditions != null) {
+            final List<String> conditionsList = Stream.of(conditions.split("\\s+")).map(String::trim).collect(Collectors.toList());
+            for (final String condition : conditionsList) {
+                final String[] nameValue = condition.split(":", 2);
+                final String name = nameValue[0];
+                final String value = nameValue.length >= 2 ? nameValue[1] : null;
 
                 if (name.equals("min-sdk")) {
                     final int minSdk = Integer.parseInt(value);
@@ -248,7 +236,7 @@ public abstract class OeffiMainActivity extends OeffiActivity {
                 } else if (name.equals("installed-package")) {
                     final List<PackageInfo> installedPackages = getPackageManager().getInstalledPackages(0);
                     boolean match = false;
-                    loop: for (final String packageName : Splitter.on(',').trimResults().splitToList(value)) {
+                    loop: for (final String packageName : Stream.of(value.split(",")).map(String::trim).collect(Collectors.toList())) {
                         for (final PackageInfo pi : installedPackages) {
                             if (pi.packageName.equals(packageName)) {
                                 match = true;
@@ -260,17 +248,17 @@ public abstract class OeffiMainActivity extends OeffiActivity {
                         return false;
                 } else if (name.equals("not-installed-package")) {
                     final List<PackageInfo> installedPackages = getPackageManager().getInstalledPackages(0);
-                    for (final String packageName : Splitter.on(',').trimResults().splitToList(value)) {
+                    for (final String packageName : Stream.of(value.split(",")).map(String::trim).collect(Collectors.toList())) {
                         for (final PackageInfo pi : installedPackages)
                             if (pi.packageName.equals(packageName))
                                 return false;
                     }
                 } else if (name.equals("installer")) {
-                    final String installer = Strings.nullToEmpty(Installer.installerPackageName(this));
+                    final String installer = Installer.installerPackageName(this);
                     if (!value.equalsIgnoreCase(installer))
                         return false;
                 } else if (name.equals("not-installer")) {
-                    final String installer = Strings.nullToEmpty(Installer.installerPackageName(this));
+                    final String installer = Installer.installerPackageName(this);
                     if (value.equalsIgnoreCase(installer))
                         return false;
                 } else {
@@ -399,7 +387,7 @@ public abstract class OeffiMainActivity extends OeffiActivity {
         else if ("update".equals(buttonSpec))
             return getString(R.string.alert_message_button_update);
         else
-            return Splitter.on('|').trimResults().limit(2).split(buttonSpec).iterator().next();
+            return Stream.of(buttonSpec.split("\\|", 2)).map(String::trim).iterator().next();
     }
 
     private MessageOnClickListener messageButtonListener(final String buttonSpec) {
@@ -416,7 +404,7 @@ public abstract class OeffiMainActivity extends OeffiActivity {
                 // TODO localize
                 return new MessageOnClickListener("https://oeffi.schildbach.de/download.html");
         } else {
-            final Iterator<String> iterator = Splitter.on('|').trimResults().limit(2).split(buttonSpec).iterator();
+            final Iterator<String> iterator = Stream.of(buttonSpec.split("\\|", 2)).map(String::trim).iterator();
             iterator.next();
             return new MessageOnClickListener(iterator.next());
         }

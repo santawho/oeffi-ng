@@ -46,7 +46,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -225,13 +225,13 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
         protected Plan(final long rowId, final String planId, final String name, final String disclaimer,
                 final Date validFrom, final NetworkId networkId, final HttpUrl url, final File localFile) {
             this.rowId = rowId;
-            this.planId = checkNotNull(planId);
-            this.name = checkNotNull(name);
+            this.planId = requireNonNull(planId);
+            this.name = requireNonNull(name);
             this.disclaimer = disclaimer;
             this.validFrom = validFrom;
             this.networkId = networkId;
             this.url = url;
-            this.localFile = checkNotNull(localFile);
+            this.localFile = requireNonNull(localFile);
         }
     }
 }

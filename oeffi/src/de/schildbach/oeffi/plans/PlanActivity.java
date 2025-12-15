@@ -40,9 +40,6 @@ import androidx.activity.EdgeToEdge;
 import androidx.activity.SystemBarStyle;
 import androidx.annotation.NonNull;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
@@ -56,7 +53,6 @@ import de.schildbach.oeffi.stations.StationContextMenu;
 import de.schildbach.oeffi.stations.StationDetailsActivity;
 import de.schildbach.oeffi.util.Downloader;
 import de.schildbach.oeffi.util.Toast;
-import de.schildbach.oeffi.util.UiThreadExecutor;
 import de.schildbach.oeffi.util.ZoomControls;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
@@ -81,8 +77,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.CompletableFuture;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 public class PlanActivity extends ComponentActivity {
     public static final String INTENT_EXTRA_PLAN_ID = "plan_id"; // Used in launcher shortcuts
@@ -94,7 +91,7 @@ public class PlanActivity extends ComponentActivity {
 
     public static Intent intent(final Context context, final String planId, final String selectedStationId) {
         final Intent intent = new Intent(Intent.ACTION_VIEW, null, context, PlanActivity.class);
-        intent.putExtra(INTENT_EXTRA_PLAN_ID, checkNotNull(planId));
+        intent.putExtra(INTENT_EXTRA_PLAN_ID, requireNonNull(planId));
         if (selectedStationId != null)
             intent.putExtra(INTENT_EXTRA_SELECTED_STATION_ID, selectedStationId);
         return intent;
@@ -150,7 +147,7 @@ public class PlanActivity extends ComponentActivity {
         bubble = findViewById(R.id.plans_bubble);
         bubble.setVisibility(View.GONE);
         bubble.setOnClickListener(v -> {
-            final Station selection = checkNotNull(PlanActivity.this.selection);
+            final Station selection = requireNonNull(PlanActivity.this.selection);
             final PopupMenu contextMenu = new StationContextMenu(
                     PlanActivity.this, v, selection.network, selection.location,
                     null, false, false, false, false,
@@ -183,8 +180,8 @@ public class PlanActivity extends ComponentActivity {
             updateScale();
         });
 
-        final String planId = checkNotNull(getIntent().getExtras().getString(INTENT_EXTRA_PLAN_ID),
-                "Required intent extra: %s", INTENT_EXTRA_PLAN_ID);
+        final String planId = requireNonNull(getIntent().getExtras().getString(INTENT_EXTRA_PLAN_ID), () ->
+                "Required intent extra: " + INTENT_EXTRA_PLAN_ID);
         final Uri planContentUri = PlanContentProvider.planUri(planId);
         final String planFilename = planId + ".png";
         final File planFile = new File(getDir(Constants.PLANS_DIR, Context.MODE_PRIVATE), planFilename);
@@ -221,16 +218,13 @@ public class PlanActivity extends ComponentActivity {
         final Downloader downloader = new Downloader(getCacheDir());
         final HttpUrl remoteUrl = planUrlStr != null ? HttpUrl.parse(planUrlStr)
                 : URLs.getPlansBaseUrl().newBuilder().addEncodedPathSegment(planFilename).build();
-        final ListenableFuture<Integer> download = downloader.download(application.okHttpClient(), remoteUrl, planFile);
-        Futures.addCallback(download, new FutureCallback<Integer>() {
-            public void onSuccess(final @Nullable Integer status) {
-                if (status == HttpURLConnection.HTTP_OK)
-                    loadPlan(planFile);
-            }
+        final CompletableFuture<Integer> download = downloader.download(application.okHttpClient(), remoteUrl, planFile);
 
-            public void onFailure(final Throwable t) {
+        download.whenComplete((status, t) -> {
+            if (t == null && status == HttpURLConnection.HTTP_OK) {
+                runOnUiThread(() -> loadPlan(planFile));
             }
-        }, new UiThreadExecutor());
+        });
 
         if (planFile.exists())
             loadPlan(planFile);

@@ -33,7 +33,6 @@ import android.os.Process;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.content.ContextCompat;
-import com.google.common.base.Throwables;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
@@ -304,8 +303,7 @@ public class DirectionsShortcutActivity extends OeffiActivity implements Locatio
             protected void onSSLException(final SSLException x) {
                 final DialogBuilder builder = DialogBuilder.warn(DirectionsShortcutActivity.this,
                         R.string.directions_alert_ssl_exception_title);
-                builder.setMessage(getString(R.string.directions_alert_ssl_exception_message,
-                        Throwables.getRootCause(x).toString()));
+                builder.setMessage(getString(R.string.directions_alert_ssl_exception_message, x.getMessage()));
                 builder.setNeutralButton(R.string.directions_alert_ssl_exception_button_dismiss,
                         (dialog, which) -> finish());
                 builder.setOnCancelListener(dialog -> finish());

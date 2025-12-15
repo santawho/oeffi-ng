@@ -69,8 +69,6 @@ import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.google.common.collect.ComparisonChain;
-import com.google.common.primitives.Ints;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.DeviceLocationAware;
 import de.schildbach.oeffi.MyActionBar;
@@ -122,6 +120,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -440,10 +439,10 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                         drawableClear.setTint(fgColor);
                         drawableBlock.setTint(fgColor);
                         starMargin = resources.getDimensionPixelOffset(R.dimen.text_padding_horizontal_lax);
-                        actionTriggerThreshold = starMargin * 2 + Ints.max(
-                                drawableStar.getIntrinsicWidth(),
+                        actionTriggerThreshold = starMargin * 2 + Math.max(
+                                drawableStar.getIntrinsicWidth(), Math.max(
                                 drawableClear.getIntrinsicWidth(),
-                                drawableBlock.getIntrinsicWidth());
+                                drawableBlock.getIntrinsicWidth()));
                     }
 
                     @Override
@@ -1212,15 +1211,15 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     }
 
     private static void sortStations(final List<Station> stations) {
-        Collections.sort(stations, (station1, station2) -> {
-            return ComparisonChain.start()
-                    // order by distance
-                    .compareTrueFirst(station1.hasDistanceAndBearing, station2.hasDistanceAndBearing)
-                    .compare(station1.distance, station2.distance)
-                    // order by product
-                    .compare(station1.getRelevantProduct(), station2.getRelevantProduct())
-                    .result();
-        });
+        Collections.sort(stations, (station1, station2) ->
+                Comparator
+                        // order by distance
+                        .<Station, Boolean>comparing(station -> station.hasDistanceAndBearing)
+                        .thenComparing(station -> station.distance)
+                        // order by product
+                        .thenComparing(Station::getRelevantProduct, Comparator.nullsLast(Product::compareTo))
+                        .compare(station1, station2)
+        );
     }
 
     private void postLoadNextVisible(final long delay) {

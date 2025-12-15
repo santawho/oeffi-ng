@@ -25,12 +25,6 @@ import android.database.CursorWrapper;
 import android.database.MatrixCursor;
 import android.net.Uri;
 import android.provider.BaseColumns;
-import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.MoreExecutors;
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.URLs;
@@ -61,8 +55,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
+import java.util.stream.Stream;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 public class PlanContentProvider extends ContentProvider {
     public static Uri CONTENT_URI() {
@@ -118,27 +115,22 @@ public class PlanContentProvider extends ContentProvider {
     @Override
     public Cursor query(final Uri uri, final String[] projection, final String selection, final String[] selectionArgs,
             final String sortOrder) {
-        final FutureCallback<Integer> notifyChangeCallback = new FutureCallback<Integer>() {
-            public void onSuccess(final @Nullable Integer status) {
-                if (status == HttpURLConnection.HTTP_OK)
-                    getContext().getContentResolver().notifyChange(uri, null);
-            }
-
-            public void onFailure(final Throwable t) {
-            }
+        BiConsumer<? super Integer, ? super Throwable> notifyChangeCallback = (status, t) -> {
+            if (t == null && status == HttpURLConnection.HTTP_OK)
+                getContext().getContentResolver().notifyChange(uri, null);
         };
 
         final File indexFile = new File(getContext().getFilesDir(), Constants.PLAN_INDEX_FILENAME);
         final HttpUrl remoteIndexUrl = URLs.getPlansBaseUrl().newBuilder()
                 .addPathSegment(Constants.PLAN_INDEX_FILENAME).build();
-        final ListenableFuture<Integer> download = downloader.download(application.okHttpClient(), remoteIndexUrl, indexFile);
-        Futures.addCallback(download, notifyChangeCallback, MoreExecutors.directExecutor());
+        final CompletableFuture<Integer> download = downloader.download(application.okHttpClient(), remoteIndexUrl, indexFile);
+        download.whenComplete(notifyChangeCallback);
 
         final File stationsFile = new File(getContext().getFilesDir(), Constants.PLAN_STATIONS_FILENAME);
         final HttpUrl remoteStationsUrl = URLs.getPlansBaseUrl().newBuilder()
                 .addPathSegment(Constants.PLAN_STATIONS_FILENAME + ".bz2").build();
-        final ListenableFuture<Integer> stationsDownload = downloader.download(application.okHttpClient(), remoteStationsUrl, stationsFile, true);
-        Futures.addCallback(stationsDownload, notifyChangeCallback, MoreExecutors.directExecutor());
+        final CompletableFuture<Integer> stationsDownload = downloader.download(application.okHttpClient(), remoteStationsUrl, stationsFile, true);
+        stationsDownload.whenComplete(notifyChangeCallback);
 
         final List<String> pathSegments = uri.getPathSegments();
         if (pathSegments.size() <= 2) {
@@ -211,21 +203,17 @@ public class PlanContentProvider extends ContentProvider {
                 if (line.length() == 0 || line.charAt(0) == '#')
                     continue;
 
-                final String[] fields = line.split("\\|");
-                final int numFields = fields.length;
+                final Iterator<String> fieldIterator = Stream.of(line.split("\\|")).map(s -> !s.trim().isEmpty() ? s.trim() : null).iterator();
 
-                if (numFields < 4)
-                    throw new IOException("bad line: '" + line + "', " + numFields + " fields");
-
-                final String planId = fields[0];
+                final String planId = fieldIterator.next();
                 final int rowId = planId.hashCode(); // FIXME colliding hashcodes
-                final String[] coords = fields[1].split(",");
+                final String[] coords = fieldIterator.next().split(",");
                 final Point p = Point.fromDouble(Double.parseDouble(coords[0]), Double.parseDouble(coords[1]));
-                final Date planValidFrom = parse(fields[2], dateFormat);
-                final String planName = fields[3];
-                final String planDisclaimer = numFields > 4 ? Strings.emptyToNull(fields[4]) : null;
-                final String planUrl = numFields > 5 ? Strings.emptyToNull(fields[5]) : null;
-                final String planNetworkLogo = numFields > 6 ? Strings.emptyToNull(fields[6]) : null;
+                final Date planValidFrom = parse(fieldIterator.next(), dateFormat);
+                final String planName = fieldIterator.next();
+                final String planDisclaimer = fieldIterator.hasNext() ? fieldIterator.next() : null;
+                final String planUrl = fieldIterator.hasNext() ? fieldIterator.next() : null;
+                final String planNetworkLogo = fieldIterator.hasNext() ? fieldIterator.next() : null;
 
                 boolean filterMatch = true;
                 if (query != null && !planName.toLowerCase(Constants.DEFAULT_LOCALE).contains(query)
@@ -286,7 +274,7 @@ public class PlanContentProvider extends ContentProvider {
                         yOffset = 0;
                         final String params = line.substring(11).trim();
                         if (!params.isEmpty()) {
-                            final Iterator<String> i = Splitter.on(',').trimResults().split(params).iterator();
+                            final Iterator<String> i = Stream.of(params.split(",")).map(String::trim).iterator();
                             if (i.hasNext())
                                 xScaleFactor = Float.parseFloat(i.next());
                             if (i.hasNext())
@@ -302,11 +290,11 @@ public class PlanContentProvider extends ContentProvider {
                         log.info("Ignoring command: {}", line);
                     }
                 } else {
-                    final Iterator<String> i = Splitter.on('|').trimResults().split(line).iterator();
-                    final String network = Strings.emptyToNull(i.next());
-                    final String localId = Strings.emptyToNull(i.next());
-                    final String label = Strings.emptyToNull(i.next());
-                    final String planId = checkNotNull(Strings.emptyToNull(i.next()));
+                    final Iterator<String> i = Stream.of(line.split("\\|")).map(s -> !s.trim().isEmpty() ? s.trim() : null).iterator();
+                    final String network = i.next();
+                    final String localId = i.next();
+                    final String label = i.next();
+                    final String planId = requireNonNull(i.next());
                     if ((planIdFilter == null || planIdFilter.equals(planId))
                             && (networkFilter == null || networkFilter.equals(network))
                             && (localIdFilter == null || localIdFilter.equals(localId))) {
@@ -330,7 +318,7 @@ public class PlanContentProvider extends ContentProvider {
     }
 
     private static Date parse(String string, final DateFormat dateFormat) throws IOException {
-        if (string.length() == 0)
+        if (string == null)
             return null;
         else if (string.length() == 4)
             string += "-01-01";
