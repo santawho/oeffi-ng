@@ -1518,6 +1518,10 @@ public class NavigationNotification {
         remoteViews.setViewVisibility(R.id.navigation_notification_critical,
                 tripRenderer.futureTransferCritical || tripRenderer.servicesCancelled
                         ? View.VISIBLE : View.GONE);
+        remoteViews.setImageViewResource(R.id.navigation_notification_critical,
+                tripRenderer.servicesCancelled
+                    ? R.drawable.ic_no_transfer_black_24dp
+                    : R.drawable.ic_warning_black_24px);
     }
 
     private static void remoteViewsSetBackgroundColor(

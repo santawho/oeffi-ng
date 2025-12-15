@@ -1863,8 +1863,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         depView.setText(tripRenderer.nextEventDepartureName);
         depView.setVisibility(tripRenderer.nextEventDepartureName != null ? View.VISIBLE : View.GONE);
 
-        ViewUtils.setVisibility(findViewById(R.id.navigation_next_event_critical),
+        final ImageView eventCriticalIcon = findViewById(R.id.navigation_next_event_critical);
+        ViewUtils.setVisibility(eventCriticalIcon,
                 tripRenderer.futureTransferCritical || tripRenderer.servicesCancelled);
+        eventCriticalIcon.setImageResource(
+                tripRenderer.servicesCancelled
+                    ? R.drawable.ic_no_transfer_black_24dp
+                    : R.drawable.ic_warning_black_24px);
     }
 
     private Spanned getLeftTimeFormatted(final Date now, final Date endTime) {
