@@ -19,6 +19,7 @@ package de.schildbach.oeffi.directions.navigation;
 
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -33,6 +34,7 @@ import android.provider.Settings;
 
 import androidx.annotation.Nullable;
 
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +46,8 @@ import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.util.ClockUtils;
 
 public class NavigationAlarmManager {
+    public static final String PREFS_KEY_FORCE_USE_ALARMS = "navigation_force_use_alarms";
+
     private final static long MIN_PERIOD_MS = 30000;
     private static NavigationAlarmManager instance;
     private static final Logger log = LoggerFactory.getLogger(NavigationAlarmManager.class);
@@ -58,8 +62,8 @@ public class NavigationAlarmManager {
 
     private boolean stopped;
     private long refreshAt = Long.MAX_VALUE;
-    private HandlerThread backgroundThread;
-    private Handler backgroundHandler;
+    private final HandlerThread backgroundThread;
+    private final Handler backgroundHandler;
     private PendingIntent showInfoIntent;
 
     private NavigationAlarmManager() {
@@ -68,7 +72,7 @@ public class NavigationAlarmManager {
         backgroundHandler = new Handler(backgroundThread.getLooper());
     }
 
-    public void start(long newRefreshAt, final PendingIntent showInfoIntent) {
+    public void start(final long newRefreshAt, final PendingIntent showInfoIntent) {
         this.showInfoIntent = showInfoIntent;
         if (!stopped) {
             if (newRefreshAt + MIN_PERIOD_MS < refreshAt) {
@@ -99,6 +103,10 @@ public class NavigationAlarmManager {
 
     private AlarmManager getSystemAlarmManager() {
         return (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
+    }
+
+    private @NonNull NotificationManager getSystemNotificationManager() {
+        return (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
     public static class RefreshReceiver extends BroadcastReceiver {
@@ -162,22 +170,33 @@ public class NavigationAlarmManager {
                 break;
             }
             long timeToWait = refreshAt - System.currentTimeMillis();
+            final boolean useRealAlarms = canUseRealAlarms();
+            final String atLeastString;
             if (timeToWait > 0) {
                 if (timeToWait < 5000) {
                     timeToWait = 5000;
-                    log.info("restart alarm: refresh at {}, time to wait at least = {}", LOG_TIME_FORMAT.format(refreshAt), timeToWait);
+                    atLeastString = " at least";
                 } else {
-                    log.info("restart alarm: refresh at {}, time to wait = {}", LOG_TIME_FORMAT.format(refreshAt), timeToWait);
+                    atLeastString = "";
                 }
-                final AlarmManager alarmManager = getSystemAlarmManager();
                 if (canScheduleExactAlarms()) {
-                    alarmManager.setAlarmClock(
-                            new AlarmManager.AlarmClockInfo(ClockUtils.clockPlus(timeToWait), showInfoIntent),
-                            getPendingRefreshIntent());
-//                    alarmManager.setExactAndAllowWhileIdle(
-//                            // AlarmManager.RTC_WAKEUP, ClockUtils.clockPlus(timeToWait),
-//                            AlarmManager.ELAPSED_REALTIME_WAKEUP, ClockUtils.elapsedTimePlus(timeToWait),
-//                            getPendingRefreshIntent());
+                    log.info("restart {}alarm: refresh at {}, time to wait{} = {}",
+                            useRealAlarms ? "real " : "(exact) pseudo-",
+                            LOG_TIME_FORMAT.format(refreshAt),
+                            atLeastString, timeToWait);
+                    final AlarmManager alarmManager = getSystemAlarmManager();
+                    if (useRealAlarms) {
+                        alarmManager.setAlarmClock(
+                                new AlarmManager.AlarmClockInfo(ClockUtils.clockPlus(timeToWait), showInfoIntent),
+                                getPendingRefreshIntent());
+                    } else {
+                        alarmManager.setExactAndAllowWhileIdle(
+                                // AlarmManager.ELAPSED_REALTIME_WAKEUP, ClockUtils.elapsedTimePlus(timeToWait),
+                                AlarmManager.RTC_WAKEUP, ClockUtils.clockPlus(timeToWait),
+                                getPendingRefreshIntent());
+                    }
+                } else {
+                    log.warn("restart alarm failed: cannot schedule exact alarms");
                 }
                 break;
             }
@@ -201,6 +220,14 @@ public class NavigationAlarmManager {
 
     private boolean canScheduleExactAlarms() {
         return Build.VERSION.SDK_INT < Build.VERSION_CODES.S || getSystemAlarmManager().canScheduleExactAlarms();
+    }
+
+    private boolean canUseRealAlarms() {
+        if (Application.getInstance().getSharedPreferences().getBoolean(PREFS_KEY_FORCE_USE_ALARMS, false))
+            return true;
+        final int interruptionFilter = getSystemNotificationManager().getCurrentInterruptionFilter();
+        // the filter is determined by DND do-not-disturb mode, aka Zen-mode
+        return interruptionFilter == NotificationManager.INTERRUPTION_FILTER_ALL;
     }
 
     public boolean checkPermission(final Activity activityToRequestPermission) {

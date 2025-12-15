@@ -77,6 +77,14 @@
     <string name="navigation_opennav_showtrip">Itinerary</string>
     <string name="navigation_opennav_shownextevent">Open</string>
 
+    <string name="navigation_force_use_alarms_title">Exact timing at all times</string>
+    <string name="navigation_force_use_alarms_summary">
+        When DND-mode is active, an in-exact timing is applied to wake up the device,
+        check data and issue instructions. This setting forces exact timing in DND-mode.
+        WARNING: this will deactivate bedtime mode, unless the appropriate option is
+        disabled in bedtime mode settings.
+    </string>
+
     <string name="navigation_travelalarm_notification_start_channel_name">Travel Alarm, start of journey</string>
     <string name="navigation_travelalarm_notification_start_channel_description">Alarm for beginning navigation</string>
     <string name="navigation_travelalarm_notification_start_title">Journey to %1$s about to begin</string>

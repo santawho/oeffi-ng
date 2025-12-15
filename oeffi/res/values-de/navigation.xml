@@ -66,6 +66,14 @@
     <string name="navigation_opennav_showtrip">Verlauf</string>
     <string name="navigation_opennav_shownextevent">Öffnen</string>
 
+    <string name="navigation_force_use_alarms_title">Exaktes Zeitverhalten zu jeder Zeit</string>
+    <string name="navigation_force_use_alarms_summary">
+        Wenn der BNS-Modus aktiv ist, wird ein unexaktes Zeitverhalten wirksam, um das Gerät zu wecken,
+        Daten zu prüfen und Anweisungen zu geben. Diese Option erzwingt exaktes Zeitverhalten im BNS-Modus.
+        WARNUNG: dadurch wird der Schlafenszeit-Modus deaktiviert, außer die zugehörige Option in den
+        Schlafenszeit-Einstellungen ist abgeschaltet.
+    </string>
+
     <string name="navigation_travelalarm_notification_start_channel_name">Reisewecker, Start der Reise</string>
     <string name="navigation_travelalarm_notification_start_channel_description">Alarm für bevorstehende Navigation</string>
     <string name="navigation_travelalarm_notification_start_title">Reise nach %1$s beginnt bald</string>

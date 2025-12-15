@@ -18,4 +18,10 @@
         android:title="@string/navigation_notifications_preferences_title"
         android:summary="@string/navigation_notifications_preferences_summary" />
 
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="navigation_force_use_alarms"
+        android:title="@string/navigation_force_use_alarms_title"
+        android:summary="@string/navigation_force_use_alarms_summary" />
+
 </PreferenceScreen>
