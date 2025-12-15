@@ -17,7 +17,7 @@
 
 package de.schildbach.oeffi.util;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import android.util.Base64;
 
@@ -86,12 +86,12 @@ public class Objects {
 
     public static Object deserializeFromString(final String base64) {
         if (base64 == null) return null;
-        return deserialize(Base64.decode(checkNotNull(base64), Base64.DEFAULT));
+        return deserialize(Base64.decode(requireNonNull(base64), Base64.DEFAULT));
     }
 
     public static byte[] uncompressFromString(final String base64) throws Exception {
         if (base64 == null) return null;
-        final byte[] compressed = Base64.decode(checkNotNull(base64), Base64.DEFAULT);
+        final byte[] compressed = Base64.decode(requireNonNull(base64), Base64.DEFAULT);
         final Inflater inflater = new Inflater();
         inflater.setInput(compressed);
         ByteArrayOutputStream os = new ByteArrayOutputStream();

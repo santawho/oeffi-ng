@@ -51,8 +51,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
-import com.google.common.base.Strings;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -555,7 +553,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
 
         if (locationType == LocationType.COORD && coord == null)
             return null;
-        else if (locationType == LocationType.ANY && Strings.isNullOrEmpty(name))
+        else if (locationType == LocationType.ANY && (name == null || name.isEmpty()))
             return null;
         else if (locationType == LocationType.STATION && convertStationToAddress)
             return new Location(LocationType.ADDRESS,

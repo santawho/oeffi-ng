@@ -17,7 +17,7 @@
 
 package de.schildbach.oeffi.util;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import android.location.Location;
 
@@ -50,7 +50,7 @@ public class GeoUtils {
             final Point start,
             @FloatRange(from = -90.0, to = 90.0) double endLatitude,
             @FloatRange(from = -180.0, to = 180.0)  double endLongitude) {
-        checkNotNull(start);
+        requireNonNull(start);
         return distanceBetween(start.getLatAsDouble(), start.getLonAsDouble(), endLatitude, endLongitude);
     }
 
@@ -58,19 +58,19 @@ public class GeoUtils {
             @FloatRange(from = -90.0, to = 90.0) double startLatitude,
             @FloatRange(from = -180.0, to = 180.0) double startLongitude,
             final Point end) {
-        checkNotNull(end);
+        requireNonNull(end);
         return distanceBetween(startLatitude, startLongitude, end.getLatAsDouble(), end.getLonAsDouble());
     }
 
     public static DistanceResult distanceBetween(
             final Point start,
             final Point end) {
-        checkNotNull(start);
+        requireNonNull(start);
         return distanceBetween(start.getLatAsDouble(), start.getLonAsDouble(), end);
     }
 
     public static DistanceResult distanceBetween(final Location start, final Point end) {
-        checkNotNull(start);
+        requireNonNull(start);
         return distanceBetween(start.getLatitude(), start.getLongitude(), end);
     }
 }

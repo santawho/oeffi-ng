@@ -18,34 +18,22 @@
 package de.schildbach.oeffi.util;
 
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.webkit.MimeTypeMap;
 
-import com.google.common.base.Charsets;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
-import org.xmlpull.v1.XmlSerializer;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Locale;
 
 import de.schildbach.oeffi.Application;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.Point;
-import de.schildbach.pte.dto.Stop;
-import de.schildbach.pte.dto.Trip;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -67,7 +55,7 @@ public class GoogleMapsUtils {
             final String location = response.header("Location");
             if (location == null)
                 return null;
-            return getLocationFromGmapsLongUrl(URLDecoder.decode(location, Charsets.UTF_8.name()));
+            return getLocationFromGmapsLongUrl(URLDecoder.decode(location, StandardCharsets.UTF_8.name()));
         } catch (IOException e) {
             log.error("cannot HEAD {}: {}", gmapsShortUrl, e.getMessage());
             return null;

@@ -170,7 +170,6 @@ dependencies {
     implementation libs.okhttp
     //noinspection GradleDependency
     implementation libs.okhttp3.logging.interceptor
-    implementation libs.guava
     implementation libs.osmdroid.android
     // implementation libs.maplibre.gl --- for MapLibre !!!
     //noinspection GradleDependency
