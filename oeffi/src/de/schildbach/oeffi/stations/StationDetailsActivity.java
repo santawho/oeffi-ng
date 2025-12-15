@@ -240,7 +240,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 }
             }
         });
-        hideCancelledDeparturesButton = actionBar.addToggleButton(R.drawable.ic_cancelled_24dp,
+        hideCancelledDeparturesButton = actionBar.addToggleButton(R.drawable.ic_cancelled_toggle_24dp,
                 R.string.stations_station_details_action_cancelled_title);
         hideCancelledDeparturesButton.setChecked(hideCancelledDepartures);
         hideCancelledDeparturesButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
