@@ -921,20 +921,19 @@ public class NavigationNotification {
             addEventOutputServicesCancelled(lastNotified != null && lastNotified.servicesCancelled);
             anyImportantIssues = true;
         }
-        if (lastNotified == null || newNotified.currentLegIndex != lastNotified.currentLegIndex) {
+        if (lastNotified == null || newNotified.currentLegCIndex != lastNotified.currentLegCIndex) {
             if (lastNotified == null) {
                 lastNotified = new TripRenderer.NotificationData();
             } else {
-                log.info("switching leg from {} to {}", lastNotified.currentLegIndex, newNotified.currentLegIndex);
-                if (newNotified.currentLegIndex >= 0 && lastNotified.currentLegIndex < 0)
+                log.info("switching leg from {} to {}", lastNotified.currentLegCIndex, newNotified.currentLegCIndex);
+                if (newNotified.currentLegCIndex >= 0 && lastNotified.currentLegCIndex < 0)
                     addEventOutputNavigationRestarted();
                 reminderSoundId = SOUND_REMIND_NEXTLEG;
             }
-            if (newNotified.currentLegIndex < 0)
-                addEventOutputNavigationEnded();
             lastNotified.leftTimeReminded = Long.MAX_VALUE;
             lastNotified.eventTime = newNotified.eventTime; // was .plannedEventTime but next announcement tells the change anyways
             if (newNotified.isTransfer) {
+                // in transfer
                 if (newNotified.publicArrivalLegIndex >= 0) {
                     addEventOutputPublicLegEnd((Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
                 }
@@ -944,12 +943,17 @@ public class NavigationNotification {
                 } else {
                     addEventOutputFinalTransferStart(trip.to);
                 }
+            } else if (newNotified.currentLegCIndex >= 0) {
+                // in public transport
+                addEventOutputPublicLegStart(nextEventTimeLeftMs, (Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
+                lastNotified.nextTransferCritical = false;
+                lastNotified.departurePosition = newNotified.plannedDeparturePosition;
             } else {
+                // finished
                 if (newNotified.publicArrivalLegIndex >= 0) {
-                    addEventOutputPublicLegStart(nextEventTimeLeftMs, (Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
-                    lastNotified.nextTransferCritical = false;
-                    lastNotified.departurePosition = newNotified.plannedDeparturePosition;
+                    addEventOutputPublicLegEnd((Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
                 }
+                addEventOutputNavigationEnded();
             }
         }
         if (newNotified.departurePosition != null && !newNotified.departurePosition.equals(lastNotified.departurePosition)) {
@@ -1857,20 +1861,20 @@ public class NavigationNotification {
             final long nextEventTimeLeftMs,
             final TripRenderer.NotificationData newNotified,
             final Trip trip) {
+        final int departureLegIndex = newNotified.publicDepartureLegIndex;
+        final Trip.Public departureLeg = departureLegIndex < 0 ? null : (Trip.Public) trip.legs.get(departureLegIndex);
         if (newNotified.isTransfer) {
-            if (newNotified.publicDepartureLegIndex >= 0) {
-                addEventOutputTransferEndReminder(
-                        nextEventTimeLeftMs,
-                        (Trip.Public) trip.legs.get(newNotified.publicDepartureLegIndex));
-            } else {
+            if (departureLeg != null)
+                addEventOutputTransferEndReminder(nextEventTimeLeftMs, departureLeg);
+            else
                 addEventOutputFinalTransferEndReminder(nextEventTimeLeftMs, trip.to);
-            }
         } else {
-            if (newNotified.publicArrivalLegIndex >= 0) {
+            final int arrivalLegIndex = newNotified.publicArrivalLegIndex;
+            if (arrivalLegIndex >= 0) {
                 addEventOutputPublicLegEndReminder(
                         nextEventTimeLeftMs,
-                        (Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex),
-                        (Trip.Public) trip.legs.get(newNotified.publicDepartureLegIndex));
+                        (Trip.Public) trip.legs.get(arrivalLegIndex),
+                        departureLeg);
             }
         }
     }
@@ -1925,7 +1929,8 @@ public class NavigationNotification {
                     predictedTimeString,
                     formatTimeSpan(plannedTime, predictedTime))));
         }
-        addEventOutputNextTransferPreview(departureLeg, arrivalLeg, notificationEnabled > 1);
+        if (departureLeg != null)
+            addEventOutputNextTransferPreview(departureLeg, arrivalLeg, notificationEnabled > 1);
     }
 
     private void addEventOutputTransferEndReminder(

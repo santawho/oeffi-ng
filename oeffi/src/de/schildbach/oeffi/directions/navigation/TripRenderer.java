@@ -330,14 +330,14 @@ public class TripRenderer {
 
         public NotificationData() {
             this.id = ++idc;
-            currentLegIndex = -1;
+            currentLegCIndex = -1;
             publicArrivalLegIndex = -1;
             publicDepartureLegIndex = -1;
         }
 
         public long refreshNotificationRequiredAt;
         public long refreshTripRequiredAt;
-        public int currentLegIndex;
+        public int currentLegCIndex;
         public boolean isTransfer;
         public Date eventTime;
         public int publicArrivalLegIndex;
@@ -482,9 +482,10 @@ public class TripRenderer {
         servicesCancelled = false;
         setNextEventClock(now);
         boolean isCurrentOrFuture = false;
+        int isCurrent = 1;
+        TripRenderer.LegContainer lastPublicLegC = null;
         for (int iLeg = 0; iLeg < legs.size(); ++iLeg) {
             final TripRenderer.LegContainer legC = legs.get(iLeg);
-            final boolean isCurrent;
             if (legC.publicLeg != null) {
                 final int iWalk = iLeg + 1;
                 final TripRenderer.LegContainer walkLegC = (iWalk < legs.size()) ? legs.get(iWalk) : null;
@@ -492,16 +493,22 @@ public class TripRenderer {
                 final TripRenderer.LegContainer nextLegC = (iNext < legs.size()) ? legs.get(iNext) : null;
                 isCurrent = updatePublicLeg(legC, walkLegC, nextLegC, now);
                 servicesCancelled |= legC.serviceCancelled;
+                lastPublicLegC = legC;
             } else {
                 isCurrent = updateIndividualLeg(legC, iLeg == 0, now);
+                lastPublicLegC = null;
             }
-            if (isCurrent) {
+            if (isCurrent == 0) {
                 currentLeg = legC;
-                notificationData.currentLegIndex = iLeg;
+                notificationData.currentLegCIndex = iLeg;
                 isCurrentOrFuture = true;
             }
             if (isCurrentOrFuture && legC.transferCritical)
                 futureTransferCritical = true;
+        }
+        if (currentLeg == null && isCurrent < 0) {
+            // time now is after last leg
+            notificationData.publicArrivalLegIndex = lastPublicLegC == null ? -1 : lastPublicLegC.legIndex;
         }
         final char[] legsCriticality = new char[legs.size()];
         for (int iLeg = 0; iLeg < legs.size(); ++iLeg) {
@@ -512,7 +519,7 @@ public class TripRenderer {
         notificationData.servicesCancelled = servicesCancelled;
     }
 
-    private boolean updatePublicLeg(
+    private int updatePublicLeg(
             final TripRenderer.LegContainer legC,
             final TripRenderer.LegContainer walkLegC,
             final TripRenderer.LegContainer nextLegC,
@@ -526,62 +533,63 @@ public class TripRenderer {
         final PTDate plannedEndTime = arrivalStop.plannedArrivalTime;
         if (now.before(beginTime)) {
             // leg is in the future
+            return 1;
         } else if (now.after(endTime)) {
             // leg is in the past
-        } else {
-            // leg is now
-            setNextEventType(true, false);
-            setPrevEventLatestTime(beginTime, plannedBeginTime);
-            final boolean eventIsNow = setNextEventTimeLeft(now, endTime, plannedEndTime, 0);
-            final String targetName = Formats.fullLocationNameIfDifferentPlace(arrivalStop.location, departureStop.location);
-            setNextEventTarget(targetName);
-            final Trip.Public nextPublicLeg = (nextLegC != null) ? nextLegC.publicLeg : null;
-            final Stop nextDepartureStop = (nextPublicLeg != null) ? nextPublicLeg.departureStop : null;
-            final String depName = (nextDepartureStop == null) ? null
-                    : (walkLegC != null && (walkLegC.individualLeg == null || walkLegC.individualLeg.type == Trip.Individual.Type.WALK))
-                    ? nextDepartureStop.location.name
-                    : Formats.fullLocationName(nextDepartureStop.location);
-            final boolean depChanged = depName != null && !depName.equals(targetName);
-            setNextEventDeparture(depChanged ? depName : null);
-            final Position arrPos = arrivalStop.getArrivalPosition();
-            final Position depPos = (nextPublicLeg != null) ? nextPublicLeg.getDeparturePosition() : null;
-            final Position plannedDepPos = (nextPublicLeg != null) ? nextDepartureStop.plannedDeparturePosition : null;
-            setNextEventPositions(
-                    arrivalStop, arrPos, arrPos != null && !arrPos.equals(arrivalStop.plannedArrivalPosition),
-                    nextDepartureStop, depPos, depPos != null && !depPos.equals(plannedDepPos));
-            setNextEventTransport(nextPublicLeg);
-            setNextEventTransferTimes(walkLegC, false, now);
-            setNextEventActions(
-                    nextLegC != null
-                            ? (eventIsNow
-                                ? R.string.navigation_next_event_action_ride_now
-                                : R.string.navigation_next_event_action_ride)
-                            : (eventIsNow
-                                ? R.string.navigation_next_event_action_arrival_now
-                                : R.string.navigation_next_event_action_arrival),
-                        walkLegC == null ? 0
-                            : nextLegC == null ? R.string.navigation_next_event_action_next_final_transfer
-                            : depChanged ? R.string.navigation_next_event_action_next_transfer
-                            : R.string.navigation_next_event_action_next_interchange
-            );
-
-            // if (nextPublicLeg != null)
-            //     setNextPublicLegDuration(nextPublicLeg.getDepartureTime(), nextPublicLeg.getArrivalTime());
-
-            notificationData.publicArrivalLegIndex = legC.legIndex;
-            notificationData.publicDepartureLegIndex = nextPublicLeg != null ? nextLegC.legIndex: -1;
-            notificationData.isTransfer = false;
-            notificationData.eventTime = endTime;
-            notificationData.plannedEventTime = plannedEndTime;
-            notificationData.departurePosition = depPos;
-            notificationData.plannedDeparturePosition = plannedDepPos;
-            notificationData.nextTransferCritical = nextEventTransferLeftTimeCritical;
-            return true;
+            return -1;
         }
-        return false;
+
+        // leg is now
+        setNextEventType(true, false);
+        setPrevEventLatestTime(beginTime, plannedBeginTime);
+        final boolean eventIsNow = setNextEventTimeLeft(now, endTime, plannedEndTime, 0);
+        final String targetName = Formats.fullLocationNameIfDifferentPlace(arrivalStop.location, departureStop.location);
+        setNextEventTarget(targetName);
+        final Trip.Public nextPublicLeg = (nextLegC != null) ? nextLegC.publicLeg : null;
+        final Stop nextDepartureStop = (nextPublicLeg != null) ? nextPublicLeg.departureStop : null;
+        final String depName = (nextDepartureStop == null) ? null
+                : (walkLegC != null && (walkLegC.individualLeg == null || walkLegC.individualLeg.type == Trip.Individual.Type.WALK))
+                ? nextDepartureStop.location.name
+                : Formats.fullLocationName(nextDepartureStop.location);
+        final boolean depChanged = depName != null && !depName.equals(targetName);
+        setNextEventDeparture(depChanged ? depName : null);
+        final Position arrPos = arrivalStop.getArrivalPosition();
+        final Position depPos = (nextPublicLeg != null) ? nextPublicLeg.getDeparturePosition() : null;
+        final Position plannedDepPos = (nextPublicLeg != null) ? nextDepartureStop.plannedDeparturePosition : null;
+        setNextEventPositions(
+                arrivalStop, arrPos, arrPos != null && !arrPos.equals(arrivalStop.plannedArrivalPosition),
+                nextDepartureStop, depPos, depPos != null && !depPos.equals(plannedDepPos));
+        setNextEventTransport(nextPublicLeg);
+        setNextEventTransferTimes(walkLegC, false, now);
+        setNextEventActions(
+                nextLegC != null
+                        ? (eventIsNow
+                            ? R.string.navigation_next_event_action_ride_now
+                            : R.string.navigation_next_event_action_ride)
+                        : (eventIsNow
+                            ? R.string.navigation_next_event_action_arrival_now
+                            : R.string.navigation_next_event_action_arrival),
+                    walkLegC == null ? 0
+                        : nextLegC == null ? R.string.navigation_next_event_action_next_final_transfer
+                        : depChanged ? R.string.navigation_next_event_action_next_transfer
+                        : R.string.navigation_next_event_action_next_interchange
+        );
+
+        // if (nextPublicLeg != null)
+        //     setNextPublicLegDuration(nextPublicLeg.getDepartureTime(), nextPublicLeg.getArrivalTime());
+
+        notificationData.publicArrivalLegIndex = legC.legIndex;
+        notificationData.publicDepartureLegIndex = nextPublicLeg != null ? nextLegC.legIndex: -1;
+        notificationData.isTransfer = false;
+        notificationData.eventTime = endTime;
+        notificationData.plannedEventTime = plannedEndTime;
+        notificationData.departurePosition = depPos;
+        notificationData.plannedDeparturePosition = plannedDepPos;
+        notificationData.nextTransferCritical = nextEventTransferLeftTimeCritical;
+        return 0;
     }
 
-    private boolean updateIndividualLeg(
+    private int updateIndividualLeg(
             final TripRenderer.LegContainer legC,
             final boolean isInitialIndividual,
             final Date now) {
@@ -595,60 +603,61 @@ public class TripRenderer {
         final PTDate plannedEndTime = transferTo != null ? transferTo.plannedDepartureTime : leg == null ? null : leg.arrivalTime;
         if (transferFrom != null && beginTime != null && now.before(beginTime)) {
             // leg is in the future
+            return 1;
         } else if (endTime != null && now.after(endTime)) {
             // leg is in the past
-        } else {
-            // leg is now
-            setNextEventType(false, isInitialIndividual);
-            if (transferFrom != null)
-                setPrevEventLatestTime(beginTime, plannedBeginTime);
-            final boolean eventIsNow = setNextEventTimeLeft(now, endTime, transferTo != null ? plannedEndTime : null, leg != null ? leg.min : 0);
-            final Location targetLocation = transferTo != null ? transferTo.location : leg != null ? leg.arrival : null;
-            final String targetName = (targetLocation == null) ? null
-                    : (leg != null && leg.type == Trip.Individual.Type.WALK)
-                    ? targetLocation.name
-                    : Formats.fullLocationName(targetLocation);
-            setNextEventTarget(targetName);
-            final String arrName = (transferFrom != null) ? Formats.fullLocationName(transferFrom.location) : null;
-            final boolean depChanged = arrName != null && !arrName.equals(targetName);
-            setNextEventDeparture(null);
-            final Position arrPos = transferFrom != null ? transferFrom.getArrivalPosition() : null;
-            final Position plannedArrPos = transferFrom != null ? transferFrom.plannedArrivalPosition : null;
-            final Position depPos = transferTo != null ? transferTo.getDeparturePosition() : null;
-            final Position plannedDepPos = transferTo != null ? transferTo.plannedDeparturePosition : null;
-            setNextEventPositions(
-                    transferFrom, arrPos, arrPos != null && !arrPos.equals(plannedArrPos),
-                    transferTo, depPos, depPos != null && !depPos.equals(plannedDepPos));
-            setNextEventTransport(nextPublicLeg);
-            setNextEventTransferTimes(legC, true, now);
-            setNextEventActions(transferTo == null ? (eventIsNow
-                                        ? R.string.navigation_next_event_action_final_transfer_now
-                                        : R.string.navigation_next_event_action_final_transfer)
-                            : transferFrom == null ? (eventIsNow
-                                        ? R.string.navigation_next_event_action_departure_now
-                                        : R.string.navigation_next_event_action_departure)
-                            : depChanged ? (eventIsNow
-                                        ? R.string.navigation_next_event_action_transfer_now
-                                        : R.string.navigation_next_event_action_transfer)
-                            : (eventIsNow
-                                        ? R.string.navigation_next_event_action_interchange_now
-                                        : R.string.navigation_next_event_action_interchange),
-                    0);
-
-             if (nextPublicLeg != null)
-                 setNextPublicLegDuration(nextPublicLeg.getDepartureTime(), nextPublicLeg.getArrivalTime());
-
-            notificationData.publicArrivalLegIndex = legC.transferFrom != null ? legC.transferFrom.legIndex : -1;
-            notificationData.publicDepartureLegIndex = legC.transferTo != null ? legC.transferTo.legIndex : -1;
-            notificationData.isTransfer = true;
-            notificationData.eventTime = endTime;
-            notificationData.plannedEventTime = plannedEndTime;
-            notificationData.departurePosition = depPos;
-            notificationData.plannedDeparturePosition = plannedDepPos;
-            notificationData.nextTransferCritical = nextEventTransferLeftTimeCritical;
-            return true;
+            return -1;
         }
-        return false;
+
+        // leg is now
+        setNextEventType(false, isInitialIndividual);
+        if (transferFrom != null)
+            setPrevEventLatestTime(beginTime, plannedBeginTime);
+        final boolean eventIsNow = setNextEventTimeLeft(now, endTime, transferTo != null ? plannedEndTime : null, leg != null ? leg.min : 0);
+        final Location targetLocation = transferTo != null ? transferTo.location : leg != null ? leg.arrival : null;
+        final String targetName = (targetLocation == null) ? null
+                : (leg != null && leg.type == Trip.Individual.Type.WALK)
+                ? targetLocation.name
+                : Formats.fullLocationName(targetLocation);
+        setNextEventTarget(targetName);
+        final String arrName = (transferFrom != null) ? Formats.fullLocationName(transferFrom.location) : null;
+        final boolean depChanged = arrName != null && !arrName.equals(targetName);
+        setNextEventDeparture(null);
+        final Position arrPos = transferFrom != null ? transferFrom.getArrivalPosition() : null;
+        final Position plannedArrPos = transferFrom != null ? transferFrom.plannedArrivalPosition : null;
+        final Position depPos = transferTo != null ? transferTo.getDeparturePosition() : null;
+        final Position plannedDepPos = transferTo != null ? transferTo.plannedDeparturePosition : null;
+        setNextEventPositions(
+                transferFrom, arrPos, arrPos != null && !arrPos.equals(plannedArrPos),
+                transferTo, depPos, depPos != null && !depPos.equals(plannedDepPos));
+        setNextEventTransport(nextPublicLeg);
+        setNextEventTransferTimes(legC, true, now);
+        setNextEventActions(transferTo == null ? (eventIsNow
+                                    ? R.string.navigation_next_event_action_final_transfer_now
+                                    : R.string.navigation_next_event_action_final_transfer)
+                        : transferFrom == null ? (eventIsNow
+                                    ? R.string.navigation_next_event_action_departure_now
+                                    : R.string.navigation_next_event_action_departure)
+                        : depChanged ? (eventIsNow
+                                    ? R.string.navigation_next_event_action_transfer_now
+                                    : R.string.navigation_next_event_action_transfer)
+                        : (eventIsNow
+                                    ? R.string.navigation_next_event_action_interchange_now
+                                    : R.string.navigation_next_event_action_interchange),
+                0);
+
+         if (nextPublicLeg != null)
+             setNextPublicLegDuration(nextPublicLeg.getDepartureTime(), nextPublicLeg.getArrivalTime());
+
+        notificationData.publicArrivalLegIndex = legC.transferFrom != null ? legC.transferFrom.legIndex : -1;
+        notificationData.publicDepartureLegIndex = legC.transferTo != null ? legC.transferTo.legIndex : -1;
+        notificationData.isTransfer = true;
+        notificationData.eventTime = endTime;
+        notificationData.plannedEventTime = plannedEndTime;
+        notificationData.departurePosition = depPos;
+        notificationData.plannedDeparturePosition = plannedDepPos;
+        notificationData.nextTransferCritical = nextEventTransferLeftTimeCritical;
+        return 0;
     }
 
     private void setupPath(final Trip.Leg leg) {
