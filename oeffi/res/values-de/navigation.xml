@@ -184,7 +184,8 @@
     <string name="navigation_event_speak_nav_restart">Navigation startet neu</string>
     <string name="navigation_event_speak_nav_end">Navigation beendet</string>
     <string name="navigation_event_speak_services_cancelled">Warnung! Warnung! Warnung! Es gibt Fahrtausfälle entlang der Route.</string>
-    <string name="navigation_event_speak_transfer_start">gehe nach %2$s zur Abfahrt von %1$s, %3$s, %4$s, %5$s</string>
+    <string name="navigation_event_speak_transfer_start">gehe nach %2$s zur Abfahrt von %1$s %3$s, %4$s, %5$s</string>
+    <string name="navigation_event_speak_transfer_start_same_station">gehe zur Abfahrt von %1$s %3$s, %4$s, %5$s</string>
     <string name="navigation_event_speak_transfer_end_reminder">%1$s Abfahrt von %2$s, %3$s, %4$s</string>
     <string name="navigation_event_speak_transfer_preview_same_location">Gehe dort %3$s</string>
     <string name="navigation_event_speak_transfer_preview_different_location">Von dort gehe nach %2$s, %3$s</string>
@@ -224,7 +225,8 @@
     <string name="navigation_event_notify_public_leg_start">Fahre mit %1$s nach %2$s, %3$s, plan %4$s, prog %5$s, %6$s, %7$s</string>
     <string name="navigation_event_notify_public_leg_end">Ankunft in %1$s</string>
     <string name="navigation_event_notify_public_leg_end_reminder">%1$s Ankunft in %2$s, %3$s, prog %4$s, %5$s</string>
-    <string name="navigation_event_notify_transfer_start">Gehe nach %2$s zur Abf. %1$s, %3$s, plan %4$s, prog %5$s, %6$s, %7$s</string>
+    <string name="navigation_event_notify_transfer_start">Gehe nach %2$s zur Abf. %1$s %3$s, plan %4$s, prog %5$s, %6$s, %7$s</string>
+    <string name="navigation_event_notify_transfer_start_same_station">Gehe zur Abf. %1$s %3$s, plan %4$s, prog %5$s, %6$s, %7$s</string>
     <string name="navigation_event_notify_transfer_end_reminder">%1$s Abfahrt %2$s an %3$s, prog %4$s, %5$s</string>
     <string name="navigation_event_notify_transfer_preview_same_location">In %1$s gehe zu %3$s</string>
     <string name="navigation_event_notify_transfer_preview_different_location">In %1$s gehe nach %2$s, %3$s</string>

@@ -921,6 +921,10 @@ public class NavigationNotification {
             addEventOutputServicesCancelled(lastNotified != null && lastNotified.servicesCancelled);
             anyImportantIssues = true;
         }
+        final Trip.Public arrivalLeg = newNotified.publicArrivalLegIndex < 0 ? null :
+                (Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex);
+        final Trip.Public departureLeg = newNotified.publicDepartureLegIndex < 0 ? null :
+                (Trip.Public) trip.legs.get(newNotified.publicDepartureLegIndex);
         if (lastNotified == null || newNotified.currentLegCIndex != lastNotified.currentLegCIndex) {
             if (lastNotified == null) {
                 lastNotified = new TripRenderer.NotificationData();
@@ -934,35 +938,31 @@ public class NavigationNotification {
             lastNotified.eventTime = newNotified.eventTime; // was .plannedEventTime but next announcement tells the change anyways
             if (newNotified.isTransfer) {
                 // in transfer
-                if (newNotified.publicArrivalLegIndex >= 0) {
-                    addEventOutputPublicLegEnd((Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
-                }
-                if (newNotified.publicDepartureLegIndex >= 0) {
-                    addEventOutputTransferStart(nextEventTimeLeftMs, (Trip.Public) trip.legs.get(newNotified.publicDepartureLegIndex));
+                if (arrivalLeg != null)
+                    addEventOutputPublicLegEnd(arrivalLeg);
+                if (departureLeg != null) {
+                    addEventOutputTransferStart(nextEventTimeLeftMs, departureLeg, arrivalLeg);
                     lastNotified.departurePosition = newNotified.plannedDeparturePosition;
                 } else {
                     addEventOutputFinalTransferStart(trip.to);
                 }
             } else if (newNotified.currentLegCIndex >= 0) {
                 // in public transport
-                addEventOutputPublicLegStart(nextEventTimeLeftMs, (Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
+                if (arrivalLeg != null) // should never be null in this case
+                    addEventOutputPublicLegStart(nextEventTimeLeftMs, arrivalLeg);
                 lastNotified.nextTransferCritical = false;
                 lastNotified.departurePosition = newNotified.plannedDeparturePosition;
             } else {
                 // finished
-                if (newNotified.publicArrivalLegIndex >= 0) {
-                    addEventOutputPublicLegEnd((Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
-                }
+                if (arrivalLeg != null)
+                    addEventOutputPublicLegEnd(arrivalLeg);
                 addEventOutputNavigationEnded();
             }
         }
         if (newNotified.departurePosition != null && !newNotified.departurePosition.equals(lastNotified.departurePosition)) {
             log.info("switching departure position from {} to {}", lastNotified.departurePosition, newNotified.departurePosition);
-            if (newNotified.publicDepartureLegIndex >= 0) {
-                addEventOutputDeparturePositionChange(
-                        (Trip.Public) trip.legs.get(newNotified.publicDepartureLegIndex),
-                        lastNotified.departurePosition);
-            }
+            if (departureLeg != null)
+                addEventOutputDeparturePositionChange(departureLeg, lastNotified.departurePosition);
             posChanged = true;
         }
         if (newNotified.eventTime != null && lastNotified.eventTime != null) {
@@ -978,11 +978,11 @@ public class NavigationNotification {
             if (timeChanged) {
                 log.info("time changed: leftSecs={}, diffSecs={}, accepting new time", leftSecs, diffSecs);
                 if (newNotified.isTransfer) {
-                    if (newNotified.publicDepartureLegIndex >= 0)
-                        addEventOutputDepartureDelayChange((Trip.Public) trip.legs.get(newNotified.publicDepartureLegIndex));
+                    if (departureLeg != null)
+                        addEventOutputDepartureDelayChange(departureLeg);
                 } else {
-                    if (newNotified.publicArrivalLegIndex >= 0)
-                        addEventOutputArrivalDelayChange((Trip.Public) trip.legs.get(newNotified.publicArrivalLegIndex));
+                    if (arrivalLeg != null)
+                        addEventOutputArrivalDelayChange(arrivalLeg);
                 }
             } else {
                 log.info("time not changed: leftSecs={}, diffSecs={}, keeping new time", leftSecs, diffSecs);
@@ -1685,15 +1685,29 @@ public class NavigationNotification {
     @SuppressLint("StringFormatInvalid")
     private void addEventOutputTransferStart(
             final long timeLeftMs,
-            final Trip.Public publicLeg) {
+            final Trip.Public departureLeg,
+            final Trip.Public arrivalLeg) {
         final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
-        final Stop stop = publicLeg.departureStop;
+        final Stop stop = departureLeg.departureStop;
         final PTDate predictedTime = stop.getDepartureTime(false);
         final PTDate plannedTime = stop.getDepartureTime(true);
-        final Line line = publicLeg.line;
-        final String locationName = Formats.fullLocationName(publicLeg.departure);
+        final Line line = departureLeg.line;
         final String plannedTimeString = Formats.formatTime(timeZoneSelector, plannedTime);
         final String predictedTimeString = Formats.formatTime(timeZoneSelector, predictedTime);
+        final String locationName;
+        final Location departureLocation = departureLeg.departure;
+        if (arrivalLeg == null) {
+            locationName = Formats.fullLocationName(departureLocation);
+        } else {
+            final Location arrivalLocation = arrivalLeg.arrival;
+            if (departureLocation.id != null && arrivalLocation.hasId()
+                    && departureLocation.id.equals(arrivalLocation.id)) {
+                // within same station
+                locationName = null;
+            } else {
+                locationName = Formats.fullLocationNameIfDifferentPlace(departureLocation, arrivalLocation);
+            }
+        }
         newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.TRANSFER_LEG_START, context.getString(
                 R.string.navigation_event_log_entry_transfer_start,
                 line.label,
@@ -1703,16 +1717,20 @@ public class NavigationNotification {
                 predictedTimeString,
                 formatTimeSpan(plannedTime, predictedTime))));
         newSpeakTexts.add(context.getString(
-                R.string.navigation_event_speak_transfer_start,
-                makeSpeakableLineName(line, publicLeg.destination, stop.location),
+                locationName == null
+                        ? R.string.navigation_event_speak_transfer_start_same_station
+                        : R.string.navigation_event_speak_transfer_start,
+                makeSpeakableLineName(line, departureLeg.destination, stop.location),
                 locationName,
                 platformForSpeakText(true, stop.plannedDeparturePosition, stop.getDeparturePosition()),
                 timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime()),
                 remainingTimeForSpeakTextAtEnd(timeLeftMs)));
         if (isEventNotificationsEnabled) {
             newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
-                    R.string.navigation_event_notify_transfer_start,
-                    makeNotificationLineName(line, publicLeg.destination, stop.location),
+                    locationName == null
+                            ? R.string.navigation_event_notify_transfer_start_same_station
+                            : R.string.navigation_event_notify_transfer_start,
+                    makeNotificationLineName(line, departureLeg.destination, stop.location),
                     locationName,
                     platformForNotificationMessage(stop.plannedDeparturePosition, stop.getDeparturePosition()),
                     plannedTimeString,

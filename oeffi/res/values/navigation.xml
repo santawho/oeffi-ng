@@ -218,7 +218,8 @@
     <string name="navigation_event_speak_nav_restart">navigation restarting</string>
     <string name="navigation_event_speak_nav_end">navigation finished</string>
     <string name="navigation_event_speak_services_cancelled">Warning! Warning! Warning! There are service cancellations along the route.</string>
-    <string name="navigation_event_speak_transfer_start">go to %2$s for departure of %1$s, %3$s, %4$s, %5$s</string>
+    <string name="navigation_event_speak_transfer_start">go to %2$s for departure of %1$s %3$s, %4$s, %5$s</string>
+    <string name="navigation_event_speak_transfer_start_same_station">go to departure of %1$s %3$s, %4$s, %5$s</string>
     <string name="navigation_event_speak_transfer_end_reminder">%1$s departure of %2$s, %3$s, %4$s</string>
     <string name="navigation_event_speak_transfer_preview_same_location">There go %3$s</string>
     <string name="navigation_event_speak_transfer_preview_different_location">From there go to %2$s, %3$s</string>
@@ -258,7 +259,8 @@
     <string name="navigation_event_notify_public_leg_start">Take %1$s to %2$s, %3$s, sched %4$s, est %5$s, %6$s, %7$s</string>
     <string name="navigation_event_notify_public_leg_end">Arrival at %1$s</string>
     <string name="navigation_event_notify_public_leg_end_reminder">%1$s arrival at %2$s, %3$s, est %4$s, %5$s</string>
-    <string name="navigation_event_notify_transfer_start">Go to %2$s for depart. %1$s, %3$s, sched %4$s, est %5$s, %6$s, %7$s</string>
+    <string name="navigation_event_notify_transfer_start">Go to %2$s for depart. %1$s %3$s, sched %4$s, est %5$s, %6$s, %7$s</string>
+    <string name="navigation_event_notify_transfer_start_same_station">Go to depart. %1$s %3$s, sched %4$s, est %5$s, %6$s, %7$s</string>
     <string name="navigation_event_notify_transfer_end_reminder">%1$s depart. %2$s at %3$s, est %4$s, %5$s</string>
     <string name="navigation_event_notify_transfer_preview_same_location">At %1$s go to %3$s</string>
     <string name="navigation_event_notify_transfer_preview_different_location">At %1$s go to %2$s, %3$s</string>
