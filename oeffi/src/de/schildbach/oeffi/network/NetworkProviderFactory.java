@@ -59,6 +59,7 @@ import de.schildbach.pte.Standard;
 import de.schildbach.pte.StvProvider;
 import de.schildbach.pte.SydneyProvider;
 import de.schildbach.pte.TlemProvider;
+import de.schildbach.pte.TransitousProvider;
 import de.schildbach.pte.VbbProvider;
 import de.schildbach.pte.VblProvider;
 import de.schildbach.pte.VbnProvider;
@@ -111,6 +112,8 @@ public final class NetworkProviderFactory {
     private static NetworkApiProvider forId(final NetworkId networkId) {
         if (networkId.equals(NetworkId.RT))
             return new RtProvider();
+        else if (networkId.equals(NetworkId.TRANSITOUS))
+            return new TransitousProvider();
         else if (networkId.equals(NetworkId.DEUTSCHLANDTICKET))
             return new DeutschlandTicketProvider();
         else if (networkId.equals(NetworkId.DB))

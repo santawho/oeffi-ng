@@ -2,6 +2,8 @@
 <resources
     xmlns:tools="http://schemas.android.com/tools" tools:ignore="UnusedResources">
 
+    <string name="network_transitous_label">Transitous</string>
+    <string name="network_transitous_comment">world-wide</string>
     <string name="network_rt_label">Europe</string>
     <string name="network_rt_comment">long-distance only</string>
     <string name="network_deutschlandticket_label">Deutschland-Ticket</string>

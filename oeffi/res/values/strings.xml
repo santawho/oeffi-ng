@@ -107,10 +107,12 @@
     <string name="network_picker_entry_state_alpha">alpha</string>
     <string name="network_picker_entry_state_beta">beta</string>
     <string name="network_picker_entry_state_deprecated">deprecated</string>
+    <string name="network_picker_entry_state_wip">under development</string>
     <string name="network_picker_separator_last">Last used</string>
     <string name="network_picker_separator_suggested">Suggested</string>
     <string name="network_picker_separator_nearby">Nearby</string>
     <string name="network_picker_separator_europe">Europe</string>
+    <string name="network_picker_separator_world">World</string>
     <string name="network_picker_context_remove_title">Remove Data</string>
 
     <!-- toasts -->
