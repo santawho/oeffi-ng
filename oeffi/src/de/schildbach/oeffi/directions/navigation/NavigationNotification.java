@@ -1559,20 +1559,20 @@ public class NavigationNotification {
             return context.getString(
                     sayOn
                         ? R.string.navigation_event_speak_position_on_unchanged_format
-                        : R.string.navigation_event_speak_position_no_on_unchanged_format,
+                        : R.string.navigation_event_speak_position_to_unchanged_format,
                     newText);
         }
         if (newPosition == null || prevText.equals(newText)) {
             return context.getString(
                     sayOn
                         ? R.string.navigation_event_speak_position_on_unchanged_format
-                        : R.string.navigation_event_speak_position_no_on_unchanged_format,
+                        : R.string.navigation_event_speak_position_to_unchanged_format,
                     prevText);
         }
         return context.getString(
                 sayOn
                     ? R.string.navigation_event_speak_position_on_changed_format
-                    : R.string.navigation_event_speak_position_no_on_changed_format,
+                    : R.string.navigation_event_speak_position_to_changed_format,
                 newText, prevText);
     }
 
