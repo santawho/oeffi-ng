@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="UnusedResources">
 
+    <string name="network_transitous_label">Transitous</string>
+    <string name="network_transitous_comment">weltweit</string>
     <string name="network_rt_label">Europa</string>
     <string name="network_rt_comment">nur Fernverkehr</string>
     <string name="network_deutschlandticket_label">Deutschland-Ticket</string>
