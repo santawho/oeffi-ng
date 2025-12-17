@@ -981,8 +981,10 @@ public class NavigationNotification {
                     if (departureLeg != null)
                         addEventOutputDepartureDelayChange(departureLeg);
                 } else {
-                    if (arrivalLeg != null)
+                    if (arrivalLeg != null) {
                         addEventOutputArrivalDelayChange(arrivalLeg);
+                        lastNotified.nextTransferCritical = false; // force repetition of criticality announcement
+                    }
                 }
             } else {
                 log.info("time not changed: leftSecs={}, diffSecs={}, keeping new time", leftSecs, diffSecs);
@@ -1023,7 +1025,7 @@ public class NavigationNotification {
                 addEventOutputAnyTransferCritical();
         }
         if (nextTransferCriticalChanged)
-            addEventOutputNextTransferCritical();
+            addEventOutputNextTransferCritical(tripRenderer);
         newNotified.playedTravelAlarmId = lastNotified.playedTravelAlarmId;
         if (travelAlarmAtMs > 0) {
             if (travelAlarmAtMs <= nowTime) {
@@ -1056,7 +1058,7 @@ public class NavigationNotification {
                 nextReminderTimeMs = nowTime + nextEventTimeLeftMs;
                 if (lastNotified.leftTimeReminded > REMINDER_SECOND_MS) {
                     log.info("reminding 2 mins = {}", nextReminderTimeMs);
-                    addEventOutputReminder(nextEventTimeLeftMs, newNotified, trip);
+                    addEventOutputReminder(nextEventTimeLeftMs, newNotified, trip, tripRenderer);
                     reminderSoundId = SOUND_REMIND_IMPORTANT;
                     newNotified.leftTimeReminded = REMINDER_SECOND_MS;
                 }
@@ -1065,7 +1067,7 @@ public class NavigationNotification {
                 nextReminderTimeMs = nowTime + nextEventTimeLeftMs - REMINDER_SECOND_MS;
                 if (lastNotified.leftTimeReminded > REMINDER_FIRST_MS) {
                     log.info("reminding 6 mins = {}", nextReminderTimeMs);
-                    addEventOutputReminder(nextEventTimeLeftMs, newNotified, trip);
+                    addEventOutputReminder(nextEventTimeLeftMs, newNotified, trip, tripRenderer);
                     reminderSoundId = SOUND_REMIND_NORMAL;
                     newNotified.leftTimeReminded = REMINDER_FIRST_MS;
 
@@ -1613,6 +1615,21 @@ public class NavigationNotification {
                 Long.toString((remainingMillis + 10000) / 60000));
     }
 
+    private String transferTimeForSpeakText(final TripRenderer tripRenderer) {
+        final int formatStringId;
+        if (tripRenderer.nextEventTransferLeftTimeExtremelyCritical)
+            formatStringId = R.string.navigation_event_speak_transfer_time_missed_format;
+        else if (tripRenderer.nextEventTransferLeftTimeCritical)
+            formatStringId = R.string.navigation_event_speak_transfer_time_critical_format;
+        else
+            formatStringId = R.string.navigation_event_speak_transfer_time_standard_format;
+
+        String minutesText = tripRenderer.nextEventTransferLeftTimeValue;
+        if (minutesText.startsWith("-")) minutesText = minutesText;
+
+        return context.getString(formatStringId, minutesText);
+    }
+
     private String remainingTimeForNotificationText(final long remainingMillis) {
         if (remainingMillis < 50000)
             return context.getString(R.string.navigation_event_notify_notime_left_front_format);
@@ -1628,6 +1645,21 @@ public class NavigationNotification {
             return context.getString(R.string.navigation_event_notify_notime_left_end_format);
         return context.getString(R.string.navigation_event_notify_time_left_end_format,
                 Long.toString((remainingMillis + 10000) / 60000));
+    }
+
+    private String transferTimeForNotificationText(final TripRenderer tripRenderer) {
+        final int formatStringId;
+        if (tripRenderer.nextEventTransferLeftTimeExtremelyCritical)
+            formatStringId = R.string.navigation_event_notify_transfer_time_missed_format;
+        else if (tripRenderer.nextEventTransferLeftTimeCritical)
+            formatStringId = R.string.navigation_event_notify_transfer_time_critical_format;
+        else
+            formatStringId = R.string.navigation_event_notify_transfer_time_standard_format;
+
+        String minutesText = tripRenderer.nextEventTransferLeftTimeValue;
+        if (minutesText.startsWith("-")) minutesText = minutesText;
+
+        return context.getString(formatStringId, minutesText);
     }
 
     private void addEventLogMessage(final String text) {
@@ -1741,6 +1773,7 @@ public class NavigationNotification {
     }
 
     private void addEventOutputNextTransferPreview(
+            final TripRenderer tripRenderer,
             final Trip.Public departureLeg,
             final Trip.Public arrivalLeg,
             final boolean outputNotification) {
@@ -1757,13 +1790,15 @@ public class NavigationNotification {
                         R.string.navigation_event_speak_transfer_preview_same_location,
                         arrivalLocationName,
                         departureLocationName,
-                        platformForSpeakText(false, departureLeg.departureStop.plannedDeparturePosition, departurePosition)));
+                        platformForSpeakText(false, departureLeg.departureStop.plannedDeparturePosition, departurePosition),
+                        transferTimeForSpeakText(tripRenderer)));
                 if (isEventNotificationsEnabled && outputNotification) {
                     newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
                             R.string.navigation_event_notify_transfer_preview_same_location,
                             arrivalLocationName,
                             departureLocationName,
-                            platformForNotificationMessage(departureLeg.departureStop.plannedDeparturePosition, departurePosition))));
+                            platformForNotificationMessage(departureLeg.departureStop.plannedDeparturePosition, departurePosition),
+                            transferTimeForNotificationText(tripRenderer))));
                 }
             }
         } else {
@@ -1772,24 +1807,28 @@ public class NavigationNotification {
                         R.string.navigation_event_speak_transfer_preview_different_location,
                         arrivalLocationName,
                         departureLocationName,
-                        platformForSpeakText(false, departureLeg.departureStop.plannedDeparturePosition, departurePosition)));
+                        platformForSpeakText(false, departureLeg.departureStop.plannedDeparturePosition, departurePosition),
+                        transferTimeForSpeakText(tripRenderer)));
                 if (isEventNotificationsEnabled && outputNotification) {
                     newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
                             R.string.navigation_event_notify_transfer_preview_different_location,
                             arrivalLocationName,
                             departureLocationName,
-                            platformForNotificationMessage(departureLeg.departureStop.plannedDeparturePosition, departurePosition))));
+                            platformForNotificationMessage(departureLeg.departureStop.plannedDeparturePosition, departurePosition),
+                            transferTimeForNotificationText(tripRenderer))));
                 }
             } else {
                 newSpeakTexts.add(context.getString(
                         R.string.navigation_event_speak_transfer_preview_different_location_no_position,
                         arrivalLocationName,
-                        departureLocationName));
+                        departureLocationName,
+                        transferTimeForSpeakText(tripRenderer)));
                 if (isEventNotificationsEnabled && outputNotification) {
                     newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
                             R.string.navigation_event_notify_transfer_preview_different_location_no_position,
                             arrivalLocationName,
-                            departureLocationName)));
+                            departureLocationName,
+                            transferTimeForNotificationText(tripRenderer))));
                 }
             }
         }
@@ -1878,7 +1917,8 @@ public class NavigationNotification {
     private void addEventOutputReminder(
             final long nextEventTimeLeftMs,
             final TripRenderer.NotificationData newNotified,
-            final Trip trip) {
+            final Trip trip,
+            final TripRenderer tripRenderer) {
         final int departureLegIndex = newNotified.publicDepartureLegIndex;
         final Trip.Public departureLeg = departureLegIndex < 0 ? null : (Trip.Public) trip.legs.get(departureLegIndex);
         if (newNotified.isTransfer) {
@@ -1892,7 +1932,8 @@ public class NavigationNotification {
                 addEventOutputPublicLegEndReminder(
                         nextEventTimeLeftMs,
                         (Trip.Public) trip.legs.get(arrivalLegIndex),
-                        departureLeg);
+                        departureLeg,
+                        tripRenderer);
             }
         }
     }
@@ -1916,7 +1957,8 @@ public class NavigationNotification {
     private void addEventOutputPublicLegEndReminder(
             final long timeLeftMs,
             final Trip.Public arrivalLeg,
-            final Trip.Public departureLeg) {
+            final Trip.Public departureLeg,
+            final TripRenderer tripRenderer) {
         final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
         final Stop stop = arrivalLeg.arrivalStop;
         final PTDate predictedTime = stop.getArrivalTime(false);
@@ -1947,8 +1989,13 @@ public class NavigationNotification {
                     predictedTimeString,
                     formatTimeSpan(plannedTime, predictedTime))));
         }
-        if (departureLeg != null)
-            addEventOutputNextTransferPreview(departureLeg, arrivalLeg, notificationEnabled > 1);
+        if (departureLeg != null) {
+            addEventOutputNextTransferPreview(
+                    tripRenderer,
+                    departureLeg,
+                    arrivalLeg,
+                    notificationEnabled > 1);
+        }
     }
 
     private void addEventOutputTransferEndReminder(
@@ -2101,14 +2148,16 @@ public class NavigationNotification {
         }
     }
 
-    private void addEventOutputNextTransferCritical() {
+    private void addEventOutputNextTransferCritical(final TripRenderer tripRenderer) {
         newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.TRANSFER_CRITICAL, context.getString(
-                R.string.navigation_event_log_entry_next_transfer_critical)));
+                R.string.navigation_event_log_entry_next_transfer_critical, tripRenderer.nextEventTransferLeftTimeValue)));
         newSpeakTexts.add(context.getString(
-                R.string.navigation_event_speak_next_transfer_critical));
+                R.string.navigation_event_speak_next_transfer_critical,
+                transferTimeForSpeakText(tripRenderer)));
         if (isEventNotificationsEnabled) {
             newEventNotifications.add(EventNotificationData.changeEvent(context.getString(
-                    R.string.navigation_event_notify_next_transfer_critical)));
+                    R.string.navigation_event_notify_next_transfer_critical,
+                    transferTimeForNotificationText(tripRenderer))));
         }
     }
 
