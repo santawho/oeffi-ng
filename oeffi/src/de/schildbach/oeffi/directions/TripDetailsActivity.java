@@ -1308,7 +1308,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final TripRenderer.LegContainer transferFromLegC = legC.transferFrom;
         final TripRenderer.LegContainer transferToLegC = legC.transferTo;
         final Trip.Public transferFromLeg = transferFromLegC == null ? null : transferFromLegC.publicLeg;
-        final Trip.Public transferFromSimulatedLeg = transferFromLegC == null ? null : transferFromLegC.simulatedPublicLeg;
+        final Trip.Public transferFromSimulatedLeg =
+                transferFromLegC != null && transferFromLegC == tripRenderer.nearestPublicLeg
+                        ? transferFromLegC.simulatedPublicLeg : null;
         final Trip.Public transferToLeg = transferToLegC == null ? null : transferToLegC.publicLeg;
         final Stop transferFrom = transferFromLeg == null ? null : transferFromLeg.arrivalStop;
         final Stop transferFromSimulated = transferFromSimulatedLeg == null ? null : transferFromSimulatedLeg.arrivalStop;
