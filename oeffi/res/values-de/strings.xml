@@ -105,11 +105,14 @@
     <string name="network_picker_entry_license">Lizenz:\n%s</string>
     <string name="network_picker_entry_state_alpha">alpha</string>
     <string name="network_picker_entry_state_beta">beta</string>
+    <string name="network_picker_entry_state_dead">TOTER SERVER?</string>
     <string name="network_picker_entry_state_deprecated">veraltet</string>
+    <string name="network_picker_entry_state_wip">in Entwicklung</string>
     <string name="network_picker_separator_last">Zuletzt genutzt</string>
     <string name="network_picker_separator_suggested">Empfohlen</string>
     <string name="network_picker_separator_nearby">In der Nähe</string>
     <string name="network_picker_separator_europe">Europa</string>
+    <string name="network_picker_separator_world">Welt</string>
     <string name="network_picker_context_remove_title">Daten löschen</string>
 
     <!-- toasts -->

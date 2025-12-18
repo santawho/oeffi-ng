@@ -49,7 +49,7 @@ VVV|de-DE|Vogtland;Plauen
 
 # AT
 OEBB|de-AT|AT
-WIEN|de-AT|Wien
+WIEN|de-AT|Wien|dead
 LINZ|de-AT|Oberösterreich;Linz
 STV|de-AT|Steiermark;Graz;Marburg;Maribor;Klagenfurt
 VOR|de-AT|Niederösterreich;Burgenland;Wien|disabled

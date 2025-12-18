@@ -409,7 +409,9 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
             final NetworkListEntry.Network networkEntry = (NetworkListEntry.Network) entry;
             final String group = networkEntry.group;
             if (!group.equals(lastGroup)) {
-                if ("eu".equals(group)) {
+                if ("zz".equals(group)) {
+                    entries.add(new NetworkListEntry.Separator(getString(R.string.network_picker_separator_world)));
+                } else if ("eu".equals(group)) {
                     entries.add(new NetworkListEntry.Separator(getString(R.string.network_picker_separator_europe)));
                 } else {
                     final String[] groupFields = group.split("-", 2);
