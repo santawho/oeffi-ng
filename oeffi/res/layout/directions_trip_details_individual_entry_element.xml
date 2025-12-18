@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:id="@+id/directions_trip_details_individual_entry_element_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginTop="@dimen/text_padding_vertical_lax"
+        android:layout_marginBottom="@dimen/text_padding_vertical_lax"
+        android:paddingStart="@dimen/text_padding_horizontal_lax"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/directions_trip_details_individual_entry_element_time_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:textStyle="bold"
+            android:textSize="@dimen/font_size_xlarge" />
+        <TextView
+            android:id="@+id/directions_trip_details_individual_entry_element_time_unit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:textSize="@dimen/font_size_tiny"
+            android:text="@string/time_minutes"/>
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/directions_trip_details_individual_entry_element_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginTop="@dimen/text_padding_vertical_lax"
+        android:layout_marginBottom="@dimen/text_padding_vertical_lax"
+        android:paddingStart="@dimen/text_padding_horizontal_lax" />
+
+    <TextView
+        android:id="@+id/directions_trip_details_individual_entry_element_text"
+        android:layout_width="0px"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/text_padding_vertical_lax"
+        android:layout_marginBottom="@dimen/text_padding_vertical_lax"
+        android:layout_weight="1"
+        android:paddingStart="@dimen/text_padding_horizontal_lax"
+        android:textSize="@dimen/font_size_large" />
+
+</LinearLayout>

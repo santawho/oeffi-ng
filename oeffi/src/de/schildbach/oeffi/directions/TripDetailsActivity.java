@@ -263,7 +263,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     protected TripRenderer tripRenderer;
     protected RenderConfig renderConfig;
     private PTDate highlightedTime;
-    private Location highlightedLocation;
     private Point deviceLocation;
     private Date deviceLocationTime;
     private int selectedLegIndex = -1;
@@ -947,8 +946,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         deviceLocationTime = now;
 
         tripRenderer.setRefPoint(deviceLocation, deviceLocationTime);
-        final TripRenderer.LegContainer nearestPublicLeg = tripRenderer.nearestPublicLeg;
-        highlightedLocation = nearestPublicLeg == null ? null : nearestPublicLeg.nearestStop.location;
     }
 
     private void updateLocations() {
@@ -1002,6 +999,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final TripRenderer.LegContainer walkLegC,
             final TripRenderer.LegContainer nextLegC,
             final Date now) {
+        final TripRenderer.LegContainer nearestPublicLeg = tripRenderer.nearestPublicLeg;
+        final boolean isHighlightedLeg = nearestPublicLeg == legC;
+        final Location highlightedLocation = isHighlightedLeg ? nearestPublicLeg.nearestStop.location : null;
         final Trip.Public leg = legC.publicLeg;
         final Trip.Public simulatedLeg = legC.simulatedPublicLeg;
         final Location destination = leg.destination;
@@ -1214,6 +1214,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         isArrivalSection = true;
 
         isHighlightedLocation = leg.arrivalStop.location.equals(highlightedLocation);
+        isRowSimulated |= isHighlightedLeg;
         addStopRow(stopsView,
                 PearlView.Type.ARRIVAL,
                 leg.arrivalStop, previousPlace, legC,
@@ -1299,16 +1300,106 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     @SuppressLint("DefaultLocale")
-    protected boolean updateIndividualLeg(final View row, final TripRenderer.LegContainer legC, final Date now) {
+    protected boolean updateIndividualLeg(
+            final View row,
+            final TripRenderer.LegContainer legC,
+            final Date now) {
         final Trip.Individual leg = legC.individualLeg;
-        final Stop transferFrom = legC.transferFrom != null ? legC.transferFrom.publicLeg.arrivalStop : null;
-        final Stop transferTo = legC.transferTo != null ? legC.transferTo.publicLeg.departureStop : null;
+        final TripRenderer.LegContainer transferFromLegC = legC.transferFrom;
+        final TripRenderer.LegContainer transferToLegC = legC.transferTo;
+        final Trip.Public transferFromLeg = transferFromLegC == null ? null : transferFromLegC.publicLeg;
+        final Trip.Public transferFromSimulatedLeg = transferFromLegC == null ? null : transferFromLegC.simulatedPublicLeg;
+        final Trip.Public transferToLeg = transferToLegC == null ? null : transferToLegC.publicLeg;
+        final Stop transferFrom = transferFromLeg == null ? null : transferFromLeg.arrivalStop;
+        final Stop transferFromSimulated = transferFromSimulatedLeg == null ? null : transferFromSimulatedLeg.arrivalStop;
+        final Stop transferTo = transferToLeg == null ? null : transferToLeg.departureStop;
+
+        final Float feasibilityProbability = legC.transferDetails == null ? null
+                : legC.transferDetails.feasibilityProbability;
+
+        final ViewGroup mainElement = row.findViewById(R.id.directions_trip_details_individual_entry_main_element);
+        updateIndividualElement(mainElement, false, leg, transferFrom, transferTo, feasibilityProbability);
+        final ViewGroup simulatedElement = row.findViewById(R.id.directions_trip_details_individual_entry_simulated_element);
+        if (transferFromSimulated != null) {
+            updateIndividualElement(simulatedElement, true, leg, transferFromSimulated, transferTo, null);
+        } else {
+            simulatedElement.setVisibility(View.GONE);
+        }
+
+        final ImageButton mapView = row.findViewById(R.id.directions_trip_details_individual_entry_map);
+        final Location transferFromLocation = transferFrom == null ? null : transferFrom.location;
+        final Location transferToLocation = transferTo == null ? null : transferTo.location;
+        if (transferFromLocation != null || transferToLocation != null) {
+            mapView.setVisibility(View.VISIBLE);
+            final List<Location> mapBoundingLocations = new ArrayList<>();
+            if (transferFromLocation != null && transferFromLocation.hasCoord())
+                mapBoundingLocations.add(transferFromLocation);
+            if (transferToLocation != null && transferToLocation.hasCoord())
+                mapBoundingLocations.add(transferToLocation);
+            mapView.setOnClickListener(v -> {
+                setMapVisible(true);
+                getMapView().zoomToStations(mapBoundingLocations, 0);
+            });
+            final View.OnLongClickListener onLongClickListener = v -> {
+                final PopupMenu popupMenu = new PopupMenu(TripDetailsActivity.this, v);
+                StationContextMenu.prepareMapMenu(TripDetailsActivity.this, popupMenu.getMenu(),
+                        network, transferToLocation != null ? transferToLocation : transferFromLocation);
+                popupMenu.setOnMenuItemClickListener(item -> {
+                    setMapVisible(true);
+                    getMapView().zoomToStations(mapBoundingLocations, 0);
+                    return true;
+                });
+                PopupHelper.setForceShowIcon(popupMenu);
+                popupMenu.show();
+                return true;
+            };
+            mapView.setOnLongClickListener(onLongClickListener);
+            row.setOnLongClickListener(onLongClickListener);
+        } else {
+            mapView.setVisibility(View.GONE);
+        }
+
+        final View progressView = row.findViewById(R.id.directions_trip_details_individual_entry_progress);
+        progressView.setVisibility(View.GONE);
+        final PTDate beginTime = transferFrom != null ? transferFrom.getArrivalTime() : leg == null ? null : leg.departureTime;
+        final PTDate endTime = transferTo != null ? transferTo.getDepartureTime() : leg == null ? null : leg.arrivalTime;
+        final boolean isNow;
+        final int backgroundColor;
+        if (transferFrom != null && beginTime != null && now.before(beginTime)) {
+            // leg is in the future
+            isNow = false;
+            backgroundColor = colorLegIndividualFutureBackground;
+        } else if (endTime != null && now.after(endTime)) {
+            // leg is in the past
+            isNow = false;
+            backgroundColor = colorLegIndividualPastBackground;
+        } else {
+            // leg is now
+            isNow = true;
+            backgroundColor = colorLegIndividualNowBackground;
+            progressView.setVisibility(View.VISIBLE);
+            progressView.setOnClickListener(view -> setShowPage(R.id.navigation_next_event));
+
+            final TextView progressText = row.findViewById(R.id.directions_trip_details_individual_entry_progress_text);
+            progressText.setText(endTime == null ? "???" : getLeftTimeFormatted(now, endTime));
+        }
+
+        setGradientBackground(row, backgroundColor, feasibilityProbability == null ? 1f : feasibilityProbability);
+        return isNow;
+    }
+
+    protected void updateIndividualElement(
+            final ViewGroup elementView,
+            final boolean isSimulated,
+            final Trip.Individual leg,
+            final Stop transferFrom,
+            final Stop transferTo,
+            final Float feasibilityProbability) {
+        elementView.setVisibility(View.VISIBLE);
+        final int textColor = isSimulated ? colorSimulated : colorSignificant;
         String legText = null;
         int iconResId;
         int requiredSecs = 0;
-        final ImageButton mapView = row.findViewById(R.id.directions_trip_details_individual_entry_map);
-        mapView.setVisibility(View.GONE);
-        mapView.setOnClickListener(null);
         if (leg != null) {
             requiredSecs = leg.min * 60;
             final String distanceStr = leg.distance != 0 ? "(" + leg.distance + "m) " : "";
@@ -1334,42 +1425,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 throw new IllegalStateException("unknown type: " + leg.type);
             }
             legText = getString(textResId, leg.min, distanceStr, Formats.makeBreakableStationName(leg.arrival.uniqueShortName()));
-        } else if (legC.transferFrom != null) {
+        } else if (transferFrom != null) {
             // no time walk after some public transport
             iconResId = R.drawable.ic_directions_walk_grey600_24dp;
         } else {
             // walk before anything
             iconResId = R.drawable.ic_stopwatch_black_24;
-        }
-
-        final Location transferFromLocation = transferFrom == null ? null : transferFrom.location;
-        final Location transferToLocation = transferTo == null ? null : transferTo.location;
-        if (transferFromLocation != null || transferToLocation != null) {
-            final List<Location> mapBoundingLocations = new ArrayList<>();
-            if (transferFromLocation != null && transferFromLocation.hasCoord())
-                mapBoundingLocations.add(transferFromLocation);
-            if (transferToLocation != null && transferToLocation.hasCoord())
-                mapBoundingLocations.add(transferToLocation);
-            mapView.setVisibility(View.VISIBLE);
-            mapView.setOnClickListener(v -> {
-                setMapVisible(true);
-                getMapView().zoomToStations(mapBoundingLocations, 0);
-            });
-            final View.OnLongClickListener onLongClickListener = v -> {
-                final PopupMenu popupMenu = new PopupMenu(TripDetailsActivity.this, v);
-                StationContextMenu.prepareMapMenu(TripDetailsActivity.this, popupMenu.getMenu(),
-                        network, transferToLocation != null ? transferToLocation : transferFromLocation);
-                popupMenu.setOnMenuItemClickListener(item -> {
-                    setMapVisible(true);
-                    getMapView().zoomToStations(mapBoundingLocations, 0);
-                    return true;
-                });
-                PopupHelper.setForceShowIcon(popupMenu);
-                popupMenu.show();
-                return true;
-            };
-            mapView.setOnLongClickListener(onLongClickListener);
-            row.setOnLongClickListener(onLongClickListener);
         }
 
         String transferText = null;
@@ -1460,9 +1521,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
         }
 
-        final Float feasibilityProbability = legC.transferDetails == null ? null
-                : legC.transferDetails.feasibilityProbability;
-
         String text =
                 transferText == null
                         ? legText
@@ -1479,54 +1537,33 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
         }
 
-        final TextView textView = row.findViewById(R.id.directions_trip_details_individual_entry_text);
+        final TextView textView = elementView.findViewById(R.id.directions_trip_details_individual_entry_element_text);
         if (text == null) {
             textView.setVisibility(View.GONE);
         } else {
             textView.setVisibility(View.VISIBLE);
             textView.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_COMPACT));
+            textView.setTextColor(textColor);
         }
 
-        final ImageView iconView = row.findViewById(R.id.directions_trip_details_individual_entry_icon);
-        iconView.setImageDrawable(getDrawable(iconResId));
+        final ImageView iconView = elementView.findViewById(R.id.directions_trip_details_individual_entry_element_icon);
+        final Drawable drawable = getDrawable(iconResId);
+        if (drawable != null)
+            drawable.setTint(textColor);
+        iconView.setImageDrawable(drawable);
 
-        final View timeView = row.findViewById(R.id.directions_trip_details_individual_entry_time);
+        final View timeView = elementView.findViewById(R.id.directions_trip_details_individual_entry_element_time);
         if (timeText == null) {
             timeView.setVisibility(View.GONE);
         } else {
             timeView.setVisibility(View.VISIBLE);
-            final TextView timeTextView = row.findViewById(R.id.directions_trip_details_individual_entry_time_text);
+            final int timeColor = timeIsCritical ? getColor(R.color.fg_trip_next_event_important) : textColor;
+            final TextView timeTextView = elementView.findViewById(R.id.directions_trip_details_individual_entry_element_time_text);
+            final TextView timeUnitView = elementView.findViewById(R.id.directions_trip_details_individual_entry_element_time_unit);
             timeTextView.setText(timeText);
-            timeTextView.setTextColor(getColor(timeIsCritical ? R.color.fg_trip_next_event_important : R.color.fg_significant));
+            timeTextView.setTextColor(timeColor);
+            timeUnitView.setTextColor(timeColor);
         }
-
-        final View progressView = row.findViewById(R.id.directions_trip_details_individual_entry_progress);
-        progressView.setVisibility(View.GONE);
-        final PTDate beginTime = transferFrom != null ? transferFrom.getArrivalTime() : leg == null ? null : leg.departureTime;
-        final PTDate endTime = transferTo != null ? transferTo.getDepartureTime() : leg == null ? null : leg.arrivalTime;
-        final boolean isNow;
-        final int backgroundColor;
-        if (transferFrom != null && beginTime != null && now.before(beginTime)) {
-            // leg is in the future
-            isNow = false;
-            backgroundColor = colorLegIndividualFutureBackground;
-        } else if (endTime != null && now.after(endTime)) {
-            // leg is in the past
-            isNow = false;
-            backgroundColor = colorLegIndividualPastBackground;
-        } else {
-            // leg is now
-            isNow = true;
-            backgroundColor = colorLegIndividualNowBackground;
-            progressView.setVisibility(View.VISIBLE);
-            progressView.setOnClickListener(view -> setShowPage(R.id.navigation_next_event));
-
-            final TextView progressText = row.findViewById(R.id.directions_trip_details_individual_entry_progress_text);
-            progressText.setText(endTime == null ? "???" : getLeftTimeFormatted(now, endTime));
-        }
-
-        setGradientBackground(row, backgroundColor, feasibilityProbability == null ? 1f : feasibilityProbability);
-        return isNow;
     }
 
     protected void setGradientBackground(final View view, final int backgroundColor, final float probability) {

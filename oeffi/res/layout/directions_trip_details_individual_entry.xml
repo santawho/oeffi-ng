@@ -4,55 +4,22 @@
     android:layout_height="wrap_content"
     android:orientation="vertical" >
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout
         style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
 
         <LinearLayout
-            android:id="@+id/directions_trip_details_individual_entry_time"
-            android:layout_width="wrap_content"
+            android:orientation="vertical"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginTop="@dimen/text_padding_vertical_lax"
-            android:layout_marginBottom="@dimen/text_padding_vertical_lax"
-            android:paddingStart="@dimen/text_padding_horizontal_lax"
-            android:orientation="vertical">
-            <TextView
-                android:id="@+id/directions_trip_details_individual_entry_time_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:textStyle="bold"
-                android:textSize="@dimen/font_size_xlarge" />
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:textSize="@dimen/font_size_tiny"
-                android:text="min"/>
+            android:layout_width="0dp"
+            android:layout_weight="1" >
+            <include layout="@layout/directions_trip_details_individual_entry_element"
+                android:id="@+id/directions_trip_details_individual_entry_main_element" />
+            <include layout="@layout/directions_trip_details_individual_entry_element"
+                android:id="@+id/directions_trip_details_individual_entry_simulated_element" />
         </LinearLayout>
-
-        <ImageView
-            android:id="@+id/directions_trip_details_individual_entry_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginTop="@dimen/text_padding_vertical_lax"
-            android:layout_marginBottom="@dimen/text_padding_vertical_lax"
-            android:paddingStart="@dimen/text_padding_horizontal_lax"
-            android:tint="#757575" />
-
-        <TextView
-            android:id="@+id/directions_trip_details_individual_entry_text"
-            android:layout_width="0px"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/text_padding_vertical_lax"
-            android:layout_marginBottom="@dimen/text_padding_vertical_lax"
-            android:layout_weight="1"
-            android:paddingStart="@dimen/text_padding_horizontal_lax"
-            android:textSize="@dimen/font_size_large" />
 
         <ImageButton
             android:id="@+id/directions_trip_details_individual_entry_map"
