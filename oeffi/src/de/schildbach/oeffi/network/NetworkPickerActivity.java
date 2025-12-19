@@ -150,7 +150,10 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
             actionBar.setBack(v -> finish());
             final NetworkId networkId = prefsGetNetworkId();
             if (networkId != null) {
-                backgroundHandler.post(new GetAreaRunnable(NetworkProviderFactory.provider(networkId), handler) {
+                backgroundHandler.post(new GetAreaRunnable(
+//                        NetworkProviderFactory.provider(networkId),
+                        networkId,
+                        handler) {
 
                     @Override
                     protected void onResult(final Point[] area) {
@@ -186,7 +189,7 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
 
         loadLastNetworks();
 
-        parseIndex();
+        generateIndex();
         updateGUI();
 
         if (ContextCompat.checkSelfPermission(this,
@@ -250,7 +253,7 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
 
         getMapView().animateToLocation(here.getLatAsDouble(), here.getLonAsDouble());
 
-        parseIndex();
+        generateIndex();
         updateGUI();
 
         new GeocoderThread(this, here, new GeocoderThread.Callback() {
@@ -262,7 +265,7 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
 
                 deviceAddress = address;
 
-                parseIndex();
+                generateIndex();
                 updateGUI();
             }
 
@@ -322,10 +325,7 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
         getMapView().invalidate();
     }
 
-    private void parseIndex() {
-        final Map<String, NetworkListEntry> entriesMap = new LinkedHashMap<>();
-        final List<NetworkListEntry> entries = new LinkedList<>();
-
+    private void loadNetworksTxtFile(final Map<String, NetworkListEntry> entriesMap) {
         String line = null;
         try (final BufferedReader reader =
                      new BufferedReader(new InputStreamReader(getAssets().open(INDEX_FILENAME)))) {
@@ -345,24 +345,46 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
                 final NetworkId networkId;
                 try {
                     networkId = NetworkId.valueOf(networkName);
-                } catch (IllegalArgumentException iae) {
+                } catch (final IllegalArgumentException iae) {
                     log.warn("networks file {} contains entry for non-existing provider \"{}\"", INDEX_FILENAME, networkName);
                     continue;
                 }
-                final NetworkListEntry entry = new NetworkListEntry.Network(networkId, state, group, coverage);
+                final NetworkListEntry entry = new NetworkListEntry.Network(networkId, NetworkId.State.valueOf(state), group, coverage);
 
                 entriesMap.put(networkName, entry);
             }
         } catch (final Exception x) {
             throw new RuntimeException("problem parsing: '" + line + "'", x);
         }
+    }
+
+    private void enriesFromConfiguredFactory(final Map<String, NetworkListEntry> entriesMap) {
+        final NetworkProviderFactory networkProviderFactory = NetworkProviderFactory.getInstance();
+        for (final NetworkId.Descriptor descriptor : networkProviderFactory.getAvailableNetworks()) {
+            final NetworkId networkId = descriptor.getNetworkId();
+            if (networkId == null)
+                log.warn("x");
+            final NetworkListEntry entry = new NetworkListEntry.Network(
+                    networkId,
+                    descriptor.getState(),
+                    descriptor.getGroup(),
+                    descriptor.getCoverage());
+            entriesMap.put(networkId.name(), entry);
+        }
+    }
+
+    private void generateIndex() {
+        final Map<String, NetworkListEntry> entriesMap = new LinkedHashMap<>();
+        // loadNetworksTxtFile(entriesMap);
+        enriesFromConfiguredFactory(entriesMap);
+
+        final List<NetworkListEntry> entries = new LinkedList<>();
 
         // last used networks
         boolean firstLastUsed = true;
         for (final NetworkId lastNetwork : lastNetworks) {
             final NetworkListEntry networkEntry = entriesMap.get(lastNetwork.name());
-            if (networkEntry != null && !NetworkListEntry.Network.STATE_DISABLED
-                    .equals(((NetworkListEntry.Network) networkEntry).state)) {
+            if (networkEntry != null && ((NetworkListEntry.Network) networkEntry).state != NetworkId.State.disabled) {
                 if (firstLastUsed) {
                     entries.add(new NetworkListEntry.Separator(getString(R.string.network_picker_separator_last)));
                     firstLastUsed = false;
@@ -375,7 +397,7 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
 
         // suggested networks
         boolean firstSuggested = true;
-        for (Iterator<NetworkListEntry> i = entriesMap.values().iterator(); i.hasNext();) {
+        for (final Iterator<NetworkListEntry> i = entriesMap.values().iterator(); i.hasNext();) {
             final NetworkListEntry.Network networkEntry = (NetworkListEntry.Network) i.next();
             if (isSuggested(networkEntry)) {
                 if (firstSuggested) {
@@ -431,20 +453,20 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
         if (deviceLocation == null)
             return false;
 
-        if (NetworkListEntry.Network.STATE_DEPRECATED.equals(network.state)
-                || NetworkListEntry.Network.STATE_DISABLED.equals(network.state))
+        if (network.state == NetworkId.State.deprecated
+                || network.state == NetworkId.State.disabled)
             return false;
 
-        final NetworkProvider networkProvider;
-        try {
-            networkProvider = NetworkProviderFactory.provider(network.id);
-        } catch (IllegalArgumentException iae) {
-            return false;
-        }
+//        final NetworkProvider networkProvider;
+//        try {
+//            networkProvider = NetworkProviderFactory.provider(network.id);
+//        } catch (final IllegalArgumentException iae) {
+//            return false;
+//        }
 
         boolean inArea = false;
 
-        final Point[] area = getArea(networkProvider);
+        final Point[] area = getArea(network.id);
 
         if (area == null || area.length <= 2)
             return false;
@@ -474,12 +496,12 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
         return inArea;
     }
 
-    private Point[] getArea(final NetworkProvider networkProvider) {
-        try {
-            return networkProvider.getArea();
-        } catch (final IOException x) {
-            throw new RuntimeException(x);
-        }
+    private Point[] getArea(final NetworkId networkId) {
+//        try {
+            return networkId.getDescriptor().getArea();
+//        } catch (final IOException x) {
+//            throw new RuntimeException(x);
+//        }
     }
 
     private boolean isNearby(final NetworkListEntry.Network network) {

@@ -22,14 +22,11 @@ import de.schildbach.pte.NetworkId;
 public interface NetworkListEntry {
     class Network implements NetworkListEntry {
         public final NetworkId id;
-        public final String state;
+        public final NetworkId.State state;
         public final String group;
         public final String coverage;
 
-        public static final String STATE_DEPRECATED = "deprecated";
-        public static final String STATE_DISABLED = "disabled";
-
-        public Network(final NetworkId id, final String state, final String group, final String coverage) {
+        public Network(final NetworkId id, final NetworkId.State state, final String group, final String coverage) {
             this.id = id;
             this.state = state;
             this.group = group;

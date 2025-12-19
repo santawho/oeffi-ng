@@ -27,6 +27,7 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.network.NetworkResources;
+import de.schildbach.pte.NetworkId;
 
 import javax.annotation.Nullable;
 
@@ -84,7 +85,7 @@ public class NetworkViewHolder extends RecyclerView.ViewHolder {
         labelView.setText(networkRes.label);
         labelView.setTextColor(isEnabled ? colorSignificant : colorLessSignificant);
 
-        if (entry.state != null && isEnabled)
+        if (isEnabled && entry.state != null && entry.state != NetworkId.State.active)
             stateView.setText(
                     res.getIdentifier("network_picker_entry_state_" + entry.state, "string", context.getPackageName()));
         else

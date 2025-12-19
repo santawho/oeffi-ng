@@ -19,6 +19,7 @@ package de.schildbach.oeffi.network;
 
 import android.os.Handler;
 import de.schildbach.oeffi.Constants;
+import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.Point;
 import de.schildbach.pte.exception.NotFoundException;
@@ -34,14 +35,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class GetAreaRunnable implements Runnable {
-    private final NetworkProvider networkProvider;
+    private final NetworkId networkId;
     private final Handler handler;
     private final AtomicBoolean cancelled = new AtomicBoolean(false);
 
     private static final Logger log = LoggerFactory.getLogger(GetAreaRunnable.class);
 
-    public GetAreaRunnable(final NetworkProvider networkProvider, final Handler handler) {
-        this.networkProvider = networkProvider;
+    public GetAreaRunnable(final NetworkId networkId, final Handler handler) {
+        this.networkId = networkId;
         this.handler = handler;
     }
 
@@ -51,32 +52,32 @@ public abstract class GetAreaRunnable implements Runnable {
         while (!cancelled.get()) {
             tries++;
 
-            try {
-                final Point[] area = networkProvider.getArea();
+//            try {
+                final Point[] area = networkId.getDescriptor().getArea();
 
                 if (!cancelled.get())
                     postOnResult(area);
 
                 break;
-            } catch (final IOException x) {
-                final String message = "IO problem while processing " + this + " on " + networkProvider + " (try "
-                        + tries + ")";
-                log.info(message, x);
-                if (tries >= Constants.MAX_TRIES_ON_IO_PROBLEM) {
-                    if (x instanceof SocketTimeoutException || x instanceof UnknownHostException
-                            || x instanceof SocketException || x instanceof NotFoundException
-                            || x instanceof SSLException) {
-                        break;
-                    } else {
-                        throw new RuntimeException(message, x);
-                    }
-                }
-
-                try { TimeUnit.SECONDS.sleep(tries); } catch (InterruptedException ix) {}
-
-                // try again
-                continue;
-            }
+//            } catch (final IOException x) {
+//                final String message = "IO problem while processing " + this + " on " + networkId + " (try "
+//                        + tries + ")";
+//                log.info(message, x);
+//                if (tries >= Constants.MAX_TRIES_ON_IO_PROBLEM) {
+//                    if (x instanceof SocketTimeoutException || x instanceof UnknownHostException
+//                            || x instanceof SocketException || x instanceof NotFoundException
+//                            || x instanceof SSLException) {
+//                        break;
+//                    } else {
+//                        throw new RuntimeException(message, x);
+//                    }
+//                }
+//
+//                try { TimeUnit.SECONDS.sleep(tries); } catch (InterruptedException ix) {}
+//
+//                // try again
+//                continue;
+//            }
         }
     }
 
