@@ -108,7 +108,7 @@ import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.oeffi.util.locationview.LocationTextView;
 import de.schildbach.pte.NetworkId;
-import de.schildbach.pte.NetworkProvider;
+import de.schildbach.pte.provider.NetworkProvider;
 import de.schildbach.pte.dto.Fare;
 import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.Line;

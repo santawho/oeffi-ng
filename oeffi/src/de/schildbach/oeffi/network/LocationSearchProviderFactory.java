@@ -22,10 +22,10 @@ import java.util.Locale;
 import java.util.Map;
 
 import de.schildbach.oeffi.Application;
-import de.schildbach.pte.LocationSearchApiProvider;
-import de.schildbach.pte.LocationSearchProvider;
-import de.schildbach.pte.LocationSearchProviderId;
-import de.schildbach.pte.NominatimLocationSearchProvider;
+import de.schildbach.pte.provider.locationsearch.LocationSearchApiProvider;
+import de.schildbach.pte.provider.locationsearch.LocationSearchProvider;
+import de.schildbach.pte.provider.locationsearch.LocationSearchProviderId;
+import de.schildbach.pte.provider.locationsearch.NominatimLocationSearchProvider;
 
 public class LocationSearchProviderFactory {
     private static Map<LocationSearchProviderId, LocationSearchProvider> providerCache = new HashMap<>();

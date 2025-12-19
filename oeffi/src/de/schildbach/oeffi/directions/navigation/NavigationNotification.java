@@ -69,7 +69,7 @@ import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.ResourceUri;
 import de.schildbach.oeffi.util.TimeZoneSelector;
-import de.schildbach.pte.DbProvider;
+import de.schildbach.pte.provider.db.DbProvider;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.Line;

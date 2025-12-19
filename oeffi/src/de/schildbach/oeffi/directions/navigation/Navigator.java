@@ -29,7 +29,7 @@ import java.util.List;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.pte.NetworkId;
-import de.schildbach.pte.NetworkProvider;
+import de.schildbach.pte.provider.NetworkProvider;
 import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.QueryJourneyResult;
 import de.schildbach.pte.dto.Stop;

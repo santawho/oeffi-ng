@@ -64,7 +64,7 @@ import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GeocoderThread;
 import de.schildbach.oeffi.util.LocationHelper;
 import de.schildbach.oeffi.util.PopupHelper;
-import de.schildbach.pte.LocationSearchProviderId;
+import de.schildbach.pte.provider.locationsearch.LocationSearchProviderId;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;

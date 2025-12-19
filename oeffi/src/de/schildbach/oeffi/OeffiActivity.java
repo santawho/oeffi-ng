@@ -81,7 +81,7 @@ import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.oeffi.util.ZoomControls;
 import de.schildbach.pte.NetworkId;
-import de.schildbach.pte.NetworkProvider;
+import de.schildbach.pte.provider.NetworkProvider;
 import de.schildbach.pte.dto.Product;
 import de.schildbach.pte.dto.ResultHeader;
 import de.schildbach.pte.dto.TripOptions;

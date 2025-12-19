@@ -62,7 +62,7 @@ import de.schildbach.oeffi.util.ErrorReporter;
 import de.schildbach.oeffi.util.SpeechInput;
 import de.schildbach.oeffi.util.TimeZoneSelector;
 import de.schildbach.pte.NetworkId;
-import de.schildbach.pte.NetworkProvider;
+import de.schildbach.pte.provider.NetworkProvider;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import org.slf4j.Logger;

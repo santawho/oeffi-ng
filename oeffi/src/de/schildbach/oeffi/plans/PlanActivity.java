@@ -55,7 +55,7 @@ import de.schildbach.oeffi.util.Downloader;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.ZoomControls;
 import de.schildbach.pte.NetworkId;
-import de.schildbach.pte.NetworkProvider;
+import de.schildbach.pte.provider.NetworkProvider;
 import de.schildbach.pte.dto.Departure;
 import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.LineDestination;

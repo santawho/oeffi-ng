@@ -18,20 +18,13 @@
 package de.schildbach.oeffi.network;
 
 import android.os.Handler;
-import de.schildbach.oeffi.Constants;
+
 import de.schildbach.pte.NetworkId;
-import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.Point;
-import de.schildbach.pte.exception.NotFoundException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.SSLException;
-import java.io.IOException;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class GetAreaRunnable implements Runnable {

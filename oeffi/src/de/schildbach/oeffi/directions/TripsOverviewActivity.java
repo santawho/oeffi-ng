@@ -50,7 +50,7 @@ import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.pte.NetworkId;
-import de.schildbach.pte.NetworkProvider;
+import de.schildbach.pte.provider.NetworkProvider;
 import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.Point;

@@ -20,7 +20,7 @@ package de.schildbach.oeffi.stations;
 import android.os.Handler;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
-import de.schildbach.pte.NetworkProvider;
+import de.schildbach.pte.provider.NetworkProvider;
 import de.schildbach.pte.dto.QueryDeparturesResult;
 import de.schildbach.pte.exception.BlockedException;
 import de.schildbach.pte.exception.InternalErrorException;

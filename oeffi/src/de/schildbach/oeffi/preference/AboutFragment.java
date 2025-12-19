@@ -30,9 +30,9 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.Installer;
 import de.schildbach.oeffi.util.AppInstaller;
-import de.schildbach.pte.NetworkProvider;
-import de.schildbach.pte.Provider;
-import de.schildbach.pte.TransferEvaluationProvider;
+import de.schildbach.pte.provider.NetworkProvider;
+import de.schildbach.pte.provider.Provider;
+import de.schildbach.pte.provider.TransferEvaluationProvider;
 
 import javax.annotation.Nullable;
 
