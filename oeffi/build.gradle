@@ -6,7 +6,6 @@ plugins {
 configurations {
     all*.exclude group: 'org.json', module: 'json'
     all*.exclude group: 'net.sf.kxml', module: 'kxml2'
-    all*.exclude group: 'androidx.legacy', module: 'legacy-support-core-ui'
     all*.exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
     all*.exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
 }
@@ -21,10 +20,8 @@ dependencies {
     implementation 'androidx.drawerlayout:drawerlayout:1.2.0'
     implementation 'androidx.core:core:1.13.1'
     implementation 'androidx.activity:activity:1.9.3'
-    //noinspection GradleDependency
-    implementation 'com.squareup.okhttp3:okhttp:3.12.13'
-    //noinspection GradleDependency
-    implementation 'com.squareup.okhttp3:logging-interceptor:3.12.13'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
     implementation 'org.osmdroid:osmdroid-android:6.1.20'
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
     //noinspection GradleDependency
@@ -34,7 +31,7 @@ dependencies {
 }
 
 android {
-    compileSdkVersion 'android-34'
+    compileSdkVersion 'android-36'
     buildToolsVersion '36.1.0'
 
     buildTypes {
@@ -79,6 +76,8 @@ android {
         exclude 'META-INF/**/coroutines.pro'
         exclude 'DebugProbesKt.bin'
         exclude 'kotlin/**'
+        exclude '**/*.kotlin_metadata'
+        exclude 'okhttp3/internal/publicsuffix/NOTICE'
         exclude 'commonMain/default/**'
         exclude 'nonJvmMain/default/**'
     }
