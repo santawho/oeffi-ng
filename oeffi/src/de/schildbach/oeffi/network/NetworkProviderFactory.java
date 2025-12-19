@@ -25,61 +25,35 @@ import de.schildbach.oeffi.Constants;
 import de.schildbach.pte.provider.hafas.AvvAachenProvider;
 import de.schildbach.pte.provider.hafas.AvvAugsburgProvider;
 import de.schildbach.pte.provider.hafas.BartProvider;
-import de.schildbach.pte.provider.efa.BayernProvider;
-import de.schildbach.pte.provider.efa.BsvagProvider;
 import de.schildbach.pte.provider.hafas.BvgProvider;
 import de.schildbach.pte.provider.db.DbHafasProvider;
-import de.schildbach.pte.provider.db.DbMovasProvider;
-import de.schildbach.pte.provider.db.DbProvider;
-import de.schildbach.pte.provider.other.DeutschlandTicketProvider;
-import de.schildbach.pte.provider.efa.DingProvider;
 import de.schildbach.pte.provider.hafas.DsbProvider;
-import de.schildbach.pte.provider.efa.DubProvider;
-import de.schildbach.pte.provider.efa.GvhProvider;
 import de.schildbach.pte.provider.hafas.InvgProvider;
 import de.schildbach.pte.provider.efa.KvvProvider;
-import de.schildbach.pte.provider.efa.LinzProvider;
 import de.schildbach.pte.provider.hafas.LuProvider;
-import de.schildbach.pte.provider.efa.MerseyProvider;
-import de.schildbach.pte.provider.efa.MvgProvider;
-import de.schildbach.pte.provider.efa.MvvProvider;
 import de.schildbach.pte.provider.hafas.NasaProvider;
 import de.schildbach.pte.provider.NetworkApiProvider;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.provider.NetworkProvider;
-import de.schildbach.pte.provider.hafas.NsProvider;
-import de.schildbach.pte.provider.efa.NvbwProvider;
 import de.schildbach.pte.provider.hafas.NvvProvider;
 import de.schildbach.pte.provider.hafas.OebbProvider;
 import de.schildbach.pte.provider.hafas.OoevvProvider;
 import de.schildbach.pte.provider.hafas.PlProvider;
 import de.schildbach.pte.provider.hafas.RmvProvider;
-import de.schildbach.pte.provider.hafas.RtProvider;
 import de.schildbach.pte.provider.hafas.SeProvider;
 import de.schildbach.pte.provider.hafas.ShProvider;
 import de.schildbach.pte.Standard;
-import de.schildbach.pte.provider.efa.StvProvider;
 import de.schildbach.pte.provider.hafas.SvvProvider;
-import de.schildbach.pte.provider.efa.SydneyProvider;
-import de.schildbach.pte.provider.efa.TlemProvider;
 import de.schildbach.pte.provider.hafas.VbbProvider;
-import de.schildbach.pte.provider.efa.VblProvider;
 import de.schildbach.pte.provider.hafas.VbnProvider;
 import de.schildbach.pte.provider.efa.VgnProvider;
 import de.schildbach.pte.provider.hafas.VgsProvider;
 import de.schildbach.pte.provider.hafas.VmobilProvider;
 import de.schildbach.pte.provider.hafas.VmtProvider;
-import de.schildbach.pte.provider.efa.VmvProvider;
 import de.schildbach.pte.provider.hafas.VorProvider;
-import de.schildbach.pte.provider.efa.VrnProvider;
-import de.schildbach.pte.provider.efa.VrrProvider;
 import de.schildbach.pte.provider.other.VrsProvider;
-import de.schildbach.pte.provider.efa.VvmProvider;
 import de.schildbach.pte.provider.efa.VvoProvider;
-import de.schildbach.pte.provider.efa.VvsProvider;
 import de.schildbach.pte.provider.hafas.VvtProvider;
-import de.schildbach.pte.provider.efa.VvvProvider;
-import de.schildbach.pte.provider.efa.WienProvider;
 import de.schildbach.pte.provider.hafas.ZvvProvider;
 import okhttp3.HttpUrl;
 
@@ -163,129 +137,5 @@ public final class NetworkProviderFactory extends de.schildbach.pte.NetworkProvi
         addConfigurator(VvtProvider.class, NetworkId.State.disabled);
         addConfigurator(SvvProvider.class, NetworkId.State.disabled);
         addConfigurator(VmobilProvider.class, NetworkId.State.disabled);
-    }
-
-    private static NetworkApiProvider forId(final NetworkId networkId) {
-        if (networkId.equals(NetworkId.RT))
-            return new RtProvider();
-        else if (networkId.equals(NetworkId.DEUTSCHLANDTICKET))
-            return new DeutschlandTicketProvider();
-        else if (networkId.equals(NetworkId.DB))
-            return new DbProvider.Fernverkehr();
-        else if (networkId.equals(NetworkId.DBREGIO))
-            return new DbProvider.Regio();
-        else if (networkId.equals(NetworkId.DBINTERNATIONAL))
-            return new DbProvider.International();
-//        else if (networkId.equals(NetworkId.DBDEUTSCHLANDTICKETWEB))
-//            return new DbWebProvider.DeutschlandTicket();
-//        else if (networkId.equals(NetworkId.DBWEB))
-//            return new DbWebProvider.Fernverkehr();
-//        else if (networkId.equals(NetworkId.DBREGIOWEB))
-//            return new DbWebProvider.Regio();
-        else if (networkId.equals(NetworkId.DBDEUTSCHLANDTICKETMOVAS))
-            return new DbMovasProvider.DeutschlandTicket();
-        else if (networkId.equals(NetworkId.DBMOVAS))
-            return new DbMovasProvider.Fernverkehr();
-        else if (networkId.equals(NetworkId.DBREGIOMOVAS))
-            return new DbMovasProvider.Regio();
-//        else if (networkId.equals(NetworkId.DBHAFAS))
-//            return new DbHafasProvider.Fernverkehr("{\"type\":\"AID\",\"aid\":\"n91dB8Z77MLdoR0K\"}",
-//                    "bdI8UVj40K5fvxwf".getBytes(Charsets.UTF_8));
-//        else if (networkId.equals(NetworkId.DBREGIOHAFAS))
-//            return new DbHafasProvider.Regio("{\"type\":\"AID\",\"aid\":\"n91dB8Z77MLdoR0K\"}",
-//                    "bdI8UVj40K5fvxwf".getBytes(Charsets.UTF_8));
-        else if (networkId.equals(NetworkId.BVG))
-            return new BvgProvider("{\"aid\":\"1Rxs112shyHLatUX4fofnmdxK\",\"type\":\"AID\"}");
-        else if (networkId.equals(NetworkId.VBB))
-            return new VbbProvider("{\"type\":\"AID\",\"aid\":\"hafas-vbb-apps\"}");
-        else if (networkId.equals(NetworkId.NVV))
-            return new NvvProvider("{\"type\":\"AID\",\"aid\":\"Kt8eNOH7qjVeSxNA\"}");
-        else if (networkId.equals(NetworkId.RMV))
-            return new RmvProvider("{\"type\":\"AID\",\"aid\":\"ikfr894fkfddXxA0U\"}");
-        else if (networkId.equals(NetworkId.BAYERN))
-            return new BayernProvider();
-        else if (networkId.equals(NetworkId.MVV))
-            return new MvvProvider();
-        else if (networkId.equals(NetworkId.INVG))
-            return new InvgProvider("{\"type\":\"AID\",\"aid\":\"GITvwi3BGOmTQ2a5\"}");
-        else if (networkId.equals(NetworkId.AVV_AUGSBURG))
-            return new AvvAugsburgProvider("{\"type\":\"AID\",\"aid\":\"jK91AVVZU77xY5oH\"}");
-        else if (networkId.equals(NetworkId.VGN))
-            return new VgnProvider(HttpUrl.parse("https://efa.vgn.de/vgnExt_oeffi/"));
-        else if (networkId.equals(NetworkId.VVM))
-            return new VvmProvider();
-        else if (networkId.equals(NetworkId.VMV))
-            return new VmvProvider();
-        else if (networkId.equals(NetworkId.SH))
-            return new ShProvider("{\"aid\":\"r0Ot9FLFNAFxijLW\",\"type\":\"AID\"}");
-        else if (networkId.equals(NetworkId.GVH))
-            return new GvhProvider();
-        else if (networkId.equals(NetworkId.BSVAG))
-            return new BsvagProvider();
-        else if (networkId.equals(NetworkId.VBN))
-            return new VbnProvider("{\"aid\":\"rnOHBWhesvc7gFkd\",\"type\":\"AID\"}");
-        else if (networkId.equals(NetworkId.NASA))
-            return new NasaProvider("{\"type\":\"AID\",\"aid\":\"nasa-apps\"}");
-        else if (networkId.equals(NetworkId.VMT))
-            return new VmtProvider("{\"aid\":\"vj5d7i3g9m5d7e3\",\"type\":\"AID\"}");
-        else if (networkId.equals(NetworkId.VVO))
-            return new VvoProvider(HttpUrl.parse("https://efa.vvo-online.de/Oeffi/"));
-        else if (networkId.equals(NetworkId.VRR))
-            return new VrrProvider();
-        else if (networkId.equals(NetworkId.VRS))
-            return new VrsProvider(VRS_CLIENT_CERTIFICATE);
-        else if (networkId.equals(NetworkId.AVV_AACHEN))
-            return new AvvAachenProvider("{\"id\":\"AVV_AACHEN\",\"l\":\"vs_oeffi\",\"type\":\"WEB\"}",
-                    "{\"type\":\"AID\",\"aid\":\"4vV1AcH3N511icH\"}");
-        else if (networkId.equals(NetworkId.MVG))
-            return new MvgProvider();
-        else if (networkId.equals(NetworkId.VRN))
-            return new VrnProvider();
-        else if (networkId.equals(NetworkId.VGS))
-            return new VgsProvider("{\"type\":\"AID\",\"aid\":\"yCW9qZFSye1wIv3gCzm5r7d2kJ3LIF\"}");
-        else if (networkId.equals(NetworkId.VVS))
-            return new VvsProvider();
-        else if (networkId.equals(NetworkId.DING))
-            return new DingProvider();
-        else if (networkId.equals(NetworkId.KVV))
-            return new KvvProvider(HttpUrl.parse("https://projekte.kvv-efa.de/oeffi/"));
-        else if (networkId.equals(NetworkId.NVBW))
-            return new NvbwProvider();
-        else if (networkId.equals(NetworkId.VVV))
-            return new VvvProvider();
-        else if (networkId.equals(NetworkId.OEBB))
-            return new OebbProvider("{\"type\":\"AID\",\"aid\":\"OWDL4fE4ixNiPBBm\"}");
-        else if (networkId.equals(NetworkId.WIEN))
-            return new WienProvider();
-        else if (networkId.equals(NetworkId.LINZ))
-            return new LinzProvider();
-        else if (networkId.equals(NetworkId.STV))
-            return new StvProvider();
-        else if (networkId.equals(NetworkId.VBL))
-            return new VblProvider();
-        else if (networkId.equals(NetworkId.ZVV))
-            return new ZvvProvider("{\"type\":\"AID\",\"aid\":\"hf7mcf9bv3nv8g5f\"}");
-        else if (networkId.equals(NetworkId.LU))
-            return new LuProvider("{\"type\":\"AID\",\"aid\":\"SkC81GuwuzL4e0\"}");
-        else if (networkId.equals(NetworkId.NS))
-            return new NsProvider();
-        else if (networkId.equals(NetworkId.DSB))
-            return new DsbProvider("{\"type\":\"AID\",\"aid\":\"irkmpm9mdznstenr-android\"}");
-        else if (networkId.equals(NetworkId.SE))
-            return new SeProvider("{\"type\":\"AID\",\"aid\":\"h5o3n7f4t2m8l9x1\"}");
-        else if (networkId.equals(NetworkId.TLEM))
-            return new TlemProvider();
-        else if (networkId.equals(NetworkId.MERSEY))
-            return new MerseyProvider();
-        else if (networkId.equals(NetworkId.PL))
-            return new PlProvider("{\"type\":\"AID\",\"aid\":\"DrxJYtYZQpEBCtcb\"}");
-        else if (networkId.equals(NetworkId.DUB))
-            return new DubProvider();
-        else if (networkId.equals(NetworkId.BART))
-            return new BartProvider("{\"type\":\"AID\",\"aid\":\"kEwHkFUCIL500dym\"}");
-        else if (networkId.equals(NetworkId.SYDNEY))
-            return new SydneyProvider();
-        else
-            throw new IllegalArgumentException(networkId.name());
     }
 }
