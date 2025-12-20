@@ -68,7 +68,7 @@ public class NetworkResources {
         final int labelId = res.getIdentifier(prefix + "_label", "string", packageName);
         final String label = labelId != 0 ? res.getString(labelId) : networkId.name();
         final int commentId = res.getIdentifier(prefix + "_comment", "string", packageName);
-        final String comment = commentId != 0 ? res.getString(commentId) : null;
+        final String comment = commentId != 0 ? res.getString(commentId) : networkId.getDescriptor().getCoverage().replaceAll(";", ", ");
         final int licenseId = res.getIdentifier(prefix + "_license", "string", packageName);
         final String license = licenseId != 0 ? res.getString(licenseId) : null;
         final boolean cooperation = isLogo;
