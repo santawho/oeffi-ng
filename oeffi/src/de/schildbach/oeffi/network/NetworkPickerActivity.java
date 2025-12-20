@@ -360,8 +360,6 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
         final NetworkProviderFactory networkProviderFactory = NetworkProviderFactory.getInstance();
         for (final NetworkId.Descriptor descriptor : networkProviderFactory.getAvailableNetworks()) {
             final NetworkId networkId = descriptor.getNetworkId();
-            if (networkId == null)
-                log.warn("x");
             final NetworkListEntry entry = new NetworkListEntry.Network(
                     networkId,
                     descriptor.getState(),
