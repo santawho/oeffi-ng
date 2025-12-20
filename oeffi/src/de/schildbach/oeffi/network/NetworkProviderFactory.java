@@ -37,23 +37,17 @@ import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.provider.NetworkProvider;
 import de.schildbach.pte.provider.hafas.NvvProvider;
 import de.schildbach.pte.provider.hafas.OebbProvider;
-import de.schildbach.pte.provider.hafas.OoevvProvider;
 import de.schildbach.pte.provider.hafas.PlProvider;
-import de.schildbach.pte.provider.hafas.RmvProvider;
 import de.schildbach.pte.provider.hafas.SeProvider;
 import de.schildbach.pte.provider.hafas.ShProvider;
 import de.schildbach.pte.Standard;
-import de.schildbach.pte.provider.hafas.SvvProvider;
 import de.schildbach.pte.provider.hafas.VbbProvider;
 import de.schildbach.pte.provider.hafas.VbnProvider;
 import de.schildbach.pte.provider.efa.VgnProvider;
 import de.schildbach.pte.provider.hafas.VgsProvider;
-import de.schildbach.pte.provider.hafas.VmobilProvider;
 import de.schildbach.pte.provider.hafas.VmtProvider;
-import de.schildbach.pte.provider.hafas.VorProvider;
 import de.schildbach.pte.provider.other.VrsProvider;
 import de.schildbach.pte.provider.efa.VvoProvider;
-import de.schildbach.pte.provider.hafas.VvtProvider;
 import de.schildbach.pte.provider.hafas.ZvvProvider;
 import okhttp3.HttpUrl;
 
@@ -111,7 +105,7 @@ public final class NetworkProviderFactory extends de.schildbach.pte.NetworkProvi
         addConfigurator(BvgProvider.class, () -> new BvgProvider("{\"aid\":\"1Rxs112shyHLatUX4fofnmdxK\",\"type\":\"AID\"}"));
         addConfigurator(VbbProvider.class, () -> new VbbProvider("{\"type\":\"AID\",\"aid\":\"hafas-vbb-apps\"}"));
         addConfigurator(NvvProvider.class, () -> new NvvProvider("{\"type\":\"AID\",\"aid\":\"Kt8eNOH7qjVeSxNA\"}"));
-        addConfigurator(RmvProvider.class, () -> new RmvProvider("{\"type\":\"AID\",\"aid\":\"ikfr894fkfddXxA0U\"}"));
+//        addConfigurator(RmvProvider.class, () -> new RmvProvider("{\"type\":\"AID\",\"aid\":\"ikfr894fkfddXxA0U\"}"));
         addConfigurator(InvgProvider.class, () -> new InvgProvider("{\"type\":\"AID\",\"aid\":\"GITvwi3BGOmTQ2a5\"}"));
         addConfigurator(AvvAugsburgProvider.class, () -> new AvvAugsburgProvider("{\"type\":\"AID\",\"aid\":\"jK91AVVZU77xY5oH\"}"));
         addConfigurator(VgnProvider.class, () -> new VgnProvider(HttpUrl.parse("https://efa.vgn.de/vgnExt_oeffi/")));
@@ -130,10 +124,10 @@ public final class NetworkProviderFactory extends de.schildbach.pte.NetworkProvi
         addConfigurator(SeProvider.class, () -> new SeProvider("{\"type\":\"AID\",\"aid\":\"h5o3n7f4t2m8l9x1\"}"));
         addConfigurator(PlProvider.class, () -> new PlProvider("{\"type\":\"AID\",\"aid\":\"DrxJYtYZQpEBCtcb\"}"));
         addConfigurator(BartProvider.class, () -> new BartProvider("{\"type\":\"AID\",\"aid\":\"kEwHkFUCIL500dym\"}"));
-        addConfigurator(VorProvider.class, NetworkId.State.unselectable);
-        addConfigurator(OoevvProvider.class, NetworkId.State.unselectable);
-        addConfigurator(VvtProvider.class, NetworkId.State.unselectable);
-        addConfigurator(SvvProvider.class, NetworkId.State.unselectable);
-        addConfigurator(VmobilProvider.class, NetworkId.State.unselectable);
+//        addConfigurator(VorProvider.class, NetworkId.State.unselectable);
+//        addConfigurator(OoevvProvider.class, NetworkId.State.unselectable);
+//        addConfigurator(VvtProvider.class, NetworkId.State.unselectable);
+//        addConfigurator(SvvProvider.class, NetworkId.State.unselectable);
+//        addConfigurator(VmobilProvider.class, NetworkId.State.unselectable);
     }
 }
