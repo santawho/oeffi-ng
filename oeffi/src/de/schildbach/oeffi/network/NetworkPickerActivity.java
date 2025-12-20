@@ -382,7 +382,7 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
         boolean firstLastUsed = true;
         for (final NetworkId lastNetwork : lastNetworks) {
             final NetworkListEntry networkEntry = entriesMap.get(lastNetwork.name());
-            if (networkEntry != null && ((NetworkListEntry.Network) networkEntry).state != NetworkId.State.disabled) {
+            if (networkEntry != null && ((NetworkListEntry.Network) networkEntry).state.lessThan(NetworkId.State.unselectable)) {
                 if (firstLastUsed) {
                     entries.add(new NetworkListEntry.Separator(getString(R.string.network_picker_separator_last)));
                     firstLastUsed = false;
@@ -451,9 +451,9 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
         if (deviceLocation == null)
             return false;
 
-        if (network.state == NetworkId.State.deprecated
-                || network.state == NetworkId.State.disabled)
-            return false;
+//        if (network.state == NetworkId.State.deprecated
+//                || network.state == NetworkId.State.disabled)
+//            return false;
 
 //        final NetworkProvider networkProvider;
 //        try {

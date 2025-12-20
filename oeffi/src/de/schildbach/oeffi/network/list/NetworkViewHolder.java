@@ -85,11 +85,16 @@ public class NetworkViewHolder extends RecyclerView.ViewHolder {
         labelView.setText(networkRes.label);
         labelView.setTextColor(isEnabled ? colorSignificant : colorLessSignificant);
 
-        if (isEnabled && entry.state != null && entry.state != NetworkId.State.active)
-            stateView.setText(
-                    res.getIdentifier("network_picker_entry_state_" + entry.state, "string", context.getPackageName()));
-        else
+        if (isEnabled && entry.state != null && entry.state != NetworkId.State.active) {
+            final int resIdentifier = res.getIdentifier("network_picker_entry_state_" + entry.state, "string", context.getPackageName());
+            if (resIdentifier == 0) {
+                stateView.setText(entry.state.name());
+            } else {
+                stateView.setText(resIdentifier);
+            }
+        } else {
             stateView.setText(null);
+        }
 
         commentView.setText(networkRes.comment);
         commentView.setTextColor(isEnabled ? colorSignificant : colorLessSignificant);

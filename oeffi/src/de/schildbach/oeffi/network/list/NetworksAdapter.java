@@ -85,7 +85,7 @@ public class NetworksAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             ((SeparatorViewHolder) holder).bind((NetworkListEntry.Separator) entries.get(position));
         } else {
             final NetworkListEntry.Network entry = (NetworkListEntry.Network) entries.get(position);
-            if (entry.state != NetworkId.State.disabled) {
+            if (entry.state.lessThan(NetworkId.State.unselectable)) {
                 ((NetworkViewHolder) holder).bind(entry, true, 0, clickListener, null);
             } else {
                 ((NetworkViewHolder) holder).bind(entry, false, 0, null, null);
