@@ -642,7 +642,7 @@ public abstract class OeffiActivity extends ComponentActivity {
     protected void onMapSetVisible() {
     }
 
-    protected void updateFragments(final int listFrameResId) {
+    protected boolean updateFragments(final int listFrameResId) {
         final Resources res = getResources();
 
         final View listFrame = findViewById(listFrameResId);
@@ -673,6 +673,8 @@ public abstract class OeffiActivity extends ComponentActivity {
             final View child = navigationDrawer.getChildAt(1);
             child.getLayoutParams().width = res.getDimensionPixelSize(R.dimen.layout_navigation_drawer_width);
         }
+
+        return mapShow;
     }
 
     private void setupMapView(final View contentView) {

@@ -256,6 +256,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private int showScreenIdWhenLocked = R.id.navigation_next_event;
 
     private ViewGroup legsGroup;
+    private Space marginView;
     private ToggleImageButton trackButton;
     private boolean mustEnableTrackButton;
 
@@ -321,6 +322,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         ViewCompat.setOnApplyWindowInsetsListener(contentView, (v, windowInsets) -> {
             final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(insets.left, 0, insets.right, 0);
+            marginView.setMinimumHeight(insets.bottom);
             return windowInsets;
         });
 
@@ -332,6 +334,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             bottomOffset.setLayoutParams(layoutParams);
             return windowInsets;
         });
+
+        marginView = findViewById(R.id.directions_trip_details_footer_margin);
 
         actionBar = getMyActionBar();
         actionBar.setBack(isTaskRoot() ? null : v -> goBack());
@@ -503,17 +507,17 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         ((TextView) findViewById(R.id.directions_trip_details_footer))
                 .setText(Html.fromHtml(getString(R.string.directions_trip_details_realtime), Html.FROM_HTML_MODE_COMPACT));
 
-        final View disclaimerView = findViewById(R.id.directions_trip_details_disclaimer_group);
-        ViewCompat.setOnApplyWindowInsetsListener(disclaimerView, (v, windowInsets) -> {
-            final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(0, 0, 0, insets.bottom);
-            return windowInsets;
-        });
-        disclaimerView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
-            final int height = disclaimerView.getHeight() - disclaimerView.getPaddingBottom();
-            final Space marginView = findViewById(R.id.directions_trip_details_footer_margin);
-            marginView.setMinimumHeight(height);
-        });
+//        final View disclaimerView = findViewById(R.id.directions_trip_details_disclaimer_group);
+//        ViewCompat.setOnApplyWindowInsetsListener(disclaimerView, (v, windowInsets) -> {
+//            final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+//            v.setPadding(0, 0, 0, insets.bottom);
+//            return windowInsets;
+//        });
+//        disclaimerView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+//            final int height = disclaimerView.getHeight() - disclaimerView.getPaddingBottom();
+//            final Space marginView = findViewById(R.id.directions_trip_details_footer_margin);
+//            marginView.setMinimumHeight(height);
+//        });
         final TextView disclaimerSourceView = findViewById(R.id.directions_trip_details_disclaimer_source);
         updateDisclaimerSource(disclaimerSourceView, network, null);
 
@@ -814,9 +818,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     protected void updateFragments() {
-        updateFragments(mapIsAtBottom
-                ? R.id.directions_trip_details_list_content
-                : R.id.directions_trip_details_content_frame);
+        if (mapIsAtBottom) {
+            final boolean mapShowing = updateFragments(R.id.directions_trip_details_list_content);
+            ViewUtils.setVisibility(marginView, !mapShowing);
+        } else {
+            updateFragments(R.id.directions_trip_details_content_frame);
+        }
     }
 
     protected boolean updateGUI() {
