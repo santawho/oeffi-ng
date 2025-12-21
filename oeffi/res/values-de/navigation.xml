@@ -191,8 +191,8 @@
     <string name="navigation_event_speak_transfer_start_same_station">gehe zur Abfahrt von %1$s %3$s, %4$s, %5$s</string>
     <string name="navigation_event_speak_transfer_end_reminder">%1$s Abfahrt von %2$s, %3$s, %4$s</string>
     <string name="navigation_event_speak_transfer_preview_same_location">Gehe dort %3$s . %4$s</string>
-    <string name="navigation_event_speak_transfer_preview_different_location">Von dort gehe nach %2$s, %3$s . %4$s</string>
-    <string name="navigation_event_speak_transfer_preview_different_location_no_position">Von dort gehe nach %2$s . %3$s</string>
+    <string name="navigation_event_speak_transfer_preview_different_location">Von dort gehe %2$s, %3$s . %4$s</string>
+    <string name="navigation_event_speak_transfer_preview_different_location_no_position">Von dort gehe %2$s . %3$s</string>
     <string name="navigation_event_speak_final_transfer_start">zum Abschluss gehe nach %1$s</string>
     <string name="navigation_event_speak_public_leg_start">fahre mit %1$s nach %2$s, Ankunft %4$s, %5$s</string>
     <string name="navigation_event_speak_public_leg_end">Ankunft in %1$s</string>
@@ -204,6 +204,9 @@
     <string name="navigation_event_speak_departure_position_change">der Steig der nächsten Abfahrt hat sich geändert: %1$s</string>
     <string name="navigation_event_speak_arrival_position_change">der Steig der nächsten Ankunft hat sich geändert: %1$s</string>
     <string name="navigation_event_speak_linename">%1$s%2$s Richtung %3$s</string>
+    <string name="navigation_event_speak_product_highspeed_train"></string>
+    <string name="navigation_event_speak_product_regional_train"></string>
+    <string name="navigation_event_speak_product_suburban_train"></string>
     <string name="navigation_event_speak_product_subway">U-Bahn</string>
     <string name="navigation_event_speak_product_tram">Straßenbahn</string>
     <string name="navigation_event_speak_product_bus">Bus</string>
@@ -211,6 +214,17 @@
     <string name="navigation_event_speak_product_cablecar">Seilbahn</string>
     <string name="navigation_event_speak_product_ondemand">Bedarfsverkehr</string>
     <string name="navigation_event_speak_product_replacement">Ersatzverkehr</string>
+    <string name="navigation_event_speak_to_destination">nach %1$s</string>
+    <string name="navigation_event_speak_to_station_highspeed_train">zum Bahnhof %1$s</string>
+    <string name="navigation_event_speak_to_station_regional_train">zum Bahnhof %1$s</string>
+    <string name="navigation_event_speak_to_station_suburban_train">zum Bahnhof %1$s</string>
+    <string name="navigation_event_speak_to_station_subway">zur U-Bahn-Station %1$s</string>
+    <string name="navigation_event_speak_to_station_tram">zur Straßenbahn-Haltestelle %1$s</string>
+    <string name="navigation_event_speak_to_station_bus">zur Bus-Haltestelle %1$s</string>
+    <string name="navigation_event_speak_to_station_ferry">zum Fähranleger %1$s</string>
+    <string name="navigation_event_speak_to_station_cablecar">zur Seilbahn-Station %1$s</string>
+    <string name="navigation_event_speak_to_station_ondemand">zur Bedarfsverkehr-Haltestelle %1$s</string>
+    <string name="navigation_event_speak_to_station_replacement">zur Ersatzverkehr-Haltestelle %1$s</string>
 
     <string name="navigation_event_notify_notime_left_front_format">jetzt</string>
     <string name="navigation_event_notify_time_left_front_format">%1$s min -&gt;</string>
@@ -235,8 +249,8 @@
     <string name="navigation_event_notify_transfer_start_same_station">Gehe zur Abf. %1$s %3$s, plan %4$s, prog %5$s, %6$s, %7$s</string>
     <string name="navigation_event_notify_transfer_end_reminder">%1$s Abfahrt %2$s an %3$s, prog %4$s, %5$s</string>
     <string name="navigation_event_notify_transfer_preview_same_location">In %1$s gehe zu %3$s. %4$s</string>
-    <string name="navigation_event_notify_transfer_preview_different_location">In %1$s gehe nach %2$s, %3$s. %4$s</string>
-    <string name="navigation_event_notify_transfer_preview_different_location_no_position">In %1$s gehe nach %2$s. %3$s</string>
+    <string name="navigation_event_notify_transfer_preview_different_location">In %1$s gehe %2$s, %3$s. %4$s</string>
+    <string name="navigation_event_notify_transfer_preview_different_location_no_position">In %1$s gehe %2$s. %3$s</string>
     <string name="navigation_event_notify_final_transfer_start">schließlich gehe nach %1$s</string>
     <string name="navigation_event_notify_departure_delay_change">Versp. Abfahrt %1$s in %2$s: %3$s, prog %4$s, %5$s</string>
     <string name="navigation_event_notify_arrival_delay_change">Versp. Ankunft %1$s in %2$s: %3$s, prog %4$s, %5$s</string>
@@ -244,6 +258,9 @@
     <string name="navigation_event_notify_arrival_position_change">Neuer Steig %1$s Ankunft %2$s in %3$s, plan %4$s</string>
     <string name="navigation_event_notify_next_transfer_critical">Der nächste Umstieg is kritisch. %1$s</string>
     <string name="navigation_event_notify_any_transfer_critical">Einige Umstiege sind kritisch</string>
+    <string name="navigation_event_notify_product_highspeed_train"></string>
+    <string name="navigation_event_notify_product_regional_train"></string>
+    <string name="navigation_event_notify_product_suburban_train"></string>
     <string name="navigation_event_notify_product_subway">U-Bahn</string>
     <string name="navigation_event_notify_product_tram">Tram</string>
     <string name="navigation_event_notify_product_bus">Bus</string>
@@ -251,5 +268,16 @@
     <string name="navigation_event_notify_product_cablecar">Seilbahn</string>
     <string name="navigation_event_notify_product_ondemand">Bedarfsverkehr</string>
     <string name="navigation_event_notify_product_replacement">Ersatzverkehr</string>
+    <string name="navigation_event_notify_to_destination">nach %1$s</string>
+    <string name="navigation_event_notify_to_station_highspeed_train">nach %1$s (Bahn)</string>
+    <string name="navigation_event_notify_to_station_regional_train">nach %1$s (Bahn)</string>
+    <string name="navigation_event_notify_to_station_suburban_train">nach %1$s (S-Bahn)</string>
+    <string name="navigation_event_notify_to_station_subway">nach %1$s (U-Bahn)</string>
+    <string name="navigation_event_notify_to_station_tram">nach %1$s (Tram)</string>
+    <string name="navigation_event_notify_to_station_bus">nach %1$s (Bus)</string>
+    <string name="navigation_event_notify_to_station_ferry">nach %1$s (Fähre)</string>
+    <string name="navigation_event_notify_to_station_cablecar">nach %1$s (Seilbahn)</string>
+    <string name="navigation_event_notify_to_station_ondemand">nach %1$s (Bedarfsverkehr)</string>
+    <string name="navigation_event_notify_to_station_replacement">nach %1$s (Ersatzverkehr)</string>
 
 </resources>

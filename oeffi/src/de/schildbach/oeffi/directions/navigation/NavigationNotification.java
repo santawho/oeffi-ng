@@ -1580,7 +1580,7 @@ public class NavigationNotification {
 
     private String platformForNotificationMessage(final Position prevPosition, final Position newPosition) {
         final String prevText = prevPosition == null ? "?" : prevPosition.toString();
-        final String newText = newPosition == null ? "?" : newPosition.toString();
+        final String newText = newPosition == null ? prevText : newPosition.toString();
         if (prevText.equals(newText))
             return context.getString(R.string.navigation_event_notify_position_unchanged_format, newText);
         return context.getString(R.string.navigation_event_notify_position_changed_format, newText, prevText);
@@ -1784,19 +1784,22 @@ public class NavigationNotification {
         final Position departurePosition = departureLeg.getDeparturePosition();
         final String arrivalLocationName = Formats.fullLocationNameIfDifferentPlace(arrivalLocation, originLocation);
         final String departureLocationName = Formats.fullLocationNameIfDifferentPlace(departureLocation, arrivalLocation);
+        final Line departureLine = departureLeg.line;
+        final String speakableDestination = makeSpeakableDestination(departureLine, departureLocationName);
+        final String notificationDestination = makeNotificationDestination(departureLine, departureLocationName);
         if (sameLocation) {
             if (departurePosition != null) {
                 newSpeakTexts.add(context.getString(
                         R.string.navigation_event_speak_transfer_preview_same_location,
                         arrivalLocationName,
-                        departureLocationName,
+                        speakableDestination,
                         platformForSpeakText(false, departureLeg.departureStop.plannedDeparturePosition, departurePosition),
                         transferTimeForSpeakText(tripRenderer)));
                 if (isEventNotificationsEnabled && outputNotification) {
                     newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
                             R.string.navigation_event_notify_transfer_preview_same_location,
                             arrivalLocationName,
-                            departureLocationName,
+                            notificationDestination,
                             platformForNotificationMessage(departureLeg.departureStop.plannedDeparturePosition, departurePosition),
                             transferTimeForNotificationText(tripRenderer))));
                 }
@@ -1806,14 +1809,14 @@ public class NavigationNotification {
                 newSpeakTexts.add(context.getString(
                         R.string.navigation_event_speak_transfer_preview_different_location,
                         arrivalLocationName,
-                        departureLocationName,
+                        speakableDestination,
                         platformForSpeakText(false, departureLeg.departureStop.plannedDeparturePosition, departurePosition),
                         transferTimeForSpeakText(tripRenderer)));
                 if (isEventNotificationsEnabled && outputNotification) {
                     newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
                             R.string.navigation_event_notify_transfer_preview_different_location,
                             arrivalLocationName,
-                            departureLocationName,
+                            notificationDestination,
                             platformForNotificationMessage(departureLeg.departureStop.plannedDeparturePosition, departurePosition),
                             transferTimeForNotificationText(tripRenderer))));
                 }
@@ -1821,13 +1824,13 @@ public class NavigationNotification {
                 newSpeakTexts.add(context.getString(
                         R.string.navigation_event_speak_transfer_preview_different_location_no_position,
                         arrivalLocationName,
-                        departureLocationName,
+                        speakableDestination,
                         transferTimeForSpeakText(tripRenderer)));
                 if (isEventNotificationsEnabled && outputNotification) {
                     newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
                             R.string.navigation_event_notify_transfer_preview_different_location_no_position,
                             arrivalLocationName,
-                            departureLocationName,
+                            notificationDestination,
                             transferTimeForNotificationText(tripRenderer))));
                 }
             }
@@ -2189,37 +2192,43 @@ public class NavigationNotification {
         return (isNegative ? "-" : positivePrefix) + Long.toString(minutes) + " " + context.getString(R.string.time_minutes);
     }
 
-    private static Map<Product, String> notificationProducts;
-
-    private String makeNotificationLineName(final Line line, final Location destination, final Location refLocation) {
-        if (notificationProducts == null) {
-            notificationProducts = new HashMap<>();
-            notificationProducts.put(Product.SUBWAY, context.getString(R.string.navigation_event_notify_product_subway));
-            notificationProducts.put(Product.TRAM, context.getString(R.string.navigation_event_notify_product_tram));
-            notificationProducts.put(Product.BUS, context.getString(R.string.navigation_event_notify_product_bus));
-            notificationProducts.put(Product.FERRY, context.getString(R.string.navigation_event_notify_product_ferry));
-            notificationProducts.put(Product.CABLECAR, context.getString(R.string.navigation_event_notify_product_cablecar));
-            notificationProducts.put(Product.ON_DEMAND, context.getString(R.string.navigation_event_notify_product_ondemand));
-            notificationProducts.put(Product.REPLACEMENT_SERVICE, context.getString(R.string.navigation_event_notify_product_replacement));
-        }
-        final String notificationDestination = Formats.fullLocationNameIfDifferentPlace(destination, refLocation);
-        final String notificationProduct = notificationProducts.get(line.product);
-        return (notificationProduct == null ? "" : notificationProduct + " ") + line.label + "->" + notificationDestination;
+    private static final Map<Product, Integer> notificationProducts = new HashMap<>();
+    static {
+        notificationProducts.put(Product.HIGH_SPEED_TRAIN, R.string.navigation_event_notify_product_highspeed_train);
+        notificationProducts.put(Product.REGIONAL_TRAIN, R.string.navigation_event_notify_product_regional_train);
+        notificationProducts.put(Product.SUBURBAN_TRAIN, R.string.navigation_event_notify_product_suburban_train);
+        notificationProducts.put(Product.SUBWAY, R.string.navigation_event_notify_product_subway);
+        notificationProducts.put(Product.TRAM, R.string.navigation_event_notify_product_tram);
+        notificationProducts.put(Product.BUS, R.string.navigation_event_notify_product_bus);
+        notificationProducts.put(Product.FERRY, R.string.navigation_event_notify_product_ferry);
+        notificationProducts.put(Product.CABLECAR, R.string.navigation_event_notify_product_cablecar);
+        notificationProducts.put(Product.ON_DEMAND, R.string.navigation_event_notify_product_ondemand);
+        notificationProducts.put(Product.REPLACEMENT_SERVICE, R.string.navigation_event_notify_product_replacement);
     }
 
-    private static Map<Product, String> speakableProducts;
+    private String makeNotificationLineName(final Line line, final Location destination, final Location refLocation) {
+        final String destinationName = Formats.fullLocationNameIfDifferentPlace(destination, refLocation);
+        final Integer notificationProductResId = notificationProducts.get(line.product);
+        final String notificationProduct = notificationProductResId == null ? null : context.getString(notificationProductResId);
+        return (notificationProduct == null || notificationProduct.isEmpty() ? "" : notificationProduct + " ")
+                + line.label + "->" + destinationName;
+    }
+
+    private static final Map<Product, Integer> speakableProducts = new HashMap<>();
+    static {
+        speakableProducts.put(Product.HIGH_SPEED_TRAIN, R.string.navigation_event_speak_product_highspeed_train);
+        speakableProducts.put(Product.REGIONAL_TRAIN, R.string.navigation_event_speak_product_regional_train);
+        speakableProducts.put(Product.SUBURBAN_TRAIN, R.string.navigation_event_speak_product_suburban_train);
+        speakableProducts.put(Product.SUBWAY, R.string.navigation_event_speak_product_subway);
+        speakableProducts.put(Product.TRAM, R.string.navigation_event_speak_product_tram);
+        speakableProducts.put(Product.BUS, R.string.navigation_event_speak_product_bus);
+        speakableProducts.put(Product.FERRY, R.string.navigation_event_speak_product_ferry);
+        speakableProducts.put(Product.CABLECAR, R.string.navigation_event_speak_product_cablecar);
+        speakableProducts.put(Product.ON_DEMAND, R.string.navigation_event_speak_product_ondemand);
+        speakableProducts.put(Product.REPLACEMENT_SERVICE, R.string.navigation_event_speak_product_replacement);
+    }
 
     private String makeSpeakableLineName(final Line line, final Location destination, final Location refLocation) {
-        if (speakableProducts == null) {
-            speakableProducts = new HashMap<>();
-            speakableProducts.put(Product.SUBWAY, context.getString(R.string.navigation_event_speak_product_subway));
-            speakableProducts.put(Product.TRAM, context.getString(R.string.navigation_event_speak_product_tram));
-            speakableProducts.put(Product.BUS, context.getString(R.string.navigation_event_speak_product_bus));
-            speakableProducts.put(Product.FERRY, context.getString(R.string.navigation_event_speak_product_ferry));
-            speakableProducts.put(Product.CABLECAR, context.getString(R.string.navigation_event_speak_product_cablecar));
-            speakableProducts.put(Product.ON_DEMAND, context.getString(R.string.navigation_event_speak_product_ondemand));
-            speakableProducts.put(Product.REPLACEMENT_SERVICE, context.getString(R.string.navigation_event_speak_product_replacement));
-        }
         final String lineName = line.label;
         if (lineName == null || lineName.length() <= 1)
             return lineName;
@@ -2239,12 +2248,58 @@ public class NavigationNotification {
             prevChar = ch;
         }
         final String speakableLineName = builder.toString();
-        final String speakableDestination = Formats.fullLocationNameIfDifferentPlace(destination, refLocation);
-        final String speakableProduct = speakableProducts.get(line.product);
+        final String destinationName = Formats.fullLocationNameIfDifferentPlace(destination, refLocation);
+        final Integer speakableProductResId = speakableProducts.get(line.product);
+        final String speakableProduct = speakableProductResId == null ? null : context.getString(speakableProductResId);
         return context.getString(R.string.navigation_event_speak_linename,
-                speakableProduct == null ? "" : speakableProduct + " ",
+                speakableProduct == null || speakableProduct.isEmpty() ? "" : speakableProduct + " ",
                 speakableLineName,
-                speakableDestination);
+                destinationName);
     }
 
+    private static final Map<Product, Integer> notificationDestinations = new HashMap<>();
+    static {
+        notificationDestinations.put(Product.HIGH_SPEED_TRAIN, R.string.navigation_event_notify_to_station_highspeed_train);
+        notificationDestinations.put(Product.REGIONAL_TRAIN, R.string.navigation_event_notify_to_station_regional_train);
+        notificationDestinations.put(Product.SUBURBAN_TRAIN, R.string.navigation_event_notify_to_station_suburban_train);
+        notificationDestinations.put(Product.SUBWAY, R.string.navigation_event_notify_to_station_subway);
+        notificationDestinations.put(Product.TRAM, R.string.navigation_event_notify_to_station_tram);
+        notificationDestinations.put(Product.BUS, R.string.navigation_event_notify_to_station_bus);
+        notificationDestinations.put(Product.FERRY, R.string.navigation_event_notify_to_station_ferry);
+        notificationDestinations.put(Product.CABLECAR, R.string.navigation_event_notify_to_station_cablecar);
+        notificationDestinations.put(Product.ON_DEMAND, R.string.navigation_event_notify_to_station_ondemand);
+        notificationDestinations.put(Product.REPLACEMENT_SERVICE, R.string.navigation_event_notify_to_station_replacement);
+    }
+
+    private String makeNotificationDestination(final Line line, final String destinationName) {
+        final Integer notificationDestinationFormatResId = line == null ? null : notificationDestinations.get(line.product);
+        return context.getString(
+                notificationDestinationFormatResId == null
+                        ? R.string.navigation_event_notify_to_destination
+                        : notificationDestinationFormatResId,
+                destinationName);
+    }
+
+    private static final Map<Product, Integer> speakableDestinations = new HashMap<>();
+    static {
+        speakableDestinations.put(Product.HIGH_SPEED_TRAIN, R.string.navigation_event_speak_to_station_highspeed_train);
+        speakableDestinations.put(Product.REGIONAL_TRAIN, R.string.navigation_event_speak_to_station_regional_train);
+        speakableDestinations.put(Product.SUBURBAN_TRAIN, R.string.navigation_event_speak_to_station_suburban_train);
+        speakableDestinations.put(Product.SUBWAY, R.string.navigation_event_speak_to_station_subway);
+        speakableDestinations.put(Product.TRAM, R.string.navigation_event_speak_to_station_tram);
+        speakableDestinations.put(Product.BUS, R.string.navigation_event_speak_to_station_bus);
+        speakableDestinations.put(Product.FERRY, R.string.navigation_event_speak_to_station_ferry);
+        speakableDestinations.put(Product.CABLECAR, R.string.navigation_event_speak_to_station_cablecar);
+        speakableDestinations.put(Product.ON_DEMAND, R.string.navigation_event_speak_to_station_ondemand);
+        speakableDestinations.put(Product.REPLACEMENT_SERVICE, R.string.navigation_event_speak_to_station_replacement);
+    }
+
+    private String makeSpeakableDestination(final Line line, final String destinationName) {
+        final Integer speakableDestinationFormatResId = line == null ? null : speakableDestinations.get(line.product);
+        return context.getString(
+                speakableDestinationFormatResId == null
+                        ? R.string.navigation_event_speak_to_destination
+                        : speakableDestinationFormatResId,
+                destinationName);
+    }
 }
