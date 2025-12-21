@@ -5,7 +5,7 @@
 
     <string name="network_rt_label">Europa</string>
     <string name="network_rt_comment">nur Fernverkehr</string>
-    <string name="network_deutschlandticket_label">Deutschland-Ticket</string>
+    <string name="network_deutschlandticket_label">Deutschland-Ticket (DB)</string>
     <string name="network_deutschlandticket_comment">Deutschland, optimiert für das Deutschland-Ticket (Regionalverkehr); durch Deutsche Bahn</string>
     <string name="network_db_label">Deutsche Bahn</string>
     <string name="network_db_comment">Deutschland, Fern- und Regionalverkehr</string>

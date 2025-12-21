@@ -4,7 +4,7 @@
 
     <string name="network_rt_label">Europe</string>
     <string name="network_rt_comment">long-distance only</string>
-    <string name="network_deutschlandticket_label">Deutschland-Ticket</string>
+    <string name="network_deutschlandticket_label">Deutschland-Ticket (DB)</string>
     <string name="network_deutschlandticket_comment">Germany, optimized for Deutschland-Ticket (regional traffic); by Deutsche Bahn</string>
     <string name="network_db_label">Deutsche Bahn</string>
     <string name="network_db_comment">Germany, long-distance and regional</string>
