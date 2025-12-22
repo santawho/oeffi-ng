@@ -235,8 +235,8 @@
     <string name="navigation_event_speak_any_transfer_critical">some transfers are critical</string>
     <string name="navigation_event_speak_departure_delay_change">the delay of the next departure has changed: %1$s, %2$s</string>
     <string name="navigation_event_speak_arrival_delay_change">the delay of the next arrival has changed: %1$s, %2$s</string>
-    <string name="navigation_event_speak_departure_position_change">the platform of the next departure has changed: %1$s</string>
-    <string name="navigation_event_speak_arrival_position_change">the platform of the next arrival has changed: %1$s</string>
+    <string name="navigation_event_speak_departure_position_change">the platform of the next departure has changed: departure %1$s</string>
+    <string name="navigation_event_speak_arrival_position_change">the platform of the next arrival has changed: departure %1$s</string>
     <string name="navigation_event_speak_linename">%1$s%2$s towards %3$s</string>
     <string name="navigation_event_speak_product_highspeed_train"></string>
     <string name="navigation_event_speak_product_regional_train"></string>

@@ -201,8 +201,8 @@
     <string name="navigation_event_speak_any_transfer_critical">Einige Umstiege sind kritisch</string>
     <string name="navigation_event_speak_departure_delay_change">die Verspätung der nächsten Abfahrt hat sich geändert: %1$s, %2$s</string>
     <string name="navigation_event_speak_arrival_delay_change">die Verspätung der nächsten Ankunft hat sich geändert: %1$s, %2$s</string>
-    <string name="navigation_event_speak_departure_position_change">der Steig der nächsten Abfahrt hat sich geändert: %1$s</string>
-    <string name="navigation_event_speak_arrival_position_change">der Steig der nächsten Ankunft hat sich geändert: %1$s</string>
+    <string name="navigation_event_speak_departure_position_change">der Steig der nächsten Abfahrt wurde geändert: Abfahrt %1$s</string>
+    <string name="navigation_event_speak_arrival_position_change">der Steig der nächsten Ankunft wurde geändert: Abfahrt %1$s</string>
     <string name="navigation_event_speak_linename">%1$s%2$s Richtung %3$s</string>
     <string name="navigation_event_speak_product_highspeed_train"></string>
     <string name="navigation_event_speak_product_regional_train"></string>
