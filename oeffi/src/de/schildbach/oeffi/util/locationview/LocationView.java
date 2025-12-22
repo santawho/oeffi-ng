@@ -363,12 +363,13 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
                 }
             });
 
-    private void setToCurrentLocation() {
+    public void setToCurrentLocation() {
         if (ContextCompat.checkSelfPermission(getContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             acquireLocation();
-        else
+        } else {
             requestLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
     }
 
     private void selectFromContacts() {

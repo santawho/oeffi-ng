@@ -19,6 +19,9 @@ package de.schildbach.oeffi.util.locationview;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.location.Criteria;
+import android.location.LocationManager;
 import android.os.Handler;
 
 import java.util.ArrayList;
@@ -28,13 +31,18 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
+import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.util.LocationHelper;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
+import de.schildbach.pte.dto.Point;
 import de.schildbach.pte.dto.Product;
 
 public class AutoCompleteLocationsHandler {
+    public static final String HERE_LOCATION = "@here";
+
     public static class Result {
         public boolean success;
         public Location location;
@@ -65,25 +73,78 @@ public class AutoCompleteLocationsHandler {
             locationView.reset();
         if (constraint == null)
             return;
+
+        final boolean isHereLocation = constraint.equals(HERE_LOCATION);
+
         if (locationView != null) {
-            locationView.setLocation(null);
-            locationView.setText(constraint);
+            if (isHereLocation) {
+                locationView.setToCurrentLocation();
+            } else {
+                locationView.setLocation(null);
+                locationView.setText(constraint);
+            }
         }
 
         jobs.add(() -> {
-            final List<Location> locations = LocationSuggestionsCollector.collectSuggestions(
-                    constraint,
-                    EnumSet.of(LocationType.STATION, LocationType.ADDRESS, LocationType.POI),
-                    network, null);
-            final Location location = getMatchingLocation(locations);
-            if (location != null) {
-                activity.runOnUiThread(() -> {
-                    if (locationView != null)
-                        locationView.setLocation(location);
-                    jobFinished(location);
-                });
+            if (isHereLocation) {
+                final LocationHelper locationHelper = new LocationHelper(
+                        (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE),
+                        new LocationHelper.Callback() {
+                            boolean done;
+
+                            void onLocationFinished() {
+                                if (!done) {
+                                    done = true;
+                                    jobFinished(null);
+                                }
+                            }
+
+                            @Override
+                            public void onLocationStart(final String provider) {
+                            }
+
+                            @Override
+                            public void onLocationStop(final boolean timedOut) {
+                                onLocationFinished();
+                            }
+
+                            @Override
+                            public void onLocationFail() {
+                                onLocationFinished();
+                            }
+
+                            @Override
+                            public void onLocation(final Point here) {
+                                if (done)
+                                    return;
+                                done = true;
+                                final Location location = Location.coord(here);
+                                activity.runOnUiThread(() -> {
+                                    if (locationView != null)
+                                        locationView.setLocation(location);
+                                    jobFinished(location);
+                                });
+                            }
+                        });
+                final Criteria criteria = new Criteria();
+                criteria.setPowerRequirement(Criteria.POWER_MEDIUM);
+                criteria.setAccuracy(Criteria.ACCURACY_COARSE);
+                locationHelper.startLocation(criteria, true, Constants.LOCATION_FOREGROUND_UPDATE_TIMEOUT_MS);
             } else {
-                jobFinished(null);
+                final List<Location> locations = LocationSuggestionsCollector.collectSuggestions(
+                        constraint,
+                        EnumSet.of(LocationType.STATION, LocationType.ADDRESS, LocationType.POI),
+                        network, null);
+                final Location location = getMatchingLocation(locations);
+                if (location != null) {
+                    activity.runOnUiThread(() -> {
+                        if (locationView != null)
+                            locationView.setLocation(location);
+                        jobFinished(location);
+                    });
+                } else {
+                    jobFinished(null);
+                }
             }
         });
     }

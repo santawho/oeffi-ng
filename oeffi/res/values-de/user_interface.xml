@@ -80,6 +80,7 @@
         \"<i>in 1 Minute</i>\",
         \"<i>in 30 Minuten</i>\"
         sein könnte.
+        Und statt einem benannten Ort kannst Du \"<i>hier</i>\" sagen.
     </string>
 
     <string name="user_interface_location_selector_category_title">Schnelle Ortswahl</string>

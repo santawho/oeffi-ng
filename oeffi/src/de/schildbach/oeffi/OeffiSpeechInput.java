@@ -29,11 +29,14 @@ import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.stations.StationsActivity;
 import de.schildbach.oeffi.util.SpeechInput;
+import de.schildbach.oeffi.util.locationview.AutoCompleteLocationsHandler;
 
 public class OeffiSpeechInput extends SpeechInput {
     private final String TIME_PATTERN_EN = "((at (?<ABSHOUR>~N)( ((?<ABSMINUTE>~N)|o'clock))?)|(in (?<RELMINUTES>~N) minutes?)|(in (?<RELHOURS>~N) hours?))";
 //    private final String TIME_PATTERN_DE = "((um (?[0-9][0-9]?):([0-9][0-9]) uhr)|(um (?<ABSHOUR>~N) uhr( (?<ABSMINUTE>~N))?)|(in (?<RELONEMINUTE>einer) minute)|(in (?<RELMINUTES>~N) minuten)|(in (?<RELONEHOUR>einer) stunde)|(in (?<RELHOURS>~N) stunden))";
     private final String TIME_PATTERN_DE = "((um (?<ABSHOUR>~N)(:(?<ABSMINUTE>~N))? uhr)|(in (?<RELONEMINUTE>einer) minute)|(in (?<RELMINUTES>~N) minuten)|(in (?<RELONEHOUR>einer) stunde)|(in (?<RELHOURS>~N) stunden))";
+    private final String LOCATION_HERE_EN = "here";
+    private final String LOCATION_HERE_DE = "hier";
 
     public class CommandWithTimeDefinition extends SpeechInput.CommandDefinition<CommandWithTimeDefinition> {
         protected CommandWithTimeDefinition(final String commandName) {
@@ -103,9 +106,9 @@ public class OeffiSpeechInput extends SpeechInput {
                 .pattern("("+ TIME_PATTERN_DE + " )?von (?<FROM>.+) nach (?<TO>.+)")
                 .action((aContext, commandDefinition, fields, language) -> {
                     final DirectionsActivity.Command command = new DirectionsActivity.Command();
-                    command.fromText = fields.get("FROM");
-                    command.toText = fields.get("TO");
-                    command.viaText = fields.get("VIA");
+                    command.fromText = transformSpecialLocations(fields.get("FROM"));
+                    command.toText = transformSpecialLocations(fields.get("TO"));
+                    command.viaText = transformSpecialLocations(fields.get("VIA"));
                     command.time = commandDefinition.getTimeSpec(fields, language);
                     if (command.time == null)
                         command.time = new TimeSpec.Relative(0);
@@ -124,12 +127,29 @@ public class OeffiSpeechInput extends SpeechInput {
                 .pattern("abfahrten( in)? (?<LOC>.+)")
                 .action((aContext, commandDefinition, fields, language) -> {
                     final StationsActivity.Command command = new StationsActivity.Command();
-                    command.atText = fields.get("LOC");
+                    command.atText = transformSpecialLocations(fields.get("LOC"));
                     command.time = commandDefinition.getTimeSpec(fields, language);
                     log.info("speech control: departures at {}", command.atText);
                     StationsActivity.start(aContext, command, Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     return true;
                 });
+    }
+
+    private String transformSpecialLocations(final String spokenLocation) {
+        if (spokenLocation == null)
+            return null;
+        final String activeLanguage = getActiveLanguage();
+        final String spokenHere;
+        if ("en".equals(activeLanguage)) {
+            spokenHere = LOCATION_HERE_EN;
+        } else if ("de".equals(activeLanguage)) {
+            spokenHere = LOCATION_HERE_DE;
+        } else {
+            spokenHere = null;
+        }
+        if (spokenLocation.equals(spokenHere))
+            return AutoCompleteLocationsHandler.HERE_LOCATION;
+        return spokenLocation;
     }
 
     @Override

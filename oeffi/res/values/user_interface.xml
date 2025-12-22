@@ -91,6 +91,7 @@
         \"<i>in ten minutes</i>\",
         \"<i>in one hour</i>\",
         \"<i>in two hours</i>\".
+        And instead of a named location, you can say \"<i>here</i>\".
     </string>
 
     <string name="user_interface_location_selector_category_title">Quick Location Selector</string>
