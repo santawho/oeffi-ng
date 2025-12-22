@@ -40,21 +40,27 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public abstract class QueryDeparturesRunnable implements Runnable {
-    private final Handler handler;
+    protected final Handler handler;
 
-    private final NetworkProvider networkProvider;
-    private final String stationId;
-    private final Date fromTime;
-    private final int maxDepartures;
+    protected final NetworkProvider networkProvider;
+    protected final String stationId;
+    protected final boolean equivs;
+    protected final Date fromTime;
+    protected final int maxDepartures;
 
-    private static final Logger log = LoggerFactory.getLogger(QueryDeparturesRunnable.class);
+    protected static final Logger log = LoggerFactory.getLogger(QueryDeparturesRunnable.class);
 
     public QueryDeparturesRunnable(
-            final Handler handler, final NetworkProvider networkProvider,
-            final String stationId, final Date time, final int maxDepartures) {
+            final Handler handler,
+            final NetworkProvider networkProvider,
+            final String stationId,
+            final boolean equivs,
+            final Date time,
+            final int maxDepartures) {
         this.handler = handler;
         this.networkProvider = networkProvider;
         this.stationId = stationId;
+        this.equivs = equivs;
         this.fromTime = time != null ? time : new Date();
         this.maxDepartures = maxDepartures;
     }
@@ -77,7 +83,7 @@ public abstract class QueryDeparturesRunnable implements Runnable {
 
             try {
                 final QueryDeparturesResult result = networkProvider.queryDepartures(
-                        stationId, fromTime, maxDepartures, true);
+                        stationId, fromTime, maxDepartures, equivs, null);
 
                 postOnResult(result);
                 break;

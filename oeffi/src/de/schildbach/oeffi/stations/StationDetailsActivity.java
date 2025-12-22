@@ -431,7 +431,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
         backgroundHandler.removeCallbacksAndMessages(null);
         backgroundHandler
-                .post(new QueryDeparturesRunnable(handler, networkProvider, requestedStationId, fromTime, MAX_DEPARTURES) {
+                .post(new QueryDeparturesRunnable(handler, networkProvider, requestedStationId, true, fromTime, MAX_DEPARTURES) {
                     @Override
                     protected void onPreExecute() {
                         swipeRefresh.setRefreshing(true);
