@@ -176,6 +176,7 @@
     <string name="navigation_event_speak_time_left_end_negative_format">das war vor %1$s min</string>
     <string name="navigation_event_speak_transfer_time_standard_format">Anschluss in %1$s min</string>
     <string name="navigation_event_speak_transfer_time_critical_format">Anschluss in nur noch %1$s min</string>
+    <string name="navigation_event_speak_transfer_time_very_critical_format">Anschluss in kritischer Zeit von nur noch %1$s min</string>
     <string name="navigation_event_speak_transfer_time_missed_format">Anschluss verpasst um %1$s min</string>
     <string name="navigation_event_speak_times_nodelay_format">um %1$s</string>
     <string name="navigation_event_speak_times_delayed_format">verspätet um %3$s min, erwartet um %2$s</string>

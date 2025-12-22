@@ -1616,16 +1616,18 @@ public class NavigationNotification {
     }
 
     private String transferTimeForSpeakText(final TripRenderer tripRenderer) {
-        final int formatStringId;
-        if (tripRenderer.nextEventTransferLeftTimeExtremelyCritical)
-            formatStringId = R.string.navigation_event_speak_transfer_time_missed_format;
-        else if (tripRenderer.nextEventTransferLeftTimeCritical)
-            formatStringId = R.string.navigation_event_speak_transfer_time_critical_format;
-        else
-            formatStringId = R.string.navigation_event_speak_transfer_time_standard_format;
-
         String minutesText = tripRenderer.nextEventTransferLeftTimeValue;
-        if (minutesText.startsWith("-")) minutesText = minutesText;
+        final int formatStringId;
+        if (minutesText.startsWith("-")) {
+            formatStringId = R.string.navigation_event_speak_transfer_time_missed_format;
+            minutesText = minutesText.substring(1);
+        } else if (tripRenderer.nextEventTransferLeftTimeExtremelyCritical) {
+            formatStringId = R.string.navigation_event_speak_transfer_time_very_critical_format;
+        } else if (tripRenderer.nextEventTransferLeftTimeCritical) {
+            formatStringId = R.string.navigation_event_speak_transfer_time_critical_format;
+        } else {
+            formatStringId = R.string.navigation_event_speak_transfer_time_standard_format;
+        }
 
         return context.getString(formatStringId, minutesText);
     }

@@ -210,6 +210,7 @@
     <string name="navigation_event_speak_time_left_end_negative_format">that was %1$s min ago</string>
     <string name="navigation_event_speak_transfer_time_standard_format">connection in %1$s min</string>
     <string name="navigation_event_speak_transfer_time_critical_format">connection in only %1$s min</string>
+    <string name="navigation_event_speak_transfer_time_very_critical_format">connection in critical time of %1$s min</string>
     <string name="navigation_event_speak_transfer_time_missed_format">connection missed by %1$s min</string>
     <string name="navigation_event_speak_times_nodelay_format">at %1$s</string>
     <string name="navigation_event_speak_times_delayed_format">delayed by %3$s min, estimated at %2$s</string>
