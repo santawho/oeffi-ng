@@ -101,7 +101,8 @@ public final class TripsGalleryAdapter extends BaseAdapter {
     private final Paint publicTimePaint = new Paint();
     private final Paint publicTimeDiffPaint = new Paint();
     private final Paint positionPaint = new Paint();
-    private final Paint positionPaintBackground = new Paint();
+    private final Paint plannedPositionPaintBackground = new Paint();
+    private final Paint changedPositionPaintBackground = new Paint();
     private final Paint feederStrokePaint = new Paint();
     private final Paint connectionStrokePaint = new Paint();
     private final Paint durationPaint = new Paint();
@@ -150,6 +151,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             colorSignificantInverse = res.getColor(R.color.fg_significant_inverse);
             colorDelayed = res.getColor(R.color.bg_delayed);
         }
+        final int colorPositionChanged = res.getColor(R.color.bg_position_changed);
         positionPaddingHorizontal = res.getDimensionPixelSize(R.dimen.text_padding_horizontal);
         positionPaddingVertical = res.getDimensionPixelSize(R.dimen.text_padding_vertical);
 
@@ -198,7 +200,8 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         publicTimeDiffPaint.setAntiAlias(true);
         publicTimeDiffPaint.setTextAlign(Align.CENTER);
 
-        positionPaintBackground.setColor(colorSignificant);
+        plannedPositionPaintBackground.setColor(colorSignificant);
+        changedPositionPaintBackground.setColor(colorPositionChanged);
         positionPaint.setColor(colorSignificantInverse);
         positionPaint.setTypeface(Typeface.DEFAULT_BOLD);
         positionPaint.setTextSize(res.getDimension(R.dimen.font_size_large));
@@ -677,7 +680,8 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                     if (departurePosition != null && !startCancelled) {
                         final long minutesFromNow = (publicDepartureTime.getTime() - now) / 60000;
                         if (minutesFromNow > -10 && minutesFromNow < 30) {
-                            startYabs = drawPosition(canvas, centerX, startYabs, height, -1, departurePosition.toString());
+                            startYabs = drawPosition(canvas, centerX, startYabs, height, -1,
+                                    departurePosition.toString(), publicDepartureStop.isDeparturePositionChanged());
                         }
                     }
                     startYabs = drawTime(canvas, centerX, startYabs, height, true,
@@ -847,7 +851,8 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                         if (departurePosition != null) {
                             final long minutesFromNow = (tDeparture - now) / 60000;
                             if (minutesFromNow > -10 && minutesFromNow < 30) {
-                                startYabs = drawPosition(canvas, centerX, startYabs, height, -1, departurePosition.toString());
+                                startYabs = drawPosition(canvas, centerX, startYabs, height, -1,
+                                        departurePosition.toString(), departureStop.isDeparturePositionChanged());
                             }
                         }
                         if (referenceTime.depArr == TimeSpec.DepArr.DEPART) {
@@ -915,14 +920,21 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             }
         }
 
-        private int drawPosition(final Canvas canvas, final int centerX, final int y, final int height, final int direction,
-                                 final String name) {
+        private int drawPosition(
+                final Canvas canvas,
+                final int centerX,
+                final int y,
+                final int height,
+                final int direction,
+                final String name,
+                final boolean isChanged) {
             final FontMetrics metrics = positionPaint.getFontMetrics();
 
             positionPaint.setFlags(positionPaint.getFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
             final float fontHeight = (-metrics.ascent + metrics.descent); // + 4 * density;
             positionPaint.getTextBounds(name, 0, name.length(), bounds);
             bounds.inset(-positionPaddingHorizontal, -positionPaddingVertical);
+            final Paint positionPaintBackground = isChanged ? changedPositionPaintBackground : plannedPositionPaintBackground;
             if (direction <= -2) {
                 bounds.offsetTo(centerX - bounds.width() / 2, (int) (y - fontHeight));
                 canvas.drawRect(bounds, positionPaintBackground);
