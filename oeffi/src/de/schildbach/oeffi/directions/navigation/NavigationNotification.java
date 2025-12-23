@@ -151,7 +151,12 @@ public class NavigationNotification {
 
     private static SharedPreferences prefs;
 
-    public static void createNotificationChannels(final Context context) {
+    public static void startuo(final Context context) {
+        createNotificationChannels(context);
+        DeviceWakeupReceiver.register(context);
+    }
+
+    private static void createNotificationChannels(final Context context) {
         prefs = Application.getInstance().getSharedPreferences();
 
         TravelAlarmManager.createNotificationChannel(context);
@@ -167,17 +172,21 @@ public class NavigationNotification {
         notificationTitleForChanges = context.getString(R.string.navigation_event_notify_changes_title);
         notificationTitleForDirections = context.getString(R.string.navigation_event_notify_directions_title);
 
-        final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_SCREEN_ON); // screen being turned on
-        intentFilter.addAction(Intent.ACTION_USER_PRESENT); // screen beig unlocked
-        context.registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(final Context context, final Intent intent) {
-                onDeviceWakingUp(context);
-            }
-        }, intentFilter);
-
         notificationChannelsCreated = true;
+    }
+
+    public static class DeviceWakeupReceiver extends BroadcastReceiver {
+        public static void register(final Context context) {
+            final IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(Intent.ACTION_SCREEN_ON); // screen being turned on
+            intentFilter.addAction(Intent.ACTION_USER_PRESENT); // screen being unlocked
+            ContextCompat.registerReceiver(context, new DeviceWakeupReceiver(), intentFilter, ContextCompat.RECEIVER_EXPORTED);
+        }
+
+        @Override
+        public void onReceive(final Context context, final Intent intent) {
+            onDeviceWakingUp(context);
+        }
     }
 
     private static void createInstructionsChannel(final Context context) {

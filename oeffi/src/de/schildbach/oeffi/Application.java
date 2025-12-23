@@ -257,7 +257,7 @@ public class Application extends android.app.Application {
 
         createShortcuts();
 
-        NavigationNotification.createNotificationChannels(this);
+        NavigationNotification.startuo(this);
 
         final OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.followRedirects(true);
