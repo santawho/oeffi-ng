@@ -52,7 +52,7 @@ import de.schildbach.oeffi.Application;
 
 public class SpeechInput {
     public interface ResultListener {
-        boolean onSpeechInputResult(final Context activityContext, final String spokenSentence);
+        boolean onSpeechInputResult(final Activity activityContext, final String spokenSentence);
     }
 
     public interface SpeechInputTerminationListener {
@@ -60,7 +60,7 @@ public class SpeechInput {
         void onSpeechInputError(final String hint);
     }
 
-    public interface CommandProcessor<CmdDef extends CommandDefinition> {
+    public interface CommandProcessor<CmdDef extends CommandDefinition<?>> {
         boolean onVoiceCommandDetected(
                 final Context activityContext,
                 final CmdDef commandDefinition,
@@ -70,11 +70,11 @@ public class SpeechInput {
 
     protected final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    public class CommandDefinition<CmdDef extends CommandDefinition<?>> implements ResultListener {
+    public abstract class CommandDefinition<CmdDef extends CommandDefinition<?>> implements ResultListener {
         final String name;
         protected List<String> fieldNames = new ArrayList<>();
         protected Map<String, List<Pattern>> languageToPatterns = new HashMap<>();
-        protected CommandProcessor commandProcessor;
+        protected CommandProcessor<CmdDef> commandProcessor;
         protected String currentLanguage;
         protected List<Pattern> currentPatterns;
         protected String currentNumberPattern;
@@ -121,7 +121,7 @@ public class SpeechInput {
         }
 
         @Override
-        public boolean onSpeechInputResult(final Context activityContext, final String spokenSentence) {
+        public boolean onSpeechInputResult(final Activity activityContext, final String spokenSentence) {
             String activeLanguage = getActiveLanguage();
             List<Pattern> patterns = languageToPatterns.get(activeLanguage);
             if (patterns == null) {
@@ -143,7 +143,11 @@ public class SpeechInput {
                         }
                     }
                     if (commandProcessor != null) {
-                        if (commandProcessor.onVoiceCommandDetected(activityContext, this, fields, activeLanguage)) {
+                        if (commandProcessor.onVoiceCommandDetected(
+                                activityContext,
+                                (CmdDef) this,
+                                fields,
+                                activeLanguage)) {
                             return true;
                         }
                     }
@@ -151,10 +155,6 @@ public class SpeechInput {
             }
             return false;
         }
-    }
-
-    public CommandDefinition<?> command(final String commandName) {
-        return addCommand(new CommandDefinition(commandName));
     }
 
     public <CmdDef extends CommandDefinition<?>> CmdDef addCommand(final CmdDef commandDefinition) {
@@ -240,7 +240,9 @@ public class SpeechInput {
         resultListeners.add(listener);
     }
 
-    public void startSpeechRecognition(final Activity activityContext, final SpeechInputTerminationListener terminationListener) {
+    public void startSpeechRecognition(
+            final Activity activityContext,
+            final SpeechInputTerminationListener terminationListener) {
         if (isSpeechRecognitionRunning)
             return;
 

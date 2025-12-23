@@ -29,14 +29,15 @@ import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.stations.StationsActivity;
 import de.schildbach.oeffi.util.SpeechInput;
+import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.locationview.AutoCompleteLocationsHandler;
 
 public class OeffiSpeechInput extends SpeechInput {
-    private final String TIME_PATTERN_EN = "((at (?<ABSHOUR>~N)( ((?<ABSMINUTE>~N)|o'clock))?)|(in (?<RELMINUTES>~N) minutes?)|(in (?<RELHOURS>~N) hours?))";
+    private static final String TIME_PATTERN_EN = "((at (?<ABSHOUR>~N)( ((?<ABSMINUTE>~N)|o'clock))?)|(in (?<RELMINUTES>~N) minutes?)|(in (?<RELHOURS>~N) hours?))";
 //    private final String TIME_PATTERN_DE = "((um (?[0-9][0-9]?):([0-9][0-9]) uhr)|(um (?<ABSHOUR>~N) uhr( (?<ABSMINUTE>~N))?)|(in (?<RELONEMINUTE>einer) minute)|(in (?<RELMINUTES>~N) minuten)|(in (?<RELONEHOUR>einer) stunde)|(in (?<RELHOURS>~N) stunden))";
-    private final String TIME_PATTERN_DE = "((um (?<ABSHOUR>~N)(:(?<ABSMINUTE>~N))? uhr)|(in (?<RELONEMINUTE>einer) minute)|(in (?<RELMINUTES>~N) minuten)|(in (?<RELONEHOUR>einer) stunde)|(in (?<RELHOURS>~N) stunden))";
-    private final String LOCATION_HERE_EN = "here";
-    private final String LOCATION_HERE_DE = "hier";
+    private static final String TIME_PATTERN_DE = "((um (?<ABSHOUR>~N)(:(?<ABSMINUTE>~N))? uhr)|(in (?<RELONEMINUTE>einer) minute)|(in (?<RELMINUTES>~N) minuten)|(in (?<RELONEHOUR>einer) stunde)|(in (?<RELHOURS>~N) stunden))";
+    private static final String LOCATION_HERE_EN = "here";
+    private static final String LOCATION_HERE_DE = "hier";
 
     public class CommandWithTimeDefinition extends SpeechInput.CommandDefinition<CommandWithTimeDefinition> {
         protected CommandWithTimeDefinition(final String commandName) {
@@ -84,7 +85,14 @@ public class OeffiSpeechInput extends SpeechInput {
 
             return timeSpec;
         }
+
+        @Override
+        public boolean onSpeechInputResult(final Activity activityContext, final String spokenSentence) {
+            showSpokenTextFeedback(activityContext, spokenSentence);
+            return super.onSpeechInputResult(activityContext, spokenSentence);
+        }
     }
+
     private CommandWithTimeDefinition commandWithTime(final String commandName) {
         return addCommand(new CommandWithTimeDefinition(commandName));
     }
@@ -165,5 +173,9 @@ public class OeffiSpeechInput extends SpeechInput {
 //        ;
 //        dispatchSpokenSentence(result.toLowerCase(getActiveLocale()), terminationListener);
 
+    }
+
+    public void showSpokenTextFeedback(final Activity activity, final String spokenText) {
+        new Toast(activity).longToast(spokenText);
     }
 }
