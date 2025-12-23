@@ -175,6 +175,8 @@ public class AppInstaller {
                     final Date lastModified = dateFormat.parse(lastModifiedStr);
                     final boolean isNewVersionAvailable = lastModified != null && lastModified.after(thisModified);
                     context.runOnUiThread(() -> {
+                        if (context.isFinishing())
+                            return;
                         if (isNewVersionAvailable) {
                             if (hasExternalInstaller()) {
                                 new AlertDialog.Builder(context)
