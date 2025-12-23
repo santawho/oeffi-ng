@@ -280,7 +280,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     boolean isShowCompactTimes;
 
-    private static final Logger log = LoggerFactory.getLogger(TripDetailsActivity.class);
+    protected static final Logger log = LoggerFactory.getLogger(TripDetailsActivity.class);
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {

@@ -733,7 +733,7 @@ public class NavigationNotification {
             final long refreshAt = lastNotified.refreshNotificationRequiredAt;
             if (refreshAt > 0) {
                 NavigationAlarmManager.getInstance().start(refreshAt,
-                        getPendingActivityIntent(false,
+                        getPendingActivityIntent(TripNavigatorActivity.DELETEREQUEST_NOT_REQUESTED,
                                 isDriverMode ? TripDetailsActivity.Page.ITINERARY : TripDetailsActivity.Page.NEXT_EVENT,
                                 trip));
             }
@@ -743,7 +743,7 @@ public class NavigationNotification {
     private Notification getActiveNotification() {
         log.info("looking for active notifications for tag={}", notificationTag);
         StatusBarNotification latestStatusBarNotification = null;
-        final @NonNull List<StatusBarNotification> activeNotifications =
+        final List<StatusBarNotification> activeNotifications =
                 getNotificationManager(context).getActiveNotifications();
         for (final StatusBarNotification statusBarNotification : activeNotifications) {
             final String tag = statusBarNotification.getTag();
@@ -909,7 +909,8 @@ public class NavigationNotification {
         // final RemoteViews notificationLayoutExpanded = new RemoteViews(context.getPackageName(), R.layout.navigation_notification);
         // setupNotificationView(context, notificationLayoutExpanded, tripRenderer, now, newNotified);
         notificationLayout.setOnClickPendingIntent(R.id.navigation_notification_open_full,
-                getPendingActivityIntent(false, null, trip));
+                getPendingActivityIntent(TripNavigatorActivity.DELETEREQUEST_NOT_REQUESTED,
+                        null, trip));
         notificationLayout.setOnClickPendingIntent(R.id.navigation_notification_next_event,
                 getPendingActionIntent(ACTION_REFRESH, trip));
 
@@ -1208,11 +1209,14 @@ public class NavigationNotification {
                 .setTimeoutAfter(duration)
                 .setExtras(extras)
                 .addAction(R.drawable.ic_clear_white_24dp, context.getString(R.string.navigation_opennav_shownextevent),
-                        getPendingActivityIntent(false, TripDetailsActivity.Page.NEXT_EVENT, trip))
+                        getPendingActivityIntent(TripNavigatorActivity.DELETEREQUEST_NOT_REQUESTED,
+                                TripDetailsActivity.Page.NEXT_EVENT, trip))
                 .addAction(R.drawable.ic_navigation_white_24dp, context.getString(R.string.navigation_opennav_showtrip),
-                        getPendingActivityIntent(false, TripDetailsActivity.Page.ITINERARY, trip))
+                        getPendingActivityIntent(TripNavigatorActivity.DELETEREQUEST_NOT_REQUESTED,
+                                TripDetailsActivity.Page.ITINERARY, trip))
                 .addAction(R.drawable.ic_clear_white_24dp, context.getString(R.string.navigation_stopnav_stop),
-                        getPendingActivityIntent(true, TripDetailsActivity.Page.ITINERARY, trip));
+                        getPendingActivityIntent(TripNavigatorActivity.DELETEREQUEST_ASK,
+                                TripDetailsActivity.Page.ITINERARY, trip));
 
         if (anyImportantIssues) {
             notificationBuilder.setSilent(true);
@@ -1282,13 +1286,13 @@ public class NavigationNotification {
     }
 
     private PendingIntent getPendingActivityIntent(
-            final boolean deleteRequest, final TripDetailsActivity.Page setShowPage,
+            final int deleteRequest, final TripDetailsActivity.Page setShowPage,
             final Trip trip) {
         final Intent intent = TripNavigatorActivity.buildStartIntent(
                 context, intentData.network, trip, intentData.renderConfig,
                 deleteRequest, setShowPage, null, false);
         return PendingIntent.getActivity(context,
-                (deleteRequest ? 1 : 0) + (setShowPage == null ? 0 : (setShowPage.pageNum << 1)),
+                deleteRequest + (setShowPage == null ? 0 : (setShowPage.pageNum << 3)),
                 intent, PendingIntent.FLAG_IMMUTABLE);
     }
 

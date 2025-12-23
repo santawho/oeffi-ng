@@ -359,12 +359,14 @@ public class TravelAlarmManager {
         final PendingIntent contentIntent = PendingIntent.getActivity(context, 99,
                 TripNavigatorActivity.buildStartIntent(
                         context, intentData.network, trip, intentData.renderConfig,
-                        false, TripDetailsActivity.Page.NEXT_EVENT, null, false),
+                        TripNavigatorActivity.DELETEREQUEST_NOT_REQUESTED,
+                        TripDetailsActivity.Page.NEXT_EVENT, null, false),
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         final PendingIntent fullScreenIntent = PendingIntent.getActivity(context, 99,
                 TripNavigatorActivity.buildStartIntent(
                         context, intentData.network, trip, intentData.renderConfig,
-                        false, TripDetailsActivity.Page.NEXT_EVENT, notificationTag, false),
+                        TripNavigatorActivity.DELETEREQUEST_NOT_REQUESTED,
+                        TripDetailsActivity.Page.NEXT_EVENT, notificationTag, false),
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         final String channelId;

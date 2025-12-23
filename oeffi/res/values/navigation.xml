@@ -70,6 +70,10 @@
     <string name="navigation_notification_channel_directions_description">Show upcoming steps</string>
 
     <string name="navigation_notification_subtext">to %1$s</string>
+    <string name="navigation_stopnavothers_title">Active Navigations</string>
+    <string name="navigation_stopnavothers_text">Do you want to stop all previous navigations?</string>
+    <string name="navigation_stopnavothers_stop">Stop all others</string>
+    <string name="navigation_stopnavothers_continue">Keep all running</string>
     <string name="navigation_stopnav_title">Navigation Cancellation</string>
     <string name="navigation_stopnav_text">Do you really want to stop this navigation?</string>
     <string name="navigation_stopnav_stop">Stop</string>

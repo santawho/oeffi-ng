@@ -19,8 +19,10 @@ package de.schildbach.oeffi.directions.navigation;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -45,7 +47,9 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
@@ -67,6 +71,9 @@ import de.schildbach.pte.dto.Trip;
 public class TripNavigatorActivity extends TripDetailsActivity {
     private static final long NAVIGATION_AUTO_REFRESH_INTERVAL_SECS = 110;
     public static final String INTENT_EXTRA_DELETEREQUEST = TripNavigatorActivity.class.getName() + ".deleterequest";
+    public static final int DELETEREQUEST_NOT_REQUESTED = 0;
+    public static final int DELETEREQUEST_ASK = 1;
+    public static final int DELETEREQUEST_FORCE = 2;
     public static final String INTENT_EXTRA_NEXTEVENT = TripNavigatorActivity.class.getName() + ".nextevent";
     public static final String INTENT_EXTRA_PLAYALARM = TripNavigatorActivity.class.getName() + ".playalarm";
 
@@ -82,7 +89,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         rc.isJourney = renderConfig.isJourney;
         rc.queryTripsRequestData = renderConfig.queryTripsRequestData;
         final Intent intent = buildStartIntent(contextActivity, network, trip, rc,
-                false, Page.NEXT_EVENT, null, sameWindow);
+                DELETEREQUEST_NOT_REQUESTED, Page.NEXT_EVENT, null, sameWindow);
         contextActivity.startActivity(intent);
         return true;
     }
@@ -90,7 +97,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     protected static Intent buildStartIntent(
             final Context context,
             final NetworkId network, final Trip trip, final RenderConfig renderConfig,
-            final boolean deleteRequest, final Page setShowPage,
+            final int deleteRequest, final Page setShowPage,
             final String playAlarmNotificationTag,
             final boolean sameWindow) {
         renderConfig.isNavigation = true;
@@ -125,8 +132,9 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     private boolean permissionRequestRunning;
     private boolean soundEnabled = true;
     private boolean isStartupComplete = false;
-    EventLogEntryView eventLogLatestView;
-    ListView eventLogListView;
+    private boolean stillCheckForOtherNavigations;
+    private EventLogEntryView eventLogLatestView;
+    private ListView eventLogListView;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -147,6 +155,8 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         handleDeleteNotification(intent);
         handleSwitchToNextEvent(intent);
         handlePlayAlarm(intent);
+
+        stillCheckForOtherNavigations = true;
     }
 
     @Override
@@ -240,6 +250,42 @@ public class TripNavigatorActivity extends TripDetailsActivity {
                     permissionRequestRunning = true;
                 }
             }
+
+            if (stillCheckForOtherNavigations) {
+                stillCheckForOtherNavigations = false;
+                askStopOtherNavigations();
+            }
+        }
+    }
+
+    private void askStopOtherNavigations() {
+        final List<Intent> taskIntents = new ArrayList<>();
+        final int myTaskId = getTaskId();
+        final ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        for (final ActivityManager.AppTask appTask : activityManager.getAppTasks()) {
+            final ActivityManager.RecentTaskInfo taskInfo = appTask.getTaskInfo();
+            final ComponentName baseActivity = taskInfo.baseActivity;
+            if (baseActivity == null)
+                continue;
+            final String activityClassName = baseActivity.getClassName();
+            if (!activityClassName.equals(TripNavigatorActivity.class.getName()))
+                continue;
+            if (taskInfo.taskId == myTaskId) // skip myself
+                continue;
+            taskIntents.add(taskInfo.baseIntent);
+        }
+        if (!taskIntents.isEmpty()) {
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.navigation_stopnavothers_title)
+                    .setMessage(R.string.navigation_stopnavothers_text)
+                    .setPositiveButton(R.string.navigation_stopnavothers_stop, (dialogInterface, i) -> {
+                        for (final Intent taskIntent : taskIntents) {
+                            taskIntent.putExtra(INTENT_EXTRA_DELETEREQUEST, DELETEREQUEST_FORCE);
+                            startActivity(taskIntent);
+                        }
+                    })
+                    .setNegativeButton(R.string.navigation_stopnavothers_continue, null)
+                    .create().show();
         }
     }
 
@@ -260,12 +306,18 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     }
 
     private boolean handleDeleteNotification(final Intent intent) {
-        final boolean deleteRequest = intent.getBooleanExtra(INTENT_EXTRA_DELETEREQUEST, false);
-        if (!deleteRequest)
-            return false;
-
-        askStopNavigation();
-        return true;
+        final int deleteRequest = intent.getIntExtra(INTENT_EXTRA_DELETEREQUEST, 0);
+        switch (deleteRequest) {
+            case DELETEREQUEST_ASK:
+                askStopNavigation();
+                return true;
+            case DELETEREQUEST_FORCE:
+                stopNavigation();
+                return true;
+            case DELETEREQUEST_NOT_REQUESTED:
+                break;
+        }
+        return false;
     }
 
     private void handlePlayAlarm(final Intent intent) {
