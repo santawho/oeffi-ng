@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <CheckBoxPreference
+        android:key="assistant_enabled"
+        android:title="@string/assistant_enabled_title"
+        android:singleLineTitle="false" />
+
+    <PreferenceCategory
+        android:title="@string/assistant_choose_title" >
+        <Preference
+            android:key="assistant_choose"
+            android:title="@string/assistant_choose_assistant_title"
+            android:singleLineTitle="false"
+            android:dependency="assistant_enabled" />
+        <Preference
+            android:key="assistant_choose_voice"
+            android:title="@string/assistant_choose_voice_title"
+            android:singleLineTitle="false"
+            android:dependency="assistant_enabled" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/assistant_button_title" >
+        <CheckBoxPreference
+            android:key="assistant_button_nearby_stations_enabled"
+            android:defaultValue="true"
+            android:title="@string/assistant_action_nearby_stations_enabled_title"
+            android:singleLineTitle="false"
+            android:dependency="assistant_enabled" />
+        <CheckBoxPreference
+            android:key="assistant_button_navigation_instruction_enabled"
+            android:defaultValue="false"
+            android:title="@string/assistant_action_navigation_instruction_enabled_title"
+            android:singleLineTitle="false"
+            android:dependency="assistant_enabled" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/assistant_headset_title" >
+        <CheckBoxPreference
+            android:key="assistant_headset_navigation_instruction_enabled"
+            android:defaultValue="true"
+            android:title="@string/assistant_action_navigation_instruction_enabled_title"
+            android:singleLineTitle="false"
+            android:dependency="assistant_enabled" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

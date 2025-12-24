@@ -26,6 +26,7 @@
     <string name="navigation_details_title">Navigation</string>
     <string name="plans_activity_title">Netzpläne</string>
     <string name="network_picker_activity_title">Wähle Verkehrsnetz</string>
+    <string name="assistant_label_title">Öffi Assistent</string>
 
     <!-- global options -->
     <string name="global_options_stations_comment">Abfahrtszeiten und Verspätungen</string>
@@ -57,15 +58,22 @@
     <!-- preferences shortcuts -->
     <string name="shortcuts_preferences_title">Startbildschirm-Verknüpfungen</string>
     <string name="shortcuts_preferences_summary">Erstelle Verknüpfungen auf dem Startbildschirm</string>
-    <string name="shortcuts_nearby_stations_assistant_title">Setze \"Nahegelegene Haltestellen\" als Assistenten-App</string>
-    <string name="shortcuts_nearby_stations_assistant_already_set_message">\"Nahegelegene Haltestellen\" ist bereits als Assistenten-App setzbar. Möchtest Du es vielleicht entfernen?</string>
-    <string name="shortcuts_nearby_stations_assistant_already_set_remove_button">Entfernen</string>
-    <string name="shortcuts_nearby_stations_assistant_already_set_again_button">Nochmal wählen</string>
+
+    <!-- preferences assistant -->
+    <string name="assistant_title">Öffi als Assistenten-App</string>
+    <string name="assistant_enabled_title">Mache Öffi zur Assistenten-App</string>
+    <string name="assistant_choose_title">Setze Öffi im System …</string>
+    <string name="assistant_choose_assistant_title">… als Standard-Assistenten-App</string>
+    <string name="assistant_choose_voice_title">… als Standard-Sprachsteuerungs-App</string>
+    <string name="assistant_button_title">Bei <b>Geräte-Button</b>-Aktion …</string>
+    <string name="assistant_headset_title">Bei <b>Headset</b>-Aktion …</string>
+    <string name="assistant_action_nearby_stations_enabled_title">… starte \"nahegelegene Haltestellen\"</string>
+    <string name="assistant_action_navigation_instruction_enabled_title">… spreche Navigations-Anweisung</string>
 
     <!-- preferences about -->
     <string name="about_title">Über %1$s</string>
     <string name="about_copyright_title">Urheberrecht</string>
-    <string name="about_copyright_summary">© 2010-2025, die Öffi-Entwickler</string>
+    <string name="about_copyright_summary">© 2010-2026, die Öffi-Entwickler</string>
     <string name="about_license_title">Lizenz</string>
     <string name="about_data_provider_title">Datenlieferant</string>
     <string name="about_data_provider_summary_pattern1">Daten werden bereitgestellt durch %1$s</string>

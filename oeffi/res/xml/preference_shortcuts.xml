@@ -4,19 +4,15 @@
 
     <Preference
         android:key="shortcuts_directions"
-        android:title="@string/directions_activity_title">
-    </Preference>
+        android:title="@string/directions_activity_title" />
     <Preference
         android:key="shortcuts_stations"
-        android:title="@string/stations_activity_title">
-    </Preference>
+        android:title="@string/stations_activity_title" />
     <Preference
         android:key="shortcuts_plans"
-        android:title="@string/plans_activity_title">
-    </Preference>
-    <Preference
-        android:key="shortcuts_nearby_stations_assistant"
-        android:title="@string/shortcuts_nearby_stations_assistant_title">
-    </Preference>
+        android:title="@string/plans_activity_title" />
+    <PreferenceScreen
+        android:fragment="de.schildbach.oeffi.preference.AssistantFragment"
+        android:title="@string/assistant_title" />
 
 </PreferenceScreen>

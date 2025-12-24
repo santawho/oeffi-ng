@@ -26,6 +26,7 @@
     <string name="navigation_details_title">Navigation</string>
     <string name="plans_activity_title">Network Plans</string>
     <string name="network_picker_activity_title">Pick Transportation Network</string>
+    <string name="assistant_label_title">Öffi Assistant</string>
 
     <!-- global options -->
     <string name="global_options_stations_comment">Departure times and delays</string>
@@ -57,15 +58,22 @@
     <!-- preferences shortcuts -->
     <string name="shortcuts_preferences_title">Homescreen Shortcuts</string>
     <string name="shortcuts_preferences_summary">Create shortcuts on homescreen</string>
-    <string name="shortcuts_nearby_stations_assistant_title">Set \"Nearby Stations\" as assistant app</string>
-    <string name="shortcuts_nearby_stations_assistant_already_set_message">\"Nearby Stations\" is already settable as assistant app. Do you probably want to remove this setting?</string>
-    <string name="shortcuts_nearby_stations_assistant_already_set_remove_button">Remove</string>
-    <string name="shortcuts_nearby_stations_assistant_already_set_again_button">Choose again</string>
+
+    <!-- preferences assistant -->
+    <string name="assistant_title">Öffi as assistant app</string>
+    <string name="assistant_enabled_title">Make Öffi an assistant app</string>
+    <string name="assistant_choose_title">Set Öffi in system …</string>
+    <string name="assistant_choose_assistant_title">… as default assistant app</string>
+    <string name="assistant_choose_voice_title">… as default voice assistant app</string>
+    <string name="assistant_button_title">On <b>device button</b> action …</string>
+    <string name="assistant_headset_title">On <b>headset</b> action …</string>
+    <string name="assistant_action_nearby_stations_enabled_title">… start \"nearby stations\"</string>
+    <string name="assistant_action_navigation_instruction_enabled_title">… speak navigation instruction</string>
 
     <!-- preferences about -->
     <string name="about_title">About %1$s</string>
     <string name="about_copyright_title">Copyright</string>
-    <string name="about_copyright_summary">© 2010-2025, the Öffi developers</string>
+    <string name="about_copyright_summary">© 2010-2026, the Öffi developers</string>
     <string name="about_license_title">License</string>
     <string name="about_data_provider_title">Data Supplier</string>
     <string name="about_data_provider_summary_pattern1">Data is supplied by %1$s</string>

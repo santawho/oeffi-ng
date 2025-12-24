@@ -46,7 +46,6 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
-import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +57,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
@@ -296,15 +298,65 @@ public class NavigationNotification {
         return false;
     }
 
-    public static long refreshAllGuides(final Context context) {
+    private static Notification getActiveNotification(final Context context, final String notificationTag) {
+        log.info("looking for active notifications for tag={}", notificationTag);
+        StatusBarNotification latestStatusBarNotification = null;
         final List<StatusBarNotification> activeNotifications =
                 getNotificationManager(context).getActiveNotifications();
-        long minRefreshAt = Long.MAX_VALUE;
         for (final StatusBarNotification statusBarNotification : activeNotifications) {
-            if (!statusBarNotification.getTag().startsWith(TAG_PREFIX_GUIDE))
+            final String tag = statusBarNotification.getTag();
+            if (tag == null || !tag.equals(notificationTag)) {
+                log.info("found other notification with tag={}", tag);
+            } else {
+                log.info("found matching notification with posttime={}, id={}, key={}",
+                        statusBarNotification.getPostTime(),
+                        statusBarNotification.getId(),
+                        statusBarNotification.getKey());
+                if (latestStatusBarNotification == null
+                        || latestStatusBarNotification.getPostTime() < statusBarNotification.getPostTime()) {
+                    latestStatusBarNotification = statusBarNotification;
+                }
+            }
+        }
+        if (latestStatusBarNotification == null)
+            return null;
+        return latestStatusBarNotification.getNotification();
+    }
+
+    public static long refreshAllGuides(final Context context) {
+        final AtomicLong minRefreshAt = new AtomicLong(Long.MAX_VALUE);
+        forAllActiveNotifications(context, "refresh", navigationNotification -> {
+            final long refreshAt = navigationNotification.refresh();
+            if (refreshAt > 0 && refreshAt < minRefreshAt.get())
+                minRefreshAt.set(refreshAt);
+        });
+        return minRefreshAt.get();
+    }
+
+    public static boolean makeAllGuidesSpeak(final Context context, final long delayMs) {
+        final AtomicBoolean notificationSpeaking = new AtomicBoolean(false);
+        forAllActiveNotifications(context, "speak", navigationNotification -> {
+            NavigationAlarmManager.runOnHandlerThread(() -> {
+                navigationNotification.update(null, true);
+            }, delayMs);
+            notificationSpeaking.set(true);
+        });
+        return notificationSpeaking.get();
+    }
+
+    private static void forAllActiveNotifications(
+            final Context context,
+            final String logText,
+            final Consumer<NavigationNotification> consumer) {
+        final List<StatusBarNotification> activeNotifications =
+                getNotificationManager(context).getActiveNotifications();
+        for (final StatusBarNotification statusBarNotification : activeNotifications) {
+            final String tag = statusBarNotification.getTag();
+            if (!tag.startsWith(TAG_PREFIX_GUIDE))
                 continue;
-            log.info("refresh notification with tag={} posttime={}, id={}, key={}",
-                    statusBarNotification.getTag(),
+            log.info("{} notification with tag={} posttime={}, id={}, key={}",
+                    logText,
+                    tag,
                     statusBarNotification.getPostTime(),
                     statusBarNotification.getId(),
                     statusBarNotification.getKey());
@@ -312,20 +364,8 @@ public class NavigationNotification {
             final Bundle extras = notification.extras;
             if (extras == null)
                 continue;
-            final TripDetailsActivity.IntentData intentData =
-                    (TripDetailsActivity.IntentData) Objects.deserialize(extras.getByteArray(EXTRA_INTENTDATA));
-            final TripRenderer.NotificationData notificationData =
-                    (TripRenderer.NotificationData) Objects.deserialize(extras.getByteArray(EXTRA_LASTNOTIFIED));
-            final Configuration configuration =
-                    (Configuration) Objects.deserialize(extras.getByteArray(EXTRA_CONFIGURATION));
-            final NavigationNotification navigationNotification = new NavigationNotification(
-                    intentData, configuration, notificationData);
-            final ExtraData extraData = (ExtraData) Objects.deserialize(extras.getByteArray(EXTRA_DATA));
-            final long refreshAt = navigationNotification.refresh(extraData != null && extraData.refreshAllLegs);
-            if (refreshAt > 0 && refreshAt < minRefreshAt)
-                minRefreshAt = refreshAt;
+            consumer.accept(new NavigationNotification(notification, tag, null));
         }
-        return minRefreshAt;
     }
 
     public static void removeAllGuides(final Context context) {
@@ -627,21 +667,44 @@ public class NavigationNotification {
     private final ExtraData extraData;
 
     public NavigationNotification(final Intent intent) {
-        this(new TripDetailsActivity.IntentData(intent), null, null);
+        this(null, null, new TripDetailsActivity.IntentData(intent));
     }
 
     private NavigationNotification(
-            final TripDetailsActivity.IntentData aIntentData,
-            final Configuration configuration,
-            final TripRenderer.NotificationData lastNotified) {
+            final Notification aNotification,
+            final String aNotificationTag,
+            final TripDetailsActivity.IntentData aIntentData
+    ) {
         this.context = Application.getInstance();
+        final Notification notification;
+        if (aNotification != null) {
+            notificationTag = aNotificationTag;
+            notification = aNotification;
+        } else {
+            notificationTag = TAG_PREFIX_GUIDE + aIntentData.trip.getUniqueId();
+            notification = getActiveNotification(context, notificationTag);
+        }
+        if (notification == null) {
+            this.intentData = aIntentData;
+            final int numLegSlots = 1 + aIntentData.trip.legs.size();
+            final Configuration conf = new Configuration(numLegSlots);
+            conf.beginningOfNavigation = System.currentTimeMillis();
+            this.configuration = conf;
+            this.extraData = new ExtraData(numLegSlots);
+            this.lastNotified = null;
+        } else {
+            final Bundle extras = notification.extras;
+            this.intentData = (TripDetailsActivity.IntentData) Objects.deserialize(extras.getByteArray(EXTRA_INTENTDATA));
+            this.configuration = (Configuration) Objects.deserialize(extras.getByteArray(EXTRA_CONFIGURATION));
+            this.extraData = (ExtraData) Objects.deserialize(extras.getByteArray(EXTRA_DATA));
+            this.lastNotified = (TripRenderer.NotificationData) Objects.deserialize(extras.getByteArray(EXTRA_LASTNOTIFIED));
+        }
+
         this.isDriverMode = prefs.getBoolean(Constants.KEY_EXTRAS_DRIVERMODE_ENABLED, false);
         this.isEventNotificationsEnabled = prefs.getBoolean(PREFS_KEY_NOTIFICATIONS_ENABLED, false);
         this.travelAlarmManager = new TravelAlarmManager(context);
-        final Trip trip = aIntentData.trip;
-        final String uniqueId = trip.getUniqueId();
         final StringBuilder b = new StringBuilder();
-        for (final Trip.Leg leg : trip.legs) {
+        for (final Trip.Leg leg : this.intentData.trip.legs) {
             if (leg instanceof Trip.Public) {
                 final Trip.Public publeg = (Trip.Public) leg;
                 final JourneyRef journeyRef = publeg.journeyRef;
@@ -666,28 +729,6 @@ public class NavigationNotification {
             }
         }
         log.info("NOTIFICATION for TRIP: {}", b);
-        notificationTag = TAG_PREFIX_GUIDE + uniqueId;
-        final Bundle extras = getActiveNotificationExtras();
-        if (extras == null) {
-            this.intentData = aIntentData;
-            final int numLegSlots = 1 + trip.legs.size();
-            if (configuration != null) {
-                this.configuration = configuration;
-            } else {
-                final Configuration conf = new Configuration(numLegSlots);
-                conf.beginningOfNavigation = System.currentTimeMillis();
-                this.configuration = conf;
-            }
-            this.extraData = new ExtraData(numLegSlots);
-            this.lastNotified = lastNotified;
-        } else {
-            this.intentData = (TripDetailsActivity.IntentData) Objects.deserialize(extras.getByteArray(EXTRA_INTENTDATA));
-            this.configuration = configuration != null ? configuration :
-                    (Configuration) Objects.deserialize(extras.getByteArray(EXTRA_CONFIGURATION));
-            this.extraData = (ExtraData) Objects.deserialize(extras.getByteArray(EXTRA_DATA));
-            this.lastNotified = lastNotified != null ? lastNotified :
-                    (TripRenderer.NotificationData) Objects.deserialize(extras.getByteArray(EXTRA_LASTNOTIFIED));
-        }
     }
 
     public NetworkId getNetwork() {
@@ -738,38 +779,6 @@ public class NavigationNotification {
                                 trip));
             }
         }
-    }
-
-    private Notification getActiveNotification() {
-        log.info("looking for active notifications for tag={}", notificationTag);
-        StatusBarNotification latestStatusBarNotification = null;
-        final List<StatusBarNotification> activeNotifications =
-                getNotificationManager(context).getActiveNotifications();
-        for (final StatusBarNotification statusBarNotification : activeNotifications) {
-            final String tag = statusBarNotification.getTag();
-            if (tag == null || !tag.equals(notificationTag)) {
-                log.info("found other notification with tag={}", tag);
-            } else {
-                log.info("found matching notification with posttime={}, id={}, key={}",
-                        statusBarNotification.getPostTime(),
-                        statusBarNotification.getId(),
-                        statusBarNotification.getKey());
-                if (latestStatusBarNotification == null
-                        || latestStatusBarNotification.getPostTime() < statusBarNotification.getPostTime()) {
-                    latestStatusBarNotification = statusBarNotification;
-                }
-            }
-        }
-        if (latestStatusBarNotification == null)
-            return null;
-        return latestStatusBarNotification.getNotification();
-    }
-
-    private Bundle getActiveNotificationExtras() {
-        final Notification notification = getActiveNotification();
-        if (notification == null)
-            return null;
-        return notification.extras;
     }
 
 //    static Long pppp;
@@ -1329,7 +1338,7 @@ public class NavigationNotification {
         return PendingIntent.getBroadcast(context, action, intent, PendingIntent.FLAG_IMMUTABLE);
     }
 
-    private long refresh(final boolean refreshAllLegs) {
+    private long refresh() {
         log.info("refreshing notification");
         final Date now = new Date();
         final long nowTime = now.getTime();
@@ -1341,7 +1350,7 @@ public class NavigationNotification {
             try {
                 log.info("refreshing trip");
                 final Navigator navigator = new Navigator(intentData.network, getTrip());
-                newTrip = navigator.refresh(refreshAllLegs, now);
+                newTrip = navigator.refresh(extraData.refreshAllLegs, now);
             } catch (IOException e) {
                 log.error("error while refreshing trip", e);
             }

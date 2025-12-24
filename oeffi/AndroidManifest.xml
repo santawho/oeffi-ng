@@ -156,18 +156,23 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity-alias>
+
         <!-- disabled after installation, enabled by shortcuts preference -->
-        <activity-alias
-            android:name=".ASSIST.NEARBY_STATIONS"
-            android:targetActivity=".stations.StationsActivity"
-            android:exported="true"
+        <activity
+            android:name=".assistant.AssistantActivity"
             android:enabled="false"
-            android:label="@string/stations_intentfilter_nearby_title">
+            android:exported="true"
+            android:launchMode="singleInstance"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:theme="@style/My.Theme.Translucent"
+            android:label="@string/assistant_label_title">
             <intent-filter>
                 <action android:name="android.intent.action.ASSIST" />
+                <action android:name="android.intent.action.VOICE_COMMAND" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </activity-alias>
+        </activity>
 
         <activity
             android:name=".stations.StationDetailsActivity"

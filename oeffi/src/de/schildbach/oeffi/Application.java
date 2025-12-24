@@ -398,20 +398,40 @@ public class Application extends android.app.Application {
         return packageInfo;
     }
 
-    private ComponentName getComponentName(final String componentName) {
+    public ComponentName getComponentName(final Class<?> componentClass) {
+        return new ComponentName(this, componentClass.getName());
+    }
+
+    public ComponentName getComponentName(final String componentName) {
         return new ComponentName(this,
                 componentName.startsWith(".") ? commonPackageName + componentName : componentName);
     }
 
+    public boolean isComponentEnabled(final Class<?> componentClass, final boolean defaultValue) {
+        return isComponentEnabled(getComponentName(componentClass), defaultValue);
+    }
+
     public boolean isComponentEnabled(final String componentName, final boolean defaultValue) {
-        final int setting = getPackageManager().getComponentEnabledSetting(getComponentName(componentName));
+        return isComponentEnabled(getComponentName(componentName), defaultValue);
+    }
+
+    public boolean isComponentEnabled(final ComponentName componentName, final boolean defaultValue) {
+        final int setting = getPackageManager().getComponentEnabledSetting(componentName);
         if (setting == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT)
             return defaultValue;
         return setting == PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
     }
 
+    public void setComponentEnabled(final Class<?> componentClass, final boolean enabled) {
+        setComponentEnabled(getComponentName(componentClass), enabled);
+    }
+
     public void setComponentEnabled(final String componentName, final boolean enabled) {
-        getPackageManager().setComponentEnabledSetting(getComponentName(componentName),
+        setComponentEnabled(getComponentName(componentName), enabled);
+    }
+
+    public void setComponentEnabled(final ComponentName componentName, final boolean enabled) {
+        getPackageManager().setComponentEnabledSetting(componentName,
                 enabled
                         ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
                         : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,

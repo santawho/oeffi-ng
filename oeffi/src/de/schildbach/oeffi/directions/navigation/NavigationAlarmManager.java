@@ -146,6 +146,10 @@ public class NavigationAlarmManager {
         getInstance().backgroundHandler.post(runnable);
     }
 
+    public static void runOnHandlerThread(final Runnable runnable, final long delayMs) {
+        getInstance().backgroundHandler.postDelayed(runnable, delayMs);
+    }
+
     private PendingIntent getPendingRefreshIntent() {
         return RefreshReceiver.getPendingIntent(getContext());
 //        return RefreshService.getPendingIntent(getContext());
