@@ -70,24 +70,19 @@ public class AssistantFragment extends PreferenceFragment {
         final Preference chooseVoicePreference = findPreference(KEY_ASSISTANT_CHOOSE_VOICE);
         chooseVoicePreference.setEnabled(hasVoiceSettings && isEnabled);
 
-        if (hasVoiceSettings) {
-            enabledPref.setOnPreferenceChangeListener((pref, newValue) -> {
-                final Boolean newChecked = (Boolean) newValue;
-                chooseVoicePreference.setEnabled(newChecked);
-                return true;
-            });
-        }
+        enabledPref.setOnPreferenceChangeListener((pref, newValue) -> {
+            final Boolean newChecked = (Boolean) newValue;
+            // enable activity alias having the ACTION_ASSIST intent filter
+            application.setComponentEnabled(AssistantActivity.class, newChecked);
+            chooseVoicePreference.setEnabled(hasVoiceSettings && newChecked);
+            return true;
+        });
     }
 
     public static class AssistantActionHandler extends ActionHandler {
         @Override
         public boolean handleAction(final PreferenceActivity context, final String prefkey) {
-            if (KEY_ASSISTANT_ENABLED.equals(prefkey)) {
-                // enable activity alias having the ACTION_ASSIST intent filter
-                final Application application = Application.getInstance();
-                final boolean toBeEnabled = application.getSharedPreferences().getBoolean(KEY_ASSISTANT_ENABLED, false);
-                application.setComponentEnabled(AssistantActivity.class, toBeEnabled);
-            } else if (KEY_ASSISTANT_CHOOSE.equals(prefkey)) {
+            if (KEY_ASSISTANT_CHOOSE.equals(prefkey)) {
                 context.startActivity(new Intent(Settings.ACTION_VOICE_INPUT_SETTINGS));
             } else if (KEY_ASSISTANT_CHOOSE_VOICE.equals(prefkey)) {
                 if (hasVoiceSettings)
