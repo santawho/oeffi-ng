@@ -24,15 +24,22 @@
     <PreferenceCategory
         android:title="@string/assistant_button_title" >
         <CheckBoxPreference
-            android:key="assistant_button_nearby_stations_enabled"
-            android:defaultValue="true"
-            android:title="@string/assistant_action_nearby_stations_enabled_title"
-            android:singleLineTitle="false"
-            android:dependency="assistant_enabled" />
-        <CheckBoxPreference
             android:key="assistant_button_navigation_instruction_enabled"
             android:defaultValue="false"
             android:title="@string/assistant_action_navigation_instruction_enabled_title"
+            android:singleLineTitle="false"
+            android:dependency="assistant_enabled" />
+        <CheckBoxPreference
+            android:key="assistant_button_navigation_screen_enabled"
+            android:defaultValue="true"
+            android:title="@string/assistant_action_navigation_screen_enabled_title"
+            android:singleLineTitle="false"
+            android:dependency="assistant_enabled" />
+        <CheckBoxPreference
+            android:key="assistant_button_nearby_stations_enabled"
+            android:defaultValue="true"
+            android:title="@string/assistant_action_nearby_stations_enabled_title"
+            android:summary="@string/assistant_action_nearby_stations_enabled_summary"
             android:singleLineTitle="false"
             android:dependency="assistant_enabled" />
     </PreferenceCategory>

@@ -1,6 +1,7 @@
 package de.schildbach.oeffi.assistant;
 
 import static de.schildbach.oeffi.preference.AssistantFragment.KEY_ASSISTANT_BUTTON_NAVIGATION_INSTRUCTION_ENABLED;
+import static de.schildbach.oeffi.preference.AssistantFragment.KEY_ASSISTANT_BUTTON_NAVIGATION_SCREEN_ENABLED;
 import static de.schildbach.oeffi.preference.AssistantFragment.KEY_ASSISTANT_BUTTON_NEARBY_STATIONS_ENABLED;
 import static de.schildbach.oeffi.preference.AssistantFragment.KEY_ASSISTANT_HEADSET_NAVIGATION_INSTRUCTION_ENABLED;
 
@@ -38,18 +39,24 @@ public class AssistantActivity extends Activity {
         final SharedPreferences prefs = Application.getInstance().getSharedPreferences();
 
         if (isButtonAction) {
-            if (!isDoubleAction
-                    && prefs.getBoolean(KEY_ASSISTANT_BUTTON_NAVIGATION_INSTRUCTION_ENABLED, false)) {
-                haveSpokenNavigationInstruction = actionSpeakNavigationInstruction(0);
+            if (!isDoubleAction) {
+                final boolean speakInstruction = prefs.getBoolean(KEY_ASSISTANT_BUTTON_NAVIGATION_INSTRUCTION_ENABLED, false);
+                final boolean showInformation = prefs.getBoolean(KEY_ASSISTANT_BUTTON_NAVIGATION_SCREEN_ENABLED, true);
+
+                if (speakInstruction || showInformation) {
+                    haveSpokenNavigationInstruction = actionSpeakNavigationInstruction(speakInstruction, showInformation, 0);
+                }
             }
 
             if (!haveSpokenNavigationInstruction
                     && prefs.getBoolean(KEY_ASSISTANT_BUTTON_NEARBY_STATIONS_ENABLED, true)) {
                 actionStartNearbyStations();
             }
-        } else if (isHeadsetAction) {
+        }
+
+        if (isHeadsetAction) {
             if (prefs.getBoolean(KEY_ASSISTANT_HEADSET_NAVIGATION_INSTRUCTION_ENABLED, true)) {
-                haveSpokenNavigationInstruction = actionSpeakNavigationInstruction(DELAY_SPEAK_ON_HEADSET_MS);
+                haveSpokenNavigationInstruction = actionSpeakNavigationInstruction(true, false, DELAY_SPEAK_ON_HEADSET_MS);
             }
         }
 
@@ -60,7 +67,10 @@ public class AssistantActivity extends Activity {
         StationsActivity.start(this, false);
     }
 
-    private boolean actionSpeakNavigationInstruction(final long delayMs) {
-        return NavigationNotification.makeAllGuidesSpeak(this, delayMs);
+    private boolean actionSpeakNavigationInstruction(
+            final boolean speakInstruction,
+            final boolean showInformation,
+            final long delayMs) {
+        return NavigationNotification.requestAction(this, speakInstruction, showInformation, delayMs);
     }
 }

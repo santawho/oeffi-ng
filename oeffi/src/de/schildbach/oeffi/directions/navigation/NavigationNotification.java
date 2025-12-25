@@ -59,7 +59,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
@@ -107,12 +107,15 @@ public class NavigationNotification {
     private static final int SOUND_REMIND_NORMAL = R.raw.nav_remind_down;
     private static final int SOUND_REMIND_IMPORTANT = R.raw.nav_remind_downup;
     private static final int SOUND_REMIND_NEXTLEG = R.raw.nav_remind_up;
+    private static final int SOUND_PREVIEW = 1001;
     private static String notificationTitleForChanges;
     private static String notificationTitleForDirections;
 
     private static int getActualSound(final int soundId) {
         int newId = soundId;
-        if (prefs.getBoolean(PREFS_KEY_NAVIGATION_REDUCED_SOUNDS, false)) {
+        if (soundId == SOUND_PREVIEW) {
+            newId = 0;
+        } else if (prefs.getBoolean(PREFS_KEY_NAVIGATION_REDUCED_SOUNDS, false)) {
             if (soundId == SOUND_ALARM)
                 newId = R.raw.nav_lowvolume_alarm;
             else if (soundId == SOUND_REMIND_NORMAL)
@@ -249,7 +252,8 @@ public class NavigationNotification {
             prefKey = PREFS_KEY_NAVIGATION_SOUND_CHANNEL_HEADSET;
         } else if (soundId == SOUND_REMIND_NORMAL
                 || soundId == SOUND_REMIND_IMPORTANT
-                || soundId == SOUND_ALARM) {
+                || soundId == SOUND_ALARM
+                || soundId == SOUND_PREVIEW) {
             prefKey = onRide
                     ? PREFS_KEY_NAVIGATION_SOUND_CHANNEL_RIDE
                     : PREFS_KEY_NAVIGATION_SOUND_CHANNEL_TRANSFER;
@@ -329,25 +333,38 @@ public class NavigationNotification {
             final long refreshAt = navigationNotification.refresh();
             if (refreshAt > 0 && refreshAt < minRefreshAt.get())
                 minRefreshAt.set(refreshAt);
+            return true;
         });
         return minRefreshAt.get();
     }
 
-    public static boolean makeAllGuidesSpeak(final Context context, final long delayMs) {
-        final AtomicBoolean notificationSpeaking = new AtomicBoolean(false);
+    public static boolean requestAction(
+            final Context context,
+            final boolean speakInstruction,
+            final boolean showInformation,
+            final long delayMs) {
+        final long delayUntil = delayMs <= 0 ? 0 : System.currentTimeMillis() + delayMs;
+        final AtomicBoolean anythingDone = new AtomicBoolean();
         forAllActiveNotifications(context, "speak", navigationNotification -> {
             NavigationAlarmManager.runOnHandlerThread(() -> {
-                navigationNotification.update(null, true);
-            }, delayMs);
-            notificationSpeaking.set(true);
+                navigationNotification.update(null, speakInstruction, delayUntil);
+            });
+            if (showInformation) {
+                context.startActivity(navigationNotification.getActivityIntent(
+                        TripNavigatorActivity.DELETEREQUEST_NOT_REQUESTED,
+                        TripDetailsActivity.Page.NEXT_EVENT,
+                        null));
+            }
+            anythingDone.set(true);
+            return false; // only the first
         });
-        return notificationSpeaking.get();
+        return anythingDone.get();
     }
 
     private static void forAllActiveNotifications(
             final Context context,
             final String logText,
-            final Consumer<NavigationNotification> consumer) {
+            final Function<NavigationNotification, Boolean> action) {
         final List<StatusBarNotification> activeNotifications =
                 getNotificationManager(context).getActiveNotifications();
         for (final StatusBarNotification statusBarNotification : activeNotifications) {
@@ -364,7 +381,8 @@ public class NavigationNotification {
             final Bundle extras = notification.extras;
             if (extras == null)
                 continue;
-            consumer.accept(new NavigationNotification(notification, tag, null));
+            if (!action.apply(new NavigationNotification(notification, tag, null)))
+                break;
         }
     }
 
@@ -787,10 +805,17 @@ public class NavigationNotification {
     List<String> newSpeakTexts;
     List<EventNotificationData> newEventNotifications;
 
-    @SuppressLint("ScheduleExactAlarm")
     private boolean update(
             final Trip aTrip,
             final boolean speakPreview) {
+        return update(aTrip, speakPreview, 0);
+    }
+
+    @SuppressLint("ScheduleExactAlarm")
+    private boolean update(
+            final Trip aTrip,
+            final boolean speakPreview,
+            final long delaySoundUntil) {
         final TimeZoneSelector systemTimeZoneSelector = Application.getInstance().getSystemTimeZoneSelector();
         final Trip trip = aTrip != null ? aTrip : getTrip();
         final Date tripUpdatedAtDate = trip.updatedAt;
@@ -1252,20 +1277,26 @@ public class NavigationNotification {
                     SOUND_ALARM,
                     VIBRATION_PATTERN_ALARM,
                     newSpeakTexts,
-                    onRide);
-        } else if ((reminderSoundId != 0 || !newSpeakTexts.isEmpty()) && reminderSoundId != SOUND_REMIND_VIA_NOTIFICATION) {
-            playAlarmSoundAndVibration(-1,
-                    reminderSoundId,
-                    reminderSoundId == 0 ? null : VIBRATION_PATTERN_REMIND,
-                    newSpeakTexts,
-                    onRide);
-        } else if (speakPreview) {
-            addEventOutputReminder(nextEventTimeLeftMs, newNotified, trip, tripRenderer, true);
-            playAlarmSoundAndVibration(-1,
-                    0,
-                    null,
-                    newSpeakTexts,
-                    onRide);
+                    onRide,
+                    delaySoundUntil);
+        } else if (reminderSoundId != SOUND_REMIND_VIA_NOTIFICATION) {
+            if (reminderSoundId != 0 || !newSpeakTexts.isEmpty()) {
+                playAlarmSoundAndVibration(-1,
+                        reminderSoundId,
+                        reminderSoundId == 0 ? null : VIBRATION_PATTERN_REMIND,
+                        newSpeakTexts,
+                        onRide,
+                        delaySoundUntil);
+            } else if (speakPreview) {
+                // create and speak preview
+                addEventOutputReminder(nextEventTimeLeftMs, newNotified, trip, tripRenderer, true);
+                playAlarmSoundAndVibration(-1,
+                        SOUND_PREVIEW,
+                        null,
+                        newSpeakTexts,
+                        onRide,
+                        delaySoundUntil);
+            }
         }
 
         lastNotified = newNotified;
@@ -1277,7 +1308,8 @@ public class NavigationNotification {
             final int aSoundId,
             final long[] vibrationPattern,
             final List<String> speakTexts,
-            final boolean onRide) {
+            final boolean onRide,
+            final long delayUntil) {
         final int actualSoundId = configuration.soundEnabled ? getActualSound(aSoundId) : 0;
         final int actualUsage = soundUsage >= 0 ? soundUsage : getAudioUsageForSound(aSoundId, onRide);
         final NotificationSoundManager soundManager = NotificationSoundManager.getInstance();
@@ -1287,6 +1319,16 @@ public class NavigationNotification {
             if ("always".equals(when) || ("headphones".equals(when) && soundManager.isHeadsetConnected()))
                 doSpeech = true;
         }
+        if (delayUntil > 0) {
+            final long sleepMs = delayUntil - System.currentTimeMillis();
+            if (sleepMs > 50) {
+                try {
+                    Thread.sleep(sleepMs);
+                } catch (final InterruptedException ie) {
+                    // ignore
+                }
+            }
+        }
         soundManager.playAlarmSoundAndVibration(actualUsage, actualSoundId, vibrationPattern, doSpeech ? speakTexts : null);
     }
 
@@ -1295,14 +1337,29 @@ public class NavigationNotification {
     }
 
     private PendingIntent getPendingActivityIntent(
-            final int deleteRequest, final TripDetailsActivity.Page setShowPage,
+            final int deleteRequest,
+            final TripDetailsActivity.Page setShowPage,
             final Trip trip) {
-        final Intent intent = TripNavigatorActivity.buildStartIntent(
-                context, intentData.network, trip, intentData.renderConfig,
-                deleteRequest, setShowPage, null, false);
+        final Intent intent = getActivityIntent(deleteRequest, setShowPage, trip);
         return PendingIntent.getActivity(context,
                 deleteRequest + (setShowPage == null ? 0 : (setShowPage.pageNum << 3)),
-                intent, PendingIntent.FLAG_IMMUTABLE);
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+    }
+
+    private Intent getActivityIntent(
+            final int deleteRequest,
+            final TripDetailsActivity.Page setShowPage,
+            final Trip trip) {
+        return TripNavigatorActivity.buildStartIntent(
+                context,
+                intentData.network,
+                trip != null ? trip : getTrip(),
+                intentData.renderConfig,
+                deleteRequest,
+                setShowPage,
+                null,
+                false);
     }
 
     public static class ActionReceiver extends BroadcastReceiver {
@@ -1358,10 +1415,14 @@ public class NavigationNotification {
                 final boolean alarmPlayed = update(newTrip, false);
                 context.sendBroadcast(new Intent(ACTION_UPDATE_TRIGGER));
                 if (!alarmPlayed && prefs.getBoolean(PREFS_KEY_NAVIGATION_REFRESH_BEEP, true)) {
-                    playAlarmSoundAndVibration(AudioAttributes.USAGE_NOTIFICATION, R.raw.nav_refresh_beep, null, null, false);
+                    playAlarmSoundAndVibration(
+                            AudioAttributes.USAGE_NOTIFICATION, R.raw.nav_refresh_beep,
+                            null, null, false, 0);
                 }
             } else {
-                playAlarmSoundAndVibration(AudioAttributes.USAGE_NOTIFICATION, R.raw.nav_refresh_error, null, null, false);
+                playAlarmSoundAndVibration(
+                        AudioAttributes.USAGE_NOTIFICATION, R.raw.nav_refresh_error,
+                        null, null, false, 0);
                 update(null, false);
             }
         } else {

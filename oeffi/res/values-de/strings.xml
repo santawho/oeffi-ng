@@ -68,7 +68,11 @@
     <string name="assistant_button_title">Bei <b>Geräte-Button</b>-Aktion …</string>
     <string name="assistant_headset_title">Bei <b>Headset</b>-Aktion …</string>
     <string name="assistant_action_nearby_stations_enabled_title">… starte \"nahegelegene Haltestellen\"</string>
+    <string name="assistant_action_nearby_stations_enabled_summary">
+        Wenn der vorherige Klick eine Navigations-Aktion gestartet hat, dann passiert dies beim zweiten Klick innerhalb von 5 Sekunden
+    </string>
     <string name="assistant_action_navigation_instruction_enabled_title">… spreche Navigations-Anweisung</string>
+    <string name="assistant_action_navigation_screen_enabled_title">… zeige Navigations-Information</string>
 
     <!-- preferences about -->
     <string name="about_title">Über %1$s</string>

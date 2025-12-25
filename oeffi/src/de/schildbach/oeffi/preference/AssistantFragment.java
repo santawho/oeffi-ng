@@ -40,6 +40,7 @@ public class AssistantFragment extends PreferenceFragment {
     public static final String KEY_ASSISTANT_CHOOSE_VOICE = "assistant_choose_voice";
     public static final String KEY_ASSISTANT_BUTTON_NEARBY_STATIONS_ENABLED = "assistant_button_nearby_stations_enabled";
     public static final String KEY_ASSISTANT_BUTTON_NAVIGATION_INSTRUCTION_ENABLED = "assistant_button_navigation_instruction_enabled";
+    public static final String KEY_ASSISTANT_BUTTON_NAVIGATION_SCREEN_ENABLED = "assistant_button_navigation_screen_enabled";
     public static final String KEY_ASSISTANT_HEADSET_NAVIGATION_INSTRUCTION_ENABLED = "assistant_headset_navigation_instruction_enabled";
 
     private static boolean hasVoiceSettings;
