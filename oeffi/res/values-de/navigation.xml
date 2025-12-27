@@ -194,10 +194,10 @@
     <string name="navigation_event_speak_nav_restart">Navigation startet neu</string>
     <string name="navigation_event_speak_nav_end">Navigation beendet</string>
     <string name="navigation_event_speak_services_cancelled">Warnung! Warnung! Warnung! Es gibt Fahrtausfälle entlang der Route.</string>
-    <string name="navigation_event_speak_transfer_start">gehe nach %2$s zur Abfahrt von %1$s %3$s, %4$s, %5$s</string>
-    <string name="navigation_event_speak_transfer_start_same_station">gehe zur Abfahrt von %1$s %3$s, %4$s, %5$s</string>
+    <string name="navigation_event_speak_transfer_start">gehe nach %2$s zur Abfahrt von %1$s %4$s %3$s, %5$s</string>
+    <string name="navigation_event_speak_transfer_start_same_station">gehe zur Abfahrt von %1$s %4$s %3$s, %5$s</string>
     <string name="navigation_event_speak_transfer_still_running">immer noch in %1$s</string>
-    <string name="navigation_event_speak_transfer_end_reminder">%1$s Abfahrt von %2$s, %3$s, %4$s</string>
+    <string name="navigation_event_speak_transfer_end_reminder">%1$s Abfahrt von %2$s %4$s %3$s</string>
     <string name="navigation_event_speak_transfer_preview_same_location">Gehe dort %3$s . %4$s</string>
     <string name="navigation_event_speak_transfer_preview_different_location">Von dort gehe %2$s, %3$s . %4$s</string>
     <string name="navigation_event_speak_transfer_preview_different_location_no_position">Von dort gehe %2$s . %3$s</string>
