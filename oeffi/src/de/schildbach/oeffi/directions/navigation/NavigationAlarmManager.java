@@ -25,6 +25,7 @@ import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -33,6 +34,7 @@ import android.os.Process;
 import android.provider.Settings;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
@@ -70,6 +72,10 @@ public class NavigationAlarmManager {
         backgroundThread = new HandlerThread("NavAlarmThread", Process.THREAD_PRIORITY_BACKGROUND);
         backgroundThread.start();
         backgroundHandler = new Handler(backgroundThread.getLooper());
+
+        ContextCompat.registerReceiver(Application.getInstance(), new RefreshReceiver(),
+                new IntentFilter(NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED),
+                ContextCompat.RECEIVER_EXPORTED);
     }
 
     public void start(final long newRefreshAt, final PendingIntent showInfoIntent) {
@@ -116,7 +122,7 @@ public class NavigationAlarmManager {
         }
 
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive(final Context context, final Intent intent) {
             log.info("refresh alarm was fired");
             runOnHandlerThread(() -> getInstance().onRefreshTimer());
         }
@@ -189,15 +195,17 @@ public class NavigationAlarmManager {
                             LOG_TIME_FORMAT.format(refreshAt),
                             atLeastString, timeToWait);
                     final AlarmManager alarmManager = getSystemAlarmManager();
+                    final PendingIntent refreshIntent = getPendingRefreshIntent();
+                    alarmManager.cancel(refreshIntent);
                     if (useRealAlarms) {
                         alarmManager.setAlarmClock(
                                 new AlarmManager.AlarmClockInfo(ClockUtils.clockPlus(timeToWait), showInfoIntent),
-                                getPendingRefreshIntent());
+                                refreshIntent);
                     } else {
                         alarmManager.setExactAndAllowWhileIdle(
                                 // AlarmManager.ELAPSED_REALTIME_WAKEUP, ClockUtils.elapsedTimePlus(timeToWait),
                                 AlarmManager.RTC_WAKEUP, ClockUtils.clockPlus(timeToWait),
-                                getPendingRefreshIntent());
+                                refreshIntent);
                     }
                 } else {
                     log.warn("restart alarm failed: cannot schedule exact alarms");
