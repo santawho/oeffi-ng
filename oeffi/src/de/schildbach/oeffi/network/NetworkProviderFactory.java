@@ -120,7 +120,7 @@ public final class NetworkProviderFactory extends de.schildbach.pte.NetworkProvi
         addConfigurator(OebbProvider.class, () -> new OebbProvider("{\"type\":\"AID\",\"aid\":\"OWDL4fE4ixNiPBBm\"}"));
         addConfigurator(ZvvProvider.class, () -> new ZvvProvider("{\"type\":\"AID\",\"aid\":\"hf7mcf9bv3nv8g5f\"}"));
         addConfigurator(LuProvider.class, () -> new LuProvider("{\"type\":\"AID\",\"aid\":\"SkC81GuwuzL4e0\"}"));
-        addConfigurator(DsbProvider.class, () -> new DsbProvider("{\"type\":\"AID\",\"aid\":\"irkmpm9mdznstenr-android\"}"));
+//        addConfigurator(DsbProvider.class, () -> new DsbProvider("{\"type\":\"AID\",\"aid\":\"irkmpm9mdznstenr-android\"}"));
         addConfigurator(SeProvider.class, () -> new SeProvider("{\"type\":\"AID\",\"aid\":\"h5o3n7f4t2m8l9x1\"}"));
         addConfigurator(PlProvider.class, () -> new PlProvider("{\"type\":\"AID\",\"aid\":\"DrxJYtYZQpEBCtcb\"}"));
         addConfigurator(BartProvider.class, () -> new BartProvider("{\"type\":\"AID\",\"aid\":\"kEwHkFUCIL500dym\"}"));
