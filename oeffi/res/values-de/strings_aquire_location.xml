@@ -6,4 +6,7 @@
     <string name="acquire_location_no_provider">Alle Standortdienste sind abgeschaltet</string>
     <string name="acquire_location_timeout">Kann Standort nicht ermitteln</string>
 
+    <string name="acquire_location_contacts_app_failed_return_data">Die Kontakte-App konnte die Kontakt-Daten nicht zurückgeben</string>
+    <string name="acquire_location_contacts_app_not_supported">Die Kontakte-App kann keine Kontakt-Daten zurückgeben</string>
+
 </resources>

@@ -6,4 +6,7 @@
     <string name="acquire_location_no_provider">All location providers are disabled</string>
     <string name="acquire_location_timeout">Can\'t acquire location</string>
 
+    <string name="acquire_location_contacts_app_failed_return_data">The contacts app failed to return the contact data</string>
+    <string name="acquire_location_contacts_app_not_supported">The contacts app is not able to return contact data</string>
+
 </resources>

@@ -60,6 +60,7 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.network.LocationSearchProviderFactory;
 import de.schildbach.oeffi.stations.FavoriteStationsActivity;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
+import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GeocoderThread;
 import de.schildbach.oeffi.util.LocationHelper;
@@ -334,23 +335,44 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
             getActivity().registerForActivityResult(new PickContact(), contentUri -> {
                 if (contentUri == null)
                     return;
-                final Cursor c = getActivity().managedQuery(contentUri, null, null, null, null);
-                if (c.moveToFirst()) {
-                    final String data = c
-                            .getString(c.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS))
-                            .replace("\n", " ");
-                    log.info("Picked from contacts: {}", data);
-                    // old code: targetLocationView.setLocation(new Location(LocationType.ADDRESS, null, null, data));
-                    final AutoCompleteLocationsHandler autoCompleteLocationsHandler = new AutoCompleteLocationsHandler(
-                            getActivity(),
-                            listener.getNetwork(), listener.getHandler(), listener.getPreferredProducts());
-                    autoCompleteLocationsHandler.addJob(data, this);
-                    autoCompleteLocationsHandler.start(result -> {
-                        if (result.success)
-                            fireChanged();
-                    });
+                final OeffiActivity activity = getActivity();
+                try {
+                    final Cursor c = activity.managedQuery(contentUri, null, null, null, null);
+                    if (c.moveToFirst()) {
+                        final String data = c
+                                .getString(c.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS))
+                                .replace("\n", " ");
+                        log.info("Picked from contacts: {}", data);
+                        // old code: targetLocationView.setLocation(new Location(LocationType.ADDRESS, null, null, data));
+                        final AutoCompleteLocationsHandler autoCompleteLocationsHandler = new AutoCompleteLocationsHandler(
+                                activity,
+                                listener.getNetwork(), listener.getHandler(), listener.getPreferredProducts());
+                        autoCompleteLocationsHandler.addJob(data, this);
+                        autoCompleteLocationsHandler.start(result -> {
+                            if (result.success)
+                                fireChanged();
+                        });
+                    }
+                } catch (final Exception e) {
+                    log.error("cannot get contact from result", e);
+                    DialogBuilder.get(activity)
+                            .setMessage(activity.getString(R.string.acquire_location_contacts_app_failed_return_data))
+                            .create().show();
                 }
             });
+
+    private void selectFromContacts() {
+        final OeffiActivity activity = getActivity();
+        try {
+            pickContactLauncher.launch(null);
+        } catch (final Exception e) {
+            log.error("contact app not accessible", e);
+            DialogBuilder.get(activity)
+                    .setMessage(activity.getString(R.string.acquire_location_contacts_app_not_supported))
+                    .create().show();
+        }
+    }
+
     private final ActivityResultLauncher<NetworkId> pickStationLauncher =
             getActivity().registerForActivityResult(new FavoriteStationsActivity.PickFavoriteStation(), contentUri -> {
                 if (contentUri == null)
@@ -363,6 +385,12 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
                 }
             });
 
+    private void selectFromFavoriteStation() {
+        final NetworkId network = listener.getNetwork();
+        if (network != null)
+            pickStationLauncher.launch(network);
+    }
+
     public void setToCurrentLocation() {
         if (ContextCompat.checkSelfPermission(getContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -370,16 +398,6 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         } else {
             requestLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
         }
-    }
-
-    private void selectFromContacts() {
-        pickContactLauncher.launch(null);
-    }
-
-    private void selectFromFavoriteStation() {
-        final NetworkId network = listener.getNetwork();
-        if (network != null)
-            pickStationLauncher.launch(network);
     }
 
     @Override
