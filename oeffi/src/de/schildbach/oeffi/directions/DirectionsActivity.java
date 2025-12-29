@@ -1360,7 +1360,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
     }
 
     private void handleShowSavedTrip(final byte[] serializedTrip) {
-        final Trip trip = (Trip) Objects.deserialize(serializedTrip);
+        final Trip trip = (Trip) Objects.deserialize(serializedTrip, true);
         if (trip == null) {
             new Toast(this).longToast(R.string.directions_query_history_invalid_blob);
             return;

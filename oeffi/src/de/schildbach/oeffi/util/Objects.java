@@ -61,10 +61,10 @@ public class Objects {
         final Deflater deflater = new Deflater();
         deflater.setInput(bytes);
         deflater.finish();
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
+        final ByteArrayOutputStream os = new ByteArrayOutputStream();
+        final byte[] buffer = new byte[1024];
         while (!deflater.finished()) {
-            int compressedSize = deflater.deflate(buffer);
+            final int compressedSize = deflater.deflate(buffer);
             os.write(buffer, 0, compressedSize);
         }
         os.close();
@@ -73,6 +73,10 @@ public class Objects {
     }
 
     public static Object deserialize(final byte[] bytes) {
+        return deserialize(bytes, false);
+    }
+
+    public static Object deserialize(final byte[] bytes, final boolean returnNullOnFailure) {
         if (bytes == null) return null;
         try {
             final ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
@@ -80,6 +84,8 @@ public class Objects {
             ois.close();
             return obj;
         } catch (final ClassNotFoundException | IOException x) {
+            if (returnNullOnFailure)
+                return null;
             throw new RuntimeException(x);
         }
     }
@@ -94,12 +100,12 @@ public class Objects {
         final byte[] compressed = Base64.decode(requireNonNull(base64), Base64.DEFAULT);
         final Inflater inflater = new Inflater();
         inflater.setInput(compressed);
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
+        final ByteArrayOutputStream os = new ByteArrayOutputStream();
+        final byte[] buffer = new byte[1024];
         while (!inflater.finished()) {
             if (inflater.needsInput())
                 throw new DataFormatException("incomplete zip data");
-            int decompressedSize = inflater.inflate(buffer);
+            final int decompressedSize = inflater.inflate(buffer);
             os.write(buffer, 0, decompressedSize);
         }
         os.close();
@@ -111,7 +117,7 @@ public class Objects {
         return deserialize(uncompressFromString(base64));
     }
 
-    public static <T extends Serializable> T clone(T object) {
+    public static <T extends Serializable> T clone(final T object) {
         if (object == null) return null;
         return (T) deserialize(serialize(object));
     }
