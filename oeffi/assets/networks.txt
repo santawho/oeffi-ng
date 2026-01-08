@@ -41,7 +41,7 @@ VRS|de-DE|Köln;Bonn
 AVV_AACHEN|de-DE|Aachen
 MVG|de-DE|Märkischer Kreis;Lüdenscheid
 VRN|de-DE|Baden-Württemberg;Rheinland-Pfalz;Mannheim;Mainz;Trier
-VGS|de-DE|Saarland;Saarbrücken
+SAARVV|de-DE|Saarland;Saarbrücken
 VVS|de-DE|Baden-Württemberg;Stuttgart
 DING|de-DE|Baden-Württemberg;Ulm;Neu-Ulm
 KVV|de-DE|Baden-Württemberg;Karlsruhe

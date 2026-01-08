@@ -77,8 +77,8 @@
     <string name="network_mvg_comment">Lokal- und Regionalverkehr</string>
     <string name="network_vrn_label">Rheinland-Pfalz, Rhein-Neckar &amp; Baden-Württemberg</string>
     <string name="network_vrn_comment">Lokal- und Regionalverkehr</string>
-    <string name="network_vgs_label">Saarbrücken &amp; Saarland</string>
-    <string name="network_vgs_comment">Lokal- und Regionalverkehr</string>
+    <string name="network_saarvv_label">Saarbrücken &amp; Saarland</string>
+    <string name="network_saarvv_comment">Lokal- und Regionalverkehr</string>
     <string name="network_vvs_label">Stuttgart</string>
     <string name="network_vvs_comment">Lokal- und Regionalverkehr</string>
     <string name="network_ding_label">Ulm</string>
