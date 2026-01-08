@@ -116,20 +116,28 @@ public class GeocoderThread extends Thread {
         else
             coord = null;
 
+        final String id = getIdFromCoord(coord);
+
         final int maxAddressLineIndex = address.getMaxAddressLineIndex();
         final Location location;
         if (address.getFeatureName() != null && address.getLocality() != null && address.getPostalCode() != null) {
             final String thoroughfare = address.getThoroughfare();
-            location = new Location(LocationType.ADDRESS, null, coord,
+            location = new Location(LocationType.ADDRESS, id, coord,
                     Stream.of(address.getPostalCode(), address.getLocality()).filter(Objects::nonNull).collect(Collectors.joining(" ")),
                     Stream.of(thoroughfare, address.getFeatureName()).filter(Objects::nonNull).collect(Collectors.joining(" ")));
         } else if (maxAddressLineIndex >= 2 && address.getAddressLine(2) != null) {
-            location = new Location(LocationType.ADDRESS, null, coord, address.getAddressLine(1),
+            location = new Location(LocationType.ADDRESS, id, coord, address.getAddressLine(1),
                     address.getAddressLine(0));
         } else {
-            location = new Location(LocationType.ADDRESS, null, coord);
+            location = new Location(LocationType.ADDRESS, id, coord);
         }
 
         return location;
+    }
+
+    private static String getIdFromCoord(final Point coord) {
+        if (coord == null)
+            return null;
+        return "Geo:" + coord.toString();
     }
 }

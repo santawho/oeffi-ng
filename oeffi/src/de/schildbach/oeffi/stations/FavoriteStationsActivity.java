@@ -111,7 +111,7 @@ public class FavoriteStationsActivity extends OeffiActivity
         @Override
         public void changed(final LocationView view) {
             final Location location = viewNewLocation.getLocation();
-            if (location == null || location.coord == null)
+            if (location == null || location.coord == null || !location.hasId())
                 return;
 
             viewNewLocation.setVisibility(View.GONE);
@@ -171,7 +171,7 @@ public class FavoriteStationsActivity extends OeffiActivity
         viewNewLocation.setImeOptions(EditorInfo.IME_ACTION_GO);
         viewNewLocation.setOnEditorActionListener((v, actionId, event) -> {
             final Location location = viewNewLocation.getLocation();
-            if (location == null || location.coord == null)
+            if (location == null || location.coord == null || !location.hasId())
                 return false;
             locationListener.changed(viewNewLocation);
             return true;
