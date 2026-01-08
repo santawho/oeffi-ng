@@ -876,7 +876,7 @@ public class TripRenderer {
             nextEventTransferAvailable = true;
             final Stop arrivalStop = walkLegC.transferFrom.publicLeg.arrivalStop;
             final Stop departureStop = walkLegC.transferTo.publicLeg.departureStop;
-            isSamePlatform = Stop.isSamePlatform(arrivalStop, departureStop);
+            isSamePlatform = walkMins == 0 && Stop.isSamePlatform(arrivalStop, departureStop);
             final PTDate arrTime = arrivalStop.getArrivalTime();
             final PTDate depTime = departureStop.getDepartureTime();
             final long leftMins = (depTime.getTime() - arrTime.getTime()) / 60000 - 1;

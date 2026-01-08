@@ -1460,7 +1460,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             // walk at the end
         } else {
             final boolean isWalkIcon;
-            isSamePlatform = Stop.isSamePlatform(transferFrom, transferTo);
+            isSamePlatform = requiredSecs == 0 && Stop.isSamePlatform(transferFrom, transferTo);
             if (isSamePlatform) {
                 isWalkIcon = false;
                 iconResId = R.drawable.ic_directions_stay_grey600_24dp;
