@@ -146,35 +146,53 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
         return totalBlocks * blockSize;
     }
 
+    @Override
     public void uncaughtException(final Thread t, final Throwable exception) {
-        log.warn("crashing because of uncaught exception", exception);
-        try {
-            report.append("=== collected at exception time ===\n\n");
+        boolean saveReport = true;
+        for (Throwable cause = exception; cause != null; cause = cause.getCause()) {
+            if (
+                    cause instanceof android.os.DeadSystemException
+            ) {
+                log.warn("crashing because of uncaught exception, but not reporting", exception);
+                saveReport = false;
+                break;
+            }
+        }
 
-            report.append("Network: " + (networkId != null ? networkId.name() : "-") + "\n\n");
-            report.append("Total Internal memory: " + getTotalInternalMemorySize() + "\n");
-            report.append("Available Internal memory: " + getAvailableInternalMemorySize() + "\n");
-            report.append("\n");
-
-            final Writer result = new StringWriter();
-            final PrintWriter printWriter = new PrintWriter(result);
-            exception.printStackTrace(printWriter);
-            final String stacktrace = result.toString();
-            report.append(stacktrace + "\n");
-            printWriter.close();
-
-            // append contents of directories
-            report.append("\nContents of FilesDir " + filesDir + ":\n");
-            appendReport(report, filesDir, 0);
-            report.append("\nContents of CacheDir " + cacheDir + ":\n");
-            appendReport(report, cacheDir, 0);
-
-            saveAsFile(report.toString());
-        } catch (final Exception x) {
-            x.printStackTrace();
+        if (saveReport) {
+            try {
+                log.warn("crashing because of uncaught exception", exception);
+                saveExceptionReportAsFile(exception);
+            } catch (final Exception x) {
+                x.printStackTrace();
+            }
         }
 
         previousHandler.uncaughtException(t, exception);
+    }
+
+    private void saveExceptionReportAsFile(final Throwable exception) {
+        report.append("=== collected at exception time ===\n\n");
+
+        report.append("Network: " + (networkId != null ? networkId.name() : "-") + "\n\n");
+        report.append("Total Internal memory: " + getTotalInternalMemorySize() + "\n");
+        report.append("Available Internal memory: " + getAvailableInternalMemorySize() + "\n");
+        report.append("\n");
+
+        final Writer result = new StringWriter();
+        final PrintWriter printWriter = new PrintWriter(result);
+        exception.printStackTrace(printWriter);
+        final String stacktrace = result.toString();
+        report.append(stacktrace + "\n");
+        printWriter.close();
+
+        // append contents of directories
+        report.append("\nContents of FilesDir " + filesDir + ":\n");
+        appendReport(report, filesDir, 0);
+        report.append("\nContents of CacheDir " + cacheDir + ":\n");
+        appendReport(report, cacheDir, 0);
+
+        saveAsFile(report.toString());
     }
 
     public static void appendDeviceInfo(final Appendable report, final Context context) throws IOException {
