@@ -980,13 +980,18 @@ public class NavigationNotification {
                 lastNotified = new TripRenderer.NotificationData();
                 goingBack = false;
             } else {
-                goingBack = newNotified.currentLegCIndex < lastNotified.currentLegCIndex;
-                anyImportantIssues |= goingBack;
                 log.info("switching leg from {} to {}", lastNotified.currentLegCIndex, newNotified.currentLegCIndex);
-                if (newNotified.currentLegCIndex >= 0 && lastNotified.currentLegCIndex < 0)
+                if (newNotified.currentLegCIndex < 0) {
+                    goingBack = false;
+                } else if (lastNotified.currentLegCIndex < 0) {
+                    goingBack = true;
                     addEventOutputNavigationRestarted();
+                } else {
+                    goingBack = newNotified.currentLegCIndex < lastNotified.currentLegCIndex;
+                }
                 reminderSoundId = SOUND_REMIND_NEXTLEG;
             }
+            anyImportantIssues |= goingBack;
             lastNotified.leftTimeReminded = Long.MAX_VALUE;
             lastNotified.eventTime = newNotified.eventTime; // was .plannedEventTime but next announcement tells the change anyways
             if (newNotified.isTransfer) {
