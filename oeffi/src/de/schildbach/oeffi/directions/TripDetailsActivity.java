@@ -1393,6 +1393,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             progressText.setText(endTime == null ? "???" : getLeftTimeFormatted(now, endTime));
         }
 
+        if (renderConfig.isJourney && !isNow) {
+            mainElement.setVisibility(View.GONE);
+            simulatedElement.setVisibility(View.GONE);
+        }
+
         setGradientBackground(row, backgroundColor, feasibilityProbability == null ? 1f : feasibilityProbability);
         return isNow;
     }
@@ -1449,8 +1454,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         if (transferFrom == null) {
             // walk at the beginning
             if (legText == null) {
-                if (transferTo == null) {
-                    legText = getString(R.string.directions_trip_details_start_at);
+                if (renderConfig.isJourney) {
+                    legText = getString(R.string.directions_trip_details_start_journey);
+                } else if (transferTo == null) {
+                    legText = getString(R.string.directions_trip_details_start);
                 } else {
                     legText = getString(R.string.directions_trip_details_start_at,
                             Formats.makeBreakableStationName(transferTo.location.uniqueShortName()));
