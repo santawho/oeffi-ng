@@ -200,6 +200,12 @@ public abstract class OeffiActivity extends ComponentActivity {
         updateNavigation();
     }
 
+    @Override
+    protected void attachBaseContext(final Context base) {
+        super.attachBaseContext(base);
+        Application.initializeConfigurationForContext(this);
+    }
+
     protected void updateFromPreferences() {
         timeZoneSelector = Application.getInstance().getPreferredNetworkTimeZoneSelector(network);
         isDriverMode = prefs.getBoolean(Constants.KEY_EXTRAS_DRIVERMODE_ENABLED, false);
@@ -909,9 +915,5 @@ public abstract class OeffiActivity extends ComponentActivity {
 
     protected boolean isDeveloperElementsEnabled() {
         return application.isDeveloperElementsEnabled();
-    }
-
-    public boolean isDarkMode() {
-        return Application.getInstance().isDarkMode();
     }
 }

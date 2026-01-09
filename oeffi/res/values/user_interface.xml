@@ -4,7 +4,7 @@
     <string name="user_interface_preferences_title">User Interface</string>
 
     <string name="user_interface_darkmode_switch_title">Dark mode</string>
-    <string name="user_interface_darkmode_switch_summary">Use dark (or light) background.  [%s]</string>
+    <string name="user_interface_darkmode_switch_summary">Use dark (or light) background. Change requires app restart.  [%s]</string>
     <string-array name="user_interface_darkmode_switch_titles">
         <item>Follow system</item>
         <item>Light mode</item>

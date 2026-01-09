@@ -125,7 +125,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
     public TripsGalleryAdapter(final Context context) {
         this.context = (OeffiActivity) context;
         final Resources res = context.getResources();
-        this.darkMode = Application.getInstance().isDarkMode();
+        this.darkMode = Application.isDarkMode(context);
 
         final boolean darkDefault;
         final TypedValue typedValue = new TypedValue();

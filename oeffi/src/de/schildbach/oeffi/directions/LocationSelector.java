@@ -139,7 +139,7 @@ public class LocationSelector extends LinearLayout implements
         setOrientation(VERTICAL);
         handler = new Handler();
 
-        this.darkMode = Application.getInstance().isDarkMode();
+        this.darkMode = Application.isDarkMode(context);
     }
 
     public void setLocationSelectionListener(final LocationSelectionListener locationSelectionListener) {

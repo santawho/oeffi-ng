@@ -2,7 +2,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <ListPreference
-        android:enabled="false"
+        android:enabled="true"
         android:key="user_interface_darkmode_switch"
         android:defaultValue="system"
         android:entries="@array/user_interface_darkmode_switch_titles"

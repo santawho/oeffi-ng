@@ -20,12 +20,14 @@ package de.schildbach.oeffi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -499,19 +501,31 @@ public class Application extends android.app.Application {
                 .build());
     }
 
-    public boolean isDarkMode() {
-        final String setting = prefs.getString("user_interface_darkmode_switch", "system");
-        if ("system".equals(setting)) {
-            // if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            //     return (getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK)
-            //             == android.content.res.Configuration.UI_MODE_NIGHT_YES;
-            // }
-            final int bgColor = getResources().getColor(R.color.bg_level1);
-            final float luminance = Color.valueOf(bgColor).luminance();
-            return luminance < 0.5;
+    public static boolean isDarkMode(final Context context) {
+        final int bgColor = context.getResources().getColor(R.color.bg_level1);
+        final float luminance = Color.valueOf(bgColor).luminance();
+        return luminance < 0.5;
+    }
+
+    @Override
+    protected void attachBaseContext(final Context base) {
+        super.attachBaseContext(base);
+        initializeConfigurationForContext(this);
+    }
+
+    public static void initializeConfigurationForContext(final Context context) {
+        final Resources resources = context.getResources();
+        final Configuration configuration = new Configuration(resources.getConfiguration());
+
+        final String setting = PreferenceManager.getDefaultSharedPreferences(context)
+                .getString("user_interface_darkmode_switch", "system");
+        if ("on".equals(setting)) {
+            configuration.uiMode = (configuration.uiMode & ~Configuration.UI_MODE_NIGHT_MASK) | Configuration.UI_MODE_NIGHT_YES;
+        } else if ("off".equals(setting)) {
+            configuration.uiMode = (configuration.uiMode & ~Configuration.UI_MODE_NIGHT_MASK) | Configuration.UI_MODE_NIGHT_NO;
         }
 
-        return "on".equals(setting);
+        resources.updateConfiguration(configuration, resources.getDisplayMetrics());
     }
 
     public void shareApp(final Activity contextActivity) {
