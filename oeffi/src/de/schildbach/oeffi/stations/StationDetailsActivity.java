@@ -867,13 +867,13 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             final Location destination = departure.destination;
             if (destination != null) {
                 destinationView.setText(Constants.DESTINATION_ARROW_PREFIX + Formats.fullLocationNameIfDifferentPlace(destination, station));
-                itemView.setOnClickListener(destination.id == null ? null : v ->
-                        start(context, network, destination, null, null));
+//                itemView.setOnClickListener(destination.id == null ? null : v ->
+//                        start(context, network, destination, null, null));
                 setStrikeThru(destinationView, cancelled);
                 setStrikeThru(destinationOverflowView, cancelled);
             } else {
                 destinationView.setText(null);
-                itemView.setOnClickListener(null);
+//                itemView.setOnClickListener(null);
             }
 
             if (departure.journeyRef != null
@@ -884,11 +884,15 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                             context.handler, context.backgroundHandler,
                             network, departure.journeyRef, station, null);
                 };
-                lineView.setClickable(true);
-                lineView.setOnClickListener(onClickListener);
-                destinationView.setClickable(true);
-                destinationView.setOnClickListener(onClickListener);
+                itemView.setOnClickListener(onClickListener);
+//                lineView.setClickable(true);
+//                lineView.setOnClickListener(onClickListener);
+//                destinationView.setClickable(true);
+//                destinationView.setOnClickListener(onClickListener);
+            } else {
+                itemView.setOnClickListener(null);
             }
+
 
             final Position position = departure.getPosition();
             if (position != null) {
