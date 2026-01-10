@@ -7,7 +7,7 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:paddingVertical="@dimen/text_padding_vertical_cram"
-    android:background="@color/bg_level0"
+    android:background="?attr/bg_level0"
     >
 
     <de.schildbach.oeffi.util.locationview.LocationTextView

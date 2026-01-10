@@ -1675,7 +1675,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     protected void updateNavigationInstructions() {
         final int colorHighlight = getColor(R.color.bg_trip_details_public_now);
-        final int colorNormal = getColor(R.color.bg_level0);
+        final int colorNormal = ViewUtils.getAttrColor(this, R.attr.bg_level0);
         final int colorHighIfPublic = tripRenderer.nextEventTypeIsPublic ? colorHighlight : colorNormal;
         final int colorHighIfChangeover = tripRenderer.nextEventTypeIsPublic ? colorNormal : colorHighlight;
         setViewBackgroundColor(R.id.navigation_next_event_current_action, colorHighlight);

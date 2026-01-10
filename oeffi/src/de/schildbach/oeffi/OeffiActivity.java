@@ -174,6 +174,9 @@ public abstract class OeffiActivity extends ComponentActivity {
     }
 
     public View setContentView(final int layoutResID, final boolean showNavigation) {
+        if (prefs.getBoolean("user_interface_darkmode_amoled_enabled", false))
+            setTheme(R.style.My_Theme_Amoled);
+
         isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
 
         // called in the final phase of onCreate by sub-classes
@@ -202,8 +205,10 @@ public abstract class OeffiActivity extends ComponentActivity {
 
     @Override
     protected void attachBaseContext(final Context base) {
+        final Configuration initialConfiguration = Application.getInstance().getResources().getConfiguration();
+        applyOverrideConfiguration(Application.getInstance().updateOverrideConfiguration(this, initialConfiguration));
+
         super.attachBaseContext(base);
-        Application.initializeConfigurationForContext(this);
     }
 
     protected void updateFromPreferences() {

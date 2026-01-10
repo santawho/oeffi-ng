@@ -48,6 +48,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.schildbach.oeffi.util.ColorHash;
+import de.schildbach.oeffi.util.ViewUtils;
 
 public class LogViewerActivity extends OeffiActivity {
     private static final Logger log = LoggerFactory.getLogger(LogViewerActivity.class);
@@ -174,7 +175,7 @@ public class LogViewerActivity extends OeffiActivity {
         }
 
         if (endOfScrollReached) {
-            final int normalColor = getColor(R.color.bg_level0);
+            final int normalColor = ViewUtils.getAttrColor(this, R.attr.bg_level0);
             final Color colorA = Color.valueOf(normalColor);
             final Color colorB = Color.valueOf(1 - colorA.red(), 1 - colorA.green(), 1 - colorA.blue(), colorA.alpha());
             final int invertedColor = colorB.toArgb();

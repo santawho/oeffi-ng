@@ -502,22 +502,23 @@ public class Application extends android.app.Application {
     }
 
     public static boolean isDarkMode(final Context context) {
-        final int bgColor = context.getResources().getColor(R.color.bg_level1);
-        final float luminance = Color.valueOf(bgColor).luminance();
-        return luminance < 0.5;
+        return context.getResources().getBoolean(R.bool.isNightMode);
     }
 
     @Override
-    protected void attachBaseContext(final Context base) {
-        super.attachBaseContext(base);
-        initializeConfigurationForContext(this);
+    public Context createConfigurationContext(final Configuration overrideConfiguration) {
+        return super.createConfigurationContext(
+                updateOverrideConfiguration(this, overrideConfiguration));
     }
 
-    public static void initializeConfigurationForContext(final Context context) {
-        final Resources resources = context.getResources();
-        final Configuration configuration = new Configuration(resources.getConfiguration());
+    public Configuration updateOverrideConfiguration(
+            final Context context,
+            final Configuration originalConfiguration) {
+        final Configuration configuration = new Configuration(originalConfiguration != null
+                ? originalConfiguration
+                : getResources().getConfiguration());
 
-        final String setting = PreferenceManager.getDefaultSharedPreferences(context)
+        final String setting = PreferenceManager.getDefaultSharedPreferences(this)
                 .getString("user_interface_darkmode_switch", "system");
         if ("on".equals(setting)) {
             configuration.uiMode = (configuration.uiMode & ~Configuration.UI_MODE_NIGHT_MASK) | Configuration.UI_MODE_NIGHT_YES;
@@ -525,7 +526,7 @@ public class Application extends android.app.Application {
             configuration.uiMode = (configuration.uiMode & ~Configuration.UI_MODE_NIGHT_MASK) | Configuration.UI_MODE_NIGHT_NO;
         }
 
-        resources.updateConfiguration(configuration, resources.getDisplayMetrics());
+        return configuration;
     }
 
     public void shareApp(final Activity contextActivity) {

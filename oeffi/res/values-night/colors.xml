@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <bool name="isNightMode">true</bool>
+
     <color name="splashscreen_background">#404040</color>
 
     <!-- foreground -->
@@ -16,8 +18,10 @@
     <color name="fg_trip_next_event_less_important">#cccccc</color>
 
     <!-- background -->
-    <color name="bg_level0">#000000</color> <!-- <color name="bg_level0">#222222</color>-->
-    <color name="bg_level1">#111111</color> <!-- <color name="bg_level1">#333333</color>-->
+    <color name="bg_level0_default">#222222</color>
+    <color name="bg_level0_amoled">#000000</color>
+    <color name="bg_level1_default">#333333</color>
+    <color name="bg_level1_amoled">#111111</color>
     <color name="bg_selected">#666666</color>
     <color name="bg_divider">#444444</color>
     <color name="bg_divider_highlight">#666666</color>

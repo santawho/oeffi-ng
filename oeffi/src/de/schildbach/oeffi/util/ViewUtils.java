@@ -1,5 +1,7 @@
 package de.schildbach.oeffi.util;
 
+import android.content.Context;
+import android.content.res.TypedArray;
 import android.view.View;
 import android.view.ViewParent;
 
@@ -20,5 +22,15 @@ public class ViewUtils {
             v = (View) parent;
         }
         return true;
+    }
+
+    public static int getAttrColorId(final Context context, final int attrColor) {
+        try (final TypedArray ta = context.obtainStyledAttributes(new int[]{attrColor})) {
+            return ta.getResourceId(0, android.R.color.black);
+        }
+    }
+
+    public static int getAttrColor(final Context context, final int attrColor) {
+        return context.getColor(getAttrColorId(context, attrColor));
     }
 }

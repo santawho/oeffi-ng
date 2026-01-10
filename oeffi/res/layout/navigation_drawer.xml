@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="@color/bg_level0" >
+        android:background="?attr/bg_level0" >
 
         <LinearLayout
             android:orientation="vertical"

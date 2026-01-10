@@ -9,8 +9,16 @@
         <item name="postSplashScreenTheme">@style/My.Theme</item>
     </style>
 
+    <style name="My.Theme.Amoled" parent="My.Theme">
+        <item name="bg_level0">@color/bg_level0_amoled</item>
+        <item name="bg_level1">@color/bg_level1_amoled</item>
+        <item name="android:windowBackground">?bg_level0</item>
+    </style>
+
     <style name="My.Theme" parent="@android:style/Theme.Material.Light.NoActionBar">
-        <item name="android:windowBackground">@color/bg_level0</item>
+        <item name="bg_level0">@color/bg_level0_default</item>
+        <item name="bg_level1">@color/bg_level1_default</item>
+        <item name="android:windowBackground">?attr/bg_level0</item>
         <item name="android:textViewStyle">@style/My.Widget.TextView</item>
         <item name="android:autoCompleteTextViewStyle">@style/My.Widget.AutoCompleteTextView</item>
         <item name="android:dropDownListViewStyle">@style/My.Widget.ListView.DropDown</item>

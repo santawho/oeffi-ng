@@ -832,7 +832,9 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             final long timeMillis = time.getTime();
             final boolean isPast = timeMillis < referenceTime;
 
-            itemView.setBackgroundColor(context.getColor(isPast ? R.color.bg_station_before : R.color.bg_level0));
+            itemView.setBackgroundColor(isPast
+                    ? context.getColor(R.color.bg_station_before)
+                    : ViewUtils.getAttrColor(context, R.attr.bg_level0));
 
             // time rel
             timeRelView.setText(Formats.formatTimeDiff(context, referenceTime, timeMillis, refIsNow));

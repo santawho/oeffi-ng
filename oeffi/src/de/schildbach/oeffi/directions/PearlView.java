@@ -26,6 +26,7 @@ import android.graphics.Paint.FontMetrics;
 import android.util.AttributeSet;
 import android.view.View;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.pte.dto.Style;
 
 public class PearlView extends View {
@@ -70,7 +71,7 @@ public class PearlView extends View {
         intermediateSize = res.getDimensionPixelSize(R.dimen.pearl_intermediate_size);
         stopStrokeWidth = res.getDisplayMetrics().density;
 
-        colorBackground = res.getColor(R.color.bg_level0);
+        colorBackground = ViewUtils.getAttrColor(context, R.attr.bg_level0);
 
         paint.setAntiAlias(true);
     }

@@ -82,7 +82,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="top"
-                    android:background="@color/bg_level1"
+                    android:background="?attr/bg_level1"
                     android:elevation="@dimen/elevation_panel">
 
                     <include layout="@layout/directions_form_include" />

@@ -4,7 +4,7 @@
     style="?android:attr/dropDownItemStyle"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/bg_level0"
+    android:background="?attr/bg_level0"
     android:drawablePadding="@dimen/text_padding_horizontal_lax"
     android:drawableTint="@color/fg_less_significant"
     android:minHeight="52dp"
