@@ -1984,6 +1984,30 @@ public class NavigationNotification {
         }
     }
 
+    private void addEventOutputFinalWalkPreview(
+            final TripRenderer tripRenderer,
+            final Trip.Individual finalWalkLeg,
+            final Trip.Public arrivalLeg,
+            final boolean outputNotification) {
+        final Location departureLocation = finalWalkLeg.departure;
+        final Location arrivalLocation = finalWalkLeg.arrival;
+        final String arrivalLocationName = Formats.fullLocationNameIfDifferentPlace(arrivalLocation, departureLocation);
+        final String speakableDestination = makeSpeakableDestination(null, arrivalLocationName);
+        final String notificationDestination = makeNotificationDestination(null, arrivalLocationName);
+        newSpeakTexts.add(context.getString(
+                R.string.navigation_event_speak_transfer_preview_different_location_no_position,
+                arrivalLocationName,
+                speakableDestination,
+                ""));
+        if (isEventNotificationsEnabled && outputNotification) {
+            newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
+                    R.string.navigation_event_notify_transfer_preview_different_location_no_position,
+                    arrivalLocationName,
+                    notificationDestination,
+                    "")));
+        }
+    }
+
     private void addEventOutputFinalTransferStart(
             final Location destination) {
         final String locationName = Formats.fullLocationName(destination);
@@ -2107,6 +2131,7 @@ public class NavigationNotification {
                         nextEventTimeLeftMs,
                         (Trip.Public) trip.legs.get(arrivalLegIndex),
                         departureLeg,
+                        trip,
                         tripRenderer,
                         onlySpeak);
             }
@@ -2133,6 +2158,7 @@ public class NavigationNotification {
             final long timeLeftMs,
             final Trip.Public arrivalLeg,
             final Trip.Public departureLeg,
+            final Trip trip,
             final TripRenderer tripRenderer,
             final boolean onlySpeak) {
         final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
@@ -2173,6 +2199,15 @@ public class NavigationNotification {
                     departureLeg,
                     arrivalLeg,
                     !onlySpeak && notificationEnabled > 1);
+        } else {
+            final Trip.Leg lastLeg = trip.legs.get(trip.legs.size() - 1);
+            if (lastLeg instanceof Trip.Individual) {
+                addEventOutputFinalWalkPreview(
+                        tripRenderer,
+                        (Trip.Individual) lastLeg,
+                        arrivalLeg,
+                        !onlySpeak && notificationEnabled > 1);
+            }
         }
     }
 
