@@ -1036,7 +1036,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                                 networkProvider.queryNearbyLocations(
                                         EnumSet.of(LocationType.STATION),
                                         referenceLocation,
-                                        false,
+                                        NetworkProvider.EquivalentStationsMode.COMBINE_SAME_NAME,
                                         0,
                                         0,
                                         products);
@@ -1250,7 +1250,11 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                     final int maxDepartures = maxDeparturesPerStation * 2;
 
                     backgroundHandler.post(
-                            new QueryDeparturesRunnable(handler, networkProvider, requestedStationId, false, presetTime, maxDepartures) {
+                            new QueryDeparturesRunnable(
+                                    handler, networkProvider,
+                                    requestedStationId,
+                                    NetworkProvider.EquivalentStationsMode.COMBINE_SAME_NAME,
+                                    presetTime, maxDepartures) {
                                 @Override
                                 protected void onPreExecute() {
                                     actionBar.startProgress();

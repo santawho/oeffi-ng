@@ -356,7 +356,7 @@ public class NearestFavoriteStationWidgetService extends JobService {
                                         stationId,
                                         new Date(),
                                         100,
-                                        false,
+                                        NetworkProvider.EquivalentStationsMode.USE_META,
                                         null);
                                 setResult(appWidgetId, networkId, result, favorite, timeFormat, canShowJourneys);
                                 appWidgetManager.updateAppWidget(appWidgetId, views);

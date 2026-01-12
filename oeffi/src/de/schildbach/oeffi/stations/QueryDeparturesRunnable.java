@@ -44,7 +44,7 @@ public abstract class QueryDeparturesRunnable implements Runnable {
 
     protected final NetworkProvider networkProvider;
     protected final String stationId;
-    protected final boolean equivs;
+    protected final NetworkProvider.EquivalentStationsMode equivsMode;
     protected final Date fromTime;
     protected final int maxDepartures;
 
@@ -54,13 +54,13 @@ public abstract class QueryDeparturesRunnable implements Runnable {
             final Handler handler,
             final NetworkProvider networkProvider,
             final String stationId,
-            final boolean equivs,
+            final NetworkProvider.EquivalentStationsMode equivsMode,
             final Date time,
             final int maxDepartures) {
         this.handler = handler;
         this.networkProvider = networkProvider;
         this.stationId = stationId;
-        this.equivs = equivs;
+        this.equivsMode = equivsMode;
         this.fromTime = time != null ? time : new Date();
         this.maxDepartures = maxDepartures;
     }
@@ -83,7 +83,7 @@ public abstract class QueryDeparturesRunnable implements Runnable {
 
             try {
                 final QueryDeparturesResult result = networkProvider.queryDepartures(
-                        stationId, fromTime, maxDepartures, equivs, null);
+                        stationId, fromTime, maxDepartures, equivsMode, null);
 
                 postOnResult(result);
                 break;
