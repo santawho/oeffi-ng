@@ -68,6 +68,10 @@
             <action
                 android:name="android.speech.RecognitionService" />
         </intent>
+        <intent>
+            <action
+                android:name="android.intent.action.ASSIST" />
+        </intent>
     </queries>
 
     <supports-screens

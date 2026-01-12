@@ -54,4 +54,11 @@
             android:dependency="assistant_enabled" />
     </PreferenceCategory>
 
+    <Preference
+        android:key="assistant_fallback_app"
+        android:title="@string/assistant_action_fallback_app_title"
+        android:summary="@string/assistant_action_fallback_app_summary"
+        android:singleLineTitle="false"
+        android:dependency="assistant_enabled" />
+
 </PreferenceScreen>

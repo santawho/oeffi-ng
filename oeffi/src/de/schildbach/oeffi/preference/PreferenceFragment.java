@@ -8,6 +8,7 @@ import android.preference.Preference;
 import android.preference.PreferenceGroup;
 
 import java.util.Map;
+import java.util.function.Function;
 
 import de.schildbach.oeffi.Application;
 
@@ -49,14 +50,33 @@ public class PreferenceFragment extends android.preference.PreferenceFragment {
     }
 
     protected void setupDynamicSummary(final String preferenceKey, final int summaryResId) {
+        setupDynamicSummary(preferenceKey, summaryResId, null);
+    }
+
+    protected void setupDynamicSummary(
+            final String preferenceKey,
+            final int summaryResId,
+            Function<Object, Object> valueMapper) {
         final Preference preference = findPreference(preferenceKey);
         preference.setOnPreferenceChangeListener((pref, newValue) -> {
-            preference.setSummary(getString(summaryResId, newValue));
+            final Object realValue = valueMapper == null ? newValue : valueMapper.apply(newValue);
+            preference.setSummary(getString(summaryResId, realValue));
             return true;
         });
         final Map<String, ?> all = preference.getSharedPreferences().getAll();
         final Object value = all.get(preference.getKey());
-        preference.setSummary(getString(summaryResId, value));
+        final Object realValue = valueMapper == null ? value : valueMapper.apply(value);
+        preference.setSummary(getString(summaryResId, realValue));
+    }
+
+    public void preferenceChanged(final String preferenceKey, final Object newValue) {
+        final Preference preference = findPreference(preferenceKey);
+        if (preference == null)
+            return;
+        final Preference.OnPreferenceChangeListener onPreferenceChangeListener = preference.getOnPreferenceChangeListener();
+        if (onPreferenceChangeListener == null)
+            return;
+        onPreferenceChangeListener.onPreferenceChange(preference, newValue);
     }
 
     protected void removeOrDisablePreference(final String preferenceName) {

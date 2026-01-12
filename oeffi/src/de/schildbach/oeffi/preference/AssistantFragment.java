@@ -17,14 +17,23 @@
 
 package de.schildbach.oeffi.preference;
 
+import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.provider.Settings;
+import android.util.TypedValue;
+import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -42,6 +51,7 @@ public class AssistantFragment extends PreferenceFragment {
     public static final String KEY_ASSISTANT_BUTTON_NAVIGATION_INSTRUCTION_ENABLED = "assistant_button_navigation_instruction_enabled";
     public static final String KEY_ASSISTANT_BUTTON_NAVIGATION_SCREEN_ENABLED = "assistant_button_navigation_screen_enabled";
     public static final String KEY_ASSISTANT_HEADSET_NAVIGATION_INSTRUCTION_ENABLED = "assistant_headset_navigation_instruction_enabled";
+    public static final String KEY_ASSISTANT_FALLBACK_APP = "assistant_fallback_app";
 
     private static boolean hasVoiceSettings;
 
@@ -58,6 +68,8 @@ public class AssistantFragment extends PreferenceFragment {
 
         setupActionPreference(KEY_ASSISTANT_CHOOSE, AssistantActionHandler.class);
         setupActionPreference(KEY_ASSISTANT_CHOOSE_VOICE, AssistantActionHandler.class);
+        setupActionPreference(KEY_ASSISTANT_FALLBACK_APP, AssistantActionHandler.class);
+        setupDynamicSummaryForFallbackApp(KEY_ASSISTANT_FALLBACK_APP);
 
         final Application application = Application.getInstance();
         final boolean isEnabled = application.isComponentEnabled(AssistantActivity.class, false);
@@ -79,6 +91,27 @@ public class AssistantFragment extends PreferenceFragment {
         });
     }
 
+    private void setupDynamicSummaryForFallbackApp(final String prefKey) {
+        setupDynamicSummary(prefKey, R.string.assistant_action_fallback_app_summary,
+                packageName -> getApplicationLabelForPackageName((String) packageName));
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        preferenceChanged(KEY_ASSISTANT_FALLBACK_APP, getFallbackAssistantPackageName(KEY_ASSISTANT_FALLBACK_APP));
+    }
+
+    private String getApplicationLabelForPackageName(final String packageName) {
+        try {
+            final PackageManager packageManager = Application.getInstance().getPackageManager();
+            final PackageInfo packageInfo = packageManager.getPackageInfo(packageName, 0);
+            return packageInfo.applicationInfo.loadLabel(packageManager).toString();
+        } catch (final Exception e) {
+            return "-";
+        }
+    }
+
     public static class AssistantActionHandler extends ActionHandler {
         @Override
         public boolean handleAction(final PreferenceActivity context, final String prefkey) {
@@ -87,10 +120,88 @@ public class AssistantFragment extends PreferenceFragment {
             } else if (KEY_ASSISTANT_CHOOSE_VOICE.equals(prefkey)) {
                 if (hasVoiceSettings)
                     context.startActivity(getVoiceSettingsActivityIntent());
+            } else if (KEY_ASSISTANT_FALLBACK_APP.equals(prefkey)) {
+                return !chooseFallbackAssistant(context, prefkey);
             } else {
                 return false;
             }
             return true;
         }
+
+        private boolean chooseFallbackAssistant(final PreferenceActivity context, final String prefkey) {
+            final Application application = Application.getInstance();
+            final SharedPreferences preferences = application.getSharedPreferences();
+            final List<AssistantInfo> assistantInfos = getAssistantApps();
+            if (assistantInfos.isEmpty())
+                return false;
+            int selectedIndex = -1;
+            final CharSequence[] items = new CharSequence[assistantInfos.size()];
+            for (int i = 0; i < assistantInfos.size(); i++) {
+                final AssistantInfo assistantInfo = assistantInfos.get(i);
+                items[i] = assistantInfo.label;
+                if (assistantInfo.packageName.equals(getFallbackAssistantPackageName(prefkey)))
+                    selectedIndex = i;
+            }
+            if (selectedIndex < 0) {
+                selectedIndex = 0;
+                preferences.edit().putString(prefkey, assistantInfos.get(selectedIndex).packageName).apply();
+            }
+            final Resources resources = context.getResources();
+            final TextView longTitle = new TextView(context);
+            longTitle.setText(R.string.assistant_choose_fallback_app_title);
+            longTitle.setTextColor(resources.getColor(R.color.fg_significant));
+            longTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, resources.getDimension(R.dimen.font_size_large));
+            new AlertDialog.Builder(context)
+                    .setCustomTitle(longTitle)
+                    .setSingleChoiceItems(items, selectedIndex, (dialog, which) -> {
+                        final String assistantPackageName = assistantInfos.get(which).packageName;
+                        preferences.edit().putString(prefkey, assistantPackageName).apply();
+                        dialog.dismiss();
+                    })
+                    .setOnDismissListener(dialog -> {
+                        dismissParentingActivity(context);
+                    })
+                    .create().show();
+            return true;
+        }
+    }
+
+    public static String getFallbackAssistantPackageName(final String prefkey) {
+        final Application application = Application.getInstance();
+        final SharedPreferences preferences = application.getSharedPreferences();
+        final String currentAssistantPackageName = preferences.getString(prefkey, null);
+        if (currentAssistantPackageName != null)
+            return currentAssistantPackageName;
+        final List<AssistantInfo> assistantApps = getAssistantApps();
+        if (assistantApps.isEmpty())
+            return null;
+        return assistantApps.get(assistantApps.size() - 1).packageName;
+    }
+
+    private static class AssistantInfo {
+        CharSequence label;
+        String packageName;
+    }
+
+    private static List<AssistantInfo> getAssistantApps() {
+        final Application application = Application.getInstance();
+        final String myPackageName = application.getPackageName();
+        final PackageManager packageManager = application.getPackageManager();
+        final Intent assistIntent = new Intent(Intent.ACTION_ASSIST);//.addCategory(Intent.CATEGORY_DEFAULT);
+        final List<AssistantInfo> assistantInfos = new ArrayList<>();
+        for (final ResolveInfo resolveInfo : packageManager.queryIntentActivities(assistIntent, PackageManager.MATCH_ALL)) {
+            final ActivityInfo activityInfo = resolveInfo.activityInfo;
+            if (activityInfo != null) {
+                final ApplicationInfo applicationInfo = activityInfo.applicationInfo;
+                final String packageName = applicationInfo.packageName;
+                if (packageName.equals(myPackageName))
+                    continue;
+                final AssistantInfo assistantInfo = new AssistantInfo();
+                assistantInfo.packageName = packageName;
+                assistantInfo.label = applicationInfo.loadLabel(packageManager);
+                assistantInfos.add(assistantInfo);
+            }
+        }
+        return assistantInfos;
     }
 }

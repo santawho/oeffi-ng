@@ -73,6 +73,9 @@
     </string>
     <string name="assistant_action_navigation_instruction_enabled_title">… speak navigation instruction</string>
     <string name="assistant_action_navigation_screen_enabled_title">… show navigation information</string>
+    <string name="assistant_action_fallback_app_title">… open another assistant</string>
+    <string name="assistant_action_fallback_app_summary">Choose another assistant app as fallback.  [%s]</string>
+    <string name="assistant_choose_fallback_app_title">Choose another assistant app as fallback.</string>
 
     <!-- preferences about -->
     <string name="about_title">About %1$s</string>
