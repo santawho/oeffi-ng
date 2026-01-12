@@ -151,6 +151,9 @@ public class AssistantFragment extends PreferenceFragment {
             longTitle.setText(R.string.assistant_choose_fallback_app_title);
             longTitle.setTextColor(resources.getColor(R.color.fg_significant));
             longTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, resources.getDimension(R.dimen.font_size_large));
+            final int horzPad = (int) resources.getDimension(R.dimen.text_padding_horizontal_verylax);
+            final int vertPad = (int) resources.getDimension(R.dimen.text_padding_vertical_lax);
+            longTitle.setPadding(horzPad, vertPad, horzPad, vertPad);
             new AlertDialog.Builder(context)
                     .setCustomTitle(longTitle)
                     .setSingleChoiceItems(items, selectedIndex, (dialog, which) -> {

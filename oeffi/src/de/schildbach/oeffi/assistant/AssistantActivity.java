@@ -80,20 +80,20 @@ public class AssistantActivity extends Activity {
         if (fallbackAssistantPackageName == null)
             return;
 
-        final Intent newIntent = new Intent()
-                .setPackage(fallbackAssistantPackageName)
-                .setAction(intent.getAction())
-                .putExtras(intent)
-                .setFlags(intent.getFlags());
+        final Intent lokkupIntent = new Intent(intent.getAction())
+                .setPackage(fallbackAssistantPackageName);
 
         final PackageManager packageManager = getPackageManager();
-        final List<ResolveInfo> resolveInfos = packageManager.queryIntentActivities(newIntent, PackageManager.MATCH_ALL);
+        final List<ResolveInfo> resolveInfos = packageManager.queryIntentActivities(lokkupIntent, PackageManager.MATCH_ALL);
         if (resolveInfos.isEmpty())
             return;
         final ResolveInfo resolveInfo = resolveInfos.get(0);
         final String activityClassName = resolveInfo.activityInfo.name;
 
-        intent.setClassName(fallbackAssistantPackageName, activityClassName);
+        final Intent newIntent = new Intent(intent)
+                .setClassName(fallbackAssistantPackageName, activityClassName);
+//                .putExtras(intent)
+//                .setFlags(intent.getFlags());
 
         try {
             startActivity(newIntent);
