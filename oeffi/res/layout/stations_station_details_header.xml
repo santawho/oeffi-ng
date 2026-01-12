@@ -28,7 +28,8 @@
             android:id="@+id/stations_station_details_header_multistations"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_expand_more_black_24dp" />
+            android:src="@drawable/ic_expand_more_black_24dp"
+            android:tint="@color/fg_significant" />
 
         <TextView
             android:id="@+id/stations_station_details_header_name"
