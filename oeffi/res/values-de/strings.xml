@@ -76,6 +76,7 @@
     <string name="assistant_action_fallback_app_title">… öffne anderen Assistent</string>
     <string name="assistant_action_fallback_app_summary">Wähle eine andere Assistenten-App als Rückfall.  [%s]</string>
     <string name="assistant_choose_fallback_app_title">Wähle eine andere Assistenten-App als Rückfall.</string>
+    <string name="assistant_choose_fallback_app_none">(keine)</string>
 
     <!-- preferences about -->
     <string name="about_title">Über %1$s</string>

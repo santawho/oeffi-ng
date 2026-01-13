@@ -56,7 +56,8 @@ public class AssistantActivity extends Activity {
                 if (prefs.getBoolean(AssistantFragment.KEY_ASSISTANT_BUTTON_NEARBY_STATIONS_ENABLED, true)) {
                     actionStartNearbyStations();
                 } else {
-                    startFallbackAssistant(intent);
+//                    if (!startFallbackAssistant(intent, AssistantFragment.ACTION_VOICE_ASSIST))
+                        startFallbackAssistant(intent, Intent.ACTION_ASSIST);
                 }
             }
         }
@@ -67,39 +68,51 @@ public class AssistantActivity extends Activity {
             }
 
             if (!haveSpokenNavigationInstruction) {
-                startFallbackAssistant(intent);
+                startFallbackAssistant(intent, Intent.ACTION_VOICE_COMMAND);
             }
         }
 
         finish();
     }
 
-    private void startFallbackAssistant(final Intent intent) {
+    private boolean startFallbackAssistant(final Intent intent, final String action) {
         final String fallbackAssistantPackageName =
-                AssistantFragment.getFallbackAssistantPackageName(AssistantFragment.KEY_ASSISTANT_FALLBACK_APP);
+                AssistantFragment.getFallbackAssistantPackageName(this,
+                        AssistantFragment.KEY_ASSISTANT_FALLBACK_APP,
+                        action);
         if (fallbackAssistantPackageName == null)
-            return;
+            return false;
 
-        final Intent lokkupIntent = new Intent(intent.getAction())
+        final Intent lookupIntent = new Intent()
+                .setAction(action)
                 .setPackage(fallbackAssistantPackageName);
 
         final PackageManager packageManager = getPackageManager();
-        final List<ResolveInfo> resolveInfos = packageManager.queryIntentActivities(lokkupIntent, PackageManager.MATCH_ALL);
+        final List<ResolveInfo> resolveInfos = packageManager.queryIntentActivities(lookupIntent, PackageManager.MATCH_ALL);
         if (resolveInfos.isEmpty())
-            return;
+            return false;
         final ResolveInfo resolveInfo = resolveInfos.get(0);
         final String activityClassName = resolveInfo.activityInfo.name;
 
-        final Intent newIntent = new Intent(intent)
-                .setClassName(fallbackAssistantPackageName, activityClassName);
-//                .putExtras(intent)
-//                .setFlags(intent.getFlags());
+        final Intent newIntent = new Intent() // new Intent(intent)
+                .setAction(action)
+                .setComponent(null).setPackage(fallbackAssistantPackageName)
+//                .setClassName(fallbackAssistantPackageName, activityClassName)
+                .replaceExtras(intent.getExtras())
+                .setFlags(intent.getFlags())
+                ;
+        for (final String category : intent.getCategories()) {
+            newIntent.addCategory(category);
+        }
 
         try {
-            startActivity(newIntent);
+            Application.getInstance().startActivity(newIntent);
         } catch (final Exception e) {
             log.error("cannot forward to external assistant app {}/{}: {}", fallbackAssistantPackageName, activityClassName, e.getMessage());
+            return false;
         }
+
+        return true;
     }
 
     private void actionStartNearbyStations() {

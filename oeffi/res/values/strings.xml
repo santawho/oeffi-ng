@@ -76,6 +76,7 @@
     <string name="assistant_action_fallback_app_title">… open another assistant</string>
     <string name="assistant_action_fallback_app_summary">Choose another assistant app as fallback.  [%s]</string>
     <string name="assistant_choose_fallback_app_title">Choose another assistant app as fallback.</string>
+    <string name="assistant_choose_fallback_app_none">(none)</string>
 
     <!-- preferences about -->
     <string name="about_title">About %1$s</string>

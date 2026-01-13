@@ -18,6 +18,7 @@
 package de.schildbach.oeffi.preference;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
@@ -35,6 +36,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.annotation.Nullable;
 
@@ -43,6 +45,7 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.assistant.AssistantActivity;
 
 public class AssistantFragment extends PreferenceFragment {
+    public static final String ACTION_VOICE_ASSIST = "android.intent.action.VOICE_ASSIST";
 
     public static final String KEY_ASSISTANT_ENABLED = "assistant_enabled";
     public static final String KEY_ASSISTANT_CHOOSE = "assistant_choose";
@@ -99,16 +102,18 @@ public class AssistantFragment extends PreferenceFragment {
     @Override
     public void onResume() {
         super.onResume();
-        preferenceChanged(KEY_ASSISTANT_FALLBACK_APP, getFallbackAssistantPackageName(KEY_ASSISTANT_FALLBACK_APP));
+        preferenceChanged(KEY_ASSISTANT_FALLBACK_APP,
+                getFallbackAssistantPackageName(preferenceActivity, KEY_ASSISTANT_FALLBACK_APP, Intent.ACTION_ASSIST));
     }
 
     private String getApplicationLabelForPackageName(final String packageName) {
+        final Application application = Application.getInstance();
         try {
-            final PackageManager packageManager = Application.getInstance().getPackageManager();
+            final PackageManager packageManager = application.getPackageManager();
             final PackageInfo packageInfo = packageManager.getPackageInfo(packageName, 0);
             return packageInfo.applicationInfo.loadLabel(packageManager).toString();
         } catch (final Exception e) {
-            return "-";
+            return application.getString(R.string.assistant_choose_fallback_app_none);
         }
     }
 
@@ -131,15 +136,22 @@ public class AssistantFragment extends PreferenceFragment {
         private boolean chooseFallbackAssistant(final PreferenceActivity context, final String prefkey) {
             final Application application = Application.getInstance();
             final SharedPreferences preferences = application.getSharedPreferences();
-            final List<AssistantInfo> assistantInfos = getAssistantApps();
-            if (assistantInfos.isEmpty())
+            final List<AssistantInfo> assistantInfos = getAssistantApps(context, Intent.ACTION_ASSIST);
+            if (assistantInfos.isEmpty()) {
+                preferences.edit().putString(prefkey, null).apply();
                 return false;
+            }
+            assistantInfos.add(0, new AssistantInfo(null,
+                    context.getString(R.string.assistant_choose_fallback_app_none)));
+            final String currentFallbackAssistantPackageName =
+                    getFallbackAssistantPackageName(context, prefkey, Intent.ACTION_ASSIST);
             int selectedIndex = -1;
             final CharSequence[] items = new CharSequence[assistantInfos.size()];
             for (int i = 0; i < assistantInfos.size(); i++) {
                 final AssistantInfo assistantInfo = assistantInfos.get(i);
                 items[i] = assistantInfo.label;
-                if (assistantInfo.packageName.equals(getFallbackAssistantPackageName(prefkey)))
+                final String packageName = assistantInfo.packageName;
+                if (Objects.equals(packageName, currentFallbackAssistantPackageName))
                     selectedIndex = i;
             }
             if (selectedIndex < 0) {
@@ -169,28 +181,39 @@ public class AssistantFragment extends PreferenceFragment {
         }
     }
 
-    public static String getFallbackAssistantPackageName(final String prefkey) {
+    public static String getFallbackAssistantPackageName(
+            final Context context,
+            final String prefkey,
+            final String action) {
         final Application application = Application.getInstance();
         final SharedPreferences preferences = application.getSharedPreferences();
         final String currentAssistantPackageName = preferences.getString(prefkey, null);
-        if (currentAssistantPackageName != null)
-            return currentAssistantPackageName;
-        final List<AssistantInfo> assistantApps = getAssistantApps();
-        if (assistantApps.isEmpty())
-            return null;
-        return assistantApps.get(assistantApps.size() - 1).packageName;
+//        if (currentAssistantPackageName != null)
+//            return currentAssistantPackageName;
+//        final List<AssistantInfo> assistantApps = getAssistantApps(context, action);
+//        if (assistantApps.isEmpty())
+//            return null;
+//        return assistantApps.get(assistantApps.size() - 1).packageName;
+        return currentAssistantPackageName;
     }
 
     private static class AssistantInfo {
-        CharSequence label;
-        String packageName;
+        final String packageName;
+        final CharSequence label;
+
+        private AssistantInfo(final String packageName, final CharSequence label) {
+            this.packageName = packageName;
+            this.label = label;
+        }
     }
 
-    private static List<AssistantInfo> getAssistantApps() {
+    private static List<AssistantInfo> getAssistantApps(
+            final Context context,
+            final String action) {
         final Application application = Application.getInstance();
         final String myPackageName = application.getPackageName();
         final PackageManager packageManager = application.getPackageManager();
-        final Intent assistIntent = new Intent(Intent.ACTION_ASSIST);//.addCategory(Intent.CATEGORY_DEFAULT);
+        final Intent assistIntent = new Intent(action);
         final List<AssistantInfo> assistantInfos = new ArrayList<>();
         for (final ResolveInfo resolveInfo : packageManager.queryIntentActivities(assistIntent, PackageManager.MATCH_ALL)) {
             final ActivityInfo activityInfo = resolveInfo.activityInfo;
@@ -199,10 +222,7 @@ public class AssistantFragment extends PreferenceFragment {
                 final String packageName = applicationInfo.packageName;
                 if (packageName.equals(myPackageName))
                     continue;
-                final AssistantInfo assistantInfo = new AssistantInfo();
-                assistantInfo.packageName = packageName;
-                assistantInfo.label = applicationInfo.loadLabel(packageManager);
-                assistantInfos.add(assistantInfo);
+                assistantInfos.add(new AssistantInfo(packageName, applicationInfo.loadLabel(packageManager)));
             }
         }
         return assistantInfos;
