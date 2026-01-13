@@ -637,7 +637,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     protected void setupActionBar() {
-        setPrimaryColor(renderConfig.actionBarColor > 0 ? renderConfig.actionBarColor : R.color.bg_action_bar_directions);
+        setPrimaryColor(renderConfig.actionBarColor > 0 ? renderConfig.actionBarColor
+                : renderConfig.isJourney ? R.color.bg_action_bar_journey : R.color.bg_action_bar_directions);
         actionBar.setPrimaryTitle(getString(renderConfig.isJourney
                         ? R.string.journey_details_title
                         : R.string.trip_details_title));

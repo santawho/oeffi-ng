@@ -44,6 +44,7 @@
     <color name="bg_action_alternative_directions">#bb6666</color>
     <color name="bg_action_bar_directions">#227722</color>
     <color name="bg_action_bar_directions_darkdefault">#114411</color>
+    <color name="bg_action_bar_journey">#226677</color>
     <color name="bg_action_bar_appendix">#cccccc</color>
     <color name="bg_selected_entry">#ffcfffaf</color>
     <color name="bg_individual">#cccccc</color>
