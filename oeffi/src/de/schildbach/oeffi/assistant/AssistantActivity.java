@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Set;
 
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.directions.navigation.NavigationNotification;
@@ -101,8 +102,11 @@ public class AssistantActivity extends Activity {
                 .replaceExtras(intent.getExtras())
                 .setFlags(intent.getFlags())
                 ;
-        for (final String category : intent.getCategories()) {
-            newIntent.addCategory(category);
+        final Set<String> categories = intent.getCategories();
+        if (categories != null) {
+            for (final String category : categories) {
+                newIntent.addCategory(category);
+            }
         }
 
         try {
