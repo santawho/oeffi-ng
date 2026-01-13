@@ -434,7 +434,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 .post(new QueryDeparturesRunnable(
                         handler, networkProvider,
                         requestedStationId,
-                        NetworkProvider.EquivalentStationsMode.COMBINE_SAME_NAME,
+                        NetworkProvider.EquivalentStationsMode.META_IF_SAME_NAME,
                         fromTime, MAX_DEPARTURES) {
                     @Override
                     protected void onPreExecute() {
