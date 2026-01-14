@@ -34,34 +34,67 @@
         android:foreground="?android:attr/selectableItemBackground">
 
         <LinearLayout
+            android:orientation="vertical"
             style="?android:attr/buttonBarStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="@dimen/text_padding_vertical_verylax"
             android:paddingBottom="@dimen/text_padding_vertical_verylax"
             android:paddingLeft="@dimen/text_padding_horizontal_lax"
-            android:paddingRight="@dimen/text_padding_horizontal_lax"
-            android:orientation="horizontal">
+            android:paddingRight="@dimen/text_padding_horizontal_lax">
 
-            <de.schildbach.oeffi.util.locationview.LocationTextView
-                android:id="@+id/directions_query_history_entry_from"
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:drawablePadding="@dimen/text_padding_horizontal"
-                android:drawableTint="@color/fg_less_significant"
-                android:gravity="center_vertical"
-                android:paddingRight="@dimen/text_padding_horizontal_cram" />
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
 
-            <de.schildbach.oeffi.util.locationview.LocationTextView
-                android:id="@+id/directions_query_history_entry_to"
-                android:layout_weight="1"
-                android:layout_width="0dp"
+                <de.schildbach.oeffi.util.locationview.LocationTextView
+                    android:id="@+id/directions_query_history_entry_from"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:drawablePadding="@dimen/text_padding_horizontal"
+                    android:drawableTint="@color/fg_less_significant"
+                    android:gravity="center_vertical"
+                    android:paddingRight="@dimen/text_padding_horizontal_cram" />
+
+                <de.schildbach.oeffi.util.locationview.LocationTextView
+                    android:id="@+id/directions_query_history_entry_to"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:drawablePadding="@dimen/text_padding_horizontal"
+                    android:drawableTint="@color/fg_less_significant"
+                    android:gravity="center_vertical"
+                    android:paddingLeft="@dimen/text_padding_horizontal_cram" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/directions_query_history_entry_via_container"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:drawablePadding="@dimen/text_padding_horizontal"
-                android:drawableTint="@color/fg_less_significant"
-                android:gravity="center_vertical"
-                android:paddingLeft="@dimen/text_padding_horizontal_cram" />
+                android:gravity="center_horizontal" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingRight="@dimen/text_padding_horizontal"
+                    android:text="@string/directions_history_via_label"
+                    android:textSize="@dimen/font_size_small"
+                    android:textColor="@color/fg_less_significant" />
+
+                <de.schildbach.oeffi.util.locationview.LocationTextView
+                    android:id="@+id/directions_query_history_entry_via"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/font_size_small"
+                    android:drawablePadding="@dimen/text_padding_horizontal"
+                    android:drawableTint="@color/fg_less_significant"
+                    android:gravity="center_vertical" />
+
+            </LinearLayout>
         </LinearLayout>
 
         <TextView

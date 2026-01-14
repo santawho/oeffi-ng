@@ -22,6 +22,8 @@ import de.schildbach.pte.dto.Location;
 import javax.annotation.Nullable;
 
 public interface QueryHistoryContextMenuItemListener {
-    boolean onQueryHistoryContextMenuItemClick(int adapterPosition, Location from, Location to,
+    boolean onQueryHistoryContextMenuItemClick(
+            int adapterPosition,
+            Location from, Location to, Location via,
             @Nullable byte[] serializedSavedTrip, int menuItemId, @Nullable Location menuItemLocation);
 }

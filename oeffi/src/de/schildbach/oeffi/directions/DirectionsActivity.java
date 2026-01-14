@@ -1308,7 +1308,9 @@ public class DirectionsActivity extends OeffiMainActivity implements
         handleShowSavedTrip(serializedSavedTrip);
     }
 
-    public boolean onQueryHistoryContextMenuItemClick(final int adapterPosition, final Location from, final Location to,
+    public boolean onQueryHistoryContextMenuItemClick(
+            final int adapterPosition,
+            final Location from, final Location to, final Location via,
             @Nullable final byte[] serializedSavedTrip, final int menuItemId,
             @Nullable final Location menuItemLocation) {
         if (menuItemId == R.id.directions_query_history_context_show_trip) {

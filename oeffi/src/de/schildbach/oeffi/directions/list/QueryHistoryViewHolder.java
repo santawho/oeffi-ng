@@ -33,6 +33,7 @@ import com.daimajia.swipe.SwipeLayout;
 
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.oeffi.util.locationview.LocationTextView;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
 import de.schildbach.oeffi.stations.StationContextMenu;
@@ -47,7 +48,9 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
     private final NetworkId network;
     private final LocationTextView fromView;
     private final LocationTextView toView;
+    private final LocationTextView viaView;
     private final View favoriteView;
+    private final View viaContainerView;
     private final Button tripView;
     private final ImageButton contextButton;
     private final SwipeLayout swipeLayout;
@@ -55,6 +58,7 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
     public QueryHistoryContextMenuItemListener contextMenuItemListener;
     private Location from;
     private Location to;
+    private Location via;
     private byte[] serializedSavedTrip;
     private boolean isFavorite;
     private Integer fromFavState;
@@ -72,6 +76,8 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
 
         fromView = itemView.findViewById(R.id.directions_query_history_entry_from);
         toView = itemView.findViewById(R.id.directions_query_history_entry_to);
+        viaView = itemView.findViewById(R.id.directions_query_history_entry_via);
+        viaContainerView = itemView.findViewById(R.id.directions_query_history_entry_via_container);
         favoriteView = itemView.findViewById(R.id.directions_query_history_entry_favorite);
         tripView = itemView.findViewById(R.id.directions_query_history_entry_trip);
         contextButton = itemView.findViewById(R.id.directions_query_history_entry_context_button);
@@ -81,13 +87,17 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
         swipeLayout.addSwipeListener(swipeListener);
     }
 
-    public void bind(final long rowId, final Location from, final Location to, final Location via, final boolean isFavorite,
+    public void bind(
+            final long rowId,
+            final Location from, final Location to, final Location via,
+            final boolean isFavorite,
             final long savedTripDepartureTime, final byte[] serializedSavedTrip, final Integer fromFavState,
             final Integer toFavState, final long selectedRowId, final QueryHistoryClickListener clickListener,
             final QueryHistoryContextMenuItemListener contextMenuItemListener) {
         this.contextMenuItemListener = contextMenuItemListener;
         this.from = from;
         this.to = to;
+        this.via = via;
         this.serializedSavedTrip = serializedSavedTrip;
         this.isFavorite = isFavorite;
         this.fromFavState = fromFavState;
@@ -96,6 +106,10 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
 
         fromView.setLocation(from);
         toView.setLocation(to);
+        if (viaContainerView != null)
+            ViewUtils.setVisibility(viaContainerView, via != null);
+        if (viaView != null)
+            viaView.setLocation(via);
 
         favoriteView.setVisibility(isFavorite ? View.VISIBLE : View.INVISIBLE);
 
@@ -178,13 +192,13 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
             final int position = getAdapterPosition();
             if (position != RecyclerView.NO_POSITION) {
                 if (fromMenu != null && item == fromMenu.findItem(item.getItemId()))
-                    return contextMenuItemListener.onQueryHistoryContextMenuItemClick(position, from, to,
+                    return contextMenuItemListener.onQueryHistoryContextMenuItemClick(position, from, to, via,
                             serializedSavedTrip, item.getItemId(), from);
                 else if (toMenu != null && item == toMenu.findItem(item.getItemId()))
-                    return contextMenuItemListener.onQueryHistoryContextMenuItemClick(position, from, to,
+                    return contextMenuItemListener.onQueryHistoryContextMenuItemClick(position, from, to, via,
                             serializedSavedTrip, item.getItemId(), to);
                 else
-                    return contextMenuItemListener.onQueryHistoryContextMenuItemClick(position, from, to,
+                    return contextMenuItemListener.onQueryHistoryContextMenuItemClick(position, from, to, via,
                             serializedSavedTrip, item.getItemId(), null);
             } else {
                 return false;
@@ -236,7 +250,7 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
                 isFavorite = !isFavorite;
                 setStarDrawable();
                 contextMenuItemListener.onQueryHistoryContextMenuItemClick(
-                        position, from, to,
+                        position, from, to, via,
                         serializedSavedTrip,
                         isFavorite
                             ? R.id.directions_query_history_context_add_favorite
@@ -247,7 +261,7 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
             if (removeOpened) {
                 removeOpened = false;
                 contextMenuItemListener.onQueryHistoryContextMenuItemClick(
-                        position, from, to,
+                        position, from, to, via,
                         serializedSavedTrip,
                         R.id.directions_query_history_context_remove_entry,
                         null);
