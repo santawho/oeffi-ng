@@ -19,7 +19,6 @@ package de.schildbach.oeffi.directions.list;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
@@ -194,7 +193,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<QueryHistoryViewHo
     @Override
     public QueryHistoryViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
         return new QueryHistoryViewHolder(
-                inflater.inflate(R.layout.directions_query_history_entry, parent, false),
+                inflater.inflate(R.layout.directions_query_history_entry_with_trip, parent, false),
                 context, network);
     }
 
