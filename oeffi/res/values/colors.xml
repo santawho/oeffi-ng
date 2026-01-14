@@ -78,6 +78,8 @@
     <color name="bg_location_selector_intermediate">#f7f787</color>
     <color name="bg_location_selector_last">#f78787</color>
 
+    <color name="bg_bookmarked_trip_border">#87c7f7</color>
+
     <item name="alpha_bright_white" format="float" type="dimen">1</item>
 
 </resources>

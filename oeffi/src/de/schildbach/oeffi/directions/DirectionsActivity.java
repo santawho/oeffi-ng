@@ -71,7 +71,6 @@ import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.util.TimeSpec.DepArr;
 import de.schildbach.oeffi.directions.list.QueryHistoryAdapter;
 import de.schildbach.oeffi.directions.list.QueryHistoryClickListener;
-import de.schildbach.oeffi.directions.list.QueryHistoryContextMenuItemListener;
 import de.schildbach.oeffi.network.NetworkPickerActivity;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
@@ -130,7 +129,7 @@ import java.util.function.Function;
 
 public class DirectionsActivity extends OeffiMainActivity implements
         QueryHistoryClickListener,
-        QueryHistoryContextMenuItemListener,
+        QueryHistoryAdapter.ContextMenuItemListener,
         LocationSelector.LocationSelectionListener {
     public static final String LINK_IDENTIFIER_TRIP = "trip";
     public static final String LINK_IDENTIFIER_SHARE_TRIP = "share-trip";
@@ -1304,10 +1303,21 @@ public class DirectionsActivity extends OeffiMainActivity implements
         queryHistoryListAdapter.setSelectedEntry(queryHistoryListAdapter.getItemId(adapterPosition));
     }
 
+    @Override
     public void onSavedTripClick(final int adapterPosition, final byte[] serializedSavedTrip) {
         handleShowSavedTrip(serializedSavedTrip);
     }
 
+    @Override
+    public boolean onQueryStoredTripContextMenuItemClick(
+            final int adapterPosition,
+            final Location from, final Location to, final Location via,
+            @Nullable final byte[] serializedSavedTrip, final int menuItemId,
+            @Nullable final Location menuItemLocation) {
+        return false;
+    }
+
+    @Override
     public boolean onQueryHistoryContextMenuItemClick(
             final int adapterPosition,
             final Location from, final Location to, final Location via,

@@ -385,6 +385,11 @@
             android:authorities="${applicationId}.directions.query_history"
             android:exported="false" />
 
+        <provider
+            android:name=".directions.QueryStoredTripsProvider"
+            android:authorities="${applicationId}.directions.query_stored_trips"
+            android:exported="false" />
+
         <activity
             android:name=".plans.PlansPickerActivity"
             android:exported="true"

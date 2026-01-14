@@ -79,7 +79,9 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
     public static boolean startNavigation(
             final Activity contextActivity,
-            final NetworkId network, final Trip trip, final RenderConfig renderConfig,
+            final NetworkId network,
+            final Trip trip,
+            final RenderConfig renderConfig,
             final boolean sameWindow) {
         if (!NavigationAlarmManager.getInstance().checkPermission(contextActivity))
             return false;

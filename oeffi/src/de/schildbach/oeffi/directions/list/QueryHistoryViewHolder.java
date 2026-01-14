@@ -31,6 +31,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.daimajia.swipe.SimpleSwipeListener;
 import com.daimajia.swipe.SwipeLayout;
 
+import javax.annotation.Nullable;
+
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.ViewUtils;
@@ -44,6 +46,13 @@ import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.PTDate;
 
 public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
+    public interface ContextMenuItemListener {
+        boolean onQueryHistoryContextMenuItemClick(
+                int adapterPosition,
+                Location from, Location to, Location via,
+                @Nullable byte[] serializedSavedTrip, int menuItemId, @Nullable Location menuItemLocation);
+    }
+
     private final OeffiActivity context;
     private final NetworkId network;
     private final LocationTextView fromView;
@@ -55,7 +64,7 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
     private final ImageButton contextButton;
     private final SwipeLayout swipeLayout;
     private final MySwipeListener swipeListener;
-    public QueryHistoryContextMenuItemListener contextMenuItemListener;
+    public ContextMenuItemListener contextMenuItemListener;
     private Location from;
     private Location to;
     private Location via;
@@ -93,7 +102,7 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
             final boolean isFavorite,
             final long savedTripDepartureTime, final byte[] serializedSavedTrip, final Integer fromFavState,
             final Integer toFavState, final long selectedRowId, final QueryHistoryClickListener clickListener,
-            final QueryHistoryContextMenuItemListener contextMenuItemListener) {
+            final ContextMenuItemListener contextMenuItemListener) {
         this.contextMenuItemListener = contextMenuItemListener;
         this.from = from;
         this.to = to;

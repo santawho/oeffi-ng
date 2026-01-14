@@ -645,7 +645,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         View.OnClickListener navigationClickListener = null;
         if (!renderConfig.isJourney) {
-            navigationClickListener = v -> startNavigation(tripRenderer.trip, renderConfig);
+            navigationClickListener = v -> {
+                final Trip trip = tripRenderer.trip;
+                QueryStoredTripsProvider.put(getContentResolver(), network, trip, renderConfig.queryTripsRequestData);
+                startNavigation(trip, renderConfig);
+            };
         } else if (isDriverMode
                 && NetworkProviderFactory.provider(network).hasCapabilities(NetworkProvider.Capability.JOURNEY)) {
             final Trip.Public journeyLeg = (Trip.Public) tripRenderer.trip.legs.get(0);
@@ -663,6 +667,23 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     protected void addActionBarButtons() {
+        if (!renderConfig.isJourney) {
+            final String tripId = tripRenderer.trip.getUniqueId();
+            if (tripId != null) {
+                final ToggleImageButton bookmarkButton = actionBar.addToggleButton(
+                        R.drawable.ic_boomark_white_24dp,
+                        R.string.directions_trip_details_action_bookmark);
+                final Long rowId = QueryStoredTripsProvider.getRowId(getContentResolver(), network, tripId);
+                bookmarkButton.setChecked(rowId != null);
+                bookmarkButton.setOnCheckedChangeListener((v, isChecked) -> {
+                    final Trip trip = tripRenderer.trip;
+                    if (isChecked)
+                        QueryStoredTripsProvider.put(getContentResolver(), network, trip, renderConfig.queryTripsRequestData);
+                    else
+                        QueryStoredTripsProvider.delete(getContentResolver(), network, trip.getUniqueId());
+                });
+            }
+        }
     }
 
     @Override

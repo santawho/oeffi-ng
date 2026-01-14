@@ -427,6 +427,7 @@
     </plurals>
 
     <!-- directions trip details options -->
+    <string name="directions_trip_details_action_bookmark">Verbindung merken</string>
     <string name="directions_trip_details_action_start_routing">Navigation starten</string>
     <string name="directions_trip_details_action_calendar_title">Zum Kalender hinzufügen</string>
     <string name="directions_trip_details_action_calendar_notfound">Es ist keine Kalender-App installiert</string>
