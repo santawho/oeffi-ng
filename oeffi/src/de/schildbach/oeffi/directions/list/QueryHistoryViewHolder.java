@@ -63,8 +63,9 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
     private PopupMenu contextMenu;
 
     public QueryHistoryViewHolder(
-            final View itemView, final OeffiActivity context,
-            final NetworkId network) {
+            final OeffiActivity context,
+            final NetworkId network,
+            final View itemView) {
         super(itemView);
         this.context = context;
         this.network = network;
@@ -91,25 +92,27 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
         this.isFavorite = isFavorite;
         this.fromFavState = fromFavState;
         this.toFavState = toFavState;
+        this.hasSavedTrip = savedTripDepartureTime > 0;
 
         fromView.setLocation(from);
         toView.setLocation(to);
 
         favoriteView.setVisibility(isFavorite ? View.VISIBLE : View.INVISIBLE);
 
-        hasSavedTrip = savedTripDepartureTime > 0;
-        if (hasSavedTrip) {
-            tripView.setVisibility(View.VISIBLE);
-            final long now = System.currentTimeMillis();
-            tripView.setText(Formats.formatDate(context.getTimeZoneSelector(), now, savedTripDepartureTime, PTDate.NETWORK_OFFSET) + "\n"
-                    + Formats.formatTime(context.getTimeZoneSelector(), savedTripDepartureTime, PTDate.NETWORK_OFFSET));
-            tripView.setOnClickListener(v -> {
-                final int position = getAdapterPosition();
-                if (position != RecyclerView.NO_POSITION)
-                    clickListener.onSavedTripClick(position, serializedSavedTrip);
-            });
-        } else {
-            tripView.setVisibility(View.GONE);
+        if (tripView != null) {
+            if (hasSavedTrip) {
+                tripView.setVisibility(View.VISIBLE);
+                final long now = System.currentTimeMillis();
+                tripView.setText(Formats.formatDate(context.getTimeZoneSelector(), now, savedTripDepartureTime, PTDate.NETWORK_OFFSET) + "\n"
+                        + Formats.formatTime(context.getTimeZoneSelector(), savedTripDepartureTime, PTDate.NETWORK_OFFSET));
+                tripView.setOnClickListener(v -> {
+                    final int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION)
+                        clickListener.onSavedTripClick(position, serializedSavedTrip);
+                });
+            } else {
+                tripView.setVisibility(View.GONE);
+            }
         }
 
         final boolean selected = rowId == selectedRowId;

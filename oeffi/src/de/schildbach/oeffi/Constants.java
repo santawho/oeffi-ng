@@ -53,6 +53,7 @@ public class Constants {
     public static final String PREFS_KEY_NETWORK_PROVIDER = "network_provider";
     public static final String PREFS_KEY_LAST_NETWORK_PROVIDERS = "last_network_providers";
     public static final String PREFS_KEY_MAX_HISTORY_ENTRIES = "max_history_entries";
+    public static final String PREFS_KEY_HISTORY_ENTRY_SHOW_TRIP = "user_interface_directions_history_show_saved_trip_enabled";
     public static final String PREFS_KEY_PRODUCT_FILTER = "product_filter";
     public static final String PREFS_KEY_OPTIMIZE_TRIP = "optimize_trip";
     public static final String PREFS_KEY_WALK_SPEED = "walk_speed";

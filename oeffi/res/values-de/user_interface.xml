@@ -43,6 +43,8 @@
     <string name="user_interface_directions_compact_times_enabled_summary">Zeigt prognostizierte Zeiten (aus Ort und vom Netzwerk) in einer Zeile, wenn identisch</string>
     <string name="user_interface_max_history_entries_title">Verlaufsgröße</string>
     <string name="user_interface_max_history_entries_summary">Maximale Anzahl Einträge, die im Verlauf gehalten werden. [%s]</string>
+    <string name="user_interface_directions_history_show_saved_trip_enabled_title">Letzte Verbindung im Verlauf</string>
+    <string name="user_interface_directions_history_show_saved_trip_enabled_summary">Zeige die zuletzt gespeicherte Verbindung im Verlauf (empfohlen: aus)</string>
 
     <string name="user_interface_category_map_title">Landkarten</string>
     <string name="user_interface_map_tile_resolution_title">Auflösung von Landkarten</string>

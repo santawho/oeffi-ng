@@ -30,6 +30,8 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import de.schildbach.oeffi.Application;
+import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.QueryHistoryProvider;
@@ -46,6 +48,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<QueryHistoryViewHo
     private final NetworkId network;
     private final QueryHistoryClickListener clickListener;
     private final QueryHistoryContextMenuItemListener contextMenuItemListener;
+    private final int historyEntryLayoutId;
 
     private final Cursor cursor;
     private final ContentObserver contentObserver;
@@ -74,7 +77,9 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<QueryHistoryViewHo
 
     private long selectedRowId = RecyclerView.NO_ID;
 
-    public QueryHistoryAdapter(final OeffiActivity context, final NetworkId network,
+    public QueryHistoryAdapter(
+            final OeffiActivity context,
+            final NetworkId network,
             final QueryHistoryClickListener clickListener,
             final QueryHistoryContextMenuItemListener contextMenuItemListener) {
         this.context = context;
@@ -83,6 +88,11 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<QueryHistoryViewHo
         this.network = network;
         this.clickListener = clickListener;
         this.contextMenuItemListener = contextMenuItemListener;
+
+        this.historyEntryLayoutId = Application.getInstance().getSharedPreferences()
+                .getBoolean(Constants.PREFS_KEY_HISTORY_ENTRY_SHOW_TRIP, false)
+                ? R.layout.directions_query_history_entry_with_trip
+                : R.layout.directions_query_history_entry_no_trip;
 
         final Uri uri = QueryHistoryProvider.CONTENT_URI().buildUpon()
                 .appendPath(network != null ? network.name() : "_NONE_").build();
@@ -193,8 +203,8 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<QueryHistoryViewHo
     @Override
     public QueryHistoryViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
         return new QueryHistoryViewHolder(
-                inflater.inflate(R.layout.directions_query_history_entry_with_trip, parent, false),
-                context, network);
+                context, network,
+                inflater.inflate(historyEntryLayoutId, parent, false));
     }
 
     @Override
