@@ -1442,7 +1442,7 @@ public class NavigationNotification {
             final RemoteViews remoteViews,
             final TripRenderer tripRenderer, final Date now) {
         final int colorHighlight = context.getColor(R.color.bg_trip_details_public_now);
-        final int colorNormal = ViewUtils.getAttrColor(context, R.attr.bg_level0);
+        final int colorNormal = context.getColor(R.color.bg_level0_default);
         final int colorHighIfPublic = tripRenderer.nextEventTypeIsPublic ? colorHighlight : colorNormal;
         final int colorHighIfChangeover = tripRenderer.nextEventTypeIsPublic ? colorNormal : colorHighlight;
         remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_current_action, colorHighlight);
