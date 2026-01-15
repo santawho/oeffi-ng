@@ -305,6 +305,7 @@
     <string name="directions_query_history_clear_confirm_button_clear_all">Wirklich alle löschen</string>
     <string name="directions_query_history_clear_confirm_button_clear_non_favorite">Außer Favoriten</string>
     <string name="directions_query_history_clear_confirm_button_cancel">Abbrechen</string>
+    <string name="directions_stored_trip_over_time_left">vorbei</string>
 
     <!-- query history context menu -->
     <string name="directions_query_history_context_show_trip">Gespeicherte Fahrt anzeigen</string>
@@ -552,9 +553,12 @@
     <string name="time_tomorrow">morgen</string>
     <string name="time_tomorrow_abbrev">morg.</string>
     <string name="time_now">jetzt</string>
-    <string name="time_in">%d&#x200a;min</string>
+    <string name="time_min">%d&#x200a;min</string>
+    <string name="time_min_short">%d&#x200a;m</string>
     <string name="time_ago">vor&#x2009;%d&#x200a;min</string>
-    <string name="time_hours">%1$dh&#x2009;%2$02d&#x200a;min</string>
+    <string name="time_hours_mins">%1$dh&#x2009;%2$02d&#x200a;min</string>
+    <string name="time_hours">%1$d&#x200a;h</string>
+    <string name="time_days">%1$d&#x200a;t</string>
     <string name="time_after">%d&#x200a;min&#x2009;nachher</string>
     <string name="time_before">%d&#x200a;min&#x2009;vorher</string>
 

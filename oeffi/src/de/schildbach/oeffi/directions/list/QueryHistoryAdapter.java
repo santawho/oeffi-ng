@@ -53,33 +53,45 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             QueryStoredTripViewHolder.ContextMenuItemListener {}
 
     private abstract class CursorBase<VHT extends RecyclerView.ViewHolder> {
-        protected final Cursor cursor;
-        protected final ContentObserver contentObserver;
-        protected final int rowIdColumn;
+        protected final Uri uri;
+        protected Cursor cursor;
+        protected ContentObserver contentObserver;
+        protected int rowIdColumn;
         protected int numRows = -1;
 
-        CursorBase(final Uri uri, final String sortOrder) {
-            cursor = contentResolver.query(uri, null, null, null, sortOrder);
-            contentObserver = new ContentObserver(new Handler()) {
-                @Override
-                public void onChange(final boolean selfChange) {
-                    requery();
-                    notifyDataSetChanged();
-                }
-            };
-            contentResolver.registerContentObserver(uri, true, contentObserver);
-            rowIdColumn = cursor.getColumnIndexOrThrow(BaseColumns._ID);
+        CursorBase(final Uri uri) {
+            this.uri = uri;
+            requery();
         }
 
         public void close() {
             numRows = -1;
-            contentResolver.unregisterContentObserver(contentObserver);
-            cursor.close();
+            if (contentObserver != null) {
+                contentResolver.unregisterContentObserver(contentObserver);
+                contentObserver = null;
+            }
+            if (cursor != null) {
+                cursor.close();
+                cursor = null;
+            }
+        }
+
+        protected String getSortOrder() {
+            return null;
         }
 
         public void requery() {
-            numRows = -1;
-            cursor.requery();
+            close();
+            cursor = contentResolver.query(uri, null, null, null, getSortOrder());
+            contentObserver = new ContentObserver(new Handler()) {
+                @Override
+                public void onChange(final boolean selfChange) {
+                    requery();
+                }
+            };
+            contentResolver.registerContentObserver(uri, true, contentObserver);
+            rowIdColumn = cursor.getColumnIndexOrThrow(BaseColumns._ID);
+            notifyDataSetChanged();
         }
 
         public int getCount() {
@@ -121,9 +133,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
         HistoryCursor() {
             super(QueryHistoryProvider.CONTENT_URI().buildUpon()
-                    .appendPath(network != null ? network.name() : "_NONE_").build(),
-                    QueryHistoryProvider.KEY_FAVORITE + " DESC, "
-                            + QueryHistoryProvider.KEY_LAST_QUERIED + " DESC");
+                    .appendPath(network != null ? network.name() : "_NONE_").build());
             fromTypeColumn = cursor.getColumnIndexOrThrow(QueryHistoryProvider.KEY_FROM_TYPE);
             fromIdColumn = cursor.getColumnIndexOrThrow(QueryHistoryProvider.KEY_FROM_ID);
             fromLatColumn = cursor.getColumnIndexOrThrow(QueryHistoryProvider.KEY_FROM_LAT);
@@ -145,6 +155,12 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             favoriteColumn = cursor.getColumnIndexOrThrow(QueryHistoryProvider.KEY_FAVORITE);
             savedTripDepartureTimeColumn = cursor.getColumnIndexOrThrow(QueryHistoryProvider.KEY_LAST_DEPARTURE_TIME);
             savedTripColumn = cursor.getColumnIndexOrThrow(QueryHistoryProvider.KEY_LAST_TRIP);
+        }
+
+        @Override
+        protected String getSortOrder() {
+            return QueryHistoryProvider.KEY_FAVORITE + " DESC, "
+                    + QueryHistoryProvider.KEY_LAST_QUERIED + " DESC";
         }
 
         @Override
@@ -215,8 +231,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
         TripsCursor() {
             super(QueryStoredTripsProvider.CONTENT_URI().buildUpon()
-                    .appendPath(network != null ? network.name() : "_NONE_").build(),
-                    null);
+                    .appendPath(network != null ? network.name() : "_NONE_").build());
             fromTypeColumn = cursor.getColumnIndexOrThrow(QueryStoredTripsProvider.KEY_FROM_TYPE);
             fromIdColumn = cursor.getColumnIndexOrThrow(QueryStoredTripsProvider.KEY_FROM_ID);
             fromLatColumn = cursor.getColumnIndexOrThrow(QueryStoredTripsProvider.KEY_FROM_LAT);
@@ -242,6 +257,23 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             tripColumn = cursor.getColumnIndexOrThrow(QueryStoredTripsProvider.KEY_TRIP);
             tripIdColumn = cursor.getColumnIndexOrThrow(QueryStoredTripsProvider.KEY_TRIP_ID);
             reloadRequestColumn = cursor.getColumnIndexOrThrow(QueryStoredTripsProvider.KEY_RELOAD_REQUEST_DATA);
+        }
+
+        @Override
+        protected String getSortOrder() {
+            return "max(0," + refTime + "-" + QueryStoredTripsProvider.KEY_ARRIVAL_TIME + "),"
+                    + QueryStoredTripsProvider.KEY_DEPARTURE_TIME;
+        }
+
+        @Override
+        public void requery() {
+            close();
+
+            if (refTime > 0 && deleteTripsAfterMillis >= 0) {
+                QueryStoredTripsProvider.deleteOlderTrips(context, network, refTime - deleteTripsAfterMillis);
+            }
+
+            super.requery();
         }
 
         @Override
@@ -296,9 +328,11 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private final QueryHistoryClickListener clickListener;
     private final ContextMenuItemListener contextMenuItemListener;
     private final int historyEntryLayoutId;
+    private final long deleteTripsAfterMillis;
 
-    private final HistoryCursor historyCursor;
-    private final TripsCursor tripsCursor;
+    private HistoryCursor historyCursor;
+    private TripsCursor tripsCursor;
+    private long refTime;
 
     private long selectedRowId = RecyclerView.NO_ID;
 
@@ -306,21 +340,20 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             final OeffiActivity context,
             final NetworkId network,
             final QueryHistoryClickListener clickListener,
-            final ContextMenuItemListener contextMenuItemListener) {
+            final ContextMenuItemListener contextMenuItemListener,
+            final long deleteTripsAfterMillis) {
         this.context = context;
         this.contentResolver = context.getContentResolver();
         this.inflater = LayoutInflater.from(context);
         this.network = network;
         this.clickListener = clickListener;
         this.contextMenuItemListener = contextMenuItemListener;
+        this.deleteTripsAfterMillis = deleteTripsAfterMillis;
 
         this.historyEntryLayoutId = Application.getInstance().getSharedPreferences()
                 .getBoolean(Constants.PREFS_KEY_HISTORY_ENTRY_SHOW_TRIP, false)
                 ? R.layout.directions_query_history_entry_with_trip
                 : R.layout.directions_query_history_entry_no_trip;
-
-        historyCursor = new HistoryCursor();
-        tripsCursor = new TripsCursor();
 
         setHasStableIds(true);
     }
@@ -330,9 +363,22 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         tripsCursor.close();
     }
 
+    public void setRefTime(final long refTime) {
+        this.refTime = refTime;
+
+        if (tripsCursor == null)
+            tripsCursor = new TripsCursor();
+        else
+            tripsCursor.requery();
+
+        if (historyCursor == null)
+            historyCursor = new HistoryCursor();
+        else
+            historyCursor.requery();
+    }
+
     public Uri putEntry(final Location from, final Location to, final Location via) {
         final Uri uri = QueryHistoryProvider.put(contentResolver, network, from, to, via, null, true);
-        notifyDataSetChanged();
         historyCursor.requery();
         return uri;
     }
@@ -356,7 +402,6 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         final ContentValues values = new ContentValues();
         values.put(QueryHistoryProvider.KEY_FAVORITE, isFavorite ? 1 : 0);
         contentResolver.update(uri, values, null, null);
-        notifyDataSetChanged();
         historyCursor.requery();
     }
 

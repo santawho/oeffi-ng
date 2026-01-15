@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- activated, plain -->
+<!--    <item android:state_activated="true">-->
+<!--        <shape>-->
+<!--            <solid android:color="@color/bg_selected_entry" />-->
+<!--        </shape>-->
+<!--    </item>-->
+
+    <!-- plain -->
+    <item>
+        <shape>
+            <solid android:color="?attr/bg_level0" />
+            <stroke android:width="2dp" android:color="@color/bg_bookmarked_trip_border_finished" />
+            <corners android:radius="7dp"/>
+<!--            <padding-->
+<!--                android:left="@dimen/text_padding_horizontal"-->
+<!--                android:right="@dimen/text_padding_horizontal"-->
+<!--                android:top="@dimen/text_padding_vertical"-->
+<!--                android:bottom="@dimen/text_padding_vertical" />-->
+        </shape>
+    </item>
+
+</selector>

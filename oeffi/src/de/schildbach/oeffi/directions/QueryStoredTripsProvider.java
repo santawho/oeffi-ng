@@ -309,7 +309,7 @@ public class QueryStoredTripsProvider extends ContentProvider {
     /**
      * Restricted to usage by {@link Application#onCreate()} only.
      */
-    public static void deleteQueryTrips(final Context context, final String network) {
+    public static void deleteTripsForNetwork(final Context context, final String network) {
         final QueryTripsHelper helper = new QueryTripsHelper(context);
         final SQLiteDatabase db = helper.getWritableDatabase();
 
@@ -317,6 +317,25 @@ public class QueryStoredTripsProvider extends ContentProvider {
         try {
             db.execSQL("DELETE FROM " + DATABASE_TABLE + " WHERE " + KEY_NETWORK + "=?", new String[] { network });
             db.execSQL("DELETE FROM " + DATABASE_TABLE + " WHERE " + KEY_NETWORK + "=?", new String[] { network });
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+
+        helper.close();
+    }
+
+    public static void deleteOlderTrips(final Context context, final NetworkId network, final long minArrivalTime) {
+        final QueryTripsHelper helper = new QueryTripsHelper(context);
+        final SQLiteDatabase db = helper.getWritableDatabase();
+
+        db.beginTransaction();
+        try {
+            db.execSQL(
+                    "DELETE FROM " + DATABASE_TABLE + " WHERE "
+                            + KEY_NETWORK + "=? AND "
+                            + KEY_ARRIVAL_TIME + "<?",
+                    new String[] { network.name(), String.valueOf(minArrivalTime)});
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();

@@ -62,6 +62,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.FromViaToAware;
 import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiMainActivity;
@@ -470,8 +471,8 @@ public class DirectionsActivity extends OeffiMainActivity implements
             viewQueryHistoryList = findViewById(R.id.directions_query_history_list);
             viewQueryHistoryList.setLayoutManager(new LinearLayoutManager(this));
             viewQueryHistoryList.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
-            queryHistoryListAdapter = new QueryHistoryAdapter(this, network, this, this);
-            viewQueryHistoryList.setAdapter(queryHistoryListAdapter);
+            newQueryHistoryListAdapter();
+
             final CoordinatorLayout.LayoutParams coordinatorLayoutParams = new CoordinatorLayout.LayoutParams(
                     viewQueryHistoryList.getLayoutParams().width, viewQueryHistoryList.getLayoutParams().height);
             coordinatorLayoutParams.setBehavior(new CoordinatorLayout.Behavior<View>() { // QuickReturnBehavior
@@ -693,6 +694,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
     @Override
     protected void onStart() {
         super.onStart();
+        updateRefTime(true);
         if (linkArgs != null && network != null) {
             try {
                 final String action = linkArgs[0];
@@ -732,9 +734,20 @@ public class DirectionsActivity extends OeffiMainActivity implements
         }
     }
 
+    private long refTime;
+
+    private void updateRefTime(final boolean force) {
+        final long now = System.currentTimeMillis();
+        if (force || now - refTime > 90000) {
+            refTime = now;
+            queryHistoryListAdapter.setRefTime(refTime);
+        }
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
+        updateRefTime(false);
 
         final boolean haveNonDefaultProducts = initProductToggles();
 
@@ -780,15 +793,27 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
         final boolean haveNonDefaultProducts = initProductToggles();
         expandForm(haveNonDefaultProducts);
-
-        queryHistoryListAdapter.close();
-        queryHistoryListAdapter = new QueryHistoryAdapter(this, network, this, this);
-        viewQueryHistoryList.setAdapter(queryHistoryListAdapter);
-
+        newQueryHistoryListAdapter();
         locationSelector.setNetwork(network);
-
         updateGUI();
         setActionBarSecondaryTitleFromNetwork();
+    }
+
+    private void newQueryHistoryListAdapter() {
+        if (queryHistoryListAdapter != null)
+            queryHistoryListAdapter.close();
+
+        final String deleteTripsAfterHoursText = prefs.getString(Constants.PREFS_KEY_STORED_TRIPS_RETENTION_HOURS, getString(R.string.default_stored_trips_retention_hours));
+        long deleteTripsAfterMillis;
+        try {
+            deleteTripsAfterMillis = (long) (Float.parseFloat(deleteTripsAfterHoursText) * 3600000f);
+        } catch (final NumberFormatException nfe) {
+            deleteTripsAfterMillis = -1;
+        }
+        queryHistoryListAdapter = new QueryHistoryAdapter(this, network, this, this, deleteTripsAfterMillis);
+
+        updateRefTime(true);
+        viewQueryHistoryList.setAdapter(queryHistoryListAdapter);
     }
 
     final LocationView.Listener locationListener = new LocationView.Listener() {

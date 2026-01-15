@@ -56,7 +56,10 @@
     <color name="bg_location_selector_intermediate">#828222</color>
     <color name="bg_location_selector_last">#822222</color>
 
-    <color name="bg_bookmarked_trip_border">#224262</color>
+    <color name="bg_bookmarked_trip_border_finished">#224262</color>
+    <color name="bg_bookmarked_trip_border_future">#8ec225</color>
+    <color name="bg_bookmarked_trip_border_upcoming">#d3d674</color>
+    <color name="bg_bookmarked_trip_border_current">#bf6119</color>
 
     <item name="alpha_bright_white" format="float" type="dimen">0.8</item>
 

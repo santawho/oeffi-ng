@@ -53,6 +53,8 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
 
     private final OeffiActivity context;
     private final NetworkId network;
+    private final View frameView;
+    private final TextView timeLeftView;
     private final TextView dateView;
     private final TextView timeView;
     private final LocationTextView fromView;
@@ -78,6 +80,7 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
         this.context = context;
         this.network = network;
 
+        timeLeftView = itemView.findViewById(R.id.directions_query_stored_trip_entry_time_left);
         dateView = itemView.findViewById(R.id.directions_query_stored_trip_entry_date);
         timeView = itemView.findViewById(R.id.directions_query_stored_trip_entry_time);
         fromView = itemView.findViewById(R.id.directions_query_stored_trip_entry_from);
@@ -86,6 +89,8 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
         this.swipeLayout = (SwipeLayout) itemView;
         swipeListener = new MySwipeListener();
         swipeLayout.addSwipeListener(swipeListener);
+
+        frameView = itemView.findViewById(R.id.directions_query_stored_trip_entry_frame);
     }
 
     public void bind(
@@ -110,10 +115,40 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
         toView.setLocation(to);
 
         final long now = System.currentTimeMillis();
-        final String departureDate = Formats.formatDate(context.getTimeZoneSelector(), now, tripDepartureTime, PTDate.NETWORK_OFFSET);
-        final String departureTime = Formats.formatTime(context.getTimeZoneSelector(), tripDepartureTime, PTDate.NETWORK_OFFSET);
-        dateView.setText(departureDate);
-        timeView.setText(departureTime);
+        final long departureTime = tripDepartureTime.getTime();
+        final long arrivalTime = tripArrivalTime.getTime();
+
+        dateView.setText(Formats.formatDate(context.getTimeZoneSelector(), now, departureTime, PTDate.NETWORK_OFFSET, true));
+        timeView.setText(Formats.formatTime(context.getTimeZoneSelector(), departureTime, PTDate.NETWORK_OFFSET));
+
+        final long MS_UPCOMING = 12 * 3600000; // 12 hours assumed upcoming
+        final int backgroundId;
+        String sTimeLeft = null;
+        final long msTimeLeft;
+        final long msLeftToArrival = arrivalTime - now;
+        if (msLeftToArrival < 0) {
+            msTimeLeft = -msLeftToArrival;
+            sTimeLeft = context.getString(R.string.directions_stored_trip_over_time_left);
+            backgroundId = R.drawable.stored_trip_entry_background_finished;
+        } else {
+            final long msLeftToDeparture = departureTime - now;
+            if (msLeftToDeparture < 0) {
+                msTimeLeft = msLeftToArrival;
+                backgroundId = R.drawable.stored_trip_entry_background_current;
+            } else {
+                msTimeLeft = msLeftToDeparture;
+                if (msLeftToDeparture < MS_UPCOMING) {
+                    backgroundId = R.drawable.stored_trip_entry_background_upcoming;
+                } else {
+                    backgroundId = R.drawable.stored_trip_entry_background_future;
+                }
+            }
+        }
+        if (sTimeLeft == null && msTimeLeft >= 0) {
+            sTimeLeft = Formats.formatTimeDiff(context, msTimeLeft, true, true);
+        }
+        frameView.setBackground(context.getDrawable(backgroundId));
+        timeLeftView.setText(sTimeLeft);
 
         final boolean selected = rowId == selectedRowId;
         itemView.setActivated(selected);

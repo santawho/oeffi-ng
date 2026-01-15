@@ -108,7 +108,11 @@ public final class Formats {
     }
 
     public static String formatDate(final TimeZoneSelector timeZoneSelector, final long now, final long time, final int offset) {
-        return formatDate(timeZoneSelector, now, time, offset, false, timeZoneSelector.context.getString(R.string.time_today));
+        return formatDate(timeZoneSelector, now, time, offset, false);
+    }
+
+    public static String formatDate(final TimeZoneSelector timeZoneSelector, final long now, final long time, final int offset, final boolean abbreviate) {
+        return formatDate(timeZoneSelector, now, time, offset, abbreviate, timeZoneSelector.context.getString(R.string.time_today));
     }
 
     public static String formatTime(final TimeZoneSelector timeZoneSelector, final Date date, final int offset) {
@@ -162,16 +166,31 @@ public final class Formats {
     }
 
     public static String formatTimeDiff(final Context context, final long diff, final boolean refIsNow) {
+        return formatTimeDiff(context, diff, refIsNow, false);
+    }
+
+    public static String formatTimeDiff(final Context context, final long diff, final boolean refIsNow, final boolean shortFormat) {
         final long rel = Math.round(((float) diff) / DateUtils.MINUTE_IN_MILLIS);
         if (refIsNow) {
-            if (rel >= 60)
-                return context.getString(R.string.time_hours, rel / 60, rel % 60);
-            else if (rel > 0)
-                return context.getString(R.string.time_in, rel);
-            else if (rel == 0)
+            if (rel >= 60) {
+                if (shortFormat) {
+                    if (rel > 24 * 60)
+                        return context.getString(R.string.time_days, (rel + 720) / 1440);
+                    else
+                        return context.getString(R.string.time_hours, (rel + 30) / 60);
+                } else {
+                    return context.getString(R.string.time_hours_mins, rel / 60, rel % 60);
+                }
+            } else if (rel > 0) {
+                if (shortFormat)
+                    return context.getString(R.string.time_min_short, rel);
+                else
+                    return context.getString(R.string.time_min, rel);
+            } else if (rel == 0) {
                 return context.getString(R.string.time_now);
-            else
+            } else {
                 return context.getString(R.string.time_ago, -rel);
+            }
         } else {
             if (rel >= 0)
                 return context.getString(R.string.time_after, rel);

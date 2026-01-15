@@ -13,7 +13,7 @@
     <item>
         <shape>
             <solid android:color="?attr/bg_level0" />
-            <stroke android:width="2dp" android:color="@color/bg_bookmarked_trip_border" />
+            <stroke android:width="4dp" android:color="@color/bg_bookmarked_trip_border_current" />
             <corners android:radius="7dp"/>
 <!--            <padding-->
 <!--                android:left="@dimen/text_padding_horizontal"-->

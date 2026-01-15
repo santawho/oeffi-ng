@@ -83,6 +83,14 @@
             android:title="@string/user_interface_max_history_entries_title"
             android:summary="@string/user_interface_max_history_entries_summary" />
 
+        <EditTextPreference
+            android:key="stored_trips_retention_hours"
+            android:singleLine="true"
+            android:inputType="numberDecimal"
+            android:defaultValue="@string/default_stored_trips_retention_hours"
+            android:title="@string/user_interface_stored_trips_retention_hours_title"
+            android:summary="@string/user_interface_stored_trips_retention_hours_summary" />
+
         <CheckBoxPreference
             android:key="user_interface_directions_history_show_saved_trip_enabled"
             android:defaultValue="false"

@@ -34,6 +34,7 @@ public class UserInterfaceFragment extends PreferenceFragment {
 
         setupDynamicSummary("user_interface_map_tile_resolution", R.string.user_interface_map_tile_resolution_summary);
         setupDynamicSummary("max_history_entries", R.string.user_interface_max_history_entries_summary);
+        setupDynamicSummary("stored_trips_retention_hours", R.string.user_interface_stored_trips_retention_hours_summary);
     }
 
     public static class SelectorHelp extends ShowHelpHandler {
