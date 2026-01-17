@@ -139,7 +139,7 @@ public class QueryStoredTripsProvider extends ContentProvider {
             values.put(QueryStoredTripsProvider.KEY_VIA_PLACE, via == null ? null : via.place);
             values.put(QueryStoredTripsProvider.KEY_VIA_NAME, via == null ? null : via.name);
 
-            values.put(KEY_RELOAD_REQUEST_DATA, Objects.serialize(reloadRequestData));
+            values.put(KEY_RELOAD_REQUEST_DATA, Objects.serialize(reloadRequestData == null ? new byte[0] : reloadRequestData));
 
             final Uri baseUri = QueryStoredTripsProvider.CONTENT_URI().buildUpon().appendPath(network.name()).build();
             tripsUri = contentResolver.insert(baseUri, values);

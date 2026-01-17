@@ -316,7 +316,8 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             holder.bind(rowId,
                     from, to, via,
                     tripDepartureTime, tripArrivalTime,
-                    serializedTrip, tripId, serializedReloadRequest,
+                    serializedTrip, tripId,
+                    serializedReloadRequest.length == 0 ? null : serializedReloadRequest,
                     selectedRowId, clickListener, contextMenuItemListener);
         }
     }

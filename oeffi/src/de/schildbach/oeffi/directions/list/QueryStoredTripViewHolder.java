@@ -42,6 +42,7 @@ import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.PTDate;
 import de.schildbach.pte.dto.Trip;
+import de.schildbach.pte.dto.TripOptions;
 
 public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
     public interface ContextMenuItemListener {
@@ -184,10 +185,20 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
     private void startNavigation() {
         final TripDetailsActivity.RenderConfig renderConfig = new TripDetailsActivity.RenderConfig();
         final Trip trip = (Trip) Objects.deserialize(serializedSavedTrip, true);
-        renderConfig.queryTripsRequestData = (QueryTripsRunnable.TripRequestData) Objects.deserialize(serializedReloadRequest, true);
-        if (trip == null || renderConfig.queryTripsRequestData == null) {
+        if (trip == null) {
             new Toast(context).longToast(R.string.directions_query_history_invalid_blob);
             return;
+        }
+        renderConfig.queryTripsRequestData = (QueryTripsRunnable.TripRequestData) Objects.deserialize(serializedReloadRequest, true);
+        if (renderConfig.queryTripsRequestData == null) {
+            final QueryTripsRunnable.TripRequestData reloadRequestData = new QueryTripsRunnable.TripRequestData();
+            reloadRequestData.from = trip.from;
+            reloadRequestData.to = trip.to;
+            reloadRequestData.via = null;
+            reloadRequestData.date = trip.getMinTime();
+            reloadRequestData.dep = true;
+            reloadRequestData.options = new TripOptions();
+            renderConfig.queryTripsRequestData = reloadRequestData;
         }
         TripNavigatorActivity.startNavigation(context, network, trip, renderConfig, false);
 
