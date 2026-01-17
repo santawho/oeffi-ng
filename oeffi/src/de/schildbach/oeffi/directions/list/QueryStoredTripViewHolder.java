@@ -18,6 +18,7 @@
 package de.schildbach.oeffi.directions.list;
 
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
@@ -55,6 +56,7 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
     private final OeffiActivity context;
     private final NetworkId network;
     private final View frameView;
+    private final ImageView iconView;
     private final TextView timeLeftView;
     private final TextView dateView;
     private final TextView timeView;
@@ -81,6 +83,7 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
         this.context = context;
         this.network = network;
 
+        iconView = itemView.findViewById(R.id.directions_query_stored_trip_entry_icon);
         timeLeftView = itemView.findViewById(R.id.directions_query_stored_trip_entry_time_left);
         dateView = itemView.findViewById(R.id.directions_query_stored_trip_entry_date);
         timeView = itemView.findViewById(R.id.directions_query_stored_trip_entry_time);
@@ -124,18 +127,23 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
 
         final long MS_UPCOMING = 12 * 3600000; // 12 hours assumed upcoming
         final int backgroundId;
+        final int iconResId;
         String sTimeLeft = null;
         final long msTimeLeft;
         final long msLeftToArrival = arrivalTime - now;
+        int timeLeftColorId = R.color.fg_significant;
         if (msLeftToArrival < 0) {
             msTimeLeft = -msLeftToArrival;
             sTimeLeft = context.getString(R.string.directions_stored_trip_over_time_left);
             backgroundId = R.drawable.stored_trip_entry_background_finished;
+            iconResId = R.drawable.ic_bookmarked_over_white_24dp;
         } else {
+            iconResId = R.drawable.ic_bookmarked_white_24dp;
             final long msLeftToDeparture = departureTime - now;
             if (msLeftToDeparture < 0) {
                 msTimeLeft = msLeftToArrival;
                 backgroundId = R.drawable.stored_trip_entry_background_current;
+                timeLeftColorId = R.color.fg_highlighted;
             } else {
                 msTimeLeft = msLeftToDeparture;
                 if (msLeftToDeparture < MS_UPCOMING) {
@@ -148,8 +156,12 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
         if (sTimeLeft == null && msTimeLeft >= 0) {
             sTimeLeft = Formats.formatTimeDiff(context, msTimeLeft, true, true);
         }
+        final int timeLeftColor = context.getColor(timeLeftColorId);
         frameView.setBackground(context.getDrawable(backgroundId));
         timeLeftView.setText(sTimeLeft);
+        timeLeftView.setTextColor(timeLeftColor);
+        iconView.setImageResource(iconResId);
+        iconView.setColorFilter(timeLeftColor);
 
         final boolean selected = rowId == selectedRowId;
         itemView.setActivated(selected);

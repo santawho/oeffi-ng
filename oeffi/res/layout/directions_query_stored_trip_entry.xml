@@ -41,6 +41,7 @@
             android:orientation="horizontal">
 
             <ImageView
+                android:id="@+id/directions_query_stored_trip_entry_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:paddingVertical="@dimen/text_padding_vertical"
