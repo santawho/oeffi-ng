@@ -219,6 +219,8 @@ public class TripsOverviewActivity extends OeffiActivity {
         final String historyUriStr = intent.getStringExtra(INTENT_EXTRA_HISTORY_URI);
         final Uri historyUri = historyUriStr != null ? Uri.parse(historyUriStr) : null;
 
+        reloadRequestData.options = resolveTripOptions(reloadRequestData.options);
+
         this.searchMoreContext = new SearchMoreContext(NetworkProviderFactory.provider(network), reloadRequestData, dep);
 
         setContentView(R.layout.directions_trip_overview_content);

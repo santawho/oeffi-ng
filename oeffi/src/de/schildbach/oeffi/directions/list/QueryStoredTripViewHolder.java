@@ -190,16 +190,6 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
             return;
         }
         renderConfig.queryTripsRequestData = (QueryTripsRunnable.TripRequestData) Objects.deserialize(serializedReloadRequest, true);
-        if (renderConfig.queryTripsRequestData == null) {
-            final QueryTripsRunnable.TripRequestData reloadRequestData = new QueryTripsRunnable.TripRequestData();
-            reloadRequestData.from = trip.from;
-            reloadRequestData.to = trip.to;
-            reloadRequestData.via = null;
-            reloadRequestData.date = trip.getMinTime();
-            reloadRequestData.dep = true;
-            reloadRequestData.options = new TripOptions();
-            renderConfig.queryTripsRequestData = reloadRequestData;
-        }
         TripNavigatorActivity.startNavigation(context, network, trip, renderConfig, false);
 
     }

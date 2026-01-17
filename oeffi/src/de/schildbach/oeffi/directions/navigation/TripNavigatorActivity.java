@@ -89,7 +89,18 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         final RenderConfig rc = new RenderConfig();
         rc.isNavigation = true;
         rc.isJourney = renderConfig.isJourney;
-        rc.queryTripsRequestData = renderConfig.queryTripsRequestData;
+        QueryTripsRunnable.TripRequestData reloadRequestData = renderConfig.queryTripsRequestData;
+        if (rc.queryTripsRequestData == null) {
+            reloadRequestData = new QueryTripsRunnable.TripRequestData();
+            reloadRequestData.from = trip.from;
+            reloadRequestData.to = trip.to;
+            reloadRequestData.via = null;
+            reloadRequestData.date = trip.getMinTime();
+            reloadRequestData.dep = true;
+            reloadRequestData.options = null;
+        }
+        renderConfig.queryTripsRequestData = reloadRequestData;
+
         final Intent intent = buildStartIntent(contextActivity, network, trip, rc,
                 DELETEREQUEST_NOT_REQUESTED, Page.NEXT_EVENT, null, sameWindow);
         contextActivity.startActivity(intent);

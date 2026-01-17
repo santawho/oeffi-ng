@@ -807,6 +807,11 @@ public abstract class OeffiActivity extends ComponentActivity {
     }
 
     @NonNull
+    protected TripOptions resolveTripOptions(final TripOptions tripOptions) {
+        return tripOptions != null ? tripOptions : getTripOptionsFromPrefs();
+    }
+
+    @NonNull
     protected TripOptions getTripOptionsFromPrefs() {
         return getTripOptionsFromPrefs(loadProductFilter(), null);
     }
