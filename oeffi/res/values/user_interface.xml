@@ -49,7 +49,7 @@
     <string name="user_interface_max_history_entries_title">History size</string>
     <string name="user_interface_max_history_entries_summary">Maximum number of history entries to keep. [%s]</string>
     <string name="user_interface_directions_history_show_saved_trip_enabled_title">Recent trips in history</string>
-    <string name="user_interface_directions_history_show_saved_trip_enabled_summary">Show recently saved trip in history entries (recommended: off)</string>
+    <string name="user_interface_directions_history_show_saved_trip_enabled_summary">Show recently saved trip in history entries (change requires restart of the app) (recommended: off)</string>
     <string name="user_interface_stored_trips_retention_hours_title">Keep bookmarked trips</string>
     <string name="user_interface_stored_trips_retention_hours_summary">How long to keep bookmarked trips after they are finished.  [%s hours]</string>
 

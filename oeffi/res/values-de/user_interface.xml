@@ -44,7 +44,7 @@
     <string name="user_interface_max_history_entries_title">Verlaufsgröße</string>
     <string name="user_interface_max_history_entries_summary">Maximale Anzahl Einträge, die im Verlauf gehalten werden. [%s]</string>
     <string name="user_interface_directions_history_show_saved_trip_enabled_title">Letzte Verbindung im Verlauf</string>
-    <string name="user_interface_directions_history_show_saved_trip_enabled_summary">Zeige die zuletzt gespeicherte Verbindung im Verlauf (empfohlen: aus)</string>
+    <string name="user_interface_directions_history_show_saved_trip_enabled_summary">Zeige die zuletzt gespeicherte Verbindung im Verlauf (Änderung erfordert Neustart der App) (empfohlen: aus)</string>
     <string name="user_interface_stored_trips_retention_hours_title">Gespeicherte Verbindungen halten</string>
     <string name="user_interface_stored_trips_retention_hours_summary">Wie lange gespeicherte Verbindungen erhalten werden, nachdem sie beendet sind.  [%s Stunden]</string>
 
