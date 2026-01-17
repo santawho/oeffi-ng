@@ -22,6 +22,7 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.daimajia.swipe.SimpleSwipeListener;
@@ -34,6 +35,7 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.QueryStoredTripsProvider;
 import de.schildbach.oeffi.directions.QueryTripsRunnable;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
+import de.schildbach.oeffi.directions.navigation.NavigationNotification;
 import de.schildbach.oeffi.directions.navigation.TripNavigatorActivity;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
@@ -127,7 +129,7 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
 
         final long MS_UPCOMING = 12 * 3600000; // 12 hours assumed upcoming
         final int backgroundId;
-        final int iconResId;
+        int iconResId;
         String sTimeLeft = null;
         final long msTimeLeft;
         final long msLeftToArrival = arrivalTime - now;
@@ -144,6 +146,9 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
                 msTimeLeft = msLeftToArrival;
                 backgroundId = R.drawable.stored_trip_entry_background_current;
                 timeLeftColorId = R.color.fg_highlighted;
+                if (NavigationNotification.isTripUnderNavigation(context, tripId)) {
+                    iconResId = R.drawable.ic_navigation_white_24dp;
+                }
             } else {
                 msTimeLeft = msLeftToDeparture;
                 if (msLeftToDeparture < MS_UPCOMING) {
@@ -157,7 +162,7 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
             sTimeLeft = Formats.formatTimeDiff(context, msTimeLeft, true, true);
         }
         final int timeLeftColor = context.getColor(timeLeftColorId);
-        frameView.setBackground(context.getDrawable(backgroundId));
+        frameView.setBackground(AppCompatResources.getDrawable(context, backgroundId));
         timeLeftView.setText(sTimeLeft);
         timeLeftView.setTextColor(timeLeftColor);
         iconView.setImageResource(iconResId);

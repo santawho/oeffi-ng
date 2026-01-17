@@ -71,7 +71,6 @@ import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.ResourceUri;
 import de.schildbach.oeffi.util.TimeZoneSelector;
-import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.pte.provider.db.DbProvider;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.JourneyRef;
@@ -360,6 +359,19 @@ public class NavigationNotification {
             return false; // only the first
         });
         return anythingDone.get();
+    }
+
+    public static boolean isTripUnderNavigation(final Context context, final String aTripId) {
+        final AtomicBoolean found = new AtomicBoolean(false);
+        forAllActiveNotifications(context, "getTripIds", navigationNotification -> {
+            final String tripId = navigationNotification.intentData.trip.getUniqueId();
+            if (aTripId.equals(tripId)) {
+                found.set(true);
+                return false;
+            }
+            return true;
+        });
+        return found.get();
     }
 
     private static void forAllActiveNotifications(
