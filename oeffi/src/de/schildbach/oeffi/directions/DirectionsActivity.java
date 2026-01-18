@@ -344,7 +344,8 @@ public class DirectionsActivity extends OeffiMainActivity implements
             initLayoutTransitions();
 
             viewFromLocation = findViewById(R.id.directions_from);
-            viewFromLocation.setEnabled(!renderConfig.isAlternativeConnectionSearch);
+            // keep the mode button enabled even when searching for alternative connections
+            viewFromLocation.setEnabled(!renderConfig.isAlternativeConnectionSearch, true);
             viewFromLocation.setStationAsAddressEnabled(true);
 
             viewViaLocation = findViewById(R.id.directions_via);

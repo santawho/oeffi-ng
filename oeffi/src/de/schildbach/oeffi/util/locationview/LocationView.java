@@ -400,6 +400,12 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         }
     }
 
+    public void setEnabled(final boolean enabled, final boolean modeEnabled) {
+        setEnabled(enabled);
+        if (modeButton != null)
+            modeButton.setEnabled(modeEnabled);
+    }
+
     @Override
     public void setEnabled(final boolean enabled) {
         super.setEnabled(enabled);
@@ -407,6 +413,8 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
             textView.setEnabled(enabled);
             textView.setTextColor(getResources().getColor(enabled ? R.color.fg_significant : R.color.fg_insignificant));
         }
+        if (modeButton != null)
+            modeButton.setEnabled(enabled);
         if (menuButton != null)
             menuButton.setEnabled(enabled);
         if (contactButton != null)
