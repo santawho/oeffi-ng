@@ -114,7 +114,9 @@ public class LogViewerActivity extends OeffiActivity {
         final long fileSize = logFile.length();
         StringBuilder sb = new StringBuilder();
         final boolean endOfScrollReached;
-        final long maxOffset = fileSize - BLOCK_SIZE;
+        long maxOffset = fileSize - BLOCK_SIZE;
+        if (maxOffset < 0)
+            maxOffset = 0;
         if (scrollToEnd)
             currentOffset = maxOffset;
         if (currentOffset < 0) {
@@ -127,7 +129,7 @@ public class LogViewerActivity extends OeffiActivity {
             endOfScrollReached = false;
         }
         actionBar.startProgress();
-        try (FileInputStream fis = new FileInputStream(logFile)) {
+        try (final FileInputStream fis = new FileInputStream(logFile)) {
             fis.skip(currentOffset);
             final byte[] block = new byte[BLOCK_SIZE];
             final int blockSize = fis.read(block);
