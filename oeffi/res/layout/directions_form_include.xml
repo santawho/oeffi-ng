@@ -147,6 +147,17 @@
         android:text="@string/directions_option_bike"
         android:visibility="gone" />
 
+    <CheckBox
+        android:id="@+id/directions_option_direct"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/text_padding_vertical_lax"
+        android:layout_marginLeft="@dimen/text_padding_horizontal_lax"
+        android:layout_marginRight="@dimen/text_padding_horizontal_lax"
+        android:layout_marginTop="@dimen/text_padding_vertical_lax"
+        android:text="@string/directions_option_direct"
+        android:visibility="gone" />
+
     <include layout="@layout/directions_form_time_and_go_include"
         android:id="@+id/time_and_go_bottom"
         android:visibility="gone" />

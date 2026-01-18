@@ -146,6 +146,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
     private View viewProducts;
     private List<ToggleImageButton> viewProductToggles = new ArrayList<>(8);
     private CheckBox viewBike;
+    private CheckBox viewDirectOption;
     private Button viewTimeDepArr;
     private Button viewTime1;
     private Button viewTime2;
@@ -415,6 +416,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             for (final View view : viewProductToggles)
                 view.setOnLongClickListener(productLongClickListener);
 
+            viewDirectOption = findViewById(R.id.directions_option_direct);
             viewBike = findViewById(R.id.directions_option_bike);
 
             final boolean timeAndGoAtBottom = prefs.getBoolean("user_interface_directions_time_and_go_bottom_enabled", false);
@@ -1285,17 +1287,17 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
             final NetworkProvider networkProvider = network != null ? NetworkProviderFactory.provider(network) : null;
 
-            viewViaLocation.setVisibility(networkProvider != null && networkProvider.hasCapabilities(NetworkProvider.Capability.TRIPS_VIA) ?
-                    View.VISIBLE : View.GONE);
+            ViewUtils.setVisibility(viewViaLocation, networkProvider != null && networkProvider.hasCapabilities(NetworkProvider.Capability.TRIPS_VIA));
             viewProducts.setVisibility(View.VISIBLE);
-            viewBike.setVisibility(networkProvider != null && networkProvider.hasCapabilities(Capability.BIKE_OPTION) ?
-                    View.VISIBLE: View.GONE);
+            ViewUtils.setVisibility(viewDirectOption, networkProvider != null && networkProvider.hasCapabilities(Capability.DIRECT_OPTION));
+            ViewUtils.setVisibility(viewBike, networkProvider != null && networkProvider.hasCapabilities(Capability.BIKE_OPTION));
         } else {
             buttonExpand.setChecked(false);
             initLayoutTransitions(false);
 
             viewViaLocation.setVisibility(View.GONE);
             viewProducts.setVisibility(View.GONE);
+            viewDirectOption.setVisibility(View.GONE);
             viewBike.setVisibility(View.GONE);
         }
     }
@@ -1516,6 +1518,9 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
         final Set<Product> products = getProductToggles();
         final Set<TripFlag> flags = new HashSet<>();
+
+        if (viewDirectOption.isChecked() && networkProvider.hasCapabilities(Capability.DIRECT_OPTION))
+            flags.add(TripFlag.DIRECT);
 
         if (viewBike.isChecked() && networkProvider.hasCapabilities(Capability.BIKE_OPTION))
             flags.add(TripFlag.BIKE);
