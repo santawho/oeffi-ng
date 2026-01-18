@@ -2093,6 +2093,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             stopNameView.setTextColor(colorSignificant);
             stopNameView.setTypeface(null, Typeface.NORMAL);
         }
+        stopNameView.setOnClickListener(null);
+        stopNameView.setOnLongClickListener(null);
         if (location.hasId()) {
             JourneyRef feederJourneyRef = leg.journeyRef;
             JourneyRef connectionJourneyRef = leg.journeyRef;
@@ -2130,14 +2132,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     }
                 }
             }
-            final StopClickListener clickListener = new StopClickListener(
-                    legC, stop, stopIsLegDeparture, stopIsLegArrival,
-                    leg.journeyRef, feederJourneyRef, connectionJourneyRef);
-            stopNameView.setOnClickListener(v -> clickListener.onClick(v, false));
-            stopNameView.setOnLongClickListener(v -> clickListener.onClick(v, true));
-        } else {
-            stopNameView.setOnClickListener(null);
-            stopNameView.setOnLongClickListener(null);
+            if (pearlType != PearlView.Type.PASSING) {
+                final StopClickListener clickListener = new StopClickListener(
+                        legC, stop, stopIsLegDeparture, stopIsLegArrival,
+                        leg.journeyRef, feederJourneyRef, connectionJourneyRef);
+                stopNameView.setOnClickListener(v -> clickListener.onClick(v, false));
+                stopNameView.setOnLongClickListener(v -> clickListener.onClick(v, true));
+            }
         }
 
         // pearl
