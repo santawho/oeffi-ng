@@ -28,5 +28,8 @@ public class DriverModeFragment extends PreferenceFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preference_drivermode);
+
+        setupDynamicSummary("extras_drivermode_threshold_early", R.string.extras_drivermode_threshold_early_summary);
+        setupDynamicSummary("extras_drivermode_threshold_delay", R.string.extras_drivermode_threshold_delay_summary);
     }
 }

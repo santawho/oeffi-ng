@@ -10,4 +10,22 @@
         android:defaultValue="false"
         android:title="@string/extras_drivermode_enabled_title" />
 
+    <EditTextPreference
+        android:dependency="extras_drivermode_enabled"
+        android:key="extras_drivermode_threshold_early"
+        android:singleLine="true"
+        android:inputType="number"
+        android:defaultValue="@string/default_drivermode_threshold_early"
+        android:title="@string/extras_drivermode_threshold_early_title"
+        android:summary="@string/extras_drivermode_threshold_early_summary" />
+
+    <EditTextPreference
+        android:dependency="extras_drivermode_enabled"
+        android:key="extras_drivermode_threshold_delay"
+        android:singleLine="true"
+        android:inputType="number"
+        android:defaultValue="@string/default_drivermode_threshold_delay"
+        android:title="@string/extras_drivermode_threshold_delay_title"
+        android:summary="@string/extras_drivermode_threshold_delay_summary" />
+
 </PreferenceScreen>
