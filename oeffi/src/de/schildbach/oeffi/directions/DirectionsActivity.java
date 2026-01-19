@@ -655,7 +655,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         }
 
         final boolean haveNonDefaultProducts = initProductToggles();
-        expandForm(haveNonDefaultProducts || viewViaLocation.getText() != null);
+        expandFormIfRequired(haveNonDefaultProducts);
 
         if (command != null) {
             final AutoCompleteLocationsHandler autoCompleteLocationsHandler =
@@ -776,7 +776,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         };
         registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
 
-        expandForm(haveNonDefaultProducts || viewViaLocation.getLocation() != null);
+        expandFormIfRequired(haveNonDefaultProducts);
 
         setActionBarSecondaryTitleFromNetwork();
         updateFragments();
@@ -795,7 +795,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         //??? viewBike.setChecked(false);
 
         final boolean haveNonDefaultProducts = initProductToggles();
-        expandForm(haveNonDefaultProducts);
+        expandFormIfRequired(haveNonDefaultProducts);
         newQueryHistoryListAdapter();
         locationSelector.setNetwork(network);
         updateGUI();
@@ -1278,6 +1278,14 @@ public class DirectionsActivity extends OeffiMainActivity implements
             }
         });
         mapView.zoomToAll();
+    }
+
+    private void expandFormIfRequired(final boolean haveNonDefaultProducts) {
+        expandForm(haveNonDefaultProducts
+                || viewViaLocation.getText() != null
+                || viewBike.isChecked()
+                || viewDirectOption.isChecked()
+        );
     }
 
     private void expandForm(final boolean expanded) {
