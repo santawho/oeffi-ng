@@ -182,7 +182,11 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
                     QueryStoredTripsProvider.delete(context.getContentResolver(), network, tripId);
                 }
             } else if (position != RecyclerView.NO_POSITION) {
-                clickListener.onSavedTripClick(position, serializedSavedTrip);
+                clickListener.onSavedTripClick(position,
+                        from, to, via,
+                        tripDepartureTime, tripArrivalTime,
+                        serializedSavedTrip, tripId,
+                        serializedReloadRequest);
             }
         });
 //        itemView.setOnLongClickListener(v -> {

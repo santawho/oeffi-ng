@@ -1332,8 +1332,13 @@ public class DirectionsActivity extends OeffiMainActivity implements
     }
 
     @Override
-    public void onSavedTripClick(final int adapterPosition, final byte[] serializedSavedTrip) {
-        handleShowSavedTrip(serializedSavedTrip);
+    public void onSavedTripClick(
+            final int adapterPosition,
+            final Location from, final Location to, final Location via,
+            final PTDate tripDepartureTime, final PTDate tripArrivalTime,
+            final byte[] serializedTrip, final String tripId,
+            final byte[] serializedReloadRequest) {
+        handleShowSavedTrip(from, to, via, tripDepartureTime, tripArrivalTime, serializedTrip, tripId, serializedReloadRequest);
     }
 
     @Override
@@ -1352,7 +1357,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             @Nullable final byte[] serializedSavedTrip, final int menuItemId,
             @Nullable final Location menuItemLocation) {
         if (menuItemId == R.id.directions_query_history_context_show_trip) {
-            handleShowSavedTrip(serializedSavedTrip);
+            handleShowSavedTrip(from, to, via, null, null, serializedSavedTrip, null, null);
             return true;
         } else if (menuItemId == R.id.directions_query_history_context_remove_trip) {
             queryHistoryListAdapter.setSavedTrip(adapterPosition, 0, 0, null);
@@ -1399,7 +1404,11 @@ public class DirectionsActivity extends OeffiMainActivity implements
         expandForm(!productsAreNetworkDefault(getProductToggles()) || via != null);
     }
 
-    private void handleShowSavedTrip(final byte[] serializedTrip) {
+    private void handleShowSavedTrip(
+            final Location from, final Location to, final Location via,
+            final PTDate tripDepartureTime, final PTDate tripArrivalTime,
+            final byte[] serializedTrip, final String tripId,
+            final byte[] serializedReloadRequest) {
         final Trip trip = (Trip) Objects.deserialize(serializedTrip, true);
         if (trip == null) {
             new Toast(this).longToast(R.string.directions_query_history_invalid_blob);
@@ -1407,7 +1416,9 @@ public class DirectionsActivity extends OeffiMainActivity implements
         }
         loadTripByTripRef(trip.tripRef, (loadedTrip) -> {
             final Trip useTrip = loadedTrip != null ? loadedTrip : trip;
-            TripDetailsActivity.start(DirectionsActivity.this, network, useTrip);
+            final TripDetailsActivity.RenderConfig config = new TripDetailsActivity.RenderConfig();
+            config.queryTripsRequestData = (QueryTripsRunnable.TripRequestData) Objects.deserialize(serializedReloadRequest);
+            TripDetailsActivity.start(DirectionsActivity.this, network, useTrip, config);
         });
     }
 

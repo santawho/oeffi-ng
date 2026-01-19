@@ -131,7 +131,11 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
                 tripView.setOnClickListener(v -> {
                     final int position = getAdapterPosition();
                     if (position != RecyclerView.NO_POSITION)
-                        clickListener.onSavedTripClick(position, serializedSavedTrip);
+                        clickListener.onSavedTripClick(position,
+                                from, to, via,
+                                new PTDate(savedTripDepartureTime, PTDate.NETWORK_OFFSET), null,
+                                serializedSavedTrip, null,
+                                null);
                 });
             } else {
                 tripView.setVisibility(View.GONE);

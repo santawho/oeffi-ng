@@ -18,9 +18,15 @@
 package de.schildbach.oeffi.directions.list;
 
 import de.schildbach.pte.dto.Location;
+import de.schildbach.pte.dto.PTDate;
 
 public interface QueryHistoryClickListener {
     void onEntryClick(int adapterPosition, Location from, Location to, Location via);
 
-    void onSavedTripClick(int adapterPosition, byte[] serializedTrip);
+    void onSavedTripClick(
+            int adapterPosition,
+            Location from, Location to, Location via,
+            PTDate tripDepartureTime, PTDate tripArrivalTime,
+            byte[] serializedTrip, String tripId,
+            byte[] serializedReloadRequest);
 }
