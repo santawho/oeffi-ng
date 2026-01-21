@@ -105,7 +105,7 @@ public class StationContextMenu extends PopupMenu {
         final EditText nameView = view.findViewById(R.id.create_launcher_shortcut_dialog_name);
         nameView.setText(location.uniqueShortName());
         final RadioButton departuresRadioButton = view.findViewById(R.id.create_launcher_shortcut_dialog_departures);
-        departuresRadioButton.setEnabled(location.type != LocationType.STATION);
+        departuresRadioButton.setEnabled(location.type == LocationType.STATION);
         builder.setView(view);
         builder.setPositiveButton(R.string.create_launcher_shortcut_dialog_button_ok,
                 (dialog, which) -> {
