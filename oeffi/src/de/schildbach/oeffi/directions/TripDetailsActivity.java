@@ -2245,8 +2245,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 isShowSimulatedLine = false;
             } else if (isShowCompactTimes) {
                 if (Math.abs(simulatedTime.getTime() - providedTime.getTime()) <= 175000) {
-                isShowSimulatedLine = false;
-                stopTimeColor = colorSimulated;
+                    isShowSimulatedLine = false;
+                    stopTimeColor = colorSimulated;
                 } else {
                     isShowSimulatedLine = true;
                 }
@@ -2315,7 +2315,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             if (delayMins != 0) {
                 collapseColumns.collapseDelayColumn = false;
                 stopDelayProvidedView.setText(String.format("(%+d)", delayMins));
-                stopDelayProvidedView.setTypeface(Typeface.DEFAULT, isTimePredicted ? Typeface.ITALIC : Typeface.NORMAL);
+                stopDelayProvidedView.setTypeface(Typeface.DEFAULT, Typeface.ITALIC);
             }
         }
 
@@ -2324,7 +2324,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             if (delayMins != 0) {
                 collapseColumns.collapseDelayColumn = false;
                 stopDelaySimulatedView.setText(String.format("(%+d)", delayMins));
-                stopDelaySimulatedView.setTypeface(Typeface.DEFAULT, isTimePredicted ? Typeface.ITALIC : Typeface.NORMAL);
+                stopDelaySimulatedView.setTypeface(Typeface.DEFAULT, Typeface.ITALIC);
             }
         } else {
             stopDelaySimulatedView.setVisibility(View.GONE);
