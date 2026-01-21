@@ -255,6 +255,7 @@ public class TripRenderer {
                             }
                         } else {
                             delayedDeparture = true;
+                            predictedDepartureTime = new PTDate(plannedDepartureTime.getTime() + delayAtRefPoint, plannedDepartureTime.getOffset());
                         }
                         intermediateStops.add(new Stop(
                                 stop.location,
