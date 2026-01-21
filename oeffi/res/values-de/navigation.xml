@@ -213,6 +213,7 @@
     <string name="navigation_event_speak_departure_position_change">der Steig der nächsten Abfahrt wurde geändert: Abfahrt %1$s</string>
     <string name="navigation_event_speak_arrival_position_change">der Steig der nächsten Ankunft wurde geändert: Abfahrt %1$s</string>
     <string name="navigation_event_speak_linename">%1$s%2$s Richtung %3$s</string>
+    <string name="navigation_event_speak_product_unknown">unbekannter Verkehr</string>
     <string name="navigation_event_speak_product_highspeed_train"></string>
     <string name="navigation_event_speak_product_regional_train"></string>
     <string name="navigation_event_speak_product_suburban_train"></string>
@@ -269,6 +270,7 @@
     <string name="navigation_event_notify_arrival_position_change">Neuer Steig %1$s Ankunft %2$s in %3$s, plan %4$s</string>
     <string name="navigation_event_notify_next_transfer_critical">Der nächste Umstieg is kritisch. %1$s</string>
     <string name="navigation_event_notify_any_transfer_critical">Einige Umstiege sind kritisch</string>
+    <string name="navigation_event_notify_product_unknown">unbekannter Verkehr</string>
     <string name="navigation_event_notify_product_highspeed_train"></string>
     <string name="navigation_event_notify_product_regional_train"></string>
     <string name="navigation_event_notify_product_suburban_train"></string>

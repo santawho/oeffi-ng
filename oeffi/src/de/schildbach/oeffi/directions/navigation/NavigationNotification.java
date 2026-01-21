@@ -2434,8 +2434,10 @@ public class NavigationNotification {
     private String makeNotificationLineName(final Line line, final Location destination, final Location refLocation) {
         final String destinationName = Formats.fullLocationNameIfDifferentPlace(destination, refLocation);
         final Integer notificationProductResId = notificationProducts.get(line.product);
-        final String notificationProduct = notificationProductResId == null ? null : context.getString(notificationProductResId);
-        return (notificationProduct == null || notificationProduct.isEmpty() ? "" : notificationProduct + " ")
+        final String notificationProduct = context.getString(notificationProductResId == null
+                ? R.string.navigation_event_notify_product_unknown
+                : notificationProductResId);
+        return (notificationProduct.isEmpty() ? "" : (notificationProduct + " "))
                 + line.label + "->" + destinationName;
     }
 
@@ -2454,30 +2456,35 @@ public class NavigationNotification {
     }
 
     private String makeSpeakableLineName(final Line line, final Location destination, final Location refLocation) {
-        final String lineName = line.label;
-        if (lineName == null || lineName.length() <= 1)
-            return lineName;
-        final StringBuilder builder = new StringBuilder();
-        char prevChar = lineName.charAt(0);
-        builder.append(prevChar);
-        for (int pos = 1; pos < lineName.length(); ++pos) {
-            final char ch = lineName.charAt(pos);
-            if (Character.isAlphabetic(ch)) {
-                if (!Character.isSpaceChar(prevChar))
-                    builder.append(Character.isAlphabetic(prevChar) ? '-' : ' ');
-            } else {
-                if (!Character.isSpaceChar(ch) && Character.isAlphabetic(prevChar))
-                    builder.append(' ');
-            }
-            builder.append(ch);
-            prevChar = ch;
-        }
-        final String speakableLineName = builder.toString();
-        final String destinationName = Formats.fullLocationNameIfDifferentPlace(destination, refLocation);
         final Integer speakableProductResId = speakableProducts.get(line.product);
-        final String speakableProduct = speakableProductResId == null ? null : context.getString(speakableProductResId);
+        final String speakableProduct = context.getString(speakableProductResId == null
+                ? R.string.navigation_event_speak_product_unknown
+                : speakableProductResId);
+        final String speakableLineName;
+        final String lineName = line.label;
+        if (lineName == null || lineName.isEmpty()) {
+            speakableLineName = "";
+        } else {
+            final StringBuilder builder = new StringBuilder();
+            char prevChar = lineName.charAt(0);
+            builder.append(prevChar);
+            for (int pos = 1; pos < lineName.length(); ++pos) {
+                final char ch = lineName.charAt(pos);
+                if (Character.isAlphabetic(ch)) {
+                    if (!Character.isSpaceChar(prevChar))
+                        builder.append(Character.isAlphabetic(prevChar) ? '-' : ' ');
+                } else {
+                    if (!Character.isSpaceChar(ch) && Character.isAlphabetic(prevChar))
+                        builder.append(' ');
+                }
+                builder.append(ch);
+                prevChar = ch;
+            }
+            speakableLineName = builder.toString();
+        }
+        final String destinationName = Formats.fullLocationNameIfDifferentPlace(destination, refLocation);
         return context.getString(R.string.navigation_event_speak_linename,
-                speakableProduct == null || speakableProduct.isEmpty() ? "" : speakableProduct + " ",
+                speakableProduct.isEmpty() ? "" : (speakableProduct + " "),
                 speakableLineName,
                 destinationName);
     }

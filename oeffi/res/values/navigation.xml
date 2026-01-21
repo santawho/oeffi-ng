@@ -247,6 +247,7 @@
     <string name="navigation_event_speak_departure_position_change">the platform of the next departure has changed: departure %1$s</string>
     <string name="navigation_event_speak_arrival_position_change">the platform of the next arrival has changed: departure %1$s</string>
     <string name="navigation_event_speak_linename">%1$s%2$s towards %3$s</string>
+    <string name="navigation_event_speak_product_unknown">unknown service</string>
     <string name="navigation_event_speak_product_highspeed_train"></string>
     <string name="navigation_event_speak_product_regional_train"></string>
     <string name="navigation_event_speak_product_suburban_train"></string>
@@ -303,6 +304,7 @@
     <string name="navigation_event_notify_arrival_position_change">New platform %1$s arrival %2$s at %3$s, sched %4$s</string>
     <string name="navigation_event_notify_next_transfer_critical">The next transfer is critical. %1$s</string>
     <string name="navigation_event_notify_any_transfer_critical">Some transfers are critical</string>
+    <string name="navigation_event_notify_product_unknown">unknown service</string>
     <string name="navigation_event_notify_product_highspeed_train"></string>
     <string name="navigation_event_notify_product_regional_train"></string>
     <string name="navigation_event_notify_product_suburban_train"></string>
