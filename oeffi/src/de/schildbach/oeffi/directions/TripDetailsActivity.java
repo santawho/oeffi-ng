@@ -182,7 +182,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
     }
 
-    public static void start(final Context context, final NetworkId network, final Trip.Public journeyLeg, final Date loadedAt) {
+    public static void start(
+            final Context context,
+            final NetworkId network, final Trip.Public journeyLeg, final Date loadedAt,
+            final int intentFlags) {
         final Trip trip = new Trip(
                 loadedAt,
                 null,
@@ -195,7 +198,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 null);
         final RenderConfig renderConfig = new RenderConfig();
         renderConfig.isJourney = true;
-        start(context, network, trip, renderConfig);
+        start(context, network, trip, renderConfig, intentFlags);
     }
 
     public static void start(
@@ -213,17 +216,27 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         start(context, network, trip, new RenderConfig(), intentFlags);
     }
 
-    public static void start(final Context context, final NetworkId network, final Trip trip, final RenderConfig renderConfig) {
+    public static void start(
+            final Context context,
+            final NetworkId network, final Trip trip,
+            final RenderConfig renderConfig) {
         start(context, network, trip, renderConfig, 0);
     }
 
-    public static void start(final Context context, final NetworkId network, final Trip trip, final RenderConfig renderConfig, final int intentFlags) {
+    public static void start(
+            final Context context,
+            final NetworkId network, final Trip trip,
+            final RenderConfig renderConfig,
+            final int intentFlags) {
         final Intent intent = buildStartIntent(TripDetailsActivity.class, context, network, trip, renderConfig);
         intent.addFlags(intentFlags);
         context.startActivity(intent);
     }
 
-    public static void startForResult(final Activity context, final int requestCode, final NetworkId network, final Trip trip, final RenderConfig renderConfig) {
+    public static void startForResult(
+            final Activity context, final int requestCode,
+            final NetworkId network, final Trip trip,
+            final RenderConfig renderConfig) {
         context.startActivityForResult(buildStartIntent(TripDetailsActivity.class, context, network, trip, renderConfig), requestCode);
     }
 
@@ -869,6 +882,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         return null;
     }
 
+    protected boolean mustOpenActivityInNewTask() {
+        return false;
+    }
+
     protected void updateFragments() {
         if (mapIsAtBottom) {
             final boolean mapShowing = updateFragments(R.id.directions_trip_details_list_content);
@@ -1143,7 +1160,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
                         this, clickedView, queryJourneyRunnable,
                         handler, backgroundHandler,
-                        network, leg.journeyRef, leg.departure, leg.arrival);
+                        network, leg.journeyRef, leg.departure, leg.arrival,
+                        mustOpenActivityInNewTask());
             };
             lineView.setClickable(true);
             lineView.setOnClickListener(onClickListener);

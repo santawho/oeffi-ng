@@ -574,6 +574,11 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         return overviewConfig;
     }
 
+    @Override
+    protected boolean mustOpenActivityInNewTask() {
+        return true;
+    }
+
     private NavigationNotification guiUpdateNavigationNotification;
 
     @Override

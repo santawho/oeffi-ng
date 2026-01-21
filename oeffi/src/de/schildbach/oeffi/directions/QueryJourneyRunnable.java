@@ -61,6 +61,7 @@ import okhttp3.HttpUrl;
 public class QueryJourneyRunnable implements Runnable {
     final Activity parentActivity;
     final View clickedView;
+    final boolean openInNewWindow;
     private final Resources res;
     private final ProgressDialog progressDialog;
     private final Handler handler;
@@ -79,7 +80,8 @@ public class QueryJourneyRunnable implements Runnable {
             final Activity parentActivity, final View clickedView,
             final QueryJourneyRunnable prevInstance, final Handler handler, final Handler backgroundHandler,
             final NetworkId networkId, final JourneyRef journeyRef,
-            final Location entryLocation, final Location exitLocation) {
+            final Location entryLocation, final Location exitLocation,
+            final boolean openInNewWindow) {
         final ProgressDialog progressDialog = ProgressDialog.show(parentActivity, null,
                 parentActivity.getString(R.string.directions_query_progress), true, true, dialog -> {
                     if (prevInstance != null)
@@ -89,9 +91,10 @@ public class QueryJourneyRunnable implements Runnable {
 
         final NetworkProvider networkProvider = NetworkProviderFactory.provider(networkId);
         final QueryJourneyRunnable queryJourneyRunnable = new QueryJourneyRunnable(
-            parentActivity, clickedView,
-            progressDialog, handler, networkProvider,
-            journeyRef, entryLocation, exitLocation);
+                parentActivity, clickedView,
+                progressDialog, handler, networkProvider,
+                journeyRef, entryLocation, exitLocation,
+                openInNewWindow);
 
         log.info("Executing: {}", queryJourneyRunnable);
 
@@ -104,9 +107,11 @@ public class QueryJourneyRunnable implements Runnable {
             final ProgressDialog progressDialog, final Handler handler,
             final NetworkProvider networkProvider,
             final JourneyRef journeyRef,
-            final Location entryLocation, final Location exitLocation) {
+            final Location entryLocation, final Location exitLocation,
+            final boolean openInNewWindow) {
         this.parentActivity = parentActivity;
         this.clickedView = clickedView;
+        this.openInNewWindow = openInNewWindow;
         this.res = parentActivity.getResources();
         this.progressDialog = progressDialog;
         this.handler = handler;
@@ -228,7 +233,10 @@ public class QueryJourneyRunnable implements Runnable {
 
             final Trip.Public journeyLeg = result.journeyLeg;
             journeyLeg.setEntryAndExit(entryLocation, exitLocation);
-            TripDetailsActivity.start(parentActivity, networkProvider.id(), journeyLeg, new Date());
+            TripDetailsActivity.start(
+                    parentActivity,
+                    networkProvider.id(), journeyLeg, new Date(),
+                    openInNewWindow ? Intent.FLAG_ACTIVITY_NEW_TASK : 0);
         } else if (result.status == QueryJourneyResult.Status.SERVICE_DOWN) {
             networkProblem();
         }

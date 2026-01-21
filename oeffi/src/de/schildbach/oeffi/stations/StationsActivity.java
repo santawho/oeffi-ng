@@ -1616,7 +1616,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
                 this, clickedView, queryJourneyRunnable,
                 handler, backgroundHandler,
-                network, journeyRef, entryLocation, null);
+                network, journeyRef, entryLocation, null,
+                false);
     }
 
     private final LocationListener locationListener = new LocationListener() {
