@@ -88,7 +88,7 @@ public class AutoCompleteLocationsHandler {
         jobs.add(() -> {
             if (isHereLocation) {
                 final LocationHelper locationHelper = new LocationHelper(
-                        (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE),
+                        activity,
                         new LocationHelper.Callback() {
                             boolean done;
 

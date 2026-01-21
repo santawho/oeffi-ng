@@ -112,7 +112,7 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
 
         prefs = Application.getInstance().getSharedPreferences();
 
-        locationHelper = new LocationHelper((LocationManager) getSystemService(Context.LOCATION_SERVICE), this);
+        locationHelper = new LocationHelper(this, this);
 
         backgroundThread = new HandlerThread("getAreaThread", Process.THREAD_PRIORITY_BACKGROUND);
         backgroundThread.start();

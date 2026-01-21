@@ -400,6 +400,7 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
             tripStrokeWidthSelectedGlow = res.getDimension(R.dimen.map_trip_stroke_width_selected_glow);
             bubbleTextColor = res.getColor(R.color.fg_significant_on_light);
         }
+
         @Override
         public void draw(final Canvas canvas, final MapView mapView, final boolean shadow) {
             if (!shadow) {

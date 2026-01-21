@@ -37,6 +37,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.location.Criteria;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.location.LocationRequest;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -69,6 +70,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 import androidx.core.graphics.Insets;
@@ -264,7 +266,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private int colorLegIndividualPastBackground, colorLegIndividualNowBackground,
             colorLegIndividualFutureBackground, colorLegIndividualTransferCriticalBackground;
     private DisplayMetrics displayMetrics;
-    private LocationManager locationManager;
     private BroadcastReceiver tickReceiver;
     private int showScreenIdWhenUnlocked = R.id.directions_trip_details_list_frame;
     private int showScreenIdWhenLocked = R.id.navigation_next_event;
@@ -280,6 +281,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     protected TripRenderer tripRenderer;
     protected RenderConfig renderConfig;
     private PTDate highlightedTime;
+    private boolean locationTrackingEnabled;
+    private String locationProvider;
     private Point deviceLocation;
     private Date deviceLocationTime;
     private int selectedLegIndex = -1;
@@ -327,7 +330,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         colorLegIndividualFutureBackground = res.getColor(R.color.bg_trip_details_individual_future);
         colorLegIndividualTransferCriticalBackground = res.getColor(R.color.bg_trip_details_individual_transfer_critical);
         displayMetrics = res.getDisplayMetrics();
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         final IntentData intentData = new IntentData(getIntent());
         renderConfig = intentData.renderConfig;
@@ -415,10 +417,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     requestLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
                 }
             } else {
-                locationManager.removeUpdates(TripDetailsActivity.this);
-                updateDeviceLocationDependencies(null, null);
-
-                getMapView().setDeviceLocationAware(null);
+                disableTracking();
             }
 
             getMapView().zoomToAll();
@@ -752,6 +751,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     protected void onResume() {
         super.onResume();
         isPaused = false;
+        requestLocationUpdates();
         checkAutoRefresh();
         if (isDriverJourney) {
             periodicUpdateGuiRunnable.run();
@@ -773,6 +773,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     @Override
     protected void onPause() {
         isPaused = true;
+        removeLocationUpdates();
         handler.removeCallbacks(periodicUpdateGuiRunnable);
         super.onPause();
     }
@@ -790,16 +791,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     @Override
     protected void onDestroy() {
         backgroundThread.getLooper().quit();
-
-        locationManager.removeUpdates(TripDetailsActivity.this);
-
+        removeLocationUpdates();
         super.onDestroy();
     }
 
     @Override
     public void onConfigurationChanged(final Configuration config) {
         super.onConfigurationChanged(config);
-
         updateFragments();
     }
 
@@ -822,49 +820,69 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             finish();
     }
 
-    private void enableTracking() {
-        final String provider = requestLocationUpdates();
-        if (provider != null) {
-            @SuppressLint("MissingPermission")
-            final android.location.Location lastKnownLocation = locationManager
-                    .getLastKnownLocation(provider);
-            updateDeviceLocationDependencies(lastKnownLocation == null
-                    || (lastKnownLocation.getLatitude() == 0 && lastKnownLocation.getLongitude() == 0)
-                    ? null : LocationHelper.locationToPoint(lastKnownLocation), new Date());
-            getMapView().setDeviceLocationAware(TripDetailsActivity.this);
+    @SuppressLint("MissingPermission")
+    protected void enableTracking() {
+        if (locationProvider == null) {
+            final Criteria criteria = new Criteria();
+            criteria.setAccuracy(Criteria.ACCURACY_FINE);
+            locationProvider = locationManager.getBestProvider(criteria, true);
+        } else {
+            new Toast(this).toast(R.string.acquire_location_no_provider);
+            disableTracking();
+            trackButton.setChecked(false);
+        }
+
+        if (!locationTrackingEnabled) {
+            locationTrackingEnabled = true;
+            requestLocationUpdates();
+        }
+    }
+
+    protected void disableTracking() {
+        if (locationTrackingEnabled) {
+            locationTrackingEnabled = false;
+            getMapView().setDeviceLocationAware(null);
+            removeLocationUpdates();
         }
     }
 
     @SuppressLint("MissingPermission")
-    private String requestLocationUpdates() {
-        final Criteria criteria = new Criteria();
-        criteria.setAccuracy(Criteria.ACCURACY_FINE);
-        final String provider = locationManager.getBestProvider(criteria, true);
-        if (provider != null) {
-            locationManager.requestLocationUpdates(provider, 5000, 5, TripDetailsActivity.this);
-            return provider;
-        } else {
-            new Toast(this).toast(R.string.acquire_location_no_provider);
-            trackButton.setChecked(false);
-
-            return null;
+    private void requestLocationUpdates() {
+        if (locationTrackingEnabled && locationProvider != null) {
+            final android.location.Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
+            if (lastKnownLocation != null
+                    && (lastKnownLocation.getLatitude() != 0 || lastKnownLocation.getLongitude() != 0)) {
+                onLocationChanged(lastKnownLocation);
+            }
+            final Criteria criteria = new Criteria();
+            criteria.setAccuracy(Criteria.ACCURACY_FINE);
+            locationManager.requestLocationUpdates(5000, 5.0f, criteria, this, null);
         }
     }
 
+    private void removeLocationUpdates() {
+        locationManager.removeUpdates(this);
+        updateDeviceLocationDependencies(null, null);
+    }
+
+    @Override
     public void onLocationChanged(@NonNull final android.location.Location location) {
         updateDeviceLocationDependencies(LocationHelper.locationToPoint(location), new Date());
         updateGUI();
     }
 
+    @Override
     public void onProviderEnabled(@NonNull final String provider) {
     }
 
+    @Override
     public void onProviderDisabled(@NonNull final String provider) {
-        locationManager.removeUpdates(TripDetailsActivity.this);
+        removeLocationUpdates();
 
-        final String newProvider = requestLocationUpdates();
-        if (newProvider == null)
-            getMapView().setDeviceLocationAware(null);
+        if (locationTrackingEnabled) {
+            disableTracking();
+            enableTracking();
+        }
     }
 
     public void onStatusChanged(final String provider, final int status, final Bundle extras) {
@@ -1025,6 +1043,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         deviceLocationTime = now;
 
         tripRenderer.setRefPoint(deviceLocation, deviceLocationTime);
+
+        if (locationTrackingEnabled)
+            getMapView().setDeviceLocationAware(this);
     }
 
     private void updateLocations() {

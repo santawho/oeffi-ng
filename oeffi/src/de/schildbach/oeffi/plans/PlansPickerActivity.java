@@ -104,7 +104,7 @@ public class PlansPickerActivity extends OeffiMainActivity implements LocationHe
         super.onCreate(savedInstanceState);
 
         connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        locationHelper = new LocationHelper((LocationManager) getSystemService(Context.LOCATION_SERVICE), this);
+        locationHelper = new LocationHelper(this, this);
 
         final File cacheDir = new File(getCacheDir(), "thumbs");
         thumbCache = new Cache(cacheDir, THUMB_CACHE_SIZE);

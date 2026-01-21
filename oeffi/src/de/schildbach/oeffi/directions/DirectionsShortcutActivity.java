@@ -104,7 +104,7 @@ public class DirectionsShortcutActivity extends OeffiActivity implements Locatio
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        locationHelper = new LocationHelper((LocationManager) getSystemService(Context.LOCATION_SERVICE), this);
+        locationHelper = new LocationHelper(this, this);
 
         backgroundThread = new HandlerThread("DirectionsShortcut.queryTripsThread", Process.THREAD_PRIORITY_BACKGROUND);
         backgroundThread.start();

@@ -150,7 +150,6 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     public static final String INTENT_EXTRA_TIME = StationsActivity.class.getName() + ".time";
     private static final String INTENT_EXTRA_COMMAND = StationsActivity.class.getName() + ".command";
     private ConnectivityManager connectivityManager;
-    private LocationManager locationManager;
     private SensorManager sensorManager;
     private Sensor sensorAccelerometer;
     private Sensor sensorMagnetometer;
@@ -280,7 +279,6 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         super.onCreate(savedInstanceState);
 
         connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         sensorMagnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);

@@ -127,7 +127,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         setOrientation(HORIZONTAL);
 
         res = context.getResources();
-        locationHelper = new LocationHelper((LocationManager) context.getSystemService(Context.LOCATION_SERVICE), this);
+        locationHelper = new LocationHelper(context, this);
 
         setup(context);
     }

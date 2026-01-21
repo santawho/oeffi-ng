@@ -17,12 +17,17 @@
 
 package de.schildbach.oeffi.util;
 
+import android.Manifest;
+import android.content.Context;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
+
+import androidx.annotation.RequiresPermission;
+
 import de.schildbach.pte.dto.Point;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,16 +46,17 @@ public final class LocationHelper {
     private final LocationManager manager;
     private final Handler handler = new Handler();
     private LocationListener listener;
-    private Callback callback;
+    private final Callback callback;
     private long startTime;
 
     private static final Logger log = LoggerFactory.getLogger(LocationHelper.class);
 
-    public LocationHelper(final LocationManager manager, final Callback callback) {
-        this.manager = manager;
+    public LocationHelper(final Context context, final Callback callback) {
+        this.manager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         this.callback = callback;
     }
 
+    @RequiresPermission(allOf = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
     public void startLocation(final Criteria criteria, final boolean includeLastKnown, final long timeout) {
         if (isRunning())
             throw new IllegalStateException();
