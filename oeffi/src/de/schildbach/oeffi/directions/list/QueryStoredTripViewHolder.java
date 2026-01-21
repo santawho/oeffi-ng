@@ -146,9 +146,6 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
                 msTimeLeft = msLeftToArrival;
                 backgroundId = R.drawable.stored_trip_entry_background_current;
                 timeLeftColorId = R.color.fg_highlighted;
-                if (NavigationNotification.isTripUnderNavigation(context, tripId)) {
-                    iconResId = R.drawable.ic_navigation_white_24dp;
-                }
             } else {
                 msTimeLeft = msLeftToDeparture;
                 if (msLeftToDeparture < MS_UPCOMING) {
@@ -157,6 +154,9 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
                     backgroundId = R.drawable.stored_trip_entry_background_future;
                 }
             }
+        }
+        if (NavigationNotification.isTripUnderNavigation(context, tripId)) {
+            iconResId = R.drawable.ic_navigation_white_24dp;
         }
         if (sTimeLeft == null && msTimeLeft >= 0) {
             sTimeLeft = Formats.formatTimeDiff(context, msTimeLeft, true, true);
@@ -182,11 +182,15 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
                     QueryStoredTripsProvider.delete(context.getContentResolver(), network, tripId);
                 }
             } else if (position != RecyclerView.NO_POSITION) {
-                clickListener.onSavedTripClick(position,
-                        from, to, via,
-                        tripDepartureTime, tripArrivalTime,
-                        serializedSavedTrip, tripId,
-                        serializedReloadRequest);
+                if (NavigationNotification.isTripUnderNavigation(context, tripId)) {
+                    startNavigation();
+                } else {
+                    clickListener.onSavedTripClick(position,
+                            from, to, via,
+                            tripDepartureTime, tripArrivalTime,
+                            serializedSavedTrip, tripId,
+                            serializedReloadRequest);
+                }
             }
         });
 //        itemView.setOnLongClickListener(v -> {
