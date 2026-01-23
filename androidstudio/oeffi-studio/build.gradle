@@ -52,6 +52,10 @@ android {
     namespace 'de.schildbach.oeffi'
     compileSdk 36
 
+    buildFeatures {
+        resValues true
+    }
+
     defaultConfig {
         applicationId "de.schildbach.oeffi"
 

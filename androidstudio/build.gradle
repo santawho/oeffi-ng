@@ -6,9 +6,16 @@ buildscript {
         classpath(libs.androidsvgdrawable.gradle.plugin) {
             exclude group: 'xerces'
         }
+        classpath(libs.bye.bye.jetifier)
     }
 }
 
 plugins {
     alias(libs.plugins.android.application) apply false
 }
+
+//  see: https://github.com/dipien/bye-bye-jetifier
+//  enable the following line
+//  then run  ./gradlew canISayByeByeJetifier -Pandroid.enableJetifier=false
+//apply plugin: "com.dipien.byebyejetifier"
+

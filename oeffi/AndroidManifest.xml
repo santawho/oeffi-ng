@@ -23,10 +23,6 @@
     android:versionCode="130023"
     android:versionName="13.0.23">
 
-    <uses-sdk
-        android:minSdkVersion="26"
-        android:targetSdkVersion="36" />
-
     <permission android:name="${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" tools:node="remove" />
     <uses-permission android:name="${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" tools:node="remove" />
     <uses-permission android:name="android.permission.INTERNET" />
