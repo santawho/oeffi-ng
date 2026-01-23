@@ -28,4 +28,13 @@
         android:title="@string/extras_drivermode_threshold_delay_title"
         android:summary="@string/extras_drivermode_threshold_delay_summary" />
 
+    <EditTextPreference
+        android:dependency="extras_drivermode_enabled"
+        android:key="extras_drivermode_stored_operations_retention_hours"
+        android:singleLine="true"
+        android:inputType="numberDecimal"
+        android:defaultValue="@string/default_stored_trips_retention_hours"
+        android:title="@string/extras_drivermode_stored_operations_retention_hours_title"
+        android:summary="@string/extras_drivermode_stored_operations_retention_hours_summary" />
+
 </PreferenceScreen>

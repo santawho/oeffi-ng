@@ -31,5 +31,6 @@ public class DriverModeFragment extends PreferenceFragment {
 
         setupDynamicSummary("extras_drivermode_threshold_early", R.string.extras_drivermode_threshold_early_summary);
         setupDynamicSummary("extras_drivermode_threshold_delay", R.string.extras_drivermode_threshold_delay_summary);
+        setupDynamicSummary("extras_drivermode_stored_operations_retention_hours", R.string.extras_drivermode_stored_operations_retention_hours_summary);
     }
 }

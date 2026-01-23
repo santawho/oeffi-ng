@@ -821,11 +821,21 @@ public class DirectionsActivity extends OeffiMainActivity implements
         setActionBarSecondaryTitleFromNetwork();
     }
 
+    protected String get_PREFS_KEY_STORED_TRIPS_RETENTION_HOURS() {
+        return Constants.PREFS_KEY_STORED_TRIPS_RETENTION_HOURS;
+    }
+
     private void newQueryHistoryListAdapter() {
         if (queryHistoryListAdapter != null)
             queryHistoryListAdapter.close();
 
-        final String deleteTripsAfterHoursText = prefs.getString(Constants.PREFS_KEY_STORED_TRIPS_RETENTION_HOURS, getString(R.string.default_stored_trips_retention_hours));
+        final int maxHistoryEntries = Integer.parseInt(prefs.getString(
+                Constants.PREFS_KEY_MAX_HISTORY_ENTRIES,
+                Integer.toString(getResources().getInteger(R.integer.default_max_history_entries))));
+
+        final String deleteTripsAfterHoursText = prefs.getString(
+                get_PREFS_KEY_STORED_TRIPS_RETENTION_HOURS(),
+                getString(R.string.default_stored_trips_retention_hours));
         long deleteTripsAfterMillis;
         try {
             deleteTripsAfterMillis = (long) (Float.parseFloat(deleteTripsAfterHoursText) * 3600000f);
@@ -835,7 +845,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         queryHistoryListAdapter = new QueryHistoryAdapter(this,
                 network, getStoredTripsUsage(),
                 this, getHistoryEntryLayoutId(),
-                this, deleteTripsAfterMillis);
+                this, deleteTripsAfterMillis, maxHistoryEntries);
 
         updateRefTime(true);
         viewQueryHistoryList.setAdapter(queryHistoryListAdapter);

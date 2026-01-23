@@ -89,7 +89,8 @@ public class QueryHistoryProvider extends ForNetworkContentProvider {
             final ContentResolver contentResolver,
             final NetworkId network, final String usage,
             final Location from, final Location to, final Location via,
-            final Boolean favorite, final boolean isQuery) {
+            final Boolean favorite, final boolean isQuery,
+            final int maxHistoryEntries) {
         final Cursor cursor = cursor(contentResolver, network, usage, from, to, via);
 
         final Uri historyUri;
@@ -164,10 +165,6 @@ public class QueryHistoryProvider extends ForNetworkContentProvider {
             final Uri baseUri = CONTENT_URI_BUILDER(network, usage).build();
             historyUri = contentResolver.insert(baseUri, values);
 
-            final Application application = Application.getInstance();
-            final int maxHistoryEntries = Integer.parseInt(application.getSharedPreferences()
-                    .getString(Constants.PREFS_KEY_MAX_HISTORY_ENTRIES, Integer.toString(
-                            application.getResources().getInteger(R.integer.default_max_history_entries))));
             final Cursor deleteCursor = contentResolver.query(baseUri, null,
                     QueryHistoryProvider.KEY_FAVORITE + "= 0", null,
                     KEY_LAST_QUERIED + " DESC");

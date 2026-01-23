@@ -329,6 +329,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private final ContextMenuItemListener contextMenuItemListener;
     private final int historyEntryLayoutId;
     private final long deleteTripsAfterMillis;
+    private final int maxHistoryEntries;
 
     private HistoryCursor historyCursor;
     private TripsCursor tripsCursor;
@@ -342,7 +343,8 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             final QueryHistoryClickListener clickListener,
             final int historyEntryLayoutId,
             final ContextMenuItemListener contextMenuItemListener,
-            final long deleteTripsAfterMillis) {
+            final long deleteTripsAfterMillis,
+            final int maxHistoryEntries) {
         this.context = context;
         this.contentResolver = context.getContentResolver();
         this.inflater = LayoutInflater.from(context);
@@ -351,6 +353,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         this.clickListener = clickListener;
         this.contextMenuItemListener = contextMenuItemListener;
         this.deleteTripsAfterMillis = deleteTripsAfterMillis;
+        this.maxHistoryEntries = maxHistoryEntries;
         this.historyEntryLayoutId = historyEntryLayoutId;
 
         setHasStableIds(true);
@@ -376,7 +379,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     public Uri putEntry(final Location from, final Location to, final Location via) {
-        final Uri uri = QueryHistoryProvider.put(contentResolver, network, usage, from, to, via, null, true);
+        final Uri uri = QueryHistoryProvider.put(contentResolver, network, usage, from, to, via, null, true, maxHistoryEntries);
         historyCursor.requery();
         return uri;
     }

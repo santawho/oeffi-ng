@@ -59,4 +59,10 @@ public class OperationsActivity extends DirectionsActivity {
     protected int getHistoryEntryLayoutId() {
         return R.layout.directions_query_history_entry_no_trip;
     }
+
+    @Override
+    protected String get_PREFS_KEY_STORED_TRIPS_RETENTION_HOURS() {
+        return "extras_drivermode_stored_operations_retention_hours";
+    }
+
 }

@@ -220,9 +220,13 @@ public class DirectionsShortcutActivity extends OeffiActivity implements Locatio
             }
 
             @Override
-            protected void onResult(final QueryTripsResult result, TripRequestData reloadRequestData) {
+            protected void onResult(final QueryTripsResult result, final TripRequestData reloadRequestData) {
                 if (result.status == QueryTripsResult.Status.OK) {
                     log.debug("Got {}", result.toShortString());
+
+                    final int maxHistoryEntries = Integer.parseInt(prefs.getString(
+                            Constants.PREFS_KEY_MAX_HISTORY_ENTRIES,
+                            Integer.toString(getResources().getInteger(R.integer.default_max_history_entries))));
 
                     final Uri historyUri;
                     if (result.from != null && result.from.name != null && result.to != null && result.to.name != null)
@@ -230,7 +234,8 @@ public class DirectionsShortcutActivity extends OeffiActivity implements Locatio
                                 getContentResolver(),
                                 networkProvider.id(), null,
                                 result.from, result.to, result.via,
-                                null, true);
+                                null, true,
+                                maxHistoryEntries);
                     else
                         historyUri = null;
 

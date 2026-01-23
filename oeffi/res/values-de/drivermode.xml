@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- preferences driver mode -->
+    <string name="extras_drivermode_title">Fahrermodus</string>
+    <string name="extras_drivermode_summary">Der Fahrermodus optimiert das Verhalten der App für Zug/Tram/Bus-Fahrer und Zugbegleiter.</string>
+    <string name="extras_drivermode_enabled_title">Fahrermodus aktiviert</string>
+    <string name="extras_drivermode_threshold_early_title">Schwelle für Verfrühung</string>
+    <string name="extras_drivermode_threshold_early_summary">Minimale Sekunden, die ein Ereignis früher als Plan prognostiziert sein muss, um als Verfrühung erkannt zu werden.  [%s]</string>
+    <string name="extras_drivermode_threshold_delay_title">Schwelle für Verspätung</string>
+    <string name="extras_drivermode_threshold_delay_summary">Minimale Sekunden, die ein Ereignis später als Plan prognostiziert sein muss, um als Verspätung erkannt zu werden.  [%s]</string>
+    <string name="extras_drivermode_stored_operations_retention_hours_title">Geplante Einsätze halten</string>
+    <string name="extras_drivermode_stored_operations_retention_hours_summary">Wie lange geplante Einsätze erhalten werden, nachdem sie beendet sind.  [%s Stunden]</string>
+
+</resources>
