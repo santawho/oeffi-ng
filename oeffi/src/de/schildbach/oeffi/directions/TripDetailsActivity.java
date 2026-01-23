@@ -148,6 +148,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         private static final long serialVersionUID = 6006525041994219717L;
 
         public boolean isJourney;
+        public boolean isOperation;
         public boolean isNavigation;
         public boolean isAlternativeConnectionSearch;
         public int actionBarColor;
@@ -184,7 +185,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     public static void start(
             final Context context,
-            final NetworkId network, final Trip.Public journeyLeg, final Date loadedAt,
+            final NetworkId network,
+            final Trip.Public journeyLeg,
+            final boolean isOperation,
+            final Date loadedAt,
             final int intentFlags) {
         final Trip trip = new Trip(
                 loadedAt,
@@ -198,6 +202,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 null);
         final RenderConfig renderConfig = new RenderConfig();
         renderConfig.isJourney = true;
+        renderConfig.isOperation = isOperation;
         start(context, network, trip, renderConfig, intentFlags);
     }
 
@@ -298,7 +303,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     protected final Handler handler = new Handler();
 
     protected boolean isShowCompactTimes;
-    protected boolean isDriverJourney;
 
     protected static final Logger log = LoggerFactory.getLogger(TripDetailsActivity.class);
 
@@ -336,10 +340,14 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         network = intentData.network;
         final Trip baseTrip = intentData.trip;
 
-        log.info("Showing {} from {} to {}", renderConfig.isJourney ? "journey" : "trip", baseTrip.from, baseTrip.to);
+        log.info(
+                "Showing {} from {} to {}",
+                renderConfig.isOperation ? "operation"
+                        : renderConfig.isJourney ? "journey"
+                        : "trip",
+                baseTrip.from, baseTrip.to);
 
-        isDriverJourney = isDriverMode && renderConfig.isJourney;
-        longStayMinMillis = isDriverJourney ? 1 : 300000;
+        longStayMinMillis = renderConfig.isOperation ? 1 : 300000;
 
         setupFromTrip(baseTrip);
 
@@ -423,7 +431,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             getMapView().zoomToAll();
             updateGUI();
         });
-        if (isDriverJourney)
+        if (renderConfig.isOperation)
             mustEnableTrackButton = true;
 
         addShowMapButtonToActionBar();
@@ -662,25 +670,37 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     protected void setupActionBar() {
         setPrimaryColor(renderConfig.actionBarColor > 0 ? renderConfig.actionBarColor
                 : renderConfig.isJourney ? R.color.bg_action_bar_journey : R.color.bg_action_bar_directions);
-        actionBar.setPrimaryTitle(getString(renderConfig.isJourney
-                        ? R.string.journey_details_title
+        actionBar.setPrimaryTitle(getString(
+                renderConfig.isOperation ? R.string.operation_details_title
+                        : renderConfig.isJourney ? R.string.journey_details_title
                         : R.string.trip_details_title));
 
         View.OnClickListener navigationClickListener = null;
         if (!renderConfig.isJourney) {
             navigationClickListener = v -> {
                 final Trip trip = tripRenderer.trip;
-                QueryStoredTripsProvider.put(getContentResolver(), network, trip, renderConfig.queryTripsRequestData);
+                QueryStoredTripsProvider.put(getContentResolver(),
+                        network, getStoredTripsUsage(),
+                        trip, renderConfig.queryTripsRequestData);
                 startNavigation(trip, renderConfig);
             };
-        } else if (isDriverJourney
+        } else if (renderConfig.isOperation
                 && NetworkProviderFactory.provider(network).hasCapabilities(NetworkProvider.Capability.JOURNEY)) {
             final Trip.Public journeyLeg = (Trip.Public) tripRenderer.trip.legs.get(0);
-            if (journeyLeg.exitLocation == null) {
-                navigationClickListener = v -> startNavigationForJourneyToExit(journeyLeg.arrivalStop);
+            final Location exitLocation = journeyLeg.exitLocation;
+            if (exitLocation != null) {
+                if (exitLocation.equals(journeyLeg.arrivalStop.location)) {
+                    navigationClickListener = v -> startNavigationForJourneyToExit(journeyLeg.arrivalStop);
+                } else if (journeyLeg.intermediateStops != null) {
+                    for (final Stop stop: journeyLeg.intermediateStops) {
+                        if (exitLocation.equals(stop.location)) {
+                            navigationClickListener = v -> startNavigationForJourneyToExit(stop);
+                            break;
+                        }
+                    }
+                }
             }
         }
-
         if (navigationClickListener != null) {
             final ImageButton navigateButton = actionBar.addButton(
                     R.drawable.ic_navigation_white_24dp,
@@ -690,23 +710,35 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     protected void addActionBarButtons() {
-        if (!renderConfig.isJourney) {
+        if (!renderConfig.isJourney || renderConfig.isOperation) {
             final String tripId = tripRenderer.trip.getUniqueId();
             if (tripId != null) {
                 final ToggleImageButton bookmarkButton = actionBar.addToggleButton(
                         R.drawable.ic_boomark_white_24dp,
                         R.string.directions_trip_details_action_bookmark);
-                final Long rowId = QueryStoredTripsProvider.getRowId(getContentResolver(), network, tripId);
+                final Long rowId = QueryStoredTripsProvider.getRowId(getContentResolver(),
+                        network, getStoredTripsUsage(), tripId);
                 bookmarkButton.setChecked(rowId != null);
                 bookmarkButton.setOnCheckedChangeListener((v, isChecked) -> {
                     final Trip trip = tripRenderer.trip;
                     if (isChecked)
-                        QueryStoredTripsProvider.put(getContentResolver(), network, trip, renderConfig.queryTripsRequestData);
+                        QueryStoredTripsProvider.put(getContentResolver(),
+                                network, getStoredTripsUsage(),
+                                trip, renderConfig.queryTripsRequestData);
                     else
-                        QueryStoredTripsProvider.delete(getContentResolver(), network, trip.getUniqueId());
+                        QueryStoredTripsProvider.delete(getContentResolver(),
+                                network, getStoredTripsUsage(),
+                                trip.getUniqueId());
                 });
             }
         }
+    }
+
+
+    protected String getStoredTripsUsage() {
+        if (renderConfig.isOperation)
+            return QueryStoredTripsProvider.USAGE_OPERATION;
+        return null;
     }
 
     private static final long FAST_REFRESH_INTERVAL_MS = 15000L;
@@ -754,7 +786,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         isPaused = false;
         requestLocationUpdates();
         checkAutoRefresh();
-        if (isDriverJourney) {
+        if (renderConfig.isOperation) {
             periodicUpdateGuiRunnable.run();
         } else {
             updateGUI();
@@ -939,7 +971,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         if (!getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
             return false;
 
-        isShowCompactTimes = !isDriverJourney && prefs.getBoolean("user_interface_directions_compact_times_enabled", false);
+        isShowCompactTimes = !renderConfig.isOperation && prefs.getBoolean("user_interface_directions_compact_times_enabled", false);
         thresholdEarlyMillis = Integer.parseInt(prefs.getString("extras_drivermode_threshold_early", getString(R.string.default_drivermode_threshold_early))) * 1000L;
         thresholdDelayMillis = Integer.parseInt(prefs.getString("extras_drivermode_threshold_delay", getString(R.string.default_drivermode_threshold_delay))) * 1000L;
 
@@ -1222,7 +1254,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
                         this, clickedView, queryJourneyRunnable,
                         handler, backgroundHandler,
-                        network, leg.journeyRef, leg.departure, leg.arrival,
+                        network, leg.journeyRef, false, leg.departure, leg.arrival,
                         mustOpenActivityInNewTask());
             };
             lineView.setClickable(true);
@@ -1292,8 +1324,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
                     // more than 5 minutes (driver mode: 1 second) stay, then show departure row
                     final boolean isLongStay = isLongStay(stop.plannedArrivalTime, stop.plannedDepartureTime)
-                            || (!isDriverJourney && isLongStay(stop.predictedArrivalTime, stop.predictedDepartureTime));
-                    final boolean showLongStay = isLongStay && (!isDriverJourney || isRowSimulated);
+                            || (!renderConfig.isOperation && isLongStay(stop.predictedArrivalTime, stop.predictedDepartureTime));
+                    final boolean showLongStay = isLongStay && (!renderConfig.isOperation || isRowSimulated);
 
                     if (isArrivalSection) {
                         addStopRow(stopsView,
@@ -2112,7 +2144,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final Stop stop, final String previousPlace, final TripRenderer.LegContainer legC,
             final boolean highlightTime, final boolean highlightLocation,
             final Date now, final CollapseColumns collapseColumns, final Stop simulatedStop) {
-        final boolean preferPlanTime = isDriverJourney;
+        final boolean preferPlanTime = renderConfig.isOperation;
         final View row = inflater.inflate(R.layout.directions_trip_details_public_entry_stop, null);
         final Trip.Public leg = legC.publicLeg;
 
@@ -2339,7 +2371,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             stopTimeSimulatedView.setTypeface(null, (stopTimeBold ? Typeface.BOLD : 0) + (isTimePredicted ? Typeface.ITALIC : 0));
 
             final int stopTimeColor;
-            if (isDriverJourney && simulatedDelay != null) {
+            if (renderConfig.isOperation && simulatedDelay != null) {
                 if (simulatedDelay < -thresholdEarlyMillis)
                     stopTimeColor = colorTimeEarly;
                 else if (simulatedDelay > thresholdDelayMillis)
@@ -2579,7 +2611,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
 
         public boolean onClick(final View v, final boolean isLongClick) {
-            if (!isLongClick && isDriverJourney) {
+            if (!isLongClick && renderConfig.isOperation) {
                 PTDate time = stop.getArrivalTime();
                 if (time == null)
                     time = stop.getDepartureTime(true);
@@ -2913,8 +2945,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 null,
                 0);
         final RenderConfig navigationRenderConfig = new RenderConfig();
-        if (isDriverMode)
-            navigationRenderConfig.isJourney = true;
+        if (renderConfig.isOperation)
+            navigationRenderConfig.isOperation = true;
         startNavigation(journeyTrip, navigationRenderConfig);
     }
 

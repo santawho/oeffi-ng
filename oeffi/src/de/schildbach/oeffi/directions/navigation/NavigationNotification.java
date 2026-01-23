@@ -731,7 +731,7 @@ public class NavigationNotification {
             this.lastNotified = (TripRenderer.NotificationData) Objects.deserialize(extras.getByteArray(EXTRA_LASTNOTIFIED));
         }
 
-        this.isDriverMode = prefs.getBoolean(Constants.KEY_EXTRAS_DRIVERMODE_ENABLED, false);
+        this.isDriverMode = context.isDriverMode();
         this.isEventNotificationsEnabled = prefs.getBoolean(PREFS_KEY_NOTIFICATIONS_ENABLED, false);
         this.travelAlarmManager = new TravelAlarmManager(context);
         final StringBuilder b = new StringBuilder();

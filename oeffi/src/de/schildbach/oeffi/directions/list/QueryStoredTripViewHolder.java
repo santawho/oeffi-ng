@@ -57,6 +57,7 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
 
     private final OeffiActivity context;
     private final NetworkId network;
+    private final String usage;
     private final View frameView;
     private final ImageView iconView;
     private final TextView timeLeftView;
@@ -80,10 +81,12 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
     public QueryStoredTripViewHolder(
             final OeffiActivity context,
             final NetworkId network,
+            final String usage,
             final View itemView) {
         super(itemView);
         this.context = context;
         this.network = network;
+        this.usage = usage;
 
         iconView = itemView.findViewById(R.id.directions_query_stored_trip_entry_icon);
         timeLeftView = itemView.findViewById(R.id.directions_query_stored_trip_entry_time_left);
@@ -179,7 +182,7 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
             } else if (removeOpened) {
                 removeOpened = false;
                 if (tripId != null) {
-                    QueryStoredTripsProvider.delete(context.getContentResolver(), network, tripId);
+                    QueryStoredTripsProvider.delete(context.getContentResolver(), network, usage, tripId);
                 }
             } else if (position != RecyclerView.NO_POSITION) {
                 if (NavigationNotification.isTripUnderNavigation(context, tripId)) {

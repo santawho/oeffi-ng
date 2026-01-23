@@ -63,6 +63,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import de.schildbach.oeffi.directions.DirectionsActivity;
+import de.schildbach.oeffi.directions.OperationsActivity;
 import de.schildbach.oeffi.directions.navigation.NavigationNotification;
 import de.schildbach.oeffi.mapview.OeffiMapView;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
@@ -211,9 +212,14 @@ public abstract class OeffiActivity extends ComponentActivity {
         super.attachBaseContext(base);
     }
 
+    protected boolean isTakeDriverModeFromApplication() {
+        return false;
+    }
+
     protected void updateFromPreferences() {
-        timeZoneSelector = Application.getInstance().getPreferredNetworkTimeZoneSelector(network);
-        isDriverMode = prefs.getBoolean(Constants.KEY_EXTRAS_DRIVERMODE_ENABLED, false);
+        timeZoneSelector = application.getPreferredNetworkTimeZoneSelector(network);
+        isDriverMode = getIntent().getBooleanExtra(Constants.KEY_EXTRAS_DRIVERMODE_ENABLED, false)
+                || (isTakeDriverModeFromApplication() && application.isDriverMode());
     }
 
     public TimeZoneSelector getTimeZoneSelector() {
@@ -270,6 +276,10 @@ public abstract class OeffiActivity extends ComponentActivity {
             drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
     }
 
+    protected int getGlobalOptionsId() {
+        return 0;
+    }
+
     private void initNavigation() {
         if (navigationDrawerLayout != null)
             return;
@@ -291,21 +301,27 @@ public abstract class OeffiActivity extends ComponentActivity {
                 inflater.inflate(R.menu.global_options, menu);
             }
 
+            private MenuItem setupItem(final Menu menu, final int itemId) {
+                final MenuItem item = menu.findItem(itemId);
+                item.setChecked(itemId == getGlobalOptionsId());
+                return item;
+            }
+
             @Override
-            public void onPrepareMenu(final Menu menu) {
-                final MenuItem stationsNearbyItem = menu.findItem(R.id.global_options_stations_nearby);
-                stationsNearbyItem.setChecked(OeffiActivity.this instanceof StationsActivity);
-                final MenuItem directionsItem = menu.findItem(R.id.global_options_directions);
-                directionsItem.setChecked(OeffiActivity.this instanceof DirectionsActivity);
-                final MenuItem plansItem = menu.findItem(R.id.global_options_plans);
-                plansItem.setChecked(OeffiActivity.this instanceof PlansPickerActivity);
+            public void onPrepareMenu(@NonNull final Menu menu) {
+                setupItem(menu, R.id.global_options_stations_nearby);
+                setupItem(menu, R.id.global_options_directions);
+                setupItem(menu, R.id.global_options_plans);
+
+                final MenuItem operationsItem = setupItem(menu, R.id.global_options_operations);
+                operationsItem.setVisible(application.isDriverMode());
 
                 final MenuItem aboutItem = menu.findItem(R.id.global_options_about);
                 aboutItem.setTitle(getString(R.string.global_options_about_title, Application.getInstance().getAppName()));
             }
 
             @Override
-            public boolean onMenuItemSelected(final MenuItem item) {
+            public boolean onMenuItemSelected(@NonNull final MenuItem item) {
                 final int itemId = item.getItemId();
                 if (itemId == R.id.global_options_stations_favorites) {
                     if (OeffiActivity.this instanceof StationsActivity) {
@@ -319,7 +335,7 @@ public abstract class OeffiActivity extends ComponentActivity {
                 }
 
                 if (itemId == R.id.global_options_stations_nearby) {
-                    if (OeffiActivity.this instanceof StationsActivity)
+                    if (itemId == getGlobalOptionsId())
                         return true;
                     StationsActivity.start(OeffiActivity.this, false);
                     // finish(); // why?
@@ -328,7 +344,7 @@ public abstract class OeffiActivity extends ComponentActivity {
                 }
 
                 if (itemId == R.id.global_options_directions) {
-                    if (OeffiActivity.this instanceof DirectionsActivity)
+                    if (itemId == getGlobalOptionsId())
                         return true;
                     final Intent intent = new Intent(OeffiActivity.this, DirectionsActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -341,8 +357,23 @@ public abstract class OeffiActivity extends ComponentActivity {
                     return true;
                 }
 
+                if (itemId == R.id.global_options_operations) {
+                    if (itemId == getGlobalOptionsId())
+                        return true;
+                    final Intent intent = new Intent(OeffiActivity.this, OperationsActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                    intent.putExtra(Constants.KEY_EXTRAS_DRIVERMODE_ENABLED, true);
+                    startActivity(intent);
+                    // finish(); // why?
+                    if (OeffiActivity.this instanceof StationsActivity)
+                        overridePendingTransition(R.anim.enter_from_right, R.anim.exit_to_left);
+                    else
+                        overridePendingTransition(R.anim.enter_from_left, R.anim.exit_to_right);
+                    return true;
+                }
+
                 if (itemId == R.id.global_options_plans) {
-                    if (OeffiActivity.this instanceof PlansPickerActivity)
+                    if (itemId == getGlobalOptionsId())
                         return true;
                     final Intent intent = new Intent(OeffiActivity.this, PlansPickerActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

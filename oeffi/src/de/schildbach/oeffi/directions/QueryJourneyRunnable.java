@@ -69,6 +69,7 @@ public class QueryJourneyRunnable implements Runnable {
     private final NetworkProvider networkProvider;
 
     private final JourneyRef journeyRef;
+    private final boolean isOperation;
     private Location entryLocation;
     private Location exitLocation;
 
@@ -79,7 +80,8 @@ public class QueryJourneyRunnable implements Runnable {
     public static QueryJourneyRunnable startShowJourney(
             final Activity parentActivity, final View clickedView,
             final QueryJourneyRunnable prevInstance, final Handler handler, final Handler backgroundHandler,
-            final NetworkId networkId, final JourneyRef journeyRef,
+            final NetworkId networkId,
+            final JourneyRef journeyRef, final boolean isOperation,
             final Location entryLocation, final Location exitLocation,
             final boolean openInNewWindow) {
         final ProgressDialog progressDialog = ProgressDialog.show(parentActivity, null,
@@ -93,7 +95,8 @@ public class QueryJourneyRunnable implements Runnable {
         final QueryJourneyRunnable queryJourneyRunnable = new QueryJourneyRunnable(
                 parentActivity, clickedView,
                 progressDialog, handler, networkProvider,
-                journeyRef, entryLocation, exitLocation,
+                journeyRef, isOperation,
+                entryLocation, exitLocation,
                 openInNewWindow);
 
         log.info("Executing: {}", queryJourneyRunnable);
@@ -107,6 +110,7 @@ public class QueryJourneyRunnable implements Runnable {
             final ProgressDialog progressDialog, final Handler handler,
             final NetworkProvider networkProvider,
             final JourneyRef journeyRef,
+            final boolean isOperation,
             final Location entryLocation, final Location exitLocation,
             final boolean openInNewWindow) {
         this.parentActivity = parentActivity;
@@ -119,6 +123,7 @@ public class QueryJourneyRunnable implements Runnable {
         this.networkProvider = networkProvider;
 
         this.journeyRef = journeyRef;
+        this.isOperation = isOperation;
         this.entryLocation = entryLocation;
         this.exitLocation = exitLocation;
     }
@@ -235,7 +240,7 @@ public class QueryJourneyRunnable implements Runnable {
             journeyLeg.setEntryAndExit(entryLocation, exitLocation);
             TripDetailsActivity.start(
                     parentActivity,
-                    networkProvider.id(), journeyLeg, new Date(),
+                    networkProvider.id(), journeyLeg, isOperation, new Date(),
                     openInNewWindow ? Intent.FLAG_ACTIVITY_NEW_TASK : 0);
         } else if (result.status == QueryJourneyResult.Status.SERVICE_DOWN) {
             networkProblem();

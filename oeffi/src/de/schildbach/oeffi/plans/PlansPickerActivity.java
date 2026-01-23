@@ -35,6 +35,7 @@ import android.view.View;
 import android.widget.TextView;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.pm.ShortcutInfoCompat;
 import androidx.core.content.pm.ShortcutManagerCompat;
@@ -162,7 +163,13 @@ public class PlansPickerActivity extends OeffiMainActivity implements LocationHe
     }
 
     @Override
-    public void onNewIntent(final Intent intent) {
+    protected int getGlobalOptionsId() {
+        return R.id.global_options_plans;
+    }
+
+    @Override
+    public void onNewIntent(@NonNull final Intent intent) {
+        super.onNewIntent(intent);
         setIntent(intent);
         handleIntent();
     }

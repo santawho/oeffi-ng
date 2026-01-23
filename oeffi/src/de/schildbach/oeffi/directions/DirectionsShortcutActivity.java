@@ -227,7 +227,8 @@ public class DirectionsShortcutActivity extends OeffiActivity implements Locatio
                     final Uri historyUri;
                     if (result.from != null && result.from.name != null && result.to != null && result.to.name != null)
                         historyUri = QueryHistoryProvider.put(
-                                getContentResolver(), networkProvider.id(),
+                                getContentResolver(),
+                                networkProvider.id(), null,
                                 result.from, result.to, result.via,
                                 null, true);
                     else

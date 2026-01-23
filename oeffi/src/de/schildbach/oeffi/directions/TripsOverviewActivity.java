@@ -96,6 +96,7 @@ public class TripsOverviewActivity extends OeffiActivity {
     public static class RenderConfig implements Serializable {
         private static final long serialVersionUID = 1567241493704301720L;
 
+        public boolean isOperationsPlanning;
         public boolean isAlternativeConnectionSearch;
         public TimeSpec referenceTime;
         public JourneyRef feederJourneyRef;
@@ -191,6 +192,8 @@ public class TripsOverviewActivity extends OeffiActivity {
     private final Handler foregroundHandler = new Handler();
     private HandlerThread backgroundThread;
     private Handler backgroundHandler;
+    protected final Handler handler = new Handler();
+    private QueryJourneyRunnable queryJourneyRunnable;
 
     private final BroadcastReceiver tickReceiver = new BroadcastReceiver() {
         @Override
@@ -232,7 +235,9 @@ public class TripsOverviewActivity extends OeffiActivity {
         });
 
         final MyActionBar actionBar = getMyActionBar();
-        setPrimaryColor(renderConfig.actionBarColor > 0 ? renderConfig.actionBarColor : R.color.bg_action_bar_directions_darkdefault);
+        setPrimaryColor(renderConfig.actionBarColor > 0 ? renderConfig.actionBarColor
+                : renderConfig.isOperationsPlanning ? R.color.bg_action_bar_operations_darkdefault
+                : R.color.bg_action_bar_directions_darkdefault);
         actionBar.setBack(v -> finish());
         actionBar.setCustomTitles(R.layout.directions_trip_overview_custom_title);
         if (searchMoreContext.canProvideSearchMore()) {
@@ -256,25 +261,39 @@ public class TripsOverviewActivity extends OeffiActivity {
             if (tripInfo != null) {
                 final Trip trip = tripInfo.trip;
                 if (trip.legs != null) {
-                    final TripDetailsActivity.RenderConfig config = new TripDetailsActivity.RenderConfig();
-                    config.isAlternativeConnectionSearch = renderConfig.isAlternativeConnectionSearch;
-                    config.queryTripsRequestData = reloadRequestData;
-                    if (config.isAlternativeConnectionSearch) {
-                        TripDetailsActivity.startForResult(TripsOverviewActivity.this, DETAILS_NEW_NAVIGATION, network, trip, config);
+                    if (renderConfig.isOperationsPlanning) {
+                        final Trip.Public publicLeg = trip.getFirstPublicLeg();
+                        if (publicLeg != null && publicLeg == trip.getLastPublicLeg()
+                                && publicLeg.journeyRef != null
+                                && NetworkProviderFactory.provider(network).hasCapabilities(NetworkProvider.Capability.JOURNEY)) {
+                            queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
+                                    this, null, queryJourneyRunnable,
+                                    handler, backgroundHandler,
+                                    network, publicLeg.journeyRef, true,
+                                    publicLeg.departure, publicLeg.arrival,
+                                    false);
+                        }
                     } else {
-                        TripDetailsActivity.start(TripsOverviewActivity.this, network, trip, config);
-                    }
+                        final TripDetailsActivity.RenderConfig config = new TripDetailsActivity.RenderConfig();
+                        config.isAlternativeConnectionSearch = renderConfig.isAlternativeConnectionSearch;
+                        config.queryTripsRequestData = reloadRequestData;
+                        if (config.isAlternativeConnectionSearch) {
+                            TripDetailsActivity.startForResult(TripsOverviewActivity.this, DETAILS_NEW_NAVIGATION, network, trip, config);
+                        } else {
+                            TripDetailsActivity.start(TripsOverviewActivity.this, network, trip, config);
+                        }
 
-                    final PTDate firstPublicLegDepartureTime = trip.getFirstPublicLegDepartureTime();
-                    final PTDate lastPublicLegArrivalTime = trip.getLastPublicLegArrivalTime();
+                        final PTDate firstPublicLegDepartureTime = trip.getFirstPublicLegDepartureTime();
+                        final PTDate lastPublicLegArrivalTime = trip.getLastPublicLegArrivalTime();
 
-                    // save last trip to history
-                    if (firstPublicLegDepartureTime != null && lastPublicLegArrivalTime != null && historyUri != null) {
-                        final ContentValues values = new ContentValues();
-                        values.put(QueryHistoryProvider.KEY_LAST_DEPARTURE_TIME, firstPublicLegDepartureTime.getTime());
-                        values.put(QueryHistoryProvider.KEY_LAST_ARRIVAL_TIME, lastPublicLegArrivalTime.getTime());
-                        values.put(QueryHistoryProvider.KEY_LAST_TRIP, Objects.serialize(trip));
-                        getContentResolver().update(historyUri, values, null, null);
+                        // save last trip to history
+                        if (firstPublicLegDepartureTime != null && lastPublicLegArrivalTime != null && historyUri != null) {
+                            final ContentValues values = new ContentValues();
+                            values.put(QueryHistoryProvider.KEY_LAST_DEPARTURE_TIME, firstPublicLegDepartureTime.getTime());
+                            values.put(QueryHistoryProvider.KEY_LAST_ARRIVAL_TIME, lastPublicLegArrivalTime.getTime());
+                            values.put(QueryHistoryProvider.KEY_LAST_TRIP, Objects.serialize(trip));
+                            getContentResolver().update(historyUri, values, null, null);
+                        }
                     }
                 }
             }

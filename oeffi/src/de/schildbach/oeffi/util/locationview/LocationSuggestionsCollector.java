@@ -32,6 +32,7 @@ public class LocationSuggestionsCollector {
             final CharSequence aConstraint,
             final AbstractSet<LocationType> suggestedLocationTypes,
             final NetworkId network,
+            final String usage,
             final LocationSearchProviderId searchProviderId) {
         if (aConstraint == null)
             return null;
@@ -50,7 +51,7 @@ public class LocationSuggestionsCollector {
             final List<Location> results = new LinkedList<>();
 
             loadResultsFromFavoriteStations(constraint, network, results);
-            loadResultsFromQueryHistory(constraint, network, results);
+            loadResultsFromQueryHistory(constraint, network, usage, results);
             loadResultsFromNetworkProvider(constraint,
                     network, searchProviderId,
                     suggestedLocationTypes,
@@ -133,10 +134,10 @@ public class LocationSuggestionsCollector {
     private static void loadResultsFromQueryHistory(
             final String constraint,
             final NetworkId network,
+            final String usage,
             final List<Location> results) {
         final Cursor cursor = Application.getInstance().getContentResolver().query(
-                QueryHistoryProvider.CONTENT_URI().buildUpon()
-                        .appendPath(network.name())
+                QueryHistoryProvider.CONTENT_URI_BUILDER(network, usage)
                         .appendQueryParameter(QueryHistoryProvider.QUERY_PARAM_Q, constraint)
                         .build(),
                 null, null, null, QueryHistoryProvider.KEY_LAST_QUERIED + " DESC");

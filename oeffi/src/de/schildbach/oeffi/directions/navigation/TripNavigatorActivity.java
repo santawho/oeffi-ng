@@ -88,6 +88,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
         final RenderConfig rc = new RenderConfig();
         rc.isNavigation = true;
+        rc.isOperation = renderConfig.isOperation;
         rc.isJourney = renderConfig.isJourney;
         QueryTripsRunnable.TripRequestData reloadRequestData = renderConfig.queryTripsRequestData;
         if (rc.queryTripsRequestData == null) {

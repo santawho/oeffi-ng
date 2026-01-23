@@ -329,6 +329,21 @@
         </activity-alias>
 
         <activity
+            android:name=".directions.OperationsActivity"
+            android:exported="true"
+            android:configChanges="keyboard|keyboardHidden"
+            android:icon="@mipmap/ic_oeffi_ng_operations_color_48dp"
+            android:label="@string/operations_icon_label"
+            android:launchMode="singleTask"
+            android:taskAffinity="${applicationId}.operations"
+            android:windowSoftInputMode="stateHidden"
+            android:theme="@style/My.Theme.Splash">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+
+        <activity
             android:name=".directions.TripsOverviewActivity"
             android:configChanges="keyboard|keyboardHidden"
             android:taskAffinity="${applicationId}.directions" />

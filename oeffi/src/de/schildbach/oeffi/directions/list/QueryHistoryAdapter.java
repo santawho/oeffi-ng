@@ -132,8 +132,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         private final int savedTripColumn;
 
         HistoryCursor() {
-            super(QueryHistoryProvider.CONTENT_URI().buildUpon()
-                    .appendPath(network != null ? network.name() : "_NONE_").build());
+            super(QueryHistoryProvider.CONTENT_URI_BUILDER(network, usage).build());
             fromTypeColumn = cursor.getColumnIndexOrThrow(QueryHistoryProvider.KEY_FROM_TYPE);
             fromIdColumn = cursor.getColumnIndexOrThrow(QueryHistoryProvider.KEY_FROM_ID);
             fromLatColumn = cursor.getColumnIndexOrThrow(QueryHistoryProvider.KEY_FROM_LAT);
@@ -230,8 +229,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         private final int reloadRequestColumn;
 
         TripsCursor() {
-            super(QueryStoredTripsProvider.CONTENT_URI().buildUpon()
-                    .appendPath(network != null ? network.name() : "_NONE_").build());
+            super(QueryStoredTripsProvider.CONTENT_URI_BUILDER(network, usage).build());
             fromTypeColumn = cursor.getColumnIndexOrThrow(QueryStoredTripsProvider.KEY_FROM_TYPE);
             fromIdColumn = cursor.getColumnIndexOrThrow(QueryStoredTripsProvider.KEY_FROM_ID);
             fromLatColumn = cursor.getColumnIndexOrThrow(QueryStoredTripsProvider.KEY_FROM_LAT);
@@ -270,7 +268,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             close();
 
             if (refTime > 0 && deleteTripsAfterMillis >= 0) {
-                QueryStoredTripsProvider.deleteOlderTrips(context, network, refTime - deleteTripsAfterMillis);
+                QueryStoredTripsProvider.deleteOlderTrips(context, network, usage, refTime - deleteTripsAfterMillis);
             }
 
             super.requery();
@@ -326,6 +324,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private final ContentResolver contentResolver;
     private final LayoutInflater inflater;
     private final NetworkId network;
+    private final String usage;
     private final QueryHistoryClickListener clickListener;
     private final ContextMenuItemListener contextMenuItemListener;
     private final int historyEntryLayoutId;
@@ -339,22 +338,20 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     public QueryHistoryAdapter(
             final OeffiActivity context,
-            final NetworkId network,
+            final NetworkId network, final String usage,
             final QueryHistoryClickListener clickListener,
+            final int historyEntryLayoutId,
             final ContextMenuItemListener contextMenuItemListener,
             final long deleteTripsAfterMillis) {
         this.context = context;
         this.contentResolver = context.getContentResolver();
         this.inflater = LayoutInflater.from(context);
         this.network = network;
+        this.usage = usage;
         this.clickListener = clickListener;
         this.contextMenuItemListener = contextMenuItemListener;
         this.deleteTripsAfterMillis = deleteTripsAfterMillis;
-
-        this.historyEntryLayoutId = Application.getInstance().getSharedPreferences()
-                .getBoolean(Constants.PREFS_KEY_HISTORY_ENTRY_SHOW_TRIP, false)
-                ? R.layout.directions_query_history_entry_with_trip
-                : R.layout.directions_query_history_entry_no_trip;
+        this.historyEntryLayoutId = historyEntryLayoutId;
 
         setHasStableIds(true);
     }
@@ -379,36 +376,37 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     public Uri putEntry(final Location from, final Location to, final Location via) {
-        final Uri uri = QueryHistoryProvider.put(contentResolver, network, from, to, via, null, true);
+        final Uri uri = QueryHistoryProvider.put(contentResolver, network, usage, from, to, via, null, true);
         historyCursor.requery();
         return uri;
     }
 
     public void removeEntry(final int position) {
-        final Uri uri = QueryHistoryProvider.historyRowUri(network, getItemId(position));
+        final Uri uri = QueryHistoryProvider.historyRowUri(network, usage, getItemId(position));
         contentResolver.delete(uri, null, null);
         notifyItemRemoved(position);
         historyCursor.requery();
     }
 
     public void removeAllEntries(final boolean exceptFavorites) {
-        final Uri uri = QueryHistoryProvider.CONTENT_URI().buildUpon().appendPath(network.name()).build();
+        final Uri uri = QueryHistoryProvider.CONTENT_URI_BUILDER(network, usage).build();
         contentResolver.delete(uri, exceptFavorites ? (QueryHistoryProvider.KEY_FAVORITE + "= 0") : null, null);
         notifyItemRangeRemoved(tripsCursor.getCount(), getItemCount());
         historyCursor.requery();
     }
 
     public void setIsFavorite(final int position, final boolean isFavorite) {
-        final Uri uri = QueryHistoryProvider.historyRowUri(network, getItemId(position));
+        final Uri uri = QueryHistoryProvider.historyRowUri(network, usage, getItemId(position));
         final ContentValues values = new ContentValues();
         values.put(QueryHistoryProvider.KEY_FAVORITE, isFavorite ? 1 : 0);
         contentResolver.update(uri, values, null, null);
         historyCursor.requery();
     }
 
-    public void setSavedTrip(final int position, final long departureTime, final long arrivalTime,
+    public void setSavedTrip(
+            final int position, final long departureTime, final long arrivalTime,
             final byte[] serializedTrip) {
-        final Uri uri = QueryHistoryProvider.historyRowUri(network, getItemId(position));
+        final Uri uri = QueryHistoryProvider.historyRowUri(network, usage, getItemId(position));
         final ContentValues values = new ContentValues();
         values.put(QueryHistoryProvider.KEY_LAST_DEPARTURE_TIME, departureTime);
         values.put(QueryHistoryProvider.KEY_LAST_ARRIVAL_TIME, arrivalTime);
@@ -456,7 +454,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         if (viewType == historyEntryLayoutId) {
             return new QueryHistoryViewHolder(context, network, itemView);
         } else if (viewType == R.layout.directions_query_stored_trip_entry) {
-            return new QueryStoredTripViewHolder(context, network, itemView);
+            return new QueryStoredTripViewHolder(context, network, usage, itemView);
         } else {
             throw new IllegalArgumentException("unexpected view type " + viewType);
         }
