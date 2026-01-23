@@ -138,14 +138,22 @@ public class QueryStoredTripsProvider extends ContentProvider {
             values.put(QueryStoredTripsProvider.KEY_VIA_LON, via != null && via.hasCoord() ? via.getLonAs1E6() : 0);
             values.put(QueryStoredTripsProvider.KEY_VIA_PLACE, via == null ? null : via.place);
             values.put(QueryStoredTripsProvider.KEY_VIA_NAME, via == null ? null : via.name);
-
-            values.put(KEY_RELOAD_REQUEST_DATA, Objects.serialize(reloadRequestData == null ? new byte[0] : reloadRequestData));
+            putReloadRequestColumnBlob(values, Objects.serialize(reloadRequestData));
 
             final Uri baseUri = QueryStoredTripsProvider.CONTENT_URI().buildUpon().appendPath(network.name()).build();
             tripsUri = contentResolver.insert(baseUri, values);
         }
 
         return tripsUri;
+    }
+
+    public static void putReloadRequestColumnBlob(final ContentValues values, final byte[] reloadRequestDataBlob) {
+        values.put(KEY_RELOAD_REQUEST_DATA, reloadRequestDataBlob == null ? new byte[0] : reloadRequestDataBlob);
+    }
+
+    public static byte[] getReloadRequestColumnBlob(final Cursor cursor, final int reloadRequestColumnIdx) {
+        final byte[] blob = cursor.getBlob(reloadRequestColumnIdx);
+        return blob.length == 0 ? null : blob;
     }
 
     public static Long getRowId(

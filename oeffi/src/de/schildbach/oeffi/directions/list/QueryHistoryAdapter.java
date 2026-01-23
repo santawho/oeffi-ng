@@ -312,12 +312,12 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             final PTDate tripArrivalTime = tripArrivalTimeValue == 0 ? null : new PTDate(tripArrivalTimeValue, tripArrivalTimeOffset);
             final byte[] serializedTrip = cursor.getBlob(tripColumn);
             final String tripId = cursor.getString(tripIdColumn);
-            final byte[] serializedReloadRequest = cursor.getBlob(reloadRequestColumn);
+            final byte[] serializedReloadRequest = QueryStoredTripsProvider.getReloadRequestColumnBlob(cursor, reloadRequestColumn);
             holder.bind(rowId,
                     from, to, via,
                     tripDepartureTime, tripArrivalTime,
                     serializedTrip, tripId,
-                    serializedReloadRequest.length == 0 ? null : serializedReloadRequest,
+                    serializedReloadRequest,
                     selectedRowId, clickListener, contextMenuItemListener);
         }
     }
