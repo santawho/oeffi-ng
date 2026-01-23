@@ -227,7 +227,7 @@
     <string name="stations_decode_foreign_failed">Decoding failed!</string>
 
     <!-- favorite stations -->
-    <string name="stations_favorite_stations_title">Favorite stations</string>
+    <string name="stations_favorite_stations_title">Favorite Stations</string>
     <string name="stations_favorite_stations_no_content_message">You have not favourited any stations on the selected transportation network.</string>
     <string name="stations_favorite_stations_add_title">Add new favorite station</string>
     <string name="stations_favorite_stations_add_location_hint">New favorite station</string>
