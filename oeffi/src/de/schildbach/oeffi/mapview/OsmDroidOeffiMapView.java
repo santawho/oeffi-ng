@@ -259,8 +259,11 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
         if (tripAware != null) {
             for (final Leg leg : tripAware.getTrip().legs) {
                 if (!hasLegSelection || tripAware.isSelectedLeg(leg)) {
-                    for (final Point p : leg.path)
-                        points.add(new GeoPoint(p.getLatAsDouble(), p.getLonAsDouble()));
+                    final List<Point> path = leg.path;
+                    if (path != null) {
+                        for (final Point p : path)
+                            points.add(new GeoPoint(p.getLatAsDouble(), p.getLonAsDouble()));
+                    }
                 }
             }
         }
@@ -497,7 +500,7 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
                             paint.setStrokeWidth(tripStrokeWidthSelected);
                             canvas.drawPath(path, paint);
 
-                            if (leg instanceof Public && !points.isEmpty()) {
+                            if (leg instanceof Public && points != null && !points.isEmpty()) {
                                 final Public publicLeg = (Public) leg;
 
                                 final double lat;
@@ -543,9 +546,10 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
                     final Leg lastLeg = trip.legs.get(trip.legs.size() - 1);
 
                     for (final Leg leg : trip.legs) {
-                        if (!leg.path.isEmpty()) {
-                            final Point firstPoint = leg.path.get(0);
-                            final Point lastPoint = leg.path.get(leg.path.size() - 1);
+                        final List<Point> path = leg.path;
+                        if (path != null && !path.isEmpty()) {
+                            final Point firstPoint = path.get(0);
+                            final Point lastPoint = path.get(path.size() - 1);
 
                             if (firstPoint == lastPoint) {
                                 projection.toPixels(
@@ -671,18 +675,19 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
 
         private Path pointsToPath(final Projection projection, final List<Point> points) {
             final Path path = new Path();
-            path.incReserve(points.size());
+            if (points != null) {
+                path.incReserve(points.size());
 
-            final android.graphics.Point point = new android.graphics.Point();
+                final android.graphics.Point point = new android.graphics.Point();
 
-            for (final Point p : points) {
-                projection.toPixels(new GeoPoint(p.getLatAsDouble(), p.getLonAsDouble()), point);
-                if (path.isEmpty())
-                    path.moveTo(point.x, point.y);
-                else
-                    path.lineTo(point.x, point.y);
+                for (final Point p : points) {
+                    projection.toPixels(new GeoPoint(p.getLatAsDouble(), p.getLonAsDouble()), point);
+                    if (path.isEmpty())
+                        path.moveTo(point.x, point.y);
+                    else
+                        path.lineTo(point.x, point.y);
+                }
             }
-
             return path;
         }
 
@@ -738,11 +743,14 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
 
                 int iRoute = 0;
                 for (final Leg leg : tripAware.getTrip().legs) {
-                    for (final Point point : leg.path) {
-                        final float distance = GeoUtils.distanceBetween(tappedLat, tappedLon, point).distanceInMeters;
-                        if (tappedLegIndex == -1 || distance < tappedPointDistance) {
-                            tappedLegIndex = iRoute;
-                            tappedPointDistance = distance;
+                    final List<Point> path = leg.path;
+                    if (path != null) {
+                        for (final Point point : path) {
+                            final float distance = GeoUtils.distanceBetween(tappedLat, tappedLon, point).distanceInMeters;
+                            if (tappedLegIndex == -1 || distance < tappedPointDistance) {
+                                tappedLegIndex = iRoute;
+                                tappedPointDistance = distance;
+                            }
                         }
                     }
 
