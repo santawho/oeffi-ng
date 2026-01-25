@@ -204,7 +204,7 @@
                                         android:drawablePadding="@dimen/text_padding_horizontal_lax"
                                         android:drawableTint="@color/fg_less_significant"
                                         android:gravity="left|center_vertical"
-                                        android:textSize="@dimen/font_size_small"
+                                        android:textSize="@dimen/font_size_tiny"
                                         android:paddingBottom="@dimen/text_padding_vertical_lax"
                                         android:paddingLeft="@dimen/text_padding_horizontal_lax"
                                         android:paddingRight="@dimen/text_padding_horizontal_lax"

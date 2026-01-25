@@ -129,7 +129,7 @@
         android:layout_marginLeft="@dimen/text_padding_horizontal_lax"
         android:layout_marginRight="@dimen/text_padding_horizontal_lax"
         android:layout_marginTop="@dimen/text_padding_vertical_lax"
-        android:textSize="@dimen/font_size_tiny"
+        android:textSize="@dimen/font_size_small"
         android:visibility="gone" />
 
     <TextView

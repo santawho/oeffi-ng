@@ -6,4 +6,4 @@
     android:layout_height="wrap_content"
     android:paddingBottom="@dimen/text_padding_vertical_cram"
     android:paddingTop="@dimen/text_padding_vertical_cram"
-    android:textSize="@dimen/font_size_tiny" />
+    android:textSize="@dimen/font_size_small" />
