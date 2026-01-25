@@ -59,7 +59,7 @@ public class Navigator {
     public Trip refresh(final boolean forceRefreshAll, final Date now) throws IOException {
         final List<Trip.Leg> newLegs = new ArrayList<>();
         final Trip latestTrip = getCurrentTrip();
-        for (Trip.Leg leg : latestTrip.legs) {
+        for (final Trip.Leg leg : latestTrip.legs) {
             Trip.Leg newLeg = leg;
             if (leg instanceof Trip.Public) {
                 newLeg = updatePublicLeg((Trip.Public) leg, forceRefreshAll, now);
@@ -174,7 +174,10 @@ public class Navigator {
         return newLeg;
     }
 
-    public static Trip.Public buildUpdatedLeg(Trip.Public initialLeg, Trip.Public journeyLeg, final Date loadedAt) {
+    public static Trip.Public buildUpdatedLeg(
+            final Trip.Public initialLeg,
+            final Trip.Public journeyLeg,
+            final Date loadedAt) {
         final List<Stop> journeyStops = new ArrayList<>();
         journeyStops.add(journeyLeg.departureStop);
         if (journeyLeg.intermediateStops != null)
@@ -187,8 +190,8 @@ public class Navigator {
         Stop departureStop = null;
         Stop arrivalStop = null;
         final List<Stop> intermediateStops = new ArrayList<>();
-        for (Stop stop : journeyStops) {
-            String locId = stop.location.id;
+        for (final Stop stop : journeyStops) {
+            final String locId = stop.location.id;
             if (locId != null) {
                 if (locId.equals(depId)) {
                     departureStop = stop;
@@ -213,7 +216,7 @@ public class Navigator {
                 journeyLeg.line,
                 journeyLeg.destination,
                 departureStop, arrivalStop, intermediateStops,
-                initialLeg.path,
+                journeyLeg.path != null ? journeyLeg.path : initialLeg.path,
                 journeyLeg.message,
                 initialLeg.journeyRef,
                 loadedAt);
