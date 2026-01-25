@@ -55,6 +55,7 @@
                     android:layout_height="wrap_content"
                     android:drawablePadding="@dimen/text_padding_horizontal"
                     android:drawableTint="@color/fg_less_significant"
+                    android:layout_gravity="center_vertical"
                     android:gravity="center_vertical"
                     android:paddingRight="@dimen/text_padding_horizontal_cram" />
 
@@ -65,6 +66,7 @@
                     android:layout_height="wrap_content"
                     android:drawablePadding="@dimen/text_padding_horizontal"
                     android:drawableTint="@color/fg_less_significant"
+                    android:layout_gravity="center_vertical"
                     android:gravity="center_vertical"
                     android:paddingLeft="@dimen/text_padding_horizontal_cram" />
 
@@ -83,7 +85,9 @@
                     android:paddingRight="@dimen/text_padding_horizontal"
                     android:text="@string/directions_history_via_label"
                     android:textSize="@dimen/font_size_small"
-                    android:textColor="@color/fg_less_significant" />
+                    android:textColor="@color/fg_less_significant"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="center_vertical" />
 
                 <de.schildbach.oeffi.util.locationview.LocationTextView
                     android:id="@+id/directions_query_history_entry_via"
@@ -92,6 +96,7 @@
                     android:textSize="@dimen/font_size_small"
                     android:drawablePadding="@dimen/text_padding_horizontal"
                     android:drawableTint="@color/fg_less_significant"
+                    android:layout_gravity="center_vertical"
                     android:gravity="center_vertical" />
 
             </LinearLayout>

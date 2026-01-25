@@ -20,13 +20,13 @@ package de.schildbach.oeffi.util.locationview;
 import android.content.Context;
 import android.text.Html;
 import android.util.AttributeSet;
-import android.widget.TextView;
+
 import de.schildbach.oeffi.R;
 import de.schildbach.pte.dto.Location;
 
 import java.util.Locale;
 
-public class LocationTextView extends TextView {
+public class LocationTextView extends androidx.appcompat.widget.AppCompatTextView {
     private String label = null;
     private Location location = null;
     private boolean showLocationType = true;
