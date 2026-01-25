@@ -2175,16 +2175,25 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         stopNameView.setOnClickListener(null);
         stopNameView.setOnLongClickListener(null);
         if (location.hasId()) {
-            JourneyRef feederJourneyRef = leg.journeyRef;
-            JourneyRef connectionJourneyRef = leg.journeyRef;
             boolean stopIsLegDeparture = false;
             boolean stopIsLegArrival = false;
+            JourneyRef feederJourneyRef = leg.journeyRef;
+            JourneyRef connectionJourneyRef = null;
             if (stop.location.id.equals(leg.departureStop.location.id)
                     && stop.plannedDepartureTime != null
                     && stop.plannedDepartureTime.equals(leg.departureStop.plannedDepartureTime)) {
-                // departure stop of a journey, find previous journey as feeder
+                // departure stop of a journey
                 stopIsLegDeparture = true;
                 feederJourneyRef = null;
+                connectionJourneyRef = leg.journeyRef;
+            } else if (stop.location.id.equals(leg.arrivalStop.location.id)
+                    && stop.plannedArrivalTime != null
+                    && stop.plannedArrivalTime.equals(leg.arrivalStop.plannedArrivalTime)) {
+                // arrival stop of a journey
+                stopIsLegArrival = true;
+            }
+            if (feederJourneyRef == null) {
+                // find previous journey as feeder
                 for (final TripRenderer.LegContainer iLegC : tripRenderer.legs) {
                     if (iLegC.publicLeg != null) {
                         if (iLegC.publicLeg == leg)
@@ -2193,12 +2202,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                             feederJourneyRef = iLegC.publicLeg.journeyRef;
                     }
                 }
-            } else if (stop.location.id.equals(leg.arrivalStop.location.id)
-                    && stop.plannedArrivalTime != null
-                    && stop.plannedArrivalTime.equals(leg.arrivalStop.plannedArrivalTime)) {
-                // arrival stop of a journey, find next journey as connection
-                stopIsLegArrival = true;
-                connectionJourneyRef = null;
+            }
+            if (connectionJourneyRef == null) {
+                // find next journey as connection
                 boolean found = false;
                 for (final TripRenderer.LegContainer iLegC : tripRenderer.legs) {
                     if (iLegC.publicLeg != null) {
