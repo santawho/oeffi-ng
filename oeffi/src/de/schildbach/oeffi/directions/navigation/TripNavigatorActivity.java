@@ -453,9 +453,14 @@ public class TripNavigatorActivity extends TripDetailsActivity {
             final JourneyRef feederJourneyRef,
             final JourneyRef connectionJourneyRef,
             final QueryTripsRunnable.TripRequestData queryTripsRequestData) {
-        final PTDate arrivalTime = stop.getArrivalTime();
-        final TimeSpec.Absolute time = new TimeSpec.Absolute(TimeSpec.DepArr.DEPART,
-                arrivalTime != null ? arrivalTime.getTime() : stop.getDepartureTime().getTime());
+        final TimeSpec time;
+        if (isLegDeparture) {
+            time = new TimeSpec.Relative(TimeSpec.DepArr.DEPART, 0);
+        } else {
+            final PTDate arrivalTime = stop.getArrivalTime();
+            time = new TimeSpec.Absolute(TimeSpec.DepArr.DEPART,
+                    arrivalTime != null ? arrivalTime.getTime() : stop.getDepartureTime().getTime());
+        }
         final TripsOverviewActivity.RenderConfig overviewConfig = getOverviewConfig(
                 stop, isLegDeparture, currentJourneyRef, feederJourneyRef, connectionJourneyRef, time);
 
