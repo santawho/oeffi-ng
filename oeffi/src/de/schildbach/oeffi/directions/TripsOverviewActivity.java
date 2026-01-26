@@ -275,9 +275,9 @@ public class TripsOverviewActivity extends OeffiActivity {
                         }
                     } else {
                         final TripDetailsActivity.RenderConfig config = new TripDetailsActivity.RenderConfig();
-                        config.isAlternativeConnectionSearch = renderConfig.isAlternativeConnectionSearch;
                         config.queryTripsRequestData = reloadRequestData;
-                        if (config.isAlternativeConnectionSearch) {
+                        if (renderConfig.isAlternativeConnectionSearch) {
+                            config.isAlternativeConnectionSearch = true;
                             TripDetailsActivity.startForResult(TripsOverviewActivity.this, DETAILS_NEW_NAVIGATION, network, trip, config);
                         } else {
                             TripDetailsActivity.start(TripsOverviewActivity.this, network, trip, config);

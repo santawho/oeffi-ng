@@ -17,9 +17,14 @@
 
 package de.schildbach.oeffi.directions;
 
-import de.schildbach.oeffi.Application;
-import de.schildbach.oeffi.Constants;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.directions.navigation.TripNavigatorActivity;
+import de.schildbach.pte.dto.Product;
+import de.schildbach.pte.dto.Trip;
 
 public class OperationsActivity extends DirectionsActivity {
 
@@ -65,4 +70,30 @@ public class OperationsActivity extends DirectionsActivity {
         return "extras_drivermode_stored_operations_retention_hours";
     }
 
+    @Override
+    protected Set<Product> getNetworkDefaultProducts() {
+        return new HashSet<>(); // empty set
+    }
+
+    @Override
+    protected boolean productsAreNetworkDefault(final Collection<Product> products) {
+        return !products.isEmpty();
+    }
+
+    @Override
+    protected String getProductsPrefsKey() {
+        return super.getProductsPrefsKey() + "@OP";
+    }
+
+    @Override
+    public void onSavedTripStartNavigation(
+            final int adapterPosition,
+            final Trip trip,
+            final QueryTripsRunnable.TripRequestData queryTripsRequestData) {
+        final TripDetailsActivity.RenderConfig renderConfig = new TripDetailsActivity.RenderConfig();
+        renderConfig.isOperation = true;
+        renderConfig.isJourney = true;
+        renderConfig.queryTripsRequestData = queryTripsRequestData;
+        TripNavigatorActivity.startNavigation(this, network, trip, renderConfig, false);
+    }
 }

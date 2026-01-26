@@ -26,7 +26,8 @@
     <string name="trip_details_title">Connection Details</string>
     <string name="journey_details_title">Line Details</string>
     <string name="operation_details_title">Operation Details</string>
-    <string name="navigation_details_title">Navigation</string>
+    <string name="navigation_title">Navigation</string>
+    <string name="operation_navigation_title">Operation Guide</string>
     <string name="plans_activity_title">Network Plans</string>
     <string name="network_picker_activity_title">Pick Transportation Network</string>
     <string name="assistant_label_title">Öffi Assistant</string>

@@ -29,6 +29,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.AttributeSet;
@@ -44,6 +45,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
 import java.io.IOException;
@@ -154,6 +156,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        inflater.inflate(R.layout.navigation_event_log, viewPager);
         findViewById(R.id.navigation_event_log).setVisibility(View.VISIBLE);
 
         eventLogLatestView = findViewById(R.id.navigation_event_log_latest);
@@ -162,6 +165,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
         swipeRefreshForTripList.setOnRefreshListener(this::refreshNavigationByUserCommand);
         swipeRefreshForTripList.setEnabled(true);
+
         swipeRefreshForNextEvent.setOnRefreshListener(this::refreshNavigationByUserCommand);
         swipeRefreshForNextEvent.setEnabled(true);
 
@@ -169,6 +173,9 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         handleDeleteNotification(intent);
         handleSwitchToNextEvent(intent);
         handlePlayAlarm(intent);
+
+        if (renderConfig.isOperation)
+            mustEnableTrackButton = true;
 
         stillCheckForOtherNavigations = true;
     }
@@ -204,7 +211,8 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
     @Override
     protected boolean allowScreenLock() {
-        return true;
+//        return true;
+        return false;
     }
 
     @Override
@@ -216,10 +224,12 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
     @Override
     protected void setupActionBar() {
-        setPrimaryColor(renderConfig.isAlternativeConnectionSearch
-                        ? R.color.bg_action_alternative_directions
-                        : R.color.bg_action_bar_navigation);
-        actionBar.setPrimaryTitle(getString(R.string.navigation_details_title));
+        setPrimaryColor(
+                renderConfig.isOperation ? R.color.bg_action_bar_operation_navigation
+                : R.color.bg_action_bar_navigation);
+        actionBar.setPrimaryTitle(getString(
+                renderConfig.isOperation ? R.string.operation_navigation_title
+                : R.string.navigation_title));
         actionBar.addProgressButton().setOnClickListener(buttonView -> refreshNavigationByUserCommand());
     }
 
@@ -252,6 +262,11 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     }
 
     @Override
+    protected long getPeriodicUpdateIntervalMs() {
+        return renderConfig.isOperation ? 15000 : 0;
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         if (!navigationNotificationBeingDeleted) {
@@ -267,11 +282,14 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
             if (stillCheckForOtherNavigations) {
                 stillCheckForOtherNavigations = false;
-                askStopOtherNavigations();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    askStopOtherNavigations();
+                }
             }
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     private void askStopOtherNavigations() {
         final List<Intent> taskIntents = new ArrayList<>();
         final int myTaskId = getTaskId();

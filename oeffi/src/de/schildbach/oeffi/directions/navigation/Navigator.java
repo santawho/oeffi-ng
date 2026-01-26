@@ -288,6 +288,7 @@ public class Navigator {
                 loadedAt);
         final List<Point> journeyLegPath = journeyLeg.getPath();
         newLeg.setPath(journeyLegPath != null ? journeyLegPath : initialLeg.getPath());
+        newLeg.setEntryAndExit(initialLeg.entryLocation, initialLeg.exitLocation);
         return newLeg;
     }
 }

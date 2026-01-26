@@ -30,7 +30,6 @@ import androidx.core.graphics.drawable.IconCompat;
 import javax.annotation.Nullable;
 
 import de.schildbach.oeffi.Application;
-import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.directions.OperationsActivity;

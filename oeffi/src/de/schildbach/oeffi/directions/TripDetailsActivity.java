@@ -256,7 +256,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     protected MyActionBar actionBar;
-    private LayoutInflater inflater;
+    protected LayoutInflater inflater;
     protected HorizontalPager viewPager;
     private Resources res;
     private int colorSignificant;
@@ -278,7 +278,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private ViewGroup legsGroup;
     private Space marginView;
     private ToggleImageButton trackButton;
-    private boolean mustEnableTrackButton;
+    protected boolean mustEnableTrackButton;
 
     protected NetworkId network;
     protected TripRenderer tripRenderer;
@@ -359,15 +359,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             return windowInsets;
         });
 
-        final View bottomOffset = findViewById(R.id.navigation_next_event_bottom_offset);
-        ViewCompat.setOnApplyWindowInsetsListener(bottomOffset, (view, windowInsets) -> {
-            final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            final ViewGroup.LayoutParams layoutParams = bottomOffset.getLayoutParams();
-            layoutParams.height = insets.bottom;
-            bottomOffset.setLayoutParams(layoutParams);
-            return windowInsets;
-        });
-
         marginView = findViewById(R.id.directions_trip_details_footer_margin);
 
         actionBar = getMyActionBar();
@@ -431,8 +422,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             getMapView().zoomToAll();
             updateGUI();
         });
-        if (renderConfig.isOperation)
-            mustEnableTrackButton = true;
 
         addShowMapButtonToActionBar();
 
@@ -579,17 +568,37 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             return true;
         };
 
-        final SwipeRefreshLayout nextEventView = findViewById(R.id.navigation_next_event);
-        final View nextEventContainerView = findViewById(R.id.navigation_next_event_container);
-        final View nextEventBackView = findViewById(R.id.navigation_next_event_back_to_itinerary);
+        viewPager = findViewById(R.id.directions_trip_details_pager);
 
-        nextEventView.setOnClickListener(exitNextEventViewClicked);
+        swipeRefreshForTripList = findViewById(R.id.directions_trip_details_list_content);
+        swipeRefreshForTripList.setEnabled(false);
+
+        inflater.inflate(
+                renderConfig.isOperation ? R.layout.navigation_next_event_operation
+                    : R.layout.navigation_next_event_trip,
+                viewPager);
+
+        final View bottomOffset = findViewById(R.id.navigation_next_event_bottom_offset);
+        ViewCompat.setOnApplyWindowInsetsListener(bottomOffset, (view, windowInsets) -> {
+            final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            final ViewGroup.LayoutParams layoutParams = bottomOffset.getLayoutParams();
+            layoutParams.height = insets.bottom;
+            bottomOffset.setLayoutParams(layoutParams);
+            return windowInsets;
+        });
+
+        swipeRefreshForNextEvent = findViewById(R.id.navigation_next_event);
+        swipeRefreshForNextEvent.setOnClickListener(exitNextEventViewClicked);
+        swipeRefreshForNextEvent.setEnabled(false);
+
+        final View nextEventContainerView = findViewById(R.id.navigation_next_event_container);
         nextEventContainerView.setOnClickListener(exitNextEventViewClicked);
+        final View nextEventBackView = findViewById(R.id.navigation_next_event_back_to_itinerary);
         nextEventBackView.setOnClickListener(exitNextEventViewClicked);
 
         if (allowScreenLock()) {
-            nextEventView.setLongClickable(true);
-            nextEventView.setOnLongClickListener(lockDeviceNextEventViewLongClicked);
+            swipeRefreshForNextEvent.setLongClickable(true);
+            swipeRefreshForNextEvent.setOnLongClickListener(lockDeviceNextEventViewLongClicked);
 
             nextEventContainerView.setLongClickable(true);
             nextEventContainerView.setOnLongClickListener(lockDeviceNextEventViewLongClicked);
@@ -598,12 +607,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             nextEventBackView.setOnLongClickListener(lockDeviceNextEventViewLongClicked);
         }
 
-        swipeRefreshForTripList = findViewById(R.id.directions_trip_details_list_content);
-        swipeRefreshForNextEvent = nextEventView;
-        swipeRefreshForTripList.setEnabled(false);
-        swipeRefreshForNextEvent.setEnabled(false);
-
-        viewPager = findViewById(R.id.directions_trip_details_pager);
         viewPager.addDragExceptionView(findViewById(R.id.vertical_map_frame));
         viewPager.setOnScreenSwitchListener((prevScreen, newScreen) -> {
             final int newId = viewPager.getCurrentView().getId();
@@ -669,7 +672,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     protected void setupActionBar() {
         setPrimaryColor(renderConfig.actionBarColor > 0 ? renderConfig.actionBarColor
-                : renderConfig.isJourney ? R.color.bg_action_bar_journey : R.color.bg_action_bar_directions);
+                : renderConfig.isOperation ? R.color.bg_action_bar_operation
+                : renderConfig.isJourney ? R.color.bg_action_bar_journey
+                : renderConfig.isAlternativeConnectionSearch ? R.color.bg_action_alternative_directions
+                : R.color.bg_action_bar_directions);
         actionBar.setPrimaryTitle(getString(
                 renderConfig.isOperation ? R.string.operation_details_title
                         : renderConfig.isJourney ? R.string.journey_details_title
@@ -690,11 +696,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final Location exitLocation = journeyLeg.exitLocation;
             if (exitLocation != null) {
                 if (exitLocation.equals(journeyLeg.arrivalStop.location)) {
-                    navigationClickListener = v -> startNavigationForJourneyToExit(journeyLeg.arrivalStop);
+                    navigationClickListener = v -> startNavigationForOperationToExit(journeyLeg.arrivalStop);
                 } else if (journeyLeg.intermediateStops != null) {
                     for (final Stop stop: journeyLeg.intermediateStops) {
                         if (exitLocation.equals(stop.location)) {
-                            navigationClickListener = v -> startNavigationForJourneyToExit(stop);
+                            navigationClickListener = v -> startNavigationForOperationToExit(stop);
                             break;
                         }
                     }
@@ -741,13 +747,29 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         return null;
     }
 
-    private static final long FAST_REFRESH_INTERVAL_MS = 15000L;
+    private long fastRefreshIntervalMs;
+
+    public boolean startPeriodicUpdateGuiRunnable(final long intervalMs) {
+        fastRefreshIntervalMs = intervalMs;
+        if (fastRefreshIntervalMs > 0) {
+            periodicUpdateGuiRunnable.run();
+            return true;
+        } else {
+            stopPeriodicUpdateGuiRunnable();
+            return false;
+        }
+    }
+
+    private void stopPeriodicUpdateGuiRunnable() {
+        handler.removeCallbacks(periodicUpdateGuiRunnable);
+    }
+
 
     private final Runnable periodicUpdateGuiRunnable = new Runnable() {
         @Override
         public void run() {
             if (updateGuiIfApplicable()) {
-                handler.postDelayed(this, FAST_REFRESH_INTERVAL_MS);
+                handler.postDelayed(this, fastRefreshIntervalMs);
             }
         }
     };
@@ -780,17 +802,18 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         return true;
     }
 
+    protected long getPeriodicUpdateIntervalMs() {
+        return -1;
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
         isPaused = false;
         requestLocationUpdates();
         checkAutoRefresh();
-        if (renderConfig.isOperation) {
-            periodicUpdateGuiRunnable.run();
-        } else {
+        if (!startPeriodicUpdateGuiRunnable(getPeriodicUpdateIntervalMs()))
             updateGUI();
-        }
 
         if (mustEnableTrackButton) {
             mustEnableTrackButton = false;
@@ -807,7 +830,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     protected void onPause() {
         isPaused = true;
         removeLocationUpdates();
-        handler.removeCallbacks(periodicUpdateGuiRunnable);
+        stopPeriodicUpdateGuiRunnable();
         super.onPause();
     }
 
@@ -1016,7 +1039,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 getColor(R.color.bg_divider), totalProbability);
 
         tripRenderer.evaluateByTime(now);
-        updateNavigationInstructions();
+
+        if (renderConfig.isOperation)
+            updateOperationInstructions();
+        else
+            updateNavigationInstructions();
 
         final int showId;
         if (currentLeg == null) {
@@ -2098,6 +2125,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     : R.drawable.ic_warning_black_24px);
     }
 
+    protected void updateOperationInstructions() {
+        // TODO
+    }
+
     private Spanned getLeftTimeFormatted(final Date now, final Date endTime) {
         final long leftSeconds = (endTime.getTime() - now.getTime()) / 1000;
         final String leftText;
@@ -2658,7 +2689,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     StationsActivity.start(TripDetailsActivity.this, network, stop.location, time);
                     return true;
                 } else if (menuItemId == R.id.station_context_navigate_to) {
-                    startNavigationForJourneyToExit(stop);
+                    if (renderConfig.isOperation)
+                        startNavigationForOperationToExit(stop);
+                    else
+                        startNavigationForJourneyToExit(stop);
                     return true;
                 } else if (menuItemId == R.id.station_context_directions_alternative_from) {
                     return onFindAlternativeConnections(
@@ -2945,8 +2979,31 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 null,
                 0);
         final RenderConfig navigationRenderConfig = new RenderConfig();
-        if (renderConfig.isOperation)
-            navigationRenderConfig.isOperation = true;
+        navigationRenderConfig.isJourney = true;
+        navigationRenderConfig.isOperation = renderConfig.isOperation;
+        startNavigation(journeyTrip, navigationRenderConfig);
+    }
+
+    private void startNavigationForOperationToExit(final Stop exitStop) {
+        if (!renderConfig.isOperation)
+            return;
+
+        final Trip.Public journeyLeg = (Trip.Public) tripRenderer.trip.legs.get(0);
+        final Location entryLocation = journeyLeg.entryLocation;
+        final Location exitLocation = exitStop.location;
+        final Trip journeyTrip = new Trip(
+                tripRenderer.trip.loadedAt,
+                null,
+                null,
+                entryLocation,
+                exitLocation,
+                Collections.singletonList(journeyLeg),
+                null,
+                null,
+                0);
+        final RenderConfig navigationRenderConfig = new RenderConfig();
+        navigationRenderConfig.isJourney = true;
+        navigationRenderConfig.isOperation = true;
         startNavigation(journeyTrip, navigationRenderConfig);
     }
 

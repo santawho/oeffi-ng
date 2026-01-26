@@ -26,7 +26,8 @@
     <string name="trip_details_title">Verbindungsdetails</string>
     <string name="journey_details_title">Fahrtdetails</string>
     <string name="operation_details_title">Einsatzdetails</string>
-    <string name="navigation_details_title">Navigation</string>
+    <string name="navigation_title">Navigation</string>
+    <string name="operation_navigation_title">Einsatzführung</string>
     <string name="plans_activity_title">Netzpläne</string>
     <string name="network_picker_activity_title">Wähle Verkehrsnetz</string>
     <string name="assistant_label_title">Öffi Assistent</string>

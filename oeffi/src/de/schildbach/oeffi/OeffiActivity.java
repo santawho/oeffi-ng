@@ -801,11 +801,14 @@ public abstract class OeffiActivity extends ComponentActivity {
         return products.size() == networkDefaultProducts.size() && products.containsAll(networkDefaultProducts);
     }
 
+    protected String getProductsPrefsKey() {
+        return Constants.PREFS_KEY_PRODUCT_FILTER + "_" + network;
+    }
+
     protected Set<Product> loadProductFilter() {
         final Set<Product> networkDefaultProducts = getNetworkDefaultProducts();
         final Set<Product> keepProducts;
-        final String networkSpecificKey = Constants.PREFS_KEY_PRODUCT_FILTER + "_" + network;
-        final String value = prefs.getString(networkSpecificKey, null);
+        final String value = prefs.getString(getProductsPrefsKey(), null);
         if (value != null) {
             keepProducts = Product.ALL_SELECTABLE;
         } else {
@@ -830,10 +833,9 @@ public abstract class OeffiActivity extends ComponentActivity {
         for (final Product product : products)
             p.append(product.code);
         final String value = p.toString();
-        final String networkSpecificKey = Constants.PREFS_KEY_PRODUCT_FILTER + "_" + network;
         prefs.edit()
                 .putString(Constants.PREFS_KEY_PRODUCT_FILTER, value)
-                .putString(networkSpecificKey, value)
+                .putString(getProductsPrefsKey(), value)
                 .apply();
     }
 

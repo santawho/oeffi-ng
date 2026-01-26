@@ -68,6 +68,7 @@ import de.schildbach.oeffi.FromViaToAware;
 import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiMainActivity;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.directions.navigation.TripNavigatorActivity;
 import de.schildbach.oeffi.mapview.OeffiMapView;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.util.TimeSpec.DepArr;
@@ -1384,6 +1385,16 @@ public class DirectionsActivity extends OeffiMainActivity implements
             final byte[] serializedTrip, final String tripId,
             final byte[] serializedReloadRequest) {
         handleShowSavedTrip(from, to, via, tripDepartureTime, tripArrivalTime, serializedTrip, tripId, serializedReloadRequest);
+    }
+
+    @Override
+    public void onSavedTripStartNavigation(
+            final int adapterPosition,
+            final Trip trip,
+            final QueryTripsRunnable.TripRequestData queryTripsRequestData) {
+        final TripDetailsActivity.RenderConfig renderConfig = new TripDetailsActivity.RenderConfig();
+        renderConfig.queryTripsRequestData = queryTripsRequestData;
+        TripNavigatorActivity.startNavigation(this, network, trip, renderConfig, false);
     }
 
     @Override
