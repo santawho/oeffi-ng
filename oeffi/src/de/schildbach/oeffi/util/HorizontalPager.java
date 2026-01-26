@@ -33,6 +33,7 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.WindowManager;
 import android.widget.Scroller;
 
@@ -273,14 +274,30 @@ public final class HorizontalPager extends ViewGroup {
 
                     final int xDiff = (int) Math.abs(x - mLastMotionX);
                     if (xDiff > mTouchSlop) {
+                        final View currentPageView = getCurrentView();
                         final Rect hitRect = new Rect();
                         View dragExceptionView = null;
                         for (final View view: dragExceptionViews) {
-                           view.getHitRect(hitRect);
-                           if (hitRect.contains((int) x, (int) y)) {
-                               dragExceptionView = view;
-                               break;
-                           }
+                            View v = view;
+                            while (v != null) {
+                                final int visibility = view.getVisibility();
+                                if (visibility != View.VISIBLE)
+                                    break;
+                                if (!view.isEnabled())
+                                    break;
+                                final ViewParent parent = v.getParent();
+                                if (!(parent instanceof View))
+                                    break;
+                                if (parent == currentPageView) {
+                                    view.getHitRect(hitRect);
+                                    if (hitRect.contains((int) x, (int) y))
+                                        dragExceptionView = view;
+                                    break;
+                                }
+                                v = (View) parent;
+                            }
+                            if (dragExceptionView != null)
+                                break;
                         }
                         if (dragExceptionView == null) {
                             // Scroll if the user moved far enough along the X axis
