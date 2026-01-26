@@ -596,6 +596,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         swipeRefreshForNextEvent.setEnabled(false);
 
         viewPager = findViewById(R.id.directions_trip_details_pager);
+        viewPager.addDragExceptionView(findViewById(R.id.vertical_map_frame));
         viewPager.setOnScreenSwitchListener((prevScreen, newScreen) -> {
             final int newId = viewPager.getCurrentView().getId();
             shownPageChanged(newId);

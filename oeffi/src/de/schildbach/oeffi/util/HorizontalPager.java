@@ -24,6 +24,7 @@ package de.schildbach.oeffi.util;
  */
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -80,7 +81,8 @@ public final class HorizontalPager extends ViewGroup {
     private static final int TOUCH_STATE_REST = 0;
     private static final int TOUCH_STATE_HORIZONTAL_SCROLLING = 1;
     private static final int TOUCH_STATE_VERTICAL_SCROLLING = -1;
-    private List<View> visibleChildren = new ArrayList<>();
+    private final List<View> visibleChildren = new ArrayList<>();
+    private final List<View> dragExceptionViews = new ArrayList<>();
     private int mCurrentScreen;
     private int mDensityAdjustedSnapVelocity;
     private boolean mFirstLayout = true;
@@ -134,7 +136,7 @@ public final class HorizontalPager extends ViewGroup {
         mScroller = new Scroller(getContext());
 
         // Calculate the density-dependent snap velocity in pixels
-        DisplayMetrics displayMetrics = new DisplayMetrics();
+        final DisplayMetrics displayMetrics = new DisplayMetrics();
         ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay()
                 .getMetrics(displayMetrics);
         mDensityAdjustedSnapVelocity =
@@ -158,7 +160,14 @@ public final class HorizontalPager extends ViewGroup {
                 visibleChildren.add(child);
             }
         }
+    }
 
+    public void addDragExceptionView(final View view) {
+        dragExceptionViews.add(view);
+    }
+
+    public void removeDragExceptionView(final View view) {
+        dragExceptionViews.remove(view);
     }
 
     @Override
@@ -192,10 +201,10 @@ public final class HorizontalPager extends ViewGroup {
              * place in the event that we had a rotation that didn't result in an activity restart
              * (code by aveyD). Without this you can end up between two pages after a rotation.
              */
-            Display display =
+            final Display display =
                     ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE))
                             .getDefaultDisplay();
-            int displayWidth = display.getWidth();
+            final int displayWidth = display.getWidth();
 
             mNextScreen = Math.max(0, Math.min(getCurrentScreen(), getVisibleChildCount() - 1));
             final int newX = mNextScreen * displayWidth;
@@ -260,20 +269,28 @@ public final class HorizontalPager extends ViewGroup {
                      */
 
                     final float x = ev.getX();
-                    final int xDiff = (int) Math.abs(x - mLastMotionX);
-                    boolean xMoved = xDiff > mTouchSlop;
+                    final float y = ev.getY();
 
-                    if (xMoved) {
-                        // Scroll if the user moved far enough along the X axis
-                        mTouchState = TOUCH_STATE_HORIZONTAL_SCROLLING;
-                        mLastMotionX = x;
+                    final int xDiff = (int) Math.abs(x - mLastMotionX);
+                    if (xDiff > mTouchSlop) {
+                        final Rect hitRect = new Rect();
+                        View dragExceptionView = null;
+                        for (final View view: dragExceptionViews) {
+                           view.getHitRect(hitRect);
+                           if (hitRect.contains((int) x, (int) y)) {
+                               dragExceptionView = view;
+                               break;
+                           }
+                        }
+                        if (dragExceptionView == null) {
+                            // Scroll if the user moved far enough along the X axis
+                            mTouchState = TOUCH_STATE_HORIZONTAL_SCROLLING;
+                            mLastMotionX = x;
+                        }
                     }
 
-                    final float y = ev.getY();
                     final int yDiff = (int) Math.abs(y - mLastMotionY);
-                    boolean yMoved = yDiff > mTouchSlop;
-
-                    if (yMoved) {
+                    if (yDiff > mTouchSlop) {
                         mTouchState = TOUCH_STATE_VERTICAL_SCROLLING;
                     }
                 }
@@ -332,7 +349,7 @@ public final class HorizontalPager extends ViewGroup {
                 break;
             case MotionEvent.ACTION_MOVE:
                 final int xDiff = (int) Math.abs(x - mLastMotionX);
-                boolean xMoved = xDiff > mTouchSlop;
+                final boolean xMoved = xDiff > mTouchSlop;
 
                 if (xMoved) {
                     // Scroll if the user moved far enough along the X axis
@@ -366,7 +383,7 @@ public final class HorizontalPager extends ViewGroup {
                     final VelocityTracker velocityTracker = mVelocityTracker;
                     velocityTracker.computeCurrentVelocity(VELOCITY_UNIT_PIXELS_PER_SECOND,
                             mMaximumVelocity);
-                    int velocityX = (int) velocityTracker.getXVelocity();
+                    final int velocityX = (int) velocityTracker.getXVelocity();
 
                     if (velocityX > mDensityAdjustedSnapVelocity && mCurrentScreen > 0) {
                         // Fling hard enough to move left
@@ -477,9 +494,9 @@ public final class HorizontalPager extends ViewGroup {
      */
     private void snapToDestination() {
         final int screenWidth = getWidth();
-        int scrollX = getScrollX();
+        final int scrollX = getScrollX();
         int whichScreen = mCurrentScreen;
-        int deltaX = scrollX - (screenWidth * mCurrentScreen);
+        final int deltaX = scrollX - (screenWidth * mCurrentScreen);
 
         // Check if they want to go to the prev. screen
         if ((deltaX < 0) && mCurrentScreen != 0
