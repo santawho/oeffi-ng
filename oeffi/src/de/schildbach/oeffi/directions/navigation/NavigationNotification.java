@@ -65,7 +65,6 @@ import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
-import de.schildbach.oeffi.directions.tripeval.TripRenderer;
 import de.schildbach.oeffi.util.ClockUtils;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;

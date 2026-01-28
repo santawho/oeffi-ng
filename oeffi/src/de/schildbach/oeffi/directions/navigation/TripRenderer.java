@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package de.schildbach.oeffi.directions.tripeval;
+package de.schildbach.oeffi.directions.navigation;
 
 import android.annotation.SuppressLint;
 

@@ -91,7 +91,7 @@ import de.schildbach.oeffi.util.KmlProducer;
 import de.schildbach.oeffi.util.PopupHelper;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.util.TimeSpec.DepArr;
-import de.schildbach.oeffi.directions.tripeval.TripRenderer;
+import de.schildbach.oeffi.directions.navigation.TripRenderer;
 import de.schildbach.oeffi.directions.navigation.TripNavigatorActivity;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.stations.LineView;
