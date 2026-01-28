@@ -22,6 +22,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.schildbach.oeffi.AreaAware;
@@ -32,6 +33,9 @@ import de.schildbach.oeffi.TripAware;
 import de.schildbach.oeffi.util.ZoomControls;
 import de.schildbach.oeffi.util.locationview.LocationView;
 import de.schildbach.pte.dto.Location;
+import de.schildbach.pte.dto.Point;
+import de.schildbach.pte.dto.Stop;
+import de.schildbach.pte.dto.Trip;
 
 public class OeffiMapView extends FrameLayout {
     public static Provider provider = new OsmDroidOeffiMapView.Provider();
@@ -174,5 +178,38 @@ public class OeffiMapView extends FrameLayout {
 
     public void setZoomControls(final ZoomControls zoomControls) {
         viewImplementation.setZoomControls(zoomControls);
+    }
+
+    public static List<Point> getPathForLeg(final Trip.Leg leg) {
+        final List<Point> legPath = leg.getPath();
+        if (legPath != null)
+            return legPath;
+
+        final List<Point> path = new ArrayList<>();
+
+        if (leg.departure != null) {
+            addPointFromLocation(path, leg.departure);
+        }
+
+        if (leg instanceof Trip.Public) {
+            final Trip.Public publicLeg = (Trip.Public) leg;
+            final List<Stop> intermediateStops = publicLeg.intermediateStops;
+
+            if (intermediateStops != null) {
+                for (final Stop stop : intermediateStops)
+                    addPointFromLocation(path, stop.location);
+            }
+        }
+
+        if (leg.arrival != null) {
+            addPointFromLocation(path, leg.arrival);
+        }
+
+        return path;
+    }
+
+    private static void addPointFromLocation(final List<Point> path, final Location location) {
+        if (location != null)
+            path.add(location.coord);
     }
 }

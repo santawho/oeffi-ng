@@ -294,10 +294,10 @@ public class TripRenderer {
                         departureStop,
                         arrivalStop,
                         intermediateStops,
-                        publicLeg.path,
                         publicLeg.message,
                         publicLeg.journeyRef,
                         refTime);
+                simulatedPublicLeg.setPath(publicLeg.getPath());
 //            }
             }
         }
@@ -441,7 +441,7 @@ public class TripRenderer {
                                 && transferDetailsIndex < transferDetails.length
                                 ? transferDetails[transferDetailsIndex] : null));
                 if (transferTo != null) {
-                    setupPath(nextLeg);
+                    // setupPath(nextLeg);
                     legs.add(transferTo);
                     ++iLeg;
                     ++transferDetailsIndex;
@@ -473,7 +473,7 @@ public class TripRenderer {
                 }
             }
 
-            setupPath(leg);
+            // setupPath(leg);
         }
     }
 
@@ -659,44 +659,6 @@ public class TripRenderer {
         notificationData.plannedDeparturePosition = plannedDepPos;
         notificationData.nextTransferCritical = nextEventTransferLeftTimeCritical;
         return 0;
-    }
-
-    private void setupPath(final Trip.Leg leg) {
-        if (leg.path == null) {
-            leg.path = new ArrayList<>();
-
-            if (leg.departure != null) {
-                final Point departurePoint = pointFromLocation(leg.departure);
-                if (departurePoint != null)
-                    leg.path.add(departurePoint);
-            }
-
-            if (leg instanceof Trip.Public) {
-                final Trip.Public publicLeg = (Trip.Public) leg;
-                final List<Stop> intermediateStops = publicLeg.intermediateStops;
-
-                if (intermediateStops != null) {
-                    for (final Stop stop : intermediateStops) {
-                        final Point stopPoint = pointFromLocation(stop.location);
-                        if (stopPoint != null)
-                            leg.path.add(stopPoint);
-                    }
-                }
-            }
-
-            if (leg.arrival != null) {
-                final Point arrivalPoint = pointFromLocation(leg.arrival);
-                if (arrivalPoint != null)
-                    leg.path.add(arrivalPoint);
-            }
-        }
-    }
-
-    private static Point pointFromLocation(final Location location) {
-        if (location.hasCoord())
-            return location.coord;
-
-        return null;
     }
 
     public boolean nextEventTypeIsPublic;

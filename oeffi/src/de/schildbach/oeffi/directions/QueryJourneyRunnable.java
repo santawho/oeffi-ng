@@ -132,7 +132,7 @@ public class QueryJourneyRunnable implements Runnable {
             tries++;
 
             try {
-                final QueryJourneyResult result = networkProvider.queryJourney(journeyRef);
+                final QueryJourneyResult result = networkProvider.queryJourney(journeyRef, false);
 
                 if (!cancelled.get())
                     postOnResult(result);

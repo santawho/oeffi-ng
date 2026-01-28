@@ -167,10 +167,10 @@ public abstract class QueryTripsRunnable implements Runnable {
                 final QueryTripsResult result;
                 final TripRequestData reloadRequestData;
                 if (tripShare != null) {
-                    result = networkProvider.loadSharedTrip(tripShare);
+                    result = networkProvider.loadSharedTrip(tripShare, true);
                     reloadRequestData = null;
                 } else if (tripRef != null) {
-                    result = networkProvider.queryReloadTrip(tripRef);
+                    result = networkProvider.queryReloadTrip(tripRef, true);
                     reloadRequestData = null;
                 } else {
                     final boolean depArr = time.depArr == TimeSpec.DepArr.DEPART;
@@ -182,7 +182,7 @@ public abstract class QueryTripsRunnable implements Runnable {
                     reloadRequestData.date = date;
                     reloadRequestData.dep = depArr;
                     reloadRequestData.options = options;
-                    result = networkProvider.queryTrips(from, via, to, date, depArr, options);
+                    result = networkProvider.queryTrips(from, via, to, date, depArr, options, false);
                 }
 
                 if (!cancelled.get())

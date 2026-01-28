@@ -435,7 +435,7 @@ public class TripsOverviewActivity extends OeffiActivity {
                     final NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
                     final QueryTripsResult netResult;
                     if (earlier || later) {
-                        netResult = networkProvider.queryMoreTrips(context, later);
+                        netResult = networkProvider.queryMoreTrips(context, later, false);
                     } else {
                         final TripRequestData requestData = searchMoreContext.getNextRequestData();
                         netResult = networkProvider.queryTrips(
@@ -444,7 +444,8 @@ public class TripsOverviewActivity extends OeffiActivity {
                                 requestData.to,
                                 requestData.date,
                                 requestData.dep,
-                                requestData.options);
+                                requestData.options,
+                                false);
                     }
 
                     final QueryTripsResult result = (netResult.status == QueryTripsResult.Status.OK)
@@ -545,7 +546,7 @@ public class TripsOverviewActivity extends OeffiActivity {
                 Trip.Public publicLeg = (Trip.Public) leg;
                 if (doRefresh) {
                     try {
-                        final QueryJourneyResult result = networkProvider.queryJourney(publicLeg.journeyRef);
+                        final QueryJourneyResult result = networkProvider.queryJourney(publicLeg.journeyRef, false);
                         if (result != null) {
                             switch (result.status) {
                                 case OK:
@@ -598,16 +599,17 @@ public class TripsOverviewActivity extends OeffiActivity {
                 }
                 newIntermediateStops.add(intermediateStop);
             }
-            prependLegs.add(new Trip.Public(
+            final Trip.Public newLeg = new Trip.Public(
                     foundLeg.line,
                     foundLeg.destination,
                     foundLeg.departureStop,
                     newArrivalStop,
                     newIntermediateStops,
-                    foundLeg.path,
                     foundLeg.message,
                     foundLeg.journeyRef,
-                    foundLeg.loadedAt));
+                    foundLeg.loadedAt);
+            newLeg.setPath(foundLeg.getPath());
+            prependLegs.add(newLeg);
             prependNumChanges += 1;
         }
     }
@@ -687,20 +689,21 @@ public class TripsOverviewActivity extends OeffiActivity {
             if (contLeg.intermediateStops != null)
                 intermediateStops.addAll(contLeg.intermediateStops);
             final List<Point> path = new ArrayList<>();
-            if (feedLeg.path != null)
-                path.addAll(feedLeg.path);
-            if (contLeg.path != null)
-                path.addAll(contLeg.path);
-            newLegs.add(new Trip.Public(
+            if (feedLeg.getPath() != null)
+                path.addAll(feedLeg.getPath());
+            if (contLeg.getPath() != null)
+                path.addAll(contLeg.getPath());
+            final Trip.Public newLeg = new Trip.Public(
                     feedLeg.line,
                     contLeg.destination,
                     feedLeg.departureStop,
                     contLeg.arrivalStop,
                     intermediateStops,
-                    path.isEmpty() ? null : path,
                     contLeg.message,
                     contLeg.journeyRef,
-                    contLeg.loadedAt));
+                    contLeg.loadedAt);
+            newLeg.setPath(path);
+            newLegs.add(newLeg);
         } else {
             if (lastPrependLeg != null)
                 newLegs.add(lastPrependLeg);

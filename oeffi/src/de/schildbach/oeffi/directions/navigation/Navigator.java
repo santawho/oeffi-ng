@@ -29,6 +29,7 @@ import java.util.List;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.pte.NetworkId;
+import de.schildbach.pte.dto.Point;
 import de.schildbach.pte.provider.NetworkProvider;
 import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.QueryJourneyResult;
@@ -160,7 +161,8 @@ public class Navigator {
                         LOG_TIME_FORMAT.format(new Date(legEndMinTime)), LOG_TIME_FORMAT.format(new Date(legEndMaxTime)));
             }
             if (doRefresh) {
-                final QueryJourneyResult result = networkProvider.queryJourney(journeyRef);
+                final boolean mustLoadPath = oldLeg.getPath() == null;
+                final QueryJourneyResult result = networkProvider.queryJourney(journeyRef, mustLoadPath);
                 if (result != null
                         && result.status == QueryJourneyResult.Status.OK
                         && result.journeyLeg != null) {
@@ -212,13 +214,15 @@ public class Navigator {
         if (arrivalStop == null)
             arrivalStop = initialLeg.arrivalStop;
 
-        return new Trip.Public(
+        final Trip.Public newLeg = new Trip.Public(
                 journeyLeg.line,
                 journeyLeg.destination,
                 departureStop, arrivalStop, intermediateStops,
-                journeyLeg.path != null ? journeyLeg.path : initialLeg.path,
                 journeyLeg.message,
                 initialLeg.journeyRef,
                 loadedAt);
+        final List<Point> journeyLegPath = journeyLeg.getPath();
+        newLeg.setPath(journeyLegPath != null ? journeyLegPath : initialLeg.getPath());
+        return newLeg;
     }
 }
