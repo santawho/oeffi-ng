@@ -35,6 +35,7 @@ import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.QueryJourneyResult;
 import de.schildbach.pte.dto.Stop;
 import de.schildbach.pte.dto.Trip;
+import de.schildbach.pte.util.GeoUtils;
 
 public class Navigator {
     private static final Logger log = LoggerFactory.getLogger(Navigator.class);
@@ -186,33 +187,97 @@ public class Navigator {
             journeyStops.addAll(journeyLeg.intermediateStops);
         journeyStops.add(journeyLeg.arrivalStop);
 
+        final int numStops = journeyStops.size();
+        int departureIndex = -1;
         final String depId = initialLeg.departureStop.location.id;
-        final String arrId = initialLeg.arrivalStop.location.id;
-
-        Stop departureStop = null;
-        Stop arrivalStop = null;
-        final List<Stop> intermediateStops = new ArrayList<>();
-        for (final Stop stop : journeyStops) {
-            final String locId = stop.location.id;
-            if (locId != null) {
-                if (locId.equals(depId)) {
-                    departureStop = stop;
-                    continue;
-                } else if (departureStop != null && locId.equals(arrId)) {
-                    arrivalStop = stop;
+        if (depId != null) {
+            // find original departure by ID
+            for (int index = 0; index < numStops; ++index) {
+                final Stop stop = journeyStops.get(index);
+                if (depId.equals(stop.location.id)) {
+                    departureIndex = index;
                     break;
                 }
             }
-            if (departureStop != null) {
-                intermediateStops.add(stop);
+        }
+        if (departureIndex < 0) {
+            final Point depCoord = initialLeg.departureStop.location.coord;
+            // not found, find departure by coordinate
+            // why? as found on INSA-Hafas Tram line 7 "to Franckeplatz" is a different station
+            // than the journey stop at "Franckeplatz": different ID, different coordinates, but very near
+            if (depCoord != null) {
+                double minDist = Double.MAX_VALUE;
+                for (int index = 0; index < numStops; ++index) {
+                    final Stop stop = journeyStops.get(index);
+                    final Point locCoord = stop.location.coord;
+                    if (locCoord != null) {
+                        final double dist = GeoUtils.geoDistanceInMeters(depCoord, locCoord);
+                        if (dist < minDist) {
+                            departureIndex = index;
+                            minDist = dist;
+                        }
+                    }
+                }
             }
         }
-
-        if (departureStop == null)
+        final Stop departureStop;
+        if (departureIndex >= 0) {
+            departureStop = journeyStops.get(departureIndex);
+        } else {
+            // big fail
             departureStop = initialLeg.departureStop;
+            log.error("cannot find departure {} in reloaded journey", departureStop);
+            throw new RuntimeException("unable to find departure stop in reloaded journey");
+        }
 
-        if (arrivalStop == null)
+        int arrivalIndex = -1;
+        final String arrId = initialLeg.arrivalStop.location.id;
+        if (arrId != null) {
+            // find original arrival by ID
+            for (int index = departureIndex + 1; index < numStops; ++index) {
+                final Stop stop = journeyStops.get(index);
+                if (arrId.equals(stop.location.id)) {
+                    arrivalIndex = index;
+                    break;
+                }
+            }
+        }
+        if (arrivalIndex < 0) {
+            final Point arrCoord = initialLeg.arrivalStop.location.coord;
+            // not found, find arrival by coordinate
+            if (arrCoord != null) {
+                double minDist = Double.MAX_VALUE;
+                for (int index = 0; index < numStops; ++index) {
+                    final Stop stop = journeyStops.get(index);
+                    final Point locCoord = stop.location.coord;
+                    if (locCoord != null) {
+                        final double dist = GeoUtils.geoDistanceInMeters(arrCoord, locCoord);
+                        if (dist < minDist) {
+                            arrivalIndex = index;
+                            minDist = dist;
+                        }
+                    }
+                }
+            }
+        }
+        final Stop arrivalStop;
+        if (arrivalIndex >= 0) {
+            arrivalStop = journeyStops.get(arrivalIndex);
+        } else {
+            // big fail
             arrivalStop = initialLeg.arrivalStop;
+            log.error("cannot find arrival {} in reloaded journey", arrivalStop);
+            throw new RuntimeException("unable to find arrival stop in reloaded journey");
+        }
+
+        final List<Stop> intermediateStops;
+        if (departureIndex >= 0 && arrivalIndex >= 0) {
+            intermediateStops = new ArrayList<>();
+            for (int index = departureIndex + 1; index < arrivalIndex; ++ index)
+                intermediateStops.add(journeyStops.get(index));
+        } else {
+            intermediateStops = initialLeg.intermediateStops;
+        }
 
         final Trip.Public newLeg = new Trip.Public(
                 journeyLeg.line,
