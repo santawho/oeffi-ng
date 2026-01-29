@@ -52,7 +52,7 @@ import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
 
 import de.schildbach.oeffi.directions.DirectionsActivity;
-import de.schildbach.oeffi.directions.OperationsActivity;
+import de.schildbach.oeffi.directions.driverops.OperationsActivity;
 import de.schildbach.oeffi.directions.QueryHistoryProvider;
 import de.schildbach.oeffi.directions.navigation.NavigationNotification;
 import de.schildbach.oeffi.directions.navigation.NotificationSoundManager;

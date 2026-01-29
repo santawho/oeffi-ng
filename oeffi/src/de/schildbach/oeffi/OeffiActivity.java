@@ -63,7 +63,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import de.schildbach.oeffi.directions.DirectionsActivity;
-import de.schildbach.oeffi.directions.OperationsActivity;
+import de.schildbach.oeffi.directions.driverops.OperationsActivity;
 import de.schildbach.oeffi.directions.navigation.NavigationNotification;
 import de.schildbach.oeffi.mapview.OeffiMapView;
 import de.schildbach.oeffi.network.NetworkProviderFactory;

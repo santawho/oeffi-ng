@@ -15,13 +15,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package de.schildbach.oeffi.directions;
+package de.schildbach.oeffi.directions.driverops;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.directions.DirectionsActivity;
+import de.schildbach.oeffi.directions.QueryStoredTripsProvider;
+import de.schildbach.oeffi.directions.QueryTripsRunnable;
+import de.schildbach.oeffi.directions.TripDetailsActivity;
+import de.schildbach.oeffi.directions.TripsOverviewActivity;
 import de.schildbach.oeffi.directions.navigation.TripNavigatorActivity;
 import de.schildbach.pte.dto.Product;
 import de.schildbach.pte.dto.Trip;

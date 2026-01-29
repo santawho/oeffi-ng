@@ -32,7 +32,7 @@ import javax.annotation.Nullable;
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.DirectionsActivity;
-import de.schildbach.oeffi.directions.OperationsActivity;
+import de.schildbach.oeffi.directions.driverops.OperationsActivity;
 import de.schildbach.oeffi.plans.PlansPickerActivity;
 import de.schildbach.oeffi.stations.StationsActivity;
 

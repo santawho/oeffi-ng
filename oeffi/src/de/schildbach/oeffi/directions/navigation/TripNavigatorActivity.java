@@ -76,7 +76,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     public static final int DELETEREQUEST_NOT_REQUESTED = 0;
     public static final int DELETEREQUEST_ASK = 1;
     public static final int DELETEREQUEST_FORCE = 2;
-    public static final String INTENT_EXTRA_NEXTEVENT = TripNavigatorActivity.class.getName() + ".nextevent";
+    public static final String INTENT_EXTRA_SHOWPAGE = TripNavigatorActivity.class.getName() + ".showpage";
     public static final String INTENT_EXTRA_PLAYALARM = TripNavigatorActivity.class.getName() + ".playalarm";
 
     public static boolean startNavigation(
@@ -120,7 +120,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         final Intent intent = TripDetailsActivity.buildStartIntent(TripNavigatorActivity.class, context, network, trip, renderConfig);
         intent.putExtra(INTENT_EXTRA_DELETEREQUEST, deleteRequest);
         if (setShowPage != null)
-            intent.putExtra(INTENT_EXTRA_NEXTEVENT, setShowPage.pageNum);
+            intent.putExtra(INTENT_EXTRA_SHOWPAGE, setShowPage.pageNum);
         if (playAlarmNotificationTag != null)
             intent.putExtra(INTENT_EXTRA_PLAYALARM, playAlarmNotificationTag);
         intent.addFlags(
@@ -174,9 +174,6 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         handleSwitchToNextEvent(intent);
         handlePlayAlarm(intent);
 
-        if (renderConfig.isOperation)
-            mustEnableTrackButton = true;
-
         stillCheckForOtherNavigations = true;
     }
 
@@ -223,14 +220,24 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     }
 
     @Override
+    protected int getActionBarColorId() {
+        return R.color.bg_action_bar_navigation;
+    }
+
+    @Override
+    protected int getActionBarTitleStringId() {
+        return R.string.navigation_title;
+    }
+
+    @Override
     protected void setupActionBar() {
-        setPrimaryColor(
-                renderConfig.isOperation ? R.color.bg_action_bar_operation_navigation
-                : R.color.bg_action_bar_navigation);
-        actionBar.setPrimaryTitle(getString(
-                renderConfig.isOperation ? R.string.operation_navigation_title
-                : R.string.navigation_title));
+        super.setupActionBar();
         actionBar.addProgressButton().setOnClickListener(buttonView -> refreshNavigationByUserCommand());
+    }
+
+    @Override
+    protected View.OnClickListener getStartNavigationClickListener() {
+        return null;
     }
 
     @Override
@@ -259,11 +266,6 @@ public class TripNavigatorActivity extends TripDetailsActivity {
             setShowPage(R.id.directions_trip_details_list_frame);
         else
             moveTaskToBack(true); // super.onBackPressedEvent();
-    }
-
-    @Override
-    protected long getPeriodicUpdateIntervalMs() {
-        return renderConfig.isOperation ? 15000 : 0;
     }
 
     @Override
@@ -332,7 +334,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     }
 
     private void handleSwitchToNextEvent(final Intent intent) {
-        final int setShowPageNum = intent.getIntExtra(INTENT_EXTRA_NEXTEVENT, -1);
+        final int setShowPageNum = intent.getIntExtra(INTENT_EXTRA_SHOWPAGE, -1);
         if (setShowPageNum >= 0)
             setShowPage(Page.getPageForNum(setShowPageNum));
     }

@@ -43,6 +43,7 @@ import javax.net.ssl.SSLException;
 
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.directions.driverops.OperationDetailsActivity;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.Toast;
@@ -238,10 +239,17 @@ public class QueryJourneyRunnable implements Runnable {
 
             final Trip.Public journeyLeg = result.journeyLeg;
             journeyLeg.setEntryAndExit(entryLocation, exitLocation);
-            TripDetailsActivity.start(
-                    parentActivity,
-                    networkProvider.id(), journeyLeg, isOperation, new Date(),
-                    openInNewWindow ? Intent.FLAG_ACTIVITY_NEW_TASK : 0);
+            if (isOperation) {
+                OperationDetailsActivity.start(
+                        parentActivity,
+                        networkProvider.id(), journeyLeg, new Date(),
+                        openInNewWindow ? Intent.FLAG_ACTIVITY_NEW_TASK : 0);
+            } else {
+                TripDetailsActivity.start(
+                        parentActivity,
+                        networkProvider.id(), journeyLeg, new Date(),
+                        openInNewWindow ? Intent.FLAG_ACTIVITY_NEW_TASK : 0);
+            }
         } else if (result.status == QueryJourneyResult.Status.SERVICE_DOWN) {
             networkProblem();
         }
