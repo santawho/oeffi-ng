@@ -38,6 +38,7 @@ import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.Point;
 import de.schildbach.pte.dto.Position;
+import de.schildbach.pte.dto.Product;
 import de.schildbach.pte.dto.Stop;
 import de.schildbach.pte.dto.PTDate;
 import de.schildbach.pte.dto.TransferDetails;
@@ -215,11 +216,12 @@ public class TripRenderer {
                 }
 
                 final long delayAtRefPoint = refTime.getTime() - plannedTimeAtRefPoint.getTime();
-//            if (delayAtRefPoint > 0) {
+                long currentDelay = delayAtRefPoint;
+                final StopDepartureDelayEstimator stopDepartureDelayEstimator = getStopDepartureDelayEstimatorForProduct(publicLeg.line.product);
                 Stop departureStop = publicLeg.departureStop;
-                boolean delayedArrival = false;
+                boolean afterBeginStop = false;
                 if (departureStop == beginStop) {
-                    delayedArrival = true;
+                    afterBeginStop = true;
                     final PTDate departureStopPlannedDepartureTime = departureStop.plannedDepartureTime;
                     departureStop = new Stop(
                             departureStop.location,
@@ -228,7 +230,7 @@ public class TripRenderer {
                             departureStop.arrivalCancelled,
                             departureStopPlannedDepartureTime,
                             new PTDate(
-                                    departureStopPlannedDepartureTime.getTime() + delayAtRefPoint,
+                                    departureStopPlannedDepartureTime.getTime() + currentDelay,
                                     departureStopPlannedDepartureTime.getOffset()),
                             departureStop.plannedDeparturePosition, departureStop.predictedDeparturePosition,
                             departureStop.departureCancelled);
@@ -242,20 +244,17 @@ public class TripRenderer {
                         PTDate predictedDepartureTime = stop.predictedDepartureTime;
                         final PTDate plannedArrivalTime = stop.plannedArrivalTime;
                         final PTDate plannedDepartureTime = stop.plannedDepartureTime;
-                        final boolean delayedDeparture;
-                        if (plannedArrivalTime != null && plannedDepartureTime != null) {
-                            if (delayedArrival) {
-                                predictedArrivalTime = new PTDate(plannedArrivalTime.getTime() + delayAtRefPoint, plannedArrivalTime.getOffset());
-                                final long stopIntervalLength = plannedDepartureTime.getTime() - plannedArrivalTime.getTime();
-                                delayedDeparture = stopIntervalLength < 4 * 60000;
-                                if (delayedDeparture)
-                                    predictedDepartureTime = new PTDate(plannedDepartureTime.getTime() + delayAtRefPoint, plannedDepartureTime.getOffset());
-                            } else {
-                                delayedDeparture = false;
+                        if (afterBeginStop) {
+                            if (plannedArrivalTime != null) {
+                                predictedArrivalTime = new PTDate(plannedArrivalTime.getTime() + currentDelay, plannedArrivalTime.getOffset());
+                                if (plannedDepartureTime != null) {
+                                    currentDelay = stopDepartureDelayEstimator.getDepartureDelay(
+                                            plannedArrivalTime.getTime(),
+                                            plannedDepartureTime.getTime(),
+                                            currentDelay);
+                                    predictedDepartureTime = new PTDate(plannedDepartureTime.getTime() + currentDelay, plannedDepartureTime.getOffset());
+                                }
                             }
-                        } else {
-                            delayedDeparture = true;
-                            predictedDepartureTime = new PTDate(plannedDepartureTime.getTime() + delayAtRefPoint, plannedDepartureTime.getOffset());
                         }
                         intermediateStops.add(new Stop(
                                 stop.location,
@@ -267,21 +266,15 @@ public class TripRenderer {
                                 predictedDepartureTime,
                                 stop.plannedDeparturePosition, stop.predictedDeparturePosition,
                                 stop.departureCancelled));
-                        if (!delayedDeparture)
-                            delayedArrival = false;
                         if (stop == beginStop)
-                            delayedArrival = true;
+                            afterBeginStop = true;
                     }
                 }
                 final PTDate arrivalStopPlannedArrivalTime = arrivalStop.plannedArrivalTime;
                 arrivalStop = new Stop(
                         arrivalStop.location,
                         arrivalStopPlannedArrivalTime,
-                        delayedArrival
-                                ? new PTDate(
-                                    arrivalStopPlannedArrivalTime.getTime() + delayAtRefPoint,
-                                    arrivalStopPlannedArrivalTime.getOffset())
-                                : arrivalStop.predictedArrivalTime,
+                        new PTDate(arrivalStopPlannedArrivalTime.getTime() + currentDelay, arrivalStopPlannedArrivalTime.getOffset()),
                         arrivalStop.plannedArrivalPosition, arrivalStop.predictedArrivalPosition,
                         arrivalStop.arrivalCancelled,
                         arrivalStop.plannedDepartureTime, arrivalStop.predictedDepartureTime,
@@ -298,7 +291,6 @@ public class TripRenderer {
                         publicLeg.journeyRef,
                         refTime);
                 simulatedPublicLeg.setPath(publicLeg.getPath());
-//            }
             }
         }
     }
@@ -919,5 +911,94 @@ public class TripRenderer {
 
     public void setNextPublicLegDuration(final PTDate begin, final PTDate end) {
         this.nextPublicLegDurationTimeValue = Long.toString((end.getTime() - begin.getTime()) / 60000);
+    }
+
+    public interface StopDepartureDelayEstimator {
+        long getDepartureDelay(long plannedArrivalTime, long plannedDepartureTime, long arrivalDelay);
+    }
+
+    public static class BasicStopDepartureDelayEstimator implements StopDepartureDelayEstimator {
+        final long minStopDuration;
+        final long maxShortStopDuration;
+        final long minDelayInterval;
+
+        public BasicStopDepartureDelayEstimator(
+                final long minStopDuration,
+                final long maxShortStopDuration,
+                final long maxEarlierInterval) {
+            this.minStopDuration = minStopDuration * 1000;
+            this.maxShortStopDuration = maxShortStopDuration * 1000;
+            this.minDelayInterval = -(maxEarlierInterval * 1000);
+        }
+
+        @Override
+        public long getDepartureDelay(final long plannedArrivalTime, final long plannedDepartureTime, final long arrivalDelay) {
+            final long plannedStopDuration = plannedDepartureTime - plannedArrivalTime;
+            final long minPlannedStopDuration = Math.max(plannedStopDuration, minStopDuration);
+            if (arrivalDelay < 0) {
+                // too early
+                if (plannedStopDuration <= 60000) {
+                    // cannot wait at stop: keep delay
+                    // can consume the delay by regular stop
+                    final long departureDelay = arrivalDelay + minStopDuration;
+                    if (departureDelay > 0) {
+                        return 0;
+                    }
+                    return departureDelay;
+                }
+                // can wait at the stop
+                final long departureDelay = arrivalDelay + minPlannedStopDuration;
+                if (departureDelay < 0) {
+                    // very early: depart on time
+                    return 0;
+                }
+                return departureDelay;
+            }
+            // delayed
+            if (plannedStopDuration <= 60000) {
+                // cannot wait at stop: keep delay
+                return arrivalDelay;
+            }
+            // consume the delay
+            final long shortenedStopDuration = plannedStopDuration < minStopDuration ? minStopDuration
+                    : (plannedStopDuration + minStopDuration) / 2;
+            final long earliestDepartureTime = plannedArrivalTime + arrivalDelay + shortenedStopDuration;
+            final long departureDelay = earliestDepartureTime - plannedDepartureTime;
+            if (departureDelay < 0) {
+                // can depart on time
+                return 0;
+            }
+            return departureDelay;
+        }
+    }
+
+    private static final Map<Product, StopDepartureDelayEstimator> productStopDepartureDelayEstimators;
+    static {
+        productStopDepartureDelayEstimators = new HashMap<>();
+        productStopDepartureDelayEstimators.put(Product.HIGH_SPEED_TRAIN, new BasicStopDepartureDelayEstimator(
+                2 * 60, 4 * 60, 0));
+        productStopDepartureDelayEstimators.put(Product.REGIONAL_TRAIN, new BasicStopDepartureDelayEstimator(
+                90, 3 * 60, 0));
+        productStopDepartureDelayEstimators.put(Product.SUBURBAN_TRAIN, new BasicStopDepartureDelayEstimator(
+                30, 2 * 60, 0));
+        productStopDepartureDelayEstimators.put(Product.SUBWAY, new BasicStopDepartureDelayEstimator(
+                30, 60, 0));
+        productStopDepartureDelayEstimators.put(Product.TRAM, new BasicStopDepartureDelayEstimator(
+                20, 2 * 60, 60));
+        productStopDepartureDelayEstimators.put(Product.BUS, new BasicStopDepartureDelayEstimator(
+                15, 2 * 60, 2 * 60));
+        productStopDepartureDelayEstimators.put(Product.REPLACEMENT_SERVICE, new BasicStopDepartureDelayEstimator(
+                15, 2 * 60, 2 * 60));
+    }
+
+    public static StopDepartureDelayEstimator FallbackDepartureDelayEstimator = (plannedArrivalTime, plannedDepartureTime, arrivalDelay) -> {
+        return arrivalDelay;
+    };
+
+    public static StopDepartureDelayEstimator getStopDepartureDelayEstimatorForProduct(final Product product) {
+        final StopDepartureDelayEstimator estimator = productStopDepartureDelayEstimators.get(product);
+        if (estimator != null)
+            return estimator;
+        return FallbackDepartureDelayEstimator;
     }
 }
