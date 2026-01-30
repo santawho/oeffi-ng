@@ -30,7 +30,7 @@ import static de.schildbach.pte.util.Preconditions.checkArgument;
 
 public final class CompassNeedleView extends View {
     public interface Callback {
-        Float getDeviceBearing();
+        Double getDeviceBearing();
 
         boolean isFaceDown();
     }
@@ -95,7 +95,7 @@ public final class CompassNeedleView extends View {
     protected void onDraw(final Canvas canvas) {
         super.onDraw(canvas);
 
-        final Float deviceBearing;
+        final Double deviceBearing;
         final boolean faceDown;
         if (callback != null) {
             deviceBearing = callback.getDeviceBearing();
@@ -107,9 +107,9 @@ public final class CompassNeedleView extends View {
 
         canvas.scale(width / 50f, height / 50f);
         if (deviceBearing != null && stationBearing != null) {
-            final float heading = stationBearing - deviceBearing;
-            final float degrees = (faceDown ? -heading : heading) - displayRotation * 90;
-            canvas.rotate(degrees, 25f, 25f);
+            final double heading = stationBearing - deviceBearing;
+            final double degrees = (faceDown ? -heading : heading) - displayRotation * 90;
+            canvas.rotate((float) degrees, 25f, 25f);
             canvas.drawPath(path, arrowPaint);
         } else {
             canvas.drawCircle(25f, 25f, 10f, circlePaint);

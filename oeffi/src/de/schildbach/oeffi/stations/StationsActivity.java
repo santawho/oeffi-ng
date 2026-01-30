@@ -163,7 +163,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private Point deviceLocation;
     private Location fixedLocation;
     private boolean fixedLocationResolving;
-    private Float deviceBearing = null;
+    private Double deviceBearing = null;
     private String filterByText;
     private String searchQuery;
     private KeyWordMatcher.Query filterQuery;
@@ -1470,10 +1470,15 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         return null;
     }
 
-    public final Float getDeviceBearing() {
+    public final Double getDeviceBearing() {
         if (fixedLocationResolving || fixedLocation != null)
             return null;
         return deviceBearing;
+    }
+
+    @Override
+    public Double getDeviceSpeed() {
+        return null;
     }
 
     private void startLocationProvider() {
@@ -1685,7 +1690,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                 return;
 
             SensorManager.getOrientation(rotationMatrix, orientation);
-            final float azimuth = (float) Math.toDegrees(orientation[0]);
+            final double azimuth = Math.toDegrees(orientation[0]);
 
             lastTime = System.currentTimeMillis();
 

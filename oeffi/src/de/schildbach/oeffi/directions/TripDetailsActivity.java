@@ -36,8 +36,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.location.Criteria;
 import android.location.LocationListener;
-import android.location.LocationManager;
-import android.location.LocationRequest;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -70,7 +68,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 import androidx.core.graphics.Insets;
@@ -87,6 +84,7 @@ import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.TripAware;
+import de.schildbach.oeffi.directions.navigation.TripGeoUtils;
 import de.schildbach.oeffi.util.GoogleMapsUtils;
 import de.schildbach.oeffi.util.HorizontalPager;
 import de.schildbach.oeffi.util.KmlProducer;
@@ -284,6 +282,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private boolean locationTrackingEnabled;
     private String locationProvider;
     private Point deviceLocation;
+    private Double deviceBearingDegrees;
+    private Double deviceSpeedMetersPerSecond;
     private Date deviceLocationTime;
     private int selectedLegIndex = -1;
     protected boolean isPaused = false;
@@ -863,12 +863,27 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     private void removeLocationUpdates() {
         locationManager.removeUpdates(this);
-        updateDeviceLocationDependencies(null, null);
+        updateDeviceLocationDependencies(null, null, null, null);
     }
 
     @Override
     public void onLocationChanged(@NonNull final android.location.Location location) {
-        updateDeviceLocationDependencies(LocationHelper.locationToPoint(location), new Date());
+        final Point newDeviceLocation = LocationHelper.locationToPoint(location);
+        final Double bearingDegrees;
+        if (location.hasBearing()) {
+            bearingDegrees = Double.valueOf(location.getBearing());
+        } else if (deviceLocation == null) {
+            bearingDegrees = null;
+        } else {
+            final double dist = TripGeoUtils.geoDistanceInMeters(deviceLocation, newDeviceLocation);
+            if (dist > 0) {
+                bearingDegrees = TripGeoUtils.getBearing(deviceLocation, newDeviceLocation);
+            } else {
+                return;
+            }
+        }
+        final Double speedMetersPerSecond = location.hasSpeed() ? (double) location.getSpeed() : null;
+        updateDeviceLocationDependencies(newDeviceLocation, bearingDegrees, speedMetersPerSecond, new Date());
         updateGUI();
     }
 
@@ -897,8 +912,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         return null;
     }
 
-    public final Float getDeviceBearing() {
-        return null;
+    public final Double getDeviceBearing() {
+        return deviceBearingDegrees;
+    }
+
+    @Override
+    public Double getDeviceSpeed() {
+        return deviceSpeedMetersPerSecond;
     }
 
     protected boolean mustOpenActivityInNewTask() {
@@ -923,7 +943,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         thresholdDelayMillis = Integer.parseInt(prefs.getString("extras_drivermode_threshold_delay", getString(R.string.default_drivermode_threshold_delay))) * 1000L;
 
         final Date now = new Date();
-        updateDeviceLocationDependencies(deviceLocation, now);
+        updateDeviceLocationDependencies(deviceLocation, deviceBearingDegrees, deviceSpeedMetersPerSecond, now);
         updateHighlightedTime(now);
         updateDeveloperInfo();
 
@@ -1039,14 +1059,33 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
     }
 
-    private void updateDeviceLocationDependencies(final Point newDeviceLocation, final Date now) {
+    private void updateDeviceLocationDependencies(
+            final Point newDeviceLocation,
+            final Double bearingDegrees,
+            final Double speedMetersPerSecond,
+            final Date now) {
         deviceLocation = newDeviceLocation;
         deviceLocationTime = now;
+        deviceBearingDegrees = bearingDegrees;
+        deviceSpeedMetersPerSecond = speedMetersPerSecond;
 
-        tripRenderer.setRefPoint(deviceLocation, deviceLocationTime);
+        setupTripRenderer();
 
         if (locationTrackingEnabled)
             getMapView().setDeviceLocationAware(this);
+    }
+
+    private void setupTripRenderer() {
+        tripRenderer.setRefPoint(
+                deviceLocation,
+                deviceBearingDegrees == null ? 0 : deviceBearingDegrees,
+                deviceSpeedMetersPerSecond == null ? 0 : deviceSpeedMetersPerSecond,
+                deviceLocationTime);
+    }
+
+    protected void setupFromTrip(final Trip trip) {
+        this.tripRenderer = new TripRenderer(tripRenderer, trip, renderConfig.isJourney, new Date());
+        setupTripRenderer();
     }
 
     private void updateLocations() {
@@ -1102,7 +1141,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final Date now) {
         final TripRenderer.LegContainer nearestPublicLeg = tripRenderer.nearestPublicLeg;
         final boolean isHighlightedLeg = nearestPublicLeg == legC;
-        final Location highlightedLocation = isHighlightedLeg ? nearestPublicLeg.nearestStop.location : null;
+        final int highlightedLocationIndex = isHighlightedLeg ? nearestPublicLeg.nearestStopIndex : -1;
         final Trip.Public leg = legC.publicLeg;
         final Trip.Public simulatedLeg = legC.simulatedPublicLeg;
         final Location destination = leg.destination;
@@ -1217,7 +1256,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         boolean isArrivalSection = false;
 
-        boolean isHighlightedLocation = departureLocation.equals(highlightedLocation);
+        boolean isHighlightedLocation = highlightedLocationIndex == 0;
         isRowSimulated |= isHighlightedLocation;
         addStopRow(stopsView,
                 PearlView.Type.DEPARTURE,
@@ -1230,9 +1269,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         String previousPlace = departureLocation.place;
 
-        if (intermediateStops != null) {
+        final int numintermediateStops = intermediateStops == null ? 0 : intermediateStops.size();
+        if (numintermediateStops > 0) {
             if (isStopsExpanded) {
-                for (int stopIndex = 0; stopIndex < intermediateStops.size(); stopIndex++) {
+                for (int stopIndex = 0; stopIndex < numintermediateStops; stopIndex++) {
                     final Stop stop = intermediateStops.get(stopIndex);
                     final Location stopLocation = stop.location;
                     final PTDate arrivalTime = stop.getArrivalTime();
@@ -1241,7 +1281,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     final boolean isArrivalTimeHighlighted = arrivalTime != null && arrivalTime.equals(highlightedTime);
                     final boolean isDepartureTimeHighlighted = departureTime != null && departureTime.equals(highlightedTime);
 
-                    isHighlightedLocation = stopLocation.equals(highlightedLocation);
+                    isHighlightedLocation = highlightedLocationIndex == stopIndex + 1;
                     // if (isHighlightedLocation && isDriverJourney)
                     //    isRowSimulated = true;
                     isRowSimulated |= isHighlightedLocation;
@@ -1321,7 +1361,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         isArrivalSection = true;
 
-        isHighlightedLocation = leg.arrivalStop.location.equals(highlightedLocation);
+        isHighlightedLocation = highlightedLocationIndex == numintermediateStops + 1;
         isRowSimulated |= isHighlightedLeg;
         addStopRow(stopsView,
                 PearlView.Type.ARRIVAL,
@@ -2901,11 +2941,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
         }
         updateGUI();
-    }
-
-    protected void setupFromTrip(final Trip trip) {
-        this.tripRenderer = new TripRenderer(tripRenderer, trip, renderConfig.isJourney, new Date());
-        tripRenderer.setRefPoint(deviceLocation, deviceLocationTime);
     }
 
     protected boolean onFindAlternativeConnections(

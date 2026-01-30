@@ -26,14 +26,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.Formats;
-import de.schildbach.oeffi.util.GeoUtils;
 import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.Point;
@@ -60,11 +58,13 @@ public class TripRenderer {
         public final boolean serviceCancelled;
         public final TransferDetails transferDetails;
         public Point refPoint;
+        public Double refBearing;
+        public Double refSpeed;
         public Date refTime;
-        public Stop nearestStop;
-        public float distanceToNearestStop;
-        public Stop sectionOtherStop;
-        public float sectionLength;
+        public int nearestStopIndex;
+        public boolean isAtNearestStop;
+        public double distanceToNearestStop;
+        public double sectionRelation;
         public boolean sectionIsAfterNearestStop; // otherwise is before
         public PTDate plannedTimeAtRefPoint;
         public Trip.Public simulatedPublicLeg;
@@ -115,183 +115,336 @@ public class TripRenderer {
         public void setCurrentLegState(final Trip.Public updatedLeg) {
             if (initialLeg != null) {
                 publicLeg = updatedLeg;
-                setRefPoint(refPoint, refTime);
+                cachedAllStops = null;
+                setRefPoint(refPoint, refBearing, refSpeed, refTime);
             }
         }
 
-        private void setRefPoint(final Point refPoint, final Date refTime) {
+        private Stop[] cachedAllStops;
+
+        private Stop[] getAllStops() {
+            if (cachedAllStops == null) {
+                if (publicLeg == null) {
+                    cachedAllStops = new Stop[0];
+                } else {
+                    final int numIntermediates = publicLeg.intermediateStops == null ? 0 : publicLeg.intermediateStops.size();
+                    cachedAllStops = new Stop[2 + numIntermediates];
+                    int index = 0;
+                    cachedAllStops[index++] = publicLeg.departureStop;
+                    if (numIntermediates > 0) {
+                        for (final Stop stop : publicLeg.intermediateStops) {
+                            if (stop.plannedArrivalTime == null && stop.plannedDepartureTime == null)
+                                continue;
+                            cachedAllStops[index++] = stop;
+                        }
+                    }
+                    cachedAllStops[index] = publicLeg.arrivalStop;
+                }
+            }
+            return cachedAllStops;
+        }
+
+        private void computeCurrentSectionV1(final Stop[] allStops) {
+            // first step: nearest stop
+            for (int index = 0; index < allStops.length; index++) {
+                final Stop stop = allStops[index];
+                if (stop.plannedArrivalTime == null && stop.plannedDepartureTime == null)
+                    continue;
+                final Location location = stop.location;
+                final Point locCoord = location.coord;
+                if (locCoord == null)
+                    continue;
+                final float distanceToRef = (float) TripGeoUtils.geoDistanceInMeters(locCoord, refPoint);
+                if (distanceToRef > distanceToNearestStop)
+                    continue;
+                nearestStopIndex = index;
+                distanceToNearestStop = distanceToRef;
+            }
+
+            if (nearestStopIndex < 0)
+                return;
+
+            final float MINIMUM_REQUIRED_DISTANCE = 500;
+            final Point nearestStopCoord = allStops[nearestStopIndex].location.coord;
+            if (nearestStopCoord == null)
+                return;
+
+            // second step: nearest other stop to the nearest stop that is at least 500 meters afar.
+            sectionIsAfterNearestStop = false;
+            boolean isAfterNearestStop = false;
+            double minDist = Float.MAX_VALUE;
+            for (int index = 0; index < allStops.length; index++) {
+                final Stop stop = allStops[index];
+                final Location location = stop.location;
+                final Point locCoord = location.coord;
+                if (locCoord == null)
+                    continue;
+                if (index == nearestStopIndex) {
+                    isAfterNearestStop = true;
+                    continue;
+                }
+                final double distanceToNearest = TripGeoUtils.geoDistanceInMeters(locCoord, nearestStopCoord);
+                if (distanceToNearest < MINIMUM_REQUIRED_DISTANCE)
+                    continue;
+                final double distanceToRef = TripGeoUtils.geoDistanceInMeters(locCoord, refPoint);
+                if (distanceToRef > minDist)
+                    continue;
+                minDist = distanceToRef;
+                final double stationRadiusInMeters =
+                        getStationRadiusProviderForProduct(publicLeg.line.product)
+                                .getStationRadiusInMeters();
+                isAtNearestStop = distanceToNearestStop < stationRadiusInMeters;
+                sectionIsAfterNearestStop = isAfterNearestStop;
+                if (sectionIsAfterNearestStop) {
+                    sectionRelation = distanceToNearestStop / distanceToNearest;
+                } else {
+                    sectionRelation = (distanceToNearest - distanceToNearestStop) / distanceToNearest;
+                }
+            }
+        }
+
+        private void computeCurrentSectionV2(final Stop[] allStops) {
+            final double stationRadiusInMeters =
+                    getStationRadiusProviderForProduct(publicLeg.line.product)
+                            .getStationRadiusInMeters();
+
+            int bestForwardAtStationIndex = -1;
+            double bestForwardAtStationDistance = Double.MAX_VALUE;
+            int bestReverseAtStationIndex = -1;
+            double bestReverseAtStationDistance = Double.MAX_VALUE;
+            int bestForwardEndIndex = -1;
+            double bestForwardDistanceToLine = Double.MAX_VALUE;
+            TripGeoUtils.PointAndDistance bestForwardPointAndDistance = null;
+            int bestReverseEndIndex = -1;
+            double bestReverseDistanceToLine = Double.MAX_VALUE;
+            TripGeoUtils.PointAndDistance bestReversePointAndDistance = null;
+
+            int startIndex = -1;
+            Point startPoint = null;
+            double refStartDistance = Double.MAX_VALUE;
+            for (int endIndex = 0; endIndex < allStops.length; ++endIndex) {
+                final Stop endStop = allStops[endIndex];
+                final Point endPoint = endStop.location.coord;
+                if (endPoint == null) {
+                    continue;
+                }
+                if (startPoint == null) {
+                    startIndex = endIndex;
+                    startPoint = endPoint;
+                    refStartDistance = TripGeoUtils.geoDistanceInMeters(refPoint, startPoint);
+                    continue;
+                }
+                final double sectionBearing = TripGeoUtils.getBearing(startPoint, endPoint);
+                double bearingDiff = sectionBearing - refBearing;
+                if (bearingDiff < -180.0)
+                    bearingDiff += 360.0;
+                else if (bearingDiff > 180.0)
+                    bearingDiff -= 360.0;
+                final boolean isGoingOpposite = bearingDiff < -90.0 || bearingDiff > 90.0;
+                final double refEndDistance = TripGeoUtils.geoDistanceInMeters(refPoint, endPoint);
+                final TripGeoUtils.PointAndDistance closestPoint =
+                        TripGeoUtils.findClosestPointOnLine(refPoint, startPoint, endPoint);
+                final double distanceToLine = closestPoint.distanceInMeters;
+                if (isGoingOpposite) {
+                    if (refStartDistance < stationRadiusInMeters && refStartDistance < bestReverseAtStationDistance) {
+                        bestReverseAtStationIndex = startIndex;
+                        bestReverseAtStationDistance = refStartDistance;
+                    }
+                    if (refEndDistance < stationRadiusInMeters && refEndDistance < bestReverseAtStationDistance) {
+                        bestReverseAtStationIndex = endIndex;
+                        bestReverseAtStationDistance = refEndDistance;
+                    }
+                    if (distanceToLine < bestReverseDistanceToLine) {
+                        bestReverseEndIndex = endIndex;
+                        bestReverseDistanceToLine = distanceToLine;
+                        bestReversePointAndDistance = closestPoint;
+                    }
+                } else {
+                    if (refStartDistance < stationRadiusInMeters && refStartDistance < bestForwardAtStationDistance) {
+                        bestForwardAtStationIndex = startIndex;
+                        bestForwardAtStationDistance = refStartDistance;
+                    }
+                    if (refEndDistance < stationRadiusInMeters && refEndDistance < bestForwardAtStationDistance) {
+                        bestForwardAtStationIndex = endIndex;
+                        bestForwardAtStationDistance = refEndDistance;
+                    }
+                    if (distanceToLine < bestForwardDistanceToLine) {
+                        bestForwardEndIndex = endIndex;
+                        bestForwardDistanceToLine = distanceToLine;
+                        bestForwardPointAndDistance = closestPoint;
+                    }
+                }
+                startIndex = endIndex;
+                startPoint = endPoint;
+                refStartDistance = Double.MAX_VALUE;
+            }
+
+            if (bestForwardAtStationIndex >= 0) {
+                // we are just next to one of the stations
+                // while going in same direction as the device is travelling
+                // assume we are waiting there for departure
+                isAtNearestStop = true;
+                nearestStopIndex = bestForwardAtStationIndex;
+                distanceToNearestStop = bestForwardAtStationDistance;
+                sectionIsAfterNearestStop = bestForwardAtStationIndex < bestForwardEndIndex || bestForwardAtStationIndex == 0;
+                sectionRelation = sectionIsAfterNearestStop ? 0.0 : 1.0;
+            } else if (bestReverseAtStationIndex >= 0) {
+                // but we are just next to one of the stations
+                // while going in the opposite direction as the device is travelling
+                // assume we are waiting there for departure
+                isAtNearestStop = true;
+                nearestStopIndex = bestReverseAtStationIndex;
+                distanceToNearestStop = bestReverseAtStationDistance;
+                sectionIsAfterNearestStop = bestReverseAtStationIndex < bestReverseEndIndex || bestReverseAtStationIndex == 0;
+                sectionRelation = sectionIsAfterNearestStop ? 0.0 : 1.0;
+            } else {
+                // we have a section going in either same or opposite direction as the device is travelling
+                isAtNearestStop = false;
+
+                int bestEndIndex;
+                final TripGeoUtils.PointAndDistance bestPointAndDistance;
+                if (bestForwardEndIndex >= 0) {
+                    bestEndIndex = bestForwardEndIndex;
+                    bestPointAndDistance = bestForwardPointAndDistance;
+                } else {
+                    bestEndIndex = bestReverseEndIndex;
+                    bestPointAndDistance = bestReversePointAndDistance;
+                }
+
+                sectionRelation = bestPointAndDistance.relativePosition;
+                sectionIsAfterNearestStop = sectionRelation < 0.5;
+                nearestStopIndex = sectionIsAfterNearestStop ? bestEndIndex - 1 : bestEndIndex;
+
+                final Point nearestStopCoord = allStops[nearestStopIndex].location.coord;
+                distanceToNearestStop = TripGeoUtils.geoDistanceInMeters(refPoint, nearestStopCoord);
+            }
+        }
+
+        private void setRefPoint(
+                final Point refPoint,
+                final Double refBearing,
+                final Double refSpeed,
+                final Date refTime) {
             this.refPoint = refPoint;
+            this.refBearing = refBearing;
+            this.refSpeed = refSpeed;
             this.refTime = refTime;
-            nearestStop = null;
-            sectionOtherStop = null;
+            nearestStopIndex = -1;
+//            sectionOppositeStop = null;
             distanceToNearestStop = Float.MAX_VALUE;
-            sectionLength = Float.MAX_VALUE;
+            sectionRelation = 0;
             simulatedPublicLeg = null;
             if (publicLeg == null)
                 return;
             if (refPoint == null)
                 return;
 
-            final Consumer<Consumer<Stop>> evalAllStops = consumer -> {
-                consumer.accept(publicLeg.departureStop);
-                if (publicLeg.intermediateStops != null) {
-                    for (final Stop intermediateStop : publicLeg.intermediateStops)
-                        consumer.accept(intermediateStop);
-                }
-                consumer.accept(publicLeg.arrivalStop);
-            };
+            final Stop[] allStops = getAllStops();
+            // computeCurrentSectionV1(allStops);
+            computeCurrentSectionV2(allStops);
+            buildSimulatedLeg(allStops);
+        }
 
-            // first step: nearest stop
-            evalAllStops.accept(stop -> {
-                if (stop.plannedArrivalTime == null && stop.plannedDepartureTime == null)
-                    return;
-                final Location location = stop.location;
-                if (!location.hasCoord())
-                    return;
-                final float distanceToRef = GeoUtils.distanceBetween(location.coord, refPoint).distanceInMeters;
-                if (distanceToRef > distanceToNearestStop)
-                    return;
-                nearestStop = stop;
-                distanceToNearestStop = distanceToRef;
-            });
-
-            if (nearestStop == null)
+        private void buildSimulatedLeg(final Stop[] allStops) {
+            if (nearestStopIndex < 0)
                 return;
 
-            final float MINIMUM_REQUIRED_DISTANCE = 500;
-            final Point nearestStopCoord = nearestStop.location.coord;
+            final Stop beginStop, endStop;
+            if (sectionIsAfterNearestStop) {
+                beginStop = allStops[nearestStopIndex];
+                endStop = allStops[nearestStopIndex + 1];
+            } else {
+                beginStop = allStops[nearestStopIndex - 1];
+                endStop = allStops[nearestStopIndex];
+            }
+            if (sectionRelation <= 0.0) {
+                plannedTimeAtRefPoint = beginStop.plannedDepartureTime;
+            } else if (sectionRelation >= 1.0) {
+                plannedTimeAtRefPoint = endStop.plannedArrivalTime;
+            } else {
+                final long beginTime = beginStop.plannedDepartureTime.getTime();
+                final long endTime = endStop.plannedArrivalTime.getTime();
+                plannedTimeAtRefPoint = new PTDate(
+                        new Date(beginTime + (long) (sectionRelation * (float) (endTime - beginTime))),
+                        beginStop.plannedDepartureTime.getOffset());
+            }
 
-            // second step: nearest other stop to the nearest stop that is at least 500 meters afar.
-            sectionIsAfterNearestStop = false;
-            evalAllStops.accept(new Consumer<Stop>() {
-                boolean isAfterNearestStop = false;
-                float minDist = Float.MAX_VALUE;
-                @Override
-                public void accept(final Stop stop) {
-                    if (stop.plannedArrivalTime == null && stop.plannedDepartureTime == null)
-                        return;
-                    final Location location = stop.location;
-                    if (!location.hasCoord())
-                        return;
-                    if (stop == nearestStop) {
-                        isAfterNearestStop = true;
-                        return;
-                    }
-                    final float distanceToNearest = GeoUtils.distanceBetween(location.coord, nearestStopCoord).distanceInMeters;
-                    if (distanceToNearest < MINIMUM_REQUIRED_DISTANCE)
-                        return;
-                    final float distanceToRef = GeoUtils.distanceBetween(location.coord, refPoint).distanceInMeters;
-                    if (distanceToRef > minDist)
-                        return;
-                    minDist = distanceToRef;
-                    sectionOtherStop = stop;
-                    sectionLength = distanceToNearest;
-                    sectionIsAfterNearestStop = isAfterNearestStop;
-                }
-            });
-
-            if (sectionOtherStop != null) {
-                final Stop beginStop, endStop;
-                final float beginDist;
-                if (sectionIsAfterNearestStop) {
-                    beginStop = nearestStop;
-                    endStop = sectionOtherStop;
-                    beginDist = distanceToNearestStop;
-                } else {
-                    beginStop = sectionOtherStop;
-                    endStop = nearestStop;
-                    beginDist = sectionLength - distanceToNearestStop;
-                }
-                final float distRel = beginDist / sectionLength; // should be between 0.0 and 1.0
-                if (distRel <= 0.0) {
-                    plannedTimeAtRefPoint = beginStop.plannedDepartureTime;
-                } else if (distRel >= 1.0) {
-                    plannedTimeAtRefPoint = endStop.plannedArrivalTime;
-                } else {
-                    final long beginTime = beginStop.plannedDepartureTime.getTime();
-                    final long endTime = endStop.plannedArrivalTime.getTime();
-                    plannedTimeAtRefPoint = new PTDate(
-                            new Date(beginTime + (long) (distRel * (float) (endTime - beginTime))),
-                            beginStop.plannedDepartureTime.getOffset());
-                }
-
-                final long delayAtRefPoint = refTime.getTime() - plannedTimeAtRefPoint.getTime();
-                long currentDelay = delayAtRefPoint;
-                final StopDepartureDelayEstimator stopDepartureDelayEstimator = getStopDepartureDelayEstimatorForProduct(publicLeg.line.product);
-                Stop departureStop = publicLeg.departureStop;
-                boolean afterBeginStop = false;
-                if (departureStop == beginStop) {
-                    afterBeginStop = true;
-                    final PTDate departureStopPlannedDepartureTime = departureStop.plannedDepartureTime;
-                    departureStop = new Stop(
-                            departureStop.location,
-                            departureStop.plannedArrivalTime, departureStop.predictedArrivalTime,
-                            departureStop.plannedArrivalPosition, departureStop.predictedArrivalPosition,
-                            departureStop.arrivalCancelled,
-                            departureStopPlannedDepartureTime,
-                            new PTDate(
-                                    departureStopPlannedDepartureTime.getTime() + currentDelay,
-                                    departureStopPlannedDepartureTime.getOffset()),
-                            departureStop.plannedDeparturePosition, departureStop.predictedDeparturePosition,
-                            departureStop.departureCancelled);
-                }
-                Stop arrivalStop = publicLeg.arrivalStop;
-                List<Stop> intermediateStops = publicLeg.intermediateStops;
-                if (arrivalStop != endStop && intermediateStops != null) {
-                    intermediateStops = new ArrayList<>();
-                    for (final Stop stop : publicLeg.intermediateStops) {
-                        PTDate predictedArrivalTime = stop.predictedArrivalTime;
-                        PTDate predictedDepartureTime = stop.predictedDepartureTime;
-                        final PTDate plannedArrivalTime = stop.plannedArrivalTime;
-                        final PTDate plannedDepartureTime = stop.plannedDepartureTime;
-                        if (afterBeginStop) {
-                            if (plannedArrivalTime != null) {
-                                predictedArrivalTime = new PTDate(plannedArrivalTime.getTime() + currentDelay, plannedArrivalTime.getOffset());
-                                if (plannedDepartureTime != null) {
-                                    currentDelay = stopDepartureDelayEstimator.getDepartureDelay(
-                                            plannedArrivalTime.getTime(),
-                                            plannedDepartureTime.getTime(),
-                                            currentDelay);
-                                    predictedDepartureTime = new PTDate(plannedDepartureTime.getTime() + currentDelay, plannedDepartureTime.getOffset());
-                                }
+            final long delayAtRefPoint = refTime.getTime() - plannedTimeAtRefPoint.getTime();
+            long currentDelay = delayAtRefPoint;
+            final DepartureDelayEstimator stopDepartureDelayEstimator = getStopDepartureDelayEstimatorForProduct(publicLeg.line.product);
+            Stop departureStop = publicLeg.departureStop;
+            boolean afterBeginStop = false;
+            if (departureStop == beginStop) {
+                afterBeginStop = true;
+                final PTDate departureStopPlannedDepartureTime = departureStop.plannedDepartureTime;
+                departureStop = new Stop(
+                        departureStop.location,
+                        departureStop.plannedArrivalTime, departureStop.predictedArrivalTime,
+                        departureStop.plannedArrivalPosition, departureStop.predictedArrivalPosition,
+                        departureStop.arrivalCancelled,
+                        departureStopPlannedDepartureTime,
+                        new PTDate(
+                                departureStopPlannedDepartureTime.getTime() + currentDelay,
+                                departureStopPlannedDepartureTime.getOffset()),
+                        departureStop.plannedDeparturePosition, departureStop.predictedDeparturePosition,
+                        departureStop.departureCancelled);
+            }
+            Stop arrivalStop = publicLeg.arrivalStop;
+            List<Stop> intermediateStops = publicLeg.intermediateStops;
+            if (arrivalStop != endStop && intermediateStops != null) {
+                intermediateStops = new ArrayList<>();
+                for (final Stop stop : publicLeg.intermediateStops) {
+                    PTDate predictedArrivalTime = stop.predictedArrivalTime;
+                    PTDate predictedDepartureTime = stop.predictedDepartureTime;
+                    final PTDate plannedArrivalTime = stop.plannedArrivalTime;
+                    final PTDate plannedDepartureTime = stop.plannedDepartureTime;
+                    if (afterBeginStop) {
+                        if (plannedArrivalTime != null) {
+                            predictedArrivalTime = new PTDate(plannedArrivalTime.getTime() + currentDelay, plannedArrivalTime.getOffset());
+                            if (plannedDepartureTime != null) {
+                                currentDelay = stopDepartureDelayEstimator.getDepartureDelay(
+                                        plannedArrivalTime.getTime(),
+                                        plannedDepartureTime.getTime(),
+                                        currentDelay);
+                                predictedDepartureTime = new PTDate(plannedDepartureTime.getTime() + currentDelay, plannedDepartureTime.getOffset());
                             }
                         }
-                        intermediateStops.add(new Stop(
-                                stop.location,
-                                plannedArrivalTime,
-                                predictedArrivalTime,
-                                stop.plannedArrivalPosition, stop.predictedArrivalPosition,
-                                stop.arrivalCancelled,
-                                plannedDepartureTime,
-                                predictedDepartureTime,
-                                stop.plannedDeparturePosition, stop.predictedDeparturePosition,
-                                stop.departureCancelled));
-                        if (stop == beginStop)
-                            afterBeginStop = true;
                     }
+                    intermediateStops.add(new Stop(
+                            stop.location,
+                            plannedArrivalTime,
+                            predictedArrivalTime,
+                            stop.plannedArrivalPosition, stop.predictedArrivalPosition,
+                            stop.arrivalCancelled,
+                            plannedDepartureTime,
+                            predictedDepartureTime,
+                            stop.plannedDeparturePosition, stop.predictedDeparturePosition,
+                            stop.departureCancelled));
+                    if (stop == beginStop)
+                        afterBeginStop = true;
                 }
-                final PTDate arrivalStopPlannedArrivalTime = arrivalStop.plannedArrivalTime;
-                arrivalStop = new Stop(
-                        arrivalStop.location,
-                        arrivalStopPlannedArrivalTime,
-                        new PTDate(arrivalStopPlannedArrivalTime.getTime() + currentDelay, arrivalStopPlannedArrivalTime.getOffset()),
-                        arrivalStop.plannedArrivalPosition, arrivalStop.predictedArrivalPosition,
-                        arrivalStop.arrivalCancelled,
-                        arrivalStop.plannedDepartureTime, arrivalStop.predictedDepartureTime,
-                        arrivalStop.plannedDeparturePosition, arrivalStop.predictedDeparturePosition,
-                        arrivalStop.departureCancelled);
-
-                simulatedPublicLeg = new Trip.Public(
-                        publicLeg.line,
-                        publicLeg.destination,
-                        departureStop,
-                        arrivalStop,
-                        intermediateStops,
-                        publicLeg.message,
-                        publicLeg.journeyRef,
-                        refTime);
-                simulatedPublicLeg.setPath(publicLeg.getPath());
             }
+            final PTDate arrivalStopPlannedArrivalTime = arrivalStop.plannedArrivalTime;
+            arrivalStop = new Stop(
+                    arrivalStop.location,
+                    arrivalStopPlannedArrivalTime,
+                    new PTDate(arrivalStopPlannedArrivalTime.getTime() + currentDelay, arrivalStopPlannedArrivalTime.getOffset()),
+                    arrivalStop.plannedArrivalPosition, arrivalStop.predictedArrivalPosition,
+                    arrivalStop.arrivalCancelled,
+                    arrivalStop.plannedDepartureTime, arrivalStop.predictedDepartureTime,
+                    arrivalStop.plannedDeparturePosition, arrivalStop.predictedDeparturePosition,
+                    arrivalStop.departureCancelled);
+
+            simulatedPublicLeg = new Trip.Public(
+                    publicLeg.line,
+                    publicLeg.destination,
+                    departureStop,
+                    arrivalStop,
+                    intermediateStops,
+                    publicLeg.message,
+                    publicLeg.journeyRef,
+                    refTime);
+            simulatedPublicLeg.setPath(publicLeg.getPath());
         }
     }
 
@@ -356,6 +509,8 @@ public class TripRenderer {
     public LegContainer nearestPublicLeg;
     public NotificationData notificationData;
     public Point refPoint;
+    public Double refBearing;
+    public Double refSpeed;
     public Date refTime;
     public boolean futureTransferCritical;
     public boolean servicesCancelled;
@@ -372,14 +527,20 @@ public class TripRenderer {
         evaluateByTime(now);
     }
 
-    public void setRefPoint(final Point refPoint, final Date refTime) {
+    public void setRefPoint(
+            final Point refPoint,
+            final double refBearing,
+            final double refSpeed,
+            final Date refTime) {
         this.refPoint = refPoint;
+        this.refBearing = refBearing;
+        this.refSpeed = refSpeed;
         this.refTime = refTime;
         nearestPublicLeg = null;
-        float minDistance = Float.MAX_VALUE;
+        double minDistance = Float.MAX_VALUE;
         for (final LegContainer leg : legs) {
-            leg.setRefPoint(refPoint, refTime);
-            if (leg.nearestStop != null && leg.distanceToNearestStop < minDistance) {
+            leg.setRefPoint(refPoint, refBearing, refSpeed, refTime);
+            if (leg.nearestStopIndex >= 0 && leg.distanceToNearestStop < minDistance) {
                 nearestPublicLeg = leg;
                 minDistance = leg.distanceToNearestStop;
             }
@@ -913,22 +1074,35 @@ public class TripRenderer {
         this.nextPublicLegDurationTimeValue = Long.toString((end.getTime() - begin.getTime()) / 60000);
     }
 
-    public interface StopDepartureDelayEstimator {
+    public interface DepartureDelayEstimator {
         long getDepartureDelay(long plannedArrivalTime, long plannedDepartureTime, long arrivalDelay);
     }
 
-    public static class BasicStopDepartureDelayEstimator implements StopDepartureDelayEstimator {
+    public interface StationRadiusProvider {
+        double getStationRadiusInMeters();
+    }
+
+    public static class BasicInfoSupplier implements
+            DepartureDelayEstimator, StationRadiusProvider {
         final long minStopDuration;
         final long maxShortStopDuration;
         final long minDelayInterval;
+        final double stationRadius;
 
-        public BasicStopDepartureDelayEstimator(
+        public BasicInfoSupplier(
                 final long minStopDuration,
                 final long maxShortStopDuration,
-                final long maxEarlierInterval) {
+                final long maxEarlierInterval,
+                final double stationRadius) {
             this.minStopDuration = minStopDuration * 1000;
             this.maxShortStopDuration = maxShortStopDuration * 1000;
             this.minDelayInterval = -(maxEarlierInterval * 1000);
+            this.stationRadius = stationRadius;
+        }
+
+        @Override
+        public double getStationRadiusInMeters() {
+            return stationRadius;
         }
 
         @Override
@@ -972,33 +1146,44 @@ public class TripRenderer {
         }
     }
 
-    private static final Map<Product, StopDepartureDelayEstimator> productStopDepartureDelayEstimators;
+    private static final Map<Product, BasicInfoSupplier> productInfoSuppliers;
     static {
-        productStopDepartureDelayEstimators = new HashMap<>();
-        productStopDepartureDelayEstimators.put(Product.HIGH_SPEED_TRAIN, new BasicStopDepartureDelayEstimator(
-                2 * 60, 4 * 60, 0));
-        productStopDepartureDelayEstimators.put(Product.REGIONAL_TRAIN, new BasicStopDepartureDelayEstimator(
-                90, 3 * 60, 0));
-        productStopDepartureDelayEstimators.put(Product.SUBURBAN_TRAIN, new BasicStopDepartureDelayEstimator(
-                30, 2 * 60, 0));
-        productStopDepartureDelayEstimators.put(Product.SUBWAY, new BasicStopDepartureDelayEstimator(
-                30, 60, 0));
-        productStopDepartureDelayEstimators.put(Product.TRAM, new BasicStopDepartureDelayEstimator(
-                20, 2 * 60, 60));
-        productStopDepartureDelayEstimators.put(Product.BUS, new BasicStopDepartureDelayEstimator(
-                15, 2 * 60, 2 * 60));
-        productStopDepartureDelayEstimators.put(Product.REPLACEMENT_SERVICE, new BasicStopDepartureDelayEstimator(
-                15, 2 * 60, 2 * 60));
+        productInfoSuppliers = new HashMap<>();
+        productInfoSuppliers.put(Product.HIGH_SPEED_TRAIN, new BasicInfoSupplier(
+                2 * 60, 4 * 60, 0, 500));
+        productInfoSuppliers.put(Product.REGIONAL_TRAIN, new BasicInfoSupplier(
+                90, 3 * 60, 0, 500));
+        productInfoSuppliers.put(Product.SUBURBAN_TRAIN, new BasicInfoSupplier(
+                30, 2 * 60, 0, 500));
+        productInfoSuppliers.put(Product.SUBWAY, new BasicInfoSupplier(
+                30, 60, 0, 200));
+        productInfoSuppliers.put(Product.TRAM, new BasicInfoSupplier(
+                20, 2 * 60, 60, 100));
+        productInfoSuppliers.put(Product.BUS, new BasicInfoSupplier(
+                15, 2 * 60, 2 * 60, 50));
+        productInfoSuppliers.put(Product.REPLACEMENT_SERVICE, new BasicInfoSupplier(
+                15, 2 * 60, 2 * 60, 50));
     }
 
-    public static StopDepartureDelayEstimator FallbackDepartureDelayEstimator = (plannedArrivalTime, plannedDepartureTime, arrivalDelay) -> {
+    public static DepartureDelayEstimator FallbackDepartureDelayEstimator = (plannedArrivalTime, plannedDepartureTime, arrivalDelay) -> {
         return arrivalDelay;
     };
 
-    public static StopDepartureDelayEstimator getStopDepartureDelayEstimatorForProduct(final Product product) {
-        final StopDepartureDelayEstimator estimator = productStopDepartureDelayEstimators.get(product);
-        if (estimator != null)
-            return estimator;
+    public static StationRadiusProvider FallbackStationRadiusProvider = () -> 300;
+
+    private static DepartureDelayEstimator getStopDepartureDelayEstimatorForProduct(final Product product) {
+        final BasicInfoSupplier supplier = productInfoSuppliers.get(product);
+        if (supplier != null)
+            return supplier;
         return FallbackDepartureDelayEstimator;
     }
+    public static StationRadiusProvider getStationRadiusProviderForProduct(final Product product) {
+        final BasicInfoSupplier supplier = productInfoSuppliers.get(product);
+        if (supplier != null)
+            return supplier;
+        return FallbackStationRadiusProvider;
+    }
+
+
+
 }

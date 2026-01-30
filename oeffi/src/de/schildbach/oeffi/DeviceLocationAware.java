@@ -22,8 +22,8 @@ import de.schildbach.pte.dto.Point;
 
 public interface DeviceLocationAware {
     Point getDeviceLocation();
+    Double getDeviceBearing();
+    Double getDeviceSpeed();
 
     Location getReferenceLocation();
-
-    Float getDeviceBearing();
 }

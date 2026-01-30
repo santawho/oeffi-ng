@@ -44,7 +44,7 @@ public class StationsAdapter extends RecyclerView.Adapter<StationViewHolder> imp
     private Date baseTime;
 
     private android.location.Location deviceLocation = null;
-    private Float deviceBearing = null;
+    private Double deviceBearing = null;
     private boolean showPlaces = false;
     private boolean faceDown = false;
     private KeyWordMatcher.Query filterQuery;
@@ -79,7 +79,7 @@ public class StationsAdapter extends RecyclerView.Adapter<StationViewHolder> imp
         this.deviceLocation = deviceLocation;
     }
 
-    public void setDeviceBearing(final Float deviceBearing, final boolean faceDown) {
+    public void setDeviceBearing(final Double deviceBearing, final boolean faceDown) {
         this.deviceBearing = deviceBearing;
         this.faceDown = faceDown;
     }
@@ -120,7 +120,7 @@ public class StationsAdapter extends RecyclerView.Adapter<StationViewHolder> imp
         holder.bind(stationsAware, isVisible, station, baseTime, productsFilter, showPlaces, favState, deviceLocation, this);
     }
 
-    public Float getDeviceBearing() {
+    public Double getDeviceBearing() {
         return deviceBearing;
     }
 

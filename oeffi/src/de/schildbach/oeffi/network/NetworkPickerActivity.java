@@ -174,7 +174,12 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
                                 return referenceLocation;
                             }
 
-                            public Float getDeviceBearing() {
+                            public Double getDeviceBearing() {
+                                return null;
+                            }
+
+                            @Override
+                            public Double getDeviceSpeed() {
                                 return null;
                             }
                         });
