@@ -91,6 +91,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -628,6 +629,59 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         return groups;
     }
 
+    private static class LocationDepartureKey {
+        final String stationId;
+        final JourneyRef journeyRef;
+
+        private LocationDepartureKey(final String stationId, final JourneyRef journeyRef) {
+            this.stationId = stationId;
+            this.journeyRef = journeyRef;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof LocationDepartureKey)) return false;
+            LocationDepartureKey that = (LocationDepartureKey) o;
+            return java.util.Objects.equals(stationId, that.stationId)
+                    && java.util.Objects.equals(journeyRef, that.journeyRef);
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(stationId, journeyRef);
+        }
+
+    }
+
+    private final Map<LocationDepartureKey, Boolean> expandedStates = new HashMap<>();
+
+    private LocationDepartureKey getKey(final Location station, final Departure departure) {
+        final String identityId = station.identityId;
+        if (identityId == null)
+            return null;
+        final JourneyRef journeyRef = departure.journeyRef;
+        if (journeyRef == null)
+            return null;
+        return new LocationDepartureKey(identityId, journeyRef);
+    }
+
+    private boolean getExpandedState(final Location station, final Departure departure) {
+        final LocationDepartureKey key = getKey(station, departure);
+        if (key != null) {
+            final Boolean expanded = expandedStates.get(key);
+            if (expanded != null)
+                return expanded;
+        }
+        return false;
+    }
+
+    private void saveExpandedState(final Location station, final Departure departure, final boolean isExpanded) {
+        final LocationDepartureKey key = getKey(station, departure);
+        if (key != null)
+            expandedStates.put(key, isExpanded);
+    }
+
     private class DeparturesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private final StationDetailsActivity context;
         private final LayoutInflater inflater;
@@ -789,6 +843,8 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         private final TextView capacity1stView;
         private final TextView capacity2ndView;
         private final TextView msgView;
+        private Location station;
+        private Departure departure;
         private String msgViewMessageText;
         private boolean msgViewExpanded;
 
@@ -811,6 +867,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             msgViewMessageText = null;
             msgView.setOnClickListener(v -> {
                 msgViewExpanded = !msgViewExpanded;
+                saveExpandedState(station, departure, msgViewExpanded);
                 renderMsgView();
             });
 
@@ -818,6 +875,9 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         }
 
         public void bind(final NetworkId network, final Location station, final Departure departure) {
+            this.station = station;
+            this.departure = departure;
+
             final boolean refIsNow = context.presetTime == null;
             final long referenceTime = (refIsNow ? new Date() : context.presetTime).getTime();
 
@@ -899,7 +959,6 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 itemView.setOnClickListener(null);
             }
 
-
             final Position position = departure.getPosition();
             if (position != null) {
                 positionView.setVisibility(View.VISIBLE);
@@ -930,7 +989,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 : Stream.of(departure.message, departure.line.message)
                     .filter(java.util.Objects::nonNull)
                     .collect(Collectors.joining("\n"));
-            msgViewExpanded = false;
+            msgViewExpanded = getExpandedState(station, departure);
             renderMsgView();
         }
 
