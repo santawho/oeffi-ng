@@ -260,7 +260,7 @@ public class Application extends android.app.Application {
 
         createShortcuts();
 
-        NavigationNotification.startuo(this);
+        NavigationNotification.startup(this);
 
         final OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.followRedirects(true);
