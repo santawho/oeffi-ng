@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="operation_preferences_title">Operation</string>
+
+    <string name="operation_details_finished">Finished</string>
+
+    <string name="operation_notification_channel_name">Operation</string>
+    <string name="operation_notification_channel_description">Operation instructions</string>
+
+    <string name="operation_notification_subtext">Line %1$s at %2$s</string>
+
+    <string name="operation_stopnavothers_title">Active Operations</string>
+    <string name="operation_stopnavothers_text">Do you want to stop all previous operations?</string>
+    <string name="operation_stopnavothers_stop">Stop all others</string>
+    <string name="operation_stopnavothers_continue">Keep all running</string>
+    <string name="operation_stopnav_title">Operation Cancellation</string>
+    <string name="operation_stopnav_text">Do you really want to stop this operation?</string>
+    <string name="operation_stopnav_stop">Stop</string>
+    <string name="operation_stopnav_continue">Continue</string>
+    <string name="operation_opennav_showtrip">Itinerary</string>
+    <string name="operation_opennav_shownextevent">Open</string>
+
+</resources>

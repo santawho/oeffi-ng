@@ -52,6 +52,7 @@ import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
 
 import de.schildbach.oeffi.directions.DirectionsActivity;
+import de.schildbach.oeffi.directions.driverops.OperationNotification;
 import de.schildbach.oeffi.directions.driverops.OperationsActivity;
 import de.schildbach.oeffi.directions.QueryHistoryProvider;
 import de.schildbach.oeffi.directions.navigation.NavigationNotification;
@@ -261,6 +262,7 @@ public class Application extends android.app.Application {
         createShortcuts();
 
         NavigationNotification.startup(this);
+        OperationNotification.startup(this);
 
         final OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.followRedirects(true);

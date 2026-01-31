@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="operation_preferences_title">Einsatz</string>
+
+    <string name="operation_details_finished">Beendet</string>
+
+    <string name="operation_notification_channel_name">Einsatz</string>
+    <string name="operation_notification_channel_description">Einsatzanweisungen</string>
+
+    <string name="operation_notification_subtext">Linie %1$s um %2$s</string>
+
+    <string name="operation_stopnavothers_title">Aktive Einsätze</string>
+    <string name="operation_stopnavothers_text">Möchtest Du die bisherigen Einsätze beenden?</string>
+    <string name="operation_stopnavothers_stop">Beende alle anderen</string>
+    <string name="operation_stopnavothers_continue">Lass\' alle laufen</string>
+    <string name="operation_stopnav_title">Einsatz abbrechen</string>
+    <string name="operation_stopnav_text">Möchtest Du diesen Einsatz wirklich beenden?</string>
+    <string name="operation_stopnav_stop">Beenden</string>
+    <string name="operation_stopnav_continue">Weiter fahren</string>
+    <string name="operation_opennav_showtrip">Verlauf</string>
+    <string name="operation_opennav_shownextevent">Öffnen</string>
+
+</resources>

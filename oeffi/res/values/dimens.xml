@@ -82,6 +82,8 @@
     <dimen name="navigation_notification_next_event_transfer_fontsize">28sp</dimen>
     <dimen name="navigation_notification_next_event_transfer_explain_fontsize">22sp</dimen>
 
+    <dimen name="operation_notification_finished_fontsize">42sp</dimen>
+
     <bool name="layout_list_show">true</bool>
     <bool name="layout_map_show">false</bool>
     <bool name="layout_map_show_toggleable">false</bool>

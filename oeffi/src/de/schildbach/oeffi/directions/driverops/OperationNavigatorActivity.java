@@ -17,23 +17,45 @@
 
 package de.schildbach.oeffi.directions.driverops;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.QueryTripsRunnable;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
 import de.schildbach.oeffi.directions.navigation.NavigationAlarmManager;
+import de.schildbach.oeffi.directions.navigation.Navigator;
+import de.schildbach.oeffi.directions.navigation.TripNavigatorActivity;
+import de.schildbach.oeffi.directions.navigation.TripRenderer;
+import de.schildbach.oeffi.util.Objects;
+import de.schildbach.oeffi.util.Toast;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Trip;
 
 public class OperationNavigatorActivity extends OperationDetailsActivity {
-
+    private static final long OPERATION_AUTO_REFRESH_INTERVAL_SECS = 110;
     public static final String INTENT_EXTRA_DELETEREQUEST = OperationNavigatorActivity.class.getName() + ".deleterequest";
     public static final int DELETEREQUEST_NOT_REQUESTED = 0;
+    public static final int DELETEREQUEST_ASK = 1;
+    public static final int DELETEREQUEST_FORCE = 2;
     public static final String INTENT_EXTRA_SHOWPAGE = OperationNavigatorActivity.class.getName() + ".showpage";
 
     public static boolean startNavigation(
@@ -95,17 +117,39 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
         return intent;
     }
 
+    private Runnable navigationRefreshRunnable;
+    private long nextNavigationRefreshTime = 0;
+    private boolean OperationNotificationBeingDeleted;
+    private boolean permissionRequestRunning;
+    private boolean isStartupComplete = false;
+    private boolean stillCheckForOtherNavigations;
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        mustEnableTrackButton = true;
 
         swipeRefreshForTripList.setOnRefreshListener(this::refreshNavigationByUserCommand);
         swipeRefreshForTripList.setEnabled(true);
 
         swipeRefreshForNextEvent.setOnRefreshListener(this::refreshNavigationByUserCommand);
         swipeRefreshForNextEvent.setEnabled(true);
+
+        final Intent intent = getIntent();
+        handleDeleteNotification(intent);
+        handleSwitchToNextEvent(intent);
+
+        stillCheckForOtherNavigations = true;
+
+        mustEnableTrackButton = true;
+    }
+
+    @Override
+    protected boolean mustOpenActivityInNewTask() {
+        return true;
+    }
+
+    protected boolean shallShowChildActivitiesInNewTask() {
+        return true;
     }
 
     @Override
@@ -129,6 +173,170 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
         actionBar.addProgressButton().setOnClickListener(buttonView -> refreshNavigationByUserCommand());
     }
 
+    @Override
+    protected View.OnClickListener getStartNavigationClickListener() {
+        return null;
+    }
+
+    @Override
+    protected void addActionBarButtons() {
+        actionBar.addButton(R.drawable.ic_clear_white_24dp, R.string.directions_trip_navigation_action_cancel)
+                .setOnClickListener(view -> askStopNavigation());
+    }
+
+    private void stopNavigation() {
+        OperationNotification.remove(this, getIntent());
+        finishAndRemoveTask();
+    }
+
+    @SuppressLint("MissingSuperCall")
+    @Override
+    public void onBackPressedEvent() {
+        if (isShowingNextEvent())
+            setShowPage(R.id.directions_trip_details_list_frame);
+        else
+            moveTaskToBack(true); // super.onBackPressedEvent();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!OperationNotificationBeingDeleted) {
+            if (!permissionRequestRunning) {
+                if (OperationNotification.requestPermissions(this, 1)) {
+                    final boolean doNotificationUpdate = !isStartupComplete;
+                    final boolean forceRefreshAll = !isStartupComplete;
+                    refreshNavigation(doNotificationUpdate, forceRefreshAll, false);
+                } else {
+                    permissionRequestRunning = true;
+                }
+            }
+
+            if (stillCheckForOtherNavigations) {
+                stillCheckForOtherNavigations = false;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    askStopOtherNavigations();
+                }
+            }
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    private void askStopOtherNavigations() {
+        final List<Intent> taskIntents = new ArrayList<>();
+        final int myTaskId = getTaskId();
+        final ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        for (final ActivityManager.AppTask appTask : activityManager.getAppTasks()) {
+            final ActivityManager.RecentTaskInfo taskInfo = appTask.getTaskInfo();
+            final ComponentName baseActivity = taskInfo.baseActivity;
+            if (baseActivity == null)
+                continue;
+            final String activityClassName = baseActivity.getClassName();
+            if (!activityClassName.equals(TripNavigatorActivity.class.getName()))
+                continue;
+            if (taskInfo.taskId == myTaskId) // skip myself
+                continue;
+            taskIntents.add(taskInfo.baseIntent);
+        }
+        if (!taskIntents.isEmpty()) {
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.navigation_stopnavothers_title)
+                    .setMessage(R.string.navigation_stopnavothers_text)
+                    .setPositiveButton(R.string.navigation_stopnavothers_stop, (dialogInterface, i) -> {
+                        for (final Intent taskIntent : taskIntents) {
+                            taskIntent.putExtra(INTENT_EXTRA_DELETEREQUEST, DELETEREQUEST_FORCE);
+                            startActivity(taskIntent);
+                        }
+                    })
+                    .setNegativeButton(R.string.navigation_stopnavothers_continue, null)
+                    .create().show();
+        }
+    }
+
+    @Override
+    protected void onNewIntent(@NonNull final Intent intent) {
+        super.onNewIntent(intent);
+        if (!handleDeleteNotification(intent)) {
+            doCheckAutoRefresh(true);
+            handleSwitchToNextEvent(intent);
+        }
+    }
+
+    private void handleSwitchToNextEvent(final Intent intent) {
+        final int setShowPageNum = intent.getIntExtra(INTENT_EXTRA_SHOWPAGE, -1);
+        if (setShowPageNum >= 0)
+            setShowPage(Page.getPageForNum(setShowPageNum));
+    }
+
+    private boolean handleDeleteNotification(final Intent intent) {
+        final int deleteRequest = intent.getIntExtra(INTENT_EXTRA_DELETEREQUEST, 0);
+        switch (deleteRequest) {
+            case DELETEREQUEST_ASK:
+                askStopNavigation();
+                return true;
+            case DELETEREQUEST_FORCE:
+                stopNavigation();
+                return true;
+            case DELETEREQUEST_NOT_REQUESTED:
+                break;
+        }
+        return false;
+    }
+
+    private void askStopNavigation() {
+        OperationNotificationBeingDeleted = true;
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.navigation_stopnav_title)
+                .setMessage(R.string.navigation_stopnav_text)
+                .setPositiveButton(R.string.navigation_stopnav_stop, (dialogInterface, i) -> {
+                    stopNavigation();
+                })
+                .setNegativeButton(R.string.navigation_stopnav_continue, (dialogInterface, i) -> {
+                    OperationNotificationBeingDeleted = false;
+                    doCheckAutoRefresh(true);
+                    updateNotification(null);
+                })
+                .create().show();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(
+            final int requestCode,
+            @NonNull final String[] permissions,
+            @NonNull final int[] grantResults,
+            final int deviceId) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults, deviceId);
+        boolean granted = true;
+        for (final int grantResult : grantResults) {
+            if (grantResult != PackageManager.PERMISSION_GRANTED) {
+                granted = false;
+                break;
+            }
+        }
+        if (granted) {
+            permissionRequestRunning = false;
+            updateNotification(null);
+        } else {
+            // warning ??
+        }
+    }
+
+    @Override
+    protected boolean checkAutoRefresh() {
+        if (!isStartupComplete)
+            return false;
+        return doCheckAutoRefresh(true);
+    }
+
+    private boolean doCheckAutoRefresh(final boolean doNotifcationUpdate) {
+        if (isPaused) return false;
+        if (nextNavigationRefreshTime < 0) return false;
+        final long now = new Date().getTime();
+        if (now < nextNavigationRefreshTime) return false;
+        refreshNavigation(doNotifcationUpdate, false, false);
+        return true;
+    }
+
     private void refreshNavigationByUserCommand() {
         refreshNavigation(
                 true,
@@ -140,42 +348,81 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
             final boolean doNotificationUpdate,
             final boolean forceRefreshAll,
             final boolean refreshTripDetails) {
-//        if (navigationRefreshRunnable != null)
-//            return;
-//
-//        nextNavigationRefreshTime = -1; // block auto-refresh
-//        actionBar.startProgress();
-//        // swipeRefreshForTripList.setRefreshing(true);
-//        // swipeRefreshForNextEvent.setRefreshing(true);
-//
-//        navigationRefreshRunnable = () -> {
-//            try {
-//                Trip updatedTrip = navigator.refresh(forceRefreshAll, new Date());
-//                if (updatedTrip == null) {
-//                    handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));
-//                } else {
-//                    if (refreshTripDetails)
-//                        updatedTrip = loadTripDetails(updatedTrip);
-//                    if (doNotificationUpdate) {
-//                        isStartupComplete = true;
-//                        updateNotification(updatedTrip);
-//                    }
-//                    final Trip finalUpdatedTrip = updatedTrip;
-//                    runOnUiThread(() -> onTripUpdated(finalUpdatedTrip));
-//                }
-//            } catch (IOException e) {
-//                handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));
-//            } finally {
-//                navigationRefreshRunnable = null;
-//                runOnUiThread(() -> {
-//                    swipeRefreshForTripList.setRefreshing(false);
-//                    swipeRefreshForNextEvent.setRefreshing(false);
-//                    actionBar.stopProgress();
-//                    nextNavigationRefreshTime = new Date().getTime()
-//                            + NAVIGATION_AUTO_REFRESH_INTERVAL_SECS * 1000;
-//                });
-//            }
-//        };
-//        backgroundHandler.post(navigationRefreshRunnable);
+        if (navigationRefreshRunnable != null)
+            return;
+
+        nextNavigationRefreshTime = -1; // block auto-refresh
+        actionBar.startProgress();
+        // swipeRefreshForTripList.setRefreshing(true);
+        // swipeRefreshForNextEvent.setRefreshing(true);
+
+        navigationRefreshRunnable = () -> {
+            try {
+                final Navigator navigator = new Navigator(network, tripRenderer.trip);
+                Trip updatedTrip = navigator.refresh(forceRefreshAll, new Date());
+                if (updatedTrip == null) {
+                    handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));
+                } else {
+                    if (refreshTripDetails)
+                        updatedTrip = loadTripDetails(updatedTrip);
+                    if (doNotificationUpdate) {
+                        isStartupComplete = true;
+                        updateNotification(updatedTrip);
+                    }
+                    final Trip finalUpdatedTrip = updatedTrip;
+                    runOnUiThread(() -> onTripUpdated(finalUpdatedTrip));
+                }
+            } catch (IOException e) {
+                handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));
+            } finally {
+                navigationRefreshRunnable = null;
+                runOnUiThread(() -> {
+                    swipeRefreshForTripList.setRefreshing(false);
+                    swipeRefreshForNextEvent.setRefreshing(false);
+                    actionBar.stopProgress();
+                    nextNavigationRefreshTime = new Date().getTime()
+                            + OPERATION_AUTO_REFRESH_INTERVAL_SECS * 1000;
+                });
+            }
+        };
+        backgroundHandler.post(navigationRefreshRunnable);
+    }
+
+    private void updateNotification(final Trip aTrip) {
+        if (!isStartupComplete)
+            return;
+
+        final Trip trip = aTrip != null ? aTrip : tripRenderer.trip;
+        final Intent intent = getIntent();
+        final OperationNotification OperationNotification = new OperationNotification(intent);
+        final OperationNotification.Configuration configuration = Objects.clone(OperationNotification.getConfiguration());
+        OperationNotification.updateFromForeground(this, intent, trip, configuration,
+                () -> runOnUiThread(this::updateGUI));
+    }
+
+    private OperationNotification guiUpdateOperationNotification;
+
+    @Override
+    protected boolean updateGUI() {
+        guiUpdateOperationNotification = new OperationNotification(getIntent());
+        if (!super.updateGUI())
+            return false;
+        return true;
+    }
+
+    @Override
+    protected boolean updatePublicLeg(final View row, final TripRenderer.LegContainer legC, final TripRenderer.LegContainer walkLegC, final TripRenderer.LegContainer nextLegC, final Date now) {
+        final boolean isNow = super.updatePublicLeg(row, legC, walkLegC, nextLegC, now);
+
+        if (isNow) {
+            // ...
+        }
+
+        return isNow;
+    }
+
+    @Override
+    protected void updateNavigationInstructions() {
+        super.updateNavigationInstructions();
     }
 }
