@@ -77,7 +77,7 @@ public class Objects {
     }
 
     public static Object deserialize(final byte[] bytes, final boolean returnNullOnFailure) {
-        if (bytes == null) return null;
+        if (bytes == null || bytes.length == 0) return null;
         try {
             final ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
             final Object obj = ois.readObject();

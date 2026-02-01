@@ -1425,7 +1425,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         loadTripByTripRef(trip.tripRef, (loadedTrip) -> {
             final Trip useTrip = loadedTrip != null ? loadedTrip : trip;
             final TripDetailsActivity.RenderConfig config = new TripDetailsActivity.RenderConfig();
-            config.queryTripsRequestData = (QueryTripsRunnable.TripRequestData) Objects.deserialize(serializedReloadRequest);
+            config.queryTripsRequestData = (QueryTripsRunnable.TripRequestData) Objects.deserialize(serializedReloadRequest, true);
             TripDetailsActivity.start(DirectionsActivity.this, network, useTrip, config);
         });
     }
