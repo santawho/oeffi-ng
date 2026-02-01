@@ -7,8 +7,6 @@
     <string name="operation_notification_channel_name">Einsatz</string>
     <string name="operation_notification_channel_description">Einsatzanweisungen</string>
 
-    <string name="operation_notification_subtext">Linie %1$s um %2$s</string>
-
     <string name="operation_stopnavothers_title">Aktive Einsätze</string>
     <string name="operation_stopnavothers_text">Möchtest Du die bisherigen Einsätze beenden?</string>
     <string name="operation_stopnavothers_stop">Beende alle anderen</string>

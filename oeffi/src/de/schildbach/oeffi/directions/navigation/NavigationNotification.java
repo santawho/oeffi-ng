@@ -206,6 +206,8 @@ public class NavigationNotification {
             final int usage = getAudioUsageForSound(SOUND_REMIND_VIA_NOTIFICATION, false);
             channel.setSound(ResourceUri.fromResource(context, SOUND_REMIND_VIA_NOTIFICATION),
                     new AudioAttributes.Builder().setUsage(usage).build());
+        } else {
+            channel.setSound(null, null);
         }
         getNotificationManager(context).createNotificationChannel(channel);
     }
@@ -590,7 +592,7 @@ public class NavigationNotification {
                     .setUsesChronometer(true)
                     // .setAutoCancel(true)
                     .setTimeoutAfter(removeWhen > 0 ? removeWhen : 0)
-                    .setSilent(true);
+                    .setSilent(true).setSound(null);
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
                     == PackageManager.PERMISSION_GRANTED) {
                 getNotificationManager(context).notify(tag, 0, notificationBuilder.build());
@@ -1269,14 +1271,14 @@ public class NavigationNotification {
                                 TripDetailsActivity.Page.ITINERARY, trip));
 
         if (anyImportantIssues) {
-            notificationBuilder.setSilent(true);
+            notificationBuilder.setSilent(true).setSound(null);
         } else if (reminderSoundId == SOUND_REMIND_VIA_NOTIFICATION) {
             notificationBuilder
+                    .setSound(ResourceUri.fromResource(context, reminderSoundId), getAudioStreamForSound(reminderSoundId))
                     .setSilent(!configuration.soundEnabled)
-                    .setVibrate(VIBRATION_PATTERN_REMIND)
-                    .setSound(ResourceUri.fromResource(context, reminderSoundId), getAudioStreamForSound(reminderSoundId));
+                    .setVibrate(VIBRATION_PATTERN_REMIND);
         } else {
-            notificationBuilder.setSilent(true);
+            notificationBuilder.setSilent(true).setSound(null);
         }
 
         final Notification notification = notificationBuilder.build();

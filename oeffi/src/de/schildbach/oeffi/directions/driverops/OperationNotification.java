@@ -29,9 +29,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -65,9 +63,12 @@ import de.schildbach.oeffi.directions.navigation.TripRenderer;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.TimeZoneSelector;
+import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.Line;
+import de.schildbach.pte.dto.PTDate;
+import de.schildbach.pte.dto.Stop;
 import de.schildbach.pte.dto.Trip;
 import de.schildbach.pte.provider.db.DbProvider;
 
@@ -125,16 +126,13 @@ public class OperationNotification {
         final NotificationChannel channel = new NotificationChannel(CHANNEL_ID_GUIDE, name, NotificationManager.IMPORTANCE_HIGH);
         channel.setDescription(description);
         channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+        channel.setSound(null, null);
         getNotificationManager(context).createNotificationChannel(channel);
     }
 
     private static NotificationManagerCompat getNotificationManager(final Context context) {
         // return (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         return NotificationManagerCompat.from(context);
-    }
-
-    private static int getAudioStreamForSound(final int soundId) {
-        return AudioManager.STREAM_NOTIFICATION;
     }
 
     private static final String[] REQUIRED_PERMISSIONS = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU ? new String[]{
@@ -397,8 +395,28 @@ public class OperationNotification {
         final long tripUpdatedAt = tripUpdatedAtDate.getTime();
         final Date now = new Date();
         final long nowTime = now.getTime();
-        final TripRenderer tripRenderer = new TripRenderer(null, trip, false, now);
-        final Trip.Public operationLeg = trip.getFirstPublicLeg();
+        final TripRenderer tripRenderer = new TripRenderer(null, trip, true, now);
+
+        final Trip.Individual initialWalkLeg;
+        final Trip.Public operationLeg;
+        if (tripRenderer.legs.isEmpty()) {
+            initialWalkLeg = null;
+            operationLeg = null;
+        } else {
+            final TripRenderer.LegContainer firstLeg = tripRenderer.legs.get(0);
+            if (firstLeg.publicLeg != null) {
+                initialWalkLeg = null;
+                operationLeg = firstLeg.publicLeg;
+            } else {
+                initialWalkLeg = firstLeg.individualLeg;
+                if (tripRenderer.legs.size() >= 2) {
+                    operationLeg = tripRenderer.legs.get(1).publicLeg;
+                } else {
+                    operationLeg = null;
+                }
+            }
+        }
+
         long nextRefreshTimeMs;
         String nextRefreshTimeReason;
         final long nextTripReloadTimeMs;
@@ -454,14 +472,12 @@ public class OperationNotification {
             return;
         }
         final RemoteViews notificationLayout = new RemoteViews(context.getPackageName(), R.layout.operation_notification);
-        setupNotificationView(notificationLayout, tripRenderer, now);
+        final int backgroundColor = setupNotificationView(notificationLayout, tripRenderer, operationLeg, initialWalkLeg, now);
         // final RemoteViews notificationLayoutExpanded = new RemoteViews(context.getPackageName(), R.layout.operation_notification);
         // setupNotificationView(context, notificationLayoutExpanded, tripRenderer, now, newNotified);
-        notificationLayout.setOnClickPendingIntent(R.id.operation_notification_open_full,
+        notificationLayout.setOnClickPendingIntent(R.id.operation_notification_status,
                 getPendingActivityIntent(OperationNavigatorActivity.DELETEREQUEST_NOT_REQUESTED,
                         null, trip));
-        notificationLayout.setOnClickPendingIntent(R.id.operation_notification_status,
-                getPendingActionIntent(ACTION_REFRESH, trip));
 
         final TripRenderer.NotificationData newNotified = tripRenderer.notificationData;
         boolean timeChanged = false;
@@ -547,29 +563,26 @@ public class OperationNotification {
 
         extras.putByteArray(EXTRA_DATA, Objects.serialize(newExtraData));
 
-        final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
         final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, CHANNEL_ID_GUIDE)
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setGroup(notificationTag)
                 .setSmallIcon(R.drawable.ic_oeffi_operations_grey600_36dp)
-                .setColorized(true).setColor(context.getColor(R.color.bg_trip_details_public_now))
-                .setSubText(context.getString(R.string.operation_notification_subtext,
-                        operationLeg.line.label,
-                        Formats.formatTime(timeZoneSelector,
-                                operationLeg.departureStop.getDepartureTime(true))))
+                .setColorized(true).setColor(backgroundColor)
                 .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
                 .setCategory(NotificationCompat.CATEGORY_NAVIGATION)
                 .setContent(notificationLayout)
                 // .setCustomContentView(notificationLayout)
                 // .setCustomBigContentView(notificationLayoutExpanded)
                 // .setContentIntent(getPendingActivityIntent(false, true))
-                .setContentIntent(getPendingActionIntent(ACTION_REFRESH, trip))
+                // .setContentIntent(getPendingActionIntent(ACTION_REFRESH, trip))
+                .setContentIntent(getPendingActivityIntent(
+                        OperationNavigatorActivity.DELETEREQUEST_NOT_REQUESTED, null, trip))
                 //.setDeleteIntent(getPendingActivityIntent(context, true))
                 .setDeleteIntent(getPendingActionIntent(ACTION_DELETE, trip))
                 .setAutoCancel(false)
                 .setOngoing(true)
                 .setLocalOnly(true)
-                .setUsesChronometer(true)
+                .setUsesChronometer(false)
                 .setWhen(nowTime)
                 .setTimeoutAfter(duration)
                 .setExtras(extras)
@@ -582,7 +595,7 @@ public class OperationNotification {
                 .addAction(R.drawable.ic_clear_white_24dp, context.getString(R.string.operation_stopnav_stop),
                         getPendingActivityIntent(OperationNavigatorActivity.DELETEREQUEST_ASK,
                                 TripDetailsActivity.Page.ITINERARY, trip))
-                .setSilent(true);
+                .setSilent(true).setSound(null);
 
         final Notification notification = notificationBuilder.build();
         log.info("set notification with tag={}", notificationTag);
@@ -686,13 +699,77 @@ public class OperationNotification {
         return lastNotified.refreshNotificationRequiredAt;
     }
 
-    private void setupNotificationView(
+    private int setupNotificationView(
             final RemoteViews remoteViews,
-            final TripRenderer tripRenderer, final Date now) {
+            final TripRenderer tripRenderer,
+            final Trip.Public operationLeg,
+            final Trip.Individual initialWalkLeg,
+            final Date now) {
         final int colorHighlight = context.getColor(R.color.bg_trip_details_public_now);
         final int colorNormal = context.getColor(R.color.bg_level0_default);
-        final int colorHighIfPublic = tripRenderer.nextEventTypeIsPublic ? colorHighlight : colorNormal;
-        final int colorHighIfChangeover = tripRenderer.nextEventTypeIsPublic ? colorNormal : colorHighlight;
+
+//        final TimeZoneSelector timeZoneSelector = getNetworkTimeZoneSelector();
+
+        if (operationLeg == null) {
+            remoteViews.setTextViewText(R.id.operation_notification_line, "??");
+            return colorNormal;
+        }
+
+        final Line line = operationLeg.line;
+        remoteViews.setTextViewText(R.id.operation_notification_line, line.label);
+        if (line.style != null) {
+            remoteViews.setTextColor(R.id.operation_notification_line, line.style.foregroundColor);
+            ViewUtils.remoteViewsSetBackgroundColor(remoteViews, R.id.operation_notification_line,
+                    line.style.backgroundColor);
+        }
+
+        Stop entryStop = operationLeg.departureStop;
+        Stop exitStop = operationLeg.arrivalStop;
+        final List<Stop> intermediateStops = operationLeg.intermediateStops;
+        if (intermediateStops != null) {
+            if (operationLeg.entryLocation != null) {
+                final String identityId = operationLeg.entryLocation.identityId;
+                for (int i = 0; i < intermediateStops.size(); i++) {
+                    final Stop stop = intermediateStops.get(i);
+                    if (identityId.equals(stop.location.identityId)) {
+                        entryStop = stop;
+                        break;
+                    }
+                }
+            }
+            if (operationLeg.exitLocation != null) {
+                final String identityId = operationLeg.exitLocation.identityId;
+                for (int i = intermediateStops.size() - 1; i >= 0 ; i--) {
+                    final Stop stop = intermediateStops.get(i);
+                    if (identityId.equals(stop.location.identityId)) {
+                        exitStop = stop;
+                        break;
+                    }
+                }
+            }
+        }
+
+        final PTDate startDate = entryStop.getDepartureTime(true);
+        final PTDate endDate = exitStop.getArrivalTime(false);
+
+        remoteViews.setTextViewText(R.id.operation_notification_time,
+                Formats.formatTime(Application.getInstance().getSystemTimeZoneSelector(), startDate));
+
+        remoteViews.setTextViewText(R.id.operation_notification_station_start,
+                Formats.fullLocationName(entryStop.location, true));
+        remoteViews.setTextViewText(R.id.operation_notification_station_end,
+                Formats.fullLocationNameIfDifferentPlace(exitStop.location, entryStop.location, true));
+
+        final long nowTime = now.getTime();
+        final long startTime = startDate.getTime();
+        final long endTime = endDate.getTime();
+        if (nowTime > startTime - 5 * 60000L
+                && nowTime < endTime + 5 * 60000L) {
+            ViewUtils.remoteViewsSetBackgroundColor(remoteViews, R.id.operation_notification_status, colorHighlight);
+            return colorHighlight;
+        }
+
+        return colorNormal;
     }
 
     private TimeZoneSelector getNetworkTimeZoneSelector() {

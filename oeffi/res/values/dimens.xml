@@ -83,6 +83,9 @@
     <dimen name="navigation_notification_next_event_transfer_explain_fontsize">22sp</dimen>
 
     <dimen name="operation_notification_finished_fontsize">42sp</dimen>
+    <dimen name="operation_notification_line_fontsize">18sp</dimen>
+    <dimen name="operation_notification_time_fontsize">18sp</dimen>
+    <dimen name="operation_notification_station_fontsize">14sp</dimen>
 
     <bool name="layout_list_show">true</bool>
     <bool name="layout_map_show">false</bool>

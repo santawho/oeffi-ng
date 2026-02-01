@@ -7,8 +7,6 @@
     <string name="operation_notification_channel_name">Operation</string>
     <string name="operation_notification_channel_description">Operation instructions</string>
 
-    <string name="operation_notification_subtext">Line %1$s at %2$s</string>
-
     <string name="operation_stopnavothers_title">Active Operations</string>
     <string name="operation_stopnavothers_text">Do you want to stop all previous operations?</string>
     <string name="operation_stopnavothers_stop">Stop all others</string>
