@@ -55,6 +55,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Chronometer;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -623,6 +624,15 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         return R.layout.navigation_next_event_trip;
     }
 
+    private boolean keepDisplayOn;
+
+    protected void setMustKeepDisplayOn(final boolean keepDisplayOn) {
+        if (keepDisplayOn != this.keepDisplayOn) {
+            this.keepDisplayOn = keepDisplayOn;
+            getWindow().setFlags(keepDisplayOn ? -1 : 0, WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
+    }
+
     protected boolean isTripDetailsLoadingEnabled() {
         return prefs.getBoolean(Constants.KEY_EXTRAS_TRIPEXTRAINFO_ENABLED, false);
     }
@@ -739,8 +749,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     private long fastRefreshIntervalMs;
 
-    public boolean startPeriodicUpdateGuiRunnable(final long intervalMs) {
-        fastRefreshIntervalMs = intervalMs;
+    public boolean startPeriodicUpdateGuiRunnable() {
+        fastRefreshIntervalMs = getPeriodicUpdateIntervalMs();
         if (fastRefreshIntervalMs > 0) {
             periodicUpdateGuiRunnable.run();
             return true;
@@ -754,12 +764,16 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         handler.removeCallbacks(periodicUpdateGuiRunnable);
     }
 
-
     private final Runnable periodicUpdateGuiRunnable = new Runnable() {
         @Override
         public void run() {
+            fastRefreshIntervalMs = getPeriodicUpdateIntervalMs();
             if (updateGuiIfApplicable()) {
-                handler.postDelayed(this, fastRefreshIntervalMs);
+                if (fastRefreshIntervalMs > 0) {
+                    handler.postDelayed(this, fastRefreshIntervalMs);
+                } else {
+                    stopPeriodicUpdateGuiRunnable();
+                }
             }
         }
     };
@@ -802,7 +816,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         isPaused = false;
         requestLocationUpdates();
         checkAutoRefresh();
-        if (!startPeriodicUpdateGuiRunnable(getPeriodicUpdateIntervalMs()))
+        if (!startPeriodicUpdateGuiRunnable())
             updateGUI();
 
         if (mustEnableTrackButton) {

@@ -10,31 +10,70 @@
         android:defaultValue="false"
         android:title="@string/extras_drivermode_enabled_title" />
 
-    <EditTextPreference
-        android:dependency="extras_drivermode_enabled"
-        android:key="extras_drivermode_threshold_early"
-        android:singleLine="true"
-        android:inputType="number"
-        android:defaultValue="@string/default_drivermode_threshold_early"
-        android:title="@string/extras_drivermode_threshold_early_title"
-        android:summary="@string/extras_drivermode_threshold_early_summary" />
+    <PreferenceCategory android:title="@string/extras_drivermode_planning_title">
 
-    <EditTextPreference
-        android:dependency="extras_drivermode_enabled"
-        android:key="extras_drivermode_threshold_delay"
-        android:singleLine="true"
-        android:inputType="number"
-        android:defaultValue="@string/default_drivermode_threshold_delay"
-        android:title="@string/extras_drivermode_threshold_delay_title"
-        android:summary="@string/extras_drivermode_threshold_delay_summary" />
+        <EditTextPreference
+            android:dependency="extras_drivermode_enabled"
+            android:key="extras_drivermode_stored_operations_retention_hours"
+            android:singleLine="true"
+            android:inputType="numberDecimal"
+            android:defaultValue="@string/default_stored_trips_retention_hours"
+            android:title="@string/extras_drivermode_stored_operations_retention_hours_title"
+            android:summary="@string/extras_drivermode_stored_operations_retention_hours_summary" />
 
-    <EditTextPreference
-        android:dependency="extras_drivermode_enabled"
-        android:key="extras_drivermode_stored_operations_retention_hours"
-        android:singleLine="true"
-        android:inputType="numberDecimal"
-        android:defaultValue="@string/default_stored_trips_retention_hours"
-        android:title="@string/extras_drivermode_stored_operations_retention_hours_title"
-        android:summary="@string/extras_drivermode_stored_operations_retention_hours_summary" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/extras_drivermode_operations_title">
+
+        <EditTextPreference
+            android:dependency="extras_drivermode_enabled"
+            android:key="extras_drivermode_threshold_early"
+            android:singleLine="true"
+            android:inputType="number"
+            android:defaultValue="@string/default_drivermode_threshold_early"
+            android:title="@string/extras_drivermode_threshold_early_title"
+            android:summary="@string/extras_drivermode_threshold_early_summary" />
+
+        <EditTextPreference
+            android:dependency="extras_drivermode_enabled"
+            android:key="extras_drivermode_threshold_delay"
+            android:singleLine="true"
+            android:inputType="number"
+            android:defaultValue="@string/default_drivermode_threshold_delay"
+            android:title="@string/extras_drivermode_threshold_delay_title"
+            android:summary="@string/extras_drivermode_threshold_delay_summary" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/extras_drivermode_navigation_title">
+
+        <EditTextPreference
+            android:dependency="extras_drivermode_enabled"
+            android:key="extras_drivermode_navigation_refresh_battery_interval"
+            android:singleLine="true"
+            android:inputType="number"
+            android:defaultValue="@string/default_drivermode_navigation_refresh_battery_interval"
+            android:title="@string/extras_drivermode_navigation_refresh_battery_interval_title"
+            android:summary="@string/extras_drivermode_navigation_refresh_battery_interval_summary" />
+
+        <EditTextPreference
+            android:dependency="extras_drivermode_enabled"
+            android:key="extras_drivermode_navigation_refresh_charging_interval"
+            android:singleLine="true"
+            android:inputType="number"
+            android:defaultValue="@string/default_drivermode_navigation_refresh_charging_interval"
+            android:title="@string/extras_drivermode_navigation_refresh_charging_interval_title"
+            android:summary="@string/extras_drivermode_navigation_refresh_charging_interval_summary" />
+
+        <ListPreference
+            android:dependency="extras_drivermode_enabled"
+            android:key="extras_drivermode_navigation_keep_active"
+            android:defaultValue="when-charging"
+            android:entries="@array/extras_drivermode_keep_active"
+            android:entryValues="@array/extras_drivermode_keep_active_values"
+            android:summary="@string/extras_drivermode_keep_active_summary"
+            android:title="@string/extras_drivermode_keep_active_title" />
+
+    </PreferenceCategory>
 
 </PreferenceScreen>

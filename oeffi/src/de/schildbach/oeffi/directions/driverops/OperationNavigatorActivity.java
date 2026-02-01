@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -123,10 +124,13 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
     private boolean permissionRequestRunning;
     private boolean isStartupComplete = false;
     private boolean stillCheckForOtherNavigations;
+    private BatteryManager batteryManager;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        batteryManager = (BatteryManager) getSystemService(Context.BATTERY_SERVICE);
 
         swipeRefreshForTripList.setOnRefreshListener(this::refreshNavigationByUserCommand);
         swipeRefreshForTripList.setEnabled(true);
@@ -153,11 +157,6 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
     }
 
     @Override
-    protected long getPeriodicUpdateIntervalMs() {
-        return 15000;
-    }
-
-    @Override
     protected int getActionBarColorId() {
         return R.color.bg_action_bar_operation_navigation;
     }
@@ -171,6 +170,50 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
     protected void setupActionBar() {
         super.setupActionBar();
         actionBar.addProgressButton().setOnClickListener(buttonView -> refreshNavigationByUserCommand());
+    }
+
+    private static final String S_KEEP_AWAKE_NEVER = "never";
+    private static final String S_KEEP_AWAKE_WHEN_CHARGING = "when-charging";
+    private static final String S_KEEP_AWAKE_ALWAYS = "always";
+    private int keepDisplayOnConfig;
+
+    private long periodicUpdateIntervalMsOnBattery;
+    private long periodicUpdateIntervalMsWhenCharging;
+
+    private int getIntegerValueFromPrefs(final String key, final int defaultValueResId) {
+        final String defaultValue = getString(defaultValueResId);
+        final String value = prefs.getString(key, defaultValue);
+        try {
+            return Integer.parseInt(value);
+        } catch (final NumberFormatException nfe) {
+            return Integer.parseInt(defaultValue);
+        }
+    }
+
+    private void setupConfig() {
+        final String value = prefs.getString("extras_drivermode_navigation_keep_active", S_KEEP_AWAKE_WHEN_CHARGING);
+        keepDisplayOnConfig = S_KEEP_AWAKE_WHEN_CHARGING.equals(value) ? 0
+                : S_KEEP_AWAKE_ALWAYS.equals(value) ? 1
+                : -1;
+        periodicUpdateIntervalMsOnBattery = 1000L * getIntegerValueFromPrefs(
+                "extras_drivermode_navigation_refresh_battery_interval",
+                R.string.default_drivermode_navigation_refresh_battery_interval);
+        periodicUpdateIntervalMsWhenCharging = 1000L * getIntegerValueFromPrefs(
+                "extras_drivermode_navigation_refresh_charging_interval",
+                R.string.default_drivermode_navigation_refresh_charging_interval);
+    }
+
+    @Override
+    protected long getPeriodicUpdateIntervalMs() {
+        return batteryManager.isCharging()
+                ? periodicUpdateIntervalMsWhenCharging
+                : periodicUpdateIntervalMsOnBattery;
+    }
+
+    private void setMustKeepDisplayOn() {
+        setMustKeepDisplayOn(keepDisplayOnConfig < 0 ? false
+                : keepDisplayOnConfig > 0 ? true
+                : batteryManager.isCharging());
     }
 
     @Override
@@ -187,6 +230,12 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
     private void stopNavigation() {
         OperationNotification.remove(this, getIntent());
         finishAndRemoveTask();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        setupConfig();
     }
 
     @SuppressLint("MissingSuperCall")
@@ -325,6 +374,7 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
     protected boolean checkAutoRefresh() {
         if (!isStartupComplete)
             return false;
+        setMustKeepDisplayOn();
         return doCheckAutoRefresh(true);
     }
 

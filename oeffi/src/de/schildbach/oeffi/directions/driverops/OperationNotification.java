@@ -581,7 +581,8 @@ public class OperationNotification {
                                 TripDetailsActivity.Page.ITINERARY, trip))
                 .addAction(R.drawable.ic_clear_white_24dp, context.getString(R.string.operation_stopnav_stop),
                         getPendingActivityIntent(OperationNavigatorActivity.DELETEREQUEST_ASK,
-                                TripDetailsActivity.Page.ITINERARY, trip));
+                                TripDetailsActivity.Page.ITINERARY, trip))
+                .setSilent(true);
 
         final Notification notification = notificationBuilder.build();
         log.info("set notification with tag={}", notificationTag);

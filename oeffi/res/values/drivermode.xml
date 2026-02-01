@@ -3,16 +3,40 @@
 
     <string name="default_drivermode_threshold_early" translatable="false">0</string>
     <string name="default_drivermode_threshold_delay" translatable="false">300</string>
+    <string name="default_drivermode_navigation_refresh_battery_interval" translatable="false">15</string>
+    <string name="default_drivermode_navigation_refresh_charging_interval" translatable="false">1</string>
 
     <!-- preferences driver mode -->
     <string name="extras_drivermode_title">Drivers\' Mode</string>
     <string name="extras_drivermode_summary">Drivers\' mode optimizes the behaviour of the app for use by train/tram/bus drivers and other staff.</string>
     <string name="extras_drivermode_enabled_title">Drivers\' mode enabled</string>
+
+    <string name="extras_drivermode_planning_title">Planning</string>
+    <string name="extras_drivermode_stored_operations_retention_hours_title">Keep planned operations</string>
+    <string name="extras_drivermode_stored_operations_retention_hours_summary">How long to keep planned operations after they are finished.  [%s hours]</string>
+
+    <string name="extras_drivermode_operations_title">Operations</string>
     <string name="extras_drivermode_threshold_early_title">Early Threshold</string>
     <string name="extras_drivermode_threshold_early_summary">Minimum seconds an event must be predicted before the scheduled time to be detected as early.  [%s]</string>
     <string name="extras_drivermode_threshold_delay_title">Delay Threshold</string>
     <string name="extras_drivermode_threshold_delay_summary">Minimum seconds an event must be predicted after the scheduled time to be detected as delayed.  [%s]</string>
-    <string name="extras_drivermode_stored_operations_retention_hours_title">Keep planned operations</string>
-    <string name="extras_drivermode_stored_operations_retention_hours_summary">How long to keep planned operations after they are finished.  [%s hours]</string>
+
+    <string name="extras_drivermode_navigation_title">Navigation</string>
+    <string name="extras_drivermode_navigation_refresh_battery_interval_title">Refresh on battery</string>
+    <string name="extras_drivermode_navigation_refresh_battery_interval_summary">Interval to update the display when running on battery.  [%s seconds]</string>
+    <string name="extras_drivermode_navigation_refresh_charging_interval_title">Refresh when charging</string>
+    <string name="extras_drivermode_navigation_refresh_charging_interval_summary">Interval to update the display when the device is charging.  [%s seconds]</string>
+    <string name="extras_drivermode_keep_active_title">Keep display on …</string>
+    <string name="extras_drivermode_keep_active_summary">When to prevent the display from going dark.  [%s]</string>
+    <string-array name="extras_drivermode_keep_active">
+        <item>never</item>
+        <item>when charging</item>
+        <item>always</item>
+    </string-array>
+    <string-array name="extras_drivermode_keep_active_values">
+        <item>never</item>
+        <item>when-charging</item>
+        <item>always</item>
+    </string-array>
 
 </resources>
