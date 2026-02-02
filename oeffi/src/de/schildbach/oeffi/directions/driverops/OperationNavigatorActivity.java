@@ -470,9 +470,4 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
 
         return isNow;
     }
-
-    @Override
-    protected void updateNavigationInstructions() {
-        super.updateNavigationInstructions();
-    }
 }

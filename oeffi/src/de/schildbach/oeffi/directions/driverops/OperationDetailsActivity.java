@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 
 import java.util.Collections;
 import java.util.Date;
@@ -31,6 +32,7 @@ import de.schildbach.oeffi.directions.TripDetailsActivity;
 import de.schildbach.oeffi.directions.navigation.TripRenderer;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.stations.StationDetailsActivity;
+import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.Location;
@@ -117,11 +119,6 @@ public class OperationDetailsActivity extends TripDetailsActivity {
     }
 
     @Override
-    protected int getContentLayoutId() {
-        return R.layout.navigation_next_event_operation;
-    }
-
-    @Override
     protected int getActionBarColorId() {
         return R.color.bg_action_bar_operation;
     }
@@ -162,7 +159,54 @@ public class OperationDetailsActivity extends TripDetailsActivity {
     }
 
     @Override
+    protected int getNextEventLayoutId() {
+        return R.layout.navigation_next_event_operation;
+    }
+
+    @Override
     protected void updateNavigationInstructions() {
+        final int colorHighlight = getColor(R.color.bg_trip_details_public_now);
+        final int colorNormal = ViewUtils.getAttrColor(this, R.attr.bg_level0);
+
+        final TripRenderer.LegContainer initialWalkLegC;
+        final TripRenderer.LegContainer operationLegC;
+        if (tripRenderer.legs.isEmpty()) {
+            initialWalkLegC = null;
+            operationLegC = null;
+        } else {
+            final TripRenderer.LegContainer firstLegC = tripRenderer.legs.get(0);
+            if (firstLegC.publicLeg != null) {
+                initialWalkLegC = null;
+                operationLegC = firstLegC;
+            } else {
+                initialWalkLegC = firstLegC;
+                if (tripRenderer.legs.size() >= 2) {
+                    operationLegC = tripRenderer.legs.get(1);
+                } else {
+                    operationLegC = null;
+                }
+            }
+        }
+
+        int messageResId = 0;
+        if (operationLegC == null) {
+            messageResId = R.string.operation_not_an_operation;
+        } else if (operationLegC.simulatedPublicLeg == null) {
+            messageResId = R.string.operation_location_tracking_required;
+        }
+        if (messageResId != 0) {
+            findViewById(R.id.operation_next_event_container).setVisibility(View.GONE);
+            findViewById(R.id.operation_next_event_message_container).setVisibility(View.VISIBLE);
+            final TextView messageView = findViewById(R.id.operation_next_event_message_text);
+            messageView.setText(getString(messageResId));
+            return;
+        }
+        findViewById(R.id.operation_next_event_message_container).setVisibility(View.GONE);
+        findViewById(R.id.operation_next_event_container).setVisibility(View.VISIBLE);
+
+        final Trip.Public operationLeg = operationLegC.publicLeg;
+        final Trip.Public simulatedLeg = operationLegC.simulatedPublicLeg;
+
         // TODO
     }
 

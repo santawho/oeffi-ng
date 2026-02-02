@@ -572,7 +572,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         swipeRefreshForTripList = findViewById(R.id.directions_trip_details_list_content);
         swipeRefreshForTripList.setEnabled(false);
 
-        inflater.inflate(getContentLayoutId(), viewPager);
+        inflater.inflate(getNextEventLayoutId(), viewPager);
 
         final View bottomOffset = findViewById(R.id.navigation_next_event_bottom_offset);
         ViewCompat.setOnApplyWindowInsetsListener(bottomOffset, (view, windowInsets) -> {
@@ -620,7 +620,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
     }
 
-    protected int getContentLayoutId() {
+    protected int getNextEventLayoutId() {
         return R.layout.navigation_next_event_trip;
     }
 
