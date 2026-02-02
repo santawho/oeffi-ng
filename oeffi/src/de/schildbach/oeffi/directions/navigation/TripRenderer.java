@@ -357,19 +357,26 @@ public class TripRenderer {
                 beginStop = allStops[nearestStopIndex - 1];
                 endStop = allStops[nearestStopIndex];
             }
-            if (sectionRelation <= 0.0) {
-                plannedTimeAtRefPoint = beginStop.plannedDepartureTime;
-            } else if (sectionRelation >= 1.0) {
-                plannedTimeAtRefPoint = endStop.plannedArrivalTime;
+            final PTDate beginDate = beginStop.plannedDepartureTime != null ? beginStop.plannedDepartureTime : beginStop.plannedArrivalTime;
+            final PTDate endDate = endStop.plannedArrivalTime != null ? endStop.plannedArrivalTime : endStop.plannedDepartureTime;
+            final long delayAtRefPoint;
+            if (beginDate == null && endDate == null) {
+                delayAtRefPoint = 0;
             } else {
-                final long beginTime = beginStop.plannedDepartureTime.getTime();
-                final long endTime = endStop.plannedArrivalTime.getTime();
-                plannedTimeAtRefPoint = new PTDate(
-                        new Date(beginTime + (long) (sectionRelation * (float) (endTime - beginTime))),
-                        beginStop.plannedDepartureTime.getOffset());
+                if (sectionRelation <= 0.0 || endDate == null) {
+                    plannedTimeAtRefPoint = beginDate;
+                } else if (sectionRelation >= 1.0 || beginDate == null) {
+                    plannedTimeAtRefPoint = endDate;
+                } else {
+                    final long beginTime = beginDate.getTime();
+                    final long endTime = endDate.getTime();
+                    plannedTimeAtRefPoint = new PTDate(
+                            new Date(beginTime + (long) (sectionRelation * (float) (endTime - beginTime))),
+                            beginDate.getOffset());
+                }
+                delayAtRefPoint = refTime.getTime() - plannedTimeAtRefPoint.getTime();
             }
 
-            final long delayAtRefPoint = refTime.getTime() - plannedTimeAtRefPoint.getTime();
             long currentDelay = delayAtRefPoint;
             final DepartureDelayEstimator stopDepartureDelayEstimator = getStopDepartureDelayEstimatorForProduct(publicLeg.line.product);
             Stop departureStop = publicLeg.departureStop;
