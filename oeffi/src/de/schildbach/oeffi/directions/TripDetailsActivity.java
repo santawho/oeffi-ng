@@ -862,6 +862,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     private void removeLocationUpdates() {
+        locationProvider = null;
         locationManager.removeUpdates(this);
         updateDeviceLocationDependencies(null, null, null, null);
     }
