@@ -111,6 +111,7 @@ public abstract class OeffiActivity extends ComponentActivity {
 
     protected Application application;
     private final Handler handler = new Handler();
+    protected long lastUserInteractionTime;
 
     protected SharedPreferences prefs;
     protected TimeZoneSelector timeZoneSelector;
@@ -246,6 +247,12 @@ public abstract class OeffiActivity extends ComponentActivity {
             mapView.onResume();
 
         ErrorReporter.getInstance().check(this, applicationVersionCode(), application.okHttpClient());
+    }
+
+    @Override
+    public void onUserInteraction() {
+        lastUserInteractionTime = System.currentTimeMillis();
+        super.onUserInteraction();
     }
 
     @Override

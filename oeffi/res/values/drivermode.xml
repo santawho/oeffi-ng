@@ -5,6 +5,7 @@
     <string name="default_drivermode_threshold_delay" translatable="false">300</string>
     <string name="default_drivermode_navigation_refresh_battery_interval" translatable="false">15</string>
     <string name="default_drivermode_navigation_refresh_charging_interval" translatable="false">1</string>
+    <string name="default_drivermode_navigation_scroll_inhibit_interval" translatable="false">10</string>
 
     <!-- preferences driver mode -->
     <string name="extras_drivermode_title">Drivers\' Mode</string>
@@ -38,5 +39,7 @@
         <item>when-charging</item>
         <item>always</item>
     </string-array>
+    <string name="extras_drivermode_navigation_scroll_inhibit_interval_title">Automatic scroll</string>
+    <string name="extras_drivermode_navigation_scroll_inhibit_interval_summary">Time of user inactivity after which navigation scrolls the view automatically.  [%s seconds, 0=off]</string>
 
 </resources>

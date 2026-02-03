@@ -19,6 +19,7 @@
     <string name="operation_opennav_shownextevent">Open</string>
 
     <string name="operation_not_an_operation">This connection cannot be processed as an operation.</string>
-    <string name="operation_location_tracking_required">This function requires location tracking. Please enable it!</string>
+    <string name="operation_location_tracking_required">This function requires location tracking.\nPlease enable it!</string>
+    <string name="operation_location_not_available">Current location is not available.</string>
 
 </resources>

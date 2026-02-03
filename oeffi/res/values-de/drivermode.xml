@@ -28,5 +28,7 @@
         <item>beim Aufladen</item>
         <item>immer</item>
     </string-array>
+    <string name="extras_drivermode_navigation_scroll_inhibit_interval_title">Automatisches Scrollen</string>
+    <string name="extras_drivermode_navigation_scroll_inhibit_interval_summary">Zeit der Nutzerinaktivität nach der die Navigation automatisch scrollt.  [%s Sekunden, 0=aus]</string>
 
 </resources>

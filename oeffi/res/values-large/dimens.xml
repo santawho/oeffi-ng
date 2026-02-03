@@ -6,6 +6,7 @@
     <dimen name="font_size_normal">15sp</dimen>
     <dimen name="font_size_large">18sp</dimen>
     <dimen name="font_size_xlarge">22sp</dimen>
+    <dimen name="font_size_2xlarge">28sp</dimen>
     <dimen name="font_size_action_bar">15dp</dimen>
     <dimen name="action_bar_height">55dp</dimen>
     <dimen name="action_bar_button_width">55dp</dimen>

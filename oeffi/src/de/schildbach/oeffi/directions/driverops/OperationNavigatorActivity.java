@@ -125,6 +125,7 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
     private boolean isStartupComplete = false;
     private boolean stillCheckForOtherNavigations;
     private BatteryManager batteryManager;
+    private long autoScrollInhibitTimeMs;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -201,6 +202,9 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
         periodicUpdateIntervalMsWhenCharging = 1000L * getIntegerValueFromPrefs(
                 "extras_drivermode_navigation_refresh_charging_interval",
                 R.string.default_drivermode_navigation_refresh_charging_interval);
+        autoScrollInhibitTimeMs = 1000L * getIntegerValueFromPrefs(
+                "extras_drivermode_navigation_scroll_inhibit_interval",
+                R.string.default_drivermode_navigation_scroll_inhibit_interval);
     }
 
     @Override
@@ -436,6 +440,13 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
             }
         };
         backgroundHandler.post(navigationRefreshRunnable);
+    }
+
+    @Override
+    protected boolean mustScrollIntoView() {
+        return super.mustScrollIntoView()
+                || (autoScrollInhibitTimeMs > 0
+                    && System.currentTimeMillis() - lastUserInteractionTime > autoScrollInhibitTimeMs);
     }
 
     private void updateNotification(final Trip aTrip) {

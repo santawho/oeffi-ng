@@ -19,6 +19,7 @@
     <string name="operation_opennav_shownextevent">Öffnen</string>
 
     <string name="operation_not_an_operation">Diese Verbindung kann nicht als Einsatz verarbeitet werden.</string>
-    <string name="operation_location_tracking_required">Dies Funktion erfordert die Ortsbestimmung. Bitte aktiviere diese!</string>
+    <string name="operation_location_tracking_required">Dies Funktion erfordert die Ortsbestimmung.\nBitte aktiviere diese!</string>
+    <string name="operation_location_not_available">Die aktuelle Position kann nicht ermittelt werden.</string>
 
 </resources>

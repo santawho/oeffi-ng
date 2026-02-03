@@ -74,6 +74,15 @@
             android:summary="@string/extras_drivermode_keep_active_summary"
             android:title="@string/extras_drivermode_keep_active_title" />
 
+        <EditTextPreference
+            android:dependency="extras_drivermode_enabled"
+            android:key="extras_drivermode_navigation_scroll_inhibit_interval"
+            android:singleLine="true"
+            android:inputType="number"
+            android:defaultValue="@string/default_drivermode_navigation_scroll_inhibit_interval"
+            android:title="@string/extras_drivermode_navigation_scroll_inhibit_interval_title"
+            android:summary="@string/extras_drivermode_navigation_scroll_inhibit_interval_summary" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>

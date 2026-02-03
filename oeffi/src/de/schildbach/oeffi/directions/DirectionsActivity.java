@@ -263,6 +263,10 @@ public class DirectionsActivity extends OeffiMainActivity implements
         return R.color.bg_action_bar_directions;
     }
 
+    protected int getActionBarTitleStringId() {
+        return R.string.directions_activity_title;
+    }
+
     @Override
     protected int getGlobalOptionsId() {
         return R.id.global_options_directions;
@@ -304,7 +308,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
             final MyActionBar actionBar = getMyActionBar();
             setPrimaryColor(renderConfig.actionBarColor > 0 ? renderConfig.actionBarColor : getActionBarColorId());
-            actionBar.setPrimaryTitle(R.string.directions_activity_title);
+            actionBar.setPrimaryTitle(getActionBarTitleStringId());
             addShowMapButtonToActionBar();
             actionBar.setTitlesOnClickListener(v -> NetworkPickerActivity.start(DirectionsActivity.this));
             buttonExpand = actionBar.addToggleButton(R.drawable.ic_expand_white_24dp,

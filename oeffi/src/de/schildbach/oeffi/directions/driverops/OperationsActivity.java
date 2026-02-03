@@ -44,6 +44,11 @@ public class OperationsActivity extends DirectionsActivity {
     }
 
     @Override
+    protected int getActionBarTitleStringId() {
+        return R.string.operations_activity_title;
+    }
+
+    @Override
     protected boolean isForceDirectOption() {
         return true;
     }

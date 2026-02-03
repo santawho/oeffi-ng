@@ -34,5 +34,6 @@ public class DriverModeFragment extends PreferenceFragment {
         setupDynamicSummary("extras_drivermode_stored_operations_retention_hours", R.string.extras_drivermode_stored_operations_retention_hours_summary);
         setupDynamicSummary("extras_drivermode_navigation_refresh_battery_interval", R.string.extras_drivermode_navigation_refresh_battery_interval_summary);
         setupDynamicSummary("extras_drivermode_navigation_refresh_charging_interval", R.string.extras_drivermode_navigation_refresh_charging_interval_summary);
+        setupDynamicSummary("extras_drivermode_navigation_scroll_inhibit_interval", R.string.default_drivermode_navigation_scroll_inhibit_interval);
     }
 }
