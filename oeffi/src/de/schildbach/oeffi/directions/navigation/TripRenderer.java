@@ -112,19 +112,19 @@ public class TripRenderer {
             return initialLeg == null;
         }
 
-        public Stop getPublicStopByIndex(final int stopIndex) {
-            if (stopIndex < 0 || publicLeg == null)
+        public static Stop getPublicStopByIndex(final Trip.Public leg, final int stopIndex) {
+            if (stopIndex < 0 || leg == null)
                 return null;
 
             if (stopIndex == 0)
-                return publicLeg.departureStop;
+                return leg.departureStop;
 
-            final int numIntermediates = publicLeg.intermediateStops == null ? 0 : publicLeg.intermediateStops.size();
+            final int numIntermediates = leg.intermediateStops == null ? 0 : leg.intermediateStops.size();
             if (stopIndex <= numIntermediates)
-                return publicLeg.intermediateStops.get(stopIndex - 1);
+                return leg.intermediateStops.get(stopIndex - 1);
 
             if (stopIndex == numIntermediates + 1)
-                return publicLeg.arrivalStop;
+                return leg.arrivalStop;
 
             return null;
         }

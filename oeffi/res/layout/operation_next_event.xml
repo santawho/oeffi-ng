@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/navigation_next_event"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:id="@+id/operation_next_event_message_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.38" />
+            <TextView
+                android:id="@+id/operation_next_event_message_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textStyle="bold"
+                android:textSize="@dimen/font_size_xlarge" />
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.62" />
+        </LinearLayout>
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="@dimen/text_padding_horizontal_verylax"
+                android:paddingVertical="@dimen/text_padding_vertical_verylax">
+                <LinearLayout
+                    android:id="@+id/navigation_next_event_container"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:gravity="center">
+
+                    <LinearLayout
+                        android:orientation="vertical"
+                        android:id="@+id/operation_next_event_nearest_station_arrival"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:id="@+id/operation_next_event_nearest_station_arrival_arrow"
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/operation_next_event_arrow_height"
+                            android:layout_gravity="center"
+                            android:scaleType="fitCenter"
+                            android:adjustViewBounds="true"
+                            android:src="@drawable/ic_arrow_down_black_24dp" />
+
+                        <LinearLayout
+                            android:orientation="horizontal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center">
+                            <TextView
+                                android:id="@+id/operation_next_event_nearest_station_arrival_delay_min"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="@dimen/operation_next_event_delay_min_fontsize" />
+                            <TextView
+                                android:id="@+id/operation_next_event_nearest_station_arrival_delay_sec"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="@dimen/operation_next_event_delay_sec_fontsize" />
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/operation_next_event_nearest_station_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_horizontal"
+                        android:textSize="@dimen/operation_next_event_nearest_station_name_fontsize"/>
+
+                    <LinearLayout
+                        android:orientation="vertical"
+                        android:id="@+id/operation_next_event_nearest_station_departure"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <LinearLayout
+                            android:orientation="horizontal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center">
+                            <TextView
+                                android:id="@+id/operation_next_event_nearest_station_departure_delay_min"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="@dimen/operation_next_event_delay_min_fontsize" />
+                            <TextView
+                                android:id="@+id/operation_next_event_nearest_station_departure_delay_sec"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="@dimen/operation_next_event_delay_sec_fontsize" />
+                        </LinearLayout>
+
+                        <ImageView
+                            android:id="@+id/operation_next_event_nearest_station_departure_arrow"
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/operation_next_event_arrow_height"
+                            android:layout_gravity="center"
+                            android:scaleType="fitCenter"
+                            android:adjustViewBounds="true"
+                            android:src="@drawable/ic_arrow_down_black_24dp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:orientation="vertical"
+                        android:id="@+id/operation_next_event_next_station_arrival"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <LinearLayout
+                            android:orientation="horizontal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center">
+                            <TextView
+                                android:id="@+id/operation_next_event_next_station_arrival_delay_min"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="@dimen/operation_next_event_delay_min_fontsize" />
+                            <TextView
+                                android:id="@+id/operation_next_event_next_station_arrival_delay_sec"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="@dimen/operation_next_event_delay_sec_fontsize" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/operation_next_event_next_station_name"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_horizontal"
+                            android:textSize="@dimen/operation_next_event_next_station_name_fontsize"/>
+
+                    </LinearLayout>
+
+                    <Space
+                        android:id="@+id/navigation_next_event_bottom_offset"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp" />
+                </LinearLayout>
+            </FrameLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <ImageView
+            android:id="@+id/navigation_next_event_back_to_itinerary"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:tint="@color/fg_trip_next_event_normal"
+            android:scaleX="2"
+            android:scaleY="2"
+            android:translationX="12dp"
+            android:translationY="6dp"
+            android:paddingHorizontal="@dimen/text_padding_horizontal"
+            android:paddingVertical="@dimen/text_padding_vertical"
+            android:src="@drawable/ic_arrow_back_white_24dp"/>
+
+    </RelativeLayout>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

@@ -88,6 +88,14 @@
     <dimen name="operation_notification_time_fontsize">18sp</dimen>
     <dimen name="operation_notification_station_fontsize">14sp</dimen>
 
+    <dimen name="operation_next_event_nearest_station_name_fontsize">40sp</dimen>
+    <dimen name="operation_next_event_next_station_name_fontsize">30sp</dimen>
+    <dimen name="operation_next_event_delay_min_fontsize">80sp</dimen>
+    <dimen name="operation_next_event_delay_sec_fontsize">50sp</dimen>
+    <dimen name="operation_next_event_arrow_height">100dp</dimen>
+
+    <dimen name="operation_details_arrow_height">50dp</dimen>
+
     <bool name="layout_list_show">true</bool>
     <bool name="layout_map_show">false</bool>
     <bool name="layout_map_show_toggleable">false</bool>

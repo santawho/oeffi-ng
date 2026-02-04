@@ -22,12 +22,10 @@
             <ImageView
                 android:id="@+id/operation_details_stop_arrow"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingBottom="@dimen/text_padding_vertical_lax"
+                android:layout_height="@dimen/operation_details_arrow_height"
                 android:layout_gravity="center"
-                android:scaleX="2"
-                android:scaleY="2"
-                android:layout_marginTop="12dp"
+                android:scaleType="fitCenter"
+                android:adjustViewBounds="true"
                 android:src="@drawable/ic_arrow_down_black_24dp" />
 
             <TextView
@@ -36,7 +34,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
-                android:textSize="@dimen/font_size_xlarge" />
+                android:textSize="@dimen/font_size_2xlarge" />
 
             <RelativeLayout
                 android:layout_width="match_parent"

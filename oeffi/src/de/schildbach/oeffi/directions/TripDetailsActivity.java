@@ -326,7 +326,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         inflater = getLayoutInflater();
         res = getResources();
-        colorDefaultBackground = res.getColor(R.color.bg_level1_default);
+        colorDefaultBackground = ViewUtils.getAttrColor(this, R.attr.bg_level0);
         colorSignificant = res.getColor(R.color.fg_significant);
         colorInsignificant = res.getColor(R.color.fg_insignificant);
         colorHighlighted = res.getColor(R.color.fg_highlighted);

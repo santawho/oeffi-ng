@@ -37,6 +37,7 @@ import de.schildbach.oeffi.directions.TripDetailsActivity;
 import de.schildbach.oeffi.directions.navigation.TripRenderer;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.stations.StationDetailsActivity;
+import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.JourneyRef;
@@ -272,7 +273,7 @@ public class OperationDetailsActivity extends TripDetailsActivity {
         if (isNextAction) {
             final TextView locationView = row.findViewById(R.id.operation_details_stop_location);
             locationView.setVisibility(View.VISIBLE);
-            locationView.setText(stop.location.name);
+            locationView.setText(Formats.makeBreakableStationName(stop.location.name));
             locationView.setTextColor(textColor);
         }
 
@@ -353,13 +354,12 @@ public class OperationDetailsActivity extends TripDetailsActivity {
                 R.id.operation_details_stop_delay_min,
                 R.id.operation_details_stop_delay_sec);
 
-        final ImageView arrowView = row.findViewById(R.id.operation_details_stop_arrow);
-        arrowView.setColorFilter(textColor);
+        ((ImageView) row.findViewById(R.id.operation_details_stop_arrow)).setColorFilter(textColor);
 
         if (isNextAction) {
             final TextView locationView = row.findViewById(R.id.operation_details_stop_location);
             locationView.setVisibility(View.VISIBLE);
-            locationView.setText(stop.location.name);
+            locationView.setText(Formats.makeBreakableStationName(stop.location.name));
             locationView.setTextColor(textColor);
         }
 
@@ -373,7 +373,7 @@ public class OperationDetailsActivity extends TripDetailsActivity {
 
     @Override
     protected int getNextEventLayoutId() {
-        return R.layout.navigation_next_event_operation;
+        return R.layout.operation_next_event;
     }
 
     @Override
@@ -413,8 +413,10 @@ public class OperationDetailsActivity extends TripDetailsActivity {
             messageResId = R.string.operation_location_not_available;
         }
 
+        final ViewGroup containerView = findViewById(R.id.navigation_next_event_container);
+
         if (messageResId != 0) {
-            findViewById(R.id.navigation_next_event_container).setVisibility(View.GONE);
+            containerView.setVisibility(View.GONE);
             findViewById(R.id.operation_next_event_message_container).setVisibility(View.VISIBLE);
             final TextView messageView = findViewById(R.id.operation_next_event_message_text);
             messageView.setText(getString(messageResId));
@@ -422,7 +424,7 @@ public class OperationDetailsActivity extends TripDetailsActivity {
         }
 
         findViewById(R.id.operation_next_event_message_container).setVisibility(View.GONE);
-        findViewById(R.id.navigation_next_event_container).setVisibility(View.VISIBLE);
+        containerView.setVisibility(View.VISIBLE);
 
         // final Trip.Public operationLeg = operationLegC.publicLeg;
         final Trip.Public simulatedLeg = operationLegC.simulatedPublicLeg;
@@ -431,27 +433,130 @@ public class OperationDetailsActivity extends TripDetailsActivity {
         final double sectionRelation = operationLegC.sectionRelation;
         final double distanceToNearestStop = operationLegC.distanceToNearestStop;
 
-        final Stop nearestStop;
-        final Stop nextStop;
-        final int numIntermediateStops = simulatedLeg.intermediateStops == null ? 0 : simulatedLeg.intermediateStops.size();
-        if (nearestStopIndex == 0) {
-            nearestStop = simulatedLeg.departureStop;
-            if (numIntermediateStops > 0)
-                nextStop = simulatedLeg.intermediateStops.get(0);
-            else
-                nextStop = simulatedLeg.arrivalStop;
-        } else if (nearestStopIndex > numIntermediateStops) {
-            nearestStop = simulatedLeg.arrivalStop;
-            nextStop = null;
+        final Stop nearestStop = TripRenderer.LegContainer.getPublicStopByIndex(simulatedLeg, nearestStopIndex);
+        final Stop nextStop = TripRenderer.LegContainer.getPublicStopByIndex(simulatedLeg, nearestStopIndex + 1);
+
+        if (nearestStop == null)
+            return;
+
+        final long now = System.currentTimeMillis();
+
+        final Long nearestArrivalDelay;
+        final Long nearestDepartureDelay;
+        final Long nextArrivalDelay;
+        PTDate tPlan, tPred;
+        if (isAtNearestStop) {
+            // waiting for departure
+            tPlan = nearestStop.plannedArrivalTime;
+            nearestArrivalDelay = tPlan == null ? null : now - tPlan.getTime();
+            tPlan = nearestStop.plannedDepartureTime;
+            nearestDepartureDelay = tPlan == null ? null : now - tPlan.getTime();
+            tPlan = nextStop == null ? null : nextStop.plannedArrivalTime;
+            nextArrivalDelay = tPlan == null ? null : now - tPlan.getTime();
         } else {
-            nearestStop = simulatedLeg.intermediateStops.get(nearestStopIndex - 1);
-            if (nearestStopIndex < numIntermediateStops)
-                nextStop = simulatedLeg.intermediateStops.get(nearestStopIndex);
-            else
-                nextStop = simulatedLeg.arrivalStop;
+            if (sectionIsAfterNearestStop) {
+                nearestArrivalDelay = null;
+                tPlan = nearestStop.plannedDepartureTime;
+                nearestDepartureDelay = tPlan == null ? null : now - tPlan.getTime();
+            } else {
+                tPlan = nearestStop.plannedArrivalTime;
+                tPred = nearestStop.predictedArrivalTime;
+                nearestArrivalDelay = tPlan == null ? null : tPred == null ? 0 : tPred.getTime() - tPlan.getTime();
+                tPlan = nearestStop.plannedDepartureTime;
+                tPred = nearestStop.predictedDepartureTime;
+                nearestDepartureDelay = tPlan == null ? null : tPred == null ? 0 : tPred.getTime() - tPlan.getTime();
+            }
+            if (nextStop == null) {
+                nextArrivalDelay = null;
+            } else {
+                tPlan = nextStop.plannedArrivalTime;
+                tPred = nextStop.predictedArrivalTime;
+                nextArrivalDelay = tPlan == null ? null : tPred == null ? 0 : tPred.getTime() - tPlan.getTime();
+            }
         }
 
+        final TextView nearestStopNameView = containerView.findViewById(R.id.operation_next_event_nearest_station_name);
+        nearestStopNameView.setText(Formats.makeBreakableStationName(nearestStop.location.name));
+        nearestStopNameView.setBackgroundColor(Color.TRANSPARENT);
+        nearestStopNameView.setTextColor(colorSignificant);
 
+        boolean isNextAction;
+        int color, textColor;
+
+        final View nearestArrivalView = containerView.findViewById(R.id.operation_next_event_nearest_station_arrival);
+        if (nearestArrivalDelay == null) {
+            nearestArrivalView.setVisibility(View.INVISIBLE);
+        } else {
+            color = getStopTimeColor(nearestArrivalDelay);
+            isNextAction = isAtNearestStop ? nearestDepartureDelay == null : !sectionIsAfterNearestStop;
+            nearestArrivalView.setVisibility(View.VISIBLE);
+            textColor = isNextAction ? colorDefaultBackground : color;
+            renderIntervalMinsAndSecs(nearestArrivalDelay, containerView, textColor, true,
+                    R.id.operation_next_event_nearest_station_arrival_delay_min,
+                    R.id.operation_next_event_nearest_station_arrival_delay_sec);
+            if (isNextAction) {
+                nearestArrivalView.setBackgroundColor(color);
+                nearestStopNameView.setBackgroundColor(color);
+                nearestStopNameView.setTextColor(colorDefaultBackground);
+
+                final ImageView arrivalArrowView = containerView.findViewById(R.id.operation_next_event_nearest_station_arrival_arrow);
+                arrivalArrowView.setColorFilter(colorDefaultBackground);
+            } else {
+                nearestArrivalView.setBackgroundColor(colorDefaultBackground);
+            }
+        }
+
+        final ImageView departureArrowView = containerView.findViewById(R.id.operation_next_event_nearest_station_departure_arrow);
+        departureArrowView.setColorFilter(colorSignificant);
+        departureArrowView.setBackgroundColor(Color.TRANSPARENT);
+
+        final View nearestDepartureView = containerView.findViewById(R.id.operation_next_event_nearest_station_departure);
+        if (nearestDepartureDelay == null) {
+            nearestDepartureView.setVisibility(View.GONE);
+        } else {
+            color = getStopTimeColor(nearestDepartureDelay);
+            isNextAction = isAtNearestStop;
+            nearestDepartureView.setVisibility(View.VISIBLE);
+            textColor = isNextAction ? colorDefaultBackground : color;
+            renderIntervalMinsAndSecs(nearestDepartureDelay, containerView, textColor, true,
+                    R.id.operation_next_event_nearest_station_departure_delay_min,
+                    R.id.operation_next_event_nearest_station_departure_delay_sec);
+            if (isNextAction) {
+                nearestDepartureView.setBackgroundColor(color);
+                nearestStopNameView.setBackgroundColor(color);
+                nearestStopNameView.setTextColor(colorDefaultBackground);
+                departureArrowView.setColorFilter(colorDefaultBackground);
+            } else {
+                nearestDepartureView.setBackgroundColor(Color.TRANSPARENT);
+            }
+        }
+
+        final View nextArrivalView = containerView.findViewById(R.id.operation_next_event_next_station_arrival);
+        if (nextArrivalDelay == null) {
+            nextArrivalView.setVisibility(View.GONE);
+        } else {
+            color = getStopTimeColor(nextArrivalDelay);
+            isNextAction = !isAtNearestStop && sectionIsAfterNearestStop;
+            nextArrivalView.setVisibility(View.VISIBLE);
+            textColor = isNextAction ? colorDefaultBackground : color;
+            renderIntervalMinsAndSecs(nextArrivalDelay, containerView, textColor, true,
+                    R.id.operation_next_event_next_station_arrival_delay_min,
+                    R.id.operation_next_event_next_station_arrival_delay_sec);
+
+            final TextView nextStopNameView = containerView.findViewById(R.id.operation_next_event_next_station_name);
+            nextStopNameView.setText(Formats.makeBreakableStationName(nextStop.location.name));
+
+            if (isNextAction) {
+                nextArrivalView.setBackgroundColor(color);
+                nextStopNameView.setTextColor(colorDefaultBackground);
+
+                departureArrowView.setColorFilter(colorDefaultBackground);
+                departureArrowView.setBackgroundColor(color);
+            } else {
+                nextArrivalView.setBackgroundColor(Color.TRANSPARENT);
+                nextStopNameView.setTextColor(colorSignificant);
+            }
+        }
     }
 
     protected TripDetailsActivity.StopClickListener newStopClickListener(
