@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <string name="dimension_selector" tools:ignore="ExtraTranslation">x-large</string>
 
     <dimen name="font_size_tiny">12sp</dimen>
     <dimen name="font_size_small">14sp</dimen>

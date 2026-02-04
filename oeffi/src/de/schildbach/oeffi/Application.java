@@ -256,6 +256,8 @@ public class Application extends android.app.Application {
         log.info("=== Starting app version {} ({})", packageInfo.versionName, packageInfo.versionCode);
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
+        final String dimensionSelector = getString(R.string.dimension_selector);
+
         NotificationSoundManager.logAvailableTextToSpeechServices();
         SpeechInput.logAvailableSpeechRecognitionServices();
 
