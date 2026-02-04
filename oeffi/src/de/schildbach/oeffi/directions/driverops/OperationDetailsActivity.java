@@ -213,13 +213,11 @@ public class OperationDetailsActivity extends TripDetailsActivity {
         final boolean isAtNearestStop = legC.isAtNearestStop;
         final boolean sectionIsAfterNearestStop = legC.sectionIsAfterNearestStop;
         final boolean isNextAction;
-        boolean isFocusView = false;
 
         if (nearestStopIndex < 0)
             return null;
         if (stopIndex == nearestStopIndex) {
             isNextAction = !sectionIsAfterNearestStop && !isAtNearestStop;
-            isFocusView = true;
         } else if (sectionIsAfterNearestStop && stopIndex == nearestStopIndex + 1) {
             // rendering the stop after the nearest
             isNextAction = !isAtNearestStop;
@@ -235,7 +233,7 @@ public class OperationDetailsActivity extends TripDetailsActivity {
         final Long arrivalDelay;
         final int color;
 
-        final Long timeToPlan = plannedTime == null ? null : (plannedTime - nowTime);
+        final Long timeToPlan = plannedTime == null ? null : (nowTime - plannedTime);
         final Long timeToPrediction = predictedTime == null ? null : (predictedTime - nowTime);
 
         if (plannedTime != null && predictedTime != null) {
@@ -271,9 +269,16 @@ public class OperationDetailsActivity extends TripDetailsActivity {
         final ImageView arrowView = row.findViewById(R.id.operation_details_stop_arrow);
         arrowView.setColorFilter(textColor);
 
+        if (isNextAction) {
+            final TextView locationView = row.findViewById(R.id.operation_details_stop_location);
+            locationView.setVisibility(View.VISIBLE);
+            locationView.setText(stop.location.name);
+            locationView.setTextColor(textColor);
+        }
+
         containerView.setBackgroundColor(backgroundColor);
 
-        if (isFocusView)
+        if (legsScrollFocusView == null)
             legsScrollFocusView = row;
 
         return row;
@@ -306,7 +311,7 @@ public class OperationDetailsActivity extends TripDetailsActivity {
         final Long departureDelay;
         final int color;
 
-        final Long timetoPlan = plannedTime == null ? null : (plannedTime - nowTime);
+        final Long timetoPlan = plannedTime == null ? null : (nowTime - plannedTime);
         final Long timeToPrediction;
 
         final int backgroundColor, textColor;
@@ -351,7 +356,17 @@ public class OperationDetailsActivity extends TripDetailsActivity {
         final ImageView arrowView = row.findViewById(R.id.operation_details_stop_arrow);
         arrowView.setColorFilter(textColor);
 
+        if (isNextAction) {
+            final TextView locationView = row.findViewById(R.id.operation_details_stop_location);
+            locationView.setVisibility(View.VISIBLE);
+            locationView.setText(stop.location.name);
+            locationView.setTextColor(textColor);
+        }
+
         containerView.setBackgroundColor(backgroundColor);
+
+        if (legsScrollFocusView == null)
+            legsScrollFocusView = row;
 
         return row;
     }

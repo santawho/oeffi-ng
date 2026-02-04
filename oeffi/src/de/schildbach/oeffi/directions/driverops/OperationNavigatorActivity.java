@@ -383,11 +383,13 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
     }
 
     private boolean doCheckAutoRefresh(final boolean doNotifcationUpdate) {
-        if (isPaused) return false;
-        if (nextNavigationRefreshTime < 0) return false;
-        final long now = new Date().getTime();
-        if (now < nextNavigationRefreshTime) return false;
-        refreshNavigation(doNotifcationUpdate, false, false);
+        if (isPaused)
+            return false;
+        if (nextNavigationRefreshTime >= 0) {
+            final long now = new Date().getTime();
+            if (now >= nextNavigationRefreshTime)
+                refreshNavigation(doNotifcationUpdate, false, false);
+        }
         return true;
     }
 

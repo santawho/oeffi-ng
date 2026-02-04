@@ -26,6 +26,7 @@
                 <LinearLayout
                     android:orientation="horizontal"
                     android:layout_alignParentLeft="true"
+                    android:layout_alignParentBottom="true"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content">
                     <TextView
@@ -42,7 +43,8 @@
 
                 <LinearLayout
                     android:orientation="horizontal"
-                    android:layout_centerInParent="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_alignParentBottom="true"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content">
                     <TextView
@@ -62,6 +64,7 @@
                 <LinearLayout
                     android:orientation="horizontal"
                     android:layout_alignParentRight="true"
+                    android:layout_alignParentBottom="true"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content">
                     <TextView
@@ -77,6 +80,14 @@
                 </LinearLayout>
 
             </RelativeLayout>
+
+            <TextView
+                android:id="@+id/operation_details_stop_location"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:textSize="@dimen/font_size_xlarge" />
 
             <ImageView
                 android:id="@+id/operation_details_stop_arrow"

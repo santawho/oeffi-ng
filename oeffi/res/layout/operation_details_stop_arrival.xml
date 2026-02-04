@@ -30,6 +30,14 @@
                 android:layout_marginTop="12dp"
                 android:src="@drawable/ic_arrow_down_black_24dp" />
 
+            <TextView
+                android:id="@+id/operation_details_stop_location"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:textSize="@dimen/font_size_xlarge" />
+
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
@@ -37,6 +45,7 @@
                 <LinearLayout
                     android:orientation="horizontal"
                     android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="true"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content">
                     <TextView
@@ -53,7 +62,8 @@
 
                 <LinearLayout
                     android:orientation="horizontal"
-                    android:layout_centerInParent="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_alignParentTop="true"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content">
                     <TextView
@@ -73,6 +83,7 @@
                 <LinearLayout
                     android:orientation="horizontal"
                     android:layout_alignParentRight="true"
+                    android:layout_alignParentTop="true"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content">
                     <TextView

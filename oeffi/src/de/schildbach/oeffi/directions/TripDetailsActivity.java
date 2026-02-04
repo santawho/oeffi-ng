@@ -776,12 +776,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         @Override
         public void run() {
             fastRefreshIntervalMs = getPeriodicUpdateIntervalMs();
-            if (updateGuiIfApplicable()) {
-                if (fastRefreshIntervalMs > 0) {
-                    handler.postDelayed(this, fastRefreshIntervalMs);
-                } else {
-                    stopPeriodicUpdateGuiRunnable();
-                }
+            updateGuiIfApplicable();
+            if (fastRefreshIntervalMs > 0) {
+                requestLocationUpdates(fastRefreshIntervalMs);
+                handler.postDelayed(this, fastRefreshIntervalMs);
+            } else {
+                stopPeriodicUpdateGuiRunnable();
             }
         }
     };
@@ -803,13 +803,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     protected boolean checkAutoRefresh() {
-        return false;
+        return true;
     }
 
     private boolean updateGuiIfApplicable() {
         if (isPaused)
             return false;
-        if (!checkAutoRefresh())
+        if (checkAutoRefresh())
             updateGUI();
         return true;
     }
@@ -916,20 +916,36 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     @SuppressLint("MissingPermission")
     private void requestLocationUpdates() {
-        if (locationTrackingEnabled && locationProvider != null) {
-            final android.location.Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
-            if (lastKnownLocation != null
-                    && (lastKnownLocation.getLatitude() != 0 || lastKnownLocation.getLongitude() != 0)) {
-                onLocationChanged(lastKnownLocation);
-            }
-            final Criteria criteria = new Criteria();
-            criteria.setAccuracy(Criteria.ACCURACY_FINE);
-            locationManager.requestLocationUpdates(5000, 5.0f, criteria, this, null);
+        if (!locationTrackingEnabled || locationProvider == null)
+            return;
+
+        final android.location.Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
+        if (lastKnownLocation != null
+                && (lastKnownLocation.getLatitude() != 0 || lastKnownLocation.getLongitude() != 0)) {
+            onLocationChanged(lastKnownLocation);
         }
+
+        requestLocationUpdates(getPeriodicUpdateIntervalMs());
+    }
+
+    private long lastLocationUpdateIntervalMs;
+
+    @SuppressLint("MissingPermission")
+    private void requestLocationUpdates(final long updateIntervalMs) {
+        if (updateIntervalMs == lastLocationUpdateIntervalMs)
+            return;
+        if (!locationTrackingEnabled || locationProvider == null)
+            return;
+        lastLocationUpdateIntervalMs = updateIntervalMs;
+        locationManager.removeUpdates(this);
+        final Criteria criteria = new Criteria();
+        criteria.setAccuracy(Criteria.ACCURACY_FINE);
+        locationManager.requestLocationUpdates(updateIntervalMs, 5.0f, criteria, this, null);
     }
 
     private void removeLocationUpdates() {
         locationProvider = null;
+        lastLocationUpdateIntervalMs = 0;
         locationManager.removeUpdates(this);
         updateDeviceLocationDependencies(null, null, null, null);
     }
@@ -952,7 +968,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
         final Double speedMetersPerSecond = location.hasSpeed() ? (double) location.getSpeed() : null;
         updateDeviceLocationDependencies(newDeviceLocation, bearingDegrees, speedMetersPerSecond, new Date());
-        updateGUI();
+        updateGuiIfApplicable();
     }
 
     @Override
