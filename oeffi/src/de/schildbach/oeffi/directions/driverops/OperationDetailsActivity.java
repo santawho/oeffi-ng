@@ -378,9 +378,6 @@ public class OperationDetailsActivity extends TripDetailsActivity {
 
     @Override
     protected void updateNavigationInstructions() {
-        final int colorHighlight = getColor(R.color.bg_trip_details_public_now);
-        final int colorNormal = ViewUtils.getAttrColor(this, R.attr.bg_level0);
-
         final TripRenderer.LegContainer initialWalkLegC;
         final TripRenderer.LegContainer operationLegC;
         if (tripRenderer.legs.isEmpty()) {
@@ -494,6 +491,9 @@ public class OperationDetailsActivity extends TripDetailsActivity {
             renderIntervalMinsAndSecs(nearestArrivalDelay, containerView, textColor, true,
                     R.id.operation_next_event_nearest_station_arrival_delay_min,
                     R.id.operation_next_event_nearest_station_arrival_delay_sec);
+            final TextView planTimeView = containerView.findViewById(R.id.operation_next_event_nearest_station_arrival_plan_time);
+            planTimeView.setText(Formats.formatTime(timeZoneSelector, nearestStop.plannedArrivalTime));
+            planTimeView.setTextColor(isNextAction ? colorDefaultBackground : colorSignificant);
             if (isNextAction) {
                 nearestArrivalView.setBackgroundColor(color);
                 nearestStopNameView.setBackgroundColor(color);
@@ -521,6 +521,9 @@ public class OperationDetailsActivity extends TripDetailsActivity {
             renderIntervalMinsAndSecs(nearestDepartureDelay, containerView, textColor, true,
                     R.id.operation_next_event_nearest_station_departure_delay_min,
                     R.id.operation_next_event_nearest_station_departure_delay_sec);
+            final TextView planTimeView = containerView.findViewById(R.id.operation_next_event_nearest_station_departure_plan_time);
+            planTimeView.setText(Formats.formatTime(timeZoneSelector, nearestStop.plannedDepartureTime));
+            planTimeView.setTextColor(isNextAction ? colorDefaultBackground : colorSignificant);
             if (isNextAction) {
                 nearestDepartureView.setBackgroundColor(color);
                 nearestStopNameView.setBackgroundColor(color);
@@ -542,6 +545,9 @@ public class OperationDetailsActivity extends TripDetailsActivity {
             renderIntervalMinsAndSecs(nextArrivalDelay, containerView, textColor, true,
                     R.id.operation_next_event_next_station_arrival_delay_min,
                     R.id.operation_next_event_next_station_arrival_delay_sec);
+            final TextView planTimeView = containerView.findViewById(R.id.operation_next_event_next_station_arrival_plan_time);
+            planTimeView.setText(Formats.formatTime(timeZoneSelector, nextStop.plannedArrivalTime));
+            planTimeView.setTextColor(isNextAction ? colorDefaultBackground : colorSignificant);
 
             final TextView nextStopNameView = containerView.findViewById(R.id.operation_next_event_next_station_name);
             nextStopNameView.setText(Formats.makeBreakableStationName(nextStop.location.name));

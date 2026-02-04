@@ -30,11 +30,13 @@ import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
 import java.io.IOException;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -474,13 +476,11 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
     }
 
     @Override
-    protected boolean updatePublicLeg(final View row, final TripRenderer.LegContainer legC, final TripRenderer.LegContainer walkLegC, final TripRenderer.LegContainer nextLegC, final Date now) {
-        final boolean isNow = super.updatePublicLeg(row, legC, walkLegC, nextLegC, now);
+    protected void updateNavigationInstructions() {
+        super.updateNavigationInstructions();
 
-        if (isNow) {
-            // ...
-        }
-
-        return isNow;
+        final int style = batteryManager.isCharging() ? DateFormat.MEDIUM : DateFormat.SHORT;
+        final String clockStr = DateFormat.getTimeInstance(style).format(new Date());
+        ((TextView) findViewById(R.id.navigation_next_event_clock)).setText(clockStr);
     }
 }

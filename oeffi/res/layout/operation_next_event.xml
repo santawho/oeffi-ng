@@ -64,22 +64,35 @@
                             android:adjustViewBounds="true"
                             android:src="@drawable/ic_arrow_down_black_24dp" />
 
-                        <LinearLayout
-                            android:orientation="horizontal"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center">
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
                             <TextView
-                                android:id="@+id/operation_next_event_nearest_station_arrival_delay_min"
+                                android:id="@+id/operation_next_event_nearest_station_arrival_plan_time"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textSize="@dimen/operation_next_event_delay_min_fontsize" />
-                            <TextView
-                                android:id="@+id/operation_next_event_nearest_station_arrival_delay_sec"
+                                android:layout_centerVertical="true"
+                                android:layout_alignParentLeft="true"
+                                android:paddingLeft="@dimen/text_padding_horizontal_lax"
+                                android:textSize="@dimen/operation_next_event_plan_time_fontsize" />
+                            <LinearLayout
+                                android:orientation="horizontal"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textSize="@dimen/operation_next_event_delay_sec_fontsize" />
-                        </LinearLayout>
+                                android:layout_centerVertical="true"
+                                android:layout_centerHorizontal="true">
+                                <TextView
+                                    android:id="@+id/operation_next_event_nearest_station_arrival_delay_min"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textSize="@dimen/operation_next_event_delay_min_fontsize" />
+                                <TextView
+                                    android:id="@+id/operation_next_event_nearest_station_arrival_delay_sec"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textSize="@dimen/operation_next_event_delay_sec_fontsize" />
+                            </LinearLayout>
+                        </RelativeLayout>
 
                     </LinearLayout>
 
@@ -96,22 +109,35 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
 
-                        <LinearLayout
-                            android:orientation="horizontal"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center">
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
                             <TextView
-                                android:id="@+id/operation_next_event_nearest_station_departure_delay_min"
+                                android:id="@+id/operation_next_event_nearest_station_departure_plan_time"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textSize="@dimen/operation_next_event_delay_min_fontsize" />
-                            <TextView
-                                android:id="@+id/operation_next_event_nearest_station_departure_delay_sec"
+                                android:layout_centerVertical="true"
+                                android:layout_alignParentLeft="true"
+                                android:paddingLeft="@dimen/text_padding_horizontal_lax"
+                                android:textSize="@dimen/operation_next_event_plan_time_fontsize" />
+                            <LinearLayout
+                                android:orientation="horizontal"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textSize="@dimen/operation_next_event_delay_sec_fontsize" />
-                        </LinearLayout>
+                                android:layout_centerVertical="true"
+                                android:layout_centerHorizontal="true">
+                                <TextView
+                                    android:id="@+id/operation_next_event_nearest_station_departure_delay_min"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textSize="@dimen/operation_next_event_delay_min_fontsize" />
+                                <TextView
+                                    android:id="@+id/operation_next_event_nearest_station_departure_delay_sec"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textSize="@dimen/operation_next_event_delay_sec_fontsize" />
+                            </LinearLayout>
+                        </RelativeLayout>
 
                         <ImageView
                             android:id="@+id/operation_next_event_nearest_station_departure_arrow"
@@ -130,22 +156,35 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
 
-                        <LinearLayout
-                            android:orientation="horizontal"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center">
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
                             <TextView
-                                android:id="@+id/operation_next_event_next_station_arrival_delay_min"
+                                android:id="@+id/operation_next_event_next_station_arrival_plan_time"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textSize="@dimen/operation_next_event_delay_min_fontsize" />
-                            <TextView
-                                android:id="@+id/operation_next_event_next_station_arrival_delay_sec"
+                                android:layout_centerVertical="true"
+                                android:layout_alignParentLeft="true"
+                                android:paddingLeft="@dimen/text_padding_horizontal_lax"
+                                android:textSize="@dimen/operation_next_event_plan_time_fontsize" />
+                            <LinearLayout
+                                android:orientation="horizontal"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textSize="@dimen/operation_next_event_delay_sec_fontsize" />
-                        </LinearLayout>
+                                android:layout_centerVertical="true"
+                                android:layout_centerHorizontal="true">
+                                <TextView
+                                    android:id="@+id/operation_next_event_next_station_arrival_delay_min"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textSize="@dimen/operation_next_event_delay_min_fontsize" />
+                                <TextView
+                                    android:id="@+id/operation_next_event_next_station_arrival_delay_sec"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textSize="@dimen/operation_next_event_delay_sec_fontsize" />
+                            </LinearLayout>
+                        </RelativeLayout>
 
                         <TextView
                             android:id="@+id/operation_next_event_next_station_name"
@@ -155,6 +194,17 @@
                             android:textSize="@dimen/operation_next_event_next_station_name_fontsize"/>
 
                     </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/navigation_next_event_clock"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:gravity="center"
+                        android:textStyle="bold"
+                        android:textSize="@dimen/operation_next_event_clock_fontsize"
+                        android:textColor="@color/fg_less_significant">
+                    </TextView>
 
                     <Space
                         android:id="@+id/navigation_next_event_bottom_offset"
