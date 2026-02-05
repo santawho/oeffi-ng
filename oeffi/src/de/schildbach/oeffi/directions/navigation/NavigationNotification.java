@@ -1432,7 +1432,7 @@ public class NavigationNotification {
             if (newTrip != null) {
                 final boolean alarmPlayed = update(newTrip, false);
                 context.sendBroadcast(new Intent(ACTION_UPDATE_TRIGGER));
-                if (!alarmPlayed && prefs.getBoolean(PREFS_KEY_NAVIGATION_REFRESH_BEEP, true)) {
+                if (!alarmPlayed && prefs.getBoolean(PREFS_KEY_NAVIGATION_REFRESH_BEEP, false)) {
                     playAlarmSoundAndVibration(
                             AudioAttributes.USAGE_NOTIFICATION, R.raw.nav_refresh_beep,
                             null, null, false, 0);
