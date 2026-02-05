@@ -24,6 +24,7 @@ import android.annotation.SuppressLint;
 import android.app.ActivityManager.TaskDescription;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -31,6 +32,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -253,6 +255,16 @@ public abstract class OeffiActivity extends ComponentActivity {
     public void onUserInteraction() {
         lastUserInteractionTime = System.currentTimeMillis();
         super.onUserInteraction();
+    }
+
+    protected boolean isExternalPower() {
+        // return batteryManager.isCharging(); -- does not work on some devices
+        final IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        final Intent batteryStatus = registerReceiver(null, ifilter);
+        if (batteryStatus == null)
+            return false;
+        final int plugged = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0);
+        return plugged != 0;
     }
 
     @Override

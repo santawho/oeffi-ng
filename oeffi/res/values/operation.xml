@@ -22,4 +22,7 @@
     <string name="operation_location_tracking_required">This function requires location tracking.\nPlease enable it!</string>
     <string name="operation_location_not_available">Current location is not available.</string>
 
+    <string name="operation_next_event_departure_time_format">dep.\n%1$s</string>
+    <string name="operation_next_event_arrival_time_format">arr.\n%1$s</string>
+
 </resources>

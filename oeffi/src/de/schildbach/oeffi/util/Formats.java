@@ -17,6 +17,7 @@
 
 package de.schildbach.oeffi.util;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
@@ -199,9 +200,16 @@ public final class Formats {
         }
     }
 
-    public static String formatTimeSpan(final long millis) {
-        final long mins = millis / DateUtils.MINUTE_IN_MILLIS;
-        return String.format("%d:%02d", mins / 60, mins % 60);
+    @SuppressLint("DefaultLocale")
+    public static String formatTimeSpanHM(final long millis, final boolean forcePlus) {
+        final long mins = Math.abs(millis) / DateUtils.MINUTE_IN_MILLIS;
+        return String.format("%s%d:%02d", millis < 0 ? "-" : forcePlus ? "+" : "", mins / 60, mins % 60);
+    }
+
+    @SuppressLint("DefaultLocale")
+    public static String formatTimeSpanMS(final long millis, final boolean forcePlus) {
+        final long secs = Math.abs(millis) / DateUtils.SECOND_IN_MILLIS;
+        return String.format("%s%d:%02d", millis < 0 ? "-" : forcePlus ? "+" : "", secs / 60, secs % 60);
     }
 
     private static final String METER_SUFFIX = Constants.CHAR_HAIR_SPACE + "m";

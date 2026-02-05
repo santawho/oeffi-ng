@@ -26,7 +26,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -47,7 +46,6 @@ import de.schildbach.oeffi.directions.TripDetailsActivity;
 import de.schildbach.oeffi.directions.navigation.NavigationAlarmManager;
 import de.schildbach.oeffi.directions.navigation.Navigator;
 import de.schildbach.oeffi.directions.navigation.TripNavigatorActivity;
-import de.schildbach.oeffi.directions.navigation.TripRenderer;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.pte.NetworkId;
@@ -126,14 +124,11 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
     private boolean permissionRequestRunning;
     private boolean isStartupComplete = false;
     private boolean stillCheckForOtherNavigations;
-    private BatteryManager batteryManager;
     private long autoScrollInhibitTimeMs;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        batteryManager = (BatteryManager) getSystemService(Context.BATTERY_SERVICE);
 
         swipeRefreshForTripList.setOnRefreshListener(this::refreshNavigationByUserCommand);
         swipeRefreshForTripList.setEnabled(true);
@@ -211,7 +206,7 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
 
     @Override
     protected long getPeriodicUpdateIntervalMs() {
-        return batteryManager.isCharging()
+        return isExternalPower()
                 ? periodicUpdateIntervalMsWhenCharging
                 : periodicUpdateIntervalMsOnBattery;
     }
@@ -219,7 +214,7 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
     private void setMustKeepDisplayOn() {
         setMustKeepDisplayOn(keepDisplayOnConfig < 0 ? false
                 : keepDisplayOnConfig > 0 ? true
-                : batteryManager.isCharging());
+                : isExternalPower());
     }
 
     @Override
@@ -476,10 +471,21 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
     }
 
     @Override
+    protected boolean isShowSeconds() {
+        // return isExternalPower();
+        return true;
+    }
+
+    @Override
+    protected boolean isShowRemaining() {
+        return true;
+    }
+
+    @Override
     protected void updateNavigationInstructions() {
         super.updateNavigationInstructions();
 
-        final int style = batteryManager.isCharging() ? DateFormat.MEDIUM : DateFormat.SHORT;
+        final int style = isShowSeconds() ? DateFormat.MEDIUM : DateFormat.SHORT;
         final String clockStr = DateFormat.getTimeInstance(style).format(new Date());
         ((TextView) findViewById(R.id.navigation_next_event_clock)).setText(clockStr);
     }

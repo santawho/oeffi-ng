@@ -21,6 +21,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -167,12 +168,21 @@ public class OperationDetailsActivity extends TripDetailsActivity {
             return colorTimeGood;
     }
 
+    protected boolean isShowSeconds() {
+        return false;
+    }
+
+    protected boolean isShowRemaining() {
+        return false;
+    }
+
     @SuppressLint("SetTextI18n")
     protected void renderIntervalMinsAndSecs(
             final Long intervalMs,
             final ViewGroup viewGroup,
             final int textColor,
             final boolean showPlus,
+            final boolean isNowBased,
             final int minsViewId, final int secsViewId) {
         final TextView minsView = viewGroup.findViewById(minsViewId);
         final TextView secsView = viewGroup.findViewById(secsViewId);
@@ -193,14 +203,22 @@ public class OperationDetailsActivity extends TripDetailsActivity {
             intervalSecs = intervalMs / 1000;
         }
 
+        final int style = isNowBased ? Typeface.ITALIC : Typeface.NORMAL;
+
         final long mins = intervalSecs / 60;
-        final long secs = intervalSecs - mins * 60;
-
         minsView.setText((isNegative ? "-" : showPlus ? "+" : "") + mins);
-        secsView.setText((secs < 10 ? ":0" : ":") + secs);
-
+        minsView.setTypeface(null, style);
         minsView.setTextColor(textColor);
-        secsView.setTextColor(textColor);
+
+        if (isShowSeconds()) {
+            secsView.setVisibility(View.VISIBLE);
+            final long secs = intervalSecs - mins * 60;
+            secsView.setText((secs < 10 ? ":0" : ":") + secs);
+            secsView.setTypeface(null, style);
+            secsView.setTextColor(textColor);
+        } else {
+            secsView.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -257,13 +275,13 @@ public class OperationDetailsActivity extends TripDetailsActivity {
         final TableRow row = (TableRow) inflater.inflate(R.layout.operation_details_stop_arrival, null);
         final ViewGroup containerView = row.findViewById(R.id.operation_details_stop_container);
 
-        renderIntervalMinsAndSecs(timeToPlan, row, textColor, false,
+        renderIntervalMinsAndSecs(timeToPlan, row, textColor, false, true,
                 R.id.operation_details_stop_time_to_plan_min,
                 R.id.operation_details_stop_time_to_plan_sec);
-        renderIntervalMinsAndSecs(timeToPrediction, row, textColor, false,
+        renderIntervalMinsAndSecs(timeToPrediction, row, textColor, false, true,
                 R.id.operation_details_stop_time_to_prediction_min,
                 R.id.operation_details_stop_time_to_prediction_sec);
-        renderIntervalMinsAndSecs(arrivalDelay, row, textColor, true,
+        renderIntervalMinsAndSecs(arrivalDelay, row, textColor, true, false,
                 R.id.operation_details_stop_delay_min,
                 R.id.operation_details_stop_delay_sec);
 
@@ -310,6 +328,7 @@ public class OperationDetailsActivity extends TripDetailsActivity {
         final Long plannedTime = plannedDepartureTime == null ? null : plannedDepartureTime.getTime();
         final Long predictedTime = predictedDepartureTime == null ? null : predictedDepartureTime.getTime();
         final Long departureDelay;
+        final boolean departureDelayIsNowBased;
         final int color;
 
         final Long timetoPlan = plannedTime == null ? null : (nowTime - plannedTime);
@@ -320,9 +339,11 @@ public class OperationDetailsActivity extends TripDetailsActivity {
             timeToPrediction = null;
             if (plannedTime != null && predictedTime != null) {
                 departureDelay = nowTime - plannedTime;
+                departureDelayIsNowBased = true;
                 color = getStopTimeColor(departureDelay);
             } else {
                 departureDelay = null;
+                departureDelayIsNowBased = false;
                 color = colorSimulated;
             }
             backgroundColor = color;
@@ -332,9 +353,11 @@ public class OperationDetailsActivity extends TripDetailsActivity {
             timeToPrediction = null;
             if (plannedTime != null && predictedTime != null) {
                 departureDelay = predictedTime - plannedTime;
+                departureDelayIsNowBased = false;
                 color = getStopTimeColor(departureDelay);
             } else {
                 departureDelay = null;
+                departureDelayIsNowBased = false;
                 color = colorSimulated;
             }
             backgroundColor = Color.TRANSPARENT;
@@ -344,13 +367,13 @@ public class OperationDetailsActivity extends TripDetailsActivity {
         final TableRow row = (TableRow) inflater.inflate(R.layout.operation_details_stop_departure, null);
         final ViewGroup containerView = row.findViewById(R.id.operation_details_stop_container);
 
-        renderIntervalMinsAndSecs(timetoPlan, row, textColor, false,
+        renderIntervalMinsAndSecs(timetoPlan, row, textColor, false, true,
                 R.id.operation_details_stop_time_to_plan_min,
                 R.id.operation_details_stop_time_to_plan_sec);
-        renderIntervalMinsAndSecs(timeToPrediction, row, textColor, false,
+        renderIntervalMinsAndSecs(timeToPrediction, row, textColor, false, true,
                 R.id.operation_details_stop_time_to_prediction_min,
                 R.id.operation_details_stop_time_to_prediction_sec);
-        renderIntervalMinsAndSecs(departureDelay, row, textColor, true,
+        renderIntervalMinsAndSecs(departureDelay, row, textColor, true, departureDelayIsNowBased,
                 R.id.operation_details_stop_delay_min,
                 R.id.operation_details_stop_delay_sec);
 
@@ -438,38 +461,47 @@ public class OperationDetailsActivity extends TripDetailsActivity {
 
         final long now = System.currentTimeMillis();
 
-        final Long nearestArrivalDelay;
-        final Long nearestDepartureDelay;
-        final Long nextArrivalDelay;
         PTDate tPlan, tPred;
+        final Long nearestArrivalDelay;
+        final boolean nearestArrivalDelayIsNowBased;
+        final Long nearestDepartureDelay;
+        final boolean nearestDepartureDelayIsNowBased;
         if (isAtNearestStop) {
             // waiting for departure
             tPlan = nearestStop.plannedArrivalTime;
             nearestArrivalDelay = tPlan == null ? null : now - tPlan.getTime();
+            nearestArrivalDelayIsNowBased = true;
             tPlan = nearestStop.plannedDepartureTime;
             nearestDepartureDelay = tPlan == null ? null : now - tPlan.getTime();
-            tPlan = nextStop == null ? null : nextStop.plannedArrivalTime;
-            nextArrivalDelay = tPlan == null ? null : now - tPlan.getTime();
+            nearestDepartureDelayIsNowBased = true;
         } else {
             if (sectionIsAfterNearestStop) {
                 nearestArrivalDelay = null;
+                nearestArrivalDelayIsNowBased = false;
                 tPlan = nearestStop.plannedDepartureTime;
                 nearestDepartureDelay = tPlan == null ? null : now - tPlan.getTime();
+                nearestDepartureDelayIsNowBased = true;
             } else {
                 tPlan = nearestStop.plannedArrivalTime;
                 tPred = nearestStop.predictedArrivalTime;
                 nearestArrivalDelay = tPlan == null ? null : tPred == null ? 0 : tPred.getTime() - tPlan.getTime();
+                nearestArrivalDelayIsNowBased = false;
                 tPlan = nearestStop.plannedDepartureTime;
                 tPred = nearestStop.predictedDepartureTime;
                 nearestDepartureDelay = tPlan == null ? null : tPred == null ? 0 : tPred.getTime() - tPlan.getTime();
+                nearestDepartureDelayIsNowBased = false;
             }
-            if (nextStop == null) {
-                nextArrivalDelay = null;
-            } else {
-                tPlan = nextStop.plannedArrivalTime;
-                tPred = nextStop.predictedArrivalTime;
-                nextArrivalDelay = tPlan == null ? null : tPred == null ? 0 : tPred.getTime() - tPlan.getTime();
-            }
+        }
+        final Long nextArrivalDelay;
+        final boolean nextArrivalDelayIsNowBased;
+        if (nextStop == null) {
+            nextArrivalDelay = null;
+            nextArrivalDelayIsNowBased = false;
+        } else {
+            tPlan = nextStop.plannedArrivalTime;
+            tPred = nextStop.predictedArrivalTime;
+            nextArrivalDelay = tPlan == null ? null : tPred == null ? 0 : tPred.getTime() - tPlan.getTime();
+            nextArrivalDelayIsNowBased = false;
         }
 
         final TextView nearestStopNameView = containerView.findViewById(R.id.operation_next_event_nearest_station_name);
@@ -478,7 +510,7 @@ public class OperationDetailsActivity extends TripDetailsActivity {
         nearestStopNameView.setTextColor(colorSignificant);
 
         boolean isNextAction;
-        int color, textColor;
+        int color, delayTextColor, otherTextColor;
 
         final View nearestArrivalView = containerView.findViewById(R.id.operation_next_event_nearest_station_arrival);
         if (nearestArrivalDelay == null) {
@@ -487,13 +519,17 @@ public class OperationDetailsActivity extends TripDetailsActivity {
             color = getStopTimeColor(nearestArrivalDelay);
             isNextAction = isAtNearestStop ? nearestDepartureDelay == null : !sectionIsAfterNearestStop;
             nearestArrivalView.setVisibility(View.VISIBLE);
-            textColor = isNextAction ? colorDefaultBackground : color;
-            renderIntervalMinsAndSecs(nearestArrivalDelay, containerView, textColor, true,
+            delayTextColor = isNextAction ? colorDefaultBackground : color;
+            otherTextColor = isNextAction ? colorDefaultBackground : colorSignificant;
+            renderIntervalMinsAndSecs(nearestArrivalDelay, containerView, delayTextColor,
+                    true, nearestArrivalDelayIsNowBased,
                     R.id.operation_next_event_nearest_station_arrival_delay_min,
                     R.id.operation_next_event_nearest_station_arrival_delay_sec);
             final TextView planTimeView = containerView.findViewById(R.id.operation_next_event_nearest_station_arrival_plan_time);
-            planTimeView.setText(Formats.formatTime(timeZoneSelector, nearestStop.plannedArrivalTime));
-            planTimeView.setTextColor(isNextAction ? colorDefaultBackground : colorSignificant);
+            setPlanTime(planTimeView, false, nearestStop.plannedArrivalTime, otherTextColor);
+            final TextView remainingView = containerView.findViewById(R.id.operation_next_event_nearest_station_arrival_remaining);
+            setRemaining(remainingView, nearestStop.plannedArrivalTime.getTime() - now, otherTextColor);
+
             if (isNextAction) {
                 nearestArrivalView.setBackgroundColor(color);
                 nearestStopNameView.setBackgroundColor(color);
@@ -517,13 +553,17 @@ public class OperationDetailsActivity extends TripDetailsActivity {
             color = getStopTimeColor(nearestDepartureDelay);
             isNextAction = isAtNearestStop;
             nearestDepartureView.setVisibility(View.VISIBLE);
-            textColor = isNextAction ? colorDefaultBackground : color;
-            renderIntervalMinsAndSecs(nearestDepartureDelay, containerView, textColor, true,
+            delayTextColor = isNextAction ? colorDefaultBackground : color;
+            otherTextColor = isNextAction ? colorDefaultBackground : colorSignificant;
+            renderIntervalMinsAndSecs(nearestDepartureDelay, containerView, delayTextColor,
+                    true, nearestDepartureDelayIsNowBased,
                     R.id.operation_next_event_nearest_station_departure_delay_min,
                     R.id.operation_next_event_nearest_station_departure_delay_sec);
             final TextView planTimeView = containerView.findViewById(R.id.operation_next_event_nearest_station_departure_plan_time);
-            planTimeView.setText(Formats.formatTime(timeZoneSelector, nearestStop.plannedDepartureTime));
-            planTimeView.setTextColor(isNextAction ? colorDefaultBackground : colorSignificant);
+            setPlanTime(planTimeView, true, nearestStop.plannedDepartureTime, otherTextColor);
+            final TextView remainingView = containerView.findViewById(R.id.operation_next_event_nearest_station_departure_remaining);
+            setRemaining(remainingView, nearestStop.plannedDepartureTime.getTime() - now, otherTextColor);
+
             if (isNextAction) {
                 nearestDepartureView.setBackgroundColor(color);
                 nearestStopNameView.setBackgroundColor(color);
@@ -541,13 +581,16 @@ public class OperationDetailsActivity extends TripDetailsActivity {
             color = getStopTimeColor(nextArrivalDelay);
             isNextAction = !isAtNearestStop && sectionIsAfterNearestStop;
             nextArrivalView.setVisibility(View.VISIBLE);
-            textColor = isNextAction ? colorDefaultBackground : color;
-            renderIntervalMinsAndSecs(nextArrivalDelay, containerView, textColor, true,
+            delayTextColor = isNextAction ? colorDefaultBackground : color;
+            otherTextColor = isNextAction ? colorDefaultBackground : colorSignificant;
+            renderIntervalMinsAndSecs(nextArrivalDelay, containerView, delayTextColor,
+                    true, nextArrivalDelayIsNowBased,
                     R.id.operation_next_event_next_station_arrival_delay_min,
                     R.id.operation_next_event_next_station_arrival_delay_sec);
             final TextView planTimeView = containerView.findViewById(R.id.operation_next_event_next_station_arrival_plan_time);
-            planTimeView.setText(Formats.formatTime(timeZoneSelector, nextStop.plannedArrivalTime));
-            planTimeView.setTextColor(isNextAction ? colorDefaultBackground : colorSignificant);
+            setPlanTime(planTimeView, false, nextStop.plannedArrivalTime, otherTextColor);
+            final TextView remainingView = containerView.findViewById(R.id.operation_next_event_next_station_arrival_remaining);
+            setRemaining(remainingView, nextStop.plannedArrivalTime.getTime() - now, otherTextColor);
 
             final TextView nextStopNameView = containerView.findViewById(R.id.operation_next_event_next_station_name);
             nextStopNameView.setText(Formats.makeBreakableStationName(nextStop.location.name));
@@ -563,6 +606,27 @@ public class OperationDetailsActivity extends TripDetailsActivity {
                 nextStopNameView.setTextColor(colorSignificant);
             }
         }
+    }
+
+    protected void setPlanTime(
+            final TextView planTimeView,
+            final boolean isDeparture,
+            final PTDate date,
+            final int textColor) {
+        planTimeView.setText(getString(
+                isDeparture
+                    ? R.string.operation_next_event_departure_time_format
+                    : R.string.operation_next_event_arrival_time_format,
+                Formats.formatTime(timeZoneSelector, date)));
+        planTimeView.setTextColor(textColor);
+    }
+
+    protected void setRemaining(
+            final TextView remainingView,
+            final long timeSpan,
+            final int textColor) {
+        remainingView.setText(isShowRemaining() ? Formats.formatTimeSpanMS(timeSpan, false) : null);
+        remainingView.setTextColor(textColor);
     }
 
     protected TripDetailsActivity.StopClickListener newStopClickListener(

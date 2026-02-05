@@ -373,9 +373,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final long duration = tripRenderer.trip.getDuration();
         final Long publicDuration = tripRenderer.trip.getPublicDuration();
         final String durationFormatted = (publicDuration == null || publicDuration == duration)
-                ? Formats.formatTimeSpan(duration)
-                : Formats.formatTimeSpan(duration)
-                    + " / " + Formats.formatTimeSpan(publicDuration);
+                ? Formats.formatTimeSpanHM(duration, false)
+                : Formats.formatTimeSpanHM(duration, false)
+                    + " / " + Formats.formatTimeSpanHM(publicDuration, false);
         final String durationText = getString(R.string.directions_trip_details_duration, durationFormatted);
         final Integer numChanges = tripRenderer.trip.getNumChanges();
         final String numChangesText = numChanges == null || numChanges <= 0 ? null :
@@ -944,7 +944,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     private void removeLocationUpdates() {
-        locationProvider = null;
         lastLocationUpdateIntervalMs = 0;
         locationManager.removeUpdates(this);
         updateDeviceLocationDependencies(null, null, null, null);
@@ -2715,7 +2714,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         // message
         final String durationString = duration == null ? null :
-                getString(R.string.directions_trip_details_public_entry_duration, Formats.formatTimeSpan(duration));
+                getString(R.string.directions_trip_details_public_entry_duration, Formats.formatTimeSpanHM(duration, false));
         final String quantityString = numIntermediateStops == 0 ? null : res.getQuantityString(
                 R.plurals.directions_trip_details_public_entry_collapsed_intermediate_stops,
                 numIntermediateStops, numIntermediateStops);

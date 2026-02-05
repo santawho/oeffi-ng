@@ -94,7 +94,8 @@
     <dimen name="operation_next_event_next_station_name_fontsize">24sp</dimen>
     <dimen name="operation_next_event_plan_time_fontsize">16sp</dimen>
     <dimen name="operation_next_event_delay_min_fontsize">64sp</dimen>
-    <dimen name="operation_next_event_delay_sec_fontsize">40sp</dimen>
+    <dimen name="operation_next_event_delay_sec_fontsize">30sp</dimen>
+    <dimen name="operation_next_event_remaining_fontsize">16sp</dimen>
     <dimen name="operation_next_event_arrow_height">80dp</dimen>
     <dimen name="operation_next_event_clock_fontsize">40sp</dimen>
 

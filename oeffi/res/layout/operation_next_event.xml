@@ -92,6 +92,15 @@
                                     android:layout_height="wrap_content"
                                     android:textSize="@dimen/operation_next_event_delay_sec_fontsize" />
                             </LinearLayout>
+                            <TextView
+                                android:id="@+id/operation_next_event_nearest_station_arrival_remaining"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:layout_alignParentRight="true"
+                                android:paddingRight="@dimen/text_padding_horizontal_lax"
+                                android:textStyle="italic"
+                                android:textSize="@dimen/operation_next_event_remaining_fontsize" />
                         </RelativeLayout>
 
                     </LinearLayout>
@@ -137,6 +146,15 @@
                                     android:layout_height="wrap_content"
                                     android:textSize="@dimen/operation_next_event_delay_sec_fontsize" />
                             </LinearLayout>
+                            <TextView
+                                android:id="@+id/operation_next_event_nearest_station_departure_remaining"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:layout_alignParentRight="true"
+                                android:paddingRight="@dimen/text_padding_horizontal_lax"
+                                android:textStyle="italic"
+                                android:textSize="@dimen/operation_next_event_remaining_fontsize" />
                         </RelativeLayout>
 
                         <ImageView
@@ -184,6 +202,15 @@
                                     android:layout_height="wrap_content"
                                     android:textSize="@dimen/operation_next_event_delay_sec_fontsize" />
                             </LinearLayout>
+                            <TextView
+                                android:id="@+id/operation_next_event_next_station_arrival_remaining"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:layout_alignParentRight="true"
+                                android:paddingRight="@dimen/text_padding_horizontal_lax"
+                                android:textStyle="italic"
+                                android:textSize="@dimen/operation_next_event_remaining_fontsize" />
                         </RelativeLayout>
 
                         <TextView

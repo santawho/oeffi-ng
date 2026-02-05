@@ -509,7 +509,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
 
             final Long duration = trip.getDuration(); // trip.getPublicDuration();
             if (duration != null) {
-                final String durationText = Formats.formatTimeSpan(duration);
+                final String durationText = Formats.formatTimeSpanHM(duration, false);
                 posFromTop += paddingVertical;
                 final FontMetrics durationPaintMetrics = durationPaint.getFontMetrics();
                 posFromTop += (int) -durationPaintMetrics.ascent;

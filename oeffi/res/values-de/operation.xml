@@ -22,4 +22,7 @@
     <string name="operation_location_tracking_required">Dies Funktion erfordert die Ortsbestimmung.\nBitte aktiviere diese!</string>
     <string name="operation_location_not_available">Die aktuelle Position kann nicht ermittelt werden.</string>
 
+    <string name="operation_next_event_departure_time_format">ab\n%1$s</string>
+    <string name="operation_next_event_arrival_time_format">an\n%1$s</string>
+
 </resources>
