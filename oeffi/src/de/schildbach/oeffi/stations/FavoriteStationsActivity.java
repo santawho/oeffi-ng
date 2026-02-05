@@ -150,7 +150,7 @@ public class FavoriteStationsActivity extends OeffiActivity
         });
 
         final MyActionBar actionBar = getMyActionBar();
-        setPrimaryColor(R.color.bg_action_bar_stations);
+        setPrimaryColor(R.color.bg_action_bar_station_favorites);
         actionBar.setPrimaryTitle(getTitle());
         actionBar.setBack(v -> finish());
         actionBar.addButton(R.drawable.ic_add_white_24dp, R.string.stations_favorite_stations_add_title)

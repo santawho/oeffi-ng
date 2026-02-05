@@ -328,6 +328,7 @@ public abstract class OeffiActivity extends ComponentActivity {
 
             @Override
             public void onPrepareMenu(@NonNull final Menu menu) {
+                setupItem(menu, R.id.global_options_stations_favorites);
                 setupItem(menu, R.id.global_options_stations_nearby);
                 setupItem(menu, R.id.global_options_directions);
                 setupItem(menu, R.id.global_options_plans);
