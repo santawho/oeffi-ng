@@ -83,25 +83,25 @@ public class TravelAlarmManager {
     public static void createNotificationChannel(final Context context) {
         if (notificationChannelCreated)
             return;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            final NotificationManager notificationManager = getNotificationManager(context);
-            for (String channelId : LEGACY_CHANNEL_IDS) {
-                notificationManager.deleteNotificationChannel(channelId);
-            }
 
-            createNotificationChannel(START_CHANNEL_ID,
-                    context.getString(R.string.navigation_travelalarm_notification_start_channel_name),
-                    context.getString(R.string.navigation_travelalarm_notification_start_channel_description),
-                    notificationManager);
-            createNotificationChannel(DEPARTURE_CHANNEL_ID,
-                    context.getString(R.string.navigation_travelalarm_notification_departure_channel_name),
-                    context.getString(R.string.navigation_travelalarm_notification_departure_channel_description),
-                    notificationManager);
-            createNotificationChannel(ARRIVAL_CHANNEL_ID,
-                    context.getString(R.string.navigation_travelalarm_notification_arrival_channel_name),
-                    context.getString(R.string.navigation_travelalarm_notification_arrival_channel_description),
-                    notificationManager);
+        final NotificationManager notificationManager = getNotificationManager(context);
+        for (String channelId : LEGACY_CHANNEL_IDS) {
+            notificationManager.deleteNotificationChannel(channelId);
         }
+
+        createNotificationChannel(START_CHANNEL_ID,
+                context.getString(R.string.navigation_travelalarm_notification_start_channel_name),
+                context.getString(R.string.navigation_travelalarm_notification_start_channel_description),
+                notificationManager);
+        createNotificationChannel(DEPARTURE_CHANNEL_ID,
+                context.getString(R.string.navigation_travelalarm_notification_departure_channel_name),
+                context.getString(R.string.navigation_travelalarm_notification_departure_channel_description),
+                notificationManager);
+        createNotificationChannel(ARRIVAL_CHANNEL_ID,
+                context.getString(R.string.navigation_travelalarm_notification_arrival_channel_name),
+                context.getString(R.string.navigation_travelalarm_notification_arrival_channel_description),
+                notificationManager);
+
         notificationChannelCreated = true;
     }
 

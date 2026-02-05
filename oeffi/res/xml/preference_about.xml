@@ -95,13 +95,13 @@
                 android:data="@string/about_git_url" >
             </intent>
         </Preference>
-        <Preference
-            android:key="about_twitter"
-            android:summary="\@oeffi"
-            android:title="Twitter">
-            <intent
-                android:action="android.intent.action.VIEW"
-                android:data="https://twitter.com/oeffi" />
-        </Preference>
+<!--        <Preference-->
+<!--            android:key="about_twitter"-->
+<!--            android:summary="\@oeffi"-->
+<!--            android:title="Twitter">-->
+<!--            <intent-->
+<!--                android:action="android.intent.action.VIEW"-->
+<!--                android:data="https://twitter.com/oeffi" />-->
+<!--        </Preference>-->
     </PreferenceCategory>
 </PreferenceScreen>

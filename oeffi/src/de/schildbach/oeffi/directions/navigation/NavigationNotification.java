@@ -168,11 +168,9 @@ public class NavigationNotification {
         if (notificationChannelsCreated)
             return;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createInstructionsChannel(context);
-            createChangesChannel(context);
-            createDirectionsChannel(context);
-        }
+        createInstructionsChannel(context);
+        createChangesChannel(context);
+        createDirectionsChannel(context);
 
         notificationTitleForChanges = context.getString(R.string.navigation_event_notify_changes_title);
         notificationTitleForDirections = context.getString(R.string.navigation_event_notify_directions_title);

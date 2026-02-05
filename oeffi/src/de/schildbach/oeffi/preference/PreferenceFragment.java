@@ -87,10 +87,7 @@ public class PreferenceFragment extends android.preference.PreferenceFragment {
         if (preference == null)
             return;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            preference.getParent().removePreference(preference);
-        else
-            preference.setEnabled(false);
+        preference.getParent().removePreference(preference);
     }
 
     protected void addPreference(final Preference preference) {

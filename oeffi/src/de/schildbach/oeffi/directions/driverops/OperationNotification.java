@@ -99,9 +99,7 @@ public class OperationNotification {
         if (notificationChannelsCreated)
             return;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createInstructionsChannel(context);
-        }
+        createInstructionsChannel(context);
 
         notificationChannelsCreated = true;
     }

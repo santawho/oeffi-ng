@@ -28,7 +28,6 @@ import android.graphics.Paint.FontMetrics;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.Typeface;
-import android.os.Build;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ReplacementSpan;
@@ -184,21 +183,18 @@ public class LineView extends TextView {
                                 line.network)
                         .filter(Objects::nonNull)
                         .collect(Collectors.joining("\n"));
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                    if (!sheet.isEmpty())
-                        setTooltipText(sheet);
-                    else
-                        setTooltipText(null);
-            } else {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                if (!sheet.isEmpty())
+                    setTooltipText(sheet);
+                else
                     setTooltipText(null);
+            } else {
+                setTooltipText(null);
             }
         } else {
             if (hideIfEmpty)
                 setVisibility(GONE);
             setText(null);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                setTooltipText(null);
+            setTooltipText(null);
         }
     }
 

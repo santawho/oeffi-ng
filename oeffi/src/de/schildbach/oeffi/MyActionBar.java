@@ -19,7 +19,6 @@ package de.schildbach.oeffi;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.os.Build;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -29,7 +28,6 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
@@ -158,8 +156,7 @@ public class MyActionBar extends LinearLayout {
         if (descriptionRes != 0) {
             final String description = context.getString(descriptionRes);
             button.setContentDescription(description);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                button.setTooltipText(description);
+            button.setTooltipText(description);
         }
         addButton(button);
 
@@ -174,8 +171,7 @@ public class MyActionBar extends LinearLayout {
         if (descriptionRes != 0) {
             final String description = context.getString(descriptionRes);
             button.setContentDescription(description);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                button.setTooltipText(description);
+            button.setTooltipText(description);
         }
         addButton(button);
 
@@ -185,8 +181,7 @@ public class MyActionBar extends LinearLayout {
     public View addProgressButton() {
         progressAlwaysVisible = true;
         progressButton.setVisibility(View.VISIBLE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            progressButton.setTooltipText(progressButton.getContentDescription());
+        progressButton.setTooltipText(progressButton.getContentDescription());
         return getProgressButton();
     }
 

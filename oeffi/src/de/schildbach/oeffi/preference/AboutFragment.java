@@ -78,8 +78,8 @@ public class AboutFragment extends PreferenceFragment {
             removeOrDisablePreference(prefMarketApp);
         }
 
-        if (!getResources().getBoolean(R.bool.flags_show_twitter))
-            removeOrDisablePreference("about_twitter");
+        // if (!getResources().getBoolean(R.bool.flags_show_twitter))
+        //     removeOrDisablePreference("about_twitter");
 
         final String changeLogUrl = application.getString(R.string.about_changelog_url);
         if (!changeLogUrl.isEmpty()) {
