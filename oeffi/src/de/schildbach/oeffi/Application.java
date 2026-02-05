@@ -30,9 +30,9 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.widget.ImageView;
@@ -52,6 +52,8 @@ import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
 
 import de.schildbach.oeffi.directions.DirectionsActivity;
+import de.schildbach.oeffi.directions.driverops.OperationNotification;
+import de.schildbach.oeffi.directions.driverops.OperationsActivity;
 import de.schildbach.oeffi.directions.QueryHistoryProvider;
 import de.schildbach.oeffi.directions.navigation.NavigationNotification;
 import de.schildbach.oeffi.directions.navigation.NotificationSoundManager;
@@ -254,12 +256,15 @@ public class Application extends android.app.Application {
         log.info("=== Starting app version {} ({})", packageInfo.versionName, packageInfo.versionCode);
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
+        final String dimensionSelector = getString(R.string.dimension_selector);
+
         NotificationSoundManager.logAvailableTextToSpeechServices();
         SpeechInput.logAvailableSpeechRecognitionServices();
 
         createShortcuts();
 
-        NavigationNotification.startuo(this);
+        NavigationNotification.startup(this);
+        OperationNotification.startup(this);
 
         final OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.followRedirects(true);
@@ -444,6 +449,10 @@ public class Application extends android.app.Application {
         return okHttpClient;
     }
 
+    public boolean isDriverMode() {
+        return prefs.getBoolean(Constants.KEY_EXTRAS_DRIVERMODE_ENABLED, false);
+    }
+
     public static String versionName(final Application application) {
         return application.packageInfo().versionName;
     }
@@ -458,12 +467,24 @@ public class Application extends android.app.Application {
                 DirectionsActivity.class,
                 StationsActivity.class,
                 R.string.stations_activity_title,
-                R.drawable.ic_oeffi_stations_grey600_36dp);
+                R.drawable.ic_oeffi_stations_grey600_36dp,
+                null);
         createLauncherShortcut("idDP",
                 DirectionsActivity.class,
                 PlansPickerActivity.class,
                 R.string.plans_activity_title,
-                R.drawable.ic_oeffi_plans_grey600_36dp);
+                R.drawable.ic_oeffi_plans_grey600_36dp,
+                null);
+        if (isDriverMode()) {
+            final Bundle extras = new Bundle();
+//            extras.putBoolean(Constants.KEY_EXTRAS_DRIVERMODE_ENABLED, true);
+            createLauncherShortcut("idDO",
+                    DirectionsActivity.class,
+                    OperationsActivity.class,
+                    R.string.operations_activity_title,
+                    R.drawable.ic_oeffi_operations_grey600_36dp,
+                    extras);
+        }
 //        createLauncherShortcut("idSD",
 //                StationsActivity.class,
 //                DirectionsActivity.class,
@@ -491,13 +512,18 @@ public class Application extends android.app.Application {
             final Class<?> sourceActivityClass,
             final Class<?> targetActivityClass,
             final int titleId,
-            final int iconId) {
+            final int iconId,
+            final Bundle extras) {
+        final Intent intent = new Intent(Intent.ACTION_MAIN)
+                .setClass(this, targetActivityClass);
+        if (extras != null)
+            intent.putExtras(extras);
         ShortcutManagerCompat.pushDynamicShortcut(this, new ShortcutInfoCompat
                 .Builder(this, shortcutId)
                 .setActivity(new ComponentName(this, sourceActivityClass))
                 .setShortLabel(getString(titleId))
                 .setIcon(IconCompat.createWithResource(this, iconId))
-                .setIntent(new Intent(this, targetActivityClass).setAction(Intent.ACTION_MAIN))
+                .setIntent(intent)
                 .build());
     }
 

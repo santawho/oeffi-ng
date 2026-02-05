@@ -45,7 +45,6 @@ import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.PTDate;
 import de.schildbach.pte.dto.Trip;
-import de.schildbach.pte.dto.TripOptions;
 
 public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
     public interface ContextMenuItemListener {
@@ -57,6 +56,7 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
 
     private final OeffiActivity context;
     private final NetworkId network;
+    private final String usage;
     private final View frameView;
     private final ImageView iconView;
     private final TextView timeLeftView;
@@ -80,10 +80,12 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
     public QueryStoredTripViewHolder(
             final OeffiActivity context,
             final NetworkId network,
+            final String usage,
             final View itemView) {
         super(itemView);
         this.context = context;
         this.network = network;
+        this.usage = usage;
 
         iconView = itemView.findViewById(R.id.directions_query_stored_trip_entry_icon);
         timeLeftView = itemView.findViewById(R.id.directions_query_stored_trip_entry_time_left);
@@ -175,15 +177,15 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
             final int position = getAdapterPosition();
             if (navigationOpened) {
                 navigationOpened = false;
-                startNavigation();
+                startNavigation(position, clickListener);
             } else if (removeOpened) {
                 removeOpened = false;
                 if (tripId != null) {
-                    QueryStoredTripsProvider.delete(context.getContentResolver(), network, tripId);
+                    QueryStoredTripsProvider.delete(context.getContentResolver(), network, usage, tripId);
                 }
             } else if (position != RecyclerView.NO_POSITION) {
                 if (NavigationNotification.isTripUnderNavigation(context, tripId)) {
-                    startNavigation();
+                    startNavigation(position, clickListener);
                 } else {
                     clickListener.onSavedTripClick(position,
                             from, to, via,
@@ -207,16 +209,15 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
 //        });
     }
 
-    private void startNavigation() {
-        final TripDetailsActivity.RenderConfig renderConfig = new TripDetailsActivity.RenderConfig();
+    private void startNavigation(final int position, final QueryHistoryClickListener clickListener) {
         final Trip trip = (Trip) Objects.deserialize(serializedSavedTrip, true);
         if (trip == null) {
             new Toast(context).longToast(R.string.directions_query_history_invalid_blob);
             return;
         }
-        renderConfig.queryTripsRequestData = (QueryTripsRunnable.TripRequestData) Objects.deserialize(serializedReloadRequest, true);
-        TripNavigatorActivity.startNavigation(context, network, trip, renderConfig, false);
-
+        final QueryTripsRunnable.TripRequestData queryTripsRequestData =
+                (QueryTripsRunnable.TripRequestData) Objects.deserialize(serializedReloadRequest, true);
+        clickListener.onSavedTripStartNavigation(position, trip, queryTripsRequestData);
     }
 
     private void showContextMenu(final View view) {

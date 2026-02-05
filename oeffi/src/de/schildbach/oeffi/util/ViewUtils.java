@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.view.View;
 import android.view.ViewParent;
+import android.widget.RemoteViews;
 
 public class ViewUtils {
     public static void setVisibility(final View view, final boolean visible) {
@@ -32,5 +33,11 @@ public class ViewUtils {
 
     public static int getAttrColor(final Context context, final int attrColor) {
         return context.getColor(getAttrColorId(context, attrColor));
+    }
+
+    public static void remoteViewsSetBackgroundColor(
+            final RemoteViews remoteViews,
+            final int viewId, final int color) {
+        remoteViews.setInt(viewId, "setBackgroundColor", color);
     }
 }

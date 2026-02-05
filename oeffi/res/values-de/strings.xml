@@ -6,6 +6,7 @@
     <string name="stations_icon_label">Öffi Haltestellen</string>
     <string name="directions_icon_label">Öffi Verbindungen</string>
     <string name="plans_icon_label">Öffi Netzpläne</string>
+    <string name="operations_icon_label">Öffi Einsatzplanung</string>
     <string name="disclaimer_network">Daten bereitgestellt von\n%s</string>
     <string name="disclaimer_responsibility">alle Angaben ohne Gewähr</string>
     <string name="disclaimer_responsibility_2line">alle Angaben\nohne Gewähr</string>
@@ -21,14 +22,18 @@
     <string name="stations_activity_title">Nahegelegene Haltestellen</string>
     <string name="station_details_activity_title">Haltestellen-Details</string>
     <string name="directions_activity_title">Verbindungsabfrage</string>
+    <string name="operations_activity_title">Einsatzplanung</string>
     <string name="trip_details_title">Verbindungsdetails</string>
     <string name="journey_details_title">Fahrtdetails</string>
-    <string name="navigation_details_title">Navigation</string>
+    <string name="operation_details_title">Einsatzdetails</string>
+    <string name="navigation_title">Navigation</string>
+    <string name="operation_navigation_title">Einsatzführung</string>
     <string name="plans_activity_title">Netzpläne</string>
     <string name="network_picker_activity_title">Wähle Verkehrsnetz</string>
     <string name="assistant_label_title">Öffi Assistent</string>
 
     <!-- global options -->
+    <string name="global_options_operations_comment">Fahrer-Einsatzplanung</string>
     <string name="global_options_stations_comment">Abfahrtszeiten und Verspätungen</string>
     <string name="global_options_directions_comment">Von Tür zu Tür</string>
     <string name="global_options_plans_comment">Für den groben Überblick</string>
@@ -109,15 +114,6 @@
     <!-- preferences extras -->
     <string name="extras_title">Sonderfunktionen</string>
     <string name="extras_tripextrainfo_enabled_title">Lade Zusatzinfos für Verbindungen</string>
-
-    <!-- preferences driver mode -->
-    <string name="extras_drivermode_title">Fahrermodus</string>
-    <string name="extras_drivermode_summary">Der Fahrermodus optimiert das Verhalten der App für Zug/Tram/Bus-Fahrer und Zugbegleiter.</string>
-    <string name="extras_drivermode_enabled_title">Fahrermodus aktiviert</string>
-    <string name="extras_drivermode_threshold_early_title">Schwelle für Verfrühung</string>
-    <string name="extras_drivermode_threshold_early_summary">Minimale Sekunden, die ein Ereignis früher als Plan prognostiziert sein muss, um als Verfrühung erkannt zu werden.  [%s]</string>
-    <string name="extras_drivermode_threshold_delay_title">Schwelle für Verspätung</string>
-    <string name="extras_drivermode_threshold_delay_summary">Minimale Sekunden, die ein Ereignis später als Plan prognostiziert sein muss, um als Verspätung erkannt zu werden.  [%s]</string>
 
     <!-- network picker -->
     <string name="network_picker_firsttime_message">Da du Öffi das erste Mal nutzt, musst Du die Region wählen die am besten passt. Du kannst das später ändern.</string>

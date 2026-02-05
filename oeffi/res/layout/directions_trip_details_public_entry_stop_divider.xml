@@ -2,11 +2,14 @@
 <TableRow
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <Space />
+    <de.schildbach.oeffi.directions.PearlView
+        android:id="@+id/directions_trip_details_public_entry_stop_pearl"
+        android:layout_width="24dp"
+        android:layout_height="match_parent"
+        android:paddingTop="@dimen/trip_details_stop_offset" />
 
     <View
         android:layout_span="5"
-        android:id="@+id/directions_trip_details_public_entry_stop_date_divider"
         android:layout_width="match_parent"
         android:layout_height="@dimen/text_padding_vertical_cram"
         android:background="@color/bg_divider"

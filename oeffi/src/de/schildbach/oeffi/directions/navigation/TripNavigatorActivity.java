@@ -29,6 +29,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.AttributeSet;
@@ -44,6 +45,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
 import java.io.IOException;
@@ -74,7 +76,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     public static final int DELETEREQUEST_NOT_REQUESTED = 0;
     public static final int DELETEREQUEST_ASK = 1;
     public static final int DELETEREQUEST_FORCE = 2;
-    public static final String INTENT_EXTRA_NEXTEVENT = TripNavigatorActivity.class.getName() + ".nextevent";
+    public static final String INTENT_EXTRA_SHOWPAGE = TripNavigatorActivity.class.getName() + ".showpage";
     public static final String INTENT_EXTRA_PLAYALARM = TripNavigatorActivity.class.getName() + ".playalarm";
 
     public static boolean startNavigation(
@@ -88,6 +90,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
         final RenderConfig rc = new RenderConfig();
         rc.isNavigation = true;
+        rc.isOperation = renderConfig.isOperation;
         rc.isJourney = renderConfig.isJourney;
         QueryTripsRunnable.TripRequestData reloadRequestData = renderConfig.queryTripsRequestData;
         if (rc.queryTripsRequestData == null) {
@@ -117,7 +120,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         final Intent intent = TripDetailsActivity.buildStartIntent(TripNavigatorActivity.class, context, network, trip, renderConfig);
         intent.putExtra(INTENT_EXTRA_DELETEREQUEST, deleteRequest);
         if (setShowPage != null)
-            intent.putExtra(INTENT_EXTRA_NEXTEVENT, setShowPage.pageNum);
+            intent.putExtra(INTENT_EXTRA_SHOWPAGE, setShowPage.pageNum);
         if (playAlarmNotificationTag != null)
             intent.putExtra(INTENT_EXTRA_PLAYALARM, playAlarmNotificationTag);
         intent.addFlags(
@@ -153,6 +156,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        inflater.inflate(R.layout.navigation_event_log, viewPager);
         findViewById(R.id.navigation_event_log).setVisibility(View.VISIBLE);
 
         eventLogLatestView = findViewById(R.id.navigation_event_log_latest);
@@ -161,6 +165,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
         swipeRefreshForTripList.setOnRefreshListener(this::refreshNavigationByUserCommand);
         swipeRefreshForTripList.setEnabled(true);
+
         swipeRefreshForNextEvent.setOnRefreshListener(this::refreshNavigationByUserCommand);
         swipeRefreshForNextEvent.setEnabled(true);
 
@@ -203,7 +208,8 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
     @Override
     protected boolean allowScreenLock() {
-        return true;
+//        return true;
+        return false;
     }
 
     @Override
@@ -214,12 +220,24 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     }
 
     @Override
+    protected int getActionBarColorId() {
+        return R.color.bg_action_bar_navigation;
+    }
+
+    @Override
+    protected int getActionBarTitleStringId() {
+        return R.string.navigation_title;
+    }
+
+    @Override
     protected void setupActionBar() {
-        setPrimaryColor(renderConfig.isAlternativeConnectionSearch
-                        ? R.color.bg_action_alternative_directions
-                        : R.color.bg_action_bar_navigation);
-        actionBar.setPrimaryTitle(getString(R.string.navigation_details_title));
+        super.setupActionBar();
         actionBar.addProgressButton().setOnClickListener(buttonView -> refreshNavigationByUserCommand());
+    }
+
+    @Override
+    protected View.OnClickListener getStartNavigationClickListener() {
+        return null;
     }
 
     @Override
@@ -266,11 +284,14 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
             if (stillCheckForOtherNavigations) {
                 stillCheckForOtherNavigations = false;
-                askStopOtherNavigations();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    askStopOtherNavigations();
+                }
             }
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     private void askStopOtherNavigations() {
         final List<Intent> taskIntents = new ArrayList<>();
         final int myTaskId = getTaskId();
@@ -313,7 +334,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     }
 
     private void handleSwitchToNextEvent(final Intent intent) {
-        final int setShowPageNum = intent.getIntExtra(INTENT_EXTRA_NEXTEVENT, -1);
+        final int setShowPageNum = intent.getIntExtra(INTENT_EXTRA_SHOWPAGE, -1);
         if (setShowPageNum >= 0)
             setShowPage(Page.getPageForNum(setShowPageNum));
     }

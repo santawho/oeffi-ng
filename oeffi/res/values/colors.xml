@@ -44,10 +44,14 @@
     <color name="bg_action_bar">#555555</color>
     <color name="bg_action_bar_stations">#777700</color>
     <color name="bg_action_bar_navigation">#772222</color>
+    <color name="bg_action_bar_operation_navigation">#772256</color>
     <color name="bg_action_alternative_directions">#bb6666</color>
     <color name="bg_action_bar_directions">#227722</color>
     <color name="bg_action_bar_directions_darkdefault">#114411</color>
-    <color name="bg_action_bar_journey">#226677</color>
+    <color name="bg_action_bar_operations">#227777</color>
+    <color name="bg_action_bar_operations_darkdefault">#114444</color>
+    <color name="bg_action_bar_journey">#22a022</color>
+    <color name="bg_action_bar_operation">#227777</color>
     <color name="bg_action_bar_appendix">#cccccc</color>
     <color name="bg_selected_entry">#ffcfffaf</color>
     <color name="bg_individual">#cccccc</color>

@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <string name="dimension_selector" tools:ignore="ExtraTranslation">x-large</string>
 
     <dimen name="font_size_tiny">12sp</dimen>
     <dimen name="font_size_small">14sp</dimen>
     <dimen name="font_size_normal">16sp</dimen>
     <dimen name="font_size_large">20sp</dimen>
     <dimen name="font_size_xlarge">24sp</dimen>
+    <dimen name="font_size_2xlarge">30sp</dimen>
     <dimen name="font_size_action_bar">16dp</dimen>
     <dimen name="action_bar_height">60dp</dimen>
     <dimen name="action_bar_button_width">50dp</dimen>

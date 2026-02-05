@@ -2,6 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:visible="false"
+        android:id="@+id/global_options_operations"
+        android:icon="@drawable/ic_oeffi_operations"
+        android:title="@string/operations_activity_title"
+        android:titleCondensed="@string/global_options_operations_comment" />
+    <item
         android:id="@+id/global_options_stations_favorites"
         android:icon="@drawable/ic_oeffi_stations"
         android:title="@string/stations_favorite_stations_title"

@@ -31,9 +31,12 @@
     <color name="bg_action_bar">#444444</color>
     <color name="bg_action_bar_stations">#444400</color>
     <color name="bg_action_bar_navigation">#441111</color>
+    <color name="bg_action_bar_operation_navigation">#441135</color>
     <color name="bg_action_alternative_directions">#662222</color>
     <color name="bg_action_bar_directions">#114411</color>
-    <color name="bg_action_bar_journey">#005566</color>
+    <color name="bg_action_bar_operations">#114444</color>
+    <color name="bg_action_bar_journey">#117711</color>
+    <color name="bg_action_bar_operation">#114444</color>
     <color name="bg_action_bar_appendix">#555555</color>
     <color name="bg_selected_entry">#284028</color>
     <color name="bg_individual">#666666</color>

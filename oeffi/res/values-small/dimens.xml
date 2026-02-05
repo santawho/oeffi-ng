@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <string name="dimension_selector" tools:ignore="ExtraTranslation">small</string>
 
     <dimen name="action_bar_height">44dp</dimen>
     <dimen name="action_bar_button_width">44dp</dimen>

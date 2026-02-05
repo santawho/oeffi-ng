@@ -39,6 +39,7 @@ import de.schildbach.pte.dto.LocationType;
 public class AutoCompleteLocationAdapter extends BaseAdapter implements Filterable {
     private final LocationView locationView;
     private final NetworkId network;
+    private final String usage;
     private LocationSearchProviderId searchProviderId;
 
     private ImageButton filterStationButton;
@@ -48,9 +49,13 @@ public class AutoCompleteLocationAdapter extends BaseAdapter implements Filterab
 
     private List<Location> locations = new LinkedList<>();
 
-    public AutoCompleteLocationAdapter(final LocationView locationView, final NetworkId network) {
+    public AutoCompleteLocationAdapter(
+            final LocationView locationView,
+            final NetworkId network,
+            final String usage) {
         this.locationView = locationView;
         this.network = network;
+        this.usage = usage;
     }
 
     public Activity getActivity() {
@@ -141,7 +146,7 @@ public class AutoCompleteLocationAdapter extends BaseAdapter implements Filterab
             if (filterAddresses) suggestedLocationTypes.add(LocationType.ADDRESS);
             if (filterPois) suggestedLocationTypes.add(LocationType.POI);
             final List<Location> results = LocationSuggestionsCollector.collectSuggestions(
-                    constraint, suggestedLocationTypes, network, searchProviderId);
+                    constraint, suggestedLocationTypes, network, usage, searchProviderId);
             if (results != null) {
                 filterResults.values = results;
                 filterResults.count = results.size();

@@ -49,6 +49,7 @@ public class AutoCompleteLocationsHandler {
     }
     private final Activity activity;
     private final NetworkId network;
+    private final String usage;
     private final Handler handler;
     private final Set<Product> preferredProducts;
     private final AtomicInteger numAwaitedLocations = new AtomicInteger();
@@ -60,10 +61,12 @@ public class AutoCompleteLocationsHandler {
     public AutoCompleteLocationsHandler(
             final Activity activity,
             final NetworkId network,
+            final String usage,
             final Handler handler,
             final Set<Product> preferredProducts) {
         this.activity = activity;
         this.network = network;
+        this.usage = usage;
         this.handler = handler;
         this.preferredProducts = preferredProducts;
     }
@@ -134,7 +137,7 @@ public class AutoCompleteLocationsHandler {
                 final List<Location> locations = LocationSuggestionsCollector.collectSuggestions(
                         constraint,
                         EnumSet.of(LocationType.STATION, LocationType.ADDRESS, LocationType.POI),
-                        network, null);
+                        network, usage, null);
                 final Location location = getMatchingLocation(locations);
                 if (location != null) {
                     activity.runOnUiThread(() -> {

@@ -62,11 +62,13 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.FromViaToAware;
 import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiMainActivity;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.directions.navigation.TripNavigatorActivity;
 import de.schildbach.oeffi.mapview.OeffiMapView;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.util.TimeSpec.DepArr;
@@ -257,6 +259,23 @@ public class DirectionsActivity extends OeffiMainActivity implements
         handleIntent(getIntent(), false);
     }
 
+    protected int getActionBarColorId() {
+        return R.color.bg_action_bar_directions;
+    }
+
+    protected int getActionBarTitleStringId() {
+        return R.string.directions_activity_title;
+    }
+
+    @Override
+    protected int getGlobalOptionsId() {
+        return R.id.global_options_directions;
+    }
+
+    protected boolean isForceDirectOption() {
+        return false;
+    }
+
     @Override
     public void onNewIntent(@NonNull final Intent intent) {
         super.onNewIntent(intent);
@@ -288,8 +307,8 @@ public class DirectionsActivity extends OeffiMainActivity implements
             });
 
             final MyActionBar actionBar = getMyActionBar();
-            setPrimaryColor(renderConfig.actionBarColor > 0 ? renderConfig.actionBarColor : R.color.bg_action_bar_directions);
-            actionBar.setPrimaryTitle(R.string.directions_activity_title);
+            setPrimaryColor(renderConfig.actionBarColor > 0 ? renderConfig.actionBarColor : getActionBarColorId());
+            actionBar.setPrimaryTitle(getActionBarTitleStringId());
             addShowMapButtonToActionBar();
             actionBar.setTitlesOnClickListener(v -> NetworkPickerActivity.start(DirectionsActivity.this));
             buttonExpand = actionBar.addToggleButton(R.drawable.ic_expand_white_24dp,
@@ -417,6 +436,10 @@ public class DirectionsActivity extends OeffiMainActivity implements
                 view.setOnLongClickListener(productLongClickListener);
 
             viewDirectOption = findViewById(R.id.directions_option_direct);
+            if (isForceDirectOption()) {
+                viewDirectOption.setChecked(true);
+                viewDirectOption.setEnabled(false);
+            }
             viewBike = findViewById(R.id.directions_option_bike);
 
             final boolean timeAndGoAtBottom = prefs.getBoolean("user_interface_directions_time_and_go_bottom_enabled", false);
@@ -660,7 +683,8 @@ public class DirectionsActivity extends OeffiMainActivity implements
         if (command != null) {
             final AutoCompleteLocationsHandler autoCompleteLocationsHandler =
                     new AutoCompleteLocationsHandler(this,
-                            network, backgroundHandler, getProductToggles());
+                            network, getStoredTripsUsage(),
+                            backgroundHandler, getProductToggles());
             autoCompleteLocationsHandler.addJob(command.fromText, viewFromLocation);
             autoCompleteLocationsHandler.addJob(command.toText, viewToLocation);
             autoCompleteLocationsHandler.addJob(command.viaText, viewViaLocation);
@@ -802,18 +826,31 @@ public class DirectionsActivity extends OeffiMainActivity implements
         setActionBarSecondaryTitleFromNetwork();
     }
 
+    protected String get_PREFS_KEY_STORED_TRIPS_RETENTION_HOURS() {
+        return Constants.PREFS_KEY_STORED_TRIPS_RETENTION_HOURS;
+    }
+
     private void newQueryHistoryListAdapter() {
         if (queryHistoryListAdapter != null)
             queryHistoryListAdapter.close();
 
-        final String deleteTripsAfterHoursText = prefs.getString(Constants.PREFS_KEY_STORED_TRIPS_RETENTION_HOURS, getString(R.string.default_stored_trips_retention_hours));
+        final int maxHistoryEntries = Integer.parseInt(prefs.getString(
+                Constants.PREFS_KEY_MAX_HISTORY_ENTRIES,
+                Integer.toString(getResources().getInteger(R.integer.default_max_history_entries))));
+
+        final String deleteTripsAfterHoursText = prefs.getString(
+                get_PREFS_KEY_STORED_TRIPS_RETENTION_HOURS(),
+                getString(R.string.default_stored_trips_retention_hours));
         long deleteTripsAfterMillis;
         try {
             deleteTripsAfterMillis = (long) (Float.parseFloat(deleteTripsAfterHoursText) * 3600000f);
         } catch (final NumberFormatException nfe) {
             deleteTripsAfterMillis = -1;
         }
-        queryHistoryListAdapter = new QueryHistoryAdapter(this, network, this, this, deleteTripsAfterMillis);
+        queryHistoryListAdapter = new QueryHistoryAdapter(this,
+                network, getStoredTripsUsage(),
+                this, getHistoryEntryLayoutId(),
+                this, deleteTripsAfterMillis, maxHistoryEntries);
 
         updateRefTime(true);
         viewQueryHistoryList.setAdapter(queryHistoryListAdapter);
@@ -823,6 +860,11 @@ public class DirectionsActivity extends OeffiMainActivity implements
         @Override
         public NetworkId getNetwork() {
             return network;
+        }
+
+        @Override
+        public String getUsage() {
+            return getStoredTripsUsage();
         }
 
         @Override
@@ -1284,7 +1326,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         expandForm(haveNonDefaultProducts
                 || viewViaLocation.getText() != null
                 || viewBike.isChecked()
-                || viewDirectOption.isChecked()
+                || (!isForceDirectOption() && viewDirectOption.isChecked())
         );
     }
 
@@ -1347,6 +1389,16 @@ public class DirectionsActivity extends OeffiMainActivity implements
             final byte[] serializedTrip, final String tripId,
             final byte[] serializedReloadRequest) {
         handleShowSavedTrip(from, to, via, tripDepartureTime, tripArrivalTime, serializedTrip, tripId, serializedReloadRequest);
+    }
+
+    @Override
+    public void onSavedTripStartNavigation(
+            final int adapterPosition,
+            final Trip trip,
+            final QueryTripsRunnable.TripRequestData queryTripsRequestData) {
+        final TripDetailsActivity.RenderConfig renderConfig = new TripDetailsActivity.RenderConfig();
+        renderConfig.queryTripsRequestData = queryTripsRequestData;
+        TripNavigatorActivity.startNavigation(this, network, trip, renderConfig, false);
     }
 
     @Override
@@ -1426,6 +1478,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             final Trip useTrip = loadedTrip != null ? loadedTrip : trip;
             final TripDetailsActivity.RenderConfig config = new TripDetailsActivity.RenderConfig();
             config.queryTripsRequestData = (QueryTripsRunnable.TripRequestData) Objects.deserialize(serializedReloadRequest, true);
+            setupTripDetailsRenderConfig(config);
             TripDetailsActivity.start(DirectionsActivity.this, network, useTrip, config);
         });
     }
@@ -1498,6 +1551,25 @@ public class DirectionsActivity extends OeffiMainActivity implements
         return prefs.getBoolean("user_interface_directions_autogo_enabled", true);
     }
 
+    protected void setupTripsOverviewRenderConfig(final TripsOverviewActivity.RenderConfig renderConfig) {
+        // nothing here, override if required
+    }
+
+    protected void setupTripDetailsRenderConfig(final TripDetailsActivity.RenderConfig renderConfig) {
+        // nothing here, override if required
+    }
+
+    protected String getStoredTripsUsage() {
+        return null;
+    }
+
+    protected int getHistoryEntryLayoutId() {
+        return Application.getInstance().getSharedPreferences()
+                .getBoolean(Constants.PREFS_KEY_HISTORY_ENTRY_SHOW_TRIP, false)
+                ? R.layout.directions_query_history_entry_with_trip
+                : R.layout.directions_query_history_entry_no_trip;
+    }
+
     private void handleAutoGo() {
         if (isHandleAutoGoEnabled())
             handleGo();
@@ -1566,10 +1638,12 @@ public class DirectionsActivity extends OeffiMainActivity implements
                 else
                     historyUri = null;
 
-                renderConfig.referenceTime = time;
+                final TripsOverviewActivity.RenderConfig newRenderConfig = Objects.clone(renderConfig);
+                newRenderConfig.referenceTime = time;
+                setupTripsOverviewRenderConfig(newRenderConfig);
                 TripsOverviewActivity.start(DirectionsActivity.this,
                         network, time.depArr, result, historyUri, reloadRequestData,
-                        renderConfig);
+                        newRenderConfig);
             }
 
             @Override

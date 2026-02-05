@@ -112,6 +112,23 @@ public class TripRenderer {
             return initialLeg == null;
         }
 
+        public static Stop getPublicStopByIndex(final Trip.Public leg, final int stopIndex) {
+            if (stopIndex < 0 || leg == null)
+                return null;
+
+            if (stopIndex == 0)
+                return leg.departureStop;
+
+            final int numIntermediates = leg.intermediateStops == null ? 0 : leg.intermediateStops.size();
+            if (stopIndex <= numIntermediates)
+                return leg.intermediateStops.get(stopIndex - 1);
+
+            if (stopIndex == numIntermediates + 1)
+                return leg.arrivalStop;
+
+            return null;
+        }
+
         public void setCurrentLegState(final Trip.Public updatedLeg) {
             if (initialLeg != null) {
                 publicLeg = updatedLeg;
@@ -301,9 +318,20 @@ public class TripRenderer {
                 // we have a section going in either same or opposite direction as the device is travelling
                 isAtNearestStop = false;
 
-                int bestEndIndex;
-                final TripGeoUtils.PointAndDistance bestPointAndDistance;
+                final boolean useBestForward;
                 if (bestForwardEndIndex >= 0) {
+                    if (bestReverseEndIndex < 0) {
+                        useBestForward = true;
+                    } else {
+                        useBestForward = bestForwardDistanceToLine / bestReverseDistanceToLine < 2.0;
+                    }
+                } else {
+                    useBestForward = false;
+                }
+
+                final int bestEndIndex;
+                final TripGeoUtils.PointAndDistance bestPointAndDistance;
+                if (useBestForward) {
                     bestEndIndex = bestForwardEndIndex;
                     bestPointAndDistance = bestForwardPointAndDistance;
                 } else {

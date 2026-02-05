@@ -17,7 +17,6 @@
 
 package de.schildbach.oeffi.directions;
 
-import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -36,11 +35,15 @@ import de.schildbach.pte.dto.LocationType;
 import java.util.ArrayList;
 import java.util.List;
 
-public class QueryHistoryProvider extends ContentProvider {
+public class QueryHistoryProvider extends ForNetworkContentProvider {
     private static final String DATABASE_TABLE = "query_history";
 
-    public static Uri CONTENT_URI() {
+    private static Uri CONTENT_URI() {
         return Uri.parse("content://" + Application.getApplicationId() + ".directions." + DATABASE_TABLE);
+    };
+
+    public static Uri.Builder CONTENT_URI_BUILDER(final NetworkId network, final String usage) {
+        return CONTENT_URI().buildUpon().appendPath(getNetworkKey(network, usage));
     };
 
     public static final String KEY_ROWID = "_id";
@@ -78,22 +81,23 @@ public class QueryHistoryProvider extends ContentProvider {
     public static final int TYPE_ADDRESS = 3;
     public static final int TYPE_COORD = 4;
 
-    public static Uri historyRowUri(final NetworkId network, final long rowId) {
-        return QueryHistoryProvider.CONTENT_URI().buildUpon().appendPath(network.name()).appendPath(Long.toString(rowId))
-                .build();
+    public static Uri historyRowUri(final NetworkId network, final String usage, final long rowId) {
+        return CONTENT_URI_BUILDER(network, usage).appendPath(Long.toString(rowId)).build();
     }
 
     public static Uri put(
-            final ContentResolver contentResolver, final NetworkId network,
+            final ContentResolver contentResolver,
+            final NetworkId network, final String usage,
             final Location from, final Location to, final Location via,
-            final Boolean favorite, final boolean isQuery) {
-        final Cursor cursor = cursor(contentResolver, network, from, to, via);
+            final Boolean favorite, final boolean isQuery,
+            final int maxHistoryEntries) {
+        final Cursor cursor = cursor(contentResolver, network, usage, from, to, via);
 
         final Uri historyUri;
 
         if (cursor.moveToFirst()) {
             final long rowId = cursor.getLong(cursor.getColumnIndexOrThrow(QueryHistoryProvider.KEY_ROWID));
-            historyUri = historyRowUri(network, rowId);
+            historyUri = historyRowUri(network, usage, rowId);
 
             final long timesQueried = cursor
                     .getLong(cursor.getColumnIndexOrThrow(QueryHistoryProvider.KEY_TIMES_QUERIED));
@@ -158,13 +162,9 @@ public class QueryHistoryProvider extends ContentProvider {
             values.put(QueryHistoryProvider.KEY_TIMES_QUERIED, isQuery ? 1 : 0);
             values.put(QueryHistoryProvider.KEY_LAST_QUERIED, isQuery ? System.currentTimeMillis() : 0);
 
-            final Uri baseUri = QueryHistoryProvider.CONTENT_URI().buildUpon().appendPath(network.name()).build();
+            final Uri baseUri = CONTENT_URI_BUILDER(network, usage).build();
             historyUri = contentResolver.insert(baseUri, values);
 
-            final Application application = Application.getInstance();
-            final int maxHistoryEntries = Integer.parseInt(application.getSharedPreferences()
-                    .getString(Constants.PREFS_KEY_MAX_HISTORY_ENTRIES, Integer.toString(
-                            application.getResources().getInteger(R.integer.default_max_history_entries))));
             final Cursor deleteCursor = contentResolver.query(baseUri, null,
                     QueryHistoryProvider.KEY_FAVORITE + "= 0", null,
                     KEY_LAST_QUERIED + " DESC");
@@ -188,7 +188,8 @@ public class QueryHistoryProvider extends ContentProvider {
     }
 
     public static Cursor cursor(
-            final ContentResolver contentResolver, final NetworkId network,
+            final ContentResolver contentResolver,
+            final NetworkId network, final String usage,
             final Location from, final Location to, final Location via) {
         final StringBuilder selection = new StringBuilder();
         final List<String> selectionArgs = new ArrayList<>();
@@ -252,7 +253,7 @@ public class QueryHistoryProvider extends ContentProvider {
             }
         }
 
-        return contentResolver.query(QueryHistoryProvider.CONTENT_URI().buildUpon().appendPath(network.name()).build(),
+        return contentResolver.query(CONTENT_URI_BUILDER(network, usage).build(),
                 null, selection.toString(), selectionArgs.toArray(new String[0]), null);
     }
 
@@ -306,8 +307,7 @@ public class QueryHistoryProvider extends ContentProvider {
         final String network = pathSegments.get(0);
         values.put(KEY_NETWORK, network);
 
-        long rowId = helper.getWritableDatabase().insertOrThrow(DATABASE_TABLE, null, values);
-
+        final long rowId = helper.getWritableDatabase().insertOrThrow(DATABASE_TABLE, null, values);
         final Uri rowUri = CONTENT_URI().buildUpon().appendPath(network).appendPath(Long.toString(rowId)).build();
 
         getContext().getContentResolver().notifyChange(rowUri, null);

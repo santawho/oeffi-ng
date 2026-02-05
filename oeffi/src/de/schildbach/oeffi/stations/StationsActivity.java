@@ -200,6 +200,11 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         }
 
         @Override
+        public String getUsage() {
+            return null;
+        }
+
+        @Override
         public Set<Product> getPreferredProducts() {
             return getNetworkDefaultProducts();
         }
@@ -614,6 +619,11 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         updateGUI();
     }
 
+    @Override
+    protected int getGlobalOptionsId() {
+        return R.id.global_options_stations_nearby;
+    }
+
     private void startBackgroundHandler() {
         if (backgroundThread == null) {
             backgroundThread = new HandlerThread("queryDeparturesThread", Process.THREAD_PRIORITY_BACKGROUND);
@@ -787,7 +797,9 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         if (command != null) {
             startBackgroundHandler();
             final AutoCompleteLocationsHandler autoCompleteLocationsHandler = new AutoCompleteLocationsHandler(
-                    this, network, backgroundHandler,
+                    this,
+                    network, null,
+                    backgroundHandler,
                     getNetworkDefaultProducts());
             autoCompleteLocationsHandler.addJob(command.atText, null);
             final Date time = command.time == null ? null : command.time.date();
@@ -1619,7 +1631,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
                 this, clickedView, queryJourneyRunnable,
                 handler, backgroundHandler,
-                network, journeyRef, entryLocation, null,
+                network, journeyRef, isDriverMode, entryLocation, null,
                 false);
     }
 

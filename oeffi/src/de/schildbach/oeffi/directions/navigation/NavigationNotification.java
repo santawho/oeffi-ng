@@ -62,7 +62,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 import de.schildbach.oeffi.Application;
-import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
@@ -71,6 +70,7 @@ import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.ResourceUri;
 import de.schildbach.oeffi.util.TimeZoneSelector;
+import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.pte.provider.db.DbProvider;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.JourneyRef;
@@ -156,7 +156,7 @@ public class NavigationNotification {
 
     private static SharedPreferences prefs;
 
-    public static void startuo(final Context context) {
+    public static void startup(final Context context) {
         createNotificationChannels(context);
         DeviceWakeupReceiver.register(context);
     }
@@ -206,6 +206,8 @@ public class NavigationNotification {
             final int usage = getAudioUsageForSound(SOUND_REMIND_VIA_NOTIFICATION, false);
             channel.setSound(ResourceUri.fromResource(context, SOUND_REMIND_VIA_NOTIFICATION),
                     new AudioAttributes.Builder().setUsage(usage).build());
+        } else {
+            channel.setSound(null, null);
         }
         getNotificationManager(context).createNotificationChannel(channel);
     }
@@ -590,7 +592,7 @@ public class NavigationNotification {
                     .setUsesChronometer(true)
                     // .setAutoCancel(true)
                     .setTimeoutAfter(removeWhen > 0 ? removeWhen : 0)
-                    .setSilent(true);
+                    .setSilent(true).setSound(null);
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
                     == PackageManager.PERMISSION_GRANTED) {
                 getNotificationManager(context).notify(tag, 0, notificationBuilder.build());
@@ -689,7 +691,6 @@ public class NavigationNotification {
 
     private final Application context;
     private final boolean isEventNotificationsEnabled;
-    private final boolean isDriverMode;
     private final TravelAlarmManager travelAlarmManager;
     private final String notificationTag;
     private final TripDetailsActivity.IntentData intentData;
@@ -731,7 +732,6 @@ public class NavigationNotification {
             this.lastNotified = (TripRenderer.NotificationData) Objects.deserialize(extras.getByteArray(EXTRA_LASTNOTIFIED));
         }
 
-        this.isDriverMode = prefs.getBoolean(Constants.KEY_EXTRAS_DRIVERMODE_ENABLED, false);
         this.isEventNotificationsEnabled = prefs.getBoolean(PREFS_KEY_NOTIFICATIONS_ENABLED, false);
         this.travelAlarmManager = new TravelAlarmManager(context);
         final StringBuilder b = new StringBuilder();
@@ -806,7 +806,7 @@ public class NavigationNotification {
             if (refreshAt > 0) {
                 NavigationAlarmManager.getInstance().start(refreshAt,
                         getPendingActivityIntent(TripNavigatorActivity.DELETEREQUEST_NOT_REQUESTED,
-                                isDriverMode ? TripDetailsActivity.Page.ITINERARY : TripDetailsActivity.Page.NEXT_EVENT,
+                                TripDetailsActivity.Page.NEXT_EVENT,
                                 trip));
             }
         }
@@ -1271,14 +1271,14 @@ public class NavigationNotification {
                                 TripDetailsActivity.Page.ITINERARY, trip));
 
         if (anyImportantIssues) {
-            notificationBuilder.setSilent(true);
+            notificationBuilder.setSilent(true).setSound(null);
         } else if (reminderSoundId == SOUND_REMIND_VIA_NOTIFICATION) {
             notificationBuilder
+                    .setSound(ResourceUri.fromResource(context, reminderSoundId), getAudioStreamForSound(reminderSoundId))
                     .setSilent(!configuration.soundEnabled)
-                    .setVibrate(VIBRATION_PATTERN_REMIND)
-                    .setSound(ResourceUri.fromResource(context, reminderSoundId), getAudioStreamForSound(reminderSoundId));
+                    .setVibrate(VIBRATION_PATTERN_REMIND);
         } else {
-            notificationBuilder.setSilent(true);
+            notificationBuilder.setSilent(true).setSound(null);
         }
 
         final Notification notification = notificationBuilder.build();
@@ -1457,15 +1457,15 @@ public class NavigationNotification {
         final int colorNormal = context.getColor(R.color.bg_level0_default);
         final int colorHighIfPublic = tripRenderer.nextEventTypeIsPublic ? colorHighlight : colorNormal;
         final int colorHighIfChangeover = tripRenderer.nextEventTypeIsPublic ? colorNormal : colorHighlight;
-        remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_current_action, colorHighlight);
-        remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_next_action, colorNormal);
-        remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_time, colorHighlight);
-        remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_target, colorHighlight);
-        remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_positions_big, colorHighIfChangeover);
-        remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_positions_small, colorHighIfChangeover);
-        remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_departure, colorNormal);
-        remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_connection, colorHighIfChangeover);
-        remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_changeover, colorHighIfChangeover);
+        ViewUtils.remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_current_action, colorHighlight);
+        ViewUtils.remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_next_action, colorNormal);
+        ViewUtils.remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_time, colorHighlight);
+        ViewUtils.remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_target, colorHighlight);
+        ViewUtils.remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_positions_big, colorHighIfChangeover);
+        ViewUtils.remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_positions_small, colorHighIfChangeover);
+        ViewUtils.remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_departure, colorNormal);
+        ViewUtils.remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_connection, colorHighIfChangeover);
+        ViewUtils.remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_changeover, colorHighIfChangeover);
 
         if (tripRenderer.nextEventCurrentStringId > 0) {
             final String s = context.getString(tripRenderer.nextEventCurrentStringId);
@@ -1488,7 +1488,7 @@ public class NavigationNotification {
         if (valueStr == null) {
             remoteViews.setViewVisibility(R.id.navigation_notification_next_event_time, View.GONE);
             remoteViews.setViewVisibility(R.id.navigation_notification_next_event_finished, View.VISIBLE);
-            remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_finished, colorHighlight);
+            ViewUtils.remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_finished, colorHighlight);
             remoteViews.setTextColor(R.id.navigation_notification_next_event_finished, context.getColor(R.color.fg_significant));
         } else {
             if (chronoFormat != null) {
@@ -1545,7 +1545,7 @@ public class NavigationNotification {
             if (tripRenderer.nextEventArrivalPosName != null) {
                 remoteViews.setViewVisibility(id_navigation_notification_next_event_position_from, View.VISIBLE);
                 remoteViews.setTextViewText(id_navigation_notification_next_event_position_from, tripRenderer.nextEventArrivalPosName);
-                remoteViewsSetBackgroundColor(remoteViews, id_navigation_notification_next_event_position_from,
+                ViewUtils.remoteViewsSetBackgroundColor(remoteViews, id_navigation_notification_next_event_position_from,
                         context.getColor(tripRenderer.nextEventArrivalPosChanged ? R.color.bg_position_changed : R.color.bg_position));
             } else {
                 remoteViews.setViewVisibility(id_navigation_notification_next_event_position_from, View.GONE);
@@ -1557,7 +1557,7 @@ public class NavigationNotification {
             if (tripRenderer.nextEventDeparturePosName != null) {
                 remoteViews.setViewVisibility(id_navigation_notification_next_event_position_to, View.VISIBLE);
                 remoteViews.setTextViewText(id_navigation_notification_next_event_position_to, tripRenderer.nextEventDeparturePosName);
-                remoteViewsSetBackgroundColor(remoteViews, id_navigation_notification_next_event_position_to,
+                ViewUtils.remoteViewsSetBackgroundColor(remoteViews, id_navigation_notification_next_event_position_to,
                         context.getColor(tripRenderer.nextEventDeparturePosChanged ? R.color.bg_position_changed : R.color.bg_position));
             } else {
                 remoteViews.setViewVisibility(id_navigation_notification_next_event_position_to, View.GONE);
@@ -1609,7 +1609,7 @@ public class NavigationNotification {
             if (tripRenderer.nextEventTransportLine.style != null) {
                 remoteViews.setTextColor(R.id.navigation_notification_next_event_connection_line,
                         tripRenderer.nextEventTransportLine.style.foregroundColor);
-                remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_connection_line,
+                ViewUtils.remoteViewsSetBackgroundColor(remoteViews, R.id.navigation_notification_next_event_connection_line,
                         tripRenderer.nextEventTransportLine.style.backgroundColor);
             }
 
@@ -1666,12 +1666,6 @@ public class NavigationNotification {
                 tripRenderer.servicesCancelled
                         ? R.drawable.ic_no_transfer_black_24dp
                         : R.drawable.ic_warning_black_24px);
-    }
-
-    private static void remoteViewsSetBackgroundColor(
-            final RemoteViews remoteViews,
-            final int viewId, final int color) {
-        remoteViews.setInt(viewId, "setBackgroundColor", color);
     }
 
     private TimeZoneSelector getNetworkTimeZoneSelector() {

@@ -81,6 +81,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
 
     public interface Listener {
         NetworkId getNetwork();
+        String getUsage();
         Set<Product> getPreferredProducts();
         Handler getHandler();
         void changed(LocationView view);
@@ -346,7 +347,8 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
                         // old code: targetLocationView.setLocation(new Location(LocationType.ADDRESS, null, null, data));
                         final AutoCompleteLocationsHandler autoCompleteLocationsHandler = new AutoCompleteLocationsHandler(
                                 activity,
-                                listener.getNetwork(), listener.getHandler(), listener.getPreferredProducts());
+                                listener.getNetwork(), listener.getUsage(),
+                                listener.getHandler(), listener.getPreferredProducts());
                         autoCompleteLocationsHandler.addJob(data, this);
                         autoCompleteLocationsHandler.start(result -> {
                             if (result.success)
@@ -463,7 +465,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
 
     public void setListener(final Listener listener) {
         this.listener = listener;
-        setAdapter(new AutoCompleteLocationAdapter(this, listener.getNetwork()));
+        setAdapter(new AutoCompleteLocationAdapter(this, listener.getNetwork(), listener.getUsage()));
     }
 
     public void acquireLocation() {

@@ -99,6 +99,11 @@ public class FavoriteStationsActivity extends OeffiActivity
         }
 
         @Override
+        public String getUsage() {
+            return null;
+        }
+
+        @Override
         public Set<Product> getPreferredProducts() {
             return getNetworkDefaultProducts();
         }

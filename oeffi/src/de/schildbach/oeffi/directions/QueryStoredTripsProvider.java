@@ -17,7 +17,6 @@
 
 package de.schildbach.oeffi.directions;
 
-import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -39,11 +38,15 @@ import de.schildbach.pte.dto.PTDate;
 import de.schildbach.pte.dto.Trip;
 import de.schildbach.pte.dto.TripRef;
 
-public class QueryStoredTripsProvider extends ContentProvider {
+public class QueryStoredTripsProvider extends ForNetworkContentProvider {
     private static final String DATABASE_TABLE = "query_stored_trips";
 
-    public static Uri CONTENT_URI() {
+    private static Uri CONTENT_URI() {
         return Uri.parse("content://" + Application.getApplicationId() + ".directions." + DATABASE_TABLE);
+    };
+
+    public static Uri.Builder CONTENT_URI_BUILDER(final NetworkId network, final String usage) {
+        return CONTENT_URI().buildUpon().appendPath(getNetworkKey(network, usage));
     };
 
     public static final String KEY_ROWID = "_id";
@@ -80,16 +83,15 @@ public class QueryStoredTripsProvider extends ContentProvider {
     public static final int TYPE_ADDRESS = 3;
     public static final int TYPE_COORD = 4;
 
-    private static Uri tripRowUri(final NetworkId network, final long rowId) {
-        return QueryStoredTripsProvider.CONTENT_URI().buildUpon().appendPath(network.name()).appendPath(Long.toString(rowId))
-                .build();
+    private static Uri tripRowUri(final NetworkId network, final String usage, final long rowId) {
+        return CONTENT_URI_BUILDER(network, usage).appendPath(Long.toString(rowId)).build();
     }
 
     public static Uri put(
-            final ContentResolver contentResolver, final NetworkId network,
+            final ContentResolver contentResolver, final NetworkId network, final String usage,
             final Trip trip, final QueryTripsRunnable.TripRequestData reloadRequestData) {
         final String tripId = trip.getUniqueId();
-        final Long rowId = getRowId(contentResolver, network, tripId);
+        final Long rowId = getRowId(contentResolver, network, usage, tripId);
 
         final ContentValues values = new ContentValues();
         final PTDate firstPublicLegDepartureTime = trip.getFirstPublicLegDepartureTime();
@@ -103,7 +105,7 @@ public class QueryStoredTripsProvider extends ContentProvider {
         final Uri tripsUri;
 
         if (rowId != null) {
-            tripsUri = tripRowUri(network, rowId);
+            tripsUri = tripRowUri(network, usage, rowId);
             contentResolver.update(tripsUri, values, null, null);
         } else {
             values.put(KEY_TRIP_ID, tripId);
@@ -140,7 +142,7 @@ public class QueryStoredTripsProvider extends ContentProvider {
             values.put(QueryStoredTripsProvider.KEY_VIA_NAME, via == null ? null : via.name);
             putReloadRequestColumnBlob(values, Objects.serialize(reloadRequestData));
 
-            final Uri baseUri = QueryStoredTripsProvider.CONTENT_URI().buildUpon().appendPath(network.name()).build();
+            final Uri baseUri = CONTENT_URI_BUILDER(network, usage).build();
             tripsUri = contentResolver.insert(baseUri, values);
         }
 
@@ -158,7 +160,7 @@ public class QueryStoredTripsProvider extends ContentProvider {
 
     public static Long getRowId(
             final ContentResolver contentResolver,
-            final NetworkId network,
+            final NetworkId network, final String usage,
             final String tripId) {
         final StringBuilder selection = new StringBuilder();
         final List<String> selectionArgs = new ArrayList<>();
@@ -166,7 +168,7 @@ public class QueryStoredTripsProvider extends ContentProvider {
         selection.append(QueryStoredTripsProvider.KEY_TRIP_ID).append("=?");
         selectionArgs.add(tripId);
 
-        try (final Cursor cursor = contentResolver.query(QueryStoredTripsProvider.CONTENT_URI().buildUpon().appendPath(network.name()).build(),
+        try (final Cursor cursor = contentResolver.query(CONTENT_URI_BUILDER(network, usage).build(),
                 null, selection.toString(), selectionArgs.toArray(new String[0]), null)) {
             if (cursor != null && cursor.moveToFirst())
                 return cursor.getLong(cursor.getColumnIndexOrThrow(QueryHistoryProvider.KEY_ROWID));
@@ -176,7 +178,7 @@ public class QueryStoredTripsProvider extends ContentProvider {
 
     public static int delete(
             final ContentResolver contentResolver,
-            final NetworkId network,
+            final NetworkId network, final String usage,
             final String tripId) {
         final StringBuilder selection = new StringBuilder();
         final List<String> selectionArgs = new ArrayList<>();
@@ -185,7 +187,7 @@ public class QueryStoredTripsProvider extends ContentProvider {
         selectionArgs.add(tripId);
 
         return contentResolver.delete(
-                QueryStoredTripsProvider.CONTENT_URI().buildUpon().appendPath(network.name()).build(),
+                CONTENT_URI_BUILDER(network, usage).build(),
                 selection.toString(), selectionArgs.toArray(new String[0]));
     }
 
@@ -239,8 +241,7 @@ public class QueryStoredTripsProvider extends ContentProvider {
         final String network = pathSegments.get(0);
         values.put(KEY_NETWORK, network);
 
-        long rowId = helper.getWritableDatabase().insertOrThrow(DATABASE_TABLE, null, values);
-
+        final long rowId = helper.getWritableDatabase().insertOrThrow(DATABASE_TABLE, null, values);
         final Uri rowUri = CONTENT_URI().buildUpon().appendPath(network).appendPath(Long.toString(rowId)).build();
 
         getContext().getContentResolver().notifyChange(rowUri, null);
@@ -317,14 +318,14 @@ public class QueryStoredTripsProvider extends ContentProvider {
     /**
      * Restricted to usage by {@link Application#onCreate()} only.
      */
-    public static void deleteTripsForNetwork(final Context context, final String network) {
+    public static void deleteTripsForNetwork(final Context context, final NetworkId network, final String usage) {
         final QueryTripsHelper helper = new QueryTripsHelper(context);
         final SQLiteDatabase db = helper.getWritableDatabase();
 
         db.beginTransaction();
         try {
-            db.execSQL("DELETE FROM " + DATABASE_TABLE + " WHERE " + KEY_NETWORK + "=?", new String[] { network });
-            db.execSQL("DELETE FROM " + DATABASE_TABLE + " WHERE " + KEY_NETWORK + "=?", new String[] { network });
+            db.execSQL("DELETE FROM " + DATABASE_TABLE + " WHERE " + KEY_NETWORK + "=?",
+                    new String[] { getNetworkKey(network, usage) });
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
@@ -333,7 +334,10 @@ public class QueryStoredTripsProvider extends ContentProvider {
         helper.close();
     }
 
-    public static void deleteOlderTrips(final Context context, final NetworkId network, final long minArrivalTime) {
+    public static void deleteOlderTrips(
+            final Context context,
+            final NetworkId network, final String usage,
+            final long minArrivalTime) {
         final QueryTripsHelper helper = new QueryTripsHelper(context);
         final SQLiteDatabase db = helper.getWritableDatabase();
 
@@ -343,7 +347,7 @@ public class QueryStoredTripsProvider extends ContentProvider {
                     "DELETE FROM " + DATABASE_TABLE + " WHERE "
                             + KEY_NETWORK + "=? AND "
                             + KEY_ARRIVAL_TIME + "<?",
-                    new String[] { network.name(), String.valueOf(minArrivalTime)});
+                    new String[] {getNetworkKey(network, usage), String.valueOf(minArrivalTime)});
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();

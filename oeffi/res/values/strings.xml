@@ -6,6 +6,7 @@
     <string name="stations_icon_label">Öffi Stations</string>
     <string name="directions_icon_label">Öffi Directions</string>
     <string name="plans_icon_label">Öffi Plans</string>
+    <string name="operations_icon_label">Öffi Operations</string>
     <string name="disclaimer_network">data provided by\n%s</string>
     <string name="disclaimer_responsibility">errors and omissions excepted</string>
     <string name="disclaimer_responsibility_2line">errors and omis-\nsions excepted</string>
@@ -21,14 +22,18 @@
     <string name="stations_activity_title">Nearby Stations</string>
     <string name="station_details_activity_title">Station Details</string>
     <string name="directions_activity_title">Directions</string>
+    <string name="operations_activity_title">Operations</string>
     <string name="trip_details_title">Connection Details</string>
     <string name="journey_details_title">Line Details</string>
-    <string name="navigation_details_title">Navigation</string>
+    <string name="operation_details_title">Operation Details</string>
+    <string name="navigation_title">Navigation</string>
+    <string name="operation_navigation_title">Operation Guide</string>
     <string name="plans_activity_title">Network Plans</string>
     <string name="network_picker_activity_title">Pick Transportation Network</string>
     <string name="assistant_label_title">Öffi Assistant</string>
 
     <!-- global options -->
+    <string name="global_options_operations_comment">Drivers\' operations planning</string>
     <string name="global_options_stations_comment">Departure times and delays</string>
     <string name="global_options_directions_comment">From door to door</string>
     <string name="global_options_plans_comment">For a rough overview</string>
@@ -109,15 +114,6 @@
     <!-- preferences extras -->
     <string name="extras_title">Special Functions</string>
     <string name="extras_tripextrainfo_enabled_title">Acquire extra info for trips</string>
-
-    <!-- preferences driver mode -->
-    <string name="extras_drivermode_title">Drivers\' Mode</string>
-    <string name="extras_drivermode_summary">Drivers\' mode optimizes the behaviour of the app for use by train/tram/bus drivers and other staff.</string>
-    <string name="extras_drivermode_enabled_title">Drivers\' mode enabled</string>
-    <string name="extras_drivermode_threshold_early_title">Early Threshold</string>
-    <string name="extras_drivermode_threshold_early_summary">Minimum seconds an event must be predicted before the scheduled time to be detected as early.  [%s]</string>
-    <string name="extras_drivermode_threshold_delay_title">Delay Threshold</string>
-    <string name="extras_drivermode_threshold_delay_summary">Minimum seconds an event must be predicted after the scheduled time to be detected as delayed.  [%s]</string>
 
     <!-- network picker -->
     <string name="network_picker_firsttime_message">Because you are using Öffi for the first time, you need to pick a region that suits you well. You

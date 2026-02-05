@@ -1,0 +1,103 @@
+<TableRow
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <de.schildbach.oeffi.directions.PearlView
+        android:id="@+id/directions_trip_details_public_entry_stop_pearl"
+        android:layout_width="24dp"
+        android:layout_height="match_parent"
+        android:paddingTop="@dimen/trip_details_stop_offset" />
+
+    <FrameLayout android:layout_span="5"
+        android:paddingHorizontal="@dimen/text_padding_horizontal_lax"
+        android:paddingTop="@dimen/text_padding_vertical"
+        android:paddingBottom="@dimen/text_padding_vertical_verylax">
+        <LinearLayout
+            android:id="@+id/operation_details_stop_container"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="@dimen/text_padding_horizontal_lax"
+            android:paddingVertical="@dimen/text_padding_vertical_lax">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:id="@+id/operation_details_stop_time_to_plan_min"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="@dimen/font_size_xlarge"/>
+                    <TextView
+                        android:id="@+id/operation_details_stop_time_to_plan_sec"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="@dimen/font_size_large"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_centerHorizontal="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:id="@+id/operation_details_stop_delay_min"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textStyle="bold"
+                        android:textSize="@dimen/font_size_2xlarge"/>
+                    <TextView
+                        android:id="@+id/operation_details_stop_delay_sec"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textStyle="bold"
+                        android:textSize="@dimen/font_size_2xlarge"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:id="@+id/operation_details_stop_time_to_prediction_min"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="@dimen/font_size_xlarge"/>
+                    <TextView
+                        android:id="@+id/operation_details_stop_time_to_prediction_sec"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="@dimen/font_size_large"/>
+                </LinearLayout>
+
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/operation_details_stop_location"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:textSize="@dimen/font_size_xlarge" />
+
+            <ImageView
+                android:id="@+id/operation_details_stop_arrow"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/operation_details_arrow_height"
+                android:layout_gravity="center"
+                android:scaleType="fitCenter"
+                android:adjustViewBounds="true"
+                android:src="@drawable/ic_arrow_down_black_24dp" />
+
+        </LinearLayout>
+    </FrameLayout>
+</TableRow>

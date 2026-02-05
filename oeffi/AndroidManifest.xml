@@ -329,9 +329,24 @@
         </activity-alias>
 
         <activity
-            android:name=".directions.TripsOverviewActivity"
+            android:name=".directions.driverops.OperationsActivity"
+            android:exported="true"
             android:configChanges="keyboard|keyboardHidden"
-            android:taskAffinity="${applicationId}.directions" />
+            android:icon="@mipmap/ic_oeffi_ng_operations_color_48dp"
+            android:label="@string/operations_icon_label"
+            android:launchMode="singleTask"
+            android:taskAffinity="${applicationId}.operations"
+            android:windowSoftInputMode="stateHidden"
+            android:theme="@style/My.Theme.Splash">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".directions.TripsOverviewActivity"
+            android:configChanges="keyboard|keyboardHidden" />
+<!--            android:taskAffinity="${applicationId}.directions" />-->
 <!--            android:theme="@style/My.Theme.DarkDefault" />-->
 
         <activity
@@ -343,9 +358,28 @@
             android:showWhenLocked="false" />
 
         <activity
+            android:name=".directions.driverops.OperationDetailsActivity"
+            android:configChanges="keyboard|keyboardHidden"
+            android:label="@string/trip_details_title"
+            android:taskAffinity="${applicationId}.operations"
+            android:showOnLockScreen="false"
+            android:showWhenLocked="false" />
+
+        <activity
             android:name=".directions.navigation.TripNavigatorActivity"
             android:configChanges="keyboard|keyboardHidden"
-            android:label="@string/navigation_details_title"
+            android:label="@string/navigation_title"
+            android:taskAffinity="${applicationId}.navigation"
+            android:autoRemoveFromRecents="false"
+            android:excludeFromRecents="false"
+            android:showOnLockScreen="true"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true" />
+
+        <activity
+            android:name=".directions.driverops.OperationNavigatorActivity"
+            android:configChanges="keyboard|keyboardHidden"
+            android:label="@string/operation_navigation_title"
             android:taskAffinity="${applicationId}.navigation"
             android:autoRemoveFromRecents="false"
             android:excludeFromRecents="false"
