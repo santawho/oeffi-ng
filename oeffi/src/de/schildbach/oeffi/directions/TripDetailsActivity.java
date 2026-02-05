@@ -909,6 +909,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     protected void disableTracking() {
         if (locationTrackingEnabled) {
             locationTrackingEnabled = false;
+            locationProvider = null;
             getMapView().setDeviceLocationAware(null);
             removeLocationUpdates();
         }
