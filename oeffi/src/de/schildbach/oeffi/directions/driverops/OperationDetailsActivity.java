@@ -512,20 +512,30 @@ public class OperationDetailsActivity extends TripDetailsActivity {
         }
 
         final TextView nearestStopNameView = containerView.findViewById(R.id.operation_next_event_nearest_station_name);
+        final TextView nearestStopPlaceView = containerView.findViewById(R.id.operation_next_event_nearest_station_place);
         nearestStopNameView.setText(Formats.makeBreakableStationName(nearestStop.location.name));
         nearestStopNameView.setBackgroundColor(Color.TRANSPARENT);
         nearestStopNameView.setTextColor(colorSignificant);
+        nearestStopPlaceView.setText(Formats.makeBreakableStationName(nearestStop.location.place));
+        nearestStopPlaceView.setBackgroundColor(Color.TRANSPARENT);
+        nearestStopPlaceView.setTextColor(colorSignificant);
 
         boolean isNextAction;
         int color, delayTextColor, otherTextColor;
 
+        final ImageView nearestArrivalArrowView = containerView.findViewById(R.id.operation_next_event_nearest_station_arrow);
+        nearestArrivalArrowView.setColorFilter(colorSignificant);
+        nearestArrivalArrowView.setBackgroundColor(Color.TRANSPARENT);
+
         final View nearestArrivalView = containerView.findViewById(R.id.operation_next_event_nearest_station_arrival);
         if (nearestArrivalDelay == null) {
             nearestArrivalView.setVisibility(View.INVISIBLE);
+            nearestArrivalArrowView.setVisibility(View.INVISIBLE);
         } else {
             color = getStopTimeColor(nearestArrivalDelay);
             isNextAction = isAtNearestStop ? nearestDepartureDelay == null : !sectionIsAfterNearestStop;
             nearestArrivalView.setVisibility(View.VISIBLE);
+            nearestArrivalArrowView.setVisibility(View.VISIBLE);
             delayTextColor = isNextAction ? colorDefaultBackground : color;
             otherTextColor = isNextAction ? colorDefaultBackground : colorSignificant;
             renderIntervalMinsAndSecs(nearestArrivalDelay, containerView, delayTextColor,
@@ -541,21 +551,23 @@ public class OperationDetailsActivity extends TripDetailsActivity {
                 nearestArrivalView.setBackgroundColor(color);
                 nearestStopNameView.setBackgroundColor(color);
                 nearestStopNameView.setTextColor(colorDefaultBackground);
+                nearestStopPlaceView.setBackgroundColor(color);
+                nearestStopPlaceView.setTextColor(colorDefaultBackground);
 
-                final ImageView arrivalArrowView = containerView.findViewById(R.id.operation_next_event_nearest_station_arrival_arrow);
-                arrivalArrowView.setColorFilter(colorDefaultBackground);
+                nearestArrivalArrowView.setBackgroundColor(color);
+                nearestArrivalArrowView.setColorFilter(colorDefaultBackground);
             } else {
-                nearestArrivalView.setBackgroundColor(colorDefaultBackground);
+                nearestArrivalView.setBackgroundColor(Color.TRANSPARENT);
             }
         }
 
-        final ImageView departureArrowView = containerView.findViewById(R.id.operation_next_event_nearest_station_departure_arrow);
-        departureArrowView.setColorFilter(colorSignificant);
-        departureArrowView.setBackgroundColor(Color.TRANSPARENT);
+        final ImageView nextArrivalArrowView = containerView.findViewById(R.id.operation_next_event_next_station_arrow);
+        nextArrivalArrowView.setColorFilter(colorSignificant);
+        nextArrivalArrowView.setBackgroundColor(Color.TRANSPARENT);
 
         final View nearestDepartureView = containerView.findViewById(R.id.operation_next_event_nearest_station_departure);
         if (nearestDepartureDelay == null) {
-            nearestDepartureView.setVisibility(View.GONE);
+            nearestDepartureView.setVisibility(View.INVISIBLE);
         } else {
             color = getStopTimeColor(nearestDepartureDelay);
             isNextAction = isAtNearestStop;
@@ -575,7 +587,11 @@ public class OperationDetailsActivity extends TripDetailsActivity {
                 nearestDepartureView.setBackgroundColor(color);
                 nearestStopNameView.setBackgroundColor(color);
                 nearestStopNameView.setTextColor(colorDefaultBackground);
-                departureArrowView.setColorFilter(colorDefaultBackground);
+                nearestStopPlaceView.setBackgroundColor(color);
+                nearestStopPlaceView.setTextColor(colorDefaultBackground);
+
+                nextArrivalArrowView.setColorFilter(colorDefaultBackground);
+                nextArrivalArrowView.setBackgroundColor(color);
             } else {
                 nearestDepartureView.setBackgroundColor(Color.TRANSPARENT);
             }
@@ -583,11 +599,13 @@ public class OperationDetailsActivity extends TripDetailsActivity {
 
         final View nextArrivalView = containerView.findViewById(R.id.operation_next_event_next_station_arrival);
         if (nextArrivalDelay == null) {
-            nextArrivalView.setVisibility(View.GONE);
+            nextArrivalView.setVisibility(View.INVISIBLE);
+            nextArrivalArrowView.setVisibility(View.INVISIBLE);
         } else {
             color = getStopTimeColor(nextArrivalDelay);
             isNextAction = !isAtNearestStop && sectionIsAfterNearestStop;
             nextArrivalView.setVisibility(View.VISIBLE);
+            nextArrivalArrowView.setVisibility(View.VISIBLE);
             delayTextColor = isNextAction ? colorDefaultBackground : color;
             otherTextColor = isNextAction ? colorDefaultBackground : colorSignificant;
             renderIntervalMinsAndSecs(nextArrivalDelay, containerView, delayTextColor,
@@ -600,17 +618,21 @@ public class OperationDetailsActivity extends TripDetailsActivity {
             setRemaining(remainingView, nextStop.getArrivalTime().getTime() - now, otherTextColor);
 
             final TextView nextStopNameView = containerView.findViewById(R.id.operation_next_event_next_station_name);
+            final TextView nextStopPlaceView = containerView.findViewById(R.id.operation_next_event_next_station_place);
             nextStopNameView.setText(Formats.makeBreakableStationName(nextStop.location.name));
+            nextStopPlaceView.setText(Formats.makeBreakableStationName(nextStop.location.place));
 
             if (isNextAction) {
                 nextArrivalView.setBackgroundColor(color);
                 nextStopNameView.setTextColor(colorDefaultBackground);
+                nextStopPlaceView.setTextColor(colorDefaultBackground);
 
-                departureArrowView.setColorFilter(colorDefaultBackground);
-                departureArrowView.setBackgroundColor(color);
+                nextArrivalArrowView.setColorFilter(colorDefaultBackground);
+                nextArrivalArrowView.setBackgroundColor(color);
             } else {
                 nextArrivalView.setBackgroundColor(Color.TRANSPARENT);
                 nextStopNameView.setTextColor(colorSignificant);
+                nextStopPlaceView.setTextColor(colorSignificant);
             }
         }
     }
