@@ -13,7 +13,9 @@ jsr305 = "3.0.2"
 junit = "4.13.2"
 swipelayout = "1.2.0"
 logbackAndroid = "3.0.0"
-loggingInterceptor = "5.3.2"
+okhttpLoggingInterceptor = "5.3.2"
+okhttpZstandardInterceptor = "5.3.2"
+okhttpBrotliInterceptor = "5.3.2"
 msgpackCore = "0.9.11"
 okhttp = "5.3.2"
 osmdroidAndroid = "6.1.20"
@@ -40,7 +42,9 @@ swipelayout = { module = "com.daimajia.swipelayout:library", version.ref = "swip
 logback-android = { module = "com.github.tony19:logback-android", version.ref = "logbackAndroid" }
 msgpack-core = { module = "org.msgpack:msgpack-core", version.ref = "msgpackCore" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
-okhttp3-logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "loggingInterceptor" }
+okhttp3-logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttpLoggingInterceptor" }
+okhttp3-zstandard-interceptor = { module = "com.squareup.okhttp3:okhttp-zstd", version.ref = "okhttpZstandardInterceptor" }
+okhttp3-brotli-interceptor = { module = "com.squareup.okhttp3:okhttp-brotli", version.ref = "okhttpBrotliInterceptor" }
 osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroidAndroid" }
 maplibre-gl = { module = 'org.maplibre.gl:android-sdk', version.ref = "maplibreGl" }
 preferencex = { group = "androidx.preference", name = "preference", version.ref = "preferencex" }
