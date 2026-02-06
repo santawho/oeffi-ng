@@ -535,7 +535,7 @@ public class OperationDetailsActivity extends TripDetailsActivity {
             final TextView planTimeView = containerView.findViewById(R.id.operation_next_event_nearest_station_arrival_plan_time);
             setPlanTime(planTimeView, false, nearestStop.plannedArrivalTime, otherTextColor);
             final TextView remainingView = containerView.findViewById(R.id.operation_next_event_nearest_station_arrival_remaining);
-            setRemaining(remainingView, nearestStop.plannedArrivalTime.getTime() - now, otherTextColor);
+            setRemaining(remainingView, nearestStop.getArrivalTime().getTime() - now, otherTextColor);
 
             if (isNextAction) {
                 nearestArrivalView.setBackgroundColor(color);
@@ -569,7 +569,7 @@ public class OperationDetailsActivity extends TripDetailsActivity {
             final TextView planTimeView = containerView.findViewById(R.id.operation_next_event_nearest_station_departure_plan_time);
             setPlanTime(planTimeView, true, nearestStop.plannedDepartureTime, otherTextColor);
             final TextView remainingView = containerView.findViewById(R.id.operation_next_event_nearest_station_departure_remaining);
-            setRemaining(remainingView, nearestStop.plannedDepartureTime.getTime() - now, otherTextColor);
+            setRemaining(remainingView, nearestStop.getDepartureTime().getTime() - now, otherTextColor);
 
             if (isNextAction) {
                 nearestDepartureView.setBackgroundColor(color);
@@ -597,7 +597,7 @@ public class OperationDetailsActivity extends TripDetailsActivity {
             final TextView planTimeView = containerView.findViewById(R.id.operation_next_event_next_station_arrival_plan_time);
             setPlanTime(planTimeView, false, nextStop.plannedArrivalTime, otherTextColor);
             final TextView remainingView = containerView.findViewById(R.id.operation_next_event_next_station_arrival_remaining);
-            setRemaining(remainingView, nextStop.plannedArrivalTime.getTime() - now, otherTextColor);
+            setRemaining(remainingView, nextStop.getArrivalTime().getTime() - now, otherTextColor);
 
             final TextView nextStopNameView = containerView.findViewById(R.id.operation_next_event_next_station_name);
             nextStopNameView.setText(Formats.makeBreakableStationName(nextStop.location.name));
