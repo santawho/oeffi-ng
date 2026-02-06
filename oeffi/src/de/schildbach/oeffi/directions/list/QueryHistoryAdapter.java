@@ -31,8 +31,6 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import de.schildbach.oeffi.Application;
-import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.QueryHistoryProvider;
@@ -48,9 +46,9 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private static final long ID_OFFSET_HISTORY = 0;
     private static final long ID_OFFSET_TRIPS = 1000000000000L;
 
-    public interface ContextMenuItemListener extends
+    public interface ContextListener extends
             QueryHistoryViewHolder.ContextMenuItemListener,
-            QueryStoredTripViewHolder.ContextMenuItemListener {}
+            QueryStoredTripViewHolder.ContextListener {}
 
     private abstract class CursorBase<VHT extends RecyclerView.ViewHolder> {
         protected final Uri uri;
@@ -197,7 +195,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             final Integer toFavState = FavoriteStationsProvider.favState(contentResolver, network, to);
             holder.bind(rowId, from, to, via,
                     isFavorite, savedTripDepartureTime, serializedSavedTrip, fromFavState, toFavState,
-                    selectedRowId, clickListener, contextMenuItemListener);
+                    selectedRowId, clickListener, contextListener);
         }
     }
 
@@ -316,7 +314,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     tripDepartureTime, tripArrivalTime,
                     serializedTrip, tripId,
                     serializedReloadRequest,
-                    selectedRowId, clickListener, contextMenuItemListener);
+                    selectedRowId, clickListener, contextListener);
         }
     }
 
@@ -326,7 +324,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private final NetworkId network;
     private final String usage;
     private final QueryHistoryClickListener clickListener;
-    private final ContextMenuItemListener contextMenuItemListener;
+    private final ContextListener contextListener;
     private final int historyEntryLayoutId;
     private final long deleteTripsAfterMillis;
     private final int maxHistoryEntries;
@@ -342,7 +340,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             final NetworkId network, final String usage,
             final QueryHistoryClickListener clickListener,
             final int historyEntryLayoutId,
-            final ContextMenuItemListener contextMenuItemListener,
+            final ContextListener contextListener,
             final long deleteTripsAfterMillis,
             final int maxHistoryEntries) {
         this.context = context;
@@ -351,7 +349,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         this.network = network;
         this.usage = usage;
         this.clickListener = clickListener;
-        this.contextMenuItemListener = contextMenuItemListener;
+        this.contextListener = contextListener;
         this.deleteTripsAfterMillis = deleteTripsAfterMillis;
         this.maxHistoryEntries = maxHistoryEntries;
         this.historyEntryLayoutId = historyEntryLayoutId;

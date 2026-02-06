@@ -17,6 +17,7 @@
 
 package de.schildbach.oeffi.directions.list;
 
+import android.content.Context;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
@@ -47,11 +48,12 @@ import de.schildbach.pte.dto.PTDate;
 import de.schildbach.pte.dto.Trip;
 
 public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
-    public interface ContextMenuItemListener {
+    public interface ContextListener {
         boolean onQueryStoredTripContextMenuItemClick(
                 int adapterPosition,
                 Location from, Location to, Location via,
                 @Nullable byte[] serializedSavedTrip, int menuItemId, @Nullable Location menuItemLocation);
+        boolean isTripUnderNavigation(final Context context, final String tripId);
     }
 
     private final OeffiActivity context;
@@ -66,7 +68,7 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
     private final LocationTextView toView;
     private final SwipeLayout swipeLayout;
     private final MySwipeListener swipeListener;
-    public ContextMenuItemListener contextMenuItemListener;
+    public ContextListener contextListener;
     private Location from;
     private Location to;
     private Location via;
@@ -108,8 +110,8 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
             final byte[] serializedSavedTrip, final String tripId,
             final byte[] serializedReloadRequest,
             final long selectedRowId, final QueryHistoryClickListener clickListener,
-            final ContextMenuItemListener contextMenuItemListener) {
-        this.contextMenuItemListener = contextMenuItemListener;
+            final ContextListener contextListener) {
+        this.contextListener = contextListener;
         this.from = from;
         this.to = to;
         this.via = via;
@@ -157,7 +159,7 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
                 }
             }
         }
-        if (NavigationNotification.isTripUnderNavigation(context, tripId)) {
+        if (contextListener.isTripUnderNavigation(context, tripId)) {
             iconResId = R.drawable.ic_navigation_white_24dp;
         }
         if (sTimeLeft == null && msTimeLeft >= 0) {
@@ -184,7 +186,7 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
                     QueryStoredTripsProvider.delete(context.getContentResolver(), network, usage, tripId);
                 }
             } else if (position != RecyclerView.NO_POSITION) {
-                if (NavigationNotification.isTripUnderNavigation(context, tripId)) {
+                if (contextListener.isTripUnderNavigation(context, tripId)) {
                     startNavigation(position, clickListener);
                 } else {
                     clickListener.onSavedTripClick(position,

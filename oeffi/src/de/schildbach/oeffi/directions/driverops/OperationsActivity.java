@@ -17,7 +17,10 @@
 
 package de.schildbach.oeffi.directions.driverops;
 
+import android.content.Context;
+
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -27,7 +30,12 @@ import de.schildbach.oeffi.directions.QueryStoredTripsProvider;
 import de.schildbach.oeffi.directions.QueryTripsRunnable;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
 import de.schildbach.oeffi.directions.TripsOverviewActivity;
+import de.schildbach.oeffi.directions.navigation.NavigationNotification;
 import de.schildbach.oeffi.directions.navigation.TripNavigatorActivity;
+import de.schildbach.oeffi.util.Objects;
+import de.schildbach.oeffi.util.Toast;
+import de.schildbach.pte.dto.Location;
+import de.schildbach.pte.dto.PTDate;
 import de.schildbach.pte.dto.Product;
 import de.schildbach.pte.dto.Trip;
 
@@ -71,6 +79,11 @@ public class OperationsActivity extends DirectionsActivity {
         return QueryStoredTripsProvider.USAGE_OPERATION;
     }
 
+    @Override
+    public boolean isTripUnderNavigation(final Context context, final String tripId) {
+        return OperationNotification.isTripUnderOperation(context, tripId);
+    }
+
     protected int getHistoryEntryLayoutId() {
         return R.layout.directions_query_history_entry_no_trip;
     }
@@ -96,6 +109,27 @@ public class OperationsActivity extends DirectionsActivity {
     }
 
     @Override
+    protected void handleShowSavedTrip(
+            final Location from, final Location to, final Location via,
+            final PTDate tripDepartureTime, final PTDate tripArrivalTime,
+            final byte[] serializedTrip, final String tripId,
+            final byte[] serializedReloadRequest) {
+        final Trip trip = (Trip) Objects.deserialize(serializedTrip, true);
+        if (trip == null) {
+            new Toast(this).longToast(R.string.directions_query_history_invalid_blob);
+            return;
+        }
+        loadTripByTripRef(trip.tripRef, (loadedTrip) -> {
+            final Trip useTrip = loadedTrip != null ? loadedTrip : trip;
+            final OperationDetailsActivity.RenderConfig config = new OperationDetailsActivity.RenderConfig();
+            config.queryTripsRequestData = (QueryTripsRunnable.TripRequestData) Objects.deserialize(serializedReloadRequest, true);
+            setupTripDetailsRenderConfig(config);
+            final Trip.Public journeyLeg = useTrip.getFirstPublicLeg();
+            OperationDetailsActivity.start(OperationsActivity.this, network, journeyLeg, new Date(), 0);
+        });
+    }
+
+    @Override
     public void onSavedTripStartNavigation(
             final int adapterPosition,
             final Trip trip,
@@ -104,6 +138,6 @@ public class OperationsActivity extends DirectionsActivity {
         renderConfig.isOperation = true;
         renderConfig.isJourney = true;
         renderConfig.queryTripsRequestData = queryTripsRequestData;
-        TripNavigatorActivity.startNavigation(this, network, trip, renderConfig, false);
+        OperationNavigatorActivity.startNavigation(this, network, trip, renderConfig, false);
     }
 }

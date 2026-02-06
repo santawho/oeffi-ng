@@ -68,6 +68,7 @@ import de.schildbach.oeffi.FromViaToAware;
 import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiMainActivity;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.directions.navigation.NavigationNotification;
 import de.schildbach.oeffi.directions.navigation.TripNavigatorActivity;
 import de.schildbach.oeffi.mapview.OeffiMapView;
 import de.schildbach.oeffi.util.TimeSpec;
@@ -132,7 +133,7 @@ import java.util.function.Function;
 
 public class DirectionsActivity extends OeffiMainActivity implements
         QueryHistoryClickListener,
-        QueryHistoryAdapter.ContextMenuItemListener,
+        QueryHistoryAdapter.ContextListener,
         LocationSelector.LocationSelectionListener {
     public static final String LINK_IDENTIFIER_TRIP = "trip";
     public static final String LINK_IDENTIFIER_SHARE_TRIP = "share-trip";
@@ -1411,6 +1412,11 @@ public class DirectionsActivity extends OeffiMainActivity implements
     }
 
     @Override
+    public boolean isTripUnderNavigation(final Context context, final String tripId) {
+        return NavigationNotification.isTripUnderNavigation(context, tripId);
+    }
+
+    @Override
     public boolean onQueryHistoryContextMenuItemClick(
             final int adapterPosition,
             final Location from, final Location to, final Location via,
@@ -1464,7 +1470,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         expandForm(!productsAreNetworkDefault(getProductToggles()) || via != null);
     }
 
-    private void handleShowSavedTrip(
+    protected void handleShowSavedTrip(
             final Location from, final Location to, final Location via,
             final PTDate tripDepartureTime, final PTDate tripArrivalTime,
             final byte[] serializedTrip, final String tripId,
@@ -1483,7 +1489,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         });
     }
 
-    private void loadTripByTripRef(final TripRef tripRef, final Consumer<Trip> tripHandler) {
+    protected void loadTripByTripRef(final TripRef tripRef, final Consumer<Trip> tripHandler) {
         if (tripRef == null) {
             tripHandler.accept(null);
             return;

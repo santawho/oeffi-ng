@@ -77,6 +77,10 @@ public class OperationDetailsActivity extends TripDetailsActivity {
 
     @Override
     protected void startNavigationForJourneyToExit(final Stop exitStop) {
+        QueryStoredTripsProvider.put(getContentResolver(),
+                network, getStoredTripsUsage(),
+                tripRenderer.trip, renderConfig.queryTripsRequestData);
+
         final Trip.Public journeyLeg = (Trip.Public) tripRenderer.trip.legs.get(0);
         final Location entryLocation = journeyLeg.entryLocation;
         final Location exitLocation = exitStop.location;
@@ -94,6 +98,10 @@ public class OperationDetailsActivity extends TripDetailsActivity {
         navigationRenderConfig.isJourney = true;
         navigationRenderConfig.isOperation = true;
         startNavigation(journeyTrip, navigationRenderConfig);
+
+        QueryStoredTripsProvider.put(getContentResolver(),
+                network, getStoredTripsUsage(),
+                journeyTrip, renderConfig.queryTripsRequestData);
     }
 
     @Override
