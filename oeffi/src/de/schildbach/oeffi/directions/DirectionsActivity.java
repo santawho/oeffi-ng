@@ -160,7 +160,8 @@ public class DirectionsActivity extends OeffiMainActivity implements
     private View viewQueryMissingCapability;
     private TextView connectivityWarningView;
 
-    private TimeSpec time = null;
+    private TimeSpec timeSpec = null;
+    private boolean timeIsToday;
     private TripsOverviewActivity.RenderConfig renderConfig;
 
     private QueryTripsRunnable queryTripsRunnable;
@@ -290,8 +291,8 @@ public class DirectionsActivity extends OeffiMainActivity implements
             connectivityReceiver = null;
         }
 
-        if (isNewIntent || time == null)
-            time = new TimeSpec.Relative(0);
+        if (isNewIntent || timeSpec == null)
+            timeSpec = new TimeSpec.Relative(0);
 
         if (intent.hasExtra(INTENT_EXTRA_RENDERCONFIG))
             renderConfig = (TripsOverviewActivity.RenderConfig) intent.getSerializableExtra(INTENT_EXTRA_RENDERCONFIG);
@@ -456,15 +457,16 @@ public class DirectionsActivity extends OeffiMainActivity implements
                             .split("_");
                     final DepArr depArr = DepArr.valueOf(parts[0]);
                     if (parts[1].equals("AT")) {
-                        time = new TimeSpec.Absolute(depArr, time.timeInMillis());
+                        timeSpec = new TimeSpec.Absolute(depArr, timeSpec.timeInMillis());
+                        timeIsToday = false;
                         // and immediately ask for date and then time
                         dateClicked();
                     } else if (parts[1].equals("IN")) {
                         if (parts.length > 2) {
-                            time = new TimeSpec.Relative(depArr,
+                            timeSpec = new TimeSpec.Relative(depArr,
                                     Long.parseLong(parts[2]) * DateUtils.MINUTE_IN_MILLIS);
                         } else {
-                            time = new TimeSpec.Relative(depArr, 0);
+                            timeSpec = new TimeSpec.Relative(depArr, 0);
                             handleDiffClick();
                         }
                     } else {
@@ -475,15 +477,16 @@ public class DirectionsActivity extends OeffiMainActivity implements
                 builder.show();
             });
             viewTimeDepArr.setOnLongClickListener(v -> {
-                final boolean isSetToNow = time instanceof TimeSpec.Relative && ((TimeSpec.Relative) time).diffMs == 0;
+                final boolean isSetToNow = timeSpec instanceof TimeSpec.Relative && ((TimeSpec.Relative) timeSpec).diffMs == 0;
                 if (isSetToNow) {
                     // set to depart at ...
-                    time = new TimeSpec.Absolute(DepArr.DEPART, time.timeInMillis());
+                    timeSpec = new TimeSpec.Absolute(DepArr.DEPART, timeSpec.timeInMillis());
+                    timeIsToday = true;
                     //  ... and ask for time
                     timeClicked();
                 } else {
                     // revert to depart now
-                    time = new TimeSpec.Relative(DepArr.DEPART, 0);
+                    timeSpec = new TimeSpec.Relative(DepArr.DEPART, 0);
                 }
                 updateGUI();
                 return true;
@@ -671,8 +674,10 @@ public class DirectionsActivity extends OeffiMainActivity implements
                 }
             }
 
-            if (intent.hasExtra(INTENT_EXTRA_TIME_SPEC))
-                time = (TimeSpec) intent.getSerializableExtra(INTENT_EXTRA_TIME_SPEC);
+            if (intent.hasExtra(INTENT_EXTRA_TIME_SPEC)) {
+                timeSpec = (TimeSpec) intent.getSerializableExtra(INTENT_EXTRA_TIME_SPEC);
+                timeIsToday = false;
+            }
 
             autoGo = intent.getBooleanExtra(INTENT_EXTRA_AUTOGO, false);
             command = (Command) intent.getSerializableExtra(INTENT_EXTRA_COMMAND);
@@ -689,7 +694,8 @@ public class DirectionsActivity extends OeffiMainActivity implements
             autoCompleteLocationsHandler.addJob(command.fromText, viewFromLocation);
             autoCompleteLocationsHandler.addJob(command.toText, viewToLocation);
             autoCompleteLocationsHandler.addJob(command.viaText, viewViaLocation);
-            time = command.time;
+            timeSpec = command.time;
+            timeIsToday = true;
             autoCompleteLocationsHandler.start(result -> {
                 if (result.success)
                     handleAutoGo();
@@ -935,11 +941,12 @@ public class DirectionsActivity extends OeffiMainActivity implements
     protected void onSaveInstanceState(final Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putSerializable("time", time);
+        outState.putSerializable("time", timeSpec);
     }
 
     private void restoreInstanceState(final Bundle savedInstanceState) {
-        time = (TimeSpec) savedInstanceState.getSerializable("time");
+        timeSpec = (TimeSpec) savedInstanceState.getSerializable("time");
+        timeIsToday = false;
     }
 
     @Override
@@ -981,35 +988,36 @@ public class DirectionsActivity extends OeffiMainActivity implements
         viewToLocation.setHint(R.string.directions_to);
 
         viewTimeDepArr
-                .setText(time.depArr == DepArr.DEPART ? R.string.directions_time_dep : R.string.directions_time_arr);
+                .setText(timeSpec.depArr == DepArr.DEPART ? R.string.directions_time_dep : R.string.directions_time_arr);
 
-        if (time == null) {
+        if (timeSpec == null) {
             viewTime1.setVisibility(View.GONE);
             viewTime2.setVisibility(View.GONE);
-        } else if (time instanceof TimeSpec.Absolute) {
+        } else if (timeSpec instanceof TimeSpec.Absolute) {
             final long now = System.currentTimeMillis();
-            final PTDate ptDatetime = PTDate.withUnknownLocationSpecificOffset(((TimeSpec.Absolute) time).timeMs);
+            final PTDate ptDatetime = PTDate.withUnknownLocationSpecificOffset(((TimeSpec.Absolute) timeSpec).timeMs);
             viewTime1.setVisibility(View.VISIBLE);
             viewTime1.setOnClickListener(v -> dateClicked());
             viewTime1.setText(Formats.formatDate(timeZoneSelector, now, ptDatetime));
             viewTime2.setVisibility(View.VISIBLE);
             viewTime2.setOnClickListener(v -> timeClicked());
             viewTime2.setText(Formats.formatTime(timeZoneSelector, ptDatetime));
-        } else if (time instanceof TimeSpec.Relative) {
-            final long diff = ((TimeSpec.Relative) time).diffMs;
+        } else if (timeSpec instanceof TimeSpec.Relative) {
+            final long diff = ((TimeSpec.Relative) timeSpec).diffMs;
             viewTime1.setVisibility(View.VISIBLE);
             viewTime1.setText(diff == 0 ? getString(R.string.time_now)
                     : getString(R.string.directions_time_relative, Formats.formatTimeDiff(this, diff)));
             viewTime1.setOnClickListener(diffClickListener);
             viewTime1.setOnLongClickListener(v -> {
-                if (time instanceof TimeSpec.Relative) {
+                if (timeSpec instanceof TimeSpec.Relative) {
                     // set to depart at ...
-                    time = new TimeSpec.Absolute(DepArr.DEPART, time.timeInMillis());
+                    timeSpec = new TimeSpec.Absolute(DepArr.DEPART, timeSpec.timeInMillis());
+                    timeIsToday = true;
                     //  ... and ask for time
                     timeClicked();
                 } else {
                     // revert to depart now
-                    time = new TimeSpec.Relative(DepArr.DEPART, 0);
+                    timeSpec = new TimeSpec.Relative(DepArr.DEPART, 0);
                 }
                 updateGUI();
                 return true;
@@ -1028,7 +1036,8 @@ public class DirectionsActivity extends OeffiMainActivity implements
             calendar.set(Calendar.YEAR, year1);
             calendar.set(Calendar.MONTH, month1);
             calendar.set(Calendar.DAY_OF_MONTH, day1);
-            time = new TimeSpec.Absolute(time.depArr, calendar.getTimeInMillis());
+            timeSpec = new TimeSpec.Absolute(timeSpec.depArr, calendar.getTimeInMillis());
+            timeIsToday = false;
             updateGUI();
             timeClicked();
         }, year, month, day) {
@@ -1050,12 +1059,12 @@ public class DirectionsActivity extends OeffiMainActivity implements
             calendar.set(Calendar.HOUR_OF_DAY, hour1);
             calendar.set(Calendar.MINUTE, minute1);
             long timeInMillis = calendar.getTimeInMillis();
-            if (timeInMillis - System.currentTimeMillis() < -3601000l) {
+            if (timeIsToday && timeInMillis - System.currentTimeMillis() < -3601000l) {
                 // time for today would be more than 1 hour in the past
                 // so it seems the user wants tomorrow, add 24h
                 timeInMillis += 24 * 3600000l;
             }
-            time = new TimeSpec.Absolute(time.depArr, timeInMillis);
+            timeSpec = new TimeSpec.Absolute(timeSpec.depArr, timeInMillis);
             updateGUI();
         }, hour, minute, DateFormat.is24HourFormat(DirectionsActivity.this)) {
             private boolean fingerIsDown;
@@ -1109,7 +1118,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
     private Calendar getTimePickerCalendar() {
         final Calendar calendar = new GregorianCalendar(timeZoneSelector.getInputTimeZone());
-        calendar.setTimeInMillis(((TimeSpec.Absolute) time).timeMs);
+        calendar.setTimeInMillis(((TimeSpec.Absolute) timeSpec).timeMs);
         return calendar;
     }
 
@@ -1131,10 +1140,11 @@ public class DirectionsActivity extends OeffiMainActivity implements
         builder.setItems(relativeTimeStrings, (dialog, which) -> {
             if (which < relativeTimeValues.length) {
                 final int mins = relativeTimeValues[which];
-                time = new TimeSpec.Relative(mins * DateUtils.MINUTE_IN_MILLIS);
+                timeSpec = new TimeSpec.Relative(mins * DateUtils.MINUTE_IN_MILLIS);
             } else {
                 // set to depart at ...
-                time = new TimeSpec.Absolute(DepArr.DEPART, time.timeInMillis());
+                timeSpec = new TimeSpec.Absolute(DepArr.DEPART, timeSpec.timeInMillis());
+                timeIsToday = true;
                 //  ... and ask for time
                 timeClicked();
             }
@@ -1281,9 +1291,9 @@ public class DirectionsActivity extends OeffiMainActivity implements
             }
 
             final Date departureDate =
-                    (time == null || (time instanceof TimeSpec.Relative && ((TimeSpec.Relative) time).diffMs == 0))
+                    (timeSpec == null || (timeSpec instanceof TimeSpec.Relative && ((TimeSpec.Relative) timeSpec).diffMs == 0))
                             ? null
-                            : new Date(time.timeInMillis());
+                            : new Date(timeSpec.timeInMillis());
 
             if (itemId == R.id.directions_location_selector_context_show_departures) {
                 StationDetailsActivity.start(this, network, location, departureDate, null);
@@ -1623,7 +1633,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             flags.add(TripFlag.BIKE);
 
         final TripOptions options = getTripOptionsFromPrefs(products, flags.isEmpty() ? null : flags);
-        queryTripsRunnable = new MyQueryTripsRunnable(networkProvider, from, via, to, time, options) {
+        queryTripsRunnable = new MyQueryTripsRunnable(networkProvider, from, via, to, timeSpec, options) {
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
