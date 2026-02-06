@@ -18,7 +18,7 @@
 
     <string name="extras_drivermode_navigation_title">Navigation</string>
     <string name="extras_drivermode_navigation_refresh_battery_interval_title">Auffrischen mit Batterie</string>
-    <string name="extras_drivermode_navigation_refresh_battery_interval_summary">Intervall um die Anzeige aufzufrischen im Batteriebbetrieb.  [%s Sekunden]</string>
+    <string name="extras_drivermode_navigation_refresh_battery_interval_summary">Intervall um die Anzeige aufzufrischen im Batteriebetrieb.  [%s Sekunden]</string>
     <string name="extras_drivermode_navigation_refresh_charging_interval_title">Auffrischen beim Laden</string>
     <string name="extras_drivermode_navigation_refresh_charging_interval_summary">Intervall um die Anzeige aufzufrischen wenn das Gerät geladen wird.  [%s Sekunden]</string>
     <string name="extras_drivermode_keep_active_title">Display eingeschaltet lassen …</string>
