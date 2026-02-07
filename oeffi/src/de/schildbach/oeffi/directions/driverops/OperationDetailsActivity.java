@@ -67,9 +67,9 @@ public class OperationDetailsActivity extends TripDetailsActivity {
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        colorTimeGood = getColor(R.color.fg_time_good);
-        colorTimeEarly = getColor(R.color.fg_time_early);
-        colorTimeDelay = getColor(R.color.fg_time_delay);
+        colorTimeGood = getColor(R.color.fg_operation_time_good);
+        colorTimeEarly = getColor(R.color.fg_operation_time_early);
+        colorTimeDelay = getColor(R.color.fg_operation_time_delay);
 
         thresholdEarlyMillis = Integer.parseInt(prefs.getString("extras_drivermode_threshold_early", getString(R.string.default_drivermode_threshold_early))) * 1000L;
         thresholdDelayMillis = Integer.parseInt(prefs.getString("extras_drivermode_threshold_delay", getString(R.string.default_drivermode_threshold_delay))) * 1000L;
@@ -524,7 +524,6 @@ public class OperationDetailsActivity extends TripDetailsActivity {
         int color, delayTextColor, otherTextColor;
 
         final ImageView nearestArrivalArrowView = containerView.findViewById(R.id.operation_next_event_nearest_station_arrow);
-        nearestArrivalArrowView.setColorFilter(colorSignificant);
         nearestArrivalArrowView.setBackgroundColor(Color.TRANSPARENT);
 
         final View nearestArrivalView = containerView.findViewById(R.id.operation_next_event_nearest_station_arrival);
@@ -558,11 +557,12 @@ public class OperationDetailsActivity extends TripDetailsActivity {
                 nearestArrivalArrowView.setColorFilter(colorDefaultBackground);
             } else {
                 nearestArrivalView.setBackgroundColor(Color.TRANSPARENT);
+
+                nearestArrivalArrowView.setColorFilter(color);
             }
         }
 
         final ImageView nextArrivalArrowView = containerView.findViewById(R.id.operation_next_event_next_station_arrow);
-        nextArrivalArrowView.setColorFilter(colorSignificant);
         nextArrivalArrowView.setBackgroundColor(Color.TRANSPARENT);
 
         final View nearestDepartureView = containerView.findViewById(R.id.operation_next_event_nearest_station_departure);
@@ -633,6 +633,8 @@ public class OperationDetailsActivity extends TripDetailsActivity {
                 nextArrivalView.setBackgroundColor(Color.TRANSPARENT);
                 nextStopNameView.setTextColor(colorSignificant);
                 nextStopPlaceView.setTextColor(colorSignificant);
+
+                nextArrivalArrowView.setColorFilter(color);
             }
         }
     }
