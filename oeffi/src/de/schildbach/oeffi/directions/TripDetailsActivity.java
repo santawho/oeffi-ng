@@ -2604,6 +2604,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
 
         // remaining time and distance
+        final TextView remainingView = row.findViewById(R.id.directions_trip_details_public_entry_stop_remaining);
         if (isShowSimulatedLine && simulatedTime != null) {
             final long remainingTime = simulatedTime.getTime() - now.getTime();
             final Point locationCoord = stop.location.coord;
@@ -2614,8 +2615,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 builder.append(String.format("   %.1f km",
                         TripGeoUtils.geoDistanceInMeters(locationCoord, deviceCoord) / 1000.0));
             }
-            final TextView remainingView = row.findViewById(R.id.directions_trip_details_public_entry_stop_remaining);
             remainingView.setText(builder.toString());
+        } else {
+            remainingView.setVisibility(View.GONE);
         }
 
         final Paint.FontMetrics fontMetrics = stopNameView.getPaint().getFontMetrics();
