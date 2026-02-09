@@ -93,6 +93,10 @@ public class OperationsActivity extends DirectionsActivity {
         return "extras_drivermode_stored_operations_retention_hours";
     }
 
+    protected long getUpcomingStoredTripsTimeLimitMs() {
+        return 30 * 60000; // show operations of next 30 minutes as upcoming
+    }
+
     @Override
     protected Set<Product> getNetworkDefaultProducts() {
         return new HashSet<>(); // empty set

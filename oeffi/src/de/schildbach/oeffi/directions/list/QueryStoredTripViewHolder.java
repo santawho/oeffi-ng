@@ -68,6 +68,7 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
     private final LocationTextView toView;
     private final SwipeLayout swipeLayout;
     private final MySwipeListener swipeListener;
+    private final long upcomingTimeLimitMs;
     public ContextListener contextListener;
     private Location from;
     private Location to;
@@ -83,11 +84,13 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
             final OeffiActivity context,
             final NetworkId network,
             final String usage,
+            final long upcomingTimeLimitMs,
             final View itemView) {
         super(itemView);
         this.context = context;
         this.network = network;
         this.usage = usage;
+        this.upcomingTimeLimitMs = upcomingTimeLimitMs;
 
         iconView = itemView.findViewById(R.id.directions_query_stored_trip_entry_icon);
         timeLeftView = itemView.findViewById(R.id.directions_query_stored_trip_entry_time_left);
@@ -131,7 +134,6 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
         dateView.setText(Formats.formatDate(context.getTimeZoneSelector(), now, departureTime, PTDate.NETWORK_OFFSET, true));
         timeView.setText(Formats.formatTime(context.getTimeZoneSelector(), departureTime, PTDate.NETWORK_OFFSET));
 
-        final long MS_UPCOMING = 12 * 3600000; // 12 hours assumed upcoming
         final int backgroundId;
         int iconResId;
         String sTimeLeft = null;
@@ -152,7 +154,7 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
                 timeLeftColorId = R.color.fg_highlighted;
             } else {
                 msTimeLeft = msLeftToDeparture;
-                if (msLeftToDeparture < MS_UPCOMING) {
+                if (msLeftToDeparture < upcomingTimeLimitMs) {
                     backgroundId = R.drawable.stored_trip_entry_background_upcoming;
                 } else {
                     backgroundId = R.drawable.stored_trip_entry_background_future;

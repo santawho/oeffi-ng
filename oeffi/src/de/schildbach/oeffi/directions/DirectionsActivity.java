@@ -837,6 +837,10 @@ public class DirectionsActivity extends OeffiMainActivity implements
         return Constants.PREFS_KEY_STORED_TRIPS_RETENTION_HOURS;
     }
 
+    protected long getUpcomingStoredTripsTimeLimitMs() {
+        return 12 * 3600000; // show trips of next 12 hours as upcoming
+    }
+
     private void newQueryHistoryListAdapter() {
         if (queryHistoryListAdapter != null)
             queryHistoryListAdapter.close();
@@ -857,7 +861,8 @@ public class DirectionsActivity extends OeffiMainActivity implements
         queryHistoryListAdapter = new QueryHistoryAdapter(this,
                 network, getStoredTripsUsage(),
                 this, getHistoryEntryLayoutId(),
-                this, deleteTripsAfterMillis, maxHistoryEntries);
+                this, deleteTripsAfterMillis, maxHistoryEntries,
+                getUpcomingStoredTripsTimeLimitMs());
 
         updateRefTime(true);
         viewQueryHistoryList.setAdapter(queryHistoryListAdapter);

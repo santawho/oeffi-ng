@@ -90,6 +90,10 @@
     <color name="bg_bookmarked_trip_border_future">#4cba4e</color>
     <color name="bg_bookmarked_trip_border_upcoming">#c8cc4b</color>
     <color name="bg_bookmarked_trip_border_current">#ed7a21</color>
+    <color name="bg_bookmarked_trip_fill_finished">#c6d6e2</color>
+    <color name="bg_bookmarked_trip_fill_future">#d2eed3</color>
+    <color name="bg_bookmarked_trip_fill_upcoming">#f1f2d2</color>
+    <color name="bg_bookmarked_trip_fill_current">#fbdec8</color>
 
     <item name="alpha_bright_white" format="float" type="dimen">1</item>
 

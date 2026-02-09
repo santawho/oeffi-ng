@@ -328,6 +328,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private final int historyEntryLayoutId;
     private final long deleteTripsAfterMillis;
     private final int maxHistoryEntries;
+    private final long upcomingTimeLimitMs;
 
     private HistoryCursor historyCursor;
     private TripsCursor tripsCursor;
@@ -342,7 +343,8 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             final int historyEntryLayoutId,
             final ContextListener contextListener,
             final long deleteTripsAfterMillis,
-            final int maxHistoryEntries) {
+            final int maxHistoryEntries,
+            final long upcomingTimeLimitMs) {
         this.context = context;
         this.contentResolver = context.getContentResolver();
         this.inflater = LayoutInflater.from(context);
@@ -352,6 +354,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         this.contextListener = contextListener;
         this.deleteTripsAfterMillis = deleteTripsAfterMillis;
         this.maxHistoryEntries = maxHistoryEntries;
+        this.upcomingTimeLimitMs = upcomingTimeLimitMs;
         this.historyEntryLayoutId = historyEntryLayoutId;
 
         setHasStableIds(true);
@@ -455,7 +458,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         if (viewType == historyEntryLayoutId) {
             return new QueryHistoryViewHolder(context, network, itemView);
         } else if (viewType == R.layout.directions_query_stored_trip_entry) {
-            return new QueryStoredTripViewHolder(context, network, usage, itemView);
+            return new QueryStoredTripViewHolder(context, network, usage, upcomingTimeLimitMs, itemView);
         } else {
             throw new IllegalArgumentException("unexpected view type " + viewType);
         }
