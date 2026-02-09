@@ -563,7 +563,7 @@ public class OperationDetailsActivity extends TripDetailsActivity {
         }
 
         final ImageView nextArrivalArrowView = containerView.findViewById(R.id.operation_next_event_next_station_arrow);
-        nextArrivalArrowView.setBackgroundColor(Color.TRANSPARENT);
+        boolean nextArrivalArrowViewAlreadyRendered = false;
 
         final View nearestDepartureView = containerView.findViewById(R.id.operation_next_event_nearest_station_departure);
         if (nearestDepartureDelay == null) {
@@ -592,6 +592,7 @@ public class OperationDetailsActivity extends TripDetailsActivity {
 
                 nextArrivalArrowView.setColorFilter(colorDefaultBackground);
                 nextArrivalArrowView.setBackgroundColor(color);
+                nextArrivalArrowViewAlreadyRendered = true;
             } else {
                 nearestDepartureView.setBackgroundColor(Color.TRANSPARENT);
             }
@@ -634,7 +635,10 @@ public class OperationDetailsActivity extends TripDetailsActivity {
                 nextStopNameView.setTextColor(colorSignificant);
                 nextStopPlaceView.setTextColor(colorSignificant);
 
-                nextArrivalArrowView.setColorFilter(color);
+                if (!nextArrivalArrowViewAlreadyRendered) {
+                    nextArrivalArrowView.setColorFilter(color);
+                    nextArrivalArrowView.setBackgroundColor(Color.TRANSPARENT);
+                }
             }
         }
     }
