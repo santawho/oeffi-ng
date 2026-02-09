@@ -2603,6 +2603,21 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             stopPositionView.setPadding(padding, 0, padding, 0);
         }
 
+        // remaining time and distance
+        if (isShowSimulatedLine && simulatedTime != null) {
+            final long remainingTime = simulatedTime.getTime() - now.getTime();
+            final Point locationCoord = stop.location.coord;
+            final Point deviceCoord = getDeviceLocation();
+            final StringBuilder builder = new StringBuilder();
+            builder.append(Formats.formatTimeSpanMorS(remainingTime, false));
+            if (locationCoord != null && deviceCoord != null) {
+                builder.append(String.format("   %.1f km",
+                        TripGeoUtils.geoDistanceInMeters(locationCoord, deviceCoord) / 1000.0));
+            }
+            final TextView remainingView = row.findViewById(R.id.directions_trip_details_public_entry_stop_remaining);
+            remainingView.setText(builder.toString());
+        }
+
         final Paint.FontMetrics fontMetrics = stopNameView.getPaint().getFontMetrics();
 
         if (arrivalRow != null)

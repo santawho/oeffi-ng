@@ -212,6 +212,15 @@ public final class Formats {
         return String.format("%s%d:%02d", millis < 0 ? "-" : forcePlus ? "+" : "", secs / 60, secs % 60);
     }
 
+    @SuppressLint("DefaultLocale")
+    public static String formatTimeSpanMorS(final long millis, final boolean forcePlus) {
+        final long secs = Math.abs(millis) / DateUtils.SECOND_IN_MILLIS;
+        final String sign = millis < 0 ? "-" : forcePlus ? "+" : "";
+        if (secs > 90)
+            return String.format("%s%d min", sign, secs / 60);
+        return String.format("%s%d sec", sign, secs);
+    }
+
     private static final String METER_SUFFIX = Constants.CHAR_HAIR_SPACE + "m";
     private static final String KILOMETER_SUFFIX = Constants.CHAR_HAIR_SPACE + "km";
 

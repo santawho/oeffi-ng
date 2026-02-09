@@ -90,6 +90,12 @@
             android:background="?android:attr/selectableItemBackground"
             android:textColor="@color/fg_significant"
             android:textSize="@dimen/font_size_large" />
+        <TextView
+            android:id="@+id/directions_trip_details_public_entry_stop_remaining"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/fg_simulated"
+            android:textSize="@dimen/font_size_normal" />
     </LinearLayout>
 
 </TableRow>
