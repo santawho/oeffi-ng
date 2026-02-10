@@ -612,11 +612,6 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
         final Intent intent = getIntent();
         handleIntent(intent);
-        if (intent.getBooleanExtra(INTENT_EXTRA_OPEN_FAVORITES, false)) {
-            FavoriteStationsActivity.start(this);
-        }
-
-        updateGUI();
     }
 
     @Override
@@ -655,13 +650,14 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         }
 
         setActionBarSecondaryTitleFromNetwork();
-        updateGUI();
+        // updateGUI();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
+        updateGUI();
         postLoadNextVisible(0);
     }
 
@@ -808,6 +804,12 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                 StationDetailsActivity.start(this, network, result.location, time, null);
             });
         }
+
+        if (intent.getBooleanExtra(INTENT_EXTRA_OPEN_FAVORITES, false)) {
+            FavoriteStationsActivity.start(this);
+        }
+
+        updateGUI();
     }
 
     private void setFixedLocation(final Location location, final Date presetTime) {
