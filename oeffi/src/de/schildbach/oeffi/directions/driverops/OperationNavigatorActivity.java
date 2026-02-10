@@ -45,7 +45,6 @@ import de.schildbach.oeffi.directions.QueryTripsRunnable;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
 import de.schildbach.oeffi.directions.navigation.NavigationAlarmManager;
 import de.schildbach.oeffi.directions.navigation.Navigator;
-import de.schildbach.oeffi.directions.navigation.TripNavigatorActivity;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.pte.NetworkId;
@@ -282,7 +281,7 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
             if (baseActivity == null)
                 continue;
             final String activityClassName = baseActivity.getClassName();
-            if (!activityClassName.equals(TripNavigatorActivity.class.getName()))
+            if (!activityClassName.equals(OperationNavigatorActivity.class.getName()))
                 continue;
             if (taskInfo.taskId == myTaskId) // skip myself
                 continue;
@@ -290,15 +289,15 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
         }
         if (!taskIntents.isEmpty()) {
             new AlertDialog.Builder(this)
-                    .setTitle(R.string.navigation_stopnavothers_title)
-                    .setMessage(R.string.navigation_stopnavothers_text)
-                    .setPositiveButton(R.string.navigation_stopnavothers_stop, (dialogInterface, i) -> {
+                    .setTitle(R.string.operation_stopnavothers_title)
+                    .setMessage(R.string.operation_stopnavothers_text)
+                    .setPositiveButton(R.string.operation_stopnavothers_stop, (dialogInterface, i) -> {
                         for (final Intent taskIntent : taskIntents) {
                             taskIntent.putExtra(INTENT_EXTRA_DELETEREQUEST, DELETEREQUEST_FORCE);
                             startActivity(taskIntent);
                         }
                     })
-                    .setNegativeButton(R.string.navigation_stopnavothers_continue, null)
+                    .setNegativeButton(R.string.operation_stopnavothers_continue, null)
                     .create().show();
         }
     }
@@ -336,12 +335,12 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
     private void askStopNavigation() {
         OperationNotificationBeingDeleted = true;
         new AlertDialog.Builder(this)
-                .setTitle(R.string.navigation_stopnav_title)
-                .setMessage(R.string.navigation_stopnav_text)
-                .setPositiveButton(R.string.navigation_stopnav_stop, (dialogInterface, i) -> {
+                .setTitle(R.string.operation_stopnav_title)
+                .setMessage(R.string.operation_stopnav_text)
+                .setPositiveButton(R.string.operation_stopnav_stop, (dialogInterface, i) -> {
                     stopNavigation();
                 })
-                .setNegativeButton(R.string.navigation_stopnav_continue, (dialogInterface, i) -> {
+                .setNegativeButton(R.string.operation_stopnav_continue, (dialogInterface, i) -> {
                     OperationNotificationBeingDeleted = false;
                     doCheckAutoRefresh(true);
                     updateNotification(null);

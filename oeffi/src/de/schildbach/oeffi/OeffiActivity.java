@@ -65,6 +65,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import de.schildbach.oeffi.directions.DirectionsActivity;
+import de.schildbach.oeffi.directions.driverops.OperationNotification;
 import de.schildbach.oeffi.directions.driverops.OperationsActivity;
 import de.schildbach.oeffi.directions.navigation.NavigationNotification;
 import de.schildbach.oeffi.mapview.OeffiMapView;
@@ -439,6 +440,7 @@ public abstract class OeffiActivity extends ComponentActivity {
                         }
                         if (subItemId == R.id.global_options_clear_navigation) {
                             NavigationNotification.removeAllGuides(OeffiActivity.this);
+                            OperationNotification.removeAllGuides(OeffiActivity.this);
                             return true;
                         }
                         if (subItemId == R.id.global_options_show_log) {
