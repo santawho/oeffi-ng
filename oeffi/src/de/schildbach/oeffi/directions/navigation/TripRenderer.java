@@ -1195,9 +1195,9 @@ public class TripRenderer {
         productInfoSuppliers.put(Product.TRAM, new BasicInfoSupplier(
                 20, 2 * 60, 60, 100));
         productInfoSuppliers.put(Product.BUS, new BasicInfoSupplier(
-                15, 2 * 60, 2 * 60, 50));
+                15, 2 * 60, 2 * 60, 100));
         productInfoSuppliers.put(Product.REPLACEMENT_SERVICE, new BasicInfoSupplier(
-                15, 2 * 60, 2 * 60, 50));
+                15, 2 * 60, 2 * 60, 100));
     }
 
     public static DepartureDelayEstimator FallbackDepartureDelayEstimator = (plannedArrivalTime, plannedDepartureTime, arrivalDelay) -> {
@@ -1218,7 +1218,4 @@ public class TripRenderer {
             return supplier;
         return FallbackStationRadiusProvider;
     }
-
-
-
 }
