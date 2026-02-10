@@ -117,6 +117,7 @@ public class LocationSelector extends LinearLayout implements
     private boolean useLongHoldMenu;
     private final boolean darkMode;
     private NetworkId networkId;
+    private String usage;
     private LocationSelectionListener locationSelectionListener;
     private Item[] availableItems;
 
@@ -215,16 +216,18 @@ public class LocationSelector extends LinearLayout implements
     private String getPrefsStateKey() {
         if (networkId == null)
             return null;
-        return PREFS_STATE + networkId.name();
+        final String key = PREFS_STATE + networkId.name();
+        return usage == null ? key : key + "_" + usage;
     }
 
-    public void setNetwork(final NetworkId networkId) {
+    public void setNetwork(final NetworkId networkId, final String usage) {
         if (!isEnabled)
             return;
-        if (networkId != null && networkId.equals(this.networkId))
+        if (Objects.equals(networkId, this.networkId) && Objects.equals(usage, this.usage))
             return;
 
         this.networkId = networkId;
+        this.usage = usage;
 
         setupContent();
     }

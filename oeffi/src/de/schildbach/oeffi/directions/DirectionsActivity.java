@@ -582,7 +582,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             locationSelector = findViewById(R.id.directions_location_selector);
             locationSelector.setLocationSelectionListener(this);
             locationSelector.setup(this, prefs);
-            locationSelector.setNetwork(network);
+            locationSelector.setNetwork(network, getStoredTripsUsage());
 
             getMapView().setDirectionsOverlay(viewFromLocation, viewToLocation);
         }
@@ -828,7 +828,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         final boolean haveNonDefaultProducts = initProductToggles();
         expandFormIfRequired(haveNonDefaultProducts);
         newQueryHistoryListAdapter();
-        locationSelector.setNetwork(network);
+        locationSelector.setNetwork(network, getStoredTripsUsage());
         updateGUI();
         setActionBarSecondaryTitleFromNetwork();
     }

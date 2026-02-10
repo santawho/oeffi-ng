@@ -31,7 +31,11 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
-public class Objects {
+public final class Objects {
+    public static boolean equals(final Object a, final Object b) {
+        return java.util.Objects.equals(a, b);
+    }
+
     public static byte[] serialize(final Serializable object) {
         if (object == null) return null;
         try {
