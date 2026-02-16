@@ -1,7 +1,7 @@
 [versions]
-activity = "1.12.2"
+activity = "1.12.4"
 agp = "9.0.1"
-androidsvgdrawableGradlePlugin = "3.1.1"
+#androidsvgdrawableGradlePlugin = "3.1.1"
 annotation = "1.9.1"
 byeByeJetifier = "1.2.2"
 coordinatorlayout = "1.3.0"
@@ -29,7 +29,7 @@ preferencex = "1.2.1"
 
 [libraries]
 activity = { module = "androidx.activity:activity", version.ref = "activity" }
-androidsvgdrawable-gradle-plugin = { module = "fr.avianey.androidsvgdrawable:gradle-plugin", version.ref = "androidsvgdrawableGradlePlugin" }
+#androidsvgdrawable-gradle-plugin = { module = "fr.avianey.androidsvgdrawable:gradle-plugin", version.ref = "androidsvgdrawableGradlePlugin" }
 annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
 coordinatorlayout = { module = "androidx.coordinatorlayout:coordinatorlayout", version.ref = "coordinatorlayout" }
 core = { module = "androidx.core:core", version.ref = "core" }

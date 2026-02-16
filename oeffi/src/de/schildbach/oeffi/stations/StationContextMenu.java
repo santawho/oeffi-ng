@@ -122,7 +122,7 @@ public class StationContextMenu extends PopupMenu {
                                 new Intent(Intent.ACTION_MAIN, null, context, StationDetailsActivity.class)
                                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK),
                                 networkId, location, null);
-                        iconId = R.mipmap.ic_oeffi_stations_color_48dp;
+                        iconId = R.mipmap.ic_oeffi_ng_stations_color_48dp;
                         defaultNameId = R.string.departures_shortcut_default_name;
                         activityClass = StationDetailsActivity.class;
                     } else {
@@ -131,7 +131,7 @@ public class StationContextMenu extends PopupMenu {
                                 new Intent(Intent.ACTION_MAIN, null, context, DirectionsShortcutActivity.class)
                                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK),
                                 networkId, location);
-                        iconId = R.mipmap.ic_oeffi_directions_color_48dp;
+                        iconId = R.mipmap.ic_oeffi_ng_directions_color_48dp;
                         defaultNameId = R.string.directions_shortcut_default_name;
                         activityClass = DirectionsActivity.class;
                     }

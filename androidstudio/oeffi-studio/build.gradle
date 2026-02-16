@@ -3,7 +3,7 @@ import groovy.json.JsonSlurper
 
 plugins {
     alias(libs.plugins.android.application)
-    id 'androidsvgdrawable'
+//    id 'androidsvgdrawable'
 }
 
 def now = new Date()
@@ -192,13 +192,13 @@ dependencies {
 //    androidTestImplementation libs.espresso.core
 }
 
-tasks.register('svgToPng', fr.avianey.androidsvgdrawable.gradle.SvgDrawableTask) {
-    from = project.files('graphics')
-    to = file('res')
-    targetedDensities = ['xxhdpi', 'xxxhdpi']
-    outputFormat = 'PNG'
-    outputType = 'mipmap'
-}
+//tasks.register('svgToPng', fr.avianey.androidsvgdrawable.gradle.SvgDrawableTask) {
+//    from = project.files('graphics')
+//    to = file('res')
+//    targetedDensities = ['xxhdpi', 'xxxhdpi']
+//    outputFormat = 'PNG'
+//    outputType = 'mipmap'
+//}
 
 afterEvaluate {
     assembleNgRelease.doLast {

@@ -287,7 +287,7 @@ public class PlansPickerActivity extends OeffiMainActivity implements LocationHe
             ShortcutManagerCompat.requestPinShortcut(this,
                     new ShortcutInfoCompat.Builder(this, shortcutId).setShortLabel(plan.name)
                             .setActivity(new ComponentName(this, PlansPickerActivity.class))
-                            .setIcon(IconCompat.createWithResource(this, R.mipmap.ic_oeffi_plans_color_48dp))
+                            .setIcon(IconCompat.createWithResource(this, R.mipmap.ic_oeffi_ng_plans_color_48dp))
                             .setIntent(PlanActivity.intent(PlansPickerActivity.this, plan.planId, null)
                                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK))
                             .build(),

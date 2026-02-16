@@ -3,9 +3,9 @@
 buildscript {
     dependencies {
         classpath(libs.json)
-        classpath(libs.androidsvgdrawable.gradle.plugin) {
-            exclude group: 'xerces'
-        }
+//        classpath(libs.androidsvgdrawable.gradle.plugin) {
+//            exclude group: 'xerces'
+//        }
         classpath(libs.bye.bye.jetifier)
     }
 }
