@@ -74,8 +74,6 @@ import de.schildbach.oeffi.util.locationview.LocationView;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.Point;
 import de.schildbach.pte.dto.Product;
-import de.schildbach.pte.dto.Trip;
-import de.schildbach.pte.dto.Trip.Leg;
 import de.schildbach.pte.dto.Trip.Public;
 
 public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implementation {
@@ -257,9 +255,10 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
         }
 
         if (tripAware != null) {
-            for (final Leg leg : tripAware.getTrip().legs) {
-                if (!hasLegSelection || tripAware.isSelectedLeg(leg)) {
-                    final List<Point> path = OeffiMapView.getPathForLeg(leg);
+            final int numberOfLegs = tripAware.getNumberOfLegs();
+            for (int legIndex = 0; legIndex < numberOfLegs; legIndex += 1) {
+                if (!hasLegSelection || tripAware.isSelectedLeg(legIndex)) {
+                    final List<Point> path = tripAware.getLegInfo(legIndex).getPath();
                     if (path != null) {
                         for (final Point p : path)
                             points.add(new GeoPoint(p.getLatAsDouble(), p.getLonAsDouble()));
@@ -464,8 +463,6 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
                 }
 
                 if (tripAware != null) {
-                    final Trip trip = tripAware.getTrip();
-
                     final Paint paint = new Paint();
                     paint.setAntiAlias(true);
                     paint.setStyle(Paint.Style.STROKE);
@@ -473,11 +470,13 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
                     paint.setStrokeCap(Paint.Cap.ROUND);
 
                     // first paint all unselected legs
-                    for (final Leg leg : trip.legs) {
-                        if (!tripAware.isSelectedLeg(leg)) {
-                            final Path path = pointsToPath(projection, OeffiMapView.getPathForLeg(leg));
+                    final int numberOfLegs = tripAware.getNumberOfLegs();
+                    for (int legIndex = 0; legIndex < numberOfLegs; legIndex += 1) {
+                        if (!tripAware.isSelectedLeg(legIndex)) {
+                            final TripAware.LegInfo legInfo = tripAware.getLegInfo(legIndex);
+                            final Path path = pointsToPath(projection, legInfo.getPath());
 
-                            paint.setColor(leg instanceof Public ? Color.MAGENTA : Color.DKGRAY);
+                            paint.setColor(legInfo.isPublicLeg() ? Color.MAGENTA : Color.DKGRAY);
                             paint.setAlpha(92);
                             paint.setStrokeWidth(tripStrokeWidth);
                             canvas.drawPath(path, paint);
@@ -485,9 +484,11 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
                     }
 
                     // then paint selected legs
-                    for (final Leg leg : trip.legs) {
-                        if (tripAware.isSelectedLeg(leg)) {
-                            final List<Point> points = OeffiMapView.getPathForLeg(leg);
+                    for (int legIndex = 0; legIndex < numberOfLegs; legIndex += 1) {
+                        if (tripAware.isSelectedLeg(legIndex)) {
+                            final TripAware.LegInfo legInfo = tripAware.getLegInfo(legIndex);
+                            final boolean isPublicLeg = legInfo.isPublicLeg();
+                            final List<Point> points = legInfo.getPath();
                             final Path path = pointsToPath(projection, points);
 
                             paint.setColor(Color.GREEN);
@@ -495,13 +496,13 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
                             paint.setStrokeWidth(tripStrokeWidthSelectedGlow);
                             canvas.drawPath(path, paint);
 
-                            paint.setColor(leg instanceof Public ? Color.RED : Color.DKGRAY);
+                            paint.setColor(isPublicLeg ? Color.RED : Color.DKGRAY);
                             paint.setAlpha(128);
                             paint.setStrokeWidth(tripStrokeWidthSelected);
                             canvas.drawPath(path, paint);
 
-                            if (leg instanceof Public && points != null && !points.isEmpty()) {
-                                final Public publicLeg = (Public) leg;
+                            if (isPublicLeg && points != null && !points.isEmpty()) {
+                                final Public publicLeg = (Public) legInfo.getLeg();
 
                                 final double lat;
                                 final double lon;
@@ -542,11 +543,8 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
                     }
 
                     // then paint decorators
-                    final Leg firstLeg = trip.legs.get(0);
-                    final Leg lastLeg = trip.legs.get(trip.legs.size() - 1);
-
-                    for (final Leg leg : trip.legs) {
-                        final List<Point> path = OeffiMapView.getPathForLeg(leg);
+                    for (int legIndex = 0; legIndex < numberOfLegs; legIndex += 1) {
+                        final List<Point> path = tripAware.getLegInfo(legIndex).getPath();
                         if (path != null && !path.isEmpty()) {
                             final Point firstPoint = path.get(0);
                             final Point lastPoint = path.get(path.size() - 1);
@@ -556,20 +554,16 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
                                         new GeoPoint(firstPoint.getLatAsDouble(), firstPoint.getLonAsDouble()),
                                         point);
                                 drawAt(canvas, startIcon, point.x, point.y, false, 0);
-                            } else if (leg == firstLeg || leg == lastLeg) {
-                                if (leg == firstLeg) {
-                                    projection.toPixels(
-                                            new GeoPoint(firstPoint.getLatAsDouble(), firstPoint.getLonAsDouble()),
-                                            point);
-                                    drawAt(canvas, startIcon, point.x, point.y, false, 0);
-                                }
-
-                                if (leg == lastLeg) {
-                                    projection.toPixels(
-                                            new GeoPoint(lastPoint.getLatAsDouble(), lastPoint.getLonAsDouble()),
-                                            point);
-                                    drawAt(canvas, endIcon, point.x, point.y, false, 0);
-                                }
+                            } else if (legIndex == 0) {
+                                projection.toPixels(
+                                        new GeoPoint(firstPoint.getLatAsDouble(), firstPoint.getLonAsDouble()),
+                                        point);
+                                drawAt(canvas, startIcon, point.x, point.y, false, 0);
+                            } else if (legIndex == numberOfLegs - 1) {
+                                projection.toPixels(
+                                        new GeoPoint(lastPoint.getLatAsDouble(), lastPoint.getLonAsDouble()),
+                                        point);
+                                drawAt(canvas, endIcon, point.x, point.y, false, 0);
                             } else {
                                 projection.toPixels(
                                         new GeoPoint(firstPoint.getLatAsDouble(), firstPoint.getLonAsDouble()),
@@ -742,8 +736,9 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
                 float tappedPointDistance = 0;
 
                 int iRoute = 0;
-                for (final Leg leg : tripAware.getTrip().legs) {
-                    final List<Point> path = OeffiMapView.getPathForLeg(leg);
+                final int numberOfLegs = tripAware.getNumberOfLegs();
+                for (int legIndex = 0; legIndex < numberOfLegs; legIndex += 1) {
+                    final List<Point> path = tripAware.getLegInfo(legIndex).getPath();
                     if (path != null) {
                         for (final Point point : path) {
                             final float distance = GeoUtils.distanceBetween(tappedLat, tappedLon, point).distanceInMeters;

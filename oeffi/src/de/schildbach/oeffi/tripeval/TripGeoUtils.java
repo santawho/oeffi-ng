@@ -1,4 +1,4 @@
-package de.schildbach.oeffi.directions.navigation;
+package de.schildbach.oeffi.tripeval;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -10,9 +10,22 @@ import de.schildbach.pte.dto.Stop;
 import de.schildbach.pte.dto.Trip;
 import de.schildbach.pte.util.GeoUtils;
 
-public class TripGeoUtils extends GeoUtils {
+public class TripGeoUtils {
     public static final int DEFAULT_ESTIMATION_UNCERTAINTY_SECONDS = 300;
     public static final int DEFAULT_MAX_DISTANCE_METERS = 1000;
+
+    public static double geoDistanceInMeters(final Point pointA, final Point pointB) {
+        final double rad = Math.PI / 180;
+        final double lat1 = pointA.getLatAsDouble() * rad;
+        final double lon1 = pointA.getLonAsDouble() * rad;
+        final double lat2 = pointB.getLatAsDouble() * rad;
+        final double lon2 = pointB.getLonAsDouble() * rad;
+        final double sinDLat = Math.sin((lat2 - lat1) / 2);
+        final double sinDLon = Math.sin((lon2 - lon1) / 2);
+        final double a = sinDLat * sinDLat + Math.cos(lat1) * Math.cos(lat2) * sinDLon * sinDLon;
+        final double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return 6371000 * c;
+    }
 
     public static double getBearing(final Point from, final Point to) {
         final double fromLat = from.getLatAsDouble();

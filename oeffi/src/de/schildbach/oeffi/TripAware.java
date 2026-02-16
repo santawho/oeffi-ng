@@ -17,15 +17,28 @@
 
 package de.schildbach.oeffi;
 
+import java.util.List;
+
+import de.schildbach.pte.dto.Point;
 import de.schildbach.pte.dto.Trip;
 import de.schildbach.pte.dto.Trip.Leg;
 
 public interface TripAware {
+    interface LegInfo {
+        boolean isPublicLeg();
+        Leg getLeg();
+        List<Point> getPath();
+    }
+
     Trip getTrip();
+
+    int getNumberOfLegs();
+
+    LegInfo getLegInfo(int legIndex);
 
     void selectLeg(int legIndex);
 
     boolean hasSelection();
 
-    boolean isSelectedLeg(Leg leg);
+    boolean isSelectedLeg(int legIndex);
 }

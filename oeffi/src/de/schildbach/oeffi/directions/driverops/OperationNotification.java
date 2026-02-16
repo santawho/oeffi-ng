@@ -59,7 +59,7 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
 import de.schildbach.oeffi.directions.navigation.NavigationAlarmManager;
 import de.schildbach.oeffi.directions.navigation.Navigator;
-import de.schildbach.oeffi.directions.navigation.TripRenderer;
+import de.schildbach.oeffi.tripeval.TripRenderer;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.TimeZoneSelector;

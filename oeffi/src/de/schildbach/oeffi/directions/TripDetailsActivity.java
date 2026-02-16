@@ -88,14 +88,14 @@ import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.TripAware;
-import de.schildbach.oeffi.directions.navigation.TripGeoUtils;
+import de.schildbach.oeffi.tripeval.TripGeoUtils;
 import de.schildbach.oeffi.util.GoogleMapsUtils;
 import de.schildbach.oeffi.util.HorizontalPager;
 import de.schildbach.oeffi.util.KmlProducer;
 import de.schildbach.oeffi.util.PopupHelper;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.util.TimeSpec.DepArr;
-import de.schildbach.oeffi.directions.navigation.TripRenderer;
+import de.schildbach.oeffi.tripeval.TripRenderer;
 import de.schildbach.oeffi.directions.navigation.TripNavigatorActivity;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.stations.LineView;
@@ -550,6 +550,44 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 return tripRenderer.trip;
             }
 
+            @Override
+            public int getNumberOfLegs() {
+                return tripRenderer.legs.size();
+            }
+
+            @Override
+            public LegInfo getLegInfo(final int legIndex) {
+                return new LegInfo() {
+                    @Override
+                    public boolean isPublicLeg() {
+                        final TripRenderer.LegContainer legC = tripRenderer.legs.get(legIndex);
+                        return legC.publicLeg != null;
+                    }
+
+                    @Override
+                    public Trip.Leg getLeg() {
+                        final TripRenderer.LegContainer legC = tripRenderer.legs.get(legIndex);
+                        final Trip.Individual individualLeg = legC.individualLeg;
+                        if (individualLeg != null)
+                            return individualLeg;
+                        return legC.publicLeg;
+                    }
+
+                    @Override
+                    public List<Point> getPath() {
+                        final TripRenderer.LegContainer legC = tripRenderer.legs.get(legIndex);
+                        final Trip.Individual individualLeg = legC.individualLeg;
+                        if (individualLeg != null)
+                            return TripGeoUtils.getPathForLeg(individualLeg);
+
+                        final Trip.Public publicLeg = legC.publicLeg;
+                        if (publicLeg == null)
+                            return null;
+                        return TripGeoUtils.getPathForLegStops(publicLeg);
+                    }
+                };
+            }
+
             public void selectLeg(final int partIndex) {
                 selectedLegIndex = partIndex;
                 getMapView().zoomToAll();
@@ -559,11 +597,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 return selectedLegIndex != -1;
             }
 
-            public boolean isSelectedLeg(final Trip.Leg part) {
-                if (!hasSelection())
-                    return false;
-
-                return tripRenderer.legs.get(selectedLegIndex).equals(part);
+            @Override
+            public boolean isSelectedLeg(final int legIndex) {
+                return selectedLegIndex == legIndex;
             }
         });
 
