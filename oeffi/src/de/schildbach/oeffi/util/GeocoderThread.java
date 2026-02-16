@@ -116,7 +116,7 @@ public class GeocoderThread extends Thread {
         else
             coord = null;
 
-        final String id = getIdFromCoord(coord);
+        final String id = null; // getIdFromCoord(coord);
 
         final int maxAddressLineIndex = address.getMaxAddressLineIndex();
         final Location location;
