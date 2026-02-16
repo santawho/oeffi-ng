@@ -1012,8 +1012,11 @@ public class DirectionsActivity extends OeffiMainActivity implements
             viewTime1.setVisibility(View.VISIBLE);
             viewTime1.setText(diff == 0 ? getString(R.string.time_now)
                     : getString(R.string.directions_time_relative, Formats.formatTimeDiff(this, diff)));
-            viewTime1.setOnClickListener(diffClickListener);
             viewTime1.setOnLongClickListener(v -> {
+                handleDiffClick();
+                return true;
+            });
+            viewTime1.setOnClickListener(v -> {
                 if (timeSpec instanceof TimeSpec.Relative) {
                     // set to depart at ...
                     timeSpec = new TimeSpec.Absolute(DepArr.DEPART, timeSpec.timeInMillis());
@@ -1025,7 +1028,6 @@ public class DirectionsActivity extends OeffiMainActivity implements
                     timeSpec = new TimeSpec.Relative(DepArr.DEPART, 0);
                 }
                 updateGUI();
-                return true;
             });
             viewTime2.setVisibility(View.GONE);
         }
@@ -1126,8 +1128,6 @@ public class DirectionsActivity extends OeffiMainActivity implements
         calendar.setTimeInMillis(((TimeSpec.Absolute) timeSpec).timeMs);
         return calendar;
     }
-
-    private final OnClickListener diffClickListener = v -> handleDiffClick();
 
     private void handleDiffClick() {
         final int[] relativeTimeValues = getResources().getIntArray(R.array.directions_set_time_relative);
