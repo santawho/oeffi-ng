@@ -511,8 +511,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 //        }
         addActionBarButtons();
 
-        findViewById(R.id.directions_trip_details_not_feasible).setVisibility(tripRenderer.isFeasible() ? View.GONE : View.VISIBLE);
-
         legsScrollView = findViewById(R.id.directions_trip_details_legs_scroll);
         legsGroup = findViewById(R.id.directions_trip_details_legs_group);
 
@@ -1038,6 +1036,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         updateDeviceLocationDependencies(deviceLocation, deviceBearingDegrees, deviceSpeedMetersPerSecond, now);
         updateHighlightedTime(now);
         updateDeveloperInfo();
+
+        findViewById(R.id.directions_trip_details_not_feasible).setVisibility(
+                tripRenderer.isFeasible() ? View.GONE : View.VISIBLE);
 
         TripRenderer.LegContainer currentLeg = null;
         int i = LEGSGROUP_INSERT_INDEX;
