@@ -188,6 +188,8 @@ public class TripsOverviewActivity extends OeffiActivity {
     private boolean queryMoreTripsRunning = false;
     private boolean reloadRequested = false;
     private boolean searchMoreRequested = false;
+    private TripRequestData reloadRequestData;
+    private Uri historyUri;
 
     private final Handler foregroundHandler = new Handler();
     private HandlerThread backgroundThread;
@@ -218,9 +220,9 @@ public class TripsOverviewActivity extends OeffiActivity {
         network = (NetworkId) intent.getSerializableExtra(INTENT_EXTRA_NETWORK);
         final QueryTripsResult result = preprocessResult((QueryTripsResult) intent.getSerializableExtra(INTENT_EXTRA_RESULT));
         final boolean dep = intent.getBooleanExtra(INTENT_EXTRA_ARR_DEP, true);
-        final TripRequestData reloadRequestData = (TripRequestData) intent.getSerializableExtra(INTENT_EXTRA_RELOAD_REQUEST_DATA);
+        reloadRequestData = (TripRequestData) intent.getSerializableExtra(INTENT_EXTRA_RELOAD_REQUEST_DATA);
         final String historyUriStr = intent.getStringExtra(INTENT_EXTRA_HISTORY_URI);
-        final Uri historyUri = historyUriStr != null ? Uri.parse(historyUriStr) : null;
+        historyUri = historyUriStr != null ? Uri.parse(historyUriStr) : null;
 
         reloadRequestData.options = resolveTripOptions(reloadRequestData.options);
 
@@ -257,46 +259,11 @@ public class TripsOverviewActivity extends OeffiActivity {
         barView = findViewById(R.id.trips_bar_view);
         barView.setRenderConfig(renderConfig);
         barView.setOnItemClickListener((parent, v, position, id) -> {
-            final TripInfo tripInfo = (TripInfo) barView.getAdapter().getItem(position);
-            if (tripInfo != null) {
-                final Trip trip = tripInfo.trip;
-                if (trip.legs != null) {
-                    if (renderConfig.isOperationsPlanning) {
-                        final Trip.Public publicLeg = trip.getFirstPublicLeg();
-                        if (publicLeg != null && publicLeg == trip.getLastPublicLeg()
-                                && publicLeg.journeyRef != null
-                                && NetworkProviderFactory.provider(network).hasCapabilities(NetworkProvider.Capability.JOURNEY)) {
-                            queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
-                                    this, null, queryJourneyRunnable,
-                                    handler, backgroundHandler,
-                                    network, publicLeg.journeyRef, true,
-                                    publicLeg.departure, publicLeg.arrival,
-                                    false);
-                        }
-                    } else {
-                        final TripDetailsActivity.RenderConfig config = new TripDetailsActivity.RenderConfig();
-                        config.queryTripsRequestData = reloadRequestData;
-                        if (renderConfig.isAlternativeConnectionSearch) {
-                            config.isAlternativeConnectionSearch = true;
-                            TripDetailsActivity.startForResult(TripsOverviewActivity.this, DETAILS_NEW_NAVIGATION, network, trip, config);
-                        } else {
-                            TripDetailsActivity.start(TripsOverviewActivity.this, network, trip, config);
-                        }
-
-                        final PTDate firstPublicLegDepartureTime = trip.getFirstPublicLegDepartureTime();
-                        final PTDate lastPublicLegArrivalTime = trip.getLastPublicLegArrivalTime();
-
-                        // save last trip to history
-                        if (firstPublicLegDepartureTime != null && lastPublicLegArrivalTime != null && historyUri != null) {
-                            final ContentValues values = new ContentValues();
-                            values.put(QueryHistoryProvider.KEY_LAST_DEPARTURE_TIME, firstPublicLegDepartureTime.getTime());
-                            values.put(QueryHistoryProvider.KEY_LAST_ARRIVAL_TIME, lastPublicLegArrivalTime.getTime());
-                            values.put(QueryHistoryProvider.KEY_LAST_TRIP, Objects.serialize(trip));
-                            getContentResolver().update(historyUri, values, null, null);
-                        }
-                    }
-                }
-            }
+            onBarViewItemClicked(position, false);
+        });
+        barView.setOnItemLongClickListener((parent, v, position, id) -> {
+            onBarViewItemClicked(position, true);
+            return true;
         });
         barView.setOnScrollListener(() -> {
 //            log.info("barView.onScrollListener -> foregroundHandler.post(checkMoreRunnable)");
@@ -311,6 +278,67 @@ public class TripsOverviewActivity extends OeffiActivity {
         });
 
         processInitialResult(result, searchMoreContext);
+    }
+
+    private void onBarViewItemClicked(final int position, final boolean isLongClick) {
+        final TripInfo tripInfo = (TripInfo) barView.getAdapter().getItem(position);
+        if (tripInfo == null)
+            return;
+        final Trip trip = tripInfo.trip;
+        if (trip.legs == null)
+            return;
+
+        if (renderConfig.isOperationsPlanning) {
+            final Trip.Public publicLeg = trip.getFirstPublicLeg();
+            if (publicLeg == null || publicLeg != trip.getLastPublicLeg()
+                    || publicLeg.journeyRef == null
+                    || !NetworkProviderFactory.provider(network).hasCapabilities(NetworkProvider.Capability.JOURNEY)) {
+                return;
+            }
+            if (isLongClick) {
+                final Long rowId = QueryStoredTripsProvider.getRowId(getContentResolver(),
+                        network, getStoredTripsUsage(), trip.getUniqueId());
+                if (rowId != null) {
+                    QueryStoredTripsProvider.delete(getContentResolver(),
+                            network, getStoredTripsUsage(),
+                            trip.getUniqueId());
+                } else {
+                    QueryStoredTripsProvider.put(getContentResolver(),
+                            network, getStoredTripsUsage(),
+                            trip, reloadRequestData);
+                }
+                barView.invalidate();
+            } else {
+                queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
+                        this, null, queryJourneyRunnable,
+                        handler, backgroundHandler,
+                        network, publicLeg.journeyRef,
+                        true, trip.getUniqueId(),
+                        publicLeg.departure, publicLeg.arrival,
+                        false);
+            }
+        } else {
+            final TripDetailsActivity.RenderConfig config = new TripDetailsActivity.RenderConfig();
+            config.queryTripsRequestData = reloadRequestData;
+            if (renderConfig.isAlternativeConnectionSearch) {
+                config.isAlternativeConnectionSearch = true;
+                TripDetailsActivity.startForResult(TripsOverviewActivity.this, DETAILS_NEW_NAVIGATION, network, trip, config);
+            } else {
+                TripDetailsActivity.start(TripsOverviewActivity.this, network, trip, config);
+            }
+
+            final PTDate firstPublicLegDepartureTime = trip.getFirstPublicLegDepartureTime();
+            final PTDate lastPublicLegArrivalTime = trip.getLastPublicLegArrivalTime();
+
+            // save last trip to history
+            if (firstPublicLegDepartureTime != null && lastPublicLegArrivalTime != null && historyUri != null) {
+                final ContentValues values = new ContentValues();
+                values.put(QueryHistoryProvider.KEY_LAST_DEPARTURE_TIME, firstPublicLegDepartureTime.getTime());
+                values.put(QueryHistoryProvider.KEY_LAST_ARRIVAL_TIME, lastPublicLegArrivalTime.getTime());
+                values.put(QueryHistoryProvider.KEY_LAST_TRIP, Objects.serialize(trip));
+                getContentResolver().update(historyUri, values, null, null);
+            }
+        }
     }
 
     @Override
@@ -331,11 +359,16 @@ public class TripsOverviewActivity extends OeffiActivity {
         registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
 
         queryMoreTripsEnabled = true;
-        barView.invalidate();
 
         // delay because GUI is not initialized immediately
 //        log.info("onStart -> foregroundHandler.postDelayed(checkMoreRunnable, 50)");
         postCheckMoreRunnable(true);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        barView.invalidate();
     }
 
     @Override
@@ -354,6 +387,12 @@ public class TripsOverviewActivity extends OeffiActivity {
         backgroundThread.getLooper().quit();
 
         super.onDestroy();
+    }
+
+    protected String getStoredTripsUsage() {
+        return renderConfig.isOperationsPlanning
+                ? QueryStoredTripsProvider.USAGE_OPERATION
+                : null;
     }
 
     private void requestReload() {
@@ -799,8 +838,11 @@ public class TripsOverviewActivity extends OeffiActivity {
 
         // determine new trips
         int countNew = 0;
-        for (final Trip trip : result.trips) {
-            final TripInfo tripInfo = searchMoreContext.newTripInfos(trip, earlierOrLater);
+        for (final Trip resultTrip : result.trips) {
+            final Trip trip = renderConfig.isOperationsPlanning
+                    ? TripUtils.createTripFromJourneyTrip(resultTrip)
+                    : resultTrip;
+            final TripInfo tripInfo = searchMoreContext.newTripInfo(trip, earlierOrLater);
             if (tripInfo != null && trips.add(tripInfo))
                 countNew += 1;
         }
@@ -811,6 +853,7 @@ public class TripsOverviewActivity extends OeffiActivity {
             // redraw
             barView.setTrips(
                     new ArrayList<>(trips),
+                    network, getStoredTripsUsage(),
                     result.context != null && result.context.canQueryLater(),
                     result.context != null && result.context.canQueryEarlier(),
                     showAccessibility, showBicycleCarriage, maxWalkDistance);
@@ -886,8 +929,7 @@ public class TripsOverviewActivity extends OeffiActivity {
             return true;
         }
 
-        public TripInfo newTripInfos(final Trip trip, final boolean isEarlierOrLater) {
-            final ArrayList<TripInfo> list = new ArrayList<>();
+        public TripInfo newTripInfo(final Trip trip, final boolean isEarlierOrLater) {
             if (!isEarlierOrLater && lastRequestedFirstTransferStationId != null) {
                 // a new short trip was found to one of the first transfer stations
                 List<Trip> tripsForStation = tripsTofirstTransferStations.get(lastRequestedFirstTransferStationId);

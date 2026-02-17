@@ -51,6 +51,7 @@ import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.TimeSpec;
+import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Fare;
 import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Position;
@@ -71,10 +72,14 @@ import java.util.regex.Pattern;
 
 import static de.schildbach.pte.util.Preconditions.checkArgument;
 
+import androidx.appcompat.content.res.AppCompatResources;
+
 public final class TripsGalleryAdapter extends BaseAdapter {
     private static final Logger log = LoggerFactory.getLogger(TripsGallery.class);
 
     private List<TripInfo> trips = Collections.emptyList();
+    private NetworkId networkId;
+    private String storedTripsUsage;
     private TripsOverviewActivity.RenderConfig renderConfig;
     private boolean canScrollLater = true, canScrollEarlier = true;
     private boolean showAccessibility, showBicycleCarriage;
@@ -111,6 +116,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
     private final int colorSignificantInverse;
     private final int colorDelayed;
     private final int colorNormalTripBackground;
+    private final int colorStoredTripBackground;
     private final int colorEarlierOrLaterTripBackground;
     private final int colorAdditionalTripBackground;
     private final int colorAdditionalFeederBackground;
@@ -120,7 +126,11 @@ public final class TripsGalleryAdapter extends BaseAdapter {
     private static final float CIRCLE_CORNER_RADIUS = 16f;
     private final int tripWidth;
 
-    private final Drawable walkIcon, stayIcon, bikeIcon, carIcon, warningIcon, wheelChairIcon, bicycleIcon;
+    private final Drawable
+            walkIcon, stayIcon, bikeIcon, carIcon,
+            warningIcon,
+            bookmarkedIcon, bookmarkableIcon,
+            wheelChairIcon, bicycleIcon;
 
     public TripsGalleryAdapter(final Context context) {
         this.context = (OeffiActivity) context;
@@ -241,24 +251,26 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         ta.recycle();
         // colorNormalTripBackground = makeBackgroundColorFromId(R.color.bg_level0);
         colorNormalTripBackground = makeBackgroundColorFromId(R.color.bg_trip_overview_initial_trip);
+        colorStoredTripBackground = makeBackgroundColorFromId(R.color.bg_trip_overview_stored_trip);
         colorEarlierOrLaterTripBackground = makeBackgroundColorFromId(R.color.bg_trip_overview_earlierorlater_trip);
         colorAdditionalTripBackground = makeBackgroundColorFromId(R.color.bg_trip_overview_additional_trip);
         colorAdditionalFeederBackground = makeBackgroundColorFromId(R.color.bg_trip_overview_additional_feeder);
 
-        walkIcon = res.getDrawable(R.drawable.ic_directions_walk_grey600_24dp);
-        stayIcon = res.getDrawable(R.drawable.ic_directions_stay_grey600_24dp);
-        bikeIcon = res.getDrawable(R.drawable.ic_directions_bike_grey600_24dp);
-        carIcon = res.getDrawable(R.drawable.ic_local_taxi_grey600_24dp);
-        warningIcon = res.getDrawable(R.drawable.ic_warning_amber_24dp);
-        wheelChairIcon = res.getDrawable(R.drawable.ic_accessible_grey600_18dp);
-        bicycleIcon = res.getDrawable(R.drawable.ic_directions_bike_grey600_18dp);
-
-        walkIcon.setTint(colorLessSignificant);
-        stayIcon.setTint(colorLessSignificant);
-        bikeIcon.setTint(colorLessSignificant);
-        carIcon.setTint(colorLessSignificant);
-        wheelChairIcon.setTint(colorLessSignificant);
-        bicycleIcon.setTint(colorLessSignificant);
+        walkIcon = getColoredIcon(R.drawable.ic_directions_walk_grey600_24dp, colorLessSignificant);
+        stayIcon = getColoredIcon(R.drawable.ic_directions_stay_grey600_24dp, colorLessSignificant);
+        bikeIcon = getColoredIcon(R.drawable.ic_directions_bike_grey600_24dp, colorLessSignificant);
+        carIcon = getColoredIcon(R.drawable.ic_local_taxi_grey600_24dp, colorLessSignificant);
+        warningIcon = getColoredIcon(R.drawable.ic_warning_amber_24dp, colorLessSignificant);
+        wheelChairIcon = getColoredIcon(R.drawable.ic_accessible_grey600_18dp, colorLessSignificant);
+        bicycleIcon = getColoredIcon(R.drawable.ic_directions_bike_grey600_18dp, colorLessSignificant);
+        bookmarkedIcon = getColoredIcon(R.drawable.ic_bookmarked_white_24dp, colorLessSignificant);
+        bookmarkableIcon = getColoredIcon(R.drawable.ic_bookmarkable_white_24dp, colorLessSignificant);
+    }
+    
+    private Drawable getColoredIcon(final int iconResId, final int color) {
+        final Drawable drawable = AppCompatResources.getDrawable(context, iconResId).mutate();
+        drawable.setTint(color);
+        return drawable;
     }
 
     private int makeBackgroundColorFromId(final int colorId) {
@@ -266,7 +278,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
     }
 
     private int makeBackgroundColor(final int color) {
-        int r, g, b;
+        final int r, b, g;
         if (darkMode) {
             r = Color.red(color) * 4;
             g = Color.green(color) * 4;
@@ -279,16 +291,19 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         return Color.argb(64, r, g, b);
     }
 
-    public void setRenderConfig(TripsOverviewActivity.RenderConfig renderConfig) {
+    public void setRenderConfig(final TripsOverviewActivity.RenderConfig renderConfig) {
         this.renderConfig = renderConfig;
     }
 
     public void setTrips(
             final List<TripInfo> trips,
+            final NetworkId networkId, final String storedTripsUsage,
             final boolean canScrollLater, final boolean canScrollEarlier,
             final boolean showAccessibility, final boolean showBicycleCarriage,
             final int maxWalkDistance) {
         this.trips = trips;
+        this.networkId = networkId;
+        this.storedTripsUsage = storedTripsUsage;
         this.canScrollLater = canScrollLater;
         this.canScrollEarlier = canScrollEarlier;
         this.showAccessibility = showAccessibility;
@@ -441,6 +456,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
 
     private class TripView extends View {
         private TripInfo tripInfo;
+        private boolean isStoredTrip;
         private final Resources res = getResources();
 
         private final float density = res.getDisplayMetrics().density;
@@ -461,8 +477,13 @@ public final class TripsGalleryAdapter extends BaseAdapter {
 
         public void setTripInfo(final TripInfo tripInfo) {
             this.tripInfo = tripInfo;
+            final Long rowId = QueryStoredTripsProvider.getRowId(context.getContentResolver(),
+                    networkId, storedTripsUsage, tripInfo.trip.getUniqueId());
+            this.isStoredTrip = rowId != null;
             final int bgColor;
-            if (tripInfo.addedInRound > 0) {
+            if (isStoredTrip) {
+                bgColor = colorStoredTripBackground;
+            } else if (tripInfo.addedInRound > 0) {
                 if (tripInfo.isAlternativelyFed)
                     bgColor = colorAdditionalFeederBackground;
                 else
@@ -507,72 +528,88 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             final int paddingVertical = (int) (4 * density);
             int posFromTop = 0;
 
-            final Long duration = trip.getDuration(); // trip.getPublicDuration();
-            if (duration != null) {
-                final String durationText = Formats.formatTimeSpanHM(duration, false);
-                posFromTop += paddingVertical;
-                final FontMetrics durationPaintMetrics = durationPaint.getFontMetrics();
-                posFromTop += (int) -durationPaintMetrics.ascent;
-                canvas.drawText(durationText, centerX, posFromTop, durationPaint);
-                posFromTop += (int) durationPaintMetrics.descent;
-            }
-
-            final List<Fare> fares = trip.fares;
-            if (fares != null) {
-                // minimum adult fare
-                final Fare fare = fares.stream()
-                        .filter(f -> f.type == Fare.Type.ADULT)
-                        .min((a, b) -> (int) ((a.fare - b.fare) * 1000))
-                        .orElse(null);
-                if (fare != null) {
-                    final String fareText = String.format(Locale.US, "%s\u2009%.2f",
-                            fare.currency.getSymbol(), fare.fare);
-
-                    posFromTop += paddingVertical;
-                    final FontMetrics farePaintMetrics = farePaint.getFontMetrics();
-                    posFromTop += (int) -farePaintMetrics.ascent;
-                    canvas.drawText(fareText, centerX, posFromTop, farePaint);
-                    posFromTop += (int) farePaintMetrics.descent;
-                }
-            }
-
-            if (!trip.isTravelable()) {
+            if (renderConfig.isOperationsPlanning) {
                 // warning icon
-                final int iconWidth = warningIcon.getIntrinsicWidth();
-                final int iconHeight = warningIcon.getIntrinsicHeight();
+                final Drawable icon = isStoredTrip ? bookmarkedIcon : bookmarkableIcon;
+                final int iconWidth = icon.getIntrinsicWidth();
+                final int iconHeight = icon.getIntrinsicHeight();
                 final int iconLeft = centerX - iconWidth / 2;
                 posFromTop += paddingVertical;
-                warningIcon.setBounds(
+                icon.setBounds(
                         iconLeft,
                         posFromTop,
                         iconLeft + iconWidth,
                         posFromTop + iconHeight);
-                warningIcon.draw(canvas);
+                icon.draw(canvas);
                 posFromTop += iconHeight;
-            } else if (tripInfo.isTripFullyWheelChairAccessible && showAccessibility) {
-                final int iconWidth = wheelChairIcon.getIntrinsicWidth();
-                final int iconHeight = wheelChairIcon.getIntrinsicHeight();
-                final int iconLeft = centerX - iconWidth / 2;
-                posFromTop += paddingVertical;
-                wheelChairIcon.setBounds(
-                        iconLeft,
-                        posFromTop,
-                        iconLeft + iconWidth,
-                        posFromTop + iconHeight);
-                wheelChairIcon.draw(canvas);
-                posFromTop += iconHeight;
-            } else if (tripInfo.isTripFullyBicycleTravelable && showBicycleCarriage) {
-                final int iconWidth = bicycleIcon.getIntrinsicWidth();
-                final int iconHeight = bicycleIcon.getIntrinsicHeight();
-                final int iconLeft = centerX - iconWidth / 2;
-                posFromTop += paddingVertical;
-                bicycleIcon.setBounds(
-                        iconLeft,
-                        posFromTop,
-                        iconLeft + iconWidth,
-                        posFromTop + iconHeight);
-                bicycleIcon.draw(canvas);
-                posFromTop += iconHeight;
+            } else {
+                final Long duration = trip.getDuration(); // trip.getPublicDuration();
+                if (duration != null) {
+                    final String durationText = Formats.formatTimeSpanHM(duration, false);
+                    posFromTop += paddingVertical;
+                    final FontMetrics durationPaintMetrics = durationPaint.getFontMetrics();
+                    posFromTop += (int) -durationPaintMetrics.ascent;
+                    canvas.drawText(durationText, centerX, posFromTop, durationPaint);
+                    posFromTop += (int) durationPaintMetrics.descent;
+                }
+
+                final List<Fare> fares = trip.fares;
+                if (fares != null) {
+                    // minimum adult fare
+                    final Fare fare = fares.stream()
+                            .filter(f -> f.type == Fare.Type.ADULT)
+                            .min((a, b) -> (int) ((a.fare - b.fare) * 1000))
+                            .orElse(null);
+                    if (fare != null) {
+                        final String fareText = String.format(Locale.US, "%s\u2009%.2f",
+                                fare.currency.getSymbol(), fare.fare);
+
+                        posFromTop += paddingVertical;
+                        final FontMetrics farePaintMetrics = farePaint.getFontMetrics();
+                        posFromTop += (int) -farePaintMetrics.ascent;
+                        canvas.drawText(fareText, centerX, posFromTop, farePaint);
+                        posFromTop += (int) farePaintMetrics.descent;
+                    }
+                }
+
+                if (!trip.isTravelable()) {
+                    // warning icon
+                    final int iconWidth = warningIcon.getIntrinsicWidth();
+                    final int iconHeight = warningIcon.getIntrinsicHeight();
+                    final int iconLeft = centerX - iconWidth / 2;
+                    posFromTop += paddingVertical;
+                    warningIcon.setBounds(
+                            iconLeft,
+                            posFromTop,
+                            iconLeft + iconWidth,
+                            posFromTop + iconHeight);
+                    warningIcon.draw(canvas);
+                    posFromTop += iconHeight;
+                } else if (tripInfo.isTripFullyWheelChairAccessible && showAccessibility) {
+                    final int iconWidth = wheelChairIcon.getIntrinsicWidth();
+                    final int iconHeight = wheelChairIcon.getIntrinsicHeight();
+                    final int iconLeft = centerX - iconWidth / 2;
+                    posFromTop += paddingVertical;
+                    wheelChairIcon.setBounds(
+                            iconLeft,
+                            posFromTop,
+                            iconLeft + iconWidth,
+                            posFromTop + iconHeight);
+                    wheelChairIcon.draw(canvas);
+                    posFromTop += iconHeight;
+                } else if (tripInfo.isTripFullyBicycleTravelable && showBicycleCarriage) {
+                    final int iconWidth = bicycleIcon.getIntrinsicWidth();
+                    final int iconHeight = bicycleIcon.getIntrinsicHeight();
+                    final int iconLeft = centerX - iconWidth / 2;
+                    posFromTop += paddingVertical;
+                    bicycleIcon.setBounds(
+                            iconLeft,
+                            posFromTop,
+                            iconLeft + iconWidth,
+                            posFromTop + iconHeight);
+                    bicycleIcon.draw(canvas);
+                    posFromTop += iconHeight;
+                }
             }
 
             // iterate delayed public legs first and draw ghosts of planned times

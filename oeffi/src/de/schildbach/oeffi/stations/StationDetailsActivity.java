@@ -346,7 +346,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
                     this, null, queryJourneyRunnable,
                     handler, backgroundHandler,
-                    network, journeyRef, isDriverMode, selectedStation, null,
+                    network, journeyRef, isDriverMode, null, selectedStation, null,
                     false);
         }
     }
@@ -947,7 +947,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                     context.queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
                             context, clickedView, context.queryJourneyRunnable,
                             context.handler, context.backgroundHandler,
-                            network, departure.journeyRef, isDriverMode, station, null,
+                            network, departure.journeyRef, isDriverMode, null, station, null,
                             false);
                 };
                 itemView.setOnClickListener(onClickListener);

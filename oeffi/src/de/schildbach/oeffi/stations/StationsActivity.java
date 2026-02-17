@@ -1633,7 +1633,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
                 this, clickedView, queryJourneyRunnable,
                 handler, backgroundHandler,
-                network, journeyRef, isDriverMode, entryLocation, null,
+                network, journeyRef, isDriverMode, null, entryLocation, null,
                 false);
     }
 

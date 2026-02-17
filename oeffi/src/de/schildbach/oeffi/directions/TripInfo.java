@@ -33,7 +33,6 @@ public class TripInfo {
 
     public TripInfo(final Trip trip) {
         this.trip = trip;
-
         setup();
     }
 

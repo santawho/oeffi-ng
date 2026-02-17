@@ -41,6 +41,7 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.util.TimeZoneSelector;
+import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.PTDate;
 import de.schildbach.pte.dto.Trip;
 
@@ -185,14 +186,26 @@ public class TripsGallery extends Gallery {
 
     public void setTrips(
             final List<TripInfo> trips,
+            final NetworkId networkId, final String storedTripsUsage,
             final boolean canScrollLater, final boolean canScrollEarlier,
             final boolean showAccessibility, final boolean showBicycleCarriage,
             final int maxWalkDistance) {
-        adapter.setTrips(trips, canScrollLater, canScrollEarlier, showAccessibility, showBicycleCarriage, maxWalkDistance);
+        adapter.setTrips(
+                trips,
+                networkId, storedTripsUsage,
+                canScrollLater, canScrollEarlier,
+                showAccessibility, showBicycleCarriage,
+                maxWalkDistance);
     }
 
     public void setOnScrollListener(final OnScrollListener onScrollListener) {
         this.onScrollListener = onScrollListener;
+    }
+
+    @Override
+    public void invalidate() {
+        adapter.notifyDataSetChanged();
+        super.invalidate();
     }
 
     private final Runnable onChildViewChangedRunnable = new Runnable() {

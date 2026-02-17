@@ -35,6 +35,7 @@ import java.util.Date;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.QueryStoredTripsProvider;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
+import de.schildbach.oeffi.directions.TripUtils;
 import de.schildbach.oeffi.tripeval.TripRenderer;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.stations.StationDetailsActivity;
@@ -52,11 +53,18 @@ public class OperationDetailsActivity extends TripDetailsActivity {
     public static void start(
             final Context context,
             final NetworkId network,
+            final String originalUniqueTripId,
             final Trip.Public journeyLeg,
             final Date loadedAt,
             final int intentFlags) {
-        start(OperationDetailsActivity.class,
-                context, network, journeyLeg, true, loadedAt, intentFlags);
+        final Trip trip = TripUtils.createTripFromJourney(loadedAt, journeyLeg);
+        trip.setUniqueId(originalUniqueTripId);
+        final RenderConfig renderConfig = new RenderConfig();
+        renderConfig.isJourney = true;
+        renderConfig.isOperation = true;
+        final Intent intent = buildStartIntent(OperationDetailsActivity.class, context, network, trip, renderConfig);
+        intent.addFlags(intentFlags);
+        context.startActivity(intent);
     }
 
     private int colorTimeGood, colorTimeEarly, colorTimeDelay;
@@ -77,18 +85,11 @@ public class OperationDetailsActivity extends TripDetailsActivity {
     @Override
     protected void startNavigationForJourneyToExit(final Stop exitStop) {
         final Trip.Public journeyLeg = (Trip.Public) tripRenderer.trip.legs.get(0);
-        final Location entryLocation = journeyLeg.entryLocation;
-        final Location exitLocation = exitStop.location;
-        final Trip journeyTrip = new Trip(
+        final Trip journeyTrip = TripUtils.createTripFromJourney(
                 tripRenderer.trip.loadedAt,
-                null,
-                null,
-                entryLocation,
-                exitLocation,
-                Collections.singletonList(journeyLeg),
-                null,
-                null,
-                0);
+                journeyLeg,
+                journeyLeg.entryLocation,
+                exitStop.location);
         final RenderConfig navigationRenderConfig = new RenderConfig();
         navigationRenderConfig.isJourney = true;
         navigationRenderConfig.isOperation = true;

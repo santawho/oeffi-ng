@@ -136,7 +136,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -193,32 +192,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final Trip.Public journeyLeg,
             final Date loadedAt,
             final int intentFlags) {
-        start(TripDetailsActivity.class,
-                context, network, journeyLeg, false, loadedAt, intentFlags);
-    }
-
-    protected static void start(
-            final Class<? extends TripDetailsActivity> activityClass,
-            final Context context,
-            final NetworkId network,
-            final Trip.Public journeyLeg,
-            final boolean isOperation,
-            final Date loadedAt,
-            final int intentFlags) {
-        final Trip trip = new Trip(
-                loadedAt,
-                null,
-                null,
-                journeyLeg.departure,
-                journeyLeg.arrival,
-                Collections.singletonList(journeyLeg),
-                null,
-                null,
-                null);
+        final Trip trip = TripUtils.createTripFromJourney(loadedAt, journeyLeg);
         final RenderConfig renderConfig = new RenderConfig();
         renderConfig.isJourney = true;
-        renderConfig.isOperation = isOperation;
-        final Intent intent = buildStartIntent(activityClass, context, network, trip, renderConfig);
+        renderConfig.isOperation = false;
+        final Intent intent = buildStartIntent(TripDetailsActivity.class, context, network, trip, renderConfig);
         intent.addFlags(intentFlags);
         context.startActivity(intent);
     }
@@ -761,21 +739,22 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final String tripId = tripRenderer.trip.getUniqueId();
         if (tripId != null) {
             final ToggleImageButton bookmarkButton = actionBar.addToggleButton(
-                    R.drawable.ic_boomark_white_24dp,
+                    R.drawable.ic_bookmark_white_24dp,
                     R.string.directions_trip_details_action_bookmark);
             final Long rowId = QueryStoredTripsProvider.getRowId(getContentResolver(),
                     network, getStoredTripsUsage(), tripId);
             bookmarkButton.setChecked(rowId != null);
             bookmarkButton.setOnCheckedChangeListener((v, isChecked) -> {
                 final Trip trip = tripRenderer.trip;
-                if (isChecked)
+                if (isChecked) {
                     QueryStoredTripsProvider.put(getContentResolver(),
                             network, getStoredTripsUsage(),
                             trip, renderConfig.queryTripsRequestData);
-                else
+                } else {
                     QueryStoredTripsProvider.delete(getContentResolver(),
                             network, getStoredTripsUsage(),
                             trip.getUniqueId());
+                }
             });
         }
     }
@@ -1364,7 +1343,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
                         this, clickedView, queryJourneyRunnable,
                         handler, backgroundHandler,
-                        network, leg.journeyRef, false, leg.departure, leg.arrival,
+                        network, leg.journeyRef, false, null, leg.departure, leg.arrival,
                         mustOpenActivityInNewTask());
             };
             lineView.setClickable(true);
@@ -3168,16 +3147,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 journeyLeg.message,
                 journeyLeg.journeyRef, journeyLeg.loadedAt);
         leg.setPath(journeyLeg.getPath());
-        final Trip journeyTrip = new Trip(
+        final Trip journeyTrip = TripUtils.createTripFromJourney(
                 tripRenderer.trip.loadedAt,
-                null,
-                null,
+                leg,
                 entryLocation,
-                exitLocation,
-                Collections.singletonList(leg),
-                null,
-                null,
-                0);
+                exitLocation);
         final RenderConfig navigationRenderConfig = new RenderConfig();
         navigationRenderConfig.isJourney = true;
         navigationRenderConfig.isOperation = renderConfig.isOperation;
