@@ -2624,8 +2624,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 && pearlType != PearlView.Type.DEPARTURE_FOR_INTERMEDIATE_ARRIVAL
                 && pearlType != PearlView.Type.ARRIVAL_FOR_INTERMEDIATE_DEPARTURE) {
             collapseColumns.collapsePositionColumn = false;
-            final SpannableStringBuilder positionStr = new SpannableStringBuilder(position.name);
+            final SpannableStringBuilder positionStr = new SpannableStringBuilder(
+                    Formats.makeBreakablePositionName(position.name)
+                            .replace('\u200B', '\n'));
             if (position.section != null) {
+                positionStr.append('\n');
                 final int sectionStart = positionStr.length();
                 positionStr.append(position.section);
                 positionStr.setSpan(new RelativeSizeSpan(0.85f), sectionStart, positionStr.length(),

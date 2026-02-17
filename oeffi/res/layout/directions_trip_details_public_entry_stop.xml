@@ -76,7 +76,8 @@
             android:gravity="center_horizontal"
             android:includeFontPadding="false"
             android:maxWidth="@dimen/position_max_width"
-            android:singleLine="true"
+            android:singleLine="false"
+            android:breakStrategy="simple"
             android:textSize="@dimen/font_size_large" />
     </LinearLayout>
 
