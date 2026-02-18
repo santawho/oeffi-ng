@@ -1,8 +1,5 @@
 package de.schildbach.oeffi.directions;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Collections;
 import java.util.Date;
 
@@ -10,8 +7,6 @@ import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.Trip;
 
 public class TripUtils {
-    private static final Logger log = LoggerFactory.getLogger(TripUtils.class);
-
     public static Trip createTripFromJourney(
             final Date loadedAt,
             final Trip.Public journeyLeg,
@@ -27,8 +22,8 @@ public class TripUtils {
                 null,
                 null,
                 0);
-        final String uniqueId = trip.getUniqueId();
-        log.debug("uniqueId = {}", uniqueId);
+        if (journeyLeg.journeyRef != null)
+            trip.setUniqueId(journeyLeg.journeyRef.getUniqueId());
         return trip;
     }
 

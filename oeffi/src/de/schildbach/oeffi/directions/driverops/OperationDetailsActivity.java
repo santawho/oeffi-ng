@@ -50,15 +50,13 @@ import de.schildbach.pte.provider.NetworkProvider;
 
 public class OperationDetailsActivity extends TripDetailsActivity {
 
-    public static void start(
+    public static void startOperation(
             final Context context,
             final NetworkId network,
-            final String originalUniqueTripId,
             final Trip.Public journeyLeg,
             final Date loadedAt,
             final int intentFlags) {
         final Trip trip = TripUtils.createTripFromJourney(loadedAt, journeyLeg);
-        trip.setUniqueId(originalUniqueTripId);
         final RenderConfig renderConfig = new RenderConfig();
         renderConfig.isJourney = true;
         renderConfig.isOperation = true;

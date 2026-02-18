@@ -738,6 +738,7 @@ public class NavigationNotification {
             if (leg instanceof Trip.Public) {
                 final Trip.Public publeg = (Trip.Public) leg;
                 final JourneyRef journeyRef = publeg.journeyRef;
+                b.append(" ");
                 if (journeyRef == null) {
                     b.append("null");
                 } else if (journeyRef instanceof DbProvider.DbJourneyRef) {
@@ -758,7 +759,7 @@ public class NavigationNotification {
                 }
             }
         }
-        log.info("NOTIFICATION for TRIP: {}", b);
+        log.info("NOTIFICATION for TRIP:{}", b);
     }
 
     public NetworkId getNetwork() {

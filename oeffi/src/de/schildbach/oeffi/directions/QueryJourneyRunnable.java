@@ -71,7 +71,6 @@ public class QueryJourneyRunnable implements Runnable {
 
     private final JourneyRef journeyRef;
     private final boolean isOperation;
-    final String originalUniqueTripId;
     private Location entryLocation;
     private Location exitLocation;
 
@@ -83,7 +82,7 @@ public class QueryJourneyRunnable implements Runnable {
             final Activity parentActivity, final View clickedView,
             final QueryJourneyRunnable prevInstance, final Handler handler, final Handler backgroundHandler,
             final NetworkId networkId,
-            final JourneyRef journeyRef, final boolean isOperation, final String originalUniqueTripId,
+            final JourneyRef journeyRef, final boolean isOperation,
             final Location entryLocation, final Location exitLocation,
             final boolean openInNewWindow) {
         final ProgressDialog progressDialog = ProgressDialog.show(parentActivity, null,
@@ -97,7 +96,7 @@ public class QueryJourneyRunnable implements Runnable {
         final QueryJourneyRunnable queryJourneyRunnable = new QueryJourneyRunnable(
                 parentActivity, clickedView,
                 progressDialog, handler, networkProvider,
-                journeyRef, isOperation, originalUniqueTripId,
+                journeyRef, isOperation,
                 entryLocation, exitLocation,
                 openInNewWindow);
 
@@ -112,7 +111,7 @@ public class QueryJourneyRunnable implements Runnable {
             final ProgressDialog progressDialog, final Handler handler,
             final NetworkProvider networkProvider,
             final JourneyRef journeyRef,
-            final boolean isOperation, final String originalUniqueTripId,
+            final boolean isOperation,
             final Location entryLocation, final Location exitLocation,
             final boolean openInNewWindow) {
         this.parentActivity = parentActivity;
@@ -126,7 +125,6 @@ public class QueryJourneyRunnable implements Runnable {
 
         this.journeyRef = journeyRef;
         this.isOperation = isOperation;
-        this.originalUniqueTripId = originalUniqueTripId;
         this.entryLocation = entryLocation;
         this.exitLocation = exitLocation;
     }
@@ -242,16 +240,14 @@ public class QueryJourneyRunnable implements Runnable {
             final Trip.Public journeyLeg = result.journeyLeg;
             journeyLeg.setEntryAndExit(entryLocation, exitLocation);
             if (isOperation) {
-                OperationDetailsActivity.start(
+                OperationDetailsActivity.startOperation(
                         parentActivity,
-                        networkProvider.id(),
-                        originalUniqueTripId, journeyLeg, new Date(),
+                        networkProvider.id(), journeyLeg, new Date(),
                         openInNewWindow ? Intent.FLAG_ACTIVITY_NEW_TASK : 0);
             } else {
-                TripDetailsActivity.start(
+                TripDetailsActivity.startJourney(
                         parentActivity,
-                        networkProvider.id(),
-                        journeyLeg, new Date(),
+                        networkProvider.id(), journeyLeg, new Date(),
                         openInNewWindow ? Intent.FLAG_ACTIVITY_NEW_TASK : 0);
             }
         } else if (result.status == QueryJourneyResult.Status.SERVICE_DOWN) {

@@ -186,7 +186,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
     }
 
-    public static void start(
+    public static void startJourney(
             final Context context,
             final NetworkId network,
             final Trip.Public journeyLeg,
@@ -1343,7 +1343,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
                         this, clickedView, queryJourneyRunnable,
                         handler, backgroundHandler,
-                        network, leg.journeyRef, false, null, leg.departure, leg.arrival,
+                        network, leg.journeyRef, false, leg.departure, leg.arrival,
                         mustOpenActivityInNewTask());
             };
             lineView.setClickable(true);

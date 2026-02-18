@@ -317,27 +317,11 @@ public class OperationNotification {
             if (leg instanceof Trip.Public) {
                 final Trip.Public publeg = (Trip.Public) leg;
                 final JourneyRef journeyRef = publeg.journeyRef;
-                if (journeyRef == null) {
-                    b.append("null");
-                } else if (journeyRef instanceof DbProvider.DbJourneyRef) {
-                    final DbProvider.DbJourneyRef dbJourneyRef = (DbProvider.DbJourneyRef) journeyRef;
-                    b.append(",j=");
-                    b.append(dbJourneyRef.journeyId);
-                    final Line line = dbJourneyRef.line;
-                    b.append(",n=");
-                    b.append(line.network);
-                    b.append(",p=");
-                    b.append(line.product);
-                    b.append(",l=");
-                    b.append(line.label);
-                    b.append(",d=");
-                    b.append(publeg.departureStop.location.id);
-                } else {
-                    b.append(journeyRef);
-                }
+                b.append(" ");
+                b.append(journeyRef == null ? "null" : journeyRef);
             }
         }
-        log.info("OPERATION for TRIP: {}", b);
+        log.info("OPERATION for TRIP:{}", b);
     }
 
     public NetworkId getNetwork() {

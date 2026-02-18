@@ -529,7 +529,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             int posFromTop = 0;
 
             if (renderConfig.isOperationsPlanning) {
-                // warning icon
+                // bookmark icon
                 final Drawable icon = isStoredTrip ? bookmarkedIcon : bookmarkableIcon;
                 final int iconWidth = icon.getIntrinsicWidth();
                 final int iconHeight = icon.getIntrinsicHeight();

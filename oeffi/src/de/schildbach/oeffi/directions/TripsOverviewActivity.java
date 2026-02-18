@@ -312,8 +312,7 @@ public class TripsOverviewActivity extends OeffiActivity {
                 queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
                         this, null, queryJourneyRunnable,
                         handler, backgroundHandler,
-                        network, publicLeg.journeyRef,
-                        true, trip.getUniqueId(),
+                        network, publicLeg.journeyRef, true,
                         publicLeg.departure, publicLeg.arrival,
                         false);
             }
