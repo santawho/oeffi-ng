@@ -90,15 +90,18 @@
     <dimen name="operation_notification_time_fontsize">18sp</dimen>
     <dimen name="operation_notification_station_fontsize">14sp</dimen>
 
-    <dimen name="operation_next_event_nearest_station_name_fontsize">32sp</dimen>
-    <dimen name="operation_next_event_nearest_station_place_fontsize">21sp</dimen>
-    <dimen name="operation_next_event_next_station_name_fontsize">24sp</dimen>
-    <dimen name="operation_next_event_next_station_place_fontsize">16sp</dimen>
+    <!-- following are in DP to explicitly prevent font scaling -->
+    <dimen name="operation_next_event_nearest_station_name_fontsize">36dp</dimen>
+    <dimen name="operation_next_event_nearest_station_place_fontsize">20dp</dimen>
+    <dimen name="operation_next_event_next_station_name_fontsize">28dp</dimen>
+    <dimen name="operation_next_event_next_station_place_fontsize">18dp</dimen>
+
     <dimen name="operation_next_event_plan_time_fontsize">16sp</dimen>
     <dimen name="operation_next_event_delay_min_fontsize">64sp</dimen>
     <dimen name="operation_next_event_delay_sec_fontsize">30sp</dimen>
     <dimen name="operation_next_event_remaining_fontsize">16sp</dimen>
-    <dimen name="operation_next_event_arrow_height">80dp</dimen>
+    <dimen name="operation_next_event_distance_fontsize">12sp</dimen>
+    <dimen name="operation_next_event_arrow_height">50dp</dimen>
     <dimen name="operation_next_event_clock_fontsize">40sp</dimen>
 
     <dimen name="operation_details_arrow_height">40dp</dimen>

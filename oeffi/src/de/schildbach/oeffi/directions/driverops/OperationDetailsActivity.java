@@ -29,13 +29,15 @@ import android.widget.ImageView;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import java.util.Collections;
 import java.util.Date;
 
+import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.QueryStoredTripsProvider;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
 import de.schildbach.oeffi.directions.TripUtils;
+import de.schildbach.oeffi.stations.LineView;
+import de.schildbach.oeffi.tripeval.TripGeoUtils;
 import de.schildbach.oeffi.tripeval.TripRenderer;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.stations.StationDetailsActivity;
@@ -44,6 +46,7 @@ import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.PTDate;
+import de.schildbach.pte.dto.Point;
 import de.schildbach.pte.dto.Stop;
 import de.schildbach.pte.dto.Trip;
 import de.schildbach.pte.provider.NetworkProvider;
@@ -453,6 +456,14 @@ public class OperationDetailsActivity extends TripDetailsActivity {
 
         // final Trip.Public operationLeg = operationLegC.publicLeg;
         final Trip.Public simulatedLeg = operationLegC.simulatedPublicLeg;
+
+        final LineView lineView = findViewById(R.id.operation_next_event_line);
+        lineView.setLine(simulatedLeg.line);
+        final TextView destinationView = findViewById(R.id.operation_next_event_destination);
+        destinationView.setText(Constants.DESTINATION_ARROW_PREFIX
+                + Formats.makeBreakableStationName(Formats.fullLocationName(
+                        simulatedLeg.destination)));
+
         final boolean sectionIsAfterNearestStop = operationLegC.sectionIsAfterNearestStop;
         final boolean isAtNearestStop = operationLegC.isAtNearestStop;
         final double sectionRelation = operationLegC.sectionRelation;
@@ -541,8 +552,12 @@ public class OperationDetailsActivity extends TripDetailsActivity {
                     R.id.operation_next_event_nearest_station_arrival_delay_sec);
             final TextView planTimeView = containerView.findViewById(R.id.operation_next_event_nearest_station_arrival_plan_time);
             setPlanTime(planTimeView, false, nearestStop.plannedArrivalTime, otherTextColor);
-            final TextView remainingView = containerView.findViewById(R.id.operation_next_event_nearest_station_arrival_remaining);
-            setRemaining(remainingView, nearestStop.getArrivalTime().getTime() - now, otherTextColor);
+            setRemaining(
+                    containerView.findViewById(R.id.operation_next_event_nearest_station_arrival_remaining),
+                    nearestStop.getArrivalTime().getTime() - now,
+                    containerView.findViewById(R.id.operation_next_event_nearest_station_arrival_distance),
+                    nearestStop.location.coord,
+                    otherTextColor);
 
             if (isNextAction) {
                 nearestArrivalView.setBackgroundColor(color);
@@ -578,8 +593,11 @@ public class OperationDetailsActivity extends TripDetailsActivity {
                     R.id.operation_next_event_nearest_station_departure_delay_sec);
             final TextView planTimeView = containerView.findViewById(R.id.operation_next_event_nearest_station_departure_plan_time);
             setPlanTime(planTimeView, true, nearestStop.plannedDepartureTime, otherTextColor);
-            final TextView remainingView = containerView.findViewById(R.id.operation_next_event_nearest_station_departure_remaining);
-            setRemaining(remainingView, nearestStop.getDepartureTime().getTime() - now, otherTextColor);
+            setRemaining(
+                    containerView.findViewById(R.id.operation_next_event_nearest_station_departure_remaining),
+                    nearestStop.getDepartureTime().getTime() - now,
+                    null, null,
+                    otherTextColor);
 
             if (isNextAction) {
                 nearestDepartureView.setBackgroundColor(color);
@@ -613,8 +631,12 @@ public class OperationDetailsActivity extends TripDetailsActivity {
                     R.id.operation_next_event_next_station_arrival_delay_sec);
             final TextView planTimeView = containerView.findViewById(R.id.operation_next_event_next_station_arrival_plan_time);
             setPlanTime(planTimeView, false, nextStop.plannedArrivalTime, otherTextColor);
-            final TextView remainingView = containerView.findViewById(R.id.operation_next_event_next_station_arrival_remaining);
-            setRemaining(remainingView, nextStop.getArrivalTime().getTime() - now, otherTextColor);
+            setRemaining(
+                    containerView.findViewById(R.id.operation_next_event_next_station_arrival_remaining),
+                    nextStop.getArrivalTime().getTime() - now,
+                    containerView.findViewById(R.id.operation_next_event_next_station_arrival_distance),
+                    nextStop.location.coord,
+                    otherTextColor);
 
             final TextView nextStopNameView = containerView.findViewById(R.id.operation_next_event_next_station_name);
             final TextView nextStopPlaceView = containerView.findViewById(R.id.operation_next_event_next_station_place);
@@ -657,9 +679,18 @@ public class OperationDetailsActivity extends TripDetailsActivity {
     protected void setRemaining(
             final TextView remainingView,
             final long timeSpan,
+            final TextView distanceView,
+            final Point locationCoord,
             final int textColor) {
         remainingView.setText(isShowRemaining() ? Formats.formatTimeSpanMS(timeSpan, false) : null);
         remainingView.setTextColor(textColor);
+
+        if (distanceView != null) {
+            final Point deviceCoord = getDeviceLocation();
+            distanceView.setText(!(isShowRemaining() && locationCoord != null && deviceCoord != null) ? null
+                    : Formats.formatDistance(TripGeoUtils.geoDistanceInMeters(locationCoord, deviceCoord), false));
+            distanceView.setTextColor(textColor);
+        }
     }
 
     protected TripDetailsActivity.StopClickListener newStopClickListener(

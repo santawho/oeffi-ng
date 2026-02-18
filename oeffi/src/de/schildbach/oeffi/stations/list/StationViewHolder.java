@@ -199,7 +199,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
         linesView.setLines(!lines.isEmpty() ? lines : null);
 
         // distance
-        distanceView.setText(station.hasDistanceAndBearing ? Formats.formatDistance(station.distance) : null);
+        distanceView.setText(station.hasDistanceAndBearing ? Formats.formatDistance(station.distance, false) : null);
         distanceView.setVisibility(station.hasDistanceAndBearing ? View.VISIBLE : View.GONE);
         distanceView.setTextColor(colorSignificant);
 

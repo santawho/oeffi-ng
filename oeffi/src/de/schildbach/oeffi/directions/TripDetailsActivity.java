@@ -2631,8 +2631,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final StringBuilder builder = new StringBuilder();
             builder.append(Formats.formatTimeSpanMorS(remainingTime, false));
             if (locationCoord != null && deviceCoord != null) {
-                builder.append(String.format("   %.1f km",
-                        TripGeoUtils.geoDistanceInMeters(locationCoord, deviceCoord) / 1000.0));
+                builder.append("  ");
+                builder.append(Formats.formatDistance(
+                        TripGeoUtils.geoDistanceInMeters(locationCoord, deviceCoord), true));
             }
             remainingView.setText(builder.toString());
         } else {

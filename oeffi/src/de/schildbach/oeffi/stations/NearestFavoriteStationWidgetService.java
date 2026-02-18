@@ -339,7 +339,7 @@ public class NearestFavoriteStationWidgetService extends JobService {
                             final Favorite favorite = favorites.get(i % numFavorites);
                             log.debug("Favorite: {}", favorite);
 
-                            views.setTextViewText(R.id.station_widget_distance, Formats.formatDistance(favorite.distance));
+                            views.setTextViewText(R.id.station_widget_distance, Formats.formatDistance(favorite.distance, false));
                             views.setViewVisibility(R.id.station_widget_distance, View.VISIBLE);
 
                             setHeader(appWidgetId, getString(R.string.nearest_favorite_station_widget_loading));

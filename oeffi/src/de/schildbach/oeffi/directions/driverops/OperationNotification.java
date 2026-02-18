@@ -403,12 +403,6 @@ public class OperationNotification {
         String nextRefreshTimeReason;
         final long nextTripReloadTimeMs;
         if (tripRenderer.nextEventEarliestTime != null) {
-            if (tripRenderer.nextEventIsInitialIndividual) {
-                final Trip.Leg firstLeg = trip.legs.isEmpty() ? null : trip.legs.get(0);
-            } else if (tripRenderer.nextEventTypeIsPublic) {
-            } else if (tripRenderer.currentLeg.transferTo != null) {
-            } else {
-            }
             final long timeLeft = tripRenderer.nextEventEarliestTime.getTime() - nowTime;
             if (timeLeft < 240000) {
                 // last 4 minutes and after, 30 secs refresh interval

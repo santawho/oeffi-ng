@@ -459,16 +459,6 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
                 () -> runOnUiThread(this::updateGUI));
     }
 
-    private OperationNotification guiUpdateOperationNotification;
-
-    @Override
-    protected boolean updateGUI() {
-        guiUpdateOperationNotification = new OperationNotification(getIntent());
-        if (!super.updateGUI())
-            return false;
-        return true;
-    }
-
     @Override
     protected boolean isShowSeconds() {
         // return isExternalPower();

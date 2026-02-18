@@ -224,9 +224,9 @@ public final class Formats {
     private static final String METER_SUFFIX = Constants.CHAR_HAIR_SPACE + "m";
     private static final String KILOMETER_SUFFIX = Constants.CHAR_HAIR_SPACE + "km";
 
-    public static String formatDistance(final float meters) {
+    public static String formatDistance(final double meters, final boolean forceKilometers) {
         final int metersInt = (int) meters;
-        if (metersInt < 1000)
+        if (!forceKilometers && metersInt < 1000)
             return String.valueOf(metersInt) + METER_SUFFIX;
         else if (metersInt < 1000 * 100)
             return String.valueOf(metersInt / 1000) + '.' + String.valueOf((metersInt % 1000) / 100) + KILOMETER_SUFFIX;
