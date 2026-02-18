@@ -19,7 +19,6 @@
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="de.schildbach.oeffi"
     android:versionCode="140000"
     android:versionName="14.0">
 
