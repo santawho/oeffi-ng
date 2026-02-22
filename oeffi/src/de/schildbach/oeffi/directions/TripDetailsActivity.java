@@ -644,6 +644,16 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         return R.layout.navigation_next_event_trip;
     }
 
+    @Override
+    protected void setMapVisible(final boolean visible) {
+        if (!isShowingItinerary()) {
+            super.setMapVisible(true);
+            setShowPage(Page.ITINERARY);
+        } else {
+            super.setMapVisible(visible);
+        }
+    }
+
     private boolean keepDisplayOn;
 
     protected void setMustKeepDisplayOn(final boolean keepDisplayOn) {
@@ -888,6 +898,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             setShowPage(R.id.directions_trip_details_list_frame);
         else
             super.onBackPressedEvent();
+    }
+
+    protected boolean isShowingItinerary() {
+        return viewPager.getCurrentView().getId() == R.id.directions_trip_details_list_frame;
     }
 
     protected boolean isShowingNextEvent() {
