@@ -315,6 +315,14 @@
     <string name="directions_query_history_context_add_favorite">Anfrage als Favorit markieren</string>
     <string name="directions_query_history_context_remove_favorite">Favorit entfernen</string>
 
+    <!-- query stored trip context menu -->
+    <string name="directions_query_stored_trip_context_search">Alternative Verbindungen suchen</string>
+    <string name="directions_query_stored_trip_context_show">Anzeigen</string>
+    <string name="directions_query_stored_trip_context_navigate">Navigieren</string>
+    <string name="directions_query_stored_trip_context_remove">Löschen</string>
+    <string name="directions_query_stored_trip_context_set_done">Als erledigt markieren</string>
+    <string name="directions_query_stored_trip_context_unset_done">Erledigt-Markierung entfernen</string>
+
     <!-- location selector -->
     <string name="directions_location_selector_context_pin_title">Anheften</string>
     <string name="directions_location_selector_context_unpin_title">Anheftung entfernen</string>

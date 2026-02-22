@@ -316,6 +316,14 @@
     <string name="directions_query_history_context_add_favorite">Mark query as favorite</string>
     <string name="directions_query_history_context_remove_favorite">Remove favorite</string>
 
+    <!-- query stored trip context menu -->
+    <string name="directions_query_stored_trip_context_search">Search alternative connections</string>
+    <string name="directions_query_stored_trip_context_show">Show</string>
+    <string name="directions_query_stored_trip_context_navigate">Navigate</string>
+    <string name="directions_query_stored_trip_context_remove">Delete</string>
+    <string name="directions_query_stored_trip_context_set_done">Mark as done</string>
+    <string name="directions_query_stored_trip_context_unset_done">Remove mark as done</string>
+
     <!-- location selector -->
     <string name="directions_location_selector_context_pin_title">Set pinned</string>
     <string name="directions_location_selector_context_unpin_title">Remove pinning</string>

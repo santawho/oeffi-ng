@@ -36,4 +36,9 @@ public interface QueryHistoryClickListener {
             int adapterPosition,
             Trip trip,
             QueryTripsRunnable.TripRequestData queryTripsRequestData);
+
+    void onSearchAgainClick(
+            int adapterPosition,
+            final PTDate tripDepartureTime, final PTDate tripArrivalTime,
+            QueryTripsRunnable.TripRequestData reloadRequest);
 }

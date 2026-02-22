@@ -41,7 +41,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -912,13 +911,16 @@ public class DirectionsActivity extends OeffiMainActivity implements
     }
 
     private boolean initProductToggles() {
-        final Collection<Product> defaultProducts = loadProductFilter();
+        return initProductToggles(loadProductFilter());
+    }
+
+    private boolean initProductToggles(final Collection<Product> setProducts) {
         for (final ToggleImageButton view : viewProductToggles) {
             final Product product = Product.fromCode(((String) view.getTag()).charAt(0));
-            final boolean checked = defaultProducts.contains(product);
+            final boolean checked = setProducts.contains(product);
             view.setChecked(checked);
         }
-        return !productsAreNetworkDefault(defaultProducts);
+        return !productsAreNetworkDefault(setProducts);
     }
 
     private Set<Product> getProductToggles() {
@@ -1418,12 +1420,22 @@ public class DirectionsActivity extends OeffiMainActivity implements
     }
 
     @Override
-    public boolean onQueryStoredTripContextMenuItemClick(
+    public void onSearchAgainClick(
             final int adapterPosition,
-            final Location from, final Location to, final Location via,
-            @Nullable final byte[] serializedSavedTrip, final int menuItemId,
-            @Nullable final Location menuItemLocation) {
-        return false;
+            final PTDate tripDepartureTime, final PTDate tripArrivalTime,
+            final QueryTripsRunnable.TripRequestData reloadRequest) {
+        viewFromLocation.setLocation(reloadRequest.from);
+        viewToLocation.setLocation(reloadRequest.to);
+        viewViaLocation.setLocation(reloadRequest.via);
+        if (reloadRequest.dep)
+            timeSpec = new TimeSpec.Absolute(DepArr.DEPART, tripDepartureTime.getTime());
+        else
+            timeSpec = new TimeSpec.Absolute(DepArr.ARRIVE, tripArrivalTime.getTime());
+        final TripOptions tripOptions = reloadRequest.options;
+        if (tripOptions != null)
+            initProductToggles(tripOptions.products);
+        updateGUI();
+        handleGo();
     }
 
     @Override
@@ -1440,23 +1452,29 @@ public class DirectionsActivity extends OeffiMainActivity implements
         if (menuItemId == R.id.directions_query_history_context_show_trip) {
             handleShowSavedTrip(from, to, via, null, null, serializedSavedTrip, null, null);
             return true;
-        } else if (menuItemId == R.id.directions_query_history_context_remove_trip) {
+        }
+        if (menuItemId == R.id.directions_query_history_context_remove_trip) {
             queryHistoryListAdapter.setSavedTrip(adapterPosition, 0, 0, null);
             return true;
-        } else if (menuItemId == R.id.directions_query_history_context_remove_entry) {
+        }
+        if (menuItemId == R.id.directions_query_history_context_remove_entry) {
             queryHistoryListAdapter.removeEntry(adapterPosition);
             ViewUtils.setVisibility(viewQueryHistoryEmpty, queryHistoryListAdapter.getItemCount() == 0);
             return true;
-        } else if (menuItemId == R.id.directions_query_history_context_add_favorite) {
+        }
+        if (menuItemId == R.id.directions_query_history_context_add_favorite) {
             queryHistoryListAdapter.setIsFavorite(adapterPosition, true);
             return true;
-        } else if (menuItemId == R.id.directions_query_history_context_remove_favorite) {
+        }
+        if (menuItemId == R.id.directions_query_history_context_remove_favorite) {
             queryHistoryListAdapter.setIsFavorite(adapterPosition, false);
             return true;
-        } else if (menuItemId == R.id.directions_query_history_location_context_details && menuItemLocation != null) {
+        }
+        if (menuItemId == R.id.directions_query_history_location_context_details && menuItemLocation != null) {
             StationDetailsActivity.start(this, network, menuItemLocation, null, null);
             return true;
-        } else if (menuItemId == R.id.directions_query_history_location_context_add_favorite
+        }
+        if (menuItemId == R.id.directions_query_history_location_context_add_favorite
                 && menuItemLocation != null) {
             FavoriteUtils.persist(getContentResolver(), FavoriteStationsProvider.TYPE_FAVORITE, network,
                     menuItemLocation);
@@ -1464,17 +1482,18 @@ public class DirectionsActivity extends OeffiMainActivity implements
                     menuItemLocation.uniqueShortName());
             queryHistoryListAdapter.notifyDataSetChanged();
             return true;
-        } else if (menuItemId == R.id.directions_query_history_location_context_launcher_shortcut
+        }
+        if (menuItemId == R.id.directions_query_history_location_context_launcher_shortcut
                 && menuItemLocation != null) {
             StationContextMenu.createLauncherShortcutDialog(DirectionsActivity.this, network, menuItemLocation).show();
             return true;
-        } else if (menuItemId == R.id.station_map_context_maps_internal && menuItemLocation != null) {
+        }
+        if (menuItemId == R.id.station_map_context_maps_internal && menuItemLocation != null) {
             setMapVisible(true);
             getMapView().zoomToStations(List.of(menuItemLocation), 0);
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     private void handleReuseQuery(final Location from, final Location to, final Location via) {

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/directions_query_stored_trip_context_search"
+        android:title="@string/directions_query_stored_trip_context_search" />
+    <item
+        android:id="@+id/directions_query_stored_trip_context_show"
+        android:title="@string/directions_query_stored_trip_context_show" />
+    <item
+        android:id="@+id/directions_query_stored_trip_context_navigate"
+        android:title="@string/directions_query_stored_trip_context_navigate" />
+    <item
+        android:id="@+id/directions_query_stored_trip_context_remove"
+        android:title="@string/directions_query_stored_trip_context_remove" />
+    <item
+        android:id="@+id/directions_query_stored_trip_context_set_done"
+        android:title="@string/directions_query_stored_trip_context_set_done" />
+    <item
+        android:id="@+id/directions_query_stored_trip_context_unset_done"
+        android:title="@string/directions_query_stored_trip_context_unset_done" />
+
+</menu>

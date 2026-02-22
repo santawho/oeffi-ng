@@ -314,6 +314,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     tripDepartureTime, tripArrivalTime,
                     serializedTrip, tripId,
                     serializedReloadRequest,
+                    null,
                     selectedRowId, clickListener, contextListener);
         }
     }

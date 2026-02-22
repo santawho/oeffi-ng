@@ -18,6 +18,8 @@
 package de.schildbach.oeffi.directions.list;
 
 import android.content.Context;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
@@ -35,9 +37,6 @@ import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.QueryStoredTripsProvider;
 import de.schildbach.oeffi.directions.QueryTripsRunnable;
-import de.schildbach.oeffi.directions.TripDetailsActivity;
-import de.schildbach.oeffi.directions.navigation.NavigationNotification;
-import de.schildbach.oeffi.directions.navigation.TripNavigatorActivity;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.Toast;
@@ -49,10 +48,6 @@ import de.schildbach.pte.dto.Trip;
 
 public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
     public interface ContextListener {
-        boolean onQueryStoredTripContextMenuItemClick(
-                int adapterPosition,
-                Location from, Location to, Location via,
-                @Nullable byte[] serializedSavedTrip, int menuItemId, @Nullable Location menuItemLocation);
         boolean isTripUnderNavigation(final Context context, final String tripId);
     }
 
@@ -78,6 +73,7 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
     private byte[] serializedSavedTrip;
     private byte[] serializedReloadRequest;
     private String tripId;
+    private Boolean markedAsDone;
     private PopupMenu contextMenu;
 
     public QueryStoredTripViewHolder(
@@ -112,6 +108,7 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
             final PTDate tripDepartureTime, final PTDate tripArrivalTime,
             final byte[] serializedSavedTrip, final String tripId,
             final byte[] serializedReloadRequest,
+            final Boolean markedAsDone,
             final long selectedRowId, final QueryHistoryClickListener clickListener,
             final ContextListener contextListener) {
         this.contextListener = contextListener;
@@ -123,6 +120,7 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
         this.serializedSavedTrip = serializedSavedTrip;
         this.serializedReloadRequest = serializedReloadRequest;
         this.tripId = tripId;
+        this.markedAsDone = markedAsDone;
 
         fromView.setLocation(from);
         toView.setLocation(to);
@@ -199,18 +197,21 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
                 }
             }
         });
-//        itemView.setOnLongClickListener(v -> {
-//            if (navigationOpened) {
-//                navigationOpened = false;
-//                openNavigation();
-//            } else if (removeOpened) {
-//                removeOpened = false;
-//                deleteEntry();
-//            } else {
-//                showContextMenu(v);
-//            }
-//            return true;
-//        });
+        itemView.setOnLongClickListener(v -> {
+            final int position = getAdapterPosition();
+            if (navigationOpened) {
+                navigationOpened = false;
+                startNavigation(position, clickListener);
+            } else if (removeOpened) {
+                removeOpened = false;
+                if (tripId != null) {
+                    QueryStoredTripsProvider.delete(context.getContentResolver(), network, usage, tripId);
+                }
+            } else {
+                showContextMenu(v, clickListener);
+            }
+            return true;
+        });
     }
 
     private void startNavigation(final int position, final QueryHistoryClickListener clickListener) {
@@ -224,70 +225,65 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
         clickListener.onSavedTripStartNavigation(position, trip, queryTripsRequestData);
     }
 
-    private void showContextMenu(final View view) {
-//        final PopupMenu contextMenu = new PopupMenu(context, view);
-//        final MenuInflater inflater = contextMenu.getMenuInflater();
-//        final Menu menu = contextMenu.getMenu();
-//        inflater.inflate(R.menu.directions_query_stored_trip_context, menu);
-//        menu.findItem(R.id.directions_query_stored_trip_context_show_trip).setVisible(hasSavedTrip);
-//        menu.findItem(R.id.directions_query_stored_trip_context_remove_trip).setVisible(hasSavedTrip);
-//        menu.findItem(R.id.directions_query_stored_trip_context_add_favorite).setVisible(!isFavorite);
-//        menu.findItem(R.id.directions_query_stored_trip_context_remove_favorite).setVisible(isFavorite);
-//        final SubMenu fromMenu;
-//        if (from.isIdentified()) {
-//            fromMenu = menu.addSubMenu(from.uniqueShortName());
-//            inflater.inflate(R.menu.directions_query_stored_trip_location_context, fromMenu);
-//            fromMenu.findItem(R.id.directions_query_stored_trip_location_context_details)
-//                    .setVisible(from.type == LocationType.STATION);
-//            fromMenu.findItem(R.id.directions_query_stored_trip_location_context_add_favorite)
-//                    .setVisible(from.type == LocationType.STATION && (fromFavState == null
-//                            || fromFavState != FavoriteStationsProvider.TYPE_FAVORITE));
-//            final MenuItem mapMenuItem = fromMenu.findItem(R.id.directions_query_stored_trip_location_context_map);
-//            if (from.hasCoord())
-//                StationContextMenu.prepareMapMenu(context, mapMenuItem.getSubMenu(), network, from);
-//            else
-//                mapMenuItem.setVisible(false);
-//        } else {
-//            fromMenu = null;
-//        }
-//        final SubMenu toMenu;
-//        if (to.isIdentified()) {
-//            toMenu = menu.addSubMenu(to.uniqueShortName());
-//            inflater.inflate(R.menu.directions_query_stored_trip_location_context, toMenu);
-//            toMenu.findItem(R.id.directions_query_stored_trip_location_context_details)
-//                    .setVisible(to.type == LocationType.STATION);
-//            toMenu.findItem(R.id.directions_query_stored_trip_location_context_add_favorite)
-//                    .setVisible(to.type == LocationType.STATION
-//                            && (toFavState == null || toFavState != FavoriteStationsProvider.TYPE_FAVORITE));
-//            final MenuItem mapMenuItem = toMenu.findItem(R.id.directions_query_stored_trip_location_context_map);
-//            if (to.hasCoord())
-//                StationContextMenu.prepareMapMenu(context, mapMenuItem.getSubMenu(), network, to);
-//            else
-//                mapMenuItem.setVisible(false);
-//        } else {
-//            toMenu = null;
-//        }
-//        contextMenu.setOnMenuItemClickListener(item -> {
-//            final int position = getAdapterPosition();
-//            if (position != RecyclerView.NO_POSITION) {
-//                if (fromMenu != null && item == fromMenu.findItem(item.getItemId()))
-//                    return contextMenuItemListener.onQueryStoredTripContextMenuItemClick(position, from, to, via,
-//                            serializedSavedTrip, item.getItemId(), from);
-//                else if (toMenu != null && item == toMenu.findItem(item.getItemId()))
-//                    return contextMenuItemListener.onQueryStoredTripContextMenuItemClick(position, from, to, via,
-//                            serializedSavedTrip, item.getItemId(), to);
-//                else
-//                    return contextMenuItemListener.onQueryStoredTripContextMenuItemClick(position, from, to, via,
-//                            serializedSavedTrip, item.getItemId(), null);
-//            } else {
-//                return false;
-//            }
-//        });
-//        contextMenu.setOnDismissListener(popupMenu -> {
-//            this.contextMenu = null;
-//        });
-//        contextMenu.show();
-//        this.contextMenu = contextMenu;
+    private void showContextMenu(
+            final View view,
+            final QueryHistoryClickListener clickListener) {
+        final PopupMenu contextMenu = new PopupMenu(context, view);
+        final MenuInflater inflater = contextMenu.getMenuInflater();
+        final Menu menu = contextMenu.getMenu();
+        inflater.inflate(R.menu.directions_query_stored_trip_context, menu);
+        menu.findItem(R.id.directions_query_stored_trip_context_set_done).setVisible(markedAsDone != null && !markedAsDone);
+        menu.findItem(R.id.directions_query_stored_trip_context_unset_done).setVisible(markedAsDone != null && markedAsDone);
+        contextMenu.setOnMenuItemClickListener(item -> {
+            final int position = getAdapterPosition();
+            if (position != RecyclerView.NO_POSITION) {
+                final int menuItemId = item.getItemId();
+                if (menuItemId == R.id.directions_query_stored_trip_context_show) {
+                    clickListener.onSavedTripClick(position,
+                            from, to, via,
+                            tripDepartureTime, tripArrivalTime,
+                            serializedSavedTrip, tripId,
+                            serializedReloadRequest);
+                    return true;
+                }
+                if (menuItemId == R.id.directions_query_stored_trip_context_navigate) {
+                    startNavigation(position, clickListener);
+                    return true;
+                }
+                if (menuItemId == R.id.directions_query_stored_trip_context_remove) {
+                    if (tripId != null) {
+                        QueryStoredTripsProvider.delete(context.getContentResolver(), network, usage, tripId);
+                    }
+                    return true;
+                }
+                if (menuItemId == R.id.directions_query_stored_trip_context_search) {
+                    final QueryTripsRunnable.TripRequestData requestData = (QueryTripsRunnable.TripRequestData)
+                            Objects.deserialize(serializedReloadRequest, true);
+                    if (requestData != null)
+                        clickListener.onSearchAgainClick(position,
+                                tripDepartureTime, tripArrivalTime, requestData);
+                    return true;
+                }
+                if (menuItemId == R.id.directions_query_stored_trip_context_set_done) {
+                    if (markedAsDone != null) {
+                        markedAsDone = true;
+                    }
+                    return true;
+                }
+                if (menuItemId == R.id.directions_query_stored_trip_context_unset_done) {
+                    if (markedAsDone != null) {
+                        markedAsDone = false;
+                    }
+                    return true;
+                }
+            }
+            return false;
+        });
+        contextMenu.setOnDismissListener(popupMenu -> {
+            this.contextMenu = null;
+        });
+        contextMenu.show();
+        this.contextMenu = contextMenu;
     }
 
     boolean navigationOpened;
