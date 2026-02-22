@@ -256,11 +256,11 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         colorAdditionalTripBackground = makeBackgroundColorFromId(R.color.bg_trip_overview_additional_trip);
         colorAdditionalFeederBackground = makeBackgroundColorFromId(R.color.bg_trip_overview_additional_feeder);
 
+        warningIcon = AppCompatResources.getDrawable(context, R.drawable.ic_warning_amber_24dp);
         walkIcon = getColoredIcon(R.drawable.ic_directions_walk_grey600_24dp, colorLessSignificant);
         stayIcon = getColoredIcon(R.drawable.ic_directions_stay_grey600_24dp, colorLessSignificant);
         bikeIcon = getColoredIcon(R.drawable.ic_directions_bike_grey600_24dp, colorLessSignificant);
         carIcon = getColoredIcon(R.drawable.ic_local_taxi_grey600_24dp, colorLessSignificant);
-        warningIcon = getColoredIcon(R.drawable.ic_warning_amber_24dp, colorLessSignificant);
         wheelChairIcon = getColoredIcon(R.drawable.ic_accessible_grey600_18dp, colorLessSignificant);
         bicycleIcon = getColoredIcon(R.drawable.ic_directions_bike_grey600_18dp, colorLessSignificant);
         bookmarkedIcon = getColoredIcon(R.drawable.ic_bookmarked_white_24dp, colorLessSignificant);
