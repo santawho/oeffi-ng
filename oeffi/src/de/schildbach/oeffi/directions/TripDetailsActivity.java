@@ -789,7 +789,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         @Override
         public void run() {
             fastRefreshIntervalMs = getPeriodicUpdateIntervalMs();
-            updateGuiIfApplicable();
+            updateGuiIfApplicable(false);
             if (fastRefreshIntervalMs > 0) {
                 requestLocationUpdates(fastRefreshIntervalMs);
                 handler.postDelayed(this, fastRefreshIntervalMs);
@@ -807,7 +807,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         tickReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(final Context context, final Intent intent) {
-                updateGuiIfApplicable();
+                updateGuiIfApplicable(false);
             }
         };
         registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
@@ -819,12 +819,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         return true;
     }
 
-    private boolean updateGuiIfApplicable() {
+    private boolean updateGuiIfApplicable(final boolean force) {
         if (isPaused)
             return false;
-        if (checkAutoRefresh())
-            updateGUI();
-        return true;
+        if (!checkAutoRefresh() && !force)
+            return false;
+        return updateGUI();
     }
 
     protected long getPeriodicUpdateIntervalMs() {
@@ -981,7 +981,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
         final Double speedMetersPerSecond = location.hasSpeed() ? (double) location.getSpeed() : null;
         updateDeviceLocationDependencies(newDeviceLocation, bearingDegrees, speedMetersPerSecond, new Date());
-        updateGuiIfApplicable();
+        updateGuiIfApplicable(true);
     }
 
     @Override
