@@ -244,52 +244,55 @@ public abstract class QueryTripsRunnable implements Runnable {
 
     private void postOnPreExecute() {
         handler.post(() -> {
-            final boolean hasOptimize = options.optimize != null;
-            final boolean hasWalkSpeed = options.walkSpeed != null && options.walkSpeed != WalkSpeed.NORMAL;
-            final boolean hasAccessibility = options.accessibility != null
-                    && options.accessibility != Accessibility.NEUTRAL;
-
-            final SpannableStringBuilder progressMessage = new SpannableStringBuilder(
-                    res.getString(R.string.directions_query_progress));
-            progressMessage.setSpan(new StyleSpan(Typeface.BOLD), 0, progressMessage.length(),
-                    SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE);
-            if (hasOptimize || hasWalkSpeed || hasAccessibility) {
-                progressMessage.append('\n');
-                if (hasOptimize) {
-                    progressMessage.append('\n')
-                            .append(res.getString(R.string.directions_preferences_optimize_trip_title))
-                            .append(": ");
-                    final int begin = progressMessage.length();
-                    progressMessage.append(
-                            res.getStringArray(R.array.directions_optimize_trip)[options.optimize.ordinal()]);
-                    progressMessage.setSpan(new StyleSpan(Typeface.BOLD), begin, progressMessage.length(),
-                            SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE);
-                }
-                if (hasWalkSpeed) {
-                    progressMessage.append('\n')
-                            .append(res.getString(R.string.directions_preferences_walk_speed_title)).append(": ");
-                    final int begin = progressMessage.length();
-                    progressMessage
-                            .append(res.getStringArray(R.array.directions_walk_speed)[options.walkSpeed.ordinal()]);
-                    progressMessage.setSpan(new StyleSpan(Typeface.BOLD), begin, progressMessage.length(),
-                            SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE);
-                }
-                if (hasAccessibility) {
-                    progressMessage.append('\n')
-                            .append(res.getString(R.string.directions_preferences_accessibility_title))
-                            .append(": ");
-                    final int begin = progressMessage.length();
-                    progressMessage.append(
-                            res.getStringArray(R.array.directions_accessibility)[options.accessibility.ordinal()]);
-                    progressMessage.setSpan(new StyleSpan(Typeface.BOLD), begin, progressMessage.length(),
-                            SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE);
-                }
-            }
-
-            progressDialog.setMessage(progressMessage);
-
+            startProgressDialog(progressDialog, res, options);
             onPreExecute();
         });
+    }
+
+    public static void startProgressDialog(final ProgressDialog progressDialog, final Resources res, final TripOptions options) {
+        final boolean hasOptimize = options.optimize != null;
+        final boolean hasWalkSpeed = options.walkSpeed != null && options.walkSpeed != WalkSpeed.NORMAL;
+        final boolean hasAccessibility = options.accessibility != null
+                && options.accessibility != Accessibility.NEUTRAL;
+
+        final SpannableStringBuilder progressMessage = new SpannableStringBuilder(
+                res.getString(R.string.directions_query_progress));
+        progressMessage.setSpan(new StyleSpan(Typeface.BOLD), 0, progressMessage.length(),
+                SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE);
+        if (hasOptimize || hasWalkSpeed || hasAccessibility) {
+            progressMessage.append('\n');
+            if (hasOptimize) {
+                progressMessage.append('\n')
+                        .append(res.getString(R.string.directions_preferences_optimize_trip_title))
+                        .append(": ");
+                final int begin = progressMessage.length();
+                progressMessage.append(
+                        res.getStringArray(R.array.directions_optimize_trip)[options.optimize.ordinal()]);
+                progressMessage.setSpan(new StyleSpan(Typeface.BOLD), begin, progressMessage.length(),
+                        SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+            if (hasWalkSpeed) {
+                progressMessage.append('\n')
+                        .append(res.getString(R.string.directions_preferences_walk_speed_title)).append(": ");
+                final int begin = progressMessage.length();
+                progressMessage
+                        .append(res.getStringArray(R.array.directions_walk_speed)[options.walkSpeed.ordinal()]);
+                progressMessage.setSpan(new StyleSpan(Typeface.BOLD), begin, progressMessage.length(),
+                        SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+            if (hasAccessibility) {
+                progressMessage.append('\n')
+                        .append(res.getString(R.string.directions_preferences_accessibility_title))
+                        .append(": ");
+                final int begin = progressMessage.length();
+                progressMessage.append(
+                        res.getStringArray(R.array.directions_accessibility)[options.accessibility.ordinal()]);
+                progressMessage.setSpan(new StyleSpan(Typeface.BOLD), begin, progressMessage.length(),
+                        SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+        }
+
+        progressDialog.setMessage(progressMessage);
     }
 
     protected void onPreExecute() {

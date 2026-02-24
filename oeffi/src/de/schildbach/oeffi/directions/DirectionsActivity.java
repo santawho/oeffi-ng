@@ -1657,6 +1657,19 @@ public class DirectionsActivity extends OeffiMainActivity implements
             flags.add(TripFlag.BIKE);
 
         final TripOptions options = getTripOptionsFromPrefs(products, flags.isEmpty() ? null : flags);
+
+        // old solution: searches within the DirectionsShortcutActivity
+        // and then switches to the TripsOverviewActivity
+        //    query(networkProvider, from, via, to, options);
+
+        // new solution: searches within the TripsOverviewActivity
+        TripsOverviewActivity.start(this, networkProvider, timeSpec, from, via, to, options);
+    }
+
+    private void query(
+            final NetworkProvider networkProvider,
+            final Location from, final Location via, final Location to,
+            final TripOptions options) {
         queryTripsRunnable = new MyQueryTripsRunnable(networkProvider, from, via, to, timeSpec, options) {
             @Override
             protected void onPreExecute() {

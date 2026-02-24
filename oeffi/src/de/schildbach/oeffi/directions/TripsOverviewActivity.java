@@ -17,6 +17,7 @@
 
 package de.schildbach.oeffi.directions;
 
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -45,6 +46,7 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.QueryTripsRunnable.TripRequestData;
 import de.schildbach.oeffi.directions.navigation.Navigator;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
+import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.TimeSpec;
@@ -87,6 +89,7 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.util.Objects.requireNonNull;
 
@@ -115,14 +118,39 @@ public class TripsOverviewActivity extends OeffiActivity {
     private static final String INTENT_EXTRA_RELOAD_REQUEST_DATA = TripsOverviewActivity.class.getName() + ".reqdata";
     private static final String INTENT_EXTRA_RENDERCONFIG = TripDetailsActivity.class.getName() + ".config";
 
-    public static void start(final Context context, final NetworkId network, final TimeSpec.DepArr depArr,
+    public static void start(
+            final Context context,
+            final NetworkProvider networkProvider, final TimeSpec timeSpec,
+            final Location from, final Location via, final Location to,
+            final TripOptions options) {
+        final TripsOverviewActivity.RenderConfig renderConfig = new TripsOverviewActivity.RenderConfig();
+        renderConfig.referenceTime = timeSpec;
+        final Date date = new Date(timeSpec.timeInMillis());
+        final QueryTripsRunnable.TripRequestData reloadRequestData = new QueryTripsRunnable.TripRequestData();
+        reloadRequestData.from = from;
+        reloadRequestData.via = via;
+        reloadRequestData.to = to;
+        reloadRequestData.date = date;
+        reloadRequestData.dep = timeSpec.depArr == TimeSpec.DepArr.DEPART;
+        reloadRequestData.options = options;
+        TripsOverviewActivity.start(context,
+                networkProvider.id(),
+                TimeSpec.DepArr.DEPART,
+                null, null, reloadRequestData, renderConfig);
+    }
+
+    public static void start(
+            final Context context,
+            final NetworkId network, final TimeSpec.DepArr depArr,
             final QueryTripsResult result, final Uri historyUri, final TripRequestData reloadRequestData,
             final RenderConfig renderConfig) {
         final Intent intent = new Intent(context, TripsOverviewActivity.class);
-        if (result.queryUri != null)
-            intent.setData(Uri.parse(result.queryUri));
         intent.putExtra(INTENT_EXTRA_NETWORK, requireNonNull(network));
-        intent.putExtra(INTENT_EXTRA_RESULT, result);
+        if (result != null) {
+            if (result.queryUri != null)
+                intent.setData(Uri.parse(result.queryUri));
+            intent.putExtra(INTENT_EXTRA_RESULT, result);
+        }
         intent.putExtra(INTENT_EXTRA_ARR_DEP, depArr == TimeSpec.DepArr.DEPART);
         if (historyUri != null)
             intent.putExtra(INTENT_EXTRA_HISTORY_URI, historyUri.toString());
@@ -186,6 +214,7 @@ public class TripsOverviewActivity extends OeffiActivity {
 
     private boolean queryMoreTripsEnabled = false;
     private boolean queryMoreTripsRunning = false;
+    private boolean initialRequested = false;
     private boolean reloadRequested = false;
     private boolean searchMoreRequested = false;
     private TripRequestData reloadRequestData;
@@ -218,7 +247,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         final Intent intent = getIntent();
         renderConfig = (RenderConfig) intent.getSerializableExtra(INTENT_EXTRA_RENDERCONFIG);
         network = (NetworkId) intent.getSerializableExtra(INTENT_EXTRA_NETWORK);
-        final QueryTripsResult result = preprocessResult((QueryTripsResult) intent.getSerializableExtra(INTENT_EXTRA_RESULT));
+        final QueryTripsResult queryTripsResult = preprocessResult((QueryTripsResult) intent.getSerializableExtra(INTENT_EXTRA_RESULT));
         final boolean dep = intent.getBooleanExtra(INTENT_EXTRA_ARR_DEP, true);
         reloadRequestData = (TripRequestData) intent.getSerializableExtra(INTENT_EXTRA_RELOAD_REQUEST_DATA);
         final String historyUriStr = intent.getStringExtra(INTENT_EXTRA_HISTORY_URI);
@@ -277,7 +306,28 @@ public class TripsOverviewActivity extends OeffiActivity {
             return windowInsets;
         });
 
-        processInitialResult(result, searchMoreContext);
+        if (queryTripsResult != null) {
+            processInitialResult(queryTripsResult, searchMoreContext);
+        } else if (reloadRequestData != null) {
+            if (reloadRequestData.from != null) {
+                ((TextView) findViewById(R.id.directions_trip_overview_custom_title_from))
+                        .setText(Formats.fullLocationName(reloadRequestData.from));
+            }
+            if (reloadRequestData.to != null) {
+                ((TextView) findViewById(R.id.directions_trip_overview_custom_title_to))
+                        .setText(Formats.fullLocationName(reloadRequestData.to));
+            }
+            if (reloadRequestData.via != null) {
+                findViewById(R.id.directions_trip_overview_custom_title_via_row).setVisibility(View.VISIBLE);
+                ((TextView) findViewById(R.id.directions_trip_overview_custom_title_via))
+                        .setText(Formats.fullLocationName(reloadRequestData.via));
+            } else {
+                findViewById(R.id.directions_trip_overview_custom_title_via_row).setVisibility(View.GONE);
+            }
+
+            initialRequested = true;
+            postCheckMoreRunnable(false);
+        }
     }
 
     private void onBarViewItemClicked(final int position, final boolean isLongClick) {
@@ -415,24 +465,28 @@ public class TripsOverviewActivity extends OeffiActivity {
             final int firstVisiblePosition = barView.getFirstVisiblePosition() - positionOffset;
 
             Runnable queryTripsRunnable = null;
-            if (reloadRequested) {
+            if (initialRequested) {
+                initialRequested = false;
+                searchMoreContext.reset();
+                queryTripsRunnable = new QueryMoreTripsRunnable(queryTripsContextLater, true, false, false, true, searchMoreContext);
+            } else if (reloadRequested) {
                 reloadRequested = false;
                 searchMoreContext.reset();
-                queryTripsRunnable = new QueryMoreTripsRunnable(queryTripsContextLater, false, false, true, searchMoreContext);
+                queryTripsRunnable = new QueryMoreTripsRunnable(queryTripsContextLater, false, false, false, true, searchMoreContext);
             } else if (searchMoreRequested) {
                 searchMoreRequested = false;
                 final SearchMoreContext.NextRoundInfo nextRoundInfo = searchMoreContext.prepareNextRound(TripsOverviewActivity.this);
                 if (nextRoundInfo != null) {
-                    queryTripsRunnable = new QueryMoreTripsRunnable(queryTripsContextLater, false, false, false, searchMoreContext);
+                    queryTripsRunnable = new QueryMoreTripsRunnable(queryTripsContextLater, false, false, false, false, searchMoreContext);
                     if (nextRoundInfo.infoText != null)
                         runOnUiThread(() -> new Toast(TripsOverviewActivity.this).toast(nextRoundInfo.infoText));
                 }
             } else if (queryTripsContextLater != null && queryTripsContextLater.canQueryLater()
                     && (lastVisiblePosition == AdapterView.INVALID_POSITION || lastVisiblePosition + 1 >= trips.size())) {
-                queryTripsRunnable = new QueryMoreTripsRunnable(queryTripsContextLater, false, true, false, searchMoreContext);
+                queryTripsRunnable = new QueryMoreTripsRunnable(queryTripsContextLater, false, false, true, false, searchMoreContext);
             } else if (queryTripsContextEarlier != null && queryTripsContextEarlier.canQueryEarlier()
                     && (firstVisiblePosition == AdapterView.INVALID_POSITION || firstVisiblePosition <= 0)) {
-                queryTripsRunnable = new QueryMoreTripsRunnable(queryTripsContextEarlier, true, false, false, searchMoreContext);
+                queryTripsRunnable = new QueryMoreTripsRunnable(queryTripsContextEarlier, false, true, false, false, searchMoreContext);
             } else if (searchMoreContext.searchMorePossible()) {
                 runOnUiThread(() -> setSearchMoreButtonEnabled(true));
             }
@@ -448,22 +502,38 @@ public class TripsOverviewActivity extends OeffiActivity {
     private class QueryMoreTripsRunnable implements Runnable {
         final private MyActionBar actionBar = getMyActionBar();
         final private QueryTripsContext context;
-        final private boolean earlier, later, refreshPrepend;
+        final private boolean initial, earlier, later, refreshPrepend;
         final private SearchMoreContext searchMoreContext;
+        private ProgressDialog progressDialog;
+        private AtomicBoolean cancelled = new AtomicBoolean(false);
 
         public QueryMoreTripsRunnable(
                 final QueryTripsContext context,
-                final boolean earlier, final boolean later, final boolean refreshPrepend,
+                final boolean initial, final boolean earlier, final boolean later, final boolean refreshPrepend,
                 final SearchMoreContext searchMoreContext) {
             this.context = context;
+            this.initial = initial;
             this.earlier = earlier;
             this.later = later;
             this.refreshPrepend = refreshPrepend;
             this.searchMoreContext = searchMoreContext;
+
         }
 
         public void run() {
-            runOnUiThread(() -> actionBar.startProgress());
+            cancelled.set(false);
+            runOnUiThread(() -> {
+                if (initial) {
+                    progressDialog = ProgressDialog.show(TripsOverviewActivity.this, null,
+                            getString(R.string.directions_query_progress), true, true, dialog -> {
+                                cancelled.set(true);
+                            });
+                    progressDialog.setCanceledOnTouchOutside(false);
+                    QueryTripsRunnable.startProgressDialog(progressDialog, getResources(), reloadRequestData.options);
+                } else {
+                    actionBar.startProgress();
+                }
+            });
 
             boolean foregroundRunning = false;
             try {
@@ -476,7 +546,14 @@ public class TripsOverviewActivity extends OeffiActivity {
                     queryMoreTripsRunning = false;
                     runOnUiThread(() -> {
                         swipeRefresh.setRefreshing(false);
-                        actionBar.stopProgress();
+                        if (initial) {
+                            if (progressDialog != null) {
+                                progressDialog.dismiss();
+                                progressDialog = null;
+                            }
+                        } else {
+                            actionBar.stopProgress();
+                        }
                     });
                 }
             }
@@ -513,18 +590,59 @@ public class TripsOverviewActivity extends OeffiActivity {
                         log.debug("Got {} ({})", result.toShortString(), later ? "later" : "earlier");
                         final int countNew;
                         if (result.status == QueryTripsResult.Status.OK) {
+                            if (result.from != null && result.from.name != null && result.to != null && result.to.name != null) {
+                                final int maxHistoryEntries = Integer.parseInt(prefs.getString(
+                                        Constants.PREFS_KEY_MAX_HISTORY_ENTRIES,
+                                        Integer.toString(getResources().getInteger(R.integer.default_max_history_entries))));
+                                historyUri = QueryHistoryProvider.put(
+                                        getContentResolver(), network, getStoredTripsUsage(),
+                                        result.from, result.to, result.via, null, true,
+                                        maxHistoryEntries);
+                            }
                             countNew = processResult(result, earlier, later, searchMoreContext);
-                        } else if (result.status == QueryTripsResult.Status.NO_TRIPS) {
+                        } else if (initial) {
                             countNew = 0;
-                            // ignore
+                            if (result.status == QueryTripsResult.Status.UNKNOWN_FROM) {
+                                new Toast(TripsOverviewActivity.this).longToast(R.string.directions_message_unknown_from);
+                            } else if (result.status == QueryTripsResult.Status.UNKNOWN_VIA) {
+                                new Toast(TripsOverviewActivity.this).longToast(R.string.directions_message_unknown_via);
+                            } else if (result.status == QueryTripsResult.Status.UNKNOWN_TO) {
+                                new Toast(TripsOverviewActivity.this).longToast(R.string.directions_message_unknown_to);
+                            } else if (result.status == QueryTripsResult.Status.UNKNOWN_LOCATION) {
+                                new Toast(TripsOverviewActivity.this).longToast(R.string.directions_message_unknown_location);
+                            } else if (result.status == QueryTripsResult.Status.TOO_CLOSE) {
+                                new Toast(TripsOverviewActivity.this).longToast(R.string.directions_message_too_close);
+                            } else if (result.status == QueryTripsResult.Status.UNRESOLVABLE_ADDRESS) {
+                                new Toast(TripsOverviewActivity.this).longToast(R.string.directions_message_unresolvable_address);
+                            } else if (result.status == QueryTripsResult.Status.NO_TRIPS) {
+                                new Toast(TripsOverviewActivity.this).longToast(R.string.directions_message_no_trips);
+                            } else if (result.status == QueryTripsResult.Status.INVALID_DATE) {
+                                new Toast(TripsOverviewActivity.this).longToast(R.string.directions_message_invalid_date);
+                            } else if (result.status == QueryTripsResult.Status.SERVICE_DOWN) {
+                                networkProblem(initial);
+                            } else if (result.status == QueryTripsResult.Status.AMBIGUOUS) {
+                                new Toast(TripsOverviewActivity.this).longToast(R.string.directions_message_ambiguous_location);
+                            }
                         } else {
-                            countNew = 0;
-                            new Toast(TripsOverviewActivity.this).toast(R.string.toast_network_problem);
+                            if (result.status == QueryTripsResult.Status.NO_TRIPS) {
+                                countNew = 0;
+                                // ignore
+                            } else {
+                                countNew = 0;
+                                new Toast(TripsOverviewActivity.this).toast(R.string.toast_network_problem);
+                            }
                         }
                         queryMoreTripsRunning = false;
 
                         swipeRefresh.setRefreshing(false);
-                        actionBar.stopProgress();
+                        if (initial) {
+                            if (progressDialog != null) {
+                                progressDialog.dismiss();
+                                progressDialog = null;
+                            }
+                        } else {
+                            actionBar.stopProgress();
+                        }
 
                         // fetch more
                         if (countNew > 0)
@@ -540,7 +658,7 @@ public class TripsOverviewActivity extends OeffiActivity {
                     final String message = "IO problem while processing " + context + " on " + network + " (try "
                             + tries + ")";
                     log.info(message, x);
-                    if (tries >= Constants.MAX_TRIES_ON_IO_PROBLEM) {
+                    if (cancelled.get() || tries >= Constants.MAX_TRIES_ON_IO_PROBLEM) {
                         if (x instanceof SocketTimeoutException || x instanceof UnknownHostException
                                 || x instanceof SocketException || x instanceof SSLException) {
                             runOnUiThread(() -> new Toast(TripsOverviewActivity.this).toast(R.string.toast_network_problem));
@@ -575,6 +693,21 @@ public class TripsOverviewActivity extends OeffiActivity {
             }
             return false;
         }
+    }
+
+    private void networkProblem(final boolean initial) {
+        final DialogBuilder builder = DialogBuilder.warn(this, R.string.alert_network_problem_title);
+        builder.setMessage(R.string.alert_network_problem_message);
+        builder.setPositiveButton(R.string.alert_network_problem_retry, (dialog, which) -> {
+            dialog.dismiss();
+            if (initial)
+                initialRequested = true;
+            else
+                reloadRequested = true;
+            postCheckMoreRunnable(false);
+        });
+        builder.setOnCancelListener(dialog -> dialog.dismiss());
+        builder.show();
     }
 
     private QueryTripsResult preprocessResult(final QueryTripsResult in) {

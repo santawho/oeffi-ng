@@ -203,13 +203,24 @@ public class DirectionsShortcutActivity extends OeffiActivity implements Locatio
             final Accessibility accessibility = application.prefsGetAccessibility();
             final Set<Product> products =  loadProductFilter();
             final TripOptions options = new TripOptions(products, optimize, walkSpeed, minTransferTime, accessibility, null);
-            query(networkProvider, from, to, options);
+
+            // old solution: searches within the DirectionsShortcutActivity
+            // and then switches to the TripsOverviewActivity
+            //    query(networkProvider, from, to, options);
+
+            // new solution: searches within the TripsOverviewActivity
+            TripsOverviewActivity.start(this,
+                    networkProvider, new TimeSpec.Relative(0),
+                    from, null, to, options);
+            finishAndRemoveTask();
         } else {
             errorDialog(R.string.directions_shortcut_error_message_network);
         }
     }
 
-    private void query(final NetworkProvider networkProvider, final Location from, final Location to,
+    private void query(
+            final NetworkProvider networkProvider,
+            final Location from, final Location to,
             final TripOptions options) {
         queryTripsRunnable = new QueryTripsRunnable(getResources(), progressDialog, handler, networkProvider, from,
                 null, to, new TimeSpec.Relative(0), options) {
