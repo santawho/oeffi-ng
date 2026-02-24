@@ -715,7 +715,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 final Trip trip = tripRenderer.trip;
                 QueryStoredTripsProvider.put(getContentResolver(),
                         network, getStoredTripsUsage(),
-                        trip, renderConfig.queryTripsRequestData);
+                        trip, renderConfig.queryTripsRequestData, 0);
                 startNavigation(trip, renderConfig);
             };
         }
@@ -759,7 +759,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 if (isChecked) {
                     QueryStoredTripsProvider.put(getContentResolver(),
                             network, getStoredTripsUsage(),
-                            trip, renderConfig.queryTripsRequestData);
+                            trip, renderConfig.queryTripsRequestData, 0);
                 } else {
                     QueryStoredTripsProvider.delete(getContentResolver(),
                             network, getStoredTripsUsage(),
@@ -979,7 +979,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     @Override
     public void onLocationChanged(@NonNull final android.location.Location location) {
-        final Point newDeviceLocation = LocationHelper.locationToPoint(location);
+        final Point newDeviceLocation = Point.fromDouble(location.getLatitude(), location.getLongitude());
         final Double bearingDegrees;
         if (location.hasBearing()) {
             bearingDegrees = Double.valueOf(location.getBearing());

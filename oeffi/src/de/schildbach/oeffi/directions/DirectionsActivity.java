@@ -604,7 +604,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
                     && intentExtraText.startsWith(GoogleMapsUtils.GMAPS_SHORT_LOCATION_URL_PREFIX)) {
                 // location shared from Google Maps app
                 if (isSharingTo && viewFromLocation.getLocation() == null) {
-                    viewFromLocation.acquireLocation();
+                    viewFromLocation.setToCurrentLocation();
                 }
                 backgroundHandler.post(() -> {
                     final Location location = GoogleMapsUtils.resolveLocationUrl(intentExtraText);
@@ -629,7 +629,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
                         if (isSharingTo) {
                             viewToLocation.setLocation(location);
                             if (viewFromLocation.getLocation() == null)
-                                viewFromLocation.acquireLocation();
+                                viewFromLocation.setToCurrentLocation();
                         } else {
                             viewFromLocation.setLocation(location);
                         }

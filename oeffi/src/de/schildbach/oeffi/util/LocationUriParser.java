@@ -81,7 +81,7 @@ public class LocationUriParser {
 
         if (coord != null) {
             if (q == null)
-                return Location.coord(coord);
+                return LocationUtils.locationFromCoord(coord);
             return new Location(LocationType.ADDRESS, null, coord, null, q);
         }
 
@@ -137,7 +137,7 @@ public class LocationUriParser {
         else if (m.group(4) != null)
             return new Location(LocationType.ADDRESS, null, point, null, m.group(4));
         else
-            return Location.coord(point);
+            return LocationUtils.locationFromCoord(point);
     }
 
     private static String normalizeDecodeParam(final String raw) {

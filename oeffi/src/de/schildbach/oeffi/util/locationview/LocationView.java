@@ -26,7 +26,6 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.location.Address;
 import android.location.Criteria;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -49,6 +48,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresPermission;
 import androidx.core.content.ContextCompat;
 
 import org.slf4j.Logger;
@@ -64,6 +64,7 @@ import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GeocoderThread;
 import de.schildbach.oeffi.util.LocationHelper;
+import de.schildbach.oeffi.util.LocationUtils;
 import de.schildbach.oeffi.util.PopupHelper;
 import de.schildbach.pte.provider.locationsearch.LocationSearchProviderId;
 import de.schildbach.pte.NetworkId;
@@ -312,11 +313,6 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         setEnabled(isEnabled());
     }
 
-    private final ActivityResultLauncher<String> requestLocationPermissionLauncher =
-            getActivity().registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
-                if (granted)
-                    acquireLocation();
-            });
     private static class PickContact extends ActivityResultContract<Void, Uri> {
         @NonNull
         @Override
@@ -398,7 +394,10 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             acquireLocation();
         } else {
-            requestLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+            getActivity().registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
+                if (granted)
+                    acquireLocation();
+            }).launch(Manifest.permission.ACCESS_FINE_LOCATION);
         }
     }
 
@@ -468,6 +467,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         setAdapter(new AutoCompleteLocationAdapter(this, listener.getNetwork(), listener.getUsage()));
     }
 
+    @RequiresPermission(allOf = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
     public void acquireLocation() {
         if (!locationHelper.isRunning()) {
             final Criteria criteria = new Criteria();
@@ -500,7 +500,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
 
     public void onLocation(final Point here) {
         if (locationType == LocationType.COORD)
-            setLocation(Location.coord(here));
+            setLocation(LocationUtils.locationFromCoord(here));
     }
 
     public void reset() {

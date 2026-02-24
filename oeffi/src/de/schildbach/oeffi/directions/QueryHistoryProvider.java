@@ -516,8 +516,8 @@ public class QueryHistoryProvider extends ForNetworkContentProvider {
                 + "," + KEY_FROM_TYPE + "," + KEY_FROM_ID + "," + KEY_FROM_LAT + "," + KEY_FROM_LON + "," + KEY_FROM_PLACE + "," + KEY_FROM_NAME
                 + "," + KEY_TO_TYPE + "," + KEY_TO_ID + "," + KEY_TO_LAT + "," + KEY_TO_LON + "," + KEY_TO_PLACE + "," + KEY_TO_NAME
                 + "," + KEY_VIA_TYPE + "," + KEY_VIA_ID + "," + KEY_VIA_LAT + "," + KEY_VIA_LON + "," + KEY_VIA_PLACE + "," + KEY_VIA_NAME
-                + "," + KEY_FAVORITE + "," + KEY_TIMES_QUERIED + "," + KEY_LAST_QUERIED + ","
-                + KEY_LAST_DEPARTURE_TIME + "," + KEY_LAST_ARRIVAL_TIME + "," + KEY_LAST_TRIP;
+                + "," + KEY_FAVORITE + "," + KEY_TIMES_QUERIED + "," + KEY_LAST_QUERIED
+                + "," + KEY_LAST_DEPARTURE_TIME + "," + KEY_LAST_ARRIVAL_TIME + "," + KEY_LAST_TRIP;
 
         public QueryHistoryHelper(final Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);

@@ -98,10 +98,10 @@ public class OperationDetailsActivity extends TripDetailsActivity {
 
         // QueryStoredTripsProvider.put(getContentResolver(),
         //         network, getStoredTripsUsage(),
-        //         tripRenderer.trip, renderConfig.queryTripsRequestData);
+        //         tripRenderer.trip, renderConfig.queryTripsRequestData, 0);
         QueryStoredTripsProvider.put(getContentResolver(),
                 network, getStoredTripsUsage(),
-                journeyTrip, renderConfig.queryTripsRequestData);
+                journeyTrip, renderConfig.queryTripsRequestData, 0);
     }
 
     @Override

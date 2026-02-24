@@ -305,7 +305,7 @@ public class TripsOverviewActivity extends OeffiActivity {
                 } else {
                     QueryStoredTripsProvider.put(getContentResolver(),
                             network, getStoredTripsUsage(),
-                            trip, reloadRequestData);
+                            trip, reloadRequestData, 0);
                 }
                 barView.invalidate();
             } else {

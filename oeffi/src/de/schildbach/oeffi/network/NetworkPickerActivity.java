@@ -25,7 +25,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.Address;
 import android.location.Criteria;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -57,6 +56,7 @@ import de.schildbach.oeffi.network.list.NetworksAdapter;
 import de.schildbach.oeffi.util.DividerItemDecoration;
 import de.schildbach.oeffi.util.GeocoderThread;
 import de.schildbach.oeffi.util.LocationHelper;
+import de.schildbach.oeffi.util.LocationUtils;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.Point;
@@ -164,7 +164,7 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
                         });
                         getMapView().setDeviceLocationAware(new DeviceLocationAware() {
                             final Location referenceLocation = area != null && area.length == 1
-                                    ? Location.coord(area[0]) : null;
+                                    ? LocationUtils.locationFromCoord(area[0]) : null;
 
                             public Point getDeviceLocation() {
                                 return deviceLocation;

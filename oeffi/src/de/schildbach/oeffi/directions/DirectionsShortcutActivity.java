@@ -19,12 +19,10 @@ package de.schildbach.oeffi.directions;
 
 import android.Manifest;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Criteria;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -40,6 +38,7 @@ import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.GeocoderThread;
 import de.schildbach.oeffi.util.LocationHelper;
+import de.schildbach.oeffi.util.LocationUtils;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.provider.NetworkProvider;
@@ -174,8 +173,8 @@ public class DirectionsShortcutActivity extends OeffiActivity implements Locatio
             }
 
             public void onGeocoderFail(final Exception exception) {
-                final Location location = Location
-                        .coord(Point.fromDouble(here.getLatAsDouble(), here.getLonAsDouble()));
+                final Location location = LocationUtils
+                        .locationFromCoord(Point.fromDouble(here.getLatAsDouble(), here.getLonAsDouble()));
                 query(location);
             }
         });

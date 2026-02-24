@@ -67,6 +67,7 @@ import de.schildbach.oeffi.stations.LineView;
 import de.schildbach.oeffi.stations.Station;
 import de.schildbach.oeffi.util.GeoUtils;
 import de.schildbach.oeffi.util.GeocoderThread;
+import de.schildbach.oeffi.util.LocationUtils;
 import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.oeffi.util.ZoomControls;
 import de.schildbach.oeffi.util.locationview.LocationTextView;
@@ -792,7 +793,7 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
             }
 
             final IGeoPoint geoPoint = mapView.getProjection().fromPixels((int) e.getX(), (int) e.getY());
-            final Location pinLocation = Location.coord(Point.fromDouble(geoPoint.getLatitude(), geoPoint.getLongitude()));
+            final Location pinLocation = LocationUtils.locationFromCoord(Point.fromDouble(geoPoint.getLatitude(), geoPoint.getLongitude()));
 
             pinView = LayoutInflater.from(getContext()).inflate(R.layout.stations_map_pin, null);
             final View pinButtons = pinView.findViewById(R.id.stations_map_pin_buttons);
@@ -836,7 +837,7 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
         @Override
         public boolean onSingleTapConfirmed(final MotionEvent e, final MapView mapView) {
             final IGeoPoint geoPoint = mapView.getProjection().fromPixels((int) e.getX(), (int) e.getY());
-            final Location pinLocation = Location.coord(Point.fromDouble(geoPoint.getLatitude(), geoPoint.getLongitude()));
+            final Location pinLocation = LocationUtils.locationFromCoord(Point.fromDouble(geoPoint.getLatitude(), geoPoint.getLongitude()));
 
             final View view = LayoutInflater.from(getContext()).inflate(R.layout.directions_map_pin, null);
             final LocationTextView locationView = view

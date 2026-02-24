@@ -96,7 +96,7 @@ public class GoogleMapsUtils {
         try {
             final Point point = Point.fromDouble(Double.parseDouble(lat), Double.parseDouble(lon));
             if (placeName == null)
-                return Location.coord(point);
+                return LocationUtils.locationFromCoord(point);
             return new Location(LocationType.ADDRESS, null, point, null, placeName);
         } catch (NumberFormatException nfe) {
             return null;

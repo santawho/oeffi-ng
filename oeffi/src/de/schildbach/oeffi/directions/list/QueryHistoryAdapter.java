@@ -225,6 +225,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         private final int tripColumn;
         private final int tripIdColumn;
         private final int reloadRequestColumn;
+        private final int stateFlagsColumn;
 
         TripsCursor() {
             super(QueryStoredTripsProvider.CONTENT_URI_BUILDER(network, usage).build());
@@ -253,6 +254,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             tripColumn = cursor.getColumnIndexOrThrow(QueryStoredTripsProvider.KEY_TRIP);
             tripIdColumn = cursor.getColumnIndexOrThrow(QueryStoredTripsProvider.KEY_TRIP_ID);
             reloadRequestColumn = cursor.getColumnIndexOrThrow(QueryStoredTripsProvider.KEY_RELOAD_REQUEST_DATA);
+            stateFlagsColumn = cursor.getColumnIndexOrThrow(QueryStoredTripsProvider.KEY_STATE_FLAGS);
         }
 
         @Override
@@ -309,6 +311,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             final byte[] serializedTrip = cursor.getBlob(tripColumn);
             final String tripId = cursor.getString(tripIdColumn);
             final byte[] serializedReloadRequest = QueryStoredTripsProvider.getReloadRequestColumnBlob(cursor, reloadRequestColumn);
+            final int stateFlags = cursor.getInt(stateFlagsColumn);
             holder.bind(rowId,
                     from, to, via,
                     tripDepartureTime, tripArrivalTime,

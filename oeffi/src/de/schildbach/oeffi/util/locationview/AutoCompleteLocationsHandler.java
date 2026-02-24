@@ -19,9 +19,7 @@ package de.schildbach.oeffi.util.locationview;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.location.Criteria;
-import android.location.LocationManager;
 import android.os.Handler;
 
 import java.util.ArrayList;
@@ -34,6 +32,7 @@ import java.util.function.Consumer;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.LocationHelper;
+import de.schildbach.oeffi.util.LocationUtils;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
@@ -121,7 +120,7 @@ public class AutoCompleteLocationsHandler {
                                 if (done)
                                     return;
                                 done = true;
-                                final Location location = Location.coord(here);
+                                final Location location = LocationUtils.locationFromCoord(here);
                                 activity.runOnUiThread(() -> {
                                     if (locationView != null)
                                         locationView.setLocation(location);

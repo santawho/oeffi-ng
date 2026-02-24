@@ -139,7 +139,7 @@ public final class LocationHelper {
         return listener != null;
     }
 
-    public static Point locationToPoint(final Location location) {
+    private static Point locationToPoint(final Location location) {
         return Point.fromDouble(location.getLatitude(), location.getLongitude());
     }
 }

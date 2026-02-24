@@ -74,8 +74,11 @@ public class QueryStoredTripsProvider extends ForNetworkContentProvider {
     public static final String KEY_ARRIVAL_TIME = "arrival_time";
     public static final String KEY_ARRIVAL_TIME_OFFSET = "arrival_time_offset";
     public static final String KEY_RELOAD_REQUEST_DATA = "reload_data";
+    public static final String KEY_STATE_FLAGS = "state_flags";
     public static final String KEY_TRIP = "trip_data";
     public static final String KEY_TRIP_ID = "trip_id";
+
+    public static final int STATE_FLAG_DONE = 1;
 
     public static final int TYPE_ANY = 0;
     public static final int TYPE_STATION = 1;
@@ -89,7 +92,9 @@ public class QueryStoredTripsProvider extends ForNetworkContentProvider {
 
     public static Uri put(
             final ContentResolver contentResolver, final NetworkId network, final String usage,
-            final Trip trip, final QueryTripsRunnable.TripRequestData reloadRequestData) {
+            final Trip trip,
+            final QueryTripsRunnable.TripRequestData reloadRequestData,
+            final int stateFlags) {
         final String tripId = trip.getUniqueId();
         final Long rowId = getRowId(contentResolver, network, usage, tripId);
 
@@ -122,25 +127,26 @@ public class QueryStoredTripsProvider extends ForNetworkContentProvider {
                 via = null;
             }
 
-            values.put(QueryStoredTripsProvider.KEY_FROM_TYPE, QueryStoredTripsProvider.convert(from.type));
-            values.put(QueryStoredTripsProvider.KEY_FROM_ID, from.id);
-            values.put(QueryStoredTripsProvider.KEY_FROM_LAT, from.hasCoord() ? from.getLatAs1E6() : 0);
-            values.put(QueryStoredTripsProvider.KEY_FROM_LON, from.hasCoord() ? from.getLonAs1E6() : 0);
-            values.put(QueryStoredTripsProvider.KEY_FROM_PLACE, from.place);
-            values.put(QueryStoredTripsProvider.KEY_FROM_NAME, from.name);
-            values.put(QueryStoredTripsProvider.KEY_TO_TYPE, QueryStoredTripsProvider.convert(to.type));
-            values.put(QueryStoredTripsProvider.KEY_TO_ID, to.id);
-            values.put(QueryStoredTripsProvider.KEY_TO_LAT, to.hasCoord() ? to.getLatAs1E6() : 0);
-            values.put(QueryStoredTripsProvider.KEY_TO_LON, to.hasCoord() ? to.getLonAs1E6() : 0);
-            values.put(QueryStoredTripsProvider.KEY_TO_PLACE, to.place);
-            values.put(QueryStoredTripsProvider.KEY_TO_NAME, to.name);
-            values.put(QueryStoredTripsProvider.KEY_VIA_TYPE, QueryStoredTripsProvider.convert(via == null ? LocationType.ANY : via.type));
-            values.put(QueryStoredTripsProvider.KEY_VIA_ID, via == null ? null : via.id);
-            values.put(QueryStoredTripsProvider.KEY_VIA_LAT, via != null && via.hasCoord() ? via.getLatAs1E6() : 0);
-            values.put(QueryStoredTripsProvider.KEY_VIA_LON, via != null && via.hasCoord() ? via.getLonAs1E6() : 0);
-            values.put(QueryStoredTripsProvider.KEY_VIA_PLACE, via == null ? null : via.place);
-            values.put(QueryStoredTripsProvider.KEY_VIA_NAME, via == null ? null : via.name);
-            putReloadRequestColumnBlob(values, Objects.serialize(reloadRequestData));
+            values.put(KEY_FROM_TYPE, convert(from.type));
+            values.put(KEY_FROM_ID, from.id);
+            values.put(KEY_FROM_LAT, from.hasCoord() ? from.getLatAs1E6() : 0);
+            values.put(KEY_FROM_LON, from.hasCoord() ? from.getLonAs1E6() : 0);
+            values.put(KEY_FROM_PLACE, from.place);
+            values.put(KEY_FROM_NAME, from.name);
+            values.put(KEY_TO_TYPE, convert(to.type));
+            values.put(KEY_TO_ID, to.id);
+            values.put(KEY_TO_LAT, to.hasCoord() ? to.getLatAs1E6() : 0);
+            values.put(KEY_TO_LON, to.hasCoord() ? to.getLonAs1E6() : 0);
+            values.put(KEY_TO_PLACE, to.place);
+            values.put(KEY_TO_NAME, to.name);
+            values.put(KEY_VIA_TYPE, convert(via == null ? LocationType.ANY : via.type));
+            values.put(KEY_VIA_ID, via == null ? null : via.id);
+            values.put(KEY_VIA_LAT, via != null && via.hasCoord() ? via.getLatAs1E6() : 0);
+            values.put(KEY_VIA_LON, via != null && via.hasCoord() ? via.getLonAs1E6() : 0);
+            values.put(KEY_VIA_PLACE, via == null ? null : via.place);
+            values.put(KEY_VIA_NAME, via == null ? null : via.name);
+            values.put(KEY_RELOAD_REQUEST_DATA, Objects.serialize(reloadRequestData));
+            values.put(KEY_STATE_FLAGS, stateFlags);
 
             final Uri baseUri = CONTENT_URI_BUILDER(network, usage).build();
             tripsUri = contentResolver.insert(baseUri, values);
@@ -149,13 +155,9 @@ public class QueryStoredTripsProvider extends ForNetworkContentProvider {
         return tripsUri;
     }
 
-    public static void putReloadRequestColumnBlob(final ContentValues values, final byte[] reloadRequestDataBlob) {
-        values.put(KEY_RELOAD_REQUEST_DATA, reloadRequestDataBlob == null ? new byte[0] : reloadRequestDataBlob);
-    }
-
     public static byte[] getReloadRequestColumnBlob(final Cursor cursor, final int reloadRequestColumnIdx) {
         final byte[] blob = cursor.getBlob(reloadRequestColumnIdx);
-        return blob.length == 0 ? null : blob;
+        return blob == null || blob.length == 0 ? null : blob;
     }
 
     public static Long getRowId(
@@ -165,7 +167,7 @@ public class QueryStoredTripsProvider extends ForNetworkContentProvider {
         final StringBuilder selection = new StringBuilder();
         final List<String> selectionArgs = new ArrayList<>();
 
-        selection.append(QueryStoredTripsProvider.KEY_TRIP_ID).append("=?");
+        selection.append(KEY_TRIP_ID).append("=?");
         selectionArgs.add(tripId);
 
         try (final Cursor cursor = contentResolver.query(CONTENT_URI_BUILDER(network, usage).build(),
@@ -183,7 +185,7 @@ public class QueryStoredTripsProvider extends ForNetworkContentProvider {
         final StringBuilder selection = new StringBuilder();
         final List<String> selectionArgs = new ArrayList<>();
 
-        selection.append(QueryStoredTripsProvider.KEY_TRIP_ID).append("=?");
+        selection.append(KEY_TRIP_ID).append("=?");
         selectionArgs.add(tripId);
 
         return contentResolver.delete(
@@ -297,7 +299,7 @@ public class QueryStoredTripsProvider extends ForNetworkContentProvider {
         qb.setTables(DATABASE_TABLE);
 
         final List<String> pathSegments = uri.getPathSegments();
-        if (pathSegments.size() < 1)
+        if (pathSegments.isEmpty())
             throw new IllegalArgumentException(uri.toString());
 
         qb.appendWhere(KEY_NETWORK + "=");
@@ -358,7 +360,7 @@ public class QueryStoredTripsProvider extends ForNetworkContentProvider {
 
     private static class QueryTripsHelper extends SQLiteOpenHelper {
         private static final String DATABASE_NAME = "trips";
-        private static final int DATABASE_VERSION = 1;
+        private static final int DATABASE_VERSION = 2;
 
         private static final String DATABASE_CREATE = "CREATE TABLE " + DATABASE_TABLE + " (" //
                 + KEY_ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT, " //
@@ -368,13 +370,13 @@ public class QueryStoredTripsProvider extends ForNetworkContentProvider {
                 + KEY_FROM_LAT + " INTEGER NOT NULL, " //
                 + KEY_FROM_LON + " INTEGER NOT NULL, " //
                 + KEY_FROM_PLACE + " TEXT, " //
-                + KEY_FROM_NAME + " TEXT NOT NULL, " //
+                + KEY_FROM_NAME + " TEXT, " //
                 + KEY_TO_TYPE + " INTEGER NOT NULL, " //
                 + KEY_TO_ID + " TEXT, " //
                 + KEY_TO_LAT + " INTEGER NOT NULL, " //
                 + KEY_TO_LON + " INTEGER NOT NULL, " //
                 + KEY_TO_PLACE + " TEXT, " //
-                + KEY_TO_NAME + " TEXT NOT NULL, " //
+                + KEY_TO_NAME + " TEXT, " //
                 + KEY_VIA_TYPE + " INTEGER NOT NULL DEFAULT " + convert(LocationType.ANY) + ", " //
                 + KEY_VIA_ID + " TEXT, " //
                 + KEY_VIA_LAT + " INTEGER NOT NULL DEFAULT 0, " //
@@ -387,7 +389,17 @@ public class QueryStoredTripsProvider extends ForNetworkContentProvider {
                 + KEY_ARRIVAL_TIME_OFFSET + " INTEGER NOT NULL, " //
                 + KEY_TRIP_ID + " TEXT NOT NULL, " //
                 + KEY_TRIP + " BLOB NOT NULL," //
-                + KEY_RELOAD_REQUEST_DATA + " BLOB NOT NULL);";
+                + KEY_RELOAD_REQUEST_DATA + " BLOB," //
+                + KEY_STATE_FLAGS + " INTEGER NOT NULL DEFAULT 0);";
+        private static final String DATABASE_COLUMN_LIST = KEY_ROWID + "," + KEY_NETWORK
+                + "," + KEY_FROM_TYPE + "," + KEY_FROM_ID + "," + KEY_FROM_LAT + "," + KEY_FROM_LON + "," + KEY_FROM_PLACE + "," + KEY_FROM_NAME
+                + "," + KEY_TO_TYPE + "," + KEY_TO_ID + "," + KEY_TO_LAT + "," + KEY_TO_LON + "," + KEY_TO_PLACE + "," + KEY_TO_NAME
+                + "," + KEY_VIA_TYPE + "," + KEY_VIA_ID + "," + KEY_VIA_LAT + "," + KEY_VIA_LON + "," + KEY_VIA_PLACE + "," + KEY_VIA_NAME
+                + "," + KEY_DEPARTURE_TIME + "," + KEY_DEPARTURE_TIME_OFFSET
+                + "," + KEY_ARRIVAL_TIME + "," + KEY_ARRIVAL_TIME_OFFSET
+                + "," + KEY_TRIP_ID + "," + KEY_TRIP
+                + "," + KEY_RELOAD_REQUEST_DATA
+                + "," + KEY_STATE_FLAGS;
 
         public QueryTripsHelper(final Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -413,10 +425,20 @@ public class QueryStoredTripsProvider extends ForNetworkContentProvider {
 
         private void upgrade(final SQLiteDatabase db, final int oldVersion) {
             if (oldVersion == 1) {
-//                db.execSQL("ALTER TABLE " + DATABASE_TABLE + " ADD COLUMN " + KEY_FROM_TYPE + " INT NOT NULL DEFAULT 0");
+                db.execSQL("ALTER TABLE " + DATABASE_TABLE + " ADD COLUMN " + KEY_STATE_FLAGS + " INTEGER NOT NULL DEFAULT 0");
+                recreate(db);
             } else  {
                 throw new UnsupportedOperationException("old=" + oldVersion);
             }
+        }
+
+        private void recreate(final SQLiteDatabase db) {
+            final String DATABASE_TABLE_OLD = DATABASE_TABLE + "_old";
+            db.execSQL("ALTER TABLE " + DATABASE_TABLE + " RENAME TO " + DATABASE_TABLE_OLD);
+            db.execSQL(DATABASE_CREATE);
+            db.execSQL("INSERT INTO " + DATABASE_TABLE + " SELECT " + DATABASE_COLUMN_LIST + " FROM "
+                    + DATABASE_TABLE_OLD);
+            db.execSQL("DROP TABLE " + DATABASE_TABLE_OLD);
         }
     }
 }

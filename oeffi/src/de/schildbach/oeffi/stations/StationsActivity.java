@@ -80,6 +80,7 @@ import de.schildbach.oeffi.directions.QueryJourneyRunnable;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GeoUtils;
 import de.schildbach.oeffi.util.KeyWordMatcher;
+import de.schildbach.oeffi.util.LocationUtils;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.network.NetworkPickerActivity;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
@@ -1480,7 +1481,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         if (fixedLocation != null)
             return fixedLocation;
         if (deviceLocation != null)
-            return Location.coord(deviceLocation);
+            return LocationUtils.locationFromCoord(deviceLocation);
         return null;
     }
 
