@@ -259,8 +259,13 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
         @Override
         protected String getSortOrder() {
-            return "max(0," + refTime + "-" + QueryStoredTripsProvider.KEY_ARRIVAL_TIME + "),"
-                    + QueryStoredTripsProvider.KEY_DEPARTURE_TIME;
+            if (canBeMarkedAsDone) {
+                return QueryStoredTripsProvider.KEY_STATE_FLAGS + " & " + QueryStoredTripsProvider.STATE_FLAG_DONE + ","
+                        + QueryStoredTripsProvider.KEY_DEPARTURE_TIME;
+            } else {
+                return "max(0," + refTime + "-" + QueryStoredTripsProvider.KEY_ARRIVAL_TIME + "),"
+                        + QueryStoredTripsProvider.KEY_DEPARTURE_TIME;
+            }
         }
 
         @Override
@@ -268,7 +273,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             close();
 
             if (refTime > 0 && deleteTripsAfterMillis >= 0) {
-                QueryStoredTripsProvider.deleteOlderTrips(context, network, usage, refTime - deleteTripsAfterMillis);
+                QueryStoredTripsProvider.deleteOlderTrips(context, network, usage, refTime - deleteTripsAfterMillis, canBeMarkedAsDone);
             }
 
             super.requery();
@@ -317,7 +322,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     tripDepartureTime, tripArrivalTime,
                     serializedTrip, tripId,
                     serializedReloadRequest,
-                    null,
+                    canBeMarkedAsDone, stateFlags,
                     selectedRowId, clickListener, contextListener);
         }
     }
@@ -327,6 +332,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private final LayoutInflater inflater;
     private final NetworkId network;
     private final String usage;
+    private final boolean canBeMarkedAsDone;
     private final QueryHistoryClickListener clickListener;
     private final ContextListener contextListener;
     private final int historyEntryLayoutId;
@@ -343,6 +349,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public QueryHistoryAdapter(
             final OeffiActivity context,
             final NetworkId network, final String usage,
+            final boolean canBeMarkedAsDone,
             final QueryHistoryClickListener clickListener,
             final int historyEntryLayoutId,
             final ContextListener contextListener,
@@ -354,6 +361,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         this.inflater = LayoutInflater.from(context);
         this.network = network;
         this.usage = usage;
+        this.canBeMarkedAsDone = canBeMarkedAsDone;
         this.clickListener = clickListener;
         this.contextListener = contextListener;
         this.deleteTripsAfterMillis = deleteTripsAfterMillis;

@@ -120,11 +120,10 @@ public class TripsOverviewActivity extends OeffiActivity {
 
     public static void start(
             final Context context,
-            final NetworkProvider networkProvider, final TimeSpec timeSpec,
+            final NetworkProvider networkProvider,
             final Location from, final Location via, final Location to,
-            final TripOptions options) {
-        final TripsOverviewActivity.RenderConfig renderConfig = new TripsOverviewActivity.RenderConfig();
-        renderConfig.referenceTime = timeSpec;
+            final TripOptions options, final RenderConfig renderConfig) {
+        final TimeSpec timeSpec = renderConfig.referenceTime;
         final Date date = new Date(timeSpec.timeInMillis());
         final QueryTripsRunnable.TripRequestData reloadRequestData = new QueryTripsRunnable.TripRequestData();
         reloadRequestData.from = from;

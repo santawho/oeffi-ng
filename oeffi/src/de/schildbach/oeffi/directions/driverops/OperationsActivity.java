@@ -79,6 +79,10 @@ public class OperationsActivity extends DirectionsActivity {
         return QueryStoredTripsProvider.USAGE_OPERATION;
     }
 
+    protected boolean getStoredTripsCanBeMarkedAsDone() {
+        return true;
+    }
+
     @Override
     public boolean isTripUnderNavigation(final Context context, final String tripId) {
         return OperationNotification.isTripUnderOperation(context, tripId);

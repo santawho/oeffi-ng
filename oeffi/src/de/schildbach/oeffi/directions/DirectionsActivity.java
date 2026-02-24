@@ -858,7 +858,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             deleteTripsAfterMillis = -1;
         }
         queryHistoryListAdapter = new QueryHistoryAdapter(this,
-                network, getStoredTripsUsage(),
+                network, getStoredTripsUsage(), getStoredTripsCanBeMarkedAsDone(),
                 this, getHistoryEntryLayoutId(),
                 this, deleteTripsAfterMillis, maxHistoryEntries,
                 getUpcomingStoredTripsTimeLimitMs());
@@ -1603,6 +1603,10 @@ public class DirectionsActivity extends OeffiMainActivity implements
         return null;
     }
 
+    protected boolean getStoredTripsCanBeMarkedAsDone() {
+        return false;
+    }
+
     protected int getHistoryEntryLayoutId() {
         return Application.getInstance().getSharedPreferences()
                 .getBoolean(Constants.PREFS_KEY_HISTORY_ENTRY_SHOW_TRIP, false)
@@ -1663,7 +1667,10 @@ public class DirectionsActivity extends OeffiMainActivity implements
         //    query(networkProvider, from, via, to, options);
 
         // new solution: searches within the TripsOverviewActivity
-        TripsOverviewActivity.start(this, networkProvider, timeSpec, from, via, to, options);
+        final TripsOverviewActivity.RenderConfig newRenderConfig = Objects.clone(renderConfig);
+        newRenderConfig.referenceTime = timeSpec;
+        setupTripsOverviewRenderConfig(newRenderConfig);
+        TripsOverviewActivity.start(this, networkProvider, from, via, to, options, newRenderConfig);
     }
 
     private void query(

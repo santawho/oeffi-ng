@@ -209,9 +209,10 @@ public class DirectionsShortcutActivity extends OeffiActivity implements Locatio
             //    query(networkProvider, from, to, options);
 
             // new solution: searches within the TripsOverviewActivity
+            final TripsOverviewActivity.RenderConfig newRenderConfig = new TripsOverviewActivity.RenderConfig();
+            newRenderConfig.referenceTime = new TimeSpec.Relative(0);
             TripsOverviewActivity.start(this,
-                    networkProvider, new TimeSpec.Relative(0),
-                    from, null, to, options);
+                    networkProvider, from, null, to, options, newRenderConfig);
             finishAndRemoveTask();
         } else {
             errorDialog(R.string.directions_shortcut_error_message_network);

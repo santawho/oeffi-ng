@@ -178,6 +178,24 @@ public class QueryStoredTripsProvider extends ForNetworkContentProvider {
         return null;
     }
 
+    public static int updateStateFlags(
+            final ContentResolver contentResolver,
+            final NetworkId network, final String usage,
+            final String tripId,
+            final int stateFlags) {
+        final Long rowId = getRowId(contentResolver, network, usage, tripId);
+        if (rowId == null)
+            return 0;
+
+        final ContentValues values = new ContentValues();
+        values.put(KEY_STATE_FLAGS, stateFlags);
+
+        return contentResolver.update(
+                tripRowUri(network, usage, rowId),
+                values,
+                null, null);
+    }
+
     public static int delete(
             final ContentResolver contentResolver,
             final NetworkId network, final String usage,
@@ -339,17 +357,17 @@ public class QueryStoredTripsProvider extends ForNetworkContentProvider {
     public static void deleteOlderTrips(
             final Context context,
             final NetworkId network, final String usage,
-            final long minArrivalTime) {
+            final long minArrivalTime, final boolean onlyIfMarkedAsDone) {
         final QueryTripsHelper helper = new QueryTripsHelper(context);
         final SQLiteDatabase db = helper.getWritableDatabase();
 
         db.beginTransaction();
         try {
-            db.execSQL(
-                    "DELETE FROM " + DATABASE_TABLE + " WHERE "
-                            + KEY_NETWORK + "=? AND "
-                            + KEY_ARRIVAL_TIME + "<?",
-                    new String[] {getNetworkKey(network, usage), String.valueOf(minArrivalTime)});
+            final String sql = "DELETE FROM " + DATABASE_TABLE + " WHERE "
+                    + KEY_NETWORK + "=?"
+                    + " AND " + KEY_ARRIVAL_TIME + "<?"
+                    + (onlyIfMarkedAsDone ? (" AND " + KEY_STATE_FLAGS + " & " + STATE_FLAG_DONE + " != 0") : "");
+            db.execSQL(sql, new String[] {getNetworkKey(network, usage), String.valueOf(minArrivalTime)});
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();

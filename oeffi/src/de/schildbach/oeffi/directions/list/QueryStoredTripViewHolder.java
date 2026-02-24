@@ -64,7 +64,11 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
     private final SwipeLayout swipeLayout;
     private final MySwipeListener swipeListener;
     private final long upcomingTimeLimitMs;
-    public ContextListener contextListener;
+
+    private long rowId;
+    private long selectedRowId;
+    private QueryHistoryClickListener clickListener;
+    private ContextListener contextListener;
     private Location from;
     private Location to;
     private Location via;
@@ -73,7 +77,8 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
     private byte[] serializedSavedTrip;
     private byte[] serializedReloadRequest;
     private String tripId;
-    private Boolean markedAsDone;
+    private boolean canBeMarkedAsDone;
+    private int stateFlags;
     private PopupMenu contextMenu;
 
     public QueryStoredTripViewHolder(
@@ -108,10 +113,10 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
             final PTDate tripDepartureTime, final PTDate tripArrivalTime,
             final byte[] serializedSavedTrip, final String tripId,
             final byte[] serializedReloadRequest,
-            final Boolean markedAsDone,
+            final boolean canBeMarkedAsDone, final int stateFlags,
             final long selectedRowId, final QueryHistoryClickListener clickListener,
             final ContextListener contextListener) {
-        this.contextListener = contextListener;
+        this.rowId = rowId;
         this.from = from;
         this.to = to;
         this.via = via;
@@ -120,8 +125,16 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
         this.serializedSavedTrip = serializedSavedTrip;
         this.serializedReloadRequest = serializedReloadRequest;
         this.tripId = tripId;
-        this.markedAsDone = markedAsDone;
+        this.canBeMarkedAsDone = canBeMarkedAsDone;
+        this.stateFlags = stateFlags;
+        this.selectedRowId = selectedRowId;
+        this.clickListener = clickListener;
+        this.contextListener = contextListener;
 
+        render();
+    }
+
+    private void render() {
         fromView.setLocation(from);
         toView.setLocation(to);
 
@@ -138,9 +151,11 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
         final long msTimeLeft;
         final long msLeftToArrival = arrivalTime - now;
         int timeLeftColorId = R.color.fg_significant;
-        if (msLeftToArrival < 0) {
+        if (canBeMarkedAsDone
+                ? (stateFlags & QueryStoredTripsProvider.STATE_FLAG_DONE) != 0
+                : msLeftToArrival < 0) {
             msTimeLeft = -msLeftToArrival;
-            sTimeLeft = context.getString(R.string.directions_stored_trip_over_time_left);
+            sTimeLeft = context.getString(R.string.directions_stored_trip_over_or_done);
             backgroundId = R.drawable.stored_trip_entry_background_finished;
             iconResId = R.drawable.ic_bookmarked_over_white_24dp;
         } else {
@@ -183,7 +198,12 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
             } else if (removeOpened) {
                 removeOpened = false;
                 if (tripId != null) {
-                    QueryStoredTripsProvider.delete(context.getContentResolver(), network, usage, tripId);
+                    if (canBeMarkedAsDone && (stateFlags & QueryStoredTripsProvider.STATE_FLAG_DONE) == 0) {
+                        this.stateFlags |= QueryStoredTripsProvider.STATE_FLAG_DONE;
+                        QueryStoredTripsProvider.updateStateFlags(context.getContentResolver(), network, usage, tripId, stateFlags);
+                    } else {
+                        QueryStoredTripsProvider.delete(context.getContentResolver(), network, usage, tripId);
+                    }
                 }
             } else if (position != RecyclerView.NO_POSITION) {
                 if (contextListener.isTripUnderNavigation(context, tripId)) {
@@ -212,6 +232,12 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
             }
             return true;
         });
+
+        ((ImageView) itemView.findViewById(R.id.directions_query_stored_trip_entry_swipe_remove))
+                .setImageDrawable(AppCompatResources.getDrawable(context,
+                        canBeMarkedAsDone && (stateFlags & QueryStoredTripsProvider.STATE_FLAG_DONE) == 0
+                                ? R.drawable.ic_check_black_24dp
+                                : R.drawable.ic_delete_black_24dp));
     }
 
     private void startNavigation(final int position, final QueryHistoryClickListener clickListener) {
@@ -232,8 +258,8 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
         final MenuInflater inflater = contextMenu.getMenuInflater();
         final Menu menu = contextMenu.getMenu();
         inflater.inflate(R.menu.directions_query_stored_trip_context, menu);
-        menu.findItem(R.id.directions_query_stored_trip_context_set_done).setVisible(markedAsDone != null && !markedAsDone);
-        menu.findItem(R.id.directions_query_stored_trip_context_unset_done).setVisible(markedAsDone != null && markedAsDone);
+        menu.findItem(R.id.directions_query_stored_trip_context_set_done).setVisible(canBeMarkedAsDone && (stateFlags & QueryStoredTripsProvider.STATE_FLAG_DONE) == 0);
+        menu.findItem(R.id.directions_query_stored_trip_context_unset_done).setVisible(canBeMarkedAsDone && (stateFlags & QueryStoredTripsProvider.STATE_FLAG_DONE) != 0);
         contextMenu.setOnMenuItemClickListener(item -> {
             final int position = getAdapterPosition();
             if (position != RecyclerView.NO_POSITION) {
@@ -265,15 +291,13 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
                     return true;
                 }
                 if (menuItemId == R.id.directions_query_stored_trip_context_set_done) {
-                    if (markedAsDone != null) {
-                        markedAsDone = true;
-                    }
+                    stateFlags |= QueryStoredTripsProvider.STATE_FLAG_DONE;
+                    QueryStoredTripsProvider.updateStateFlags(context.getContentResolver(), network, usage, tripId, stateFlags);
                     return true;
                 }
                 if (menuItemId == R.id.directions_query_stored_trip_context_unset_done) {
-                    if (markedAsDone != null) {
-                        markedAsDone = false;
-                    }
+                    stateFlags &=~ QueryStoredTripsProvider.STATE_FLAG_DONE;
+                    QueryStoredTripsProvider.updateStateFlags(context.getContentResolver(), network, usage, tripId, stateFlags);
                     return true;
                 }
             }
