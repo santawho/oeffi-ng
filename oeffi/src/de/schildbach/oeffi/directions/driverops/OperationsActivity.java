@@ -18,6 +18,7 @@
 package de.schildbach.oeffi.directions.driverops;
 
 import android.content.Context;
+import android.content.Intent;
 
 import java.util.Collection;
 import java.util.Date;
@@ -29,9 +30,8 @@ import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.directions.QueryStoredTripsProvider;
 import de.schildbach.oeffi.directions.QueryTripsRunnable;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
+import de.schildbach.oeffi.directions.TripUtils;
 import de.schildbach.oeffi.directions.TripsOverviewActivity;
-import de.schildbach.oeffi.directions.navigation.NavigationNotification;
-import de.schildbach.oeffi.directions.navigation.TripNavigatorActivity;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.pte.dto.Location;
@@ -40,6 +40,11 @@ import de.schildbach.pte.dto.Product;
 import de.schildbach.pte.dto.Trip;
 
 public class OperationsActivity extends DirectionsActivity {
+
+    public static void start(final Context context) {
+        final Intent intent = new Intent(context, OperationsActivity.class);
+        context.startActivity(intent);
+    }
 
     @Override
     protected int getGlobalOptionsId() {
@@ -146,6 +151,7 @@ public class OperationsActivity extends DirectionsActivity {
         renderConfig.isOperation = true;
         renderConfig.isJourney = true;
         renderConfig.queryTripsRequestData = queryTripsRequestData;
-        OperationNavigatorActivity.startNavigation(this, network, trip, renderConfig, false);
+        final Trip journeyTrip = TripUtils.createTripFromJourneyTrip(trip);
+        OperationNavigatorActivity.startNavigation(this, network, journeyTrip, renderConfig, false);
     }
 }

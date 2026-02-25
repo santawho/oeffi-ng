@@ -25,6 +25,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -40,11 +41,16 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.directions.QueryStoredTripsProvider;
 import de.schildbach.oeffi.directions.QueryTripsRunnable;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
+import de.schildbach.oeffi.directions.TripUtils;
 import de.schildbach.oeffi.directions.navigation.NavigationAlarmManager;
 import de.schildbach.oeffi.directions.navigation.Navigator;
+import de.schildbach.oeffi.stations.LineView;
+import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.pte.NetworkId;
@@ -133,15 +139,19 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
         swipeRefreshForTripList.setEnabled(true);
 
         swipeRefreshForNextEvent.setOnRefreshListener(this::refreshNavigationByUserCommand);
+        swipeRefreshForNextEvent.setOnClickListener(v -> askStopNavigation());
         swipeRefreshForNextEvent.setEnabled(true);
+
+        findViewById(R.id.navigation_next_event_container).setOnClickListener(v -> askStopNavigation());
 
         final Intent intent = getIntent();
         handleDeleteNotification(intent);
         handleSwitchToNextEvent(intent);
 
         stillCheckForOtherNavigations = true;
-
         mustEnableTrackButton = true;
+
+        markTripAsDone(false);
     }
 
     @Override
@@ -227,9 +237,16 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
                 .setOnClickListener(view -> askStopNavigation());
     }
 
-    private void stopNavigation() {
+    private void stopNavigation(final boolean markAsDone) {
         OperationNotification.remove(this, getIntent());
+        markTripAsDone(markAsDone);
         finishAndRemoveTask();
+    }
+
+    private void markTripAsDone(final boolean isDone) {
+        final String tripId = tripRenderer.trip.getUniqueId();
+        QueryStoredTripsProvider.updateStateFlags(getContentResolver(),
+                network, getStoredTripsUsage(), tripId, isDone ? QueryStoredTripsProvider.STATE_FLAG_DONE : 0);
     }
 
     @Override
@@ -324,7 +341,7 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
                 askStopNavigation();
                 return true;
             case DELETEREQUEST_FORCE:
-                stopNavigation();
+                stopNavigation(true);
                 return true;
             case DELETEREQUEST_NOT_REQUESTED:
                 break;
@@ -334,18 +351,94 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
 
     private void askStopNavigation() {
         OperationNotificationBeingDeleted = true;
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.operation_stopnav_title)
-                .setMessage(R.string.operation_stopnav_text)
-                .setPositiveButton(R.string.operation_stopnav_stop, (dialogInterface, i) -> {
-                    stopNavigation();
-                })
-                .setNegativeButton(R.string.operation_stopnav_continue, (dialogInterface, i) -> {
-                    OperationNotificationBeingDeleted = false;
-                    doCheckAutoRefresh(true);
-                    updateNotification(null);
-                })
-                .create().show();
+        final View menuView = inflater.inflate(R.layout.operation_menu, null);
+        final AlertDialog alertDialog = new AlertDialog.Builder(this)
+                .setView(menuView)
+                .setOnCancelListener(dialog -> cancelStopNavigation())
+                .setCancelable(true)
+                .create();
+        menuView.findViewById(R.id.operation_menu_continue).setOnClickListener(v -> {
+            alertDialog.dismiss();
+            cancelStopNavigation();
+        });
+        menuView.findViewById(R.id.operation_menu_stop_for_later).setOnClickListener(v -> {
+            alertDialog.dismiss();
+            stopNavigation(false);
+            OperationsActivity.start(this);
+        });
+        menuView.findViewById(R.id.operation_menu_terminate).setOnClickListener(v -> {
+            alertDialog.dismiss();
+            stopNavigation(true);
+            OperationsActivity.start(this);
+        });
+
+        loadNextOperation();
+
+        final Trip.Public journeyLeg = nextTrip == null ? null : nextTrip.getFirstPublicLeg();
+        if (journeyLeg == null) {
+            menuView.findViewById(R.id.operation_menu_next_operation_container).setVisibility(View.GONE);
+        } else {
+            final LineView lineView = menuView.findViewById(R.id.operation_menu_next_operation_line);
+            lineView.setLine(journeyLeg.line);
+            final TextView destinationView = menuView.findViewById(R.id.operation_menu_next_operation_destination);
+            destinationView.setText(Constants.DESTINATION_ARROW_PREFIX
+                    + Formats.makeBreakableStationName(Formats.fullLocationName(journeyLeg.destination)));
+
+            final View.OnClickListener onClickListener = v -> {
+                alertDialog.dismiss();
+                stopNavigation(true);
+                startNextNavigation(nextTrip, nextTripsRequestData);
+            };
+            menuView.findViewById(R.id.operation_menu_next_operation).setOnClickListener(onClickListener);
+            menuView.findViewById(R.id.operation_menu_next_operation_info).setOnClickListener(onClickListener);
+        }
+
+        alertDialog.show();
+    }
+
+    private void cancelStopNavigation() {
+        OperationNotificationBeingDeleted = false;
+        doCheckAutoRefresh(true);
+        updateNotification(null);
+    }
+
+    private Trip nextTrip;
+    private QueryTripsRunnable.TripRequestData nextTripsRequestData;
+
+    private void loadNextOperation() {
+        final String currentTripId = tripRenderer.trip.getUniqueId();
+        nextTrip = null;
+        nextTripsRequestData = null;
+        try (final Cursor cursor = getContentResolver().query(
+                QueryStoredTripsProvider.CONTENT_URI_BUILDER(network, getStoredTripsUsage()).build(),
+                null,
+                QueryStoredTripsProvider.KEY_STATE_FLAGS + " & " + QueryStoredTripsProvider.STATE_FLAG_DONE + " =0", null,
+                QueryStoredTripsProvider.KEY_DEPARTURE_TIME)) {
+            if (cursor == null)
+                return;
+            while (cursor.moveToNext()) {
+                final String tripId = cursor.getString(cursor.getColumnIndexOrThrow(QueryStoredTripsProvider.KEY_TRIP_ID));
+                if (currentTripId.equals(tripId))
+                    continue;
+                nextTrip = (Trip) Objects.deserialize(cursor.getBlob(
+                        cursor.getColumnIndexOrThrow(QueryStoredTripsProvider.KEY_TRIP)), true);
+                nextTripsRequestData = (QueryTripsRunnable.TripRequestData) Objects.deserialize(cursor.getBlob(
+                        cursor.getColumnIndexOrThrow(QueryStoredTripsProvider.KEY_RELOAD_REQUEST_DATA)), true);
+                break;
+            }
+        }
+    }
+
+    private void startNextNavigation(
+            final Trip trip,
+            final QueryTripsRunnable.TripRequestData tripsRequestData) {
+        final TripDetailsActivity.RenderConfig renderConfig = new TripDetailsActivity.RenderConfig();
+        renderConfig.isOperation = true;
+        renderConfig.isJourney = true;
+        renderConfig.queryTripsRequestData = tripsRequestData;
+        final Trip journeyTrip = TripUtils.createTripFromJourneyTrip(trip);
+        OperationNavigatorActivity.startNavigation(this, network, journeyTrip, renderConfig, false);
+
     }
 
     @Override

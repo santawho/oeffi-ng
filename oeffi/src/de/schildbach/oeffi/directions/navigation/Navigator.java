@@ -85,6 +85,7 @@ public class Navigator {
                 latestTrip.getNumChanges());
         // currentTrip.transferDetails = latestTrip.transferDetails; -- do not keep transfer details, they are outdated
         currentTrip.updatedAt = now;
+        currentTrip.setUniqueId(latestTrip.getUniqueId());
 
         return currentTrip;
     }

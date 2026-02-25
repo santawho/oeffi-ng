@@ -158,6 +158,11 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
             sTimeLeft = context.getString(R.string.directions_stored_trip_over_or_done);
             backgroundId = R.drawable.stored_trip_entry_background_finished;
             iconResId = R.drawable.ic_bookmarked_over_white_24dp;
+        } else if (canBeMarkedAsDone && msLeftToArrival < -3600000) {
+            msTimeLeft = -msLeftToArrival;
+            sTimeLeft = context.getString(R.string.directions_stored_trip_over_or_done);
+            backgroundId = R.drawable.stored_trip_entry_background_current;
+            iconResId = R.drawable.ic_bookmarked_over_white_24dp;
         } else {
             iconResId = R.drawable.ic_bookmarked_white_24dp;
             final long msLeftToDeparture = departureTime - now;
@@ -225,7 +230,12 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
             } else if (removeOpened) {
                 removeOpened = false;
                 if (tripId != null) {
-                    QueryStoredTripsProvider.delete(context.getContentResolver(), network, usage, tripId);
+                    if (canBeMarkedAsDone && (stateFlags & QueryStoredTripsProvider.STATE_FLAG_DONE) == 0) {
+                        this.stateFlags |= QueryStoredTripsProvider.STATE_FLAG_DONE;
+                        QueryStoredTripsProvider.updateStateFlags(context.getContentResolver(), network, usage, tripId, stateFlags);
+                    } else {
+                        QueryStoredTripsProvider.delete(context.getContentResolver(), network, usage, tripId);
+                    }
                 }
             } else {
                 showContextMenu(v, clickListener);

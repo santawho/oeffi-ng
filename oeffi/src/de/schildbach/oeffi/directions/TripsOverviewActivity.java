@@ -352,9 +352,11 @@ public class TripsOverviewActivity extends OeffiActivity {
                             network, getStoredTripsUsage(),
                             trip.getUniqueId());
                 } else {
+                    final Trip journeyTrip = TripUtils.createTripFromJourneyTrip(trip);
+                    journeyTrip.getFirstPublicLeg().setEntryAndExit(publicLeg.departure, publicLeg.arrival);
                     QueryStoredTripsProvider.put(getContentResolver(),
                             network, getStoredTripsUsage(),
-                            trip, reloadRequestData, 0);
+                            journeyTrip, reloadRequestData, 0);
                 }
                 barView.invalidate();
             } else {

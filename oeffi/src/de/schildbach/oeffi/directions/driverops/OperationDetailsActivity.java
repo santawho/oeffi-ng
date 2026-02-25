@@ -308,6 +308,7 @@ public class OperationDetailsActivity extends TripDetailsActivity {
         if (legsScrollFocusView == null)
             legsScrollFocusView = row;
 
+        row.setOnClickListener(view -> setShowPage(R.id.navigation_next_event));
         return row;
     }
 
@@ -399,6 +400,7 @@ public class OperationDetailsActivity extends TripDetailsActivity {
         if (legsScrollFocusView == null)
             legsScrollFocusView = row;
 
+        row.setOnClickListener(view -> setShowPage(R.id.navigation_next_event));
         return row;
     }
 

@@ -25,4 +25,9 @@
     <string name="operation_next_event_departure_time_format">ab\n%1$s</string>
     <string name="operation_next_event_arrival_time_format">an\n%1$s</string>
 
+    <string name="operation_menu_continue">Nein, fortführen</string>
+    <string name="operation_menu_stop_for_later">Anhalten (noch nicht erledigt)</string>
+    <string name="operation_menu_terminate">Beenden und erledigt</string>
+    <string name="operation_menu_next_operation">Nächster Einsatz</string>
+
 </resources>
