@@ -3,10 +3,18 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <style name="My.Theme.Amoled" parent="My.Theme">
+        <item name="bg_level0">@color/bg_level0_amoled</item>
+        <item name="bg_level1">@color/bg_level1_amoled</item>
+        <item name="bg_shaded">@color/bg_shaded_amoled</item>
+        <item name="android:windowBackground">@color/bg_level0_amoled</item>
+    </style>
+
     <style name="My.Theme" parent="@android:style/Theme.Material.NoActionBar">
         <item name="bg_level0">@color/bg_level0_default</item>
         <item name="bg_level1">@color/bg_level1_default</item>
-        <item name="android:windowBackground">?attr/bg_level0</item>
+        <item name="bg_shaded">@color/bg_shaded_default</item>
+        <item name="android:windowBackground">@color/bg_level0_default</item>
         <item name="android:textViewStyle">@style/My.Widget.TextView</item>
         <item name="android:autoCompleteTextViewStyle">@style/My.Widget.AutoCompleteTextView</item>
         <item name="android:dropDownListViewStyle">@style/My.Widget.ListView.DropDown</item>

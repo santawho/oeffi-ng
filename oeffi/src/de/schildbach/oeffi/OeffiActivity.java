@@ -189,6 +189,7 @@ public abstract class OeffiActivity extends ComponentActivity {
         super.setContentView(layoutResID);
 
         final View contentView = findViewById(android.R.id.content);
+        contentView.setBackgroundColor(ViewUtils.getAttrColor(this, R.attr.bg_level0));
         setupMapView(contentView);
 
         // chance to perform general setup

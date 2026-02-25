@@ -25,6 +25,8 @@
     <color name="bg_level0_amoled">#000000</color>
     <color name="bg_level1_default">#333333</color>
     <color name="bg_level1_amoled">#111111</color>
+    <color name="bg_shaded_default">#444444</color>
+    <color name="bg_shaded_amoled">#222222</color>
     <color name="bg_selected">#666666</color>
     <color name="bg_divider">#444444</color>
     <color name="bg_divider_highlight">#666666</color>

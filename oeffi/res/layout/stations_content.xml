@@ -105,7 +105,7 @@
                             android:id="@+id/stations_location"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:background="@color/bg_divider" />
+                            android:background="?attr/bg_shaded" />
 
                         <ViewAnimator
                             android:id="@+id/stations_list_layout"

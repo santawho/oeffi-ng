@@ -32,12 +32,15 @@
     <!-- background -->
     <attr name="bg_level0" format="reference|color" />
     <attr name="bg_level1" format="reference|color" />
+    <attr name="bg_shaded" format="reference|color" />
     <color name="bg_fallback">#cc0088</color>
     <color name="bg_level0_default">#f7f7f7</color>
     <color name="bg_level0_amoled">#f7f7f7</color>
     <color name="bg_level0_darkdefault">#222222</color>
     <color name="bg_level1_default">#ffffff</color>
     <color name="bg_level1_amoled">#ffffff</color>
+    <color name="bg_shaded_default">#e0e0e0</color>
+    <color name="bg_shaded_amoled">#e0e0e0</color>
     <color name="bg_selected">#bbbbbb</color>
     <color name="bg_divider">#dddddd</color>
     <color name="bg_divider_highlight">#bbbbbb</color>
