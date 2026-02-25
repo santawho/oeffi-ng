@@ -441,12 +441,12 @@ public class OperationNotification {
             }
         }
 //nextRefreshTimeMs = nowTime + 30000;
-        final Date timeoutAt = new Date(trip.getLastArrivalTime().getTime() + KEEP_NOTIFICATION_FOR_MINUTES * 60000);
-        final long duration = timeoutAt.getTime() - nowTime;
-        if (duration <= 1000) {
-            remove();
-            return;
-        }
+//        final Date timeoutAt = new Date(trip.getLastArrivalTime().getTime() + KEEP_NOTIFICATION_FOR_MINUTES * 60000);
+//        final long duration = timeoutAt.getTime() - nowTime;
+//        if (duration <= 1000) {
+//            remove();
+//            return;
+//        }
         final RemoteViews notificationLayout = new RemoteViews(context.getPackageName(), R.layout.operation_notification);
         final int backgroundColor = setupNotificationView(notificationLayout, tripRenderer, operationLeg, initialWalkLeg, now);
         // final RemoteViews notificationLayoutExpanded = new RemoteViews(context.getPackageName(), R.layout.operation_notification);
@@ -560,7 +560,7 @@ public class OperationNotification {
                 .setLocalOnly(true)
                 .setUsesChronometer(false)
                 .setWhen(nowTime)
-                .setTimeoutAfter(duration)
+//                .setTimeoutAfter(duration)
                 .setExtras(extras)
                 .addAction(R.drawable.ic_clear_white_24dp, context.getString(R.string.operation_opennav_shownextevent),
                         getPendingActivityIntent(OperationNavigatorActivity.DELETEREQUEST_NOT_REQUESTED,
