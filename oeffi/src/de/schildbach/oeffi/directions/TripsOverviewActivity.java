@@ -325,7 +325,6 @@ public class TripsOverviewActivity extends OeffiActivity {
             }
 
             initialRequested = true;
-            postCheckMoreRunnable(false);
         }
     }
 
@@ -528,6 +527,7 @@ public class TripsOverviewActivity extends OeffiActivity {
                     progressDialog = ProgressDialog.show(TripsOverviewActivity.this, null,
                             getString(R.string.directions_query_progress), true, true, dialog -> {
                                 cancelled.set(true);
+                                TripsOverviewActivity.this.finish();
                             });
                     progressDialog.setCanceledOnTouchOutside(false);
                     QueryTripsRunnable.startProgressDialog(progressDialog, getResources(), reloadRequestData.options);
@@ -545,18 +545,23 @@ public class TripsOverviewActivity extends OeffiActivity {
             } finally {
                 if (!foregroundRunning) {
                     queryMoreTripsRunning = false;
-                    runOnUiThread(() -> {
-                        swipeRefresh.setRefreshing(false);
-                        if (initial) {
-                            if (progressDialog != null) {
-                                progressDialog.dismiss();
-                                progressDialog = null;
-                            }
-                        } else {
-                            actionBar.stopProgress();
-                        }
-                    });
+                    runOnUiThread(this::stopProgess);
                 }
+            }
+        }
+
+        private void stopProgess() {
+            if (TripsOverviewActivity.this.isDestroyed())
+                return;
+
+            swipeRefresh.setRefreshing(false);
+            if (initial) {
+                if (progressDialog != null) {
+                    progressDialog.dismiss();
+                    progressDialog = null;
+                }
+            } else {
+                actionBar.stopProgress();
             }
         }
 
@@ -591,7 +596,9 @@ public class TripsOverviewActivity extends OeffiActivity {
                         log.debug("Got {} ({})", result.toShortString(), later ? "later" : "earlier");
                         final int countNew;
                         if (result.status == QueryTripsResult.Status.OK) {
-                            if (result.from != null && result.from.name != null && result.to != null && result.to.name != null) {
+                            if (initial
+                                    && result.from != null && result.from.name != null
+                                    && result.to != null && result.to.name != null) {
                                 final int maxHistoryEntries = Integer.parseInt(prefs.getString(
                                         Constants.PREFS_KEY_MAX_HISTORY_ENTRIES,
                                         Integer.toString(getResources().getInteger(R.integer.default_max_history_entries))));
@@ -633,17 +640,10 @@ public class TripsOverviewActivity extends OeffiActivity {
                                 new Toast(TripsOverviewActivity.this).toast(R.string.toast_network_problem);
                             }
                         }
-                        queryMoreTripsRunning = false;
 
-                        swipeRefresh.setRefreshing(false);
-                        if (initial) {
-                            if (progressDialog != null) {
-                                progressDialog.dismiss();
-                                progressDialog = null;
-                            }
-                        } else {
-                            actionBar.stopProgress();
-                        }
+                        stopProgess();
+
+                        queryMoreTripsRunning = false;
 
                         // fetch more
                         if (countNew > 0)
@@ -808,7 +808,7 @@ public class TripsOverviewActivity extends OeffiActivity {
     private QueryTripsResult prependTripToAllTrips(final QueryTripsResult in) {
         if (prependLegs == null)
             setupPrepend(false);
-        if (in.trips == null)
+        if (in == null || in.trips == null)
             return in;
         final List<Trip> newTrips = new LinkedList<>();
         for (final Trip inTrip : in.trips) {

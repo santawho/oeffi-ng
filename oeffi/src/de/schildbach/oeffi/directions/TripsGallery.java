@@ -168,13 +168,11 @@ public class TripsGallery extends Gallery {
 
         setOnHierarchyChangeListener(new OnHierarchyChangeListener() {
             public void onChildViewRemoved(final View parent, final View child) {
-                handler.removeCallbacksAndMessages(null);
-                handler.post(onChildViewChangedRunnable);
+                postOnChildViewChangedRunnable(false);
             }
 
             public void onChildViewAdded(final View parent, final View child) {
-                handler.removeCallbacksAndMessages(null);
-                handler.post(onChildViewChangedRunnable);
+                postOnChildViewChangedRunnable(false);
             }
         });
     }
@@ -208,6 +206,19 @@ public class TripsGallery extends Gallery {
         super.invalidate();
     }
 
+    private boolean onChildViewChangedRunnableAlreadyPosted;
+
+    private void postOnChildViewChangedRunnable(final boolean delayed) {
+        if (onChildViewChangedRunnableAlreadyPosted)
+            return;
+        onChildViewChangedRunnableAlreadyPosted = true;
+        handler.removeCallbacksAndMessages(null);
+        if (delayed)
+            handler.postDelayed(onChildViewChangedRunnable, 20);
+        else
+            handler.post(onChildViewChangedRunnable);
+    }
+
     private final Runnable onChildViewChangedRunnable = new Runnable() {
         public void run() {
             final long currentTime = System.currentTimeMillis();
@@ -231,7 +242,7 @@ public class TripsGallery extends Gallery {
                         if (tripMaxTime != null && tripMaxTime.getTime() > maxTime)
                             maxTime = tripMaxTime.getTime();
                     }
-                } catch (IllegalStateException ise) {
+                } catch (final IllegalStateException ise) {
                     log.error("cannot get adapter item at position {}, first={}, last={}", index, first, last, ise);
                     // ignore and continue
                 }
@@ -258,22 +269,23 @@ public class TripsGallery extends Gallery {
             final long currentMaxTime = adapter.getMaxTime();
 
             if (currentMinTime != 0 || currentMaxTime != 0) {
-                final long diffMin = minTime - currentMinTime;
+                final long diffMin = currentMinTime - minTime;
                 final long diffMax = maxTime - currentMaxTime;
 
                 if (Math.abs(diffMin) > DateUtils.SECOND_IN_MILLIS * 10
                         || Math.abs(diffMax) > DateUtils.SECOND_IN_MILLIS * 10) {
-                    minTime = currentMinTime + diffMin / 5;
+                    minTime = currentMinTime - diffMin / 5;
                     maxTime = currentMaxTime + diffMax / 5;
 
-                    handler.postDelayed(this, 20); // 50 fps
+                    onChildViewChangedRunnableAlreadyPosted = false;
+                    postOnChildViewChangedRunnable(true);
                 }
             }
 
             adapter.setMinMaxTimes(minTime, maxTime);
 
             // refresh views
-            invalidate();
+            // -- invalidate(); -- no! causes recursion
             final int childCount = getChildCount();
             for (int i = 0; i < childCount; i++)
                 getChildAt(i).invalidate();
@@ -281,6 +293,8 @@ public class TripsGallery extends Gallery {
             // notify listener
             if (onScrollListener != null)
                 onScrollListener.onScroll();
+
+            onChildViewChangedRunnableAlreadyPosted = false;
         }
     };
 
