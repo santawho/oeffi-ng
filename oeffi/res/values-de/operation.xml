@@ -30,4 +30,6 @@
     <string name="operation_menu_terminate">Beenden und erledigt</string>
     <string name="operation_menu_next_operation">Nächster Einsatz</string>
 
+    <string name="operation_open_journey_as_operation">Als Einsatz für Fahrer öffnen</string>
+
 </resources>

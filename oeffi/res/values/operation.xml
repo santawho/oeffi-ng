@@ -30,4 +30,6 @@
     <string name="operation_menu_terminate">Terminate and done</string>
     <string name="operation_menu_next_operation">Next Operation</string>
 
+    <string name="operation_open_journey_as_operation">Open as operation for driver</string>
+
 </resources>

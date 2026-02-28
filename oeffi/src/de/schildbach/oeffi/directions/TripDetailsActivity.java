@@ -743,6 +743,26 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     R.string.directions_trip_details_action_start_routing);
             navigateButton.setOnClickListener(navigationClickListener);
         }
+
+        if (!isDriverMode && application.isDriverMode()
+                && renderConfig.isJourney && !renderConfig.isOperation) {
+            // action to open journey as operation
+            final ImageButton openOperationButton = actionBar.addButton(
+                    R.drawable.ic_operation_white_24dp,
+                    R.string.operation_open_journey_as_operation);
+            openOperationButton.setOnClickListener(v -> {
+                final Trip.Public journeyLeg = tripRenderer.trip.getFirstPublicLeg();
+                if (journeyLeg != null) {
+                    queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
+                            this, v, queryJourneyRunnable,
+                            handler, backgroundHandler,
+                            network, journeyLeg.journeyRef,
+                            true,
+                            journeyLeg.departure, journeyLeg.arrival,
+                            false);
+                }
+            });
+        }
     }
 
     protected void addBookmarkActionBarButton() {
@@ -1360,9 +1380,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                         network, leg.journeyRef, false, leg.departure, leg.arrival,
                         mustOpenActivityInNewTask());
             };
-            lineView.setClickable(true);
             lineView.setOnClickListener(onClickListener);
-            destinationView.setClickable(true);
             destinationView.setOnClickListener(onClickListener);
         }
 
