@@ -85,6 +85,15 @@
                         android:layout_marginTop="-20dp"
                         android:paddingHorizontal="8dp"
                         android:textSize="@dimen/navigation_next_event_time_fontsize_explain"/>
+                    <TextView
+                        android:id="@+id/navigation_next_event_time_distance"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:layout_marginTop="-20dp"
+                        android:textColor="@color/fg_simulated"
+                        android:textStyle="bold"
+                        android:textSize="@dimen/navigation_next_event_time_fontsize_distance"/>
                 </LinearLayout>
                 <TextView
                     android:id="@+id/navigation_next_event_current_action"

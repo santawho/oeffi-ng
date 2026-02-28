@@ -2076,6 +2076,18 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             explainView.setVisibility(View.GONE);
         }
 
+        final TextView distanceView = findViewById(R.id.navigation_next_event_time_distance);
+        final Stop nextEventArrivalStop = tripRenderer.nextEventArrivalStop;
+        final Point locationCoord = nextEventArrivalStop == null ? null : nextEventArrivalStop.location.coord;
+        final Point deviceCoord = getDeviceLocation();
+        if (locationCoord != null && deviceCoord != null) {
+            distanceView.setVisibility(View.VISIBLE);
+            distanceView.setText(Formats.formatDistance(
+                    TripGeoUtils.geoDistanceInMeters(locationCoord, deviceCoord), true));
+        } else {
+            distanceView.setVisibility(View.GONE);
+        }
+
         final TextView targetView = findViewById(R.id.navigation_next_event_target);
         if (tripRenderer.nextEventTargetName != null) {
             targetView.setText(tripRenderer.nextEventTargetName);
