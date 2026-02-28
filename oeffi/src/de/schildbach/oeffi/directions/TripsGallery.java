@@ -214,89 +214,87 @@ public class TripsGallery extends Gallery {
         onChildViewChangedRunnableAlreadyPosted = true;
         handler.removeCallbacksAndMessages(null);
         if (delayed)
-            handler.postDelayed(onChildViewChangedRunnable, 20);
+            handler.postDelayed(this::onChildViewChanged, 20);
         else
-            handler.post(onChildViewChangedRunnable);
+            handler.post(this::onChildViewChanged);
     }
 
-    private final Runnable onChildViewChangedRunnable = new Runnable() {
-        public void run() {
-            final long currentTime = System.currentTimeMillis();
-            final int first = getFirstVisiblePosition();
-            final int last = getLastVisiblePosition();
+    public void onChildViewChanged() {
+        final long currentTime = System.currentTimeMillis();
+        final int first = getFirstVisiblePosition();
+        final int last = getLastVisiblePosition();
 
-            // determine min/max time
-            long minTime = Long.MAX_VALUE;
-            long maxTime = 0;
+        // determine min/max time
+        long minTime = Long.MAX_VALUE;
+        long maxTime = 0;
 
-            for (int index = first; index <= last; index++) {
-                try {
-                    final TripInfo tripInfo = adapter.getItem(index);
-                    if (tripInfo != null) {
-                        final Trip trip = tripInfo.trip;
-                        final PTDate tripMinTime = trip.getMinTime();
-                        if (tripMinTime != null && tripMinTime.getTime() < minTime)
-                            minTime = tripMinTime.getTime();
+        for (int index = first; index <= last; index++) {
+            try {
+                final TripInfo tripInfo = adapter.getItem(index);
+                if (tripInfo != null) {
+                    final Trip trip = tripInfo.trip;
+                    final PTDate tripMinTime = trip.getMinTime();
+                    if (tripMinTime != null && tripMinTime.getTime() < minTime)
+                        minTime = tripMinTime.getTime();
 
-                        final PTDate tripMaxTime = trip.getMaxTime();
-                        if (tripMaxTime != null && tripMaxTime.getTime() > maxTime)
-                            maxTime = tripMaxTime.getTime();
-                    }
-                } catch (final IllegalStateException ise) {
-                    log.error("cannot get adapter item at position {}, first={}, last={}", index, first, last, ise);
-                    // ignore and continue
+                    final PTDate tripMaxTime = trip.getMaxTime();
+                    if (tripMaxTime != null && tripMaxTime.getTime() > maxTime)
+                        maxTime = tripMaxTime.getTime();
                 }
+            } catch (final IllegalStateException ise) {
+                log.error("cannot get adapter item at position {}, first={}, last={}", index, first, last, ise);
+                // ignore and continue
             }
-
-            // snap to current time
-            if (minTime == Long.MAX_VALUE || (currentTime > minTime - DateUtils.MINUTE_IN_MILLIS * 30 && currentTime < minTime))
-                minTime = currentTime;
-            else if (maxTime == 0 || (currentTime < maxTime + DateUtils.MINUTE_IN_MILLIS * 30 && currentTime > maxTime))
-                maxTime = currentTime;
-
-            // padding
-            final long timeDiff = maxTime - minTime;
-            long timePadding = timeDiff / 12;
-            if (timeDiff < DateUtils.MINUTE_IN_MILLIS * 30) // zoom limit
-                timePadding = (DateUtils.MINUTE_IN_MILLIS * 30 - timeDiff) / 2;
-            if (timePadding < DateUtils.MINUTE_IN_MILLIS) // minimum padding
-                timePadding = DateUtils.MINUTE_IN_MILLIS;
-            minTime = minTime - timePadding;
-            maxTime = maxTime + timePadding;
-
-            // animate
-            final long currentMinTime = adapter.getMinTime();
-            final long currentMaxTime = adapter.getMaxTime();
-
-            if (currentMinTime != 0 || currentMaxTime != 0) {
-                final long diffMin = currentMinTime - minTime;
-                final long diffMax = maxTime - currentMaxTime;
-
-                if (Math.abs(diffMin) > DateUtils.SECOND_IN_MILLIS * 10
-                        || Math.abs(diffMax) > DateUtils.SECOND_IN_MILLIS * 10) {
-                    minTime = currentMinTime - diffMin / 5;
-                    maxTime = currentMaxTime + diffMax / 5;
-
-                    onChildViewChangedRunnableAlreadyPosted = false;
-                    postOnChildViewChangedRunnable(true);
-                }
-            }
-
-            adapter.setMinMaxTimes(minTime, maxTime);
-
-            // refresh views
-            // -- invalidate(); -- no! causes recursion
-            final int childCount = getChildCount();
-            for (int i = 0; i < childCount; i++)
-                getChildAt(i).invalidate();
-
-            // notify listener
-            if (onScrollListener != null)
-                onScrollListener.onScroll();
-
-            onChildViewChangedRunnableAlreadyPosted = false;
         }
-    };
+
+        // snap to current time
+        if (minTime == Long.MAX_VALUE || (currentTime > minTime - DateUtils.MINUTE_IN_MILLIS * 30 && currentTime < minTime))
+            minTime = currentTime;
+        else if (maxTime == 0 || (currentTime < maxTime + DateUtils.MINUTE_IN_MILLIS * 30 && currentTime > maxTime))
+            maxTime = currentTime;
+
+        // padding
+        final long timeDiff = maxTime - minTime;
+        long timePadding = timeDiff / 12;
+        if (timeDiff < DateUtils.MINUTE_IN_MILLIS * 30) // zoom limit
+            timePadding = (DateUtils.MINUTE_IN_MILLIS * 30 - timeDiff) / 2;
+        if (timePadding < DateUtils.MINUTE_IN_MILLIS) // minimum padding
+            timePadding = DateUtils.MINUTE_IN_MILLIS;
+        minTime = minTime - timePadding;
+        maxTime = maxTime + timePadding;
+
+        // animate
+        final long currentMinTime = adapter.getMinTime();
+        final long currentMaxTime = adapter.getMaxTime();
+
+        if (currentMinTime != 0 || currentMaxTime != 0) {
+            final long diffMin = currentMinTime - minTime;
+            final long diffMax = maxTime - currentMaxTime;
+
+            if (Math.abs(diffMin) > DateUtils.SECOND_IN_MILLIS * 10
+                    || Math.abs(diffMax) > DateUtils.SECOND_IN_MILLIS * 10) {
+                minTime = currentMinTime - diffMin / 5;
+                maxTime = currentMaxTime + diffMax / 5;
+
+                onChildViewChangedRunnableAlreadyPosted = false;
+                postOnChildViewChangedRunnable(true);
+            }
+        }
+
+        adapter.setMinMaxTimes(minTime, maxTime);
+
+        // refresh views
+        super.invalidate(); // -- invalidate(); -- no! causes recursion
+        final int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++)
+            getChildAt(i).invalidate();
+
+        // notify listener
+        if (onScrollListener != null)
+            onScrollListener.onScroll();
+
+        onChildViewChangedRunnableAlreadyPosted = false;
+    }
 
     private final Calendar gridPtr = new GregorianCalendar();
     private final Rect bounds = new Rect();
