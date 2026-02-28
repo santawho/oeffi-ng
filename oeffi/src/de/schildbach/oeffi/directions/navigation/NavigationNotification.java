@@ -2539,6 +2539,8 @@ public class NavigationNotification {
     }
 
     private String makeSpeakableLocationName(final String locationName) {
+        if (locationName == null)
+            return null;
         return removeDisturbingInterpunctuationFromSpeakableName(locationName);
     }
 
