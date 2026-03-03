@@ -646,8 +646,7 @@ public class TripsOverviewActivity extends OeffiActivity {
                         queryMoreTripsRunning = false;
 
                         // fetch more
-                        if (countNew > 0)
-                            postCheckMoreRunnable(true);
+                        postCheckMoreRunnable(true);
                     });
                     return true;
                 } catch (final SessionExpiredException | NotFoundException x) {
