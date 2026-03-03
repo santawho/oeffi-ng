@@ -6,6 +6,7 @@
         <trust-anchors>
             <certificates src="system" />
             <certificates src="user" />
+            <certificates src="@raw/extra_ca_sectigo_root_r46" />
         </trust-anchors>
     </base-config>
 
