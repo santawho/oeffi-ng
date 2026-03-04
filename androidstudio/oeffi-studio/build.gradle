@@ -108,7 +108,7 @@ android {
     sourceSets {
         main {
             manifest.srcFile '../../oeffi/AndroidManifest.xml'
-            java.srcDirs = ['../../oeffi/src', '../../public-transport-enabler/src']
+            java.srcDirs = ['./imported_sources/swipelayout', '../../oeffi/src', '../../public-transport-enabler/src']
             res.srcDirs = ['../../oeffi/res']
             assets.srcDirs = ['../../oeffi/assets']
         }
@@ -182,7 +182,8 @@ dependencies {
     implementation libs.slf4j.api
     implementation libs.logback.android
     implementation libs.msgpack.core
-    implementation libs.swipelayout
+//    implementation libs.swipelayout
+    implementation libs.swiperefreshlayout
     testImplementation libs.junit
 
 //    implementation libs.appcompat

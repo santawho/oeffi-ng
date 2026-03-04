@@ -6,7 +6,7 @@ buildscript {
 //        classpath(libs.androidsvgdrawable.gradle.plugin) {
 //            exclude group: 'xerces'
 //        }
-        classpath(libs.bye.bye.jetifier)
+//        classpath(libs.bye.bye.jetifier)
     }
 }
 
