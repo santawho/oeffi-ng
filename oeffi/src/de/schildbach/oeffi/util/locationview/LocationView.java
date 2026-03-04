@@ -389,15 +389,22 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
             pickStationLauncher.launch(network);
     }
 
+    private ActivityResultLauncher<String> locationPermissionAcquiryLauncher;
+
     public void setToCurrentLocation() {
         if (ContextCompat.checkSelfPermission(getContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             acquireLocation();
-        } else {
-            getActivity().registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
-                if (granted)
-                    acquireLocation();
-            }).launch(Manifest.permission.ACCESS_FINE_LOCATION);
+        } else if (locationPermissionAcquiryLauncher == null) {
+            locationPermissionAcquiryLauncher = getActivity().getActivityResultRegistry().register(
+                    Long.toString(System.currentTimeMillis()),
+                    new ActivityResultContracts.RequestPermission(), granted -> {
+                        locationPermissionAcquiryLauncher.unregister();
+                        locationPermissionAcquiryLauncher = null;
+                        if (granted)
+                            acquireLocation();
+                    });
+            locationPermissionAcquiryLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
         }
     }
 
