@@ -19,14 +19,11 @@ package de.schildbach.oeffi.preference;
 
 import android.os.Bundle;
 
-import javax.annotation.Nullable;
-
 import de.schildbach.oeffi.R;
 
 public class NavigationTravelAlarmFragment extends PreferenceFragment {
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onCreatePreferences(@androidx.annotation.Nullable final Bundle savedInstanceState, @androidx.annotation.Nullable final String rootKey) {
         addPreferencesFromResource(R.xml.preference_navigation_travelalarm);
         setupDynamicSummary("travelalarm_time_ratio", R.string.travelalarm_time_ratio_summary);
         setupDynamicSummary("travelalarm_start_time_default", R.string.travelalarm_start_time_default_summary);

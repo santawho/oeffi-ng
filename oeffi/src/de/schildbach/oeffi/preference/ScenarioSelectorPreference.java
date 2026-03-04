@@ -19,8 +19,8 @@ package de.schildbach.oeffi.preference;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.ListPreference;
 import android.util.AttributeSet;
+import androidx.preference.ListPreference;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -114,7 +114,7 @@ public class ScenarioSelectorPreference extends ListPreference {
     }
 
     private void setPreferences(final String scenarioValue) {
-        final SharedPreferences.Editor editor = getEditor();
+        final SharedPreferences.Editor editor = getSharedPreferences().edit();
         handleScenarioValue(scenarioValue, new ScenarioValuesHandler() {
             @Override
             public void stringValue(final String name, final String value) {

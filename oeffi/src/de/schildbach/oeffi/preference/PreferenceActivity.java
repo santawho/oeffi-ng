@@ -17,31 +17,32 @@
 
 package de.schildbach.oeffi.preference;
 
+import static android.preference.PreferenceActivity.EXTRA_SHOW_FRAGMENT;
+
 import android.app.Activity;
 import android.app.ComponentCaller;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
-import android.preference.Preference;
 import android.view.MenuItem;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.preference.Preference;
 
 import de.schildbach.oeffi.Application;
+import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.R;
 
-import java.util.List;
-
-public class PreferenceActivity extends android.preference.PreferenceActivity {
+public class PreferenceActivity extends AppCompatActivity {
     public static final String EXTRA_PREFKEY = "prefkey";
     public static final String EXTRA_HANDLER = "handler";
 
     public static void start(final Activity activity) {
-        activity.startActivity(new Intent(activity, PreferenceActivity.class));
+        start(activity, SettingsFragment.class);
     }
 
     public static void start(
@@ -71,26 +72,55 @@ public class PreferenceActivity extends android.preference.PreferenceActivity {
                 .putExtra(EXTRA_HANDLER, actionHandlerClass.getName()));
     }
 
+    private PreferenceFragment preferenceFragment;
+
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.BAKLAVA) {
-            final View contentView = findViewById(android.R.id.content);
-            final int paddingLeft = contentView.getPaddingLeft();
-            final int paddingTop = contentView.getPaddingTop();
-            final int paddingRight = contentView.getPaddingRight();
-            final int paddingBottom = contentView.getPaddingBottom();
-            ViewCompat.setOnApplyWindowInsetsListener(contentView, (v, windowInsets) -> {
-                final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-                v.setPadding(
-                        paddingLeft + insets.left,
-                        paddingTop + insets.top,
-                        paddingRight + insets.right,
-                        paddingBottom + insets.bottom);
-                return windowInsets;
-            });
+        setContentView(R.layout.settings_content);
+
+        final Intent intent = getIntent();
+
+        final String fragmentClassName = intent.getStringExtra(EXTRA_SHOW_FRAGMENT);
+        if (fragmentClassName != null) {
+            try {
+                final Class<?> fragmentClass = Class.forName(fragmentClassName);
+                preferenceFragment = (PreferenceFragment) fragmentClass.newInstance();
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.preferences_fragment_container, preferenceFragment)
+                        .commit();
+            } catch (final ClassNotFoundException | IllegalAccessException |
+                           InstantiationException e) {
+                throw new RuntimeException(e);
+            }
         }
-        handleIntent(getIntent());
+
+        final View contentView = findViewById(android.R.id.content);
+        final int paddingLeft = contentView.getPaddingLeft();
+        final int paddingTop = contentView.getPaddingTop();
+        final int paddingRight = contentView.getPaddingRight();
+        final int paddingBottom = contentView.getPaddingBottom();
+        ViewCompat.setOnApplyWindowInsetsListener(contentView, (v, windowInsets) -> {
+            final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(
+                    paddingLeft + insets.left,
+                    0, // paddingTop + insets.top,
+                    paddingRight + insets.right,
+                    paddingBottom + insets.bottom);
+            return windowInsets;
+        });
+
+        final MyActionBar actionBar = getMyActionBar();
+        actionBar.setBackgroundColor(getColor(R.color.bg_action_bar_settings));
+        actionBar.setBack(v -> onBackPressed());
+        // actionBar.setPrimaryTitle(getTitle());
+
+        handleIntent(intent);
+    }
+
+    protected final MyActionBar getMyActionBar() {
+        return findViewById(R.id.action_bar);
     }
 
     @Override
@@ -119,10 +149,19 @@ public class PreferenceActivity extends android.preference.PreferenceActivity {
             finish();
     }
 
+    public void setSubTitle(final CharSequence title) {
+        final MyActionBar actionBar = getMyActionBar();
+        final String mainTitle = getString(R.string.global_options_preferences_title);
+        setTitle(mainTitle);
+        actionBar.setSecondaryTitle(title.equals(mainTitle) ? null : title);
+    }
+
     @Override
-    public void onBuildHeaders(final List<Header> target) {
-        loadHeadersFromResource(R.xml.preference_headers, target);
-        target.add(AboutFragment.getHeader());
+    public void setTitle(final CharSequence title) {
+        super.setTitle(title);
+        final MyActionBar actionBar = getMyActionBar();
+        actionBar.setPrimaryTitle(title);
+        actionBar.setSecondaryTitle(null);
     }
 
     @Override
@@ -134,10 +173,5 @@ public class PreferenceActivity extends android.preference.PreferenceActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    protected boolean isValidFragment(final String fragmentClassName) {
-        return PreferenceFragment.isSuperClassOf(fragmentClassName);
     }
 }

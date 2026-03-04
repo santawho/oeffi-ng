@@ -19,11 +19,20 @@ package de.schildbach.oeffi.preference;
 
 import android.os.Bundle;
 
+import androidx.preference.PreferenceManager;
+import androidx.preference.PreferenceScreen;
+
+import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
 
-public class DeveloperOptionsFragment extends PreferenceFragment {
+public class SettingsFragment extends PreferenceFragment {
     @Override
     public void onCreatePreferences(@androidx.annotation.Nullable final Bundle savedInstanceState, @androidx.annotation.Nullable final String rootKey) {
-        addPreferencesFromResource(R.xml.preference_developeroptions);
+        addPreferencesFromResource(R.xml.preference_settings);
+
+        final PreferenceScreen aboutPreferenceScreen = getPreferenceManager().createPreferenceScreen(getContext());
+        aboutPreferenceScreen.setFragment(AboutFragment.class.getName());
+        aboutPreferenceScreen.setTitle(Application.getInstance().getString(R.string.about_title, Application.getInstance().getAppName()));
+        addPreference(aboutPreferenceScreen);
     }
 }

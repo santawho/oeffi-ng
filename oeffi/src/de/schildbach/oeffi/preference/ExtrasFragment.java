@@ -19,9 +19,8 @@ package de.schildbach.oeffi.preference;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
 
-import javax.annotation.Nullable;
+import androidx.preference.CheckBoxPreference;
 
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
@@ -52,8 +51,7 @@ public class ExtrasFragment extends PreferenceFragment {
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onCreatePreferences(@androidx.annotation.Nullable final Bundle savedInstanceState, @androidx.annotation.Nullable final String rootKey) {
         addPreferencesFromResource(R.xml.preference_extras);
 
         if (!isMoreExtrasEnabled())

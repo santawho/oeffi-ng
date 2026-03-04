@@ -20,12 +20,11 @@ package de.schildbach.oeffi.preference;
 import android.os.Bundle;
 import de.schildbach.oeffi.R;
 
-import javax.annotation.Nullable;
-
 public class DirectionsFragment extends PreferenceFragment {
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onCreatePreferences(
+            @androidx.annotation.Nullable final Bundle savedInstanceState,
+            @androidx.annotation.Nullable final String rootKey) {
         addPreferencesFromResource(R.xml.preference_directions);
     }
 }

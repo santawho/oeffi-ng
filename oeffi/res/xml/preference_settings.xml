@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/global_options_preferences_title">
+
+    <PreferenceScreen
+        android:fragment="de.schildbach.oeffi.preference.CommonFragment"
+        android:title="@string/global_preferences_title" />
+    <PreferenceScreen
+        android:fragment="de.schildbach.oeffi.preference.UserInterfaceFragment"
+        android:title="@string/user_interface_preferences_title" />
+    <PreferenceScreen
+        android:fragment="de.schildbach.oeffi.preference.DirectionsFragment"
+        android:title="@string/directions_preferences_title" />
+    <PreferenceScreen
+        android:fragment="de.schildbach.oeffi.preference.NavigationFragment"
+        android:title="@string/navigation_preferences_title" />
+    <PreferenceScreen
+        android:fragment="de.schildbach.oeffi.preference.ExtrasFragment"
+        android:title="@string/extras_title" />
+    <PreferenceScreen
+        android:fragment="de.schildbach.oeffi.preference.ShortcutsFragment"
+        android:title="@string/shortcuts_preferences_title"
+        android:summary="@string/shortcuts_preferences_summary"/>
+<!--    <header-->
+<!--        android:fragment="de.schildbach.oeffi.preference.AboutFragment"-->
+<!--        android:title="@string/about_title" />-->
+
+</PreferenceScreen>

@@ -43,7 +43,7 @@
         <item name="android:textViewStyle">@style/My.Widget.TextView</item>
     </style>
 
-    <style name="My.Theme.Preference" parent="@android:style/Theme.Material.Light.DarkActionBar">
+    <style name="My.Theme.Preference" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:actionBarStyle">@style/My.Widget.ActionBar</item>
     </style>
 

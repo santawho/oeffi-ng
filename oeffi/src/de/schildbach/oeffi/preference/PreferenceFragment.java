@@ -3,16 +3,16 @@ package de.schildbach.oeffi.preference;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
-import android.preference.Preference;
-import android.preference.PreferenceGroup;
+
+import androidx.preference.Preference;
+import androidx.preference.PreferenceGroup;
 
 import java.util.Map;
 import java.util.function.Function;
 
 import de.schildbach.oeffi.Application;
 
-public class PreferenceFragment extends android.preference.PreferenceFragment {
+public abstract class PreferenceFragment extends androidx.preference.PreferenceFragmentCompat {
     public static abstract class ActionHandler {
         // return true, to finish the parenting PreferenceActivity after handling the action
         // return false to do it later by calling dismissParentingActivity()
@@ -46,7 +46,11 @@ public class PreferenceFragment extends android.preference.PreferenceFragment {
         super.onResume();
         final CharSequence title = getPreferenceScreen().getTitle();
         if (title != null && title.length() > 0)
-            preferenceActivity.setTitle(title);
+            preferenceActivity.setSubTitle(title);
+    }
+
+    public CharSequence getTitle() {
+        return getPreferenceScreen().getTitle();
     }
 
     protected void setupDynamicSummary(final String preferenceKey, final int summaryResId) {
@@ -56,7 +60,7 @@ public class PreferenceFragment extends android.preference.PreferenceFragment {
     protected void setupDynamicSummary(
             final String preferenceKey,
             final int summaryResId,
-            Function<Object, Object> valueMapper) {
+            final Function<Object, Object> valueMapper) {
         final Preference preference = findPreference(preferenceKey);
         preference.setOnPreferenceChangeListener((pref, newValue) -> {
             final Object realValue = valueMapper == null ? newValue : valueMapper.apply(newValue);

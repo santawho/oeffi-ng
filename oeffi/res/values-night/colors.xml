@@ -31,6 +31,7 @@
     <color name="bg_divider">#444444</color>
     <color name="bg_divider_highlight">#666666</color>
     <color name="bg_action_bar">#444444</color>
+    <color name="bg_action_bar_settings">#777777</color>
     <color name="bg_action_bar_stations">#444400</color>
     <color name="bg_action_bar_station_favorites">#777700</color>
     <color name="bg_action_bar_navigation">#441111</color>

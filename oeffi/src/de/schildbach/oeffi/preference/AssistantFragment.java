@@ -28,17 +28,16 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
-import android.preference.Preference;
 import android.provider.Settings;
 import android.util.TypedValue;
 import android.widget.TextView;
 
+import androidx.preference.CheckBoxPreference;
+import androidx.preference.Preference;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import javax.annotation.Nullable;
 
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
@@ -65,8 +64,7 @@ public class AssistantFragment extends PreferenceFragment {
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onCreatePreferences(@androidx.annotation.Nullable final Bundle savedInstanceState, @androidx.annotation.Nullable final String rootKey) {
         addPreferencesFromResource(R.xml.preference_assistant);
 
         setupActionPreference(KEY_ASSISTANT_CHOOSE, AssistantActionHandler.class);

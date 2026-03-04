@@ -17,10 +17,13 @@
 
 package de.schildbach.oeffi.preference;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.Preference;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceManager;
+import androidx.preference.PreferenceScreen;
 
 import java.io.IOException;
 
@@ -34,17 +37,8 @@ import de.schildbach.pte.provider.NetworkProvider;
 import de.schildbach.pte.provider.Provider;
 import de.schildbach.pte.provider.TransferEvaluationProvider;
 
-import javax.annotation.Nullable;
-
 /** @noinspection deprecation*/
 public class AboutFragment extends PreferenceFragment {
-    public static PreferenceActivity.Header getHeader() {
-        final PreferenceActivity.Header aboutHeader = new PreferenceActivity.Header();
-        aboutHeader.fragment = AboutFragment.class.getName();
-        aboutHeader.title = Application.getInstance().getString(R.string.about_title, Application.getInstance().getAppName());
-        return aboutHeader;
-    }
-
     private static final String KEY_ABOUT_VERSION = "about_version";
     private static final String KEY_ABOUT_COPYRIGHT = "about_copyright";
     private static final String KEY_ABOUT_DATA_PROVIDER = "about_data_provider";
@@ -60,12 +54,12 @@ public class AboutFragment extends PreferenceFragment {
     private static final String KEY_ABOUT_SHOW_QR = "about_show_qr";
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onCreatePreferences(@androidx.annotation.Nullable final Bundle savedInstanceState, @androidx.annotation.Nullable final String rootKey) {
         addPreferencesFromResource(R.xml.preference_about);
 
         final Application application = Application.getInstance();
 
+        preferenceActivity.setTitle(application.getString(R.string.about_title, application.getAppName()));
         findPreference(KEY_ABOUT_VERSION).setSummary(application.packageInfo().versionName);
 
         final Installer installer = Installer.from(application);
@@ -77,9 +71,6 @@ public class AboutFragment extends PreferenceFragment {
         } else {
             removeOrDisablePreference(prefMarketApp);
         }
-
-        // if (!getResources().getBoolean(R.bool.flags_show_twitter))
-        //     removeOrDisablePreference("about_twitter");
 
         final String changeLogUrl = application.getString(R.string.about_changelog_url);
         if (!changeLogUrl.isEmpty()) {

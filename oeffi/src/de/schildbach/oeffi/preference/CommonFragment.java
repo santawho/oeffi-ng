@@ -22,14 +22,11 @@ import android.os.Bundle;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.network.NetworkPickerActivity;
 
-import javax.annotation.Nullable;
-
 public class CommonFragment extends PreferenceFragment {
     public static final String KEY_COMMON_NETWORK_PROVIDER = "network_provider";
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onCreatePreferences(@androidx.annotation.Nullable final Bundle savedInstanceState, @androidx.annotation.Nullable final String rootKey) {
         addPreferencesFromResource(R.xml.preference_common);
 
         setupActionPreference(KEY_COMMON_NETWORK_PROVIDER, NetworkProviderActionHandler.class);

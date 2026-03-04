@@ -27,8 +27,6 @@ import androidx.core.content.pm.ShortcutInfoCompat;
 import androidx.core.content.pm.ShortcutManagerCompat;
 import androidx.core.graphics.drawable.IconCompat;
 
-import javax.annotation.Nullable;
-
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.DirectionsActivity;
@@ -44,8 +42,7 @@ public class ShortcutsFragment extends PreferenceFragment {
     public static final String KEY_SHORTCUTS_OPERATIONS = "shortcuts_operations";
 
     @Override
-    public void onCreate(@Nullable final Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onCreatePreferences(@androidx.annotation.Nullable final Bundle savedInstanceState, @androidx.annotation.Nullable final String rootKey) {
         addPreferencesFromResource(R.xml.preference_shortcuts);
 
         setupActionPreference(KEY_SHORTCUTS_DIRECTIONS, DirectionsShortcutActionHandler.class);

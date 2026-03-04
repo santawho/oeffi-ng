@@ -24,7 +24,7 @@
         <item name="android:popupMenuStyle">@style/My.Widget.PopupMenu</item>
     </style>
 
-    <style name="My.Theme.Preference" parent="@android:style/Theme.Material">
+    <style name="My.Theme.Preference" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="android:actionBarStyle">@style/My.Widget.ActionBar</item>
     </style>
 

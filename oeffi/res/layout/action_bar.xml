@@ -21,6 +21,7 @@
         android:id="@+id/action_bar_back_button"
         android:layout_width="@dimen/action_bar_button_width"
         android:layout_height="match_parent"
+        android:background="@android:color/transparent"
         android:contentDescription="@string/action_bar_back_description"
         android:minHeight="@dimen/action_bar_height"
         android:scaleType="center"
