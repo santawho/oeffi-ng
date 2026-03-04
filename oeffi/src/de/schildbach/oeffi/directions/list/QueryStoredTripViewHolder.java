@@ -28,10 +28,7 @@ import android.widget.TextView;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.daimajia.swipe.SimpleSwipeListener;
-import com.daimajia.swipe.SwipeLayout;
-
-import javax.annotation.Nullable;
+import de.schildbach.oeffi.util.SwipeLayout;
 
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
@@ -46,7 +43,8 @@ import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.PTDate;
 import de.schildbach.pte.dto.Trip;
 
-public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
+public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder
+    implements SwipeLayout.SwipeListener {
     public interface ContextListener {
         boolean isTripUnderNavigation(final Context context, final String tripId);
     }
@@ -55,14 +53,13 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
     private final NetworkId network;
     private final String usage;
     private final View frameView;
+    private final SwipeLayout swipeLayout;
     private final ImageView iconView;
     private final TextView timeLeftView;
     private final TextView dateView;
     private final TextView timeView;
     private final LocationTextView fromView;
     private final LocationTextView toView;
-    private final SwipeLayout swipeLayout;
-    private final MySwipeListener swipeListener;
     private final long upcomingTimeLimitMs;
 
     private long rowId;
@@ -100,9 +97,17 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
         fromView = itemView.findViewById(R.id.directions_query_stored_trip_entry_from);
         toView = itemView.findViewById(R.id.directions_query_stored_trip_entry_to);
 
-        this.swipeLayout = (SwipeLayout) itemView;
-        swipeListener = new MySwipeListener();
-        swipeLayout.addSwipeListener(swipeListener);
+        swipeLayout = (SwipeLayout) itemView;
+        swipeLayout.addSwipeListener(this);
+
+        swipeLayout.addRevealListener(R.id.directions_query_stored_trip_entry_swipe_navigate,
+                (child, edge, fraction, distance) -> {
+                    navigationOpened = fraction > 0.999;
+                });
+        swipeLayout.addRevealListener(R.id.directions_query_stored_trip_entry_swipe_remove,
+                (child, edge, fraction, distance) -> {
+                    removeOpened = fraction > 0.999;
+                });
 
         frameView = itemView.findViewById(R.id.directions_query_stored_trip_entry_frame);
     }
@@ -323,52 +328,16 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder {
     boolean navigationOpened;
     boolean removeOpened;
 
-    private class MySwipeListener extends SimpleSwipeListener {
-        public MySwipeListener() {
-            swipeLayout.addRevealListener(R.id.directions_query_stored_trip_entry_swipe_navigate,
-                    (child, edge, fraction, distance) -> {
-                        navigationOpened = fraction > 0.999;
-                    });
-            swipeLayout.addRevealListener(R.id.directions_query_stored_trip_entry_swipe_remove,
-                    (child, edge, fraction, distance) -> {
-                        removeOpened = fraction > 0.999;
-                    });
+    @Override
+    public void onStartOpen(final SwipeLayout layout) {
+        if (contextMenu != null) {
+            contextMenu.dismiss();
+            contextMenu = null;
         }
+    }
 
-        @Override
-        public void onStartOpen(final SwipeLayout layout) {
-            super.onStartOpen(layout);
-            if (contextMenu != null) {
-                contextMenu.dismiss();
-                contextMenu = null;
-            }
-        }
-
-        @Override
-        public void onHandRelease(final SwipeLayout layout, final float xvel, final float yvel) {
-            super.onHandRelease(layout, xvel, yvel);
-
-//            final int position = getAdapterPosition();
-
-//            if (navigationOpened) {
-//                navigationOpened = false;
-//                isFavorite = !isFavorite;
-//                setStarDrawable();
-//                contextMenuItemListener.onQueryStoredTripContextMenuItemClick(
-//                        position, from, to, via,
-//                        serializedSavedTrip,
-//                        isFavorite
-//                            ? R.id.directions_query_stored_trip_context_add_favorite
-//                            : R.id.directions_query_stored_trip_context_remove_favorite,
-//                        null);
-//            }
-
-//            if (removeOpened) {
-//                removeOpened = false;
-//                if (tripId != null) {
-//                    QueryStoredTripsProvider.delete(context.getContentResolver(), network, tripId);
-//                }
-//            }
-        }
+    @Override
+    public void onHandRelease(final SwipeLayout layout, final float xvel, final float yvel) {
+        swipeLayout.close();
     }
 }

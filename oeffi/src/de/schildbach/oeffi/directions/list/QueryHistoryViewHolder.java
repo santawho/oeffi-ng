@@ -28,8 +28,7 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.daimajia.swipe.SimpleSwipeListener;
-import com.daimajia.swipe.SwipeLayout;
+import de.schildbach.oeffi.util.SwipeLayout;
 
 import javax.annotation.Nullable;
 
@@ -45,7 +44,8 @@ import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.PTDate;
 
-public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
+public class QueryHistoryViewHolder extends RecyclerView.ViewHolder
+        implements SwipeLayout.SwipeListener {
     public interface ContextMenuItemListener {
         boolean onQueryHistoryContextMenuItemClick(
                 int adapterPosition,
@@ -55,6 +55,7 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
 
     private final OeffiActivity context;
     private final NetworkId network;
+    private final SwipeLayout swipeLayout;
     private final LocationTextView fromView;
     private final LocationTextView toView;
     private final LocationTextView viaView;
@@ -62,8 +63,6 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
     private final View viaContainerView;
     private final Button tripView;
     private final ImageButton contextButton;
-    private final SwipeLayout swipeLayout;
-    private final MySwipeListener swipeListener;
     public ContextMenuItemListener contextMenuItemListener;
     private Location from;
     private Location to;
@@ -74,6 +73,9 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
     private Integer toFavState;
     private boolean hasSavedTrip;
     private PopupMenu contextMenu;
+    private final ImageView starView;
+    private boolean starOpened;
+    private boolean removeOpened;
 
     public QueryHistoryViewHolder(
             final OeffiActivity context,
@@ -91,9 +93,20 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
         tripView = itemView.findViewById(R.id.directions_query_history_entry_trip);
         contextButton = itemView.findViewById(R.id.directions_query_history_entry_context_button);
 
-        this.swipeLayout = (SwipeLayout) itemView;
-        swipeListener = new MySwipeListener();
-        swipeLayout.addSwipeListener(swipeListener);
+        swipeLayout = (SwipeLayout) itemView;
+        starView = swipeLayout.findViewById(R.id.directions_query_history_entry_swipe_star);
+        setStarDrawable();
+
+        swipeLayout.addRevealListener(R.id.directions_query_history_entry_swipe_star,
+                (child, edge, fraction, distance) -> {
+                    starOpened = fraction > 0.999;
+                });
+        swipeLayout.addRevealListener(R.id.directions_query_history_entry_swipe_remove,
+                (child, edge, fraction, distance) -> {
+                    removeOpened = fraction > 0.999;
+                });
+
+        swipeLayout.addSwipeListener(this);
     }
 
     public void bind(
@@ -224,67 +237,45 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder {
         this.contextMenu = contextMenu;
     }
 
-    private class MySwipeListener extends SimpleSwipeListener {
-        final ImageView starView;
-        boolean starOpened;
-        boolean removeOpened;
-        boolean isFavorite;
+    @Override
+    public void onStartOpen(final SwipeLayout layout) {
+        if (contextMenu != null) {
+            contextMenu.dismiss();
+            contextMenu = null;
+        }
+    }
 
-        public MySwipeListener() {
-            this.starView = swipeLayout.findViewById(R.id.directions_query_history_entry_swipe_star);
+    @Override
+    public void onHandRelease(final SwipeLayout layout, final float xvel, final float yvel) {
+        swipeLayout.close();
+        final int position = getAdapterPosition();
+
+        if (starOpened) {
+            starOpened = false;
+            isFavorite = !isFavorite;
             setStarDrawable();
-
-            swipeLayout.addRevealListener(R.id.directions_query_history_entry_swipe_star,
-                    (child, edge, fraction, distance) -> {
-                        starOpened = fraction > 0.999;
-                    });
-            swipeLayout.addRevealListener(R.id.directions_query_history_entry_swipe_remove,
-                    (child, edge, fraction, distance) -> {
-                        removeOpened = fraction > 0.999;
-                    });
+            contextMenuItemListener.onQueryHistoryContextMenuItemClick(
+                    position, from, to, via,
+                    serializedSavedTrip,
+                    isFavorite
+                        ? R.id.directions_query_history_context_add_favorite
+                        : R.id.directions_query_history_context_remove_favorite,
+                    null);
         }
 
-        @Override
-        public void onStartOpen(final SwipeLayout layout) {
-            super.onStartOpen(layout);
-            if (contextMenu != null) {
-                contextMenu.dismiss();
-                contextMenu = null;
-            }
+        if (removeOpened) {
+            removeOpened = false;
+            contextMenuItemListener.onQueryHistoryContextMenuItemClick(
+                    position, from, to, via,
+                    serializedSavedTrip,
+                    R.id.directions_query_history_context_remove_entry,
+                    null);
         }
+    }
 
-        @Override
-        public void onHandRelease(final SwipeLayout layout, final float xvel, final float yvel) {
-            super.onHandRelease(layout, xvel, yvel);
-            final int position = getAdapterPosition();
-
-            if (starOpened) {
-                starOpened = false;
-                isFavorite = !isFavorite;
-                setStarDrawable();
-                contextMenuItemListener.onQueryHistoryContextMenuItemClick(
-                        position, from, to, via,
-                        serializedSavedTrip,
-                        isFavorite
-                            ? R.id.directions_query_history_context_add_favorite
-                            : R.id.directions_query_history_context_remove_favorite,
-                        null);
-            }
-
-            if (removeOpened) {
-                removeOpened = false;
-                contextMenuItemListener.onQueryHistoryContextMenuItemClick(
-                        position, from, to, via,
-                        serializedSavedTrip,
-                        R.id.directions_query_history_context_remove_entry,
-                        null);
-            }
-        }
-
-        private void setStarDrawable() {
-            starView.setImageDrawable(isFavorite
-                    ? context.getDrawable(R.drawable.ic_star_border_white_24dp)
-                    : context.getDrawable(R.drawable.ic_star_white_24dp));
-        }
+    private void setStarDrawable() {
+        starView.setImageDrawable(isFavorite
+                ? context.getDrawable(R.drawable.ic_star_border_white_24dp)
+                : context.getDrawable(R.drawable.ic_star_white_24dp));
     }
 }
