@@ -121,12 +121,17 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
 
     public LocationView(final Context context, final AttributeSet attrs) {
         this(context, attrs, 0);
-        setSaveEnabled(true);
     }
 
-    public LocationView(final Context context, final AttributeSet attrs, final int defStyle) {
-        super(context, attrs, defStyle);
+    public LocationView(final Context context, final AttributeSet attrs, final int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public LocationView(final Context context, final AttributeSet attrs, final int defStyleAttr, final int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
         setOrientation(HORIZONTAL);
+
+        setSaveEnabled(true);
 
         res = context.getResources();
         locationHelper = new LocationHelper(context, this);

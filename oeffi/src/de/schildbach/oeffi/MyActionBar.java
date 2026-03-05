@@ -32,6 +32,9 @@ import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+
+import androidx.appcompat.widget.AppCompatImageButton;
+
 import de.schildbach.oeffi.util.ToggleImageButton;
 
 public class MyActionBar extends LinearLayout {
@@ -149,7 +152,7 @@ public class MyActionBar extends LinearLayout {
     }
 
     public ImageButton addButton(final int drawableRes, final int descriptionRes) {
-        final ImageButton button = new ImageButton(context);
+        final ImageButton button = new AppCompatImageButton(context);
         button.setImageResource(drawableRes);
         button.setScaleType(ScaleType.CENTER);
         button.setMinimumHeight(res.getDimensionPixelSize(R.dimen.action_bar_height));

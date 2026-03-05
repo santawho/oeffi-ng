@@ -22,9 +22,10 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.widget.Checkable;
-import android.widget.ImageButton;
 
-public class ToggleImageButton extends ImageButton implements Checkable {
+import androidx.appcompat.widget.AppCompatImageButton;
+
+public class ToggleImageButton extends AppCompatImageButton implements Checkable {
     public static interface OnCheckedChangeListener {
         void onCheckedChanged(final ToggleImageButton buttonView, final boolean isChecked);
     }

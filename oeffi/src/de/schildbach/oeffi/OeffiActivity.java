@@ -36,6 +36,7 @@ import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.text.format.DateUtils;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -51,9 +52,11 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.window.OnBackInvokedDispatcher;
 
-import androidx.activity.ComponentActivity;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.splashscreen.SplashScreen;
@@ -100,7 +103,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-public abstract class OeffiActivity extends ComponentActivity {
+public abstract class OeffiActivity extends AppCompatActivity {
     protected static final String INTENT_EXTRA_LINK_ARGS = OeffiActivity.class.getName() + ".link_args";
     protected static final String INTENT_EXTRA_NETWORK_NAME = OeffiActivity.class.getName() + ".network";
 
@@ -211,10 +214,19 @@ public abstract class OeffiActivity extends ComponentActivity {
 
     @Override
     protected void attachBaseContext(final Context base) {
-        final Configuration initialConfiguration = Application.getInstance().getResources().getConfiguration();
-        applyOverrideConfiguration(Application.getInstance().updateOverrideConfiguration(this, initialConfiguration));
+        final String setting = Application.getInstance().getSharedPreferences()
+                .getString("user_interface_darkmode_switch", "system");
+        if ("on".equals(setting)) {
+            getDelegate().setLocalNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        } else if ("off".equals(setting)) {
+            getDelegate().setLocalNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
 
-        super.attachBaseContext(base);
+        final Configuration initialConfiguration = base.getResources().getConfiguration();
+        final Configuration overrideConfiguration = Application.getInstance().updateOverrideConfiguration(this, initialConfiguration);
+        // applyOverrideConfiguration(overrideConfiguration);
+        // super.attachBaseContext(base);
+        super.attachBaseContext(base.createConfigurationContext(overrideConfiguration));
     }
 
     protected boolean isTakeDriverModeFromApplication() {
@@ -524,7 +536,7 @@ public abstract class OeffiActivity extends ComponentActivity {
         if (navigationDrawerLayout == null)
             return;
 
-        final Switch toggleSwitch = navigationDrawerLayout.findViewById(R.id.navigation_drawer_voice_control_toggle);
+        final SwitchCompat toggleSwitch = navigationDrawerLayout.findViewById(R.id.navigation_drawer_voice_control_toggle);
         final TextView triggerView = navigationDrawerLayout.findViewById(R.id.navigation_drawer_voice_control_trigger);
         boolean showTrigger = false;
         boolean showToggle = false;
@@ -569,7 +581,7 @@ public abstract class OeffiActivity extends ComponentActivity {
                 break;
             case VOICE_CONTROL_OPTION_TOGGLE:
                 final boolean toggleState = prefs.getBoolean(PREFS_KEY_VOICE_TOGGLE_STATE, true);
-                final Switch toggleSwitch = navigationDrawerLayout.findViewById(R.id.navigation_drawer_voice_control_toggle);
+                final SwitchCompat toggleSwitch = navigationDrawerLayout.findViewById(R.id.navigation_drawer_voice_control_toggle);
                 toggleSwitch.setText(getString(toggleState
                         ? R.string.user_interface_voice_control_toggle_on_title
                         : R.string.user_interface_voice_control_toggle_off_title));

@@ -542,7 +542,7 @@ public class Application extends android.app.Application {
             final Configuration originalConfiguration) {
         final Configuration configuration = new Configuration(originalConfiguration != null
                 ? originalConfiguration
-                : getResources().getConfiguration());
+                : context.getResources().getConfiguration());
 
         final String setting = PreferenceManager.getDefaultSharedPreferences(this)
                 .getString("user_interface_darkmode_switch", "system");

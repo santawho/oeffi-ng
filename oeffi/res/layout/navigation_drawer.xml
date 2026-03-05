@@ -46,7 +46,7 @@
                     android:scaleType="fitCenter"
                     android:tint="#FF757575"
                     android:src="@drawable/ic_microphone_black_24dp" />
-                <Switch
+                <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/navigation_drawer_voice_control_toggle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

@@ -27,7 +27,6 @@ import android.view.MenuItem;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -35,9 +34,10 @@ import androidx.preference.Preference;
 
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.MyActionBar;
+import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 
-public class PreferenceActivity extends AppCompatActivity {
+public class PreferenceActivity extends OeffiActivity {
     public static final String EXTRA_PREFKEY = "prefkey";
     public static final String EXTRA_HANDLER = "handler";
 
@@ -117,10 +117,6 @@ public class PreferenceActivity extends AppCompatActivity {
         // actionBar.setPrimaryTitle(getTitle());
 
         handleIntent(intent);
-    }
-
-    protected final MyActionBar getMyActionBar() {
-        return findViewById(R.id.action_bar);
     }
 
     @Override
