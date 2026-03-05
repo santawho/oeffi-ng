@@ -688,6 +688,10 @@ public abstract class OeffiActivity extends AppCompatActivity {
         onBackPressedEvent();
     }
 
+    public final void realOnBackPressed() {
+        super.onBackPressed();
+    }
+
     public void onBackPressedEvent() {
         if (!isMainActivity() && isTaskRoot())
             finishAndRemoveTask();

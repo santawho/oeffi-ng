@@ -145,6 +145,11 @@ public class PreferenceActivity extends OeffiActivity {
             finish();
     }
 
+    @Override
+    public void onBackPressedEvent() {
+        realOnBackPressed();
+    }
+
     public void setSubTitle(final CharSequence title) {
         final MyActionBar actionBar = getMyActionBar();
         final String mainTitle = getString(R.string.global_options_preferences_title);
