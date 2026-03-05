@@ -70,6 +70,8 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.navigation.NavigationNotification;
 import de.schildbach.oeffi.directions.navigation.TripNavigatorActivity;
 import de.schildbach.oeffi.mapview.OeffiMapView;
+import de.schildbach.oeffi.preference.DirectionsFragment;
+import de.schildbach.oeffi.preference.PreferenceActivity;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.util.TimeSpec.DepArr;
 import de.schildbach.oeffi.directions.list.QueryHistoryAdapter;
@@ -582,6 +584,10 @@ public class DirectionsActivity extends OeffiMainActivity implements
             locationSelector.setLocationSelectionListener(this);
             locationSelector.setup(this, prefs);
             locationSelector.setNetwork(network, getStoredTripsUsage());
+
+            findViewById(R.id.directions_options_settings).setOnClickListener(v -> {
+                PreferenceActivity.start(this, DirectionsFragment.class);
+            });
 
             getMapView().setDirectionsOverlay(viewFromLocation, viewToLocation);
         }
@@ -1341,7 +1347,9 @@ public class DirectionsActivity extends OeffiMainActivity implements
     }
 
     private void expandFormIfRequired(final boolean haveNonDefaultProducts) {
-        expandForm(haveNonDefaultProducts
+        expandForm(
+                buttonExpand.isChecked()
+                || haveNonDefaultProducts
                 || viewViaLocation.getText() != null
                 || viewBike.isChecked()
                 || (!isForceDirectOption() && viewDirectOption.isChecked())
@@ -1349,24 +1357,20 @@ public class DirectionsActivity extends OeffiMainActivity implements
     }
 
     private void expandForm(final boolean expanded) {
+        ViewUtils.setVisibility(findViewById(R.id.directions_options_container), expanded);
+        buttonExpand.setChecked(expanded);
         if (expanded) {
-            buttonExpand.setChecked(true);
             initLayoutTransitions(true);
 
             final NetworkProvider networkProvider = network != null ? NetworkProviderFactory.provider(network) : null;
 
             ViewUtils.setVisibility(viewViaLocation, networkProvider != null && networkProvider.hasCapabilities(NetworkProvider.Capability.TRIPS_VIA));
-            viewProducts.setVisibility(View.VISIBLE);
             ViewUtils.setVisibility(viewDirectOption, networkProvider != null && networkProvider.hasCapabilities(Capability.DIRECT_OPTION));
             ViewUtils.setVisibility(viewBike, networkProvider != null && networkProvider.hasCapabilities(Capability.BIKE_OPTION));
         } else {
-            buttonExpand.setChecked(false);
             initLayoutTransitions(false);
 
             viewViaLocation.setVisibility(View.GONE);
-            viewProducts.setVisibility(View.GONE);
-            viewDirectOption.setVisibility(View.GONE);
-            viewBike.setVisibility(View.GONE);
         }
     }
 
@@ -1384,6 +1388,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         ((ViewGroup) findViewById(R.id.directions_form)).setLayoutTransition(lt3);
 
         final LayoutTransition lt4 = new LayoutTransition();
+        lt4.enableTransitionType(LayoutTransition.CHANGING);
         ((ViewGroup) findViewById(R.id.directions_form_location_group)).setLayoutTransition(lt4);
     }
 

@@ -38,125 +38,148 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
-    <HorizontalScrollView
-        android:id="@+id/directions_products"
+    <RelativeLayout
+        android:id="@+id/directions_options_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scrollbars="none"
-        android:visibility="gone">
+        android:layout_height="wrap_content">
 
         <LinearLayout
+            android:id="@+id/directions_options"
+            android:orientation="vertical"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <HorizontalScrollView
+                android:id="@+id/directions_products"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="@dimen/text_padding_horizontal"
+                    android:paddingRight="@dimen/text_padding_horizontal"
+                    android:minHeight="@dimen/action_bar_button_width"
+                    android:orientation="horizontal">
+
+                    <de.schildbach.oeffi.util.ToggleImageButton
+                        android:id="@+id/directions_products_i"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@string/product_i"
+                        android:minWidth="@dimen/action_bar_button_width"
+                        android:src="@drawable/ic_menu_product_highspeed"
+                        android:tag="I" />
+
+                    <de.schildbach.oeffi.util.ToggleImageButton
+                        android:id="@+id/directions_products_r"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@string/product_r"
+                        android:minWidth="@dimen/action_bar_button_width"
+                        android:src="@drawable/ic_menu_product_train"
+                        android:tag="R" />
+
+                    <de.schildbach.oeffi.util.ToggleImageButton
+                        android:id="@+id/directions_products_s"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@string/product_s"
+                        android:minWidth="@dimen/action_bar_button_width"
+                        android:src="@drawable/ic_menu_product_suburban"
+                        android:tag="S" />
+
+                    <de.schildbach.oeffi.util.ToggleImageButton
+                        android:id="@+id/directions_products_u"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@string/product_u"
+                        android:minWidth="@dimen/action_bar_button_width"
+                        android:src="@drawable/ic_menu_product_subway"
+                        android:tag="U" />
+
+                    <de.schildbach.oeffi.util.ToggleImageButton
+                        android:id="@+id/directions_products_t"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@string/product_t"
+                        android:minWidth="@dimen/action_bar_button_width"
+                        android:src="@drawable/ic_menu_product_tram"
+                        android:tag="T" />
+
+                    <de.schildbach.oeffi.util.ToggleImageButton
+                        android:id="@+id/directions_products_b"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@string/product_b"
+                        android:minWidth="@dimen/action_bar_button_width"
+                        android:src="@drawable/ic_menu_product_bus"
+                        android:tag="B" />
+
+                    <de.schildbach.oeffi.util.ToggleImageButton
+                        android:id="@+id/directions_products_p"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@string/product_p"
+                        android:minWidth="@dimen/action_bar_button_width"
+                        android:src="@drawable/ic_menu_product_call"
+                        android:tag="P" />
+
+                    <de.schildbach.oeffi.util.ToggleImageButton
+                        android:id="@+id/directions_products_f"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@string/product_f"
+                        android:minWidth="@dimen/action_bar_button_width"
+                        android:src="@drawable/ic_menu_product_ferry"
+                        android:tag="F" />
+
+                    <de.schildbach.oeffi.util.ToggleImageButton
+                        android:id="@+id/directions_products_c"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@string/product_c"
+                        android:minWidth="@dimen/action_bar_button_width"
+                        android:src="@drawable/ic_menu_product_cablecar"
+                        android:tag="C" />
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <CheckBox
+                android:id="@+id/directions_option_bike"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/text_padding_vertical_lax"
+                android:layout_marginLeft="@dimen/text_padding_horizontal_lax"
+                android:layout_marginRight="@dimen/text_padding_horizontal_lax"
+                android:layout_marginTop="@dimen/text_padding_vertical_lax"
+                android:text="@string/directions_option_bike" />
+
+            <CheckBox
+                android:id="@+id/directions_option_direct"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/text_padding_vertical_lax"
+                android:layout_marginLeft="@dimen/text_padding_horizontal_lax"
+                android:layout_marginRight="@dimen/text_padding_horizontal_lax"
+                android:layout_marginTop="@dimen/text_padding_vertical_lax"
+                android:text="@string/directions_option_direct" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/directions_options_settings"
+            android:layout_alignBottom="@id/directions_options"
+            android:layout_alignParentRight="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingLeft="@dimen/text_padding_horizontal"
-            android:paddingRight="@dimen/text_padding_horizontal"
-            android:minHeight="@dimen/action_bar_button_width"
-            android:orientation="horizontal">
-
-            <de.schildbach.oeffi.util.ToggleImageButton
-                android:id="@+id/directions_products_i"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:contentDescription="@string/product_i"
-                android:minWidth="@dimen/action_bar_button_width"
-                android:src="@drawable/ic_menu_product_highspeed"
-                android:tag="I" />
-
-            <de.schildbach.oeffi.util.ToggleImageButton
-                android:id="@+id/directions_products_r"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:contentDescription="@string/product_r"
-                android:minWidth="@dimen/action_bar_button_width"
-                android:src="@drawable/ic_menu_product_train"
-                android:tag="R" />
-
-            <de.schildbach.oeffi.util.ToggleImageButton
-                android:id="@+id/directions_products_s"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:contentDescription="@string/product_s"
-                android:minWidth="@dimen/action_bar_button_width"
-                android:src="@drawable/ic_menu_product_suburban"
-                android:tag="S" />
-
-            <de.schildbach.oeffi.util.ToggleImageButton
-                android:id="@+id/directions_products_u"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:contentDescription="@string/product_u"
-                android:minWidth="@dimen/action_bar_button_width"
-                android:src="@drawable/ic_menu_product_subway"
-                android:tag="U" />
-
-            <de.schildbach.oeffi.util.ToggleImageButton
-                android:id="@+id/directions_products_t"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:contentDescription="@string/product_t"
-                android:minWidth="@dimen/action_bar_button_width"
-                android:src="@drawable/ic_menu_product_tram"
-                android:tag="T" />
-
-            <de.schildbach.oeffi.util.ToggleImageButton
-                android:id="@+id/directions_products_b"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:contentDescription="@string/product_b"
-                android:minWidth="@dimen/action_bar_button_width"
-                android:src="@drawable/ic_menu_product_bus"
-                android:tag="B" />
-
-            <de.schildbach.oeffi.util.ToggleImageButton
-                android:id="@+id/directions_products_p"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:contentDescription="@string/product_p"
-                android:minWidth="@dimen/action_bar_button_width"
-                android:src="@drawable/ic_menu_product_call"
-                android:tag="P" />
-
-            <de.schildbach.oeffi.util.ToggleImageButton
-                android:id="@+id/directions_products_f"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:contentDescription="@string/product_f"
-                android:minWidth="@dimen/action_bar_button_width"
-                android:src="@drawable/ic_menu_product_ferry"
-                android:tag="F" />
-
-            <de.schildbach.oeffi.util.ToggleImageButton
-                android:id="@+id/directions_products_c"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:contentDescription="@string/product_c"
-                android:minWidth="@dimen/action_bar_button_width"
-                android:src="@drawable/ic_menu_product_cablecar"
-                android:tag="C" />
-        </LinearLayout>
-    </HorizontalScrollView>
-
-    <CheckBox
-        android:id="@+id/directions_option_bike"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/text_padding_vertical_lax"
-        android:layout_marginLeft="@dimen/text_padding_horizontal_lax"
-        android:layout_marginRight="@dimen/text_padding_horizontal_lax"
-        android:layout_marginTop="@dimen/text_padding_vertical_lax"
-        android:text="@string/directions_option_bike"
-        android:visibility="gone" />
-
-    <CheckBox
-        android:id="@+id/directions_option_direct"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/text_padding_vertical_lax"
-        android:layout_marginLeft="@dimen/text_padding_horizontal_lax"
-        android:layout_marginRight="@dimen/text_padding_horizontal_lax"
-        android:layout_marginTop="@dimen/text_padding_vertical_lax"
-        android:text="@string/directions_option_direct"
-        android:visibility="gone" />
+            android:paddingHorizontal="@dimen/text_padding_horizontal_lax"
+            android:paddingVertical="@dimen/text_padding_vertical_lax"
+            android:tint="@color/fg_significant"
+            android:src="@drawable/ic_settings_grey600_24dp" />
+    </RelativeLayout>
 
     <include layout="@layout/directions_form_time_and_go_include"
         android:id="@+id/time_and_go_bottom"
