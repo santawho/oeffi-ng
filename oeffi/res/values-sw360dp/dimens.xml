@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- in androidx.preferences reserves space for the icon on larger devices by default -->
+    <!-- this MUST be overidden explicitly HERE for sw360dp  -->
+    <bool name="config_materialPreferenceIconSpaceReserved" tools:override="true">false</bool>
+
+</resources>

@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <string name="dimension_selector" tools:ignore="ExtraTranslation">standard</string>
+    <string name="dimension_selector" translatable="false" tools:ignore="ExtraTranslation">standard</string>
+
+    <!-- in androidx.preferences reserves space for the icon on larger devices by default -->
+    <!-- this MUST also be overidden explicitly for sw360dp  -->
+    <bool name="config_materialPreferenceIconSpaceReserved" tools:override="true">false</bool>
 
     <dimen name="font_size_tiny">10sp</dimen>
     <dimen name="font_size_small">12sp</dimen>
