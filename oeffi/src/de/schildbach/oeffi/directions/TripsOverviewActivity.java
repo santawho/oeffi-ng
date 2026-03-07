@@ -74,6 +74,7 @@ import javax.annotation.Nullable;
 import javax.net.ssl.SSLException;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
@@ -295,7 +296,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         });
         barView.setOnScrollListener(() -> {
 //            log.info("barView.onScrollListener -> foregroundHandler.post(checkMoreRunnable)");
-            postCheckMoreRunnable(false);
+            postCheckMoreRunnable(true);
         });
 
         final View disclaimerView = findViewById(R.id.directions_trip_overview_disclaimer_group);
@@ -452,6 +453,8 @@ public class TripsOverviewActivity extends OeffiActivity {
 
     public void postCheckMoreRunnable(final boolean delayed) {
 //        log.info("fetch more");
+        if (!delayed)
+            foregroundHandler.removeCallbacks(checkMoreRunnable);
         foregroundHandler.postDelayed(checkMoreRunnable, delayed ? 50 : 0);
     }
 
@@ -468,25 +471,25 @@ public class TripsOverviewActivity extends OeffiActivity {
             if (initialRequested) {
                 initialRequested = false;
                 searchMoreContext.reset();
-                queryTripsRunnable = new QueryMoreTripsRunnable(queryTripsContextLater, true, false, false, true, searchMoreContext);
+                queryTripsRunnable = new QueryMoreTripsRunnable(null, true, false, false, true, searchMoreContext);
             } else if (reloadRequested) {
                 reloadRequested = false;
                 searchMoreContext.reset();
-                queryTripsRunnable = new QueryMoreTripsRunnable(queryTripsContextLater, false, false, false, true, searchMoreContext);
+                queryTripsRunnable = new QueryMoreTripsRunnable(null, false, false, false, true, searchMoreContext);
             } else if (searchMoreRequested) {
                 searchMoreRequested = false;
                 final SearchMoreContext.NextRoundInfo nextRoundInfo = searchMoreContext.prepareNextRound(TripsOverviewActivity.this);
                 if (nextRoundInfo != null) {
-                    queryTripsRunnable = new QueryMoreTripsRunnable(queryTripsContextLater, false, false, false, false, searchMoreContext);
+                    queryTripsRunnable = new QueryMoreTripsRunnable(null, false, false, false, false, searchMoreContext);
                     if (nextRoundInfo.infoText != null)
                         runOnUiThread(() -> new Toast(TripsOverviewActivity.this).toast(nextRoundInfo.infoText));
                 }
-            } else if (queryTripsContextLater != null && queryTripsContextLater.canQueryLater()
-                    && (lastVisiblePosition == AdapterView.INVALID_POSITION || lastVisiblePosition + 1 >= trips.size())) {
-                queryTripsRunnable = new QueryMoreTripsRunnable(queryTripsContextLater, false, false, true, false, searchMoreContext);
             } else if (queryTripsContextEarlier != null && queryTripsContextEarlier.canQueryEarlier()
                     && (firstVisiblePosition == AdapterView.INVALID_POSITION || firstVisiblePosition <= 0)) {
                 queryTripsRunnable = new QueryMoreTripsRunnable(queryTripsContextEarlier, false, true, false, false, searchMoreContext);
+            } else if (queryTripsContextLater != null && queryTripsContextLater.canQueryLater()
+                    && (lastVisiblePosition == AdapterView.INVALID_POSITION || lastVisiblePosition + 1 >= trips.size())) {
+                queryTripsRunnable = new QueryMoreTripsRunnable(queryTripsContextLater, false, false, true, false, searchMoreContext);
             } else if (searchMoreContext.searchMorePossible()) {
                 runOnUiThread(() -> setSearchMoreButtonEnabled(true));
             }
@@ -597,7 +600,7 @@ public class TripsOverviewActivity extends OeffiActivity {
                         final int countNew;
                         if (result.status == QueryTripsResult.Status.OK) {
                             if (initial) {
-                                processInitialResult(result, searchMoreContext);
+                                countNew = processInitialResult(result, searchMoreContext);
 
                                 if (result.from != null && result.from.name != null
                                         && result.to != null && result.to.name != null) {
@@ -609,8 +612,9 @@ public class TripsOverviewActivity extends OeffiActivity {
                                             result.from, result.to, result.via, null, true,
                                             maxHistoryEntries);
                                 }
+                            } else {
+                                countNew = processResult(result, earlier, later, searchMoreContext);
                             }
-                            countNew = processResult(result, earlier, later, searchMoreContext);
                         } else if (initial) {
                             countNew = 0;
                             if (result.status == QueryTripsResult.Status.UNKNOWN_FROM) {
@@ -637,7 +641,14 @@ public class TripsOverviewActivity extends OeffiActivity {
                         } else {
                             if (result.status == QueryTripsResult.Status.NO_TRIPS) {
                                 countNew = 0;
-                                // ignore
+                                if (earlier) {
+                                    queryTripsContextEarlier = null;
+                                    barView.setCanScrollEarlier(false);
+                                }
+                                if (later) {
+                                    queryTripsContextLater = null;
+                                    barView.setCanScrollLater(false);
+                                }
                             } else {
                                 countNew = 0;
                                 new Toast(TripsOverviewActivity.this).toast(R.string.toast_network_problem);
@@ -649,7 +660,8 @@ public class TripsOverviewActivity extends OeffiActivity {
                         queryMoreTripsRunning = false;
 
                         // fetch more
-                        postCheckMoreRunnable(true);
+                        if (countNew > 0)
+                            postCheckMoreRunnable(false);
                     });
                     return true;
                 } catch (final SessionExpiredException | NotFoundException x) {
@@ -984,27 +996,26 @@ public class TripsOverviewActivity extends OeffiActivity {
         if (!earlierOrLater)
             searchMoreContext.tellNewTripsAddedAndAddMoreIfNecessary(countNew, trips);
 
-        if (countNew > 0) {
-            // redraw
-            barView.setTrips(
-                    new ArrayList<>(trips),
-                    network, getStoredTripsUsage(),
-                    result.context != null && result.context.canQueryLater(),
-                    result.context != null && result.context.canQueryEarlier(),
-                    showAccessibility, showBicycleCarriage, maxWalkDistance);
-
-            // initial cursor positioning
-            if (initial && !trips.isEmpty())
-                barView.setSelection(searchMoreContext.departureBased ? 1 : trips.size() - 1);
-        }
-
-
         // save context for next request
         if (!earlier)
             queryTripsContextLater = result.context;
 
         if (!later)
             queryTripsContextEarlier = result.context;
+
+        if (countNew > 0) {
+            // redraw
+            barView.setTrips(
+                    new ArrayList<>(trips),
+                    network, getStoredTripsUsage(),
+                    queryTripsContextLater != null && queryTripsContextLater.canQueryLater(),
+                    queryTripsContextEarlier != null && queryTripsContextEarlier.canQueryEarlier(),
+                    showAccessibility, showBicycleCarriage, maxWalkDistance);
+
+            // initial cursor positioning
+            if (initial && !trips.isEmpty())
+                barView.setSelection(searchMoreContext.departureBased ? 1 : trips.size() - 1);
+        }
 
         return countNew;
     }

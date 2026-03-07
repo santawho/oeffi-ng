@@ -313,6 +313,16 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
+    public void setCanScrollEarlier(final boolean canScrollEarlier) {
+        this.canScrollEarlier = canScrollEarlier;
+        notifyDataSetChanged();
+    }
+
+    public void setCanScrollLater(final boolean canScrollLater) {
+        this.canScrollLater = canScrollLater;
+        notifyDataSetChanged();
+    }
+
     public void setMinMaxTimes(final long minTime, final long maxTime) {
         checkArgument(minTime > 0);
         checkArgument(maxTime > minTime);

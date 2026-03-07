@@ -196,6 +196,14 @@ public class TripsGallery extends Gallery {
                 maxWalkDistance);
     }
 
+    public void setCanScrollEarlier(final boolean canScrollEarlier) {
+        adapter.setCanScrollEarlier(canScrollEarlier);
+    }
+
+    public void setCanScrollLater(final boolean canScrollLater) {
+        adapter.setCanScrollLater(canScrollLater);
+    }
+
     public void setOnScrollListener(final OnScrollListener onScrollListener) {
         this.onScrollListener = onScrollListener;
     }
