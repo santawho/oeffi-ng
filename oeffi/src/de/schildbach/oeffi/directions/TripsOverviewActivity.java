@@ -596,16 +596,19 @@ public class TripsOverviewActivity extends OeffiActivity {
                         log.debug("Got {} ({})", result.toShortString(), later ? "later" : "earlier");
                         final int countNew;
                         if (result.status == QueryTripsResult.Status.OK) {
-                            if (initial
-                                    && result.from != null && result.from.name != null
-                                    && result.to != null && result.to.name != null) {
-                                final int maxHistoryEntries = Integer.parseInt(prefs.getString(
-                                        Constants.PREFS_KEY_MAX_HISTORY_ENTRIES,
-                                        Integer.toString(getResources().getInteger(R.integer.default_max_history_entries))));
-                                historyUri = QueryHistoryProvider.put(
-                                        getContentResolver(), network, getStoredTripsUsage(),
-                                        result.from, result.to, result.via, null, true,
-                                        maxHistoryEntries);
+                            if (initial) {
+                                processInitialResult(result, searchMoreContext);
+
+                                if (result.from != null && result.from.name != null
+                                        && result.to != null && result.to.name != null) {
+                                    final int maxHistoryEntries = Integer.parseInt(prefs.getString(
+                                            Constants.PREFS_KEY_MAX_HISTORY_ENTRIES,
+                                            Integer.toString(getResources().getInteger(R.integer.default_max_history_entries))));
+                                    historyUri = QueryHistoryProvider.put(
+                                            getContentResolver(), network, getStoredTripsUsage(),
+                                            result.from, result.to, result.via, null, true,
+                                            maxHistoryEntries);
+                                }
                             }
                             countNew = processResult(result, earlier, later, searchMoreContext);
                         } else if (initial) {
