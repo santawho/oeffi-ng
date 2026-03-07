@@ -195,17 +195,8 @@
                         android:layout_weight="1"
                         android:drawablePadding="@dimen/text_padding_horizontal_lax"
                         android:gravity="bottom|left"
-                        android:maxLines="2"
                         android:textSize="@dimen/font_size_disclaimer" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="bottom"
-                        android:gravity="bottom|right"
-                        android:text="@string/disclaimer_responsibility_2line"
-                        android:textSize="@dimen/font_size_disclaimer"
-                        tools:ignore="TextSizeCheck" />
                 </LinearLayout>
 
                 <Space

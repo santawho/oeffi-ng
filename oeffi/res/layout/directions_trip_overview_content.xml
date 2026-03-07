@@ -26,10 +26,12 @@
 
         </de.schildbach.oeffi.util.StrictSwipeRefreshLayout>
 
-        <FrameLayout
+        <LinearLayout
+            android:orientation="horizontal"
             android:id="@+id/directions_trip_overview_disclaimer_group"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_gravity="bottom"
             android:layout_marginLeft="@dimen/text_padding_horizontal_verylax"
             android:layout_marginRight="@dimen/text_padding_horizontal_verylax"
             android:layout_marginTop="@dimen/text_padding_vertical"
@@ -37,21 +39,13 @@
 
             <TextView
                 android:id="@+id/trips_server_product"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom|left"
-                android:gravity="left"
+                android:layout_gravity="bottom"
+                android:drawablePadding="@dimen/text_padding_horizontal_lax"
                 android:textSize="@dimen/font_size_disclaimer"
                 android:visibility="gone" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom|right"
-                android:gravity="right"
-                android:text="@string/disclaimer_responsibility_2line"
-                android:textSize="@dimen/font_size_disclaimer" />
-        </FrameLayout>
+        </LinearLayout>
     </FrameLayout>
 
 </LinearLayout>

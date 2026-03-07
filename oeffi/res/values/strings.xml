@@ -7,6 +7,7 @@
     <string name="directions_icon_label">Öffi Directions</string>
     <string name="plans_icon_label">Öffi Plans</string>
     <string name="operations_icon_label">Öffi Operations</string>
+    <string name="disclaimer_network_and_responsibility">data provided by %s\nerrors and omissions excepted</string>
     <string name="disclaimer_network">data provided by\n%s</string>
     <string name="disclaimer_responsibility">errors and omissions excepted</string>
     <string name="disclaimer_responsibility_2line">errors and omis-\nsions excepted</string>

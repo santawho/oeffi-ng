@@ -7,6 +7,7 @@
     <string name="directions_icon_label">Öffi Verbindungen</string>
     <string name="plans_icon_label">Öffi Netzpläne</string>
     <string name="operations_icon_label">Öffi Einsatzplanung</string>
+    <string name="disclaimer_network_and_responsibility">Daten bereitgestellt von %s\nalle Angaben ohne Gewähr</string>
     <string name="disclaimer_network">Daten bereitgestellt von\n%s</string>
     <string name="disclaimer_responsibility">alle Angaben ohne Gewähr</string>
     <string name="disclaimer_responsibility_2line">alle Angaben\nohne Gewähr</string>
