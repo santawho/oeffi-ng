@@ -325,6 +325,7 @@ public final class HorizontalPager extends ViewGroup {
                  */
                 mLastMotionY = ev.getY();
                 mLastMotionX = ev.getX();
+                mTouchState = TOUCH_STATE_REST;
                 break;
             default:
                 break;
@@ -335,7 +336,6 @@ public final class HorizontalPager extends ViewGroup {
 
     @Override
     public boolean onTouchEvent(final MotionEvent ev) {
-
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain();
         }
