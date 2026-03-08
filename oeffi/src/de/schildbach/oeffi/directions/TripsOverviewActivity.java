@@ -96,6 +96,7 @@ import static java.util.Objects.requireNonNull;
 
 public class TripsOverviewActivity extends OeffiActivity {
     private static final int DETAILS_NEW_NAVIGATION = 4711;
+    private static final long INHIBIT_DATA_REQUESTS_AFTER_ERROR_MS = 10000;
 
     public static class RenderConfig implements Serializable {
         private static final long serialVersionUID = 1567241493704301720L;
@@ -212,7 +213,7 @@ public class TripsOverviewActivity extends OeffiActivity {
                 .compare(trip1, trip2);
     });
 
-    private boolean queryMoreTripsEnabled = false;
+    private long queryMoreTripsEnabledAfterTime = Long.MAX_VALUE;
     private boolean queryMoreTripsRunning = false;
     private boolean initialRequested = false;
     private boolean reloadRequested = false;
@@ -408,7 +409,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         // regular refresh
         registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
 
-        queryMoreTripsEnabled = true;
+        queryMoreTripsEnabledAfterTime = Long.MIN_VALUE;
 
         // delay because GUI is not initialized immediately
 //        log.info("onStart -> foregroundHandler.postDelayed(checkMoreRunnable, 50)");
@@ -425,7 +426,7 @@ public class TripsOverviewActivity extends OeffiActivity {
     protected void onStop() {
         unregisterReceiver(tickReceiver);
 
-        queryMoreTripsEnabled = false;
+        queryMoreTripsEnabledAfterTime = Long.MAX_VALUE;
         super.onStop();
     }
 
@@ -460,7 +461,10 @@ public class TripsOverviewActivity extends OeffiActivity {
 
     private final Runnable checkMoreRunnable = new Runnable() {
         public void run() {
-            if (!queryMoreTripsEnabled || queryMoreTripsRunning || backgroundHandler == null)
+            if (queryMoreTripsRunning || backgroundHandler == null)
+                return;
+
+            if (System.currentTimeMillis() < queryMoreTripsEnabledAfterTime)
                 return;
 
             final int positionOffset = queryTripsContextEarlier != null && queryTripsContextEarlier.canQueryEarlier() ? 0 : 1;
@@ -617,6 +621,7 @@ public class TripsOverviewActivity extends OeffiActivity {
                             }
                         } else if (initial) {
                             countNew = 0;
+                            queryMoreTripsEnabledAfterTime = System.currentTimeMillis() + INHIBIT_DATA_REQUESTS_AFTER_ERROR_MS;
                             if (result.status == QueryTripsResult.Status.UNKNOWN_FROM) {
                                 new Toast(TripsOverviewActivity.this).longToast(R.string.directions_message_unknown_from);
                             } else if (result.status == QueryTripsResult.Status.UNKNOWN_VIA) {
@@ -651,6 +656,7 @@ public class TripsOverviewActivity extends OeffiActivity {
                                 }
                             } else {
                                 countNew = 0;
+                                queryMoreTripsEnabledAfterTime = System.currentTimeMillis() + INHIBIT_DATA_REQUESTS_AFTER_ERROR_MS;
                                 new Toast(TripsOverviewActivity.this).toast(R.string.toast_network_problem);
                             }
                         }
