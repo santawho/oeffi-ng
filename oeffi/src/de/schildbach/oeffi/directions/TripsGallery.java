@@ -256,16 +256,19 @@ public class TripsGallery extends Gallery {
         }
 
         // snap to current time
-        if (minTime == Long.MAX_VALUE || (currentTime > minTime - DateUtils.MINUTE_IN_MILLIS * 30 && currentTime < minTime))
+        final long SNAP_CURRENT_TIME_SPAN = DateUtils.MINUTE_IN_MILLIS * 30;
+        if (minTime == Long.MAX_VALUE || (currentTime > minTime - SNAP_CURRENT_TIME_SPAN && currentTime < minTime))
             minTime = currentTime;
-        else if (maxTime == 0 || (currentTime < maxTime + DateUtils.MINUTE_IN_MILLIS * 30 && currentTime > maxTime))
+        else if (maxTime == 0 || (currentTime < maxTime + SNAP_CURRENT_TIME_SPAN && currentTime > maxTime))
             maxTime = currentTime;
 
         // padding
+        final long PADDING_DEFAULT_FRACTION = 6;  // was 12
+        final long PADDING_MIN_TIME = DateUtils.MINUTE_IN_MILLIS * 14;  // was 30 minutes
         final long timeDiff = maxTime - minTime;
-        long timePadding = timeDiff / 12;
-        if (timeDiff < DateUtils.MINUTE_IN_MILLIS * 30) // zoom limit
-            timePadding = (DateUtils.MINUTE_IN_MILLIS * 30 - timeDiff) / 2;
+        long timePadding = timeDiff / PADDING_DEFAULT_FRACTION;
+        if (timeDiff < PADDING_MIN_TIME) // zoom limit
+            timePadding = (PADDING_MIN_TIME - timeDiff) / 2;
         if (timePadding < DateUtils.MINUTE_IN_MILLIS) // minimum padding
             timePadding = DateUtils.MINUTE_IN_MILLIS;
         minTime = minTime - timePadding;
@@ -279,8 +282,8 @@ public class TripsGallery extends Gallery {
             final long diffMin = currentMinTime - minTime;
             final long diffMax = maxTime - currentMaxTime;
 
-            if (Math.abs(diffMin) > DateUtils.SECOND_IN_MILLIS * 10
-                    || Math.abs(diffMax) > DateUtils.SECOND_IN_MILLIS * 10) {
+            final long ANIMATE_TO_TIME = DateUtils.SECOND_IN_MILLIS * 59;
+            if (Math.abs(diffMin) > ANIMATE_TO_TIME || Math.abs(diffMax) > ANIMATE_TO_TIME) {
                 minTime = currentMinTime - diffMin / 5;
                 maxTime = currentMaxTime + diffMax / 5;
 
