@@ -176,6 +176,8 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         handlePlayAlarm(intent);
 
         stillCheckForOtherNavigations = true;
+
+        NavigationNotification.startForegroundService(this);
     }
 
     @Override
@@ -441,20 +443,18 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
         navigationRefreshRunnable = () -> {
             try {
-                Trip updatedTrip = navigator.refresh(forceRefreshAll, new Date());
+                final Trip updatedTrip = navigator.refresh(forceRefreshAll, new Date());
                 if (updatedTrip == null) {
                     handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));
                 } else {
-                    if (refreshTripDetails)
-                        updatedTrip = loadTripDetails(updatedTrip);
                     if (doNotificationUpdate) {
                         isStartupComplete = true;
-                        updateNotification(updatedTrip);
+                        runOnUiThread(() -> updateNotification(updatedTrip));
                     }
-                    final Trip finalUpdatedTrip = updatedTrip;
-                    runOnUiThread(() -> onTripUpdated(finalUpdatedTrip));
+                    final Trip detailedTrip = refreshTripDetails ? loadTripDetails(updatedTrip) : updatedTrip;
+                    runOnUiThread(() -> onTripUpdated(detailedTrip));
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));
             } finally {
                 navigationRefreshRunnable = null;

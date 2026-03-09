@@ -24,4 +24,10 @@
         android:title="@string/navigation_force_use_alarms_title"
         android:summary="@string/navigation_force_use_alarms_summary" />
 
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="navigation_invert_use_foreground_service"
+        android:title="@string/navigation_invert_use_foreground_service_title"
+        android:summary="@string/navigation_invert_use_foreground_service_summary" />
+
 </PreferenceScreen>

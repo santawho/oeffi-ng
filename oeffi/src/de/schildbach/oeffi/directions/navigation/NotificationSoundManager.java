@@ -248,7 +248,11 @@ public class NotificationSoundManager {
                         .setWillPauseWhenDucked(false)
                         .build();
         try {
-            audioManager.requestAudioFocus(currentAudioFocusRequest);
+            final int res = audioManager.requestAudioFocus(currentAudioFocusRequest);
+            if (res != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                log.warn("requesting audio focus, not granted");
+                currentAudioFocusRequest = null;
+            }
         } catch (final RuntimeException rte) {
             log.warn("requesting audio focus", rte);
             currentAudioFocusRequest = null;

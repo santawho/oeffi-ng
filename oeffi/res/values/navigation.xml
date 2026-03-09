@@ -89,6 +89,13 @@
         disabled in bedtime mode settings.
     </string>
 
+    <string name="navigation_invert_use_foreground_service_title">Invert foreground service</string>
+    <string name="navigation_invert_use_foreground_service_summary">
+        EXPERT SETTING, TAKE CARE! (requires restart)
+        Android 15 and above: DO NOT USE a foreground service to show navigation notifications.
+        Android 14 and below: use foreground service instead of simple notifications.
+    </string>
+
     <string name="navigation_travelalarm_notification_start_channel_name">Travel Alarm, start of journey</string>
     <string name="navigation_travelalarm_notification_start_channel_description">Alarm for beginning navigation</string>
     <string name="navigation_travelalarm_notification_start_title">Journey to %1$s about to begin</string>

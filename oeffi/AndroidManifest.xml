@@ -44,6 +44,8 @@
 <!--    <uses-permission android:name="android.permission.READ_CALENDAR" />-->
 <!--    <uses-permission android:name="android.permission.READ_CONTACTS" />-->
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
     <uses-feature
         android:name="android.hardware.touchscreen"
@@ -227,6 +229,8 @@
         <receiver android:name=".directions.navigation.NavigationNotification$ActionReceiver" />
         <service android:name=".directions.navigation.NavigationAlarmManager$RefreshService"
             android:exported="false" />
+        <service android:name=".directions.navigation.NavigationNotification$MediaPlaybackForegroundService"
+            android:exported="false" android:foregroundServiceType="mediaPlayback" />
 
 <!--        <receiver android:name=".DeviceAdmin$MyDeviceAdminReceiver"-->
 <!--            android:exported="true"-->

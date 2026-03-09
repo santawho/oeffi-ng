@@ -25,25 +25,30 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.pm.ServiceInfo;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.PowerManager;
 import android.service.notification.StatusBarNotification;
 import android.view.View;
 import android.widget.RemoteViews;
 
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.app.ServiceCompat;
 import androidx.core.content.ContextCompat;
 
 import org.slf4j.Logger;
@@ -157,14 +162,18 @@ public class NavigationNotification {
 
     private static SharedPreferences prefs;
 
+    private static boolean useForegroundService;
+
     public static void startup(final Context context) {
+        prefs = Application.getInstance().getSharedPreferences();
+        useForegroundService = Build.VERSION.SDK_INT >= 35
+                ^ prefs.getBoolean("navigation_invert_use_foreground_service", false);
+
         createNotificationChannels(context);
         DeviceWakeupReceiver.register(context);
     }
 
     private static void createNotificationChannels(final Context context) {
-        prefs = Application.getInstance().getSharedPreferences();
-
         TravelAlarmManager.createNotificationChannel(context);
         if (notificationChannelsCreated)
             return;
@@ -309,13 +318,16 @@ public class NavigationNotification {
         final List<StatusBarNotification> activeNotifications =
                 getNotificationManager(context).getActiveNotifications();
         for (final StatusBarNotification statusBarNotification : activeNotifications) {
-            final String tag = statusBarNotification.getTag();
+            final int id = statusBarNotification.getId();
+            final String tag = useForegroundService
+                    ? notificationTagsById.get(id)
+                    : statusBarNotification.getTag();
             if (tag == null || !tag.equals(notificationTag)) {
                 log.info("found other notification with tag={}", tag);
             } else {
                 log.info("found matching notification with posttime={}, id={}, key={}",
                         statusBarNotification.getPostTime(),
-                        statusBarNotification.getId(),
+                        id,
                         statusBarNotification.getKey());
                 if (latestStatusBarNotification == null
                         || latestStatusBarNotification.getPostTime() < statusBarNotification.getPostTime()) {
@@ -382,14 +394,17 @@ public class NavigationNotification {
         final List<StatusBarNotification> activeNotifications =
                 getNotificationManager(context).getActiveNotifications();
         for (final StatusBarNotification statusBarNotification : activeNotifications) {
-            final String tag = statusBarNotification.getTag();
-            if (!tag.startsWith(TAG_PREFIX_GUIDE))
+            final int id = statusBarNotification.getId();
+            final String tag = useForegroundService
+                    ? notificationTagsById.get(id)
+                    : statusBarNotification.getTag();
+            if (tag == null || !tag.startsWith(TAG_PREFIX_GUIDE))
                 continue;
             log.info("{} notification with tag={} posttime={}, id={}, key={}",
                     logText,
                     tag,
                     statusBarNotification.getPostTime(),
-                    statusBarNotification.getId(),
+                    id,
                     statusBarNotification.getKey());
             final Notification notification = statusBarNotification.getNotification();
             final Bundle extras = notification.extras;
@@ -405,11 +420,13 @@ public class NavigationNotification {
         final List<StatusBarNotification> activeNotifications =
                 notificationManager.getActiveNotifications();
         for (final StatusBarNotification statusBarNotification : activeNotifications) {
-            final String tag = statusBarNotification.getTag();
-            if (!tag.startsWith(TAG_PREFIX_GUIDE))
-                continue;
             final int id = statusBarNotification.getId();
-            notificationManager.cancel(tag, id);
+            final String tag = useForegroundService
+                    ? notificationTagsById.get(id)
+                    : statusBarNotification.getTag();
+            if (tag == null || !tag.startsWith(TAG_PREFIX_GUIDE))
+                continue;
+            notificationManager.cancel(null, id); // .cancel(tag, id);
         }
     }
 
@@ -417,6 +434,57 @@ public class NavigationNotification {
         NavigationAlarmManager.runOnHandlerThread(() -> {
             new NavigationNotification(intent).remove();
         });
+    }
+
+    private static final int NOTIFICATION_ID_BASE = 47110000;
+    private static final Map<String, Integer> notificationIdsByTag = new HashMap<>();
+    private static final Map<Integer, String> notificationTagsById = new HashMap<>();
+
+    private static int getNotificationIdByTag(final String notificationTag, final boolean create) {
+        if (notificationTag == null)
+            return 0;
+        synchronized (notificationIdsByTag) {
+            final Integer id = notificationIdsByTag.get(notificationTag);
+            if (id != null)
+                return id;
+            if (!create)
+                return 0;
+            int newId = NOTIFICATION_ID_BASE;
+            while (notificationTagsById.get(newId) != null)
+                newId += 1;
+            notificationIdsByTag.put(notificationTag, newId);
+            notificationTagsById.put(newId, notificationTag);
+            return newId;
+        }
+    }
+
+    public static class MediaPlaybackForegroundService extends Service {
+        public static MediaPlaybackForegroundService instance;
+
+        @Override
+        public void onCreate() {
+            instance = this;
+            super.onCreate();
+        }
+
+        @Nullable
+        @Override
+        public IBinder onBind(final Intent intent) {
+            return null;
+        }
+
+//        @Override
+//        public int onStartCommand(final Intent intent, final int flags, final int startId) {
+//            final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID_GUIDE);
+//            ServiceCompat.startForeground(this, 47110815, notificationBuilder.build(), ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
+//            return super.onStartCommand(intent, flags, startId);
+//        }
+    }
+
+    public static void startForegroundService(final Context context) {
+        if (useForegroundService) {
+            context.startForegroundService(new Intent(context, MediaPlaybackForegroundService.class));
+        }
     }
 
     private static final String S_ISSUE_NEVER = "never";
@@ -790,7 +858,8 @@ public class NavigationNotification {
             final Trip trip, final Configuration configuration,
             final Runnable doneListener) {
         NavigationAlarmManager.runOnHandlerThread(() -> {
-            new NavigationNotification(intent).internUpdateFromForeground(trip, configuration);
+            final NavigationNotification navigationNotification = new NavigationNotification(intent);
+            navigationNotification.internUpdateFromForeground(trip, configuration);
             if (doneListener != null)
                 doneListener.run();
         });
@@ -1285,7 +1354,16 @@ public class NavigationNotification {
         log.info("set notification with tag={}", notificationTag);
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
                 == PackageManager.PERMISSION_GRANTED) {
-            getNotificationManager(context).notify(notificationTag, 0, notification);
+            if (useForegroundService) {
+                synchronized (notificationIdsByTag) {
+                    final int notificationId = getNotificationIdByTag(notificationTag, true);
+                    ServiceCompat.startForeground(MediaPlaybackForegroundService.instance,
+                            notificationId, notification,
+                            ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
+                }
+            } else {
+                getNotificationManager(context).notify(notificationTag, 0, notification);
+            }
         }
 
         postEventNotifications(newEventNotifications);
@@ -1351,7 +1429,19 @@ public class NavigationNotification {
     }
 
     public void remove() {
-        getNotificationManager(context).cancel(notificationTag, 0);
+        if (useForegroundService) {
+            synchronized (notificationIdsByTag) {
+                final int notificationId = getNotificationIdByTag(notificationTag, false);
+                notificationTagsById.remove(notificationId);
+                if (notificationId != 0) {
+                    ServiceCompat.stopForeground(MediaPlaybackForegroundService.instance, ServiceCompat.STOP_FOREGROUND_DETACH);
+                    getNotificationManager(context).cancel(null, notificationId); // .cancel(notificationTag, 0);
+                    notificationIdsByTag.remove(notificationTag);
+                }
+            }
+        } else {
+            getNotificationManager(context).cancel(notificationTag, 0);
+        }
     }
 
     private PendingIntent getPendingActivityIntent(

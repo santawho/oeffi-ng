@@ -78,6 +78,13 @@
         Schlafenszeit-Einstellungen ist abgeschaltet.
     </string>
 
+    <string name="navigation_invert_use_foreground_service_title">Invertiere Foreground-Service</string>
+    <string name="navigation_invert_use_foreground_service_summary">
+        VORSICHT, EXPERTEN-OPTION! (erfordert Neustart)
+        Android 15 und darüber: benutze KEINEN Foreground-Service um Navigations-Benachrichtigungen anzuzeigen.
+        Android 14 und darunter: verwende den Foreground-Service an Stelle einfacher Benachrichtigungen.
+    </string>
+
     <string name="navigation_travelalarm_notification_start_channel_name">Reisewecker, Start der Reise</string>
     <string name="navigation_travelalarm_notification_start_channel_description">Alarm für bevorstehende Navigation</string>
     <string name="navigation_travelalarm_notification_start_title">Reise nach %1$s beginnt bald</string>
