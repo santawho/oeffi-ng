@@ -30,7 +30,8 @@ NVV|de-DE|Hessen;Kassel
 RMV|de-DE|Rhein-Main;Frankfurt;Wiesbaden;Darmstadt;Fulda
 VMV|de-DE|Mecklenburg-Vorpommern;Schwerin
 SH|de-DE|Schleswig-Holstein;Kiel;Lübeck;Hamburg
-GVH|de-DE|Niedersachsen;Hannover;Hamburg
+#GVH|de-DE|Niedersachsen;Hannover;Hamburg
+UESTRA|de-DE|Niedersachsen;Hannover;Hamburg
 BSVAG|de-DE|Braunschweig;Wolfsburg
 VBN|de-DE|Niedersachsen;Hamburg;Bremen;Bremerhaven;Oldenburg (Oldenburg);Osnabrück;Göttingen;Rostock
 VVO|de-DE|Sachsen;Dresden;Mittelsachsen;Chemnitz

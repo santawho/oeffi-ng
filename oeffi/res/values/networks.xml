@@ -56,6 +56,8 @@
     <string name="network_sh_comment">Kiel, Lübeck &amp; Schleswig-Holstein, local and regional</string>
     <string name="network_gvh_label">Hannover &amp; Lower Saxony</string>
     <string name="network_gvh_comment">local and regional</string>
+    <string name="network_uestra_label">Hannover &amp; Lower Saxony</string>
+    <string name="network_uestra_comment">local and regional</string>
     <string name="network_bsvag_label">Braunschweig &amp; Wolfsburg</string>
     <string name="network_bsvag_comment">local and regional</string>
     <string name="network_vbn_label">Hamburg, Bremen, Rostock &amp; South Lower Saxony</string>
