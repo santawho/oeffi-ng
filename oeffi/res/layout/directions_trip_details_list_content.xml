@@ -194,6 +194,7 @@
                         android:layout_gravity="bottom"
                         android:layout_weight="1"
                         android:drawablePadding="@dimen/text_padding_horizontal_lax"
+                        android:paddingHorizontal="@dimen/text_padding_horizontal_lax"
                         android:gravity="bottom|left"
                         android:textSize="@dimen/font_size_disclaimer" />
 

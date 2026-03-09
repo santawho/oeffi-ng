@@ -82,7 +82,10 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="bottom"
                         android:layout_weight="1"
+                        android:background="@color/bg_floating_disclaimer"
                         android:drawablePadding="@dimen/text_padding_horizontal_lax"
+                        android:paddingHorizontal="@dimen/text_padding_horizontal_lax"
+                        android:paddingVertical="@dimen/text_padding_vertical_lax"
                         android:gravity="bottom|left"
                         android:textSize="@dimen/font_size_disclaimer" />
 

@@ -43,6 +43,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 android:drawablePadding="@dimen/text_padding_horizontal_lax"
+                android:paddingHorizontal="@dimen/text_padding_horizontal_lax"
                 android:textSize="@dimen/font_size_disclaimer"
                 android:visibility="gone" />
         </LinearLayout>
