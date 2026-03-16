@@ -231,7 +231,7 @@ public class OperationNotification {
                 notificationManager.getActiveNotifications();
         for (final StatusBarNotification statusBarNotification : activeNotifications) {
             final String tag = statusBarNotification.getTag();
-            if (!tag.startsWith(TAG_PREFIX_GUIDE))
+            if (tag == null || !tag.startsWith(TAG_PREFIX_GUIDE))
                 continue;
             final int id = statusBarNotification.getId();
             notificationManager.cancel(tag, id);
