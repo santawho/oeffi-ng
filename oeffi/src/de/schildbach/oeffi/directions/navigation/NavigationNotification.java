@@ -40,6 +40,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.view.View;
 import android.widget.RemoteViews;
@@ -134,6 +135,7 @@ public class NavigationNotification {
         return newId;
     }
 
+    private static final String CHANNEL_ID_FOREGROUND_SERVICE = "foregroundservice";
     private static final String CHANNEL_ID_GUIDE = "navigation";
     private static final String CHANNEL_ID_CHANGES = "navigation-changes";
     private static final String CHANNEL_ID_DIRECTIONS = "navigation-directions";
@@ -163,11 +165,14 @@ public class NavigationNotification {
     private static SharedPreferences prefs;
 
     private static boolean useForegroundService;
+    private static boolean showFixedForegroundNotification;
 
     public static void startup(final Context context) {
         prefs = Application.getInstance().getSharedPreferences();
-        useForegroundService = Build.VERSION.SDK_INT >= 35
-                ^ prefs.getBoolean("navigation_invert_use_foreground_service", false);
+        // useForegroundService = Build.VERSION.SDK_INT >= 35
+        //         ^ prefs.getBoolean("navigation_invert_use_foreground_service", false);
+        useForegroundService = false;
+        showFixedForegroundNotification = Build.VERSION.SDK_INT >= 35;
 
         createNotificationChannels(context);
         DeviceWakeupReceiver.register(context);
@@ -178,6 +183,7 @@ public class NavigationNotification {
         if (notificationChannelsCreated)
             return;
 
+        createForegroundServiceChannel(context);
         createInstructionsChannel(context);
         createChangesChannel(context);
         createDirectionsChannel(context);
@@ -200,6 +206,19 @@ public class NavigationNotification {
         public void onReceive(final Context context, final Intent intent) {
             onDeviceWakingUp(context);
         }
+    }
+
+    private static void createForegroundServiceChannel(final Context context) {
+        if (!showFixedForegroundNotification)
+            return;
+
+        final CharSequence name = context.getString(R.string.navigation_foreground_service_channel_name);
+        final String description = context.getString(R.string.navigation_foreground_service_channel_description);
+        final NotificationChannel channel = new NotificationChannel(CHANNEL_ID_FOREGROUND_SERVICE, name, NotificationManager.IMPORTANCE_LOW);
+        channel.setDescription(description);
+        channel.setSound(null, null);
+        channel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+        getNotificationManager(context).createNotificationChannel(channel);
     }
 
     private static void createInstructionsChannel(final Context context) {
@@ -473,16 +492,34 @@ public class NavigationNotification {
             return null;
         }
 
-//        @Override
-//        public int onStartCommand(final Intent intent, final int flags, final int startId) {
-//            final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID_GUIDE);
-//            ServiceCompat.startForeground(this, 47110815, notificationBuilder.build(), ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
-//            return super.onStartCommand(intent, flags, startId);
-//        }
+        @Override
+        public int onStartCommand(final Intent intent, final int flags, final int startId) {
+            if (showFixedForegroundNotification && Build.VERSION.SDK_INT >= 35) {
+                final String contentText = getString(R.string.navigation_foreground_service_notification_text);
+                final Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID_FOREGROUND_SERVICE)
+                        .setOngoing(true)
+                        .setSilent(true)
+                        .setSmallIcon(R.drawable.ic_oeffi_directions_grey600_36dp)
+                        .setStyle(new NotificationCompat.BigTextStyle().bigText(contentText))
+                        .setContentIntent(PendingIntent.getActivity(
+                                this,
+                                0,
+                                new Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                                        .putExtra(Settings.EXTRA_APP_PACKAGE, this.getPackageName())
+                                        .putExtra(Settings.EXTRA_CHANNEL_ID, CHANNEL_ID_FOREGROUND_SERVICE),
+                                PendingIntent.FLAG_IMMUTABLE))
+                        .build();
+                ServiceCompat.startForeground(MediaPlaybackForegroundService.instance,
+                        NOTIFICATION_ID_BASE - 1, notification,
+                        ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
+            }
+
+            return super.onStartCommand(intent, flags, startId);
+        }
     }
 
     public static void startForegroundService(final Context context) {
-        if (useForegroundService) {
+        if (useForegroundService || showFixedForegroundNotification) {
             context.startForegroundService(new Intent(context, MediaPlaybackForegroundService.class));
         }
     }

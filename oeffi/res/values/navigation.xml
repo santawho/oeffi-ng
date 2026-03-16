@@ -62,6 +62,14 @@
     <string name="navigation_alarm_dialog_status_alarm_inactive_text">Alarm is currently inactive or not yet fixed.</string>
     <string name="navigation_alarm_dialog_status_alarm_at_text">Alarm will go off at %s.</string>
 
+    <string name="navigation_foreground_service_channel_name">Navigation sound control</string>
+    <string name="navigation_foreground_service_channel_description">Show ongoing permission to control sound output</string>
+    <string name="navigation_foreground_service_notification_text">
+        This notification is required, to give the app permission to control sound output,
+        e.g. for pausing music playback while giving navigation instructions.
+        You may deactivate display of this notification in the system settings for this app.
+        Tap here to open the settings page.
+    </string>
     <string name="navigation_notification_channel_name">Navigation</string>
     <string name="navigation_notification_channel_description">Navigation instructions</string>
     <string name="navigation_notification_channel_changes_name">Navigation Changes</string>

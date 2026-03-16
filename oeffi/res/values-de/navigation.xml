@@ -51,6 +51,14 @@
     <string name="navigation_alarm_dialog_status_alarm_inactive_text">Alarm ist derzeit inaktiv oder noch nicht festgelegt.</string>
     <string name="navigation_alarm_dialog_status_alarm_at_text">Alarm wird um %s ausgelöst.</string>
 
+    <string name="navigation_foreground_service_channel_name">Navigation Sound-Steuerung</string>
+    <string name="navigation_foreground_service_channel_description">Zeige andauernde Erlaubnis zur Steuerung der Sound-Ausgabe</string>
+    <string name="navigation_foreground_service_notification_text">
+        Diese Benachrichtigung ist notwendig, um der App die Erlaubnis zur Steuerung der Sound-Ausgabe zu geben,
+        z.B. zum Pausieren der Musik-Wiedergabe während der Ausgabe von Navigationsanweisungen.
+        Du kannst die Anzeige dieser Benachrichtigung in den System-Einstellungen dieser App deaktivieren.
+        Tippe hier, um diese Einstellungsseite zu öffnen.
+    </string>
     <string name="navigation_notification_channel_name">Navigation</string>
     <string name="navigation_notification_channel_description">Navigationsanweisungen</string>
     <string name="navigation_notification_channel_changes_name">Navigations-Änderungen</string>
