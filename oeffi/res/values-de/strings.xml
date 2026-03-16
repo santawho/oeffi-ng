@@ -247,7 +247,7 @@
     <string name="directions_intentfilter_from_title">Reise von hier mit öffentlichen Verkehrsmitteln</string>
 
     <!-- directions options -->
-    <string name="directions_options_clear_history_title">Gespeicherten Anfragen löschen</string>
+    <string name="directions_options_clear_history_title">Gespeicherte Anfragen löschen</string>
     <string name="directions_options_clear_bookmarks_title">Gemerkte Reisen löschen</string>
 
     <!-- directions query -->
