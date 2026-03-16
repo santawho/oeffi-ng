@@ -31,6 +31,8 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.Date;
+
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.QueryHistoryProvider;
@@ -397,18 +399,27 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         return uri;
     }
 
-    public void removeEntry(final int position) {
+    public void removeHistoryEntry(final int position) {
         final Uri uri = QueryHistoryProvider.historyRowUri(network, usage, getItemId(position));
         contentResolver.delete(uri, null, null);
         notifyItemRemoved(position);
         historyCursor.requery();
     }
 
-    public void removeAllEntries(final boolean exceptFavorites) {
+    public void removeAllHistoryEntries(final boolean exceptFavorites) {
         final Uri uri = QueryHistoryProvider.CONTENT_URI_BUILDER(network, usage).build();
         contentResolver.delete(uri, exceptFavorites ? (QueryHistoryProvider.KEY_FAVORITE + "= 0") : null, null);
         notifyItemRangeRemoved(tripsCursor.getCount(), getItemCount());
         historyCursor.requery();
+    }
+
+    public void removeAllStoredTrips(final boolean expiredOnly) {
+        final long refTime = new Date().getTime() - 90000;
+        final Uri uri = QueryStoredTripsProvider.CONTENT_URI_BUILDER(network, usage).build();
+        final int count = tripsCursor.getCount();
+        contentResolver.delete(uri, expiredOnly ? (QueryStoredTripsProvider.KEY_ARRIVAL_TIME + "< " + refTime) : null, null);
+        notifyItemRangeRemoved(0, count);
+        tripsCursor.requery();
     }
 
     public void setIsFavorite(final int position, final boolean isFavorite) {

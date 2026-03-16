@@ -247,7 +247,8 @@
     <string name="directions_intentfilter_from_title">Reise von hier mit öffentlichen Verkehrsmitteln</string>
 
     <!-- directions options -->
-    <string name="directions_options_clear_history_title">Alle gespeicherten Anfragen löschen</string>
+    <string name="directions_options_clear_history_title">Gespeicherten Anfragen löschen</string>
+    <string name="directions_options_clear_bookmarks_title">Gemerkte Reisen löschen</string>
 
     <!-- directions query -->
     <string name="directions_location_view_coordinate">Koordinate</string>
@@ -323,6 +324,10 @@
     <string name="directions_query_stored_trip_context_remove">Löschen</string>
     <string name="directions_query_stored_trip_context_set_done">Als erledigt markieren</string>
     <string name="directions_query_stored_trip_context_unset_done">Erledigt-Markierung entfernen</string>
+    <string name="directions_query_stored_trips_clear_confirm_message">Bist du dir sicher, dass du die gemerkten Reisen löschen möchtest?</string>
+    <string name="directions_query_stored_trips_clear_confirm_button_clear_all">Wirklich alle löschen</string>
+    <string name="directions_query_stored_trips_clear_confirm_button_clear_expired_only">Nur abgelaufene Reisen</string>
+    <string name="directions_query_stored_trips_clear_confirm_button_cancel">Abbrechen</string>
 
     <!-- location selector -->
     <string name="directions_location_selector_context_pin_title">Anheften</string>

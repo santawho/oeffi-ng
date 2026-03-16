@@ -6,4 +6,8 @@
         android:id="@+id/directions_options_clear_history"
         android:title="@string/directions_options_clear_history_title" />
 
+    <item
+        android:id="@+id/directions_options_clear_bookmarks"
+        android:title="@string/directions_options_clear_bookmarks_title" />
+
 </menu>

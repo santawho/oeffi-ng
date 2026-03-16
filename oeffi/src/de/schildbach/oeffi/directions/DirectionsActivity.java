@@ -334,25 +334,42 @@ public class DirectionsActivity extends OeffiMainActivity implements
                         .setOnClickListener(v -> viewToLocation.exchangeWith(viewFromLocation));
             }
             actionBar.overflow(R.menu.directions_options, item -> {
-                if (item.getItemId() == R.id.directions_options_clear_history) {
+                final int itemId = item.getItemId();
+                if (itemId == R.id.directions_options_clear_history) {
                     if (network != null) {
                         final DialogBuilder builder = DialogBuilder.get(this);
                         builder.setMessage(R.string.directions_query_history_clear_confirm_message);
                         builder.setPositiveButton(R.string.directions_query_history_clear_confirm_button_clear_non_favorite,
                                 (dialog, which) -> {
-                                    queryHistoryListAdapter.removeAllEntries(true);
+                                    queryHistoryListAdapter.removeAllHistoryEntries(true);
                                     viewFromLocation.reset();
                                     viewViaLocation.reset();
                                     viewToLocation.reset();
                                 });
                         builder.setNeutralButton(R.string.directions_query_history_clear_confirm_button_clear_all,
                                 (dialog, which) -> {
-                                    queryHistoryListAdapter.removeAllEntries(false);
+                                    queryHistoryListAdapter.removeAllHistoryEntries(false);
                                     viewFromLocation.reset();
                                     viewViaLocation.reset();
                                     viewToLocation.reset();
                                 });
                         builder.setNegativeButton(R.string.directions_query_history_clear_confirm_button_cancel, null);
+                        builder.create().show();
+                    }
+                    return true;
+                } else if (itemId == R.id.directions_options_clear_bookmarks) {
+                    if (network != null) {
+                        final DialogBuilder builder = DialogBuilder.get(this);
+                        builder.setMessage(R.string.directions_query_stored_trips_clear_confirm_message);
+                        builder.setPositiveButton(R.string.directions_query_stored_trips_clear_confirm_button_clear_expired_only,
+                                (dialog, which) -> {
+                                    queryHistoryListAdapter.removeAllStoredTrips(true);
+                                });
+                        builder.setNeutralButton(R.string.directions_query_stored_trips_clear_confirm_button_clear_all,
+                                (dialog, which) -> {
+                                    queryHistoryListAdapter.removeAllStoredTrips(false);
+                                });
+                        builder.setNegativeButton(R.string.directions_query_stored_trips_clear_confirm_button_cancel, null);
                         builder.create().show();
                     }
                     return true;
@@ -1464,7 +1481,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             return true;
         }
         if (menuItemId == R.id.directions_query_history_context_remove_entry) {
-            queryHistoryListAdapter.removeEntry(adapterPosition);
+            queryHistoryListAdapter.removeHistoryEntry(adapterPosition);
             ViewUtils.setVisibility(viewQueryHistoryEmpty, queryHistoryListAdapter.getItemCount() == 0);
             return true;
         }

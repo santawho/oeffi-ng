@@ -248,7 +248,8 @@
     <string name="directions_intentfilter_from_title">Travel from here by Public Transport</string>
 
     <!-- directions options -->
-    <string name="directions_options_clear_history_title">Clear all saved queries</string>
+    <string name="directions_options_clear_history_title">Clear saved queries</string>
+    <string name="directions_options_clear_bookmarks_title">Clear bookmarked trips</string>
 
     <!-- directions query -->
     <string name="directions_location_view_coordinate">Coordinate</string>
@@ -324,6 +325,10 @@
     <string name="directions_query_stored_trip_context_remove">Delete</string>
     <string name="directions_query_stored_trip_context_set_done">Mark as done</string>
     <string name="directions_query_stored_trip_context_unset_done">Remove mark as done</string>
+    <string name="directions_query_stored_trips_clear_confirm_message">Are you sure you want to remove your bookmarked trips?</string>
+    <string name="directions_query_stored_trips_clear_confirm_button_clear_all">Remove really all</string>
+    <string name="directions_query_stored_trips_clear_confirm_button_clear_expired_only">Expired trips only</string>
+    <string name="directions_query_stored_trips_clear_confirm_button_cancel">Cancel</string>
 
     <!-- location selector -->
     <string name="directions_location_selector_context_pin_title">Set pinned</string>
