@@ -312,6 +312,15 @@ public class DirectionsActivity extends OeffiMainActivity implements
             final MyActionBar actionBar = getMyActionBar();
             setPrimaryColor(renderConfig.actionBarColor > 0 ? renderConfig.actionBarColor : getActionBarColorId());
             actionBar.setPrimaryTitle(getActionBarTitleStringId());
+            // if (renderConfig.isAlternativeConnectionSearch) {
+                actionBar.addButton(R.drawable.ic_clear_white_24dp, R.string.directions_action_restart_planning_title)
+                        .setOnClickListener(v -> {
+                            finish();
+                            final Intent newIntent = new Intent(this, DirectionsActivity.class);
+                            newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(newIntent);
+                        });
+            // }
             addShowMapButtonToActionBar();
             actionBar.setTitlesOnClickListener(v -> NetworkPickerActivity.start(DirectionsActivity.this));
             buttonExpand = actionBar.addToggleButton(R.drawable.ic_expand_white_24dp,
@@ -320,15 +329,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
                 expandForm(isChecked);
                 updateMap();
             });
-            if (renderConfig.isAlternativeConnectionSearch) {
-                actionBar.addButton(R.drawable.ic_clear_white_24dp, R.string.directions_action_restart_planning_title)
-                        .setOnClickListener(v -> {
-                            finish();
-                            final Intent newIntent = new Intent(this, DirectionsActivity.class);
-                            newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(newIntent);
-                        });
-            } else {
+            if (!renderConfig.isAlternativeConnectionSearch) {
                 actionBar.addButton(R.drawable.ic_shuffle_white_24dp, R.string.directions_action_return_trip_title)
                         .setOnClickListener(v -> viewToLocation.exchangeWith(viewFromLocation));
             }
