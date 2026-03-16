@@ -81,19 +81,18 @@ public class PreferenceActivity extends OeffiActivity {
 
         final Intent intent = getIntent();
 
-        final String fragmentClassName = intent.getStringExtra(EXTRA_SHOW_FRAGMENT);
-        if (fragmentClassName != null) {
-            try {
-                final Class<?> fragmentClass = Class.forName(fragmentClassName);
-                preferenceFragment = (PreferenceFragment) fragmentClass.newInstance();
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.preferences_fragment_container, preferenceFragment)
-                        .commit();
-            } catch (final ClassNotFoundException | IllegalAccessException |
-                           InstantiationException e) {
-                throw new RuntimeException(e);
-            }
+        try {
+            final String fragmentClassName = intent.getStringExtra(EXTRA_SHOW_FRAGMENT);
+            final Class<?> fragmentClass = fragmentClassName == null ? SettingsFragment.class
+                    : Class.forName(fragmentClassName);
+            preferenceFragment = (PreferenceFragment) fragmentClass.newInstance();
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.preferences_fragment_container, preferenceFragment)
+                    .commit();
+        } catch (final ClassNotFoundException | IllegalAccessException |
+                       InstantiationException e) {
+            throw new RuntimeException(e);
         }
 
         final View contentView = findViewById(android.R.id.content);
