@@ -146,9 +146,7 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder
         final long now = System.currentTimeMillis();
         final long departureTime = tripDepartureTime.getTime();
         final long arrivalTime = tripArrivalTime.getTime();
-
-        dateView.setText(Formats.formatDate(context.getTimeZoneSelector(), now, departureTime, PTDate.NETWORK_OFFSET, true));
-        timeView.setText(Formats.formatTime(context.getTimeZoneSelector(), departureTime, PTDate.NETWORK_OFFSET));
+        final long timeToShow;
 
         final int backgroundId;
         int iconResId;
@@ -159,27 +157,37 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder
         if (canBeMarkedAsDone
                 ? (stateFlags & QueryStoredTripsProvider.STATE_FLAG_DONE) != 0
                 : msLeftToArrival < 0) {
+            // done
+            timeToShow = arrivalTime;
             msTimeLeft = -msLeftToArrival;
             sTimeLeft = context.getString(R.string.directions_stored_trip_over_or_done);
             backgroundId = R.drawable.stored_trip_entry_background_finished;
             iconResId = R.drawable.ic_bookmarked_over_white_24dp;
         } else if (canBeMarkedAsDone && msLeftToArrival < -3600000) {
+            // not marked as done and over since less than one hour
+            timeToShow = arrivalTime;
             msTimeLeft = -msLeftToArrival;
             sTimeLeft = context.getString(R.string.directions_stored_trip_over_or_done);
             backgroundId = R.drawable.stored_trip_entry_background_current;
             iconResId = R.drawable.ic_bookmarked_over_white_24dp;
         } else {
+            // present or future
+            timeToShow = departureTime;
             iconResId = R.drawable.ic_bookmarked_white_24dp;
             final long msLeftToDeparture = departureTime - now;
             if (msLeftToDeparture < 0) {
+                // present
                 msTimeLeft = msLeftToArrival;
                 backgroundId = R.drawable.stored_trip_entry_background_current;
                 timeLeftColorId = R.color.fg_highlighted;
             } else {
+                // future
                 msTimeLeft = msLeftToDeparture;
                 if (msLeftToDeparture < upcomingTimeLimitMs) {
+                    // near future
                     backgroundId = R.drawable.stored_trip_entry_background_upcoming;
                 } else {
+                    // far future
                     backgroundId = R.drawable.stored_trip_entry_background_future;
                 }
             }
@@ -196,6 +204,9 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder
         timeLeftView.setTextColor(timeLeftColor);
         iconView.setImageResource(iconResId);
         iconView.setColorFilter(timeLeftColor);
+
+        dateView.setText(Formats.formatDate(context.getTimeZoneSelector(), now, timeToShow, PTDate.NETWORK_OFFSET, true));
+        timeView.setText(Formats.formatTime(context.getTimeZoneSelector(), timeToShow, PTDate.NETWORK_OFFSET));
 
         final boolean selected = rowId == selectedRowId;
         itemView.setActivated(selected);

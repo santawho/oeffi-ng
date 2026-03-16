@@ -99,12 +99,12 @@ public class QueryStoredTripsProvider extends ForNetworkContentProvider {
         final Long rowId = getRowId(contentResolver, network, usage, tripId);
 
         final ContentValues values = new ContentValues();
-        final PTDate firstPublicLegDepartureTime = trip.getFirstPublicLegDepartureTime();
-        final PTDate lastPublicLegArrivalTime = trip.getLastPublicLegArrivalTime();
-        values.put(KEY_DEPARTURE_TIME, firstPublicLegDepartureTime == null ? 0 : firstPublicLegDepartureTime.getTime());
-        values.put(KEY_DEPARTURE_TIME_OFFSET, firstPublicLegDepartureTime == null ? 0 : firstPublicLegDepartureTime.getOffset());
-        values.put(KEY_ARRIVAL_TIME, lastPublicLegArrivalTime == null ? 0 : lastPublicLegArrivalTime.getTime());
-        values.put(KEY_ARRIVAL_TIME_OFFSET, lastPublicLegArrivalTime == null ? 0 : lastPublicLegArrivalTime.getOffset());
+        final PTDate departureTime = trip.getFirstDepartureTime();
+        final PTDate arrivalTime = trip.getLastArrivalTime();
+        values.put(KEY_DEPARTURE_TIME, departureTime == null ? 0 : departureTime.getTime());
+        values.put(KEY_DEPARTURE_TIME_OFFSET, departureTime == null ? 0 : departureTime.getOffset());
+        values.put(KEY_ARRIVAL_TIME, arrivalTime == null ? 0 : arrivalTime.getTime());
+        values.put(KEY_ARRIVAL_TIME_OFFSET, arrivalTime == null ? 0 : arrivalTime.getOffset());
         values.put(KEY_TRIP, Objects.serialize(trip));
 
         final Uri tripsUri;
