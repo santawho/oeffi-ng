@@ -39,6 +39,7 @@ NASA|de-DE|Sachsen;Leipzig;Sachsen-Anhalt;Magdeburg;Halle
 VMT|de-DE|Thüringen;Mittelthüringen;Erfurt;Jena;Gera;Weimar;Gotha
 VRR|de-DE|Nordrhein-Westfalen;Essen;Dortmund;Düsseldorf;Münster;Paderborn;Höxter;Bielefeld
 VRS|de-DE|Köln;Bonn
+KVB|de-DE|Köln;Bonn
 AVV_AACHEN|de-DE|Aachen
 MVG|de-DE|Märkischer Kreis;Lüdenscheid
 VRN|de-DE|Baden-Württemberg;Rheinland-Pfalz;Mannheim;Mainz;Trier

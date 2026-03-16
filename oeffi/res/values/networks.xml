@@ -70,8 +70,10 @@
     <string name="network_vvo_comment">Dresden &amp; Chemnitz, local and regional</string>
     <string name="network_vrr_label">Verkehrsverbund Rhein-Ruhr</string>
     <string name="network_vrr_comment">North Rhine-Westphalia, Düsseldorf &amp; Dortmund, local and regional</string>
-    <string name="network_vrs_label">Cologne &amp; Bonn</string>
+    <string name="network_vrs_label">Rhine-Sieg, Cologne &amp; Bonn</string>
     <string name="network_vrs_comment">local and regional</string>
+    <string name="network_kvb_label">Cologne, Bonn, Rhine-Sieg</string>
+    <string name="network_kvb_comment">local and regional</string>
     <string name="network_avv_aachen_label">Aachener Verkehrsverbund</string>
     <string name="network_avv_aachen_comment">local and regional</string>
     <string name="network_mvg_label">Lüdenscheid &amp; Märkischer Kreis</string>

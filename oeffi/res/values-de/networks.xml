@@ -71,8 +71,10 @@
     <string name="network_vvo_comment">Dresden &amp; Chemnitz, Lokal- und Regionalverkehr (TG:VVO)</string>
     <string name="network_vrr_label">Verkehrsverbund Rhein-Ruhr</string>
     <string name="network_vrr_comment">Nordrhein-Westfalen, Düsseldorf &amp; Dortmund, Lokal- und Regionalverkehr</string>
-    <string name="network_vrs_label">Köln &amp; Bonn</string>
+    <string name="network_vrs_label">Rhein-Sieg, Köln &amp; Bonn</string>
     <string name="network_vrs_comment">Lokal- und Regionalverkehr (TG:VRS)</string>
+    <string name="network_kvb_label">Köln, Bonn, Rhein-Sieg</string>
+    <string name="network_kvb_comment">Lokal- und Regionalverkehr (TG:KVB/VRS)</string>
     <string name="network_avv_aachen_label">Aachener Verkehrsverbund</string>
     <string name="network_avv_aachen_comment">Lokal- und Regionalverkehr</string>
     <string name="network_mvg_label">Lüdenscheid &amp; Märkischer Kreis</string>
