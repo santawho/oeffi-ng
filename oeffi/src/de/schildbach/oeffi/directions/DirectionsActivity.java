@@ -312,15 +312,18 @@ public class DirectionsActivity extends OeffiMainActivity implements
             final MyActionBar actionBar = getMyActionBar();
             setPrimaryColor(renderConfig.actionBarColor > 0 ? renderConfig.actionBarColor : getActionBarColorId());
             actionBar.setPrimaryTitle(getActionBarTitleStringId());
-            // if (renderConfig.isAlternativeConnectionSearch) {
+            if (renderConfig.isAlternativeConnectionSearch
+                    || prefs.getBoolean("user_interface_directions_show_clear_button_enabled", false)) {
                 actionBar.addButton(R.drawable.ic_clear_white_24dp, R.string.directions_action_restart_planning_title)
                         .setOnClickListener(v -> {
-                            finish();
+                            // finish();
                             final Intent newIntent = new Intent(this, DirectionsActivity.class);
-                            newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            // newIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            newIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            newIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                             startActivity(newIntent);
                         });
-            // }
+            }
             addShowMapButtonToActionBar();
             actionBar.setTitlesOnClickListener(v -> NetworkPickerActivity.start(DirectionsActivity.this));
             buttonExpand = actionBar.addToggleButton(R.drawable.ic_expand_white_24dp,

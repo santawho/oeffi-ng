@@ -47,6 +47,8 @@
     <string name="user_interface_directions_history_show_saved_trip_enabled_summary">Zeige die zuletzt gespeicherte Verbindung im Verlauf (Änderung erfordert Neustart der App) (empfohlen: aus)</string>
     <string name="user_interface_stored_trips_retention_hours_title">Gespeicherte Verbindungen halten</string>
     <string name="user_interface_stored_trips_retention_hours_summary">Wie lange gespeicherte Verbindungen erhalten werden, nachdem sie beendet sind.  [%s Stunden]</string>
+    <string name="user_interface_directions_show_clear_button_enabled_title">Lösch-Button</string>
+    <string name="user_interface_directions_show_clear_button_enabled_summary">Zeige immer den Button zum Löschen der Eingabe</string>
 
     <string name="user_interface_category_map_title">Landkarten</string>
     <string name="user_interface_map_tile_resolution_title">Auflösung von Landkarten</string>
