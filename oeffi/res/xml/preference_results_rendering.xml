@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/user_interface_category_results_title" >
+
+    <CheckBoxPreference
+        android:key="user_interface_results_noprovidercolors_enabled"
+        android:defaultValue="false"
+        android:title="@string/user_interface_results_noprovidercolors_enabled_title"
+        android:summary="@string/user_interface_results_noprovidercolors_enabled_summary" />
+
+    <CheckBoxPreference
+        android:key="user_interface_results_preferpredefinedcolors_enabled"
+        android:defaultValue="false"
+        android:title="@string/user_interface_results_preferpredefinedcolors_enabled_title"
+        android:summary="@string/user_interface_results_preferpredefinedcolors_enabled_summary" />
+
+</PreferenceScreen>

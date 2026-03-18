@@ -478,7 +478,8 @@
 
     <!-- directions preferences -->
     <string name="directions_preferences_title">Verbindungen</string>
-    <string name="directions_preferences_summary">Diese Einstellungen wirken sich nicht auf alle Verkehrsnetze in der gleichen Weise aus.</string>
+    <string name="directions_params_preferences_title">Parameter für die Verbindungssuche</string>
+    <string name="directions_params_preferences_summary">Diese Einstellungen wirken sich nicht auf alle Verkehrsnetze in der gleichen Weise aus.</string>
     <string name="directions_preferences_optimize_trip_title">Optimierung</string>
     <string name="directions_preferences_optimize_trip_summary">Was ist dir am wichtigsten?</string>
     <string name="directions_preferences_walk_speed_title">Gehgeschwindigkeit</string>

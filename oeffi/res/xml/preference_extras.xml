@@ -7,6 +7,11 @@
         android:fragment="de.schildbach.oeffi.preference.DriverModeFragment"
         android:title="@string/extras_drivermode_title" />
 
+    <CheckBoxPreference
+        android:key="user_interface_mainmenu_shareapp_enabled"
+        android:defaultValue="false"
+        android:title="@string/user_interface_mainmenu_shareapp_enabled_title" />
+
     <PreferenceScreen
         android:fragment="de.schildbach.oeffi.preference.DeveloperOptionsFragment"
         android:title="@string/developer_options_title" />

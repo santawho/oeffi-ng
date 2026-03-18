@@ -70,7 +70,7 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.navigation.NavigationNotification;
 import de.schildbach.oeffi.directions.navigation.TripNavigatorActivity;
 import de.schildbach.oeffi.mapview.OeffiMapView;
-import de.schildbach.oeffi.preference.DirectionsFragment;
+import de.schildbach.oeffi.preference.DirectionsParamsFragment;
 import de.schildbach.oeffi.preference.PreferenceActivity;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.util.TimeSpec.DepArr;
@@ -607,7 +607,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             locationSelector.setNetwork(network, getStoredTripsUsage());
 
             findViewById(R.id.directions_options_settings).setOnClickListener(v -> {
-                PreferenceActivity.start(this, DirectionsFragment.class);
+                PreferenceActivity.start(this, DirectionsParamsFragment.class);
             });
 
             getMapView().setDirectionsOverlay(viewFromLocation, viewToLocation);

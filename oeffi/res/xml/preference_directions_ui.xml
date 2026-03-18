@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/user_interface_category_directions_title" >
+
+    <CheckBoxPreference
+        android:key="user_interface_directions_time_and_go_bottom_enabled"
+        android:defaultValue="false"
+        android:title="@string/user_interface_directions_time_and_go_bottom_enabled_title"
+        android:summary="@string/user_interface_directions_time_and_go_bottom_enabled_summary" />
+
+    <CheckBoxPreference
+        android:key="user_interface_directions_autogo_enabled"
+        android:defaultValue="true"
+        android:title="@string/user_interface_directions_autogo_enabled_title"
+        android:summary="@string/user_interface_directions_autogo_enabled_summary" />
+
+    <CheckBoxPreference
+        android:key="user_interface_directions_compact_times_enabled"
+        android:defaultValue="false"
+        android:title="@string/user_interface_directions_compact_times_enabled_title"
+        android:summary="@string/user_interface_directions_compact_times_enabled_summary" />
+
+    <EditTextPreference
+        android:key="max_history_entries"
+        android:singleLine="true"
+        android:inputType="number"
+        android:defaultValue="@integer/default_max_history_entries"
+        android:title="@string/user_interface_max_history_entries_title"
+        android:summary="@string/user_interface_max_history_entries_summary" />
+
+    <EditTextPreference
+        android:key="stored_trips_retention_hours"
+        android:singleLine="true"
+        android:inputType="numberDecimal"
+        android:defaultValue="@string/default_stored_trips_retention_hours"
+        android:title="@string/user_interface_stored_trips_retention_hours_title"
+        android:summary="@string/user_interface_stored_trips_retention_hours_summary" />
+
+    <CheckBoxPreference
+        android:key="user_interface_directions_history_show_saved_trip_enabled"
+        android:defaultValue="false"
+        android:title="@string/user_interface_directions_history_show_saved_trip_enabled_title"
+        android:summary="@string/user_interface_directions_history_show_saved_trip_enabled_summary" />
+
+    <CheckBoxPreference
+        android:key="user_interface_directions_show_clear_button_enabled"
+        android:defaultValue="false"
+        android:title="@string/user_interface_directions_show_clear_button_enabled_title"
+        android:summary="@string/user_interface_directions_show_clear_button_enabled_summary" />
+
+    <PreferenceCategory android:title="@string/user_interface_location_selector_category_title">
+        <Preference
+            android:key="user_interface_location_selector_help"
+            android:summary="@string/directions_location_selector_help_short_text" />
+
+        <CheckBoxPreference
+            android:key="user_interface_location_selector_enabled"
+            android:defaultValue="true"
+            android:title="@string/user_interface_location_selector_enabled_title"
+            android:summary="@string/user_interface_location_selector_enabled_summary" />
+        <CheckBoxPreference
+            android:key="user_interface_location_selector_colorized"
+            android:defaultValue="true"
+            android:title="@string/user_interface_location_selector_colorized_title"
+            android:summary="@string/user_interface_location_selector_colorized_summary" />
+        <ListPreference
+            android:key="user_interface_location_selector_numrows"
+            android:defaultValue="4"
+            android:entries="@array/user_interface_location_selector_numrows_titles"
+            android:entryValues="@array/user_interface_location_selector_numrows_values"
+            android:title="@string/user_interface_location_selector_numrows_title"
+            android:summary="@string/user_interface_location_selector_numrows_summary" />
+        <EditTextPreference
+            android:key="user_interface_location_selector_longholdtime"
+            android:singleLine="true"
+            android:inputType="number"
+            android:defaultValue="500"
+            android:title="@string/user_interface_location_selector_longholdtime_title"
+            android:summary="@string/user_interface_location_selector_longholdtime_summary" />
+        <CheckBoxPreference
+            android:key="user_interface_location_selector_longholdmenu"
+            android:defaultValue="true"
+            android:title="@string/user_interface_location_selector_longholdmenu_title"
+            android:summary="@string/user_interface_location_selector_longholdmenu_summary" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

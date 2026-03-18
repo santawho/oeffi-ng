@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/user_interface_category_map_title" >
+
+    <SeekBarPreference
+        android:key="user_interface_map_tile_resolution"
+        android:defaultValue="100"
+        android:max="200"
+        android:title="@string/user_interface_map_tile_resolution_title"
+        android:summary="@string/user_interface_map_tile_resolution_summary"/>
+
+</PreferenceScreen>

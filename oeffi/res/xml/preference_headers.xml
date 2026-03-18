@@ -9,8 +9,8 @@
         android:fragment="de.schildbach.oeffi.preference.UserInterfaceFragment"
         android:title="@string/user_interface_preferences_title" />
     <header
-        android:fragment="de.schildbach.oeffi.preference.DirectionsFragment"
-        android:title="@string/directions_preferences_title" />
+        android:fragment="de.schildbach.oeffi.preference.DirectionsParamsFragment"
+        android:title="@string/directions_params_preferences_title" />
     <header
         android:fragment="de.schildbach.oeffi.preference.NavigationFragment"
         android:title="@string/navigation_preferences_title" />

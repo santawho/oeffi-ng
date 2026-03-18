@@ -21,9 +21,9 @@ import android.os.Bundle;
 
 import de.schildbach.oeffi.R;
 
-public class UserInterfaceFragment extends PreferenceFragment {
+public class ResultsRenderingFragment extends PreferenceFragment {
     @Override
     public void onCreatePreferences(@androidx.annotation.Nullable final Bundle savedInstanceState, @androidx.annotation.Nullable final String rootKey) {
-        addPreferencesFromResource(R.xml.preference_user_interface);
+        addPreferencesFromResource(R.xml.preference_results_rendering);
     }
 }

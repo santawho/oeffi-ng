@@ -21,9 +21,18 @@ import android.os.Bundle;
 
 import de.schildbach.oeffi.R;
 
-public class UserInterfaceFragment extends PreferenceFragment {
+public class VoiceControlFragment extends PreferenceFragment {
     @Override
     public void onCreatePreferences(@androidx.annotation.Nullable final Bundle savedInstanceState, @androidx.annotation.Nullable final String rootKey) {
-        addPreferencesFromResource(R.xml.preference_user_interface);
+        addPreferencesFromResource(R.xml.preference_voice_control);
+
+        setupActionPreference("user_interface_voice_control_help", VoiceControlFragment.class, VoiceControlHelp.class);
+    }
+
+    public static class VoiceControlHelp extends ShowHelpHandler {
+        @Override
+        protected int getHelpTextResourceId() {
+            return R.string.user_interface_voice_control_help_long_text;
+        }
     }
 }

@@ -18,12 +18,13 @@
 package de.schildbach.oeffi.preference;
 
 import android.os.Bundle;
-
 import de.schildbach.oeffi.R;
 
-public class UserInterfaceFragment extends PreferenceFragment {
+public class DirectionsParamsFragment extends PreferenceFragment {
     @Override
-    public void onCreatePreferences(@androidx.annotation.Nullable final Bundle savedInstanceState, @androidx.annotation.Nullable final String rootKey) {
-        addPreferencesFromResource(R.xml.preference_user_interface);
+    public void onCreatePreferences(
+            @androidx.annotation.Nullable final Bundle savedInstanceState,
+            @androidx.annotation.Nullable final String rootKey) {
+        addPreferencesFromResource(R.xml.preference_directions_params);
     }
 }

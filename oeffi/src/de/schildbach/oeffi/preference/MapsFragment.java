@@ -18,13 +18,14 @@
 package de.schildbach.oeffi.preference;
 
 import android.os.Bundle;
+
 import de.schildbach.oeffi.R;
 
-public class DirectionsFragment extends PreferenceFragment {
+public class MapsFragment extends PreferenceFragment {
     @Override
-    public void onCreatePreferences(
-            @androidx.annotation.Nullable final Bundle savedInstanceState,
-            @androidx.annotation.Nullable final String rootKey) {
-        addPreferencesFromResource(R.xml.preference_directions);
+    public void onCreatePreferences(@androidx.annotation.Nullable final Bundle savedInstanceState, @androidx.annotation.Nullable final String rootKey) {
+        addPreferencesFromResource(R.xml.preference_maps);
+
+        setupDynamicSummary("user_interface_map_tile_resolution", R.string.user_interface_map_tile_resolution_summary);
     }
 }

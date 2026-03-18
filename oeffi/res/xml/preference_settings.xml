@@ -7,14 +7,29 @@
         android:fragment="de.schildbach.oeffi.preference.CommonFragment"
         android:title="@string/global_preferences_title" />
     <PreferenceScreen
+        android:fragment="de.schildbach.oeffi.preference.DirectionsParamsFragment"
+        android:title="@string/directions_params_preferences_title" />
+    <PreferenceScreen
         android:fragment="de.schildbach.oeffi.preference.UserInterfaceFragment"
         android:title="@string/user_interface_preferences_title" />
     <PreferenceScreen
-        android:fragment="de.schildbach.oeffi.preference.DirectionsFragment"
-        android:title="@string/directions_preferences_title" />
+        android:fragment="de.schildbach.oeffi.preference.DeparturesFragment"
+        android:title="@string/user_interface_category_station_departures_title" />
+    <PreferenceScreen
+        android:fragment="de.schildbach.oeffi.preference.DirectionsUIFragment"
+        android:title="@string/user_interface_category_directions_title" />
+    <PreferenceScreen
+        android:fragment="de.schildbach.oeffi.preference.ResultsRenderingFragment"
+        android:title="@string/user_interface_category_results_title" />
     <PreferenceScreen
         android:fragment="de.schildbach.oeffi.preference.NavigationFragment"
         android:title="@string/navigation_preferences_title" />
+    <PreferenceScreen
+        android:fragment="de.schildbach.oeffi.preference.VoiceControlFragment"
+        android:title="@string/user_interface_voice_control_category_title" />
+    <PreferenceScreen
+        android:fragment="de.schildbach.oeffi.preference.MapsFragment"
+        android:title="@string/user_interface_category_map_title" />
     <PreferenceScreen
         android:fragment="de.schildbach.oeffi.preference.ExtrasFragment"
         android:title="@string/extras_title" />
