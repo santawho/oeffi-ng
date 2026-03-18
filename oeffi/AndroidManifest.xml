@@ -339,8 +339,7 @@
             android:label="@string/operations_icon_label"
             android:launchMode="singleTask"
             android:taskAffinity="${applicationId}.operations"
-            android:windowSoftInputMode="stateHidden"
-            android:theme="@style/My.Theme.Splash">
+            android:windowSoftInputMode="stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
