@@ -3,7 +3,11 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:visible="false"
         android:id="@+id/network_picker_context_remove"
         android:title="@string/network_picker_context_remove_title" />
+    <item
+        android:id="@+id/network_picker_context_toggle_favorite"
+        android:title="@string/network_picker_context_toggle_favorite_title" />
 
 </menu>

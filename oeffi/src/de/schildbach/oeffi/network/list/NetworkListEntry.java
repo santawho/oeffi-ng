@@ -25,6 +25,7 @@ public interface NetworkListEntry {
         public final NetworkId.State state;
         public final String group;
         public final String coverage;
+        public boolean isFavorite;
 
         public Network(final NetworkId id, final NetworkId.State state, final String group, final String coverage) {
             this.id = id;

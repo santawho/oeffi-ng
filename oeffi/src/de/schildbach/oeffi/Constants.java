@@ -52,6 +52,7 @@ public class Constants {
     public static final String PREFS_KEY_PREFERRED_TIMEZONE = "common_preferred_timezone";
     public static final String PREFS_KEY_NETWORK_PROVIDER = "network_provider";
     public static final String PREFS_KEY_LAST_NETWORK_PROVIDERS = "last_network_providers";
+    public static final String PREFS_KEY_FAVORITE_NETWORK_PROVIDERS = "favorite_network_providers";
     public static final String PREFS_KEY_MAX_HISTORY_ENTRIES = "max_history_entries";
     public static final String PREFS_KEY_HISTORY_ENTRY_SHOW_TRIP = "user_interface_directions_history_show_saved_trip_enabled";
     public static final String PREFS_KEY_STORED_TRIPS_RETENTION_HOURS = "stored_trips_retention_hours";

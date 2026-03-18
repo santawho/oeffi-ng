@@ -27,6 +27,7 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.network.NetworkResources;
+import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.pte.NetworkId;
 
 import javax.annotation.Nullable;
@@ -44,6 +45,7 @@ public class NetworkViewHolder extends RecyclerView.ViewHolder {
     private final TextView usageView;
     private final ImageButton contextButton;
     private final View contextButtonSpace;
+    private final TextView favoriteView;
 
     private static final int MEGABYTE = 1024 * 1024;
 
@@ -61,6 +63,7 @@ public class NetworkViewHolder extends RecyclerView.ViewHolder {
         usageView = itemView.findViewById(R.id.network_picker_entry_usage);
         contextButton = itemView.findViewById(R.id.network_picker_entry_context_button);
         contextButtonSpace = itemView.findViewById(R.id.network_picker_entry_context_button_space);
+        favoriteView = itemView.findViewById(R.id.network_picker_entry_favorite);
     }
 
     public void bind(final NetworkListEntry.Network entry, final boolean isEnabled, final long dbFileLength,
@@ -118,12 +121,15 @@ public class NetworkViewHolder extends RecyclerView.ViewHolder {
             contextButton.setOnClickListener(v -> {
                 final PopupMenu contextMenu = new PopupMenu(context, v);
                 contextMenu.inflate(R.menu.network_picker_context);
-                contextMenu.setOnMenuItemClickListener(item -> contextMenuItemListener.onNetworkContextMenuItemClick(entry, item.getItemId()));
+                contextMenu.setOnMenuItemClickListener(item ->
+                        contextMenuItemListener.onNetworkContextMenuItemClick(entry, item.getItemId()));
                 contextMenu.show();
             });
         } else {
             contextButton.setVisibility(View.GONE);
             contextButtonSpace.setVisibility(View.GONE);
         }
+
+        ViewUtils.setVisibility(favoriteView, entry.isFavorite);
     }
 }

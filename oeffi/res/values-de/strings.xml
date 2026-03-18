@@ -131,6 +131,7 @@
     <string name="network_picker_separator_europe">Europa</string>
     <string name="network_picker_separator_world">Welt</string>
     <string name="network_picker_context_remove_title">Daten löschen</string>
+    <string name="network_picker_context_toggle_favorite_title">Favoritenmarkierung wechseln</string>
 
     <!-- toasts -->
     <string name="toast_add_favorite">%s\nzu Favoriten hinzugefügt</string>

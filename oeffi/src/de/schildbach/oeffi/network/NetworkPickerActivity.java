@@ -20,7 +20,6 @@ package de.schildbach.oeffi.network;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.Address;
@@ -42,7 +41,6 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.AreaAware;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.DeviceLocationAware;
@@ -65,6 +63,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.Serial;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -72,20 +71,75 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class NetworkPickerActivity extends OeffiActivity implements LocationHelper.Callback, NetworkClickListener,
+public class NetworkPickerActivity extends OeffiActivity implements
+        LocationHelper.Callback,
+        NetworkClickListener,
         NetworkContextMenuItemListener {
+
     public static void start(final Context context) {
         final Intent intent = new Intent(context, NetworkPickerActivity.class);
         context.startActivity(intent);
     }
 
-    private SharedPreferences prefs;
+    public class NetworkList extends LinkedList<NetworkId> {
+        @Serial
+        private static final long serialVersionUID = 4948873861563709547L;
+
+        final String prefKey;
+        final int maxSize;
+
+        public NetworkList(final String prefKey) {
+            this(prefKey, Integer.MAX_VALUE);
+        }
+
+        public NetworkList(final String prefKey, final int maxSize) {
+            this.prefKey = prefKey;
+            this.maxSize = maxSize;
+        }
+
+        public void addNetwork(final NetworkId networkId) {
+            // put last selected network to the front
+            remove(networkId);
+            add(0, networkId);
+            while (size() > maxSize)
+                remove(size() - 1);
+            save();
+        }
+
+        public void removeNetwork(final NetworkId networkId) {
+            remove(networkId);
+            save();
+        }
+
+        private void load() {
+            clear();
+            for (final String networkId : prefs.getString(prefKey, "").split(",")) {
+                try {
+                    add(NetworkId.valueOf(networkId));
+                } catch (final IllegalArgumentException x) {
+                    // don't care
+                }
+            }
+        }
+
+        private void save() {
+            final StringBuilder prefsValue = new StringBuilder();
+            for (final NetworkId network : this)
+                prefsValue.append(network.name()).append(',');
+            if (prefsValue.length() > 0)
+                prefsValue.setLength(prefsValue.length() - 1);
+            prefs.edit().putString(prefKey, prefsValue.toString()).commit();
+        }
+    }
 
     private MyActionBar actionBar;
     private RecyclerView listView;
     private NetworksAdapter listAdapter;
 
-    private final List<NetworkId> lastNetworks = new LinkedList<>();
+    private final NetworkList lastNetworks = new NetworkList(
+            Constants.PREFS_KEY_LAST_NETWORK_PROVIDERS, MAX_LAST_NETWORKS);
+    private final NetworkList favoriteNetworks = new NetworkList(
+            Constants.PREFS_KEY_FAVORITE_NETWORK_PROVIDERS);
 
     private LocationHelper locationHelper;
     private Point deviceLocation;
@@ -109,8 +163,6 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
     protected void onCreate(final Bundle savedInstanceState) {
         EdgeToEdge.enable(this, Constants.STATUS_BAR_STYLE);
         super.onCreate(savedInstanceState);
-
-        prefs = Application.getInstance().getSharedPreferences();
 
         locationHelper = new LocationHelper(this, this);
 
@@ -190,7 +242,8 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
             }
         }
 
-        loadLastNetworks();
+        lastNetworks.load();
+        favoriteNetworks.load();
 
         generateIndex();
         updateGUI();
@@ -294,29 +347,32 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
         return super.onKeyDown(keyCode, event);
     }
 
+    @Override
     public void onNetworkClick(final NetworkListEntry.Network entry) {
         // persist in preferences
         prefs.edit().putString(Constants.PREFS_KEY_NETWORK_PROVIDER, entry.id.name()).commit();
-
-        // put last selected network to the front
-        final NetworkId network = entry.id;
-        lastNetworks.remove(network);
-        lastNetworks.add(0, network);
-        while (lastNetworks.size() > MAX_LAST_NETWORKS)
-            lastNetworks.remove(lastNetworks.size() - 1);
-        saveLastNetworks();
-
+        lastNetworks.addNetwork(entry.id);
         finish();
     }
 
     public boolean onNetworkContextMenuItemClick(final NetworkListEntry.Network entry, final int menuItemId) {
-        if (menuItemId == R.id.network_picker_context_remove) {
-            // placeholder for action
+        if (menuItemId == R.id.network_picker_context_toggle_favorite) {
+            final NetworkId networkId = entry.id;
+            if (favoriteNetworks.contains(networkId)) {
+                entry.isFavorite = false;
+                favoriteNetworks.removeNetwork(networkId);
+            } else {
+                entry.isFavorite = true;
+                favoriteNetworks.addNetwork(networkId);
+            }
             listAdapter.notifyDataSetChanged();
             return true;
-        } else {
-            return false;
+        } else if (menuItemId == R.id.network_picker_context_remove) {
+                // placeholder for action
+                listAdapter.notifyDataSetChanged();
+                return true;
         }
+        return false;
     }
 
     protected void updateFragments() {
@@ -361,7 +417,7 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
         }
     }
 
-    private void enriesFromConfiguredFactory(final Map<String, NetworkListEntry> entriesMap) {
+    private void entriesFromConfiguredFactory(final Map<String, NetworkListEntry> entriesMap) {
         final NetworkProviderFactory networkProviderFactory = NetworkProviderFactory.getInstance();
         for (final NetworkId.Descriptor descriptor : networkProviderFactory.getAvailableNetworks()) {
             final NetworkId networkId = descriptor.getNetworkId();
@@ -377,21 +433,37 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
     private void generateIndex() {
         final Map<String, NetworkListEntry> entriesMap = new LinkedHashMap<>();
         // loadNetworksTxtFile(entriesMap);
-        enriesFromConfiguredFactory(entriesMap);
+        entriesFromConfiguredFactory(entriesMap);
 
         final List<NetworkListEntry> entries = new LinkedList<>();
 
         // last used networks
         boolean firstLastUsed = true;
         for (final NetworkId lastNetwork : lastNetworks) {
-            final NetworkListEntry networkEntry = entriesMap.get(lastNetwork.name());
-            if (networkEntry != null && ((NetworkListEntry.Network) networkEntry).state.lessThan(NetworkId.State.unselectable)) {
+            final NetworkListEntry.Network networkEntry = (NetworkListEntry.Network) entriesMap.get(lastNetwork.name());
+            if (networkEntry != null && networkEntry.state.lessThan(NetworkId.State.unselectable)) {
                 if (firstLastUsed) {
                     entries.add(new NetworkListEntry.Separator(getString(R.string.network_picker_separator_last)));
                     firstLastUsed = false;
                 }
 
+                networkEntry.isFavorite = favoriteNetworks.contains(lastNetwork);
                 entriesMap.remove(lastNetwork.name());
+                entries.add(networkEntry);
+            }
+        }
+
+        // favorite networks
+        for (final NetworkId networkId : favoriteNetworks) {
+            final NetworkListEntry.Network networkEntry = (NetworkListEntry.Network) entriesMap.get(networkId.name());
+            if (networkEntry != null && networkEntry.state.lessThan(NetworkId.State.unselectable)) {
+                if (firstLastUsed) {
+                    entries.add(new NetworkListEntry.Separator(getString(R.string.network_picker_separator_last)));
+                    firstLastUsed = false;
+                }
+
+                networkEntry.isFavorite = true;
+                entriesMap.remove(networkId.name());
                 entries.add(networkEntry);
             }
         }
@@ -528,25 +600,5 @@ public class NetworkPickerActivity extends OeffiActivity implements LocationHelp
             return true;
 
         return false;
-    }
-
-    private void loadLastNetworks() {
-        lastNetworks.clear();
-        for (final String networkId : prefs.getString(Constants.PREFS_KEY_LAST_NETWORK_PROVIDERS, "").split(",")) {
-            try {
-                lastNetworks.add(NetworkId.valueOf(networkId));
-            } catch (final IllegalArgumentException x) {
-                // don't care
-            }
-        }
-    }
-
-    private void saveLastNetworks() {
-        final StringBuilder prefsValue = new StringBuilder();
-        for (final NetworkId network : lastNetworks)
-            prefsValue.append(network.name()).append(',');
-        if (prefsValue.length() > 0)
-            prefsValue.setLength(prefsValue.length() - 1);
-        prefs.edit().putString(Constants.PREFS_KEY_LAST_NETWORK_PROVIDERS, prefsValue.toString()).commit();
     }
 }
