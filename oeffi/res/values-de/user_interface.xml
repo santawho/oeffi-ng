@@ -100,7 +100,7 @@
     <string name="user_interface_location_selector_colorized_summary">Nutze verschiedene Farben pro Station in der schnellen Ortswahl</string>
 
     <string name="user_interface_location_selector_numrows_title">Anzahl Einträge</string>
-    <string name="user_interface_location_selector_numrows_summary">Setze die Anzahl der Button-Zeilen der schnellen Ortswahl</string>
+    <string name="user_interface_location_selector_numrows_summary">Setze die Anzahl der Button-Zeilen der schnellen Ortswahl.  [%s]</string>
     <string-array name="user_interface_location_selector_numrows_titles">
         <item>2 Zeilen (4 Einträge)</item>
         <item>3 Zeilen (6 Einträge)</item>
@@ -109,7 +109,7 @@
     </string-array>
 
     <string name="user_interface_location_selector_longholdtime_title">Lange Halte-Zeit (ms)</string>
-    <string name="user_interface_location_selector_longholdtime_summary">Anzahl Millisekunden bis langes Halten in der schnellen Ortswahl erkannt wird</string>
+    <string name="user_interface_location_selector_longholdtime_summary">Anzahl Millisekunden bis langes Halten in der schnellen Ortswahl erkannt wird.  [%s]</string>
 
     <string name="user_interface_location_selector_longholdmenu_title">Menü beim lange Halten</string>
     <string name="user_interface_location_selector_longholdmenu_summary">Langes Halten in der schnellen Ortswahl öffnet Kontextmenü.\nHinweis: du kannst jederzeit mit 2 Fingern tippen.</string>

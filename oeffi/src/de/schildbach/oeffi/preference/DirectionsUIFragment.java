@@ -30,6 +30,9 @@ public class DirectionsUIFragment extends PreferenceFragment {
 
         setupDynamicSummary("max_history_entries", R.string.user_interface_max_history_entries_summary);
         setupDynamicSummary("stored_trips_retention_hours", R.string.user_interface_stored_trips_retention_hours_summary);
+
+        setupDynamicSummary("user_interface_location_selector_numrows", R.string.user_interface_location_selector_numrows_summary);
+        setupDynamicSummary("user_interface_location_selector_longholdtime", R.string.user_interface_location_selector_longholdtime_summary);
     }
 
     public static class SelectorHelp extends ShowHelpHandler {

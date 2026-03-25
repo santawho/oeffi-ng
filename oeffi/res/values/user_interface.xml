@@ -111,7 +111,7 @@
     <string name="user_interface_location_selector_colorized_summary">Use different colors for each station in the quick location selector</string>
 
     <string name="user_interface_location_selector_numrows_title">Number of entries</string>
-    <string name="user_interface_location_selector_numrows_summary">Set number of rows for the quick location selector</string>
+    <string name="user_interface_location_selector_numrows_summary">Set number of rows for the quick location selector.  [%s]</string>
     <string-array name="user_interface_location_selector_numrows_titles">
         <item>2 rows (4 items)</item>
         <item>3 rows (6 items)</item>
@@ -126,7 +126,7 @@
     </string-array>
 
     <string name="user_interface_location_selector_longholdtime_title">Long hold time (msec)</string>
-    <string name="user_interface_location_selector_longholdtime_summary">Number of milli-seconds to recognize long hold in the quick location selector</string>
+    <string name="user_interface_location_selector_longholdtime_summary">Number of milli-seconds to recognize long hold in the quick location selector.  [%s]</string>
 
     <string name="user_interface_location_selector_longholdmenu_title">Menu at long tap</string>
     <string name="user_interface_location_selector_longholdmenu_summary">Long tap opens context menu from quick location selector.\nNote: you can always use 2 fingers tap.</string>
