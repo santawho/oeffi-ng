@@ -1,5 +1,6 @@
 import java.text.SimpleDateFormat
 import groovy.json.JsonSlurper
+import groovy.xml.XmlSlurper
 
 plugins {
     alias(libs.plugins.android.application)
@@ -35,6 +36,7 @@ if (!oeffi_ng_password) {
     }
 }
 
+CREDENTIALS.oeffiOriginalVersionCode = new XmlSlurper().parse("../oeffi/AndroidManifest.xml").'@android:versionCode'.toString()
 CREDENTIALS.editionName = gitBranch != null && gitBranch !== 'main' && gitBranch != 'master' && gitBranch != 'nextgen' ? gitBranch : null
 CREDENTIALS.applicationId = "de.santawho.oeffi_ng${CREDENTIALS.editionName ? ".${CREDENTIALS.editionName}" : ''}"
 CREDENTIALS.report_email = "oeffi.report@santawho.de"
@@ -100,6 +102,9 @@ android {
             resValue "string", "oeffi_base_default_url", "https://santawho.github.io/oeffi-web/"
             resValue "string", "plans_base_default_url", "https://santawho.github.io/oeffi-web/plans"
             resValue "string", "messages_base_default_url", "https://santawho.github.io/oeffi-web/messages"
+            resValue "string", "messages_file_url", "messages-ng.txt"
+            resValue "string", "download_html_url", "https://github.com/santawho/oeffi-ng/wiki"
+            resValue "integer", "oeffi_original_version_code", "${CREDENTIALS.oeffiOriginalVersionCode}"
             resValue "bool", "flags_show_twitter", "false"
             resValue "bool", "flags_show_navigation_drawer_footer", "false"
         }
@@ -261,7 +266,7 @@ def createRelease(String tagName, File apkFile) {
     "git tag ${tagName}".execute()
     "git push --tags".execute()
 
-    def manifestJson = "{\"tag\": \"${tagName}\"}"
+    def manifestJson = "{\"tag\": \"${tagName}\", \"versionCode\": ${timeInt}}"
 
     def releaseId = githubCreateRelease(tagName)
     uploadToGithub(releaseId, project.oeffi.CREDENTIALS.asset_name_apk_file, apkFile.readBytes())

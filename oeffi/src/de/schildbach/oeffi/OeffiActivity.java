@@ -933,11 +933,15 @@ public abstract class OeffiActivity extends AppCompatActivity {
     }
 
     protected final String applicationVersionName() {
-        return Application.versionName(application);
+        return application.versionName();
     }
 
     protected final int applicationVersionCode() {
-        return Application.versionCode(application);
+        return application.versionCode();
+    }
+
+    protected final int oeffiOriginalVersionCode() {
+        return application.oeffiOriginalVersionCode();
     }
 
     protected final long applicationFirstInstallTime() {

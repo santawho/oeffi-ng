@@ -18,6 +18,10 @@
     <string name="oeffi_base_default_url">https://oeffi.schildbach.de/</string>
     <string name="plans_base_default_url">https://oeffi.schildbach.de/plans</string>
     <string name="messages_base_default_url">https://oeffi.schildbach.de/messages</string>
+    <string name="messages_file_url">messages.txt</string>
+    <string name="download_html_url">https://oeffi.schildbach.de/download.html</string>
     <string name="app_url_host">oeffi.schildbach.de</string>
     <string name="app_url_path_prefix">app/</string>
+
+    <integer name="oeffi_original_version_code">0</integer>
 </resources>

@@ -35,6 +35,16 @@ public class URLs {
         return oeffiBaseUrl;
     }
 
+    public static HttpUrl getDownloadHtmlUrl() {
+        final String urlString = Application.getInstance().getString(R.string.download_html_url);
+        if (urlString.isEmpty()) {
+            return URLs.getOeffiBaseUrl().newBuilder()
+                    .addPathSegment("download.html")
+                    .build();
+        }
+        return HttpUrl.parse(urlString);
+    }
+
     public static HttpUrl getPlansBaseUrl() {
         if (plansBaseUrl == null) {
             final String urlString = Application.getInstance().getString(R.string.plans_base_default_url);

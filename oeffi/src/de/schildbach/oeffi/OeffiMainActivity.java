@@ -65,6 +65,7 @@ public abstract class OeffiMainActivity extends OeffiActivity {
     private static boolean stillCheckForUpdate = true;
 
     private int versionCode;
+    private int oeffiVersionCode;
 
     private static final int DIALOG_MESSAGE = 102;
 
@@ -77,6 +78,7 @@ public abstract class OeffiMainActivity extends OeffiActivity {
         // initialize network
         final long now = System.currentTimeMillis();
         versionCode = applicationVersionCode();
+        oeffiVersionCode = oeffiOriginalVersionCode();
         final int lastVersionCode = prefs.getInt(Constants.PREFS_KEY_LAST_VERSION, 0);
 
         if (prefsGetNetworkId() == null) {
@@ -118,17 +120,21 @@ public abstract class OeffiMainActivity extends OeffiActivity {
 
     @Override
     protected Dialog onCreateDialog(final int id, final Bundle bundle) {
-        switch (id) {
-        case DIALOG_MESSAGE:
+        if (id == DIALOG_MESSAGE) {
             return messageDialog(bundle);
         }
 
         return super.onCreateDialog(id, bundle);
     }
 
+    private static boolean messagesAlreadyProcessedInThisProcess;
+
     private void downloadAndProcessMessages(final NetworkId network) {
+        if (messagesAlreadyProcessedInThisProcess)
+            return;
+        messagesAlreadyProcessedInThisProcess = true;
         final HttpUrl.Builder remoteUrl = URLs.getMessagesBaseUrl().newBuilder();
-        remoteUrl.addPathSegment("messages.txt");
+        remoteUrl.addPathSegment(getString(R.string.messages_file_url)); // "messages.txt"
         final String installerPackageName = Installer.installerPackageName(this);
         if (installerPackageName != null)
             remoteUrl.addEncodedQueryParameter("installer", installerPackageName);
@@ -147,14 +153,12 @@ public abstract class OeffiMainActivity extends OeffiActivity {
     }
 
     private void processMessages(final NetworkId network) {
-
-        String line = null;
         final File indexFile = new File(getFilesDir(), "messages.txt");
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(
                 indexFile.exists() ? new FileInputStream(indexFile) : getAssets().open("messages.txt"),
                 StandardCharsets.UTF_8))) {
             while (true) {
-                line = reader.readLine();
+                String line = reader.readLine();
                 if (line == null)
                     break;
                 line = line.trim();
@@ -209,6 +213,18 @@ public abstract class OeffiMainActivity extends OeffiActivity {
                 } else if (name.equals("version")) {
                     final int version = Integer.parseInt(value);
                     if (applicationVersionCode() >= version)
+                        return false;
+                } else if (name.equals("min-oeffi-version")) {
+                    final int version = Integer.parseInt(value);
+                    if (oeffiOriginalVersionCode() < version)
+                        return false;
+                } else if (name.equals("max-oeffi-version")) {
+                    final int version = Integer.parseInt(value);
+                    if (oeffiOriginalVersionCode() > version)
+                        return false;
+                } else if (name.equals("oeffi-version")) {
+                    final int version = Integer.parseInt(value);
+                    if (oeffiOriginalVersionCode() >= version)
                         return false;
                 } else if (name.equals("network")) {
                     if (network == null || !value.equalsIgnoreCase(network.name()))
@@ -282,7 +298,7 @@ public abstract class OeffiMainActivity extends OeffiActivity {
         log.info("Picked message: '{}'", line);
 
         // fetch and show message
-        if ("info".equals(action) || "warning".equals(action)) {
+        if ("info".equals(action) || "warning".equals(action) || "error".equals(action)) {
             final HttpUrl.Builder url = URLs.getMessagesBaseUrl().newBuilder()
                     .addEncodedPathSegment(id + (Locale.getDefault().getLanguage().equals("de") ? "-de" : "") + ".txt");
             final Request.Builder request = new Request.Builder();
@@ -354,11 +370,18 @@ public abstract class OeffiMainActivity extends OeffiActivity {
 
     private Dialog messageDialog(final Bundle message) {
         final DialogBuilder builder = DialogBuilder.get(this);
+        final boolean stopAppOnDismiss;
         final String action = message.getString("action");
-        if ("info".equals(action))
-            builder.setIcon(R.drawable.ic_info_grey600_24dp);
-        else if ("warning".equals(action))
+        if ("warning".equals(action)) {
             builder.setIcon(R.drawable.ic_warning_amber_24dp);
+            stopAppOnDismiss = false;
+        } else if ("error".equals(action)) {
+            builder.setIcon(R.drawable.ic_error_red_24dp);
+            stopAppOnDismiss = true;
+        } else {
+            builder.setIcon(R.drawable.ic_info_grey600_24dp);
+            stopAppOnDismiss = false;
+        }
         final String title = message.getString("title");
         if (title != null)
             builder.setTitle(title);
@@ -366,15 +389,15 @@ public abstract class OeffiMainActivity extends OeffiActivity {
         builder.setMessage(body);
         final String positive = message.getString("button-positive");
         if (positive != null)
-            builder.setPositiveButton(messageButtonText(positive), messageButtonListener(positive));
+            builder.setPositiveButton(messageButtonText(positive), messageButtonListener(positive, stopAppOnDismiss));
         final String neutral = message.getString("button-neutral");
         if (neutral != null)
-            builder.setNeutralButton(messageButtonText(neutral), messageButtonListener(neutral));
+            builder.setNeutralButton(messageButtonText(neutral), messageButtonListener(neutral, stopAppOnDismiss));
         final String negative = message.getString("button-negative");
         if (negative != null)
-            builder.setNegativeButton(messageButtonText(negative), messageButtonListener(negative));
+            builder.setNegativeButton(messageButtonText(negative), messageButtonListener(negative, stopAppOnDismiss));
         else
-            builder.setNegativeButton(R.string.alert_message_button_dismiss, null);
+            builder.setNegativeButton(R.string.alert_message_button_dismiss, messageButtonListener("dismiss", stopAppOnDismiss));
 
         final Dialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(false);
@@ -386,12 +409,16 @@ public abstract class OeffiMainActivity extends OeffiActivity {
             return getString(R.string.alert_message_button_dismiss);
         else if ("update".equals(buttonSpec))
             return getString(R.string.alert_message_button_update);
+        else if ("update-ng".equals(buttonSpec))
+            return getString(R.string.alert_message_button_update);
         else
             return Stream.of(buttonSpec.split("\\|", 2)).map(String::trim).iterator().next();
     }
 
-    private MessageOnClickListener messageButtonListener(final String buttonSpec) {
+    private DialogInterface.OnClickListener messageButtonListener(final String buttonSpec, final boolean stopAppOnDismiss) {
         if ("dismiss".equals(buttonSpec)) {
+            if (stopAppOnDismiss)
+                return (dialog, which) -> finishAndRemoveTask();
             return null;
         } else if ("update".equals(buttonSpec)) {
             final String installerPackageName = getPackageManager().getInstallerPackageName(getPackageName());
@@ -401,8 +428,14 @@ public abstract class OeffiMainActivity extends OeffiActivity {
                     || "org.fdroid.fdroid.privileged".equals(installerPackageName))
                 return new MessageOnClickListener("https://f-droid.org/de/packages/" + getPackageName() + "/");
             else
-                // TODO localize
-                return new MessageOnClickListener("https://oeffi.schildbach.de/download.html");
+                return new MessageOnClickListener(URLs.getDownloadHtmlUrl().toString());
+        } else if ("update-ng".equals(buttonSpec)) {
+            return (dialog, which) ->
+                    new AppInstaller(this,
+                            stopAppOnDismiss
+                                    ? aBoolean -> finishAndRemoveTask()
+                                    : null)
+                            .checkForUpdate(true);
         } else {
             final Iterator<String> iterator = Stream.of(buttonSpec.split("\\|", 2)).map(String::trim).iterator();
             iterator.next();

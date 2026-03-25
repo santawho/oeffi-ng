@@ -453,12 +453,16 @@ public class Application extends android.app.Application {
         return prefs.getBoolean(Constants.KEY_EXTRAS_DRIVERMODE_ENABLED, false);
     }
 
-    public static String versionName(final Application application) {
-        return application.packageInfo().versionName;
+    public String versionName() {
+        return packageInfo().versionName;
     }
 
-    public static int versionCode(final Application application) {
-        return application.packageInfo().versionCode;
+    public int versionCode() {
+        return packageInfo().versionCode;
+    }
+
+    public int oeffiOriginalVersionCode() {
+        return getResources().getInteger(R.integer.oeffi_original_version_code);
     }
 
     private void createShortcuts() {

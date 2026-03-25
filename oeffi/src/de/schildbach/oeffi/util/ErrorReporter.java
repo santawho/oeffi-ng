@@ -416,7 +416,7 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
             builder.setPositiveButton(R.string.alert_crash_report_download, (dialog, which) -> {
                 stackTraceFile.delete();
                 activity.startActivity(
-                        new Intent(Intent.ACTION_VIEW, Uri.parse(URLs.getOeffiBaseUrl() + "download.html")));
+                        new Intent(Intent.ACTION_VIEW, Uri.parse(URLs.getDownloadHtmlUrl().toString())));
             });
         } else {
             builder.setPositiveButton(R.string.alert_crash_report_positive, (dialog, which) -> {
