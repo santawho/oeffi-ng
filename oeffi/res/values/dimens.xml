@@ -46,6 +46,8 @@
     <item name="trips_overview_entry_public_box_fraction" type="fraction">80%</item>
     <item name="trips_overview_entry_individual_box_fraction" type="fraction">30%</item>
 
+    <dimen name="stations_station_details_header_lines_scroll_max_height">130dp</dimen>
+
     <dimen name="trips_overview_entry_box_stroke_width">2dp</dimen>
     <dimen name="trip_details_stop_offset">7sp</dimen>
     <dimen name="pearl_line_width">8dp</dimen>

@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.net.Uri;
@@ -49,6 +48,7 @@ import androidx.annotation.NonNull;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -193,6 +193,14 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
     private boolean showJourneyMessages = true;
 
+    private View headerView;
+    private TextView nameView;
+    private TextView idView;
+    private NestedScrollView linesGroupScroll;
+    private LinearLayout linesGroup;
+    private ImageView multiStationsView;
+    private LinearLayout.LayoutParams LINES_LAYOUT_PARAMS;
+
     private static final Logger log = LoggerFactory.getLogger(StationDetailsActivity.class);
 
     @Override
@@ -314,6 +322,19 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         });
         disclaimerSourceView = findViewById(R.id.stations_station_details_disclaimer_source);
         updateDisclaimerSource(disclaimerSourceView, selectedNetwork, null);
+
+        headerView = findViewById(R.id.stations_station_details_header);
+        nameView = findViewById(R.id.stations_station_details_header_name);
+        idView = findViewById(R.id.stations_station_details_header_id);
+        linesGroupScroll = findViewById(R.id.stations_station_details_header_lines_scroll);
+        linesGroup = findViewById(R.id.stations_station_details_header_lines);
+        multiStationsView = findViewById(R.id.stations_station_details_header_multistations);
+        multiStationsView.setVisibility(View.GONE);
+        LINES_LAYOUT_PARAMS = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        LINES_LAYOUT_PARAMS.setMargins(
+                0, getResources().getDimensionPixelSize(R.dimen.text_padding_vertical_cram),
+                0, 0);
     }
 
     @Override
@@ -383,6 +404,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         showJourneyMessages = prefs.getBoolean("user_interface_station_departures_show_journey_messages", true);
         final List<Departure> selectedDepartures = this.getFilteredDepartures();
         if (selectedDepartures != null && !selectedDepartures.isEmpty()) {
+            updateHeader();
             viewAnimator.setDisplayedChild(0);
             listAdapter.notifyDataSetChanged();
         } else {
@@ -651,7 +673,6 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         public int hashCode() {
             return java.util.Objects.hash(stationId, journeyRef);
         }
-
     }
 
     private final Map<LocationDepartureKey, Boolean> expandedStates = new HashMap<>();
@@ -682,6 +703,66 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             expandedStates.put(key, isExpanded);
     }
 
+    public void updateHeader() {
+        // name and id
+        nameView.setText(selectedStation.uniqueShortName());
+        idView.setText(selectedStation.displayId != null ? selectedStation.displayId : "");
+        if (stations.size() > 1) {
+            headerView.setVisibility(View.VISIBLE);
+            multiStationsView.setVisibility(View.VISIBLE);
+            headerView.setOnClickListener(v -> {
+                final PopupMenu popupMenu = new PopupMenu(v.getContext(), v);
+                final Menu menu = popupMenu.getMenu();
+                for (int i = 0; i < stations.size(); i++)
+                    menu.add(Menu.NONE, i, Menu.NONE, stations.get(i).location.uniqueShortName());
+                popupMenu.setOnMenuItemClickListener(item -> {
+                    final Station newStation = stations.get(item.getItemId());
+                    selectStation(newStation);
+                    return true;
+                });
+                popupMenu.show();
+            });
+        } else {
+            headerView.setVisibility(View.GONE);
+            multiStationsView.setVisibility(View.GONE);
+            headerView.setOnClickListener(null);
+        }
+
+        // lines
+        linesGroup.removeAllViews();
+        if (selectedLines != null) {
+            linesGroupScroll.setVisibility(View.VISIBLE);
+            linesGroupScroll.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                    selectedLines.size() < 6
+                            ? LinearLayout.LayoutParams.WRAP_CONTENT
+                            : (int) getResources().getDimension(R.dimen.stations_station_details_header_lines_scroll_max_height)));
+            for (final Map.Entry<Line, List<Location>> linesEntry : selectedLines.entrySet()) {
+                final Line line = linesEntry.getKey();
+                final List<Location> destinations = linesEntry.getValue();
+
+                final View lineRow = getLayoutInflater().inflate(R.layout.stations_station_details_header_line, null);
+                linesGroup.addView(lineRow, LINES_LAYOUT_PARAMS);
+
+                final LineView lineView = lineRow
+                        .findViewById(R.id.stations_station_details_header_line_line);
+                lineView.setLine(line);
+
+                final TextView destinationView = lineRow
+                        .findViewById(R.id.stations_station_details_header_line_destination);
+                final StringBuilder text = new StringBuilder();
+                for (final Location destination : destinations) {
+                    if (text.length() > 0)
+                        text.append(Constants.CHAR_THIN_SPACE).append(Constants.CHAR_LEFT_RIGHT_ARROW)
+                                .append(Constants.CHAR_THIN_SPACE);
+                    text.append(destination.uniqueShortName());
+                }
+                destinationView.setText(text);
+            }
+        } else {
+            linesGroupScroll.setVisibility(View.GONE);
+        }
+    }
+
     private class DeparturesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private final StationDetailsActivity context;
         private final LayoutInflater inflater;
@@ -696,139 +777,34 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         @Override
         public int getItemCount() {
             final List<Departure> selectedDepartures = StationDetailsActivity.this.getFilteredDepartures();
-            final int numDepartures = selectedDepartures != null ? selectedDepartures.size() : 0;
-            return numDepartures + 1; // account for header
+            return selectedDepartures != null ? selectedDepartures.size() : 0;
         }
 
         @Override
         public int getItemViewType(final int position) {
-            if (position == 0)
-                return R.layout.stations_station_details_header;
             return R.layout.stations_station_details_entry;
         }
 
         public Departure getItem(final int position) {
-            if (position == 0)
-                return null;
-            return requireNonNull(getFilteredDepartures()).get(position - 1);
+            return requireNonNull(getFilteredDepartures()).get(position);
         }
 
         @Override
         public long getItemId(final int position) {
-            if (position == 0)
-                return RecyclerView.NO_ID;
             return getItem(position).hashCode();
         }
 
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
-            if (viewType == R.layout.stations_station_details_header)
-                return new HeaderViewHolder(context,
-                        inflater.inflate(R.layout.stations_station_details_header, parent, false));
-            else
-                return new DepartureViewHolder(context,
-                        inflater.inflate(R.layout.stations_station_details_entry, parent, false));
+            return new DepartureViewHolder(context,
+                    inflater.inflate(R.layout.stations_station_details_entry, parent, false));
         }
 
         @Override
         public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, final int position) {
-            if (holder instanceof HeaderViewHolder) {
-                ((HeaderViewHolder) holder).bind(selectedStation, selectedLines, null, StationDetailsActivity.this);
-            } else {
-                final Departure departure = getItem(position);
-                ((DepartureViewHolder) holder).bind(selectedNetwork, selectedStation, departure);
-            }
-        }
-    }
-
-    private static class HeaderViewHolder extends RecyclerView.ViewHolder {
-        private final TextView nameView;
-        private final TextView idView;
-        private final LinearLayout linesGroup;
-        private final LineView additionalLinesView;
-        private final ImageView multiStationsView;
-
-        private final LayoutInflater inflater;
-
-        private final LinearLayout.LayoutParams LINES_LAYOUT_PARAMS = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-
-        public HeaderViewHolder(final Context context, final View itemView) {
-            super(itemView);
-
-            nameView = itemView.findViewById(R.id.stations_station_details_header_name);
-            idView = itemView.findViewById(R.id.stations_station_details_header_id);
-            linesGroup = itemView.findViewById(R.id.stations_station_details_header_lines);
-            additionalLinesView = itemView
-                    .findViewById(R.id.stations_station_details_header_additional_lines);
-            multiStationsView = itemView.findViewById(R.id.stations_station_details_header_multistations);
-            multiStationsView.setVisibility(View.GONE);
-
-            inflater = LayoutInflater.from(context);
-            final Resources res = context.getResources();
-            LINES_LAYOUT_PARAMS.setMargins(0, res.getDimensionPixelSize(R.dimen.text_padding_vertical_cram), 0,
-                    0);
-        }
-
-        public void bind(final Location station, @Nullable final LinkedHashMap<Line, List<Location>> lines,
-                         @Nullable final List<Line> additionalLines,
-                         final StationDetailsActivity activity) {
-            final List<Station> stations = activity.stations;
-            // name and id
-            nameView.setText(station.uniqueShortName());
-            idView.setText(station.displayId != null ? station.displayId : "");
-            if (stations.size() > 1) {
-                multiStationsView.setVisibility(View.VISIBLE);
-                itemView.setOnClickListener(v -> {
-                    final PopupMenu popupMenu = new PopupMenu(v.getContext(), v);
-                    final Menu menu = popupMenu.getMenu();
-                    for (int i = 0; i < stations.size(); i++)
-                        menu.add(Menu.NONE, i, Menu.NONE, stations.get(i).location.uniqueShortName());
-                    popupMenu.setOnMenuItemClickListener(item -> {
-                        final Station newStation = stations.get(item.getItemId());
-                        activity.selectStation(newStation);
-                        return true;
-                    });
-                    popupMenu.show();
-                });
-            } else {
-                multiStationsView.setVisibility(View.GONE);
-                itemView.setOnClickListener(null);
-            }
-
-            // lines
-            linesGroup.removeAllViews();
-            if (lines != null) {
-                linesGroup.setVisibility(View.VISIBLE);
-                for (final Map.Entry<Line, List<Location>> linesEntry : lines.entrySet()) {
-                    final Line line = linesEntry.getKey();
-                    final List<Location> destinations = linesEntry.getValue();
-
-                    final View lineRow = inflater.inflate(R.layout.stations_station_details_header_line, null);
-                    linesGroup.addView(lineRow, LINES_LAYOUT_PARAMS);
-
-                    final LineView lineView = lineRow
-                            .findViewById(R.id.stations_station_details_header_line_line);
-                    lineView.setLine(line);
-
-                    final TextView destinationView = lineRow
-                            .findViewById(R.id.stations_station_details_header_line_destination);
-                    final StringBuilder text = new StringBuilder();
-                    for (final Location destination : destinations) {
-                        if (text.length() > 0)
-                            text.append(Constants.CHAR_THIN_SPACE).append(Constants.CHAR_LEFT_RIGHT_ARROW)
-                                    .append(Constants.CHAR_THIN_SPACE);
-                        text.append(destination.uniqueShortName());
-                    }
-                    destinationView.setText(text);
-                }
-            } else {
-                linesGroup.setVisibility(View.GONE);
-            }
-
-            // additional lines
-            additionalLinesView.setLines(additionalLines);
+            final Departure departure = getItem(position);
+            ((DepartureViewHolder) holder).bind(selectedNetwork, selectedStation, departure);
         }
     }
 
