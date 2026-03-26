@@ -240,7 +240,7 @@ public final class Formats {
         // "\u200B" is a breakable whitespace with zero width
         return originalName
                 .replaceAll("[ .]+", "\u200B")
-                .replaceAll("([-A-Z]*)([-0-9]+)([-A-Z]*)", "$1\u200B$2\u200B$3")
+                .replaceAll("([-A-Z]*)([-0-9a-b]+)([-A-Z]*)", "$1\u200B$2\u200B$3")
                 .replaceAll("\u200B+", "\u200B")
                 .replaceAll("^\u200B", "")
                 .replaceAll("\u200B$", "");
