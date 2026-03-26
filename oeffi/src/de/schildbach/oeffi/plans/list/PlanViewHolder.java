@@ -32,6 +32,7 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.network.NetworkResources;
+import de.schildbach.oeffi.util.ViewUtils;
 import okhttp3.Call;
 
 import javax.annotation.Nullable;
@@ -48,6 +49,7 @@ public class PlanViewHolder extends RecyclerView.ViewHolder {
     private final TextView validFromView;
     private final ImageView networkLogoView;
     private final ImageButton contextButton;
+    private final TextView favoriteView;
 
     @Nullable
     private Call call = null;
@@ -65,13 +67,14 @@ public class PlanViewHolder extends RecyclerView.ViewHolder {
         validFromView = itemView.findViewById(R.id.plans_picker_entry_valid_from);
         networkLogoView = itemView.findViewById(R.id.plans_picker_entry_network_logo);
         contextButton = itemView.findViewById(R.id.plans_picker_entry_context_button);
+        favoriteView = itemView.findViewById(R.id.plans_picker_entry_favorite);
     }
 
     public void bind(final PlansAdapter.Plan plan, final PlanClickListener clickListener,
             final PlanContextMenuItemListener contextMenuItemListener) {
         itemView.setOnClickListener(v -> clickListener.onPlanClick(plan));
 
-        thumbView.setImageDrawable(null);
+        bindThumb(plan.thumb);
 
         nameView.setText(plan.name);
 
@@ -103,6 +106,8 @@ public class PlanViewHolder extends RecyclerView.ViewHolder {
                     item.getItemId()));
             contextMenu.show();
         });
+
+        ViewUtils.setVisibility(favoriteView, plan.isFavorite);
     }
 
     public void bindThumb(final Drawable thumb) {

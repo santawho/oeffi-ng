@@ -504,6 +504,7 @@
     <!-- plans picker -->
     <string name="plans_picker_context_open_title">Plan öffnen</string>
     <string name="plans_picker_context_remove_title">Plan löschen</string>
+    <string name="plans_picker_context_toggle_favorite_title">Favoritenmarkierung wechseln</string>
     <string name="plans_picker_context_launcher_shortcut_title">Launcher-Verknüpfung erstellen</string>
     <string name="plans_picker_list_empty">Keine Pläne gefunden</string>
     <string name="plans_picker_entry_valid_from">Gültig ab\n%s</string>

@@ -27,7 +27,6 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.location.Criteria;
-import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -70,6 +69,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class PlansPickerActivity extends OeffiMainActivity implements LocationHelper.Callback, PlanClickListener,
         PlanContextMenuItemListener {
+
     private ConnectivityManager connectivityManager;
     private LocationHelper locationHelper;
 
@@ -121,6 +121,8 @@ public class PlansPickerActivity extends OeffiMainActivity implements LocationHe
         actionBar = getMyActionBar();
         setPrimaryColor(R.color.bg_action_bar);
         actionBar.setPrimaryTitle(R.string.plans_activity_title);
+        actionBar.addButton(R.drawable.ic_refresh_white_24dp, R.string.action_bar_progress_description)
+                .setOnClickListener(v -> requery());
         actionBar.addButton(R.drawable.ic_search_white_24dp, R.string.plans_picker_action_search_title)
                 .setOnClickListener(v -> onSearchRequested());
 
@@ -281,6 +283,9 @@ public class PlansPickerActivity extends OeffiMainActivity implements LocationHe
             final int position = listView.findViewHolderForItemId(plan.rowId).getAdapterPosition();
             if (position != RecyclerView.NO_POSITION)
                 listAdapter.setLoaded(position, false);
+            return true;
+        } else if (menuItemId == R.id.plans_picker_context_toggle_favorite) {
+            listAdapter.toggleFavorite(plan);
             return true;
         } else if (menuItemId == R.id.plans_picker_context_launcher_shortcut) {
             final String shortcutId = "plan-" + plan.planId;

@@ -26,7 +26,9 @@ import android.os.Handler;
 import android.provider.BaseColumns;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+
 import androidx.recyclerview.widget.RecyclerView;
+
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.URLs;
@@ -44,7 +46,9 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
 
@@ -53,6 +57,7 @@ import org.slf4j.LoggerFactory;
 
 public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
     private static final Logger log = LoggerFactory.getLogger(PlansAdapter.class);
+
     private final Context context;
     private final Resources res;
     private final LayoutInflater inflater;
@@ -66,11 +71,15 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
     private final int urlColumn;
     private final PlanClickListener clickListener;
     private final PlanContextMenuItemListener contextMenuItemListener;
+    private Map<Integer, Plan> plansByPosition = new HashMap<>();
 
     private final Handler handler = new Handler();
     private final OkHttpClient cachingOkHttpClient;
 
-    public PlansAdapter(final Context context, final Cursor cursor, final Cache thumbCache,
+    public PlansAdapter(
+            final Context context,
+            final Cursor cursor,
+            final Cache thumbCache,
             final PlanClickListener clickListener, final PlanContextMenuItemListener contextMenuItemListener,
             final OkHttpClient okHttpClient) {
         this.context = context;
@@ -91,6 +100,11 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
         setHasStableIds(true);
 
         cachingOkHttpClient = okHttpClient.newBuilder().cache(thumbCache).build();
+    }
+
+    public void toggleFavorite(final PlansAdapter.Plan plan) {
+        plan.isFavorite = PlanContentProvider.toggleFavorite(plan.getId());
+        notifyDataSetChanged();
     }
 
     public void setProgressPermille(final int position, final int progressPermille) {
@@ -140,40 +154,42 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
         }
     }
 
-    @Override
     public void onViewAttachedToWindow(final PlanViewHolder holder) {
         final int position = holder.getAdapterPosition();
         final Plan plan = getPlan(position);
-        if (holder.getCall() == null) {
-            final HttpUrl thumbUrl = URLs.getPlansBaseUrl().newBuilder()
-                    .addEncodedPathSegment(plan.planId + "_thumb.png").build();
-            final Request request = new Request.Builder().url(thumbUrl).build();
-            final Call call = cachingOkHttpClient.newCall(request);
-            holder.setCall(call);
-            call.enqueue(new Callback() {
-                public void onResponse(final Call call, final Response r) throws IOException {
-                    try (final Response response = r) {
+        if (plan.thumb != null)
+            return;
+        if (holder.getCall() != null)
+            return;
+        final HttpUrl thumbUrl = URLs.getPlansBaseUrl().newBuilder()
+                .addEncodedPathSegment(plan.planId + "_thumb.png").build();
+        final Request request = new Request.Builder().url(thumbUrl).build();
+        final Call call = cachingOkHttpClient.newCall(request);
+        holder.setCall(call);
+        call.enqueue(new Callback() {
+            public void onResponse(final Call call, final Response r) throws IOException {
+                try (final Response response = r) {
+                    if (!call.isCanceled()) {
                         final Drawable thumb;
                         if (response.isSuccessful())
                             thumb = new BitmapDrawable(res, response.body().byteStream());
                         else
                             thumb = res.getDrawable(R.drawable.ic_oeffi_plans_grey300_72dp).mutate();
-                        if (!call.isCanceled()) {
-                            handler.post(() -> {
-                                holder.setCall(null);
-                                final int position1 = holder.getAdapterPosition();
-                                if (position1 != RecyclerView.NO_POSITION)
-                                    notifyItemChanged(position1, thumb);
-                            });
-                        }
+                        plan.thumb = thumb;
+                        handler.post(() -> {
+                            holder.setCall(null);
+                            final int position1 = holder.getAdapterPosition();
+                            if (position1 != RecyclerView.NO_POSITION)
+                                notifyItemChanged(position1, thumb);
+                        });
                     }
                 }
+            }
 
-                public void onFailure(final Call call, final IOException e) {
-                    handler.post(() -> holder.setCall(null));
-                }
-            });
-        }
+            public void onFailure(final Call call, final IOException e) {
+                handler.post(() -> holder.setCall(null));
+            }
+        });
     }
 
     @Override
@@ -186,6 +202,9 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
     }
 
     public Plan getPlan(final int position) {
+        final Plan plan = plansByPosition.get(position);
+        if (plan != null)
+            return plan;
         cursor.moveToPosition(position);
         final long rowId = cursor.getLong(rowIdColumn);
         final String planId = cursor.getString(planIdColumn);
@@ -205,7 +224,12 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
                 log.warn("network plan \"{}\" references undefined network id \"{}\"", planId, networkLogo);
             }
         }
-        return new Plan(rowId, planId, name, disclaimer, validFrom, networkId, url, localFile);
+        final Plan newPlan = new Plan(
+                rowId, planId, name, disclaimer,
+                validFrom, networkId, url, localFile,
+                PlanContentProvider.isPlanFavorite(planId));
+        plansByPosition.put(position, newPlan);
+        return newPlan;
     }
 
     public static class Plan {
@@ -221,9 +245,13 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
         @Nullable
         public final HttpUrl url;
         public final File localFile;
+        public boolean isFavorite;
+        public Drawable thumb;
 
-        protected Plan(final long rowId, final String planId, final String name, final String disclaimer,
-                final Date validFrom, final NetworkId networkId, final HttpUrl url, final File localFile) {
+        private Plan(
+                final long rowId, final String planId, final String name, final String disclaimer,
+                final Date validFrom, final NetworkId networkId, final HttpUrl url, final File localFile,
+                final boolean isFavorite) {
             this.rowId = rowId;
             this.planId = requireNonNull(planId);
             this.name = requireNonNull(name);
@@ -232,6 +260,11 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
             this.networkId = networkId;
             this.url = url;
             this.localFile = requireNonNull(localFile);
+            this.isFavorite = isFavorite;
+        }
+
+        public String getId() {
+            return planId;
         }
     }
 }

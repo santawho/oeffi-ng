@@ -505,6 +505,7 @@
     <!-- plans picker -->
     <string name="plans_picker_context_open_title">Open plan</string>
     <string name="plans_picker_context_remove_title">Remove plan</string>
+    <string name="plans_picker_context_toggle_favorite_title">Toggle favorite</string>
     <string name="plans_picker_context_launcher_shortcut_title">Create Launcher Shortcut</string>
     <string name="plans_picker_list_empty">No plans found</string>
     <string name="plans_picker_entry_valid_from">Valid from\n%s</string>

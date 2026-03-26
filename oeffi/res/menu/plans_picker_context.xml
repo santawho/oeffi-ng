@@ -9,6 +9,9 @@
         android:id="@+id/plans_picker_context_remove"
         android:title="@string/plans_picker_context_remove_title" />
     <item
+        android:id="@+id/plans_picker_context_toggle_favorite"
+        android:title="@string/plans_picker_context_toggle_favorite_title" />
+    <item
         android:id="@+id/plans_picker_context_launcher_shortcut"
         android:title="@string/plans_picker_context_launcher_shortcut_title" />
 

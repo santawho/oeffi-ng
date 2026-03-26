@@ -124,11 +124,11 @@ public class NetworkPickerActivity extends OeffiActivity implements
 
         private void save() {
             final StringBuilder prefsValue = new StringBuilder();
-            for (final NetworkId network : this)
-                prefsValue.append(network.name()).append(',');
+            for (final NetworkId networkId : this)
+                prefsValue.append(networkId.name()).append(',');
             if (prefsValue.length() > 0)
                 prefsValue.setLength(prefsValue.length() - 1);
-            prefs.edit().putString(prefKey, prefsValue.toString()).commit();
+            prefs.edit().putString(prefKey, prefsValue.toString()).apply();
         }
     }
 

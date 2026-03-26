@@ -43,6 +43,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Serial;
 import java.net.HttpURLConnection;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -82,6 +83,76 @@ public class PlanContentProvider extends ContentProvider {
     public static final String KEY_STATION_X = "station_x";
     public static final String KEY_STATION_Y = "station_y";
 
+    public static class PlanList extends LinkedList<String> {
+        @Serial
+        private static final long serialVersionUID = 4948873861563709547L;
+
+        final String prefKey;
+        final int maxSize;
+
+        public PlanList(final String prefKey) {
+            this(prefKey, Integer.MAX_VALUE);
+        }
+
+        public PlanList(final String prefKey, final int maxSize) {
+            this.prefKey = prefKey;
+            this.maxSize = maxSize;
+        }
+
+        public void addPlan(final String planId) {
+            // put last selected network to the front
+            remove(planId);
+            add(0, planId);
+            while (size() > maxSize)
+                remove(size() - 1);
+            save();
+        }
+
+        public void removePlan(final String planId) {
+            remove(planId);
+            save();
+        }
+
+        private void load() {
+            clear();
+            for (final String planId : Application.getInstance().getSharedPreferences()
+                    .getString(prefKey, "").split(",")) {
+                try {
+                    add(planId);
+                } catch (final IllegalArgumentException x) {
+                    // don't care
+                }
+            }
+        }
+
+        private void save() {
+            final StringBuilder prefsValue = new StringBuilder();
+            for (final String planId : this)
+                prefsValue.append(planId).append(',');
+            if (prefsValue.length() > 0)
+                prefsValue.setLength(prefsValue.length() - 1);
+            Application.getInstance().getSharedPreferences().edit()
+                    .putString(prefKey, prefsValue.toString())
+                    .apply();
+        }
+    }
+
+    private static final PlanList favoritePlans = new PlanList(Constants.PREFS_KEY_FAVORITE_PLANS);
+
+    public static boolean toggleFavorite(final String planId) {
+        if (favoritePlans.contains(planId)) {
+            favoritePlans.removePlan(planId);
+            return false;
+        } else {
+            favoritePlans.addPlan(planId);
+            return true;
+        }
+    }
+
+    public static boolean isPlanFavorite(final String planId) {
+        return favoritePlans.contains(planId);
+    }
+
     private Application application;
     private Downloader downloader;
 
@@ -113,8 +184,12 @@ public class PlanContentProvider extends ContentProvider {
     }
 
     @Override
-    public Cursor query(final Uri uri, final String[] projection, final String selection, final String[] selectionArgs,
+    public Cursor query(
+            final Uri uri, final String[] projection,
+            final String selection, final String[] selectionArgs,
             final String sortOrder) {
+        favoritePlans.load();
+
         BiConsumer<? super Integer, ? super Throwable> notifyChangeCallback = (status, t) -> {
             if (t == null && status == HttpURLConnection.HTTP_OK)
                 getContext().getContentResolver().notifyChange(uri, null);
@@ -150,9 +225,9 @@ public class PlanContentProvider extends ContentProvider {
                 final String[] latLon = sortOrder.split(",");
                 final double lat = Double.parseDouble(latLon[0]);
                 final double lon = Double.parseDouble(latLon[1]);
-                return new DistanceSortingCursorWrapper(cursor, lat, lon);
+                return new DistanceSortingCursorWrapper(cursor, favoritePlans, lat, lon);
             } else {
-                return cursor;
+                return new DistanceSortingCursorWrapper(cursor, favoritePlans);
             }
         } else if (pathSegments.size() == 3) {
             if (pathSegments.get(0).equals("plan") && pathSegments.get(2).equals("stations")) {
@@ -334,41 +409,79 @@ public class PlanContentProvider extends ContentProvider {
     }
 
     private static class DistanceSortingCursorWrapper extends CursorWrapper {
-        private final Cursor cursor;
-        private final int size;
         private List<Integer> mapping;
         private int pos = -1;
 
-        public DistanceSortingCursorWrapper(final Cursor cursor, final double lat, final double lon) {
+        public DistanceSortingCursorWrapper(
+                final Cursor cursor,
+                final PlanList favoritePlans) {
             super(cursor);
 
-            this.cursor = cursor;
-            this.size = cursor.getCount();
+            final int planIdColumn = cursor.getColumnIndexOrThrow(KEY_PLAN_ID);
 
-            mapping = new LinkedList<>();
-            for (int i = 0; i < size; i++)
-                mapping.add(i);
+            sort(
+                    (index1, index2) -> {
+                        cursor.moveToPosition(index1);
+                        final String planId1 = cursor.getString(planIdColumn);
+                        final boolean plan1isFavorite = favoritePlans.contains(planId1);
 
+                        cursor.moveToPosition(index2);
+                        final String planId2 = cursor.getString(planIdColumn);
+                        final boolean plan2isFavorite = favoritePlans.contains(planId2);
+
+                        if (plan1isFavorite && !plan2isFavorite)
+                            return -1;
+                        if (!plan1isFavorite && plan2isFavorite)
+                            return 1;
+                        return 0;
+                    },
+                    "");
+        }
+
+        public DistanceSortingCursorWrapper(
+                final Cursor cursor,
+                final PlanList favoritePlans,
+                final double lat, final double lon) {
+            super(cursor);
+
+            final int planIdColumn = cursor.getColumnIndexOrThrow(KEY_PLAN_ID);
             final int latColumn = cursor.getColumnIndexOrThrow(KEY_PLAN_LAT);
             final int lonColumn = cursor.getColumnIndexOrThrow(KEY_PLAN_LON);
 
-            final Comparator<Integer> comparator = new Comparator<Integer>() {
-                public int compare(final Integer index1, final Integer index2) {
-                    cursor.moveToPosition(index1);
-                    final Point p1 = Point.from1E6(cursor.getInt(latColumn), cursor.getInt(lonColumn));
-                    final float dist1 = GeoUtils.distanceBetween(lat, lon, p1).distanceInMeters;
+            sort(
+                    (index1, index2) -> {
+                        cursor.moveToPosition(index1);
+                        final String planId1 = cursor.getString(planIdColumn);
+                        final boolean plan1isFavorite = favoritePlans.contains(planId1);
+                        final Point p1 = Point.from1E6(cursor.getInt(latColumn), cursor.getInt(lonColumn));
+                        final float dist1 = GeoUtils.distanceBetween(lat, lon, p1).distanceInMeters;
 
-                    cursor.moveToPosition(index2);
-                    final Point p2 = Point.from1E6(cursor.getInt(latColumn), cursor.getInt(lonColumn));
-                    final float dist2 = GeoUtils.distanceBetween(lat, lon, p2).distanceInMeters;
-                    return Float.compare(dist1, dist2);
-                }
-            };
+                        cursor.moveToPosition(index2);
+                        final String planId2 = cursor.getString(planIdColumn);
+                        final boolean plan2isFavorite = favoritePlans.contains(planId2);
+                        final Point p2 = Point.from1E6(cursor.getInt(latColumn), cursor.getInt(lonColumn));
+                        final float dist2 = GeoUtils.distanceBetween(lat, lon, p2).distanceInMeters;
 
+                        if (plan1isFavorite && !plan2isFavorite)
+                            return -1;
+                        if (!plan1isFavorite && plan2isFavorite)
+                            return 1;
+                        return Float.compare(dist1, dist2);
+                    },
+                    "by distance to " + lat + "," + lon);
+        }
+
+        private void sort(
+                final Comparator<Integer> comparator,
+                final String errorMessage) {
+            mapping = new LinkedList<>();
+            final int size = getWrappedCursor().getCount();
+            for (int i = 0; i < size; i++)
+                mapping.add(i);
             try {
                 Collections.sort(mapping, comparator);
             } catch (final IllegalArgumentException x) {
-                log.warn("Failed sorting " + size + " cursor entries by distance to " + lat + "," + lon, x);
+                log.warn("Failed sorting " + size + " cursor entries " + errorMessage, x);
                 // we boldly continue, hoping that the list isn't corrupt
             }
         }
@@ -380,6 +493,8 @@ public class PlanContentProvider extends ContentProvider {
 
         @Override
         public final boolean moveToPosition(final int position) {
+            final Cursor cursor = getWrappedCursor();
+            final int size = cursor.getCount();
             if (position < 0) {
                 pos = -1;
                 cursor.moveToPosition(-1);
@@ -407,7 +522,7 @@ public class PlanContentProvider extends ContentProvider {
 
         @Override
         public final boolean moveToLast() {
-            return moveToPosition(size - 1);
+            return moveToPosition(getWrappedCursor().getCount() - 1);
         }
 
         @Override
