@@ -192,8 +192,18 @@
 
         <activity
             android:name=".stations.FavoriteStationsActivity"
-            android:label="@string/stations_favorite_stations_title"
-            android:taskAffinity="${applicationId}.stations" />
+            android:label="@string/stations_favorite_stations_title" />
+        <activity
+            android:name=".stations.FavoriteStationsActivity$Main"
+            android:exported="true"
+            android:icon="@mipmap/ic_oeffi_ng_favorites_color_48dp"
+            android:label="@string/favorite_stations_icon_label"
+            android:launchMode="singleInstancePerTask"
+            android:taskAffinity="${applicationId}.favorites">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
 
         <provider
             android:name=".stations.FavoriteStationsProvider"

@@ -304,8 +304,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         actionBar.setPrimaryTitle(R.string.stations_activity_title);
         actionBar.setTitlesOnClickListener(v -> NetworkPickerActivity.start(StationsActivity.this));
         actionBar.addProgressButton().setOnClickListener(v -> requestRefresh());
-        actionBar.addButton(R.drawable.ic_star_white_24dp, R.string.stations_options_favorites_title)
-                .setOnClickListener(view -> FavoriteStationsActivity.start(StationsActivity.this));
+        // actionBar.addButton(R.drawable.ic_star_white_24dp, R.string.stations_options_favorites_title)
+        //         .setOnClickListener(view -> FavoriteStationsActivity.start(StationsActivity.this));
         addShowMapButtonToActionBar();
         actionBar.addButton(R.drawable.ic_search_white_24dp, R.string.stations_action_search_title)
                 .setOnClickListener(v -> {

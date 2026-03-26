@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:drawable="@drawable/ic_oeffi_favorites_color_36dp" android:state_checked="true" />
+    <item android:drawable="@drawable/ic_oeffi_favorites_grey600_36dp" />
+
+</selector>

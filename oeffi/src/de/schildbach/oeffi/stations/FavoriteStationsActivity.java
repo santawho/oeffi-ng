@@ -61,12 +61,19 @@ public class FavoriteStationsActivity extends OeffiActivity
         implements StationClickListener, StationContextMenuItemListener {
     private static final String INTENT_EXTRA_NETWORK = FavoriteStationsActivity.class.getName() + ".network";
 
+    public static class Main extends FavoriteStationsActivity {
+        public static void start(final Context context) {
+            final Intent intent = new Intent(context, Main.class);
+            context.startActivity(intent);
+        }
+    }
+
     public static void start(final Context context) {
         final Intent intent = new Intent(context, FavoriteStationsActivity.class);
         context.startActivity(intent);
     }
 
-    public static class PickFavoriteStation extends ActivityResultContract<NetworkId, Uri> {
+    public static class PickFavoriteStationContract extends ActivityResultContract<NetworkId, Uri> {
         @Override
         public Intent createIntent(final Context context, final NetworkId network) {
             final Intent intent = new Intent(context, FavoriteStationsActivity.class);
@@ -141,7 +148,9 @@ public class FavoriteStationsActivity extends OeffiActivity
         backgroundThread.start();
         backgroundHandler = new Handler(backgroundThread.getLooper());
 
-        setContentView(R.layout.favorites_content);
+        final boolean isRootActivity = isTaskRoot();
+
+        setContentView(R.layout.favorites_content, isRootActivity);
         final View contentView = findViewById(android.R.id.content);
         ViewCompat.setOnApplyWindowInsetsListener(contentView, (v, windowInsets) -> {
             final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -151,8 +160,8 @@ public class FavoriteStationsActivity extends OeffiActivity
 
         final MyActionBar actionBar = getMyActionBar();
         setPrimaryColor(R.color.bg_action_bar_station_favorites);
-        actionBar.setPrimaryTitle(getTitle());
-        actionBar.setBack(v -> finish());
+        actionBar.setPrimaryTitle(R.string.stations_favorite_stations_title);
+        actionBar.setBack(isRootActivity ? null : v -> finish());
         actionBar.addButton(R.drawable.ic_add_white_24dp, R.string.stations_favorite_stations_add_title)
                 .setOnClickListener(view -> viewNewLocation.setVisibility(
                     viewNewLocation.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE));
@@ -183,6 +192,11 @@ public class FavoriteStationsActivity extends OeffiActivity
         });
 
         updateGUI();
+    }
+
+    @Override
+    protected int getGlobalOptionsId() {
+        return R.id.global_options_stations_favorites;
     }
 
     @Override

@@ -4,6 +4,7 @@
     <string name="locale">en</string>
 
     <string name="stations_icon_label">Öffi Stations</string>
+    <string name="favorite_stations_icon_label">Öffi Favorite</string>
     <string name="directions_icon_label">Öffi Directions</string>
     <string name="plans_icon_label">Öffi Plans</string>
     <string name="operations_icon_label">Öffi Operations</string>

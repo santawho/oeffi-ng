@@ -9,7 +9,7 @@
         android:titleCondensed="@string/global_options_operations_comment" />
     <item
         android:id="@+id/global_options_stations_favorites"
-        android:icon="@drawable/ic_oeffi_stations"
+        android:icon="@drawable/ic_oeffi_favorites"
         android:title="@string/stations_favorite_stations_title"
         android:titleCondensed="@string/global_options_stations_comment" />
     <item

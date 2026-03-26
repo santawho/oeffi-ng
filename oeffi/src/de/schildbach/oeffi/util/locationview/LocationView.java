@@ -377,7 +377,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
     }
 
     private final ActivityResultLauncher<NetworkId> pickStationLauncher =
-            getActivity().registerForActivityResult(new FavoriteStationsActivity.PickFavoriteStation(), contentUri -> {
+            getActivity().registerForActivityResult(new FavoriteStationsActivity.PickFavoriteStationContract(), contentUri -> {
                 if (contentUri == null)
                     return;
                 final Cursor c = getActivity().managedQuery(contentUri, null, null, null, null);

@@ -32,12 +32,14 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.directions.driverops.OperationsActivity;
 import de.schildbach.oeffi.plans.PlansPickerActivity;
+import de.schildbach.oeffi.stations.FavoriteStationsActivity;
 import de.schildbach.oeffi.stations.StationsActivity;
 
 public class ShortcutsFragment extends PreferenceFragment {
 
     public static final String KEY_SHORTCUTS_DIRECTIONS = "shortcuts_directions";
     public static final String KEY_SHORTCUTS_STATIONS = "shortcuts_stations";
+    public static final String KEY_SHORTCUTS_FAVORITES = "shortcuts_favorites";
     public static final String KEY_SHORTCUTS_PLANS = "shortcuts_plans";
     public static final String KEY_SHORTCUTS_OPERATIONS = "shortcuts_operations";
 
@@ -47,6 +49,7 @@ public class ShortcutsFragment extends PreferenceFragment {
 
         setupActionPreference(KEY_SHORTCUTS_DIRECTIONS, DirectionsShortcutActionHandler.class);
         setupActionPreference(KEY_SHORTCUTS_STATIONS, StationsShortcutActionHandler.class);
+        setupActionPreference(KEY_SHORTCUTS_FAVORITES, FavoritesShortcutActionHandler.class);
         setupActionPreference(KEY_SHORTCUTS_PLANS, PlansShortcutActionHandler.class);
 
         if (Application.getInstance().isDriverMode())
@@ -88,6 +91,18 @@ public class ShortcutsFragment extends PreferenceFragment {
                     StationsActivity.class,
                     R.string.stations_icon_label,
                     R.mipmap.ic_oeffi_ng_stations_color_48dp,
+                    null);
+            return true;
+        }
+    }
+
+    public static class FavoritesShortcutActionHandler extends ActionHandler {
+        @Override
+        public boolean handleAction(final PreferenceActivity context, final String prefkey) {
+            createShortcut(context,
+                    FavoriteStationsActivity.Main.class,
+                    R.string.favorite_stations_icon_label,
+                    R.mipmap.ic_oeffi_ng_favorites_color_48dp,
                     null);
             return true;
         }

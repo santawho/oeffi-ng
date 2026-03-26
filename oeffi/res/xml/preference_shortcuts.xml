@@ -13,6 +13,9 @@
         android:key="shortcuts_stations"
         android:title="@string/stations_activity_title" />
     <Preference
+        android:key="shortcuts_favorites"
+        android:title="@string/stations_favorite_stations_title" />
+    <Preference
         android:key="shortcuts_plans"
         android:title="@string/plans_activity_title" />
     <PreferenceScreen

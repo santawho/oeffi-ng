@@ -358,13 +358,14 @@ public abstract class OeffiActivity extends AppCompatActivity {
             public boolean onMenuItemSelected(@NonNull final MenuItem item) {
                 final int itemId = item.getItemId();
                 if (itemId == R.id.global_options_stations_favorites) {
-                    if (OeffiActivity.this instanceof StationsActivity) {
-                        FavoriteStationsActivity.start(OeffiActivity.this);
-                    } else {
-                        StationsActivity.start(OeffiActivity.this, true);
-                        // finish(); // why?
-                        overridePendingTransition(R.anim.enter_from_left, R.anim.exit_to_right);
-                    }
+                    FavoriteStationsActivity.Main.start(OeffiActivity.this);
+                    // if (OeffiActivity.this instanceof StationsActivity) {
+                    //     FavoriteStationsActivity.start(OeffiActivity.this);
+                    // } else {
+                    //     StationsActivity.start(OeffiActivity.this, true);
+                    //     // finish(); // why?
+                    //     overridePendingTransition(R.anim.enter_from_left, R.anim.exit_to_right);
+                    // }
                     return true;
                 }
 
