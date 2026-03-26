@@ -714,7 +714,8 @@ public class NavigationNotification {
                     .setUsesChronometer(true)
                     // .setAutoCancel(true)
                     .setTimeoutAfter(removeWhen > 0 ? removeWhen : 0)
-                    .setSilent(!(isChangeEvent || showDirectionEventsWithHighPriority)).setSound(null);
+                    .setSilent(!(isChangeEvent || showDirectionEventsWithHighPriority))
+                    .setSound(null);
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
                     == PackageManager.PERMISSION_GRANTED) {
                 getNotificationManager(context).notify(tag, 0, notificationBuilder.build());
