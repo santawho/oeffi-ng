@@ -46,6 +46,9 @@
     <string name="navigation_preferences_reduced_sounds_summary">Play reduced sounds (shorter and lower volume) as navigation reminders</string>
     <string name="navigation_preferences_reduced_sounds_title">Reduced Sounds</string>
 
+    <string name="navigation_preferences_vibrate_summary">Use vibration as navigation reminders</string>
+    <string name="navigation_preferences_vibrate_title">Vibrate</string>
+
     <string name="navigation_preferences_refresh_beep_summary">Play beep sounds when refreshing the navigation in background</string>
     <string name="navigation_preferences_refresh_beep_title">Background Sounds</string>
 
@@ -145,16 +148,18 @@
     <string name="navigation_notifications_scenarios_summary">Set all preferences by choosing from predefined scenarios. [%s]</string>
     <string-array name="navigation_notifications_scenarios">
         <item>do not show event notifications</item>
-        <item>show all notifications on smart watch</item>
-        <item>show all notifications on smart watch, only when display is off</item>
+        <item>show all notifications as pop-ups</item>
+        <item>show all notifications on smartwatch</item>
+        <item>show all notifications on smartwatch, only when display is off</item>
         <item>show all notifications at all times</item>
         <item>user defined settings</item>
     </string-array>
     <string-array name="navigation_notifications_scenario_values">
-        <item>navigation_notifications_enabled=Bfalse;navigation_notification_changes_show_when=Snever;navigation_notification_changes_remove_when=Snever;navigation_notification_directions_show_when=Snever;navigation_notification_directions_remove_when=Snever</item>
-        <item>navigation_notifications_enabled=Btrue;navigation_notification_changes_show_when=Salways;navigation_notification_changes_remove_when=S2;navigation_notification_directions_show_when=Salways;navigation_notification_directions_remove_when=S2;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_2_minutes_preview=Btrue;navigation_notifications_remind_6_minutes=Btrue;navigation_notifications_remind_6_minutes_preview=Btrue</item>
-        <item>navigation_notifications_enabled=Btrue;navigation_notification_changes_show_when=Swhen-off;navigation_notification_changes_remove_when=S2;navigation_notification_directions_show_when=Swhen-off;navigation_notification_directions_remove_when=S2;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_2_minutes_preview=Btrue;navigation_notifications_remind_6_minutes=Btrue;navigation_notifications_remind_6_minutes_preview=Btrue</item>
-        <item>navigation_notifications_enabled=Btrue;navigation_notification_changes_show_when=Salways;navigation_notification_changes_remove_when=Snever;navigation_notification_directions_show_when=Salways;navigation_notification_directions_remove_when=Snever;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_2_minutes_preview=Btrue;navigation_notifications_remind_6_minutes=Btrue;navigation_notifications_remind_6_minutes_preview=Btrue</item>
+        <item>navigation_notifications_enabled=Bfalse;navigation_notifications_direction_high_priority=Btrue;navigation_notification_changes_show_when=Snever;navigation_notification_changes_remove_when=Snever;navigation_notification_directions_show_when=Snever;navigation_notification_directions_remove_when=Snever</item>
+        <item>navigation_notifications_enabled=Btrue;navigation_notifications_direction_high_priority=Btrue;navigation_notification_changes_show_when=Salways;navigation_notification_changes_remove_when=S10;navigation_notification_directions_show_when=Salways;navigation_notification_directions_remove_when=S10;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_2_minutes_preview=Btrue;navigation_notifications_remind_6_minutes=Btrue;navigation_notifications_remind_6_minutes_preview=Btrue</item>
+        <item>navigation_notifications_enabled=Btrue;navigation_notifications_direction_high_priority=Bfalse;navigation_notification_changes_show_when=Salways;navigation_notification_changes_remove_when=S2;navigation_notification_directions_show_when=Salways;navigation_notification_directions_remove_when=S2;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_2_minutes_preview=Btrue;navigation_notifications_remind_6_minutes=Btrue;navigation_notifications_remind_6_minutes_preview=Btrue</item>
+        <item>navigation_notifications_enabled=Btrue;navigation_notifications_direction_high_priority=Bfalse;navigation_notification_changes_show_when=Swhen-off;navigation_notification_changes_remove_when=S2;navigation_notification_directions_show_when=Swhen-off;navigation_notification_directions_remove_when=S2;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_2_minutes_preview=Btrue;navigation_notifications_remind_6_minutes=Btrue;navigation_notifications_remind_6_minutes_preview=Btrue</item>
+        <item>navigation_notifications_enabled=Btrue;navigation_notifications_direction_high_priority=Btrue;navigation_notification_changes_show_when=Salways;navigation_notification_changes_remove_when=Snever;navigation_notification_directions_show_when=Salways;navigation_notification_directions_remove_when=Snever;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_2_minutes_preview=Btrue;navigation_notifications_remind_6_minutes=Btrue;navigation_notifications_remind_6_minutes_preview=Btrue</item>
         <item/>
     </string-array>
     <string name="navigation_notifications_changes_category_title">Navigation Changes</string>
@@ -195,6 +200,7 @@
         <item>30</item>
         <item>60</item>
     </string-array>
+    <string name="navigation_notifications_direction_high_priority_title">High importance</string>
     <string name="navigation_notifications_remind_2_minutes_title">Show reminder 2 minutes before</string>
     <string name="navigation_notifications_remind_6_minutes_title">Show reminder 6 minutes before</string>
     <string name="navigation_notifications_remind_preview_title">… and preview for transfer</string>

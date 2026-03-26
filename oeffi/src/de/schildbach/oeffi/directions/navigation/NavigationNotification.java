@@ -139,6 +139,7 @@ public class NavigationNotification {
     private static final String CHANNEL_ID_GUIDE = "navigation";
     private static final String CHANNEL_ID_CHANGES = "navigation-changes";
     private static final String CHANNEL_ID_DIRECTIONS = "navigation-directions";
+    private static final String CHANNEL_ID_DIRECTIONS_HIGH = "navigation-directions-high";
     private static final String TAG_PREFIX_COMMON = NavigationNotification.class.getName() + ":";
     private static final String TAG_PREFIX_GUIDE = TAG_PREFIX_COMMON + "guide:";
     private static final String TAG_PREFIX_CHANGES = TAG_PREFIX_COMMON + "changes:";
@@ -166,6 +167,7 @@ public class NavigationNotification {
 
     private static boolean useForegroundService;
     private static boolean showFixedForegroundNotification;
+    private static boolean showDirectionEventsWithHighPriority;
 
     public static void startup(final Context context) {
         prefs = Application.getInstance().getSharedPreferences();
@@ -250,13 +252,20 @@ public class NavigationNotification {
     }
 
     private static void createDirectionsChannel(final Context context) {
+        showDirectionEventsWithHighPriority = prefs.getBoolean("navigation_notifications_direction_high_priority", true);
         final CharSequence name = context.getString(R.string.navigation_notification_channel_directions_name);
         final String description = context.getString(R.string.navigation_notification_channel_directions_description);
-        final NotificationChannel channel = new NotificationChannel(CHANNEL_ID_DIRECTIONS, name, NotificationManager.IMPORTANCE_DEFAULT);
+        final NotificationChannel channel = showDirectionEventsWithHighPriority
+                ? new NotificationChannel(CHANNEL_ID_DIRECTIONS_HIGH, name, NotificationManager.IMPORTANCE_HIGH)
+                : new NotificationChannel(CHANNEL_ID_DIRECTIONS, name, NotificationManager.IMPORTANCE_DEFAULT);
         channel.setDescription(description);
         channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
         // channel.setGroup(EVENT_NOTIFICATION_GROUP);
-        getNotificationManager(context).createNotificationChannel(channel);
+        final NotificationManagerCompat notificationManager = getNotificationManager(context);
+        notificationManager.createNotificationChannel(channel);
+        notificationManager.deleteNotificationChannel(showDirectionEventsWithHighPriority
+                ? CHANNEL_ID_DIRECTIONS
+                : CHANNEL_ID_DIRECTIONS_HIGH);
     }
 
     private static NotificationManagerCompat getNotificationManager(final Context context) {
@@ -684,8 +693,15 @@ public class NavigationNotification {
                 uniqueCounter = 0;
             final String tag = (isChangeEvent ? TAG_PREFIX_CHANGES : TAG_PREFIX_DIRECTIONS) + uniqueId;
 
-            final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context,
-                    isChangeEvent ? CHANNEL_ID_CHANGES : CHANNEL_ID_DIRECTIONS)
+            final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(
+                    context,
+                    isChangeEvent ? CHANNEL_ID_CHANGES
+                            : showDirectionEventsWithHighPriority ? CHANNEL_ID_DIRECTIONS_HIGH
+                            : CHANNEL_ID_DIRECTIONS)
+                    .setDefaults(NotificationCompat.DEFAULT_ALL)
+                    .setPriority(isChangeEvent || showFixedForegroundNotification
+                            ? NotificationCompat.PRIORITY_HIGH
+                            : NotificationCompat.PRIORITY_DEFAULT)
                     .setSmallIcon(R.drawable.ic_oeffi_directions_grey600_36dp)
                     .setCategory(NotificationCompat.CATEGORY_EVENT)
                     .setGroup(NOTIFICATION_GROUP_EVENTS)
@@ -1462,7 +1478,13 @@ public class NavigationNotification {
                 }
             }
         }
-        soundManager.playAlarmSoundAndVibration(actualUsage, actualSoundId, vibrationPattern, doSpeech ? speakTexts : null);
+        final long[] actualVibrationPattern =
+                prefs.getBoolean("navigation_vibrate", false)
+                        ? vibrationPattern : null;
+        soundManager.playAlarmSoundAndVibration(
+                actualUsage, actualSoundId,
+                actualVibrationPattern,
+                doSpeech ? speakTexts : null);
     }
 
     public void remove() {

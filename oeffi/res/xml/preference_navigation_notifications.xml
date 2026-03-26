@@ -41,6 +41,12 @@
 
     <PreferenceCategory android:title="@string/navigation_notifications_directions_category_title" >
 
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:dependency="navigation_notifications_enabled"
+            android:key="navigation_notifications_direction_high_priority"
+            android:title="@string/navigation_notifications_direction_high_priority_title" />
+
         <ListPreference
             android:defaultValue="never"
             android:dependency="navigation_notifications_enabled"

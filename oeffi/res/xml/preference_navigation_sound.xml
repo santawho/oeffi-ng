@@ -53,6 +53,11 @@
         android:title="@string/navigation_preferences_reduced_sounds_title" />
     <CheckBoxPreference
         android:defaultValue="false"
+        android:key="navigation_vibrate"
+        android:summary="@string/navigation_preferences_vibrate_summary"
+        android:title="@string/navigation_preferences_vibrate_title" />
+    <CheckBoxPreference
+        android:defaultValue="false"
         android:key="navigation_refresh_beep"
         android:summary="@string/navigation_preferences_refresh_beep_summary"
         android:title="@string/navigation_preferences_refresh_beep_title" />

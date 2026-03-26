@@ -35,6 +35,9 @@
     <string name="navigation_preferences_reduced_sounds_summary">Nutze reduzierte Töne (kürzer und geringer Lautstärke) als Navigations-Erinnerungen</string>
     <string name="navigation_preferences_reduced_sounds_title">Reduzierte Töne</string>
 
+    <string name="navigation_preferences_vibrate_summary">Nutze Vibration als Navigations-Erinnerungen</string>
+    <string name="navigation_preferences_vibrate_title">Vibrieren</string>
+
     <string name="navigation_preferences_refresh_beep_summary">Spiele Piepstöne, wenn die Navigationsdaten im Hintergrund aufgefrischt werden</string>
     <string name="navigation_preferences_refresh_beep_title">Hintergrundtöne</string>
 
@@ -134,6 +137,7 @@
     <string name="navigation_notifications_scenarios_summary">Setze alle Einstellungen durch Wahl eines vordefierten Szenarios. [%s]</string>
     <string-array name="navigation_notifications_scenarios">
         <item>zeige keine Benachrichtigungen</item>
+        <item>zeige alle Benachrichtigungen als Pop-Ups</item>
         <item>zeige alle Benachrichtigungen auf der Smart-Watch</item>
         <item>zeige alle Benachrichtigungen auf der Smart-Watch, nur wenn der Bildschirm aus ist</item>
         <item>zeige alle Benachrichtigungen zu jeder Zeit</item>
@@ -161,6 +165,7 @@
         <item>nach 30 Sekunden</item>
         <item>nach 1 Minute</item>
     </string-array>
+    <string name="navigation_notifications_direction_high_priority_title">Hohe Dringlichkeit</string>
     <string name="navigation_notifications_remind_2_minutes_title">Erinnerung 2 Minuten vorher</string>
     <string name="navigation_notifications_remind_6_minutes_title">Erinnerung 6 Minuten vorher</string>
     <string name="navigation_notifications_remind_preview_title">… und Vorschau für Umstieg</string>
