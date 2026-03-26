@@ -43,6 +43,7 @@
             android:paddingRight="@dimen/text_padding_horizontal_lax"
             android:paddingVertical="@dimen/text_padding_vertical_verylax"
             android:contentDescription="@string/directions_location_context_current_location"
+            android:tint="@color/fg_less_significant"
             android:src="@drawable/ic_gps_fixed_grey600_24dp"/>
 
         <ImageButton
@@ -53,7 +54,8 @@
             android:paddingRight="@dimen/text_padding_horizontal_lax"
             android:paddingVertical="@dimen/text_padding_vertical_verylax"
             android:contentDescription="@string/directions_location_context_map"
-            android:src="@drawable/ic_map_black_24dp"/>
+            android:tint="@color/fg_less_significant"
+            android:src="@drawable/ic_map_grey600_24dp"/>
 
         <ImageButton
             android:id="@+id/location_view_contact_button"
@@ -63,6 +65,7 @@
             android:paddingRight="@dimen/text_padding_horizontal_lax"
             android:paddingVertical="@dimen/text_padding_vertical_verylax"
             android:contentDescription="@string/directions_location_context_contact"
+            android:tint="@color/fg_less_significant"
             android:src="@drawable/ic_contacts_grey600_24dp"/>
 
         <ImageButton
@@ -73,6 +76,7 @@
             android:paddingRight="@dimen/text_padding_horizontal_lax"
             android:paddingVertical="@dimen/text_padding_vertical_verylax"
             android:contentDescription="@string/directions_location_context_favorite_station"
+            android:tint="@color/fg_less_significant"
             android:src="@drawable/ic_star_grey600_24dp"/>
 
         <ImageButton
@@ -83,6 +87,7 @@
             android:paddingRight="@dimen/text_padding_horizontal_lax"
             android:paddingVertical="@dimen/text_padding_vertical_verylax"
             android:contentDescription="@string/directions_location_context_alternate_search"
+            android:tint="@color/fg_less_significant"
             android:src="@drawable/ic_search_grey600_24dp"/>
 
         <ImageButton
@@ -93,6 +98,7 @@
             android:paddingRight="@dimen/text_padding_horizontal_lax"
             android:paddingVertical="@dimen/text_padding_vertical_verylax"
             android:contentDescription="@string/directions_location_view_menu_description"
+            android:tint="@color/fg_less_significant"
             android:src="@drawable/ic_more_vert_grey600_24dp"/>
     </LinearLayout>
 
@@ -104,6 +110,7 @@
         android:paddingHorizontal="@dimen/text_padding_horizontal_lax"
         android:paddingVertical="@dimen/text_padding_vertical_verylax"
         android:contentDescription="@string/directions_location_view_clear_description"
+        android:tint="@color/fg_less_significant"
         android:src="@drawable/ic_clear_grey600_24dp"/>
 
 </LinearLayout>
