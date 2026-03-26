@@ -57,6 +57,7 @@ import org.slf4j.LoggerFactory;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.mapview.OeffiMapView;
 import de.schildbach.oeffi.network.LocationSearchProviderFactory;
 import de.schildbach.oeffi.stations.FavoriteStationsActivity;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
@@ -66,6 +67,7 @@ import de.schildbach.oeffi.util.GeocoderThread;
 import de.schildbach.oeffi.util.LocationHelper;
 import de.schildbach.oeffi.util.LocationUtils;
 import de.schildbach.oeffi.util.PopupHelper;
+import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.pte.provider.locationsearch.LocationSearchProviderId;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
@@ -86,6 +88,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         Set<Product> getPreferredProducts();
         Handler getHandler();
         void changed(LocationView view);
+        OeffiMapView.MapPointSelectionProvider getMapPointSelectionProvider();
     }
 
     private final Resources res;
@@ -99,6 +102,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
     private ImageButton contactButton;
     private ImageButton currentLocationButton;
     private ImageButton favoriteStationButton;
+    private ImageButton mapButton;
     private ImageButton alternateSearchButton;
     private ImageButton clearButton;
     private ImageButton modeButton;
@@ -273,15 +277,20 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         contactButton = findViewById(R.id.location_view_contact_button);
         alternateSearchButton = findViewById(R.id.location_view_alternate_search_button);
         favoriteStationButton = findViewById(R.id.location_view_favorite_station_button);
+        mapButton = findViewById(R.id.location_view_map_button);
         currentLocationButton = findViewById(R.id.location_view_current_location_button);
         menuButton.setOnClickListener((view) -> {
             final PopupMenu popupMenu = new PopupMenu(getContext(), view);
             popupMenu.inflate(R.menu.directions_location_context);
+            popupMenu.getMenu().findItem(R.id.directions_location_map)
+                    .setVisible(listener.getMapPointSelectionProvider() != null);
             PopupHelper.setForceShowIcon(popupMenu);
             popupMenu.setOnMenuItemClickListener(item -> {
                 final int itemId = item.getItemId();
                 if (itemId == R.id.directions_location_current_location)
                     setToCurrentLocation();
+                else if (itemId == R.id.directions_location_map)
+                    selectFromMap();
                 else if (itemId == R.id.directions_location_contact)
                     selectFromContacts();
                 else if (itemId == R.id.directions_location_favorite_station)
@@ -297,8 +306,8 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         contactButton.setOnClickListener(v -> selectFromContacts());
         favoriteStationButton.setOnClickListener(v -> selectFromFavoriteStation());
         currentLocationButton.setOnClickListener(v -> setToCurrentLocation());
+        mapButton.setOnClickListener(v -> selectFromMap());
         alternateSearchButton.setOnClickListener(v -> toggleAlternateSearchProviderNominatim());
-
 
         clearButton = findViewById(R.id.location_view_clear_button);
         clearButton.setOnClickListener((view) -> {
@@ -413,6 +422,14 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         }
     }
 
+    public void selectFromMap() {
+        final OeffiMapView.MapPointSelectionProvider mapPointSelectionProvider = listener.getMapPointSelectionProvider();
+        if (mapPointSelectionProvider != null) {
+            locationType = LocationType.COORD;
+            mapPointSelectionProvider.showMapToSelectLocation(this::onLocation);
+        }
+    }
+
     public void setEnabled(final boolean enabled, final boolean modeEnabled) {
         setEnabled(enabled);
         if (modeButton != null)
@@ -476,6 +493,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
 
     public void setListener(final Listener listener) {
         this.listener = listener;
+        ViewUtils.setVisibility(mapButton, listener != null && listener.getMapPointSelectionProvider() != null);
         setAdapter(new AutoCompleteLocationAdapter(this, listener.getNetwork(), listener.getUsage()));
     }
 

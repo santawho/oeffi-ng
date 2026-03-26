@@ -324,7 +324,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
                             startActivity(newIntent);
                         });
             }
-            addShowMapButtonToActionBar();
+            // addShowMapButtonToActionBar();
             actionBar.setTitlesOnClickListener(v -> NetworkPickerActivity.start(DirectionsActivity.this));
             buttonExpand = actionBar.addToggleButton(R.drawable.ic_expand_white_24dp,
                     R.string.directions_action_expand_title);
@@ -920,6 +920,11 @@ public class DirectionsActivity extends OeffiMainActivity implements
             updateMap();
             queryHistoryListAdapter.clearSelectedEntry();
             requestFocusFirst();
+        }
+
+        @Override
+        public OeffiMapView.MapPointSelectionProvider getMapPointSelectionProvider() {
+            return DirectionsActivity.this;
         }
     };
 

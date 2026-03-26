@@ -7,6 +7,10 @@
         android:icon="@drawable/ic_gps_fixed_grey600_24dp"
         android:title="@string/directions_location_context_current_location" />
     <item
+        android:id="@+id/directions_location_map"
+        android:icon="@drawable/ic_map_grey600_24dp"
+        android:title="@string/directions_location_context_map" />
+    <item
         android:id="@+id/directions_location_contact"
         android:icon="@drawable/ic_contacts_grey600_24dp"
         android:title="@string/directions_location_context_contact" />

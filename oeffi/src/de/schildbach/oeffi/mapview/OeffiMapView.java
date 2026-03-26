@@ -32,6 +32,7 @@ import de.schildbach.oeffi.TripAware;
 import de.schildbach.oeffi.util.ZoomControls;
 import de.schildbach.oeffi.util.locationview.LocationView;
 import de.schildbach.pte.dto.Location;
+import de.schildbach.pte.dto.Point;
 
 public class OeffiMapView extends FrameLayout {
     public static Provider provider = new OsmDroidOeffiMapView.Provider();
@@ -54,6 +55,8 @@ public class OeffiMapView extends FrameLayout {
         void animateToLocation(final double latitude, final double longitude);
         void setDeviceLocationAware(final DeviceLocationAware locationAware);
         void zoomToAll();
+        void setSingleClickOverlay(
+                MapPointSelectionListener listener);
         void setStationsOverlay(
                 final LocationView viewCenterLocation);
         void setDirectionsOverlay(
@@ -67,6 +70,14 @@ public class OeffiMapView extends FrameLayout {
                 final int maxStations);
         void setFromViaToAware(final FromViaToAware fromViaToAware);
         void setZoomControls(final ZoomControls zoom);
+    }
+
+    public interface MapPointSelectionListener {
+        void onLocationSelectedOnMap(Point point);
+    }
+
+    public interface MapPointSelectionProvider {
+        void showMapToSelectLocation(MapPointSelectionListener mapPointSelectionListener);
     }
 
     public static void init() {
@@ -139,6 +150,11 @@ public class OeffiMapView extends FrameLayout {
 
     public void zoomToAll() {
         viewImplementation.zoomToAll();
+    }
+
+    public void setSingleClickOverlay(
+            final MapPointSelectionListener listener) {
+        viewImplementation.setSingleClickOverlay(listener);
     }
 
     public void setStationsOverlay(

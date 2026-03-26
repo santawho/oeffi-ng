@@ -24,6 +24,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Path.FillType;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
@@ -37,6 +38,8 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+
 import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
@@ -46,6 +49,7 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.Projection;
 import org.osmdroid.views.overlay.Overlay;
+import org.osmdroid.views.overlay.OverlayManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -199,6 +203,55 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
     public void setAreaAware(final AreaAware areaAware) {
         this.areaAware = areaAware;
         invalidate();
+    }
+
+    private Overlay singleClickOverlay;
+    private OeffiMapView.MapPointSelectionListener currentSingleClickListener;
+
+    @Override
+    protected void onFocusChanged(final boolean gainFocus, final int direction, @Nullable final Rect previouslyFocusedRect) {
+        if (!gainFocus) {
+            // focus lost
+            final OeffiMapView.MapPointSelectionListener singleClickListener = currentSingleClickListener;
+            currentSingleClickListener = null;
+            getOverlayManager().remove(singleClickOverlay);
+            if (singleClickListener != null) {
+                singleClickListener.onLocationSelectedOnMap(null);
+            }
+        }
+        super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
+    }
+
+    @Override
+    public void setSingleClickOverlay(
+            final OeffiMapView.MapPointSelectionListener listener) {
+        final boolean hasFocusAlready = hasFocus();
+        final OverlayManager overlayManager = getOverlayManager();
+        if (singleClickOverlay != null) {
+            overlayManager.remove(singleClickOverlay);
+        }
+        singleClickOverlay = new Overlay() {
+            @Override
+            public boolean onSingleTapConfirmed(final MotionEvent e, final MapView mapView) {
+                overlayManager.remove(singleClickOverlay);
+                singleClickOverlay = null;
+                final OeffiMapView.MapPointSelectionListener singleClickListener = currentSingleClickListener;
+                currentSingleClickListener = null;
+                if (singleClickListener == null)
+                    return false;
+                final Projection projection = mapView.getProjection();
+                final IGeoPoint geoPoint = projection.fromPixels((int) e.getX(), (int) e.getY());
+                final Point point = Point.fromDouble(geoPoint.getLatitude(), geoPoint.getLongitude());
+                singleClickListener.onLocationSelectedOnMap(point);
+                return true;
+            }
+        };
+        currentSingleClickListener = listener;
+        overlayManager.add(singleClickOverlay);
+        if (!hasFocusAlready) {
+            setFocusableInTouchMode(true);
+            requestFocus();
+        }
     }
 
     public void setStationsOverlay(

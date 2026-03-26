@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <string name="directions_location_context_current_location">My current location</string>
+    <string name="directions_location_context_map">Location on map</string>
     <string name="directions_location_context_contact">Contact address</string>
     <string name="directions_location_context_favorite_station">Favorite station</string>
     <string name="directions_location_context_alternate_search">Use alternate search</string>

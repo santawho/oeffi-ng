@@ -77,6 +77,7 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.StationsAware;
 import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.directions.QueryJourneyRunnable;
+import de.schildbach.oeffi.mapview.OeffiMapView;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GeoUtils;
 import de.schildbach.oeffi.util.KeyWordMatcher;
@@ -220,6 +221,11 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
             final Location location = viewLocation.getLocation();
             if (location != null)
                 setLocationByUser(location);
+        }
+
+        @Override
+        public OeffiMapView.MapPointSelectionProvider getMapPointSelectionProvider() {
+            return StationsActivity.this;
         }
     };
 

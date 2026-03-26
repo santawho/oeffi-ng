@@ -103,7 +103,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-public abstract class OeffiActivity extends AppCompatActivity {
+public abstract class OeffiActivity extends AppCompatActivity
+        implements OeffiMapView.MapPointSelectionProvider {
     protected static final String INTENT_EXTRA_LINK_ARGS = OeffiActivity.class.getName() + ".link_args";
     protected static final String INTENT_EXTRA_NETWORK_NAME = OeffiActivity.class.getName() + ".network";
 
@@ -810,6 +811,19 @@ public abstract class OeffiActivity extends AppCompatActivity {
                     .addButton(R.drawable.ic_map_white_24dp, R.string.directions_trip_details_action_showmap_title)
                     .setOnClickListener(v -> setMapVisible(!mapEnabled));
         }
+    }
+
+    @Override
+    public void showMapToSelectLocation(
+            final OeffiMapView.MapPointSelectionListener listener) {
+        final boolean mapWasEnabled = mapEnabled;
+        setMapVisible(true);
+        mapView.setSingleClickOverlay(point -> {
+            if (!mapWasEnabled)
+                setMapVisible(false);
+            if (point != null && listener != null)
+                listener.onLocationSelectedOnMap(point);
+        });
     }
 
     protected void setMapVisible(final boolean visible) {

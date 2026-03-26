@@ -2,6 +2,7 @@
 <resources>
 
     <string name="directions_location_context_current_location">Mein aktueller Standort</string>
+    <string name="directions_location_context_map">Ort in der Karte</string>
     <string name="directions_location_context_contact">Adresse aus Kontakt</string>
     <string name="directions_location_context_favorite_station">Haltestellen-Favorit</string>
     <string name="directions_location_context_alternate_search">Alternative Suche verwenden</string>

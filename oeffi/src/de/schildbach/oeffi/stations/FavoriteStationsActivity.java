@@ -39,6 +39,7 @@ import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.DirectionsActivity;
+import de.schildbach.oeffi.mapview.OeffiMapView;
 import de.schildbach.oeffi.util.locationview.LocationView;
 import de.schildbach.oeffi.stations.list.FavoriteStationsAdapter;
 import de.schildbach.oeffi.stations.list.StationClickListener;
@@ -130,6 +131,11 @@ public class FavoriteStationsActivity extends OeffiActivity
             viewNewLocation.reset();
             onNewStationAdded(location);
             updateGUI();
+        }
+
+        @Override
+        public OeffiMapView.MapPointSelectionProvider getMapPointSelectionProvider() {
+            return null;
         }
     };
 
