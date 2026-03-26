@@ -221,11 +221,11 @@ afterEvaluate {
 //                releaseBuildTask.mustRunAfter variant.assembleProvider
 //            }
 //        }
-        createRelease(githubTag, new File("${project.projectDir}/build/outputs/apk/ng/release/oeffi-studio-ng-release.apk"), false)
+        createRelease(githubTag, new File("${project.projectDir}/build/outputs/apk/ng/release/oeffi-studio-ng-release.apk"), false, timeInt)
     }
     assembleNgPreRelease.doLast {
         // runs always after the NG pre-release build
-        createRelease(githubTag, new File("${project.projectDir}/build/outputs/apk/ng/preRelease/oeffi-studio-ng-preRelease.apk"), true)
+        createRelease(githubTag, new File("${project.projectDir}/build/outputs/apk/ng/preRelease/oeffi-studio-ng-preRelease.apk"), true, timeInt)
     }
 }
 
@@ -264,7 +264,7 @@ def uploadToGithub(String releaseId, String assetName, byte[] uploadBytes) {
         throw respBody
 }
 
-def createRelease(String tagName, File apkFile, boolean preRelease) {
+def createRelease(String tagName, File apkFile, boolean preRelease, int versionCode) {
     println "Creating ${ preRelease ? "pre-release" : "release" } ${tagName} from ${apkFile.absolutePath}"
     if (!apkFile.exists()) {
         println "${apkFile.absolutePath} does not exist"
@@ -273,7 +273,7 @@ def createRelease(String tagName, File apkFile, boolean preRelease) {
     "git tag ${tagName}".execute()
     "git push --tags".execute()
 
-    def manifestJson = "{\"tag\": \"${tagName}\", \"versionCode\": ${timeInt}}"
+    def manifestJson = "{\"tag\": \"${tagName}\", \"prerelease\": ${preRelease}, \"versionCode\": ${versionCode}}"
 
     def releaseId = githubCreateRelease(tagName, preRelease)
     uploadToGithub(releaseId, project.oeffi.CREDENTIALS.asset_name_apk_file, apkFile.readBytes())
