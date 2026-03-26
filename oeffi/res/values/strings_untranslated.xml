@@ -23,5 +23,6 @@
     <string name="app_url_host">oeffi.schildbach.de</string>
     <string name="app_url_path_prefix">app/</string>
 
+    <string name="oeffi_original_version_name"></string>
     <integer name="oeffi_original_version_code">0</integer>
 </resources>

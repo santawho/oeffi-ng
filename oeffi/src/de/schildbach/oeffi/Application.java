@@ -461,6 +461,10 @@ public class Application extends android.app.Application {
         return packageInfo().versionCode;
     }
 
+    public String oeffiOriginalVersionName() {
+        return getString(R.string.oeffi_original_version_name);
+    }
+
     public int oeffiOriginalVersionCode() {
         return getResources().getInteger(R.integer.oeffi_original_version_code);
     }

@@ -40,6 +40,7 @@ import de.schildbach.pte.provider.TransferEvaluationProvider;
 /** @noinspection deprecation*/
 public class AboutFragment extends PreferenceFragment {
     private static final String KEY_ABOUT_VERSION = "about_version";
+    private static final String KEY_ABOUT_ORIGINAL_VERSION = "about_original_version";
     private static final String KEY_ABOUT_COPYRIGHT = "about_copyright";
     private static final String KEY_ABOUT_DATA_PROVIDER = "about_data_provider";
     private static final String KEY_ABOUT_MARKET_APP = "about_market_app";
@@ -60,7 +61,8 @@ public class AboutFragment extends PreferenceFragment {
         final Application application = Application.getInstance();
 
         preferenceActivity.setTitle(application.getString(R.string.about_title, application.getAppName()));
-        findPreference(KEY_ABOUT_VERSION).setSummary(application.packageInfo().versionName);
+        findPreference(KEY_ABOUT_VERSION).setSummary(application.versionName());
+        findPreference(KEY_ABOUT_ORIGINAL_VERSION).setSummary(application.oeffiOriginalVersionName());
 
         final Installer installer = Installer.from(application);
         final Preference prefMarketApp = findPreference(KEY_ABOUT_MARKET_APP);

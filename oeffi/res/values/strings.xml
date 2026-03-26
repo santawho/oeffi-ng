@@ -86,6 +86,8 @@
 
     <!-- preferences about -->
     <string name="about_title">About %1$s</string>
+    <string name="about_version_title">Version</string>
+    <string name="about_original_version_title">Original app version</string>
     <string name="about_copyright_title">Copyright</string>
     <string name="about_copyright_summary">© 2010-2026, the Öffi developers</string>
     <string name="about_license_title">License</string>

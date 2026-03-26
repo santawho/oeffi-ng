@@ -36,7 +36,9 @@ if (!oeffi_ng_password) {
     }
 }
 
-CREDENTIALS.oeffiOriginalVersionCode = new XmlSlurper().parse("../oeffi/AndroidManifest.xml").'@android:versionCode'.toString()
+def androidManifest = new XmlSlurper().parse("../oeffi/AndroidManifest.xml")
+CREDENTIALS.oeffiOriginalVersionName = androidManifest.'@android:versionName'.toString()
+CREDENTIALS.oeffiOriginalVersionCode = androidManifest.'@android:versionCode'.toString()
 CREDENTIALS.editionName = gitBranch != null && gitBranch !== 'main' && gitBranch != 'master' && gitBranch != 'nextgen' ? gitBranch : null
 CREDENTIALS.applicationId = "de.santawho.oeffi_ng${CREDENTIALS.editionName ? ".${CREDENTIALS.editionName}" : ''}"
 CREDENTIALS.report_email = "oeffi.report@santawho.de"
@@ -104,6 +106,7 @@ android {
             resValue "string", "messages_base_default_url", "https://santawho.github.io/oeffi-web/messages"
             resValue "string", "messages_file_url", "messages-ng.txt"
             resValue "string", "download_html_url", "https://github.com/santawho/oeffi-ng/wiki"
+            resValue "string", "oeffi_original_version_name", "${CREDENTIALS.oeffiOriginalVersionName}"
             resValue "integer", "oeffi_original_version_code", "${CREDENTIALS.oeffiOriginalVersionCode}"
             resValue "bool", "flags_show_twitter", "false"
             resValue "bool", "flags_show_navigation_drawer_footer", "false"

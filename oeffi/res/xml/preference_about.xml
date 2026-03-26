@@ -4,7 +4,10 @@
 
     <Preference
         android:key="about_version"
-        android:title="Version" />
+        android:title="@string/about_version_title" />
+    <Preference
+        android:key="about_original_version"
+        android:title="@string/about_original_version_title" />
     <Preference
         android:key="about_copyright"
         android:summary="@string/about_copyright_summary"
