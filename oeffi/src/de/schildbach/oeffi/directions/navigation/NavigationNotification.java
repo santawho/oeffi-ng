@@ -246,6 +246,7 @@ public class NavigationNotification {
         final String description = context.getString(R.string.navigation_notification_channel_changes_description);
         final NotificationChannel channel = new NotificationChannel(CHANNEL_ID_CHANGES, name, NotificationManager.IMPORTANCE_HIGH);
         channel.setDescription(description);
+        channel.setSound(null, null);
         channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
         // channel.setGroup(EVENT_NOTIFICATION_GROUP);
         getNotificationManager(context).createNotificationChannel(channel);
@@ -259,6 +260,7 @@ public class NavigationNotification {
                 ? new NotificationChannel(CHANNEL_ID_DIRECTIONS_HIGH, name, NotificationManager.IMPORTANCE_HIGH)
                 : new NotificationChannel(CHANNEL_ID_DIRECTIONS, name, NotificationManager.IMPORTANCE_DEFAULT);
         channel.setDescription(description);
+        channel.setSound(null, null);
         channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
         // channel.setGroup(EVENT_NOTIFICATION_GROUP);
         final NotificationManagerCompat notificationManager = getNotificationManager(context);
@@ -699,7 +701,7 @@ public class NavigationNotification {
                             : showDirectionEventsWithHighPriority ? CHANNEL_ID_DIRECTIONS_HIGH
                             : CHANNEL_ID_DIRECTIONS)
                     .setDefaults(NotificationCompat.DEFAULT_ALL)
-                    .setPriority(isChangeEvent || showFixedForegroundNotification
+                    .setPriority(isChangeEvent || showDirectionEventsWithHighPriority
                             ? NotificationCompat.PRIORITY_HIGH
                             : NotificationCompat.PRIORITY_DEFAULT)
                     .setSmallIcon(R.drawable.ic_oeffi_directions_grey600_36dp)
@@ -712,7 +714,7 @@ public class NavigationNotification {
                     .setUsesChronometer(true)
                     // .setAutoCancel(true)
                     .setTimeoutAfter(removeWhen > 0 ? removeWhen : 0)
-                    .setSilent(true).setSound(null);
+                    .setSilent(!(isChangeEvent || showDirectionEventsWithHighPriority)).setSound(null);
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
                     == PackageManager.PERMISSION_GRANTED) {
                 getNotificationManager(context).notify(tag, 0, notificationBuilder.build());
