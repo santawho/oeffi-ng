@@ -221,11 +221,11 @@ afterEvaluate {
 //                releaseBuildTask.mustRunAfter variant.assembleProvider
 //            }
 //        }
-        createRelease(githubTag, false)
+        createRelease(githubTag, new File("${project.projectDir}/build/outputs/apk/ng/release/oeffi-studio-ng-release.apk"), false)
     }
     assembleNgPreRelease.doLast {
         // runs always after the NG pre-release build
-        createRelease(githubTag, true)
+        createRelease(githubTag, new File("${project.projectDir}/build/outputs/apk/ng/preRelease/oeffi-studio-ng-preRelease.apk"), true)
     }
 }
 
@@ -262,10 +262,6 @@ def uploadToGithub(String releaseId, String assetName, byte[] uploadBytes) {
     println("upload ${assetName}: ${respCode}: ${respBody}")
     if (!respCode.equals(201))
         throw respBody
-}
-
-def createRelease(String tagName, boolean preRelease) {
-    createRelease(tagName, new File("${project.projectDir}/build/outputs/apk/ng/release/oeffi-studio-ng-release.apk"), preRelease)
 }
 
 def createRelease(String tagName, File apkFile, boolean preRelease) {
