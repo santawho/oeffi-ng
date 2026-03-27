@@ -598,8 +598,10 @@ public class NavigationNotification {
                 notificationManager.getActiveNotifications();
         for (final StatusBarNotification statusBarNotification : activeNotifications) {
             final String tag = statusBarNotification.getTag();
-            final int removeWhen;
+            if (tag == null)
+                continue;
 
+            final int removeWhen;
             if (tag.startsWith(TAG_PREFIX_CHANGES))
                 removeWhen = removeChangesWhen;
             else if (tag.startsWith(TAG_PREFIX_DIRECTIONS))
