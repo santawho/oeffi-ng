@@ -3,6 +3,9 @@
 
     <string name="locale">en</string>
 
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+
     <string name="stations_icon_label">Öffi Stations</string>
     <string name="favorite_stations_icon_label">Öffi Favorite</string>
     <string name="directions_icon_label">Öffi Directions</string>
@@ -40,6 +43,7 @@
     <string name="global_options_directions_comment">From door to door</string>
     <string name="global_options_plans_comment">For a rough overview</string>
     <string name="global_options_show_log_title">Show log</string>
+    <string name="global_options_terminate_title">Terminate</string>
     <string name="global_options_report_bug_title">Report bug</string>
     <string name="global_options_preferences_title">Settings</string>
     <string name="global_options_extras_title">Extras</string>
@@ -118,6 +122,12 @@
     <!-- preferences extras -->
     <string name="extras_title">Special Functions</string>
     <string name="extras_tripextrainfo_enabled_title">Acquire extra info for trips</string>
+
+    <string name="preference_changes_require_restart_title">Restart?</string>
+    <string name="preference_changes_require_restart_message">
+        Some changes will not be effective unless the app is restarted?
+        \nDo you want to restart now?
+    </string>
 
     <!-- network picker -->
     <string name="network_picker_firsttime_message">Because you are using Öffi for the first time, you need to pick a region that suits you well. You
@@ -483,7 +493,7 @@
 
     <!-- directions preferences -->
     <string name="directions_preferences_title">Directions</string>
-    <string name="directions_params_preferences_title">Parameters for directions</string>
+    <string name="directions_params_preferences_title">Parameters for Directions</string>
     <string name="directions_params_preferences_summary">These settings do not affect all transport networks in the same way.</string>
     <string name="directions_preferences_optimize_trip_title">Optimize</string>
     <string name="directions_preferences_optimize_trip_summary">What\'s most important to you?</string>

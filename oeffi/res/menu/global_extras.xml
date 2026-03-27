@@ -16,5 +16,10 @@
         android:icon="@drawable/ic_showlog_grey600_24dp"
         android:orderInCategory="999"
         android:title="@string/global_options_show_log_title" />
+    <item
+        android:id="@+id/global_options_terminate"
+        android:icon="@drawable/ic_power_grey600_24dp"
+        android:orderInCategory="999"
+        android:title="@string/global_options_terminate_title" />
 
 </menu>

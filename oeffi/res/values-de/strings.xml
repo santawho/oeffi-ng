@@ -3,6 +3,9 @@
 
     <string name="locale">de</string>
 
+    <string name="yes">Ja</string>
+    <string name="no">Nein</string>
+
     <string name="stations_icon_label">Öffi Haltestellen</string>
     <string name="favorite_stations_icon_label">Öffi Favoriten</string>
     <string name="directions_icon_label">Öffi Verbindungen</string>
@@ -40,6 +43,7 @@
     <string name="global_options_directions_comment">Von Tür zu Tür</string>
     <string name="global_options_plans_comment">Für den groben Überblick</string>
     <string name="global_options_show_log_title">Log anzeigen</string>
+    <string name="global_options_terminate_title">Beenden</string>
     <string name="global_options_report_bug_title">Fehler melden</string>
     <string name="global_options_preferences_title">Einstellungen</string>
     <string name="global_options_extras_title">Extras</string>
@@ -118,6 +122,12 @@
     <!-- preferences extras -->
     <string name="extras_title">Sonderfunktionen</string>
     <string name="extras_tripextrainfo_enabled_title">Lade Zusatzinfos für Verbindungen</string>
+
+    <string name="preference_changes_require_restart_title">Neustart?</string>
+    <string name="preference_changes_require_restart_message">
+        Einige Änderungen werden erst nach dem Neustart der App wirksam?
+        \nMöchtest Du jetzt neu starten?
+    </string>
 
     <!-- network picker -->
     <string name="network_picker_firsttime_message">Da du Öffi das erste Mal nutzt, musst Du die Region wählen die am besten passt. Du kannst das später ändern.</string>

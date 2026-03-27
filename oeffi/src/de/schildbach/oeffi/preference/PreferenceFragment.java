@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.annotation.Nullable;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceGroup;
 
@@ -12,7 +13,8 @@ import java.util.function.Function;
 
 import de.schildbach.oeffi.Application;
 
-public abstract class PreferenceFragment extends androidx.preference.PreferenceFragmentCompat {
+public abstract class PreferenceFragment extends androidx.preference.PreferenceFragmentCompat
+        implements SharedPreferences.OnSharedPreferenceChangeListener {
     public static abstract class ActionHandler {
         // return true, to finish the parenting PreferenceActivity after handling the action
         // return false to do it later by calling dismissParentingActivity()
@@ -39,6 +41,18 @@ public abstract class PreferenceFragment extends androidx.preference.PreferenceF
         super.onAttach(context);
         preferenceActivity = (PreferenceActivity) context;
         prefs = Application.getInstance().getSharedPreferences();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        prefs.registerOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    public void onStop() {
+        prefs.unregisterOnSharedPreferenceChangeListener(this);
+        super.onStop();
     }
 
     @Override
@@ -141,5 +155,27 @@ public abstract class PreferenceFragment extends androidx.preference.PreferenceF
                     .show();
             return false;
         }
+    }
+
+    protected boolean isPreferenceRequiringRestart(final String key) {
+        return false;
+    }
+
+    private static boolean restartRequired;
+
+    public static void clearRestartRequired() {
+        restartRequired = false;
+    }
+    public static boolean isRestartRequired() {
+        return restartRequired;
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(
+            final SharedPreferences sharedPreferences, @Nullable final String key) {
+        if (key == null)
+            return;
+        if (isPreferenceRequiringRestart(key))
+            restartRequired = true;
     }
 }

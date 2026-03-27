@@ -36,7 +36,6 @@ import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.text.format.DateUtils;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -48,7 +47,6 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.window.OnBackInvokedDispatcher;
 
@@ -460,6 +458,11 @@ public abstract class OeffiActivity extends AppCompatActivity
                         }
                         if (subItemId == R.id.global_options_show_log) {
                             LogViewerActivity.start(OeffiActivity.this);
+                            return true;
+                        }
+                        if (subItemId == R.id.global_options_terminate) {
+                            finish();
+                            Application.getInstance().postTerminate(null);
                             return true;
                         }
                         return false;

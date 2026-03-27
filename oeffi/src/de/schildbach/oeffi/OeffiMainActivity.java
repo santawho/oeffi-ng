@@ -30,6 +30,7 @@ import android.text.format.DateUtils;
 
 import de.schildbach.oeffi.network.NetworkPickerActivity;
 import de.schildbach.oeffi.network.NetworkResources;
+import de.schildbach.oeffi.preference.PreferenceFragment;
 import de.schildbach.oeffi.util.AppInstaller;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.Downloader;
@@ -94,6 +95,24 @@ public abstract class OeffiMainActivity extends OeffiActivity {
         } else {
             downloadAndProcessMessages(prefsGetNetworkId());
         }
+    }
+
+    @Override
+    protected void onStart() {
+        final boolean restartRequired = PreferenceFragment.isRestartRequired();
+        PreferenceFragment.clearRestartRequired();
+        super.onStart();
+        if (!restartRequired)
+            return;
+        DialogBuilder.get(this)
+                .setTitle(R.string.preference_changes_require_restart_title)
+                .setMessage(R.string.preference_changes_require_restart_message)
+                .setPositiveButton(R.string.yes, (dialog, which) -> {
+                    Application.getInstance().postTerminate(this);
+                })
+                .setNegativeButton(R.string.no, null)
+                .setCancelable(true)
+                .create().show();
     }
 
     @Override

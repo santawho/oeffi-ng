@@ -33,11 +33,14 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
 import androidx.core.content.pm.ShortcutInfoCompat;
 import androidx.core.content.pm.ShortcutManagerCompat;
@@ -121,6 +124,26 @@ public class Application extends android.app.Application {
 
     public SharedPreferences getSharedPreferences() {
         return prefs;
+    }
+
+    public void postTerminate(@Nullable final Activity activity) {
+        final Intent activityIntent;
+        if (activity != null) {
+            activityIntent = activity.getIntent();
+            activity.finish();
+        } else {
+            activityIntent = null;
+        }
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            if (activityIntent != null) {
+                try {
+                    startActivity(activityIntent);
+                } catch (final Exception e) {
+                    // ignore
+                }
+            }
+            System.exit(0);
+        }, 500);
     }
 
     public String getTranslatedString(final int resId) {

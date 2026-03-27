@@ -33,4 +33,10 @@ public class DriverModeFragment extends PreferenceFragment {
         setupDynamicSummary("extras_drivermode_navigation_refresh_charging_interval", R.string.extras_drivermode_navigation_refresh_charging_interval_summary);
         setupDynamicSummary("extras_drivermode_navigation_scroll_inhibit_interval", R.string.default_drivermode_navigation_scroll_inhibit_interval);
     }
+
+    @Override
+    protected boolean isPreferenceRequiringRestart(final String key) {
+        return "extras_drivermode_enabled".equals(key)
+                || super.isPreferenceRequiringRestart(key);
+    }
 }

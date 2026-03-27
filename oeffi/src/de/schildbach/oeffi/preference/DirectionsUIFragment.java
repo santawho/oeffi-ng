@@ -35,6 +35,16 @@ public class DirectionsUIFragment extends PreferenceFragment {
         setupDynamicSummary("user_interface_location_selector_longholdtime", R.string.user_interface_location_selector_longholdtime_summary);
     }
 
+    @Override
+    protected boolean isPreferenceRequiringRestart(final String key) {
+        return "user_interface_directions_time_and_go_bottom_enabled".equals(key)
+                || "max_history_entries".equals(key)
+                || "stored_trips_retention_hours".equals(key)
+                || "user_interface_directions_history_show_saved_trip_enabled".equals(key)
+                || "user_interface_directions_show_clear_button_enabled".equals(key)
+                || super.isPreferenceRequiringRestart(key);
+    }
+
     public static class SelectorHelp extends ShowHelpHandler {
         @Override
         protected int getHelpTextResourceId() {

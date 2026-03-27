@@ -26,4 +26,11 @@ public class UserInterfaceFragment extends PreferenceFragment {
     public void onCreatePreferences(@androidx.annotation.Nullable final Bundle savedInstanceState, @androidx.annotation.Nullable final String rootKey) {
         addPreferencesFromResource(R.xml.preference_user_interface);
     }
+
+    @Override
+    protected boolean isPreferenceRequiringRestart(final String key) {
+        return "user_interface_darkmode_switch".equals(key)
+                || "user_interface_darkmode_amoled_enabled".equals(key)
+                || super.isPreferenceRequiringRestart(key);
+    }
 }

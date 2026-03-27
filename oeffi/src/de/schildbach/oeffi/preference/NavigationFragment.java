@@ -26,4 +26,10 @@ public class NavigationFragment extends PreferenceFragment {
     public void onCreatePreferences(@androidx.annotation.Nullable final Bundle savedInstanceState, @androidx.annotation.Nullable final String rootKey) {
         addPreferencesFromResource(R.xml.preference_navigation);
     }
+
+    @Override
+    protected boolean isPreferenceRequiringRestart(final String key) {
+        return "navigation_invert_use_foreground_service".equals(key)
+                || super.isPreferenceRequiringRestart(key);
+    }
 }
