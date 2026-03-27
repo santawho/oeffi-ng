@@ -236,7 +236,7 @@ def githubCreateRelease(String tagName, boolean preRelease) {
     conn.setRequestProperty('Authorization', "Bearer ${project.oeffi.CREDENTIALS.github_token}")
     conn.setRequestProperty('X-GitHub-Api-Version', '2022-11-28')
     conn.doOutput = true
-    conn.outputStream.write("{\"tag_name\":\"${tagName}\",\"prerelease\":${preRelease}}".getBytes('UTF-8'))
+    conn.outputStream.write("{\"tag_name\":\"${tagName}\",\"prerelease\":${preRelease},\"body\":\"${preRelease ? "pre-release" : "release"} ${tagName}\"}".getBytes('UTF-8'))
     def respCode = conn.getResponseCode();
     def respBody = conn.getInputStream().getText()
     println("create release: ${respCode}: ${respBody}");
