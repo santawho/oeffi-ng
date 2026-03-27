@@ -301,8 +301,6 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                     (List<Departure>) intent.getSerializableExtra(INTENT_EXTRA_DEPARTURES),
                     loadProductFilter()));
         }
-        selectStation(station);
-        statusMessage(getString(R.string.stations_station_details_progress));
 
         if (presetTime != null) {
             final TextView timeView = findViewById(R.id.stations_station_details_time_text);
@@ -321,7 +319,6 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             return windowInsets;
         });
         disclaimerSourceView = findViewById(R.id.stations_station_details_disclaimer_source);
-        updateDisclaimerSource(disclaimerSourceView, selectedNetwork, null);
 
         headerView = findViewById(R.id.stations_station_details_header);
         nameView = findViewById(R.id.stations_station_details_header_name);
@@ -335,6 +332,10 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         LINES_LAYOUT_PARAMS.setMargins(
                 0, getResources().getDimensionPixelSize(R.dimen.text_padding_vertical_cram),
                 0, 0);
+
+        selectStation(station);
+        statusMessage(getString(R.string.stations_station_details_progress));
+        updateDisclaimerSource(disclaimerSourceView, selectedNetwork, null);
     }
 
     @Override
