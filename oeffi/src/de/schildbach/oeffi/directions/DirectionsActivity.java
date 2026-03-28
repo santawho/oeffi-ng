@@ -501,11 +501,12 @@ public class DirectionsActivity extends OeffiMainActivity implements
             viewTimeDepArr.setOnLongClickListener(v -> {
                 final boolean isSetToNow = timeSpec instanceof TimeSpec.Relative && ((TimeSpec.Relative) timeSpec).diffMs == 0;
                 if (isSetToNow) {
-                    // set to depart at ...
-                    timeSpec = new TimeSpec.Absolute(DepArr.DEPART, timeSpec.timeInMillis());
-                    timeIsToday = true;
-                    //  ... and ask for time
-                    timeClicked();
+//                    // set to depart at ...
+//                    timeSpec = new TimeSpec.Absolute(DepArr.DEPART, timeSpec.timeInMillis());
+//                    timeIsToday = true;
+//                    //  ... and ask for date and time
+//                    dateClicked();
+                    handleDiffClick();
                 } else {
                     // revert to depart now
                     timeSpec = new TimeSpec.Relative(DepArr.DEPART, 0);
@@ -1046,10 +1047,6 @@ public class DirectionsActivity extends OeffiMainActivity implements
             viewTime1.setVisibility(View.VISIBLE);
             viewTime1.setText(diff == 0 ? getString(R.string.time_now)
                     : getString(R.string.directions_time_relative, Formats.formatTimeDiff(this, diff)));
-            viewTime1.setOnLongClickListener(v -> {
-                handleDiffClick();
-                return true;
-            });
             viewTime1.setOnClickListener(v -> {
                 if (timeSpec instanceof TimeSpec.Relative) {
                     // set to depart at ...
@@ -1065,6 +1062,21 @@ public class DirectionsActivity extends OeffiMainActivity implements
             });
             viewTime2.setVisibility(View.GONE);
         }
+        viewTime1.setOnLongClickListener(v -> {
+            // handleDiffClick();
+            if (timeSpec instanceof TimeSpec.Relative) {
+                // set to depart at ...
+                timeSpec = new TimeSpec.Absolute(DepArr.DEPART, timeSpec.timeInMillis());
+                timeIsToday = true;
+                //  ... and ask for date + time
+                dateClicked();
+            } else {
+                // revert to depart now
+                timeSpec = new TimeSpec.Relative(DepArr.DEPART, 0);
+            }
+            updateGUI();
+            return true;
+        });
     }
 
     private void dateClicked() {
