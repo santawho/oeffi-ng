@@ -66,8 +66,12 @@
     <string name="navigation_notification_channel_description">Navigationsanweisungen</string>
     <string name="navigation_notification_channel_changes_name">Navigations-Änderungen</string>
     <string name="navigation_notification_channel_changes_description">Warne bei wichtigen Änderungen</string>
+    <string name="navigation_notification_channel_changes_high_name">Navigations-Änderungen mit Pop-Up</string>
+    <string name="navigation_notification_channel_changes_high_description">Warne bei wichtigen Änderungen mit Banner-Popups</string>
     <string name="navigation_notification_channel_directions_name">Navigations-Hinweise</string>
     <string name="navigation_notification_channel_directions_description">Zeige die nächsten Schritte</string>
+    <string name="navigation_notification_channel_directions_high_name">Navigations-Hinweise mit Pop-Up</string>
+    <string name="navigation_notification_channel_directions_high_description">Zeige die nächsten Schritte mit Banner-Popups</string>
 
     <string name="navigation_notification_subtext">nach %1$s</string>
     <string name="navigation_stopnavothers_title">Aktive Navigationen</string>
@@ -165,7 +169,8 @@
         <item>nach 30 Sekunden</item>
         <item>nach 1 Minute</item>
     </string-array>
-    <string name="navigation_notifications_direction_high_priority_title">Hohe Dringlichkeit</string>
+    <string name="navigation_notifications_high_priority_title">Zeige Banner-Popups</string>
+    <string name="navigation_notifications_high_priority_summary">Nutze einen Benachrichtigungskanal mit hoher Dringlichkeit, wodurch Banner-Popups angezeigt werden</string>
     <string name="navigation_notifications_remind_2_minutes_title">Erinnerung 2 Minuten vorher</string>
     <string name="navigation_notifications_remind_6_minutes_title">Erinnerung 6 Minuten vorher</string>
     <string name="navigation_notifications_remind_preview_title">… und Vorschau für Umstieg</string>

@@ -31,9 +31,9 @@ public class NavigationNotificationsFragment extends PreferenceFragment {
 //        setupDynamicSummary("navigation_notification_directions_remove_when", R.string.navigation_notifications_remove_when_summary);
     }
 
-    @Override
-    protected boolean isPreferenceRequiringRestart(final String key) {
-        return "navigation_notifications_direction_high_priority".equals(key)
-                || super.isPreferenceRequiringRestart(key);
-    }
+//    @Override
+//    protected boolean isPreferenceRequiringRestart(final String key) {
+//        return "navigation_notifications_direction_high_priority".equals(key)
+//                || super.isPreferenceRequiringRestart(key);
+//    }
 }

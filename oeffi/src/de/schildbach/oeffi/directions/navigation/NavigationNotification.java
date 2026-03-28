@@ -137,7 +137,8 @@ public class NavigationNotification {
 
     private static final String CHANNEL_ID_FOREGROUND_SERVICE = "foregroundservice";
     private static final String CHANNEL_ID_GUIDE = "navigation";
-    private static final String CHANNEL_ID_CHANGES = "navigation-changes";
+    private static final String CHANNEL_ID_CHANGES = "navigation-changes-low";
+    private static final String CHANNEL_ID_CHANGES_HIGH = "navigation-changes";
     private static final String CHANNEL_ID_DIRECTIONS = "navigation-directions";
     private static final String CHANNEL_ID_DIRECTIONS_HIGH = "navigation-directions-high";
     private static final String TAG_PREFIX_COMMON = NavigationNotification.class.getName() + ":";
@@ -167,6 +168,7 @@ public class NavigationNotification {
 
     private static boolean useForegroundService;
     private static boolean showFixedForegroundNotification;
+    private static boolean showChangesEventsWithHighPriority;
     private static boolean showDirectionEventsWithHighPriority;
 
     public static void startup(final Context context) {
@@ -242,32 +244,49 @@ public class NavigationNotification {
     }
 
     private static void createChangesChannel(final Context context) {
-        final CharSequence name = context.getString(R.string.navigation_notification_channel_changes_name);
-        final String description = context.getString(R.string.navigation_notification_channel_changes_description);
-        final NotificationChannel channel = new NotificationChannel(CHANNEL_ID_CHANGES, name, NotificationManager.IMPORTANCE_HIGH);
-        channel.setDescription(description);
-        channel.setSound(null, null);
-        channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+        showChangesEventsWithHighPriority = prefs.getBoolean("navigation_notifications_changes_high_priority", true);
+        final NotificationManagerCompat notificationManager = getNotificationManager(context);
+
+        final NotificationChannel channelHigh = new NotificationChannel(CHANNEL_ID_CHANGES_HIGH,
+                context.getString(R.string.navigation_notification_channel_changes_high_name),
+                NotificationManager.IMPORTANCE_HIGH);
+        channelHigh.setDescription(context.getString(R.string.navigation_notification_channel_changes_high_description));
+        channelHigh.setSound(null, null);
+        channelHigh.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
         // channel.setGroup(EVENT_NOTIFICATION_GROUP);
-        getNotificationManager(context).createNotificationChannel(channel);
+        notificationManager.createNotificationChannel(channelHigh);
+
+        final NotificationChannel channelLow = new NotificationChannel(CHANNEL_ID_CHANGES,
+                context.getString(R.string.navigation_notification_channel_changes_name),
+                NotificationManager.IMPORTANCE_DEFAULT);
+        channelLow.setDescription(context.getString(R.string.navigation_notification_channel_changes_description));
+        channelLow.setSound(null, null);
+        channelLow.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+        // channel.setGroup(EVENT_NOTIFICATION_GROUP);
+        notificationManager.createNotificationChannel(channelLow);
     }
 
     private static void createDirectionsChannel(final Context context) {
-        showDirectionEventsWithHighPriority = prefs.getBoolean("navigation_notifications_direction_high_priority", true);
-        final CharSequence name = context.getString(R.string.navigation_notification_channel_directions_name);
-        final String description = context.getString(R.string.navigation_notification_channel_directions_description);
-        final NotificationChannel channel = showDirectionEventsWithHighPriority
-                ? new NotificationChannel(CHANNEL_ID_DIRECTIONS_HIGH, name, NotificationManager.IMPORTANCE_HIGH)
-                : new NotificationChannel(CHANNEL_ID_DIRECTIONS, name, NotificationManager.IMPORTANCE_DEFAULT);
-        channel.setDescription(description);
-        channel.setSound(null, null);
-        channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-        // channel.setGroup(EVENT_NOTIFICATION_GROUP);
+        showDirectionEventsWithHighPriority = prefs.getBoolean("navigation_notifications_direction_high_priority", false);
         final NotificationManagerCompat notificationManager = getNotificationManager(context);
-        notificationManager.createNotificationChannel(channel);
-        notificationManager.deleteNotificationChannel(showDirectionEventsWithHighPriority
-                ? CHANNEL_ID_DIRECTIONS
-                : CHANNEL_ID_DIRECTIONS_HIGH);
+
+        final NotificationChannel channelHigh = new NotificationChannel(CHANNEL_ID_DIRECTIONS_HIGH,
+                context.getString(R.string.navigation_notification_channel_directions_high_name),
+                NotificationManager.IMPORTANCE_HIGH);
+        channelHigh.setDescription(context.getString(R.string.navigation_notification_channel_directions_high_description));
+        channelHigh.setSound(null, null);
+        channelHigh.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+        // channel.setGroup(EVENT_NOTIFICATION_GROUP);
+        notificationManager.createNotificationChannel(channelHigh);
+
+        final NotificationChannel channelLow = new NotificationChannel(CHANNEL_ID_DIRECTIONS,
+                context.getString(R.string.navigation_notification_channel_directions_name),
+                NotificationManager.IMPORTANCE_DEFAULT);
+        channelLow.setDescription(context.getString(R.string.navigation_notification_channel_directions_description));
+        channelLow.setSound(null, null);
+        channelLow.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+        // channel.setGroup(EVENT_NOTIFICATION_GROUP);
+        notificationManager.createNotificationChannel(channelLow);
     }
 
     private static NotificationManagerCompat getNotificationManager(final Context context) {
@@ -699,13 +718,12 @@ public class NavigationNotification {
 
             final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(
                     context,
-                    isChangeEvent ? CHANNEL_ID_CHANGES
-                            : showDirectionEventsWithHighPriority ? CHANNEL_ID_DIRECTIONS_HIGH
-                            : CHANNEL_ID_DIRECTIONS)
+                    isChangeEvent
+                            ? (showChangesEventsWithHighPriority ? CHANNEL_ID_CHANGES_HIGH : CHANNEL_ID_CHANGES)
+                            : (showDirectionEventsWithHighPriority ? CHANNEL_ID_DIRECTIONS_HIGH : CHANNEL_ID_DIRECTIONS))
                     .setDefaults(NotificationCompat.DEFAULT_ALL)
-                    .setPriority(isChangeEvent || showDirectionEventsWithHighPriority
-                            ? NotificationCompat.PRIORITY_HIGH
-                            : NotificationCompat.PRIORITY_DEFAULT)
+                    .setPriority((isChangeEvent ? showChangesEventsWithHighPriority : showDirectionEventsWithHighPriority)
+                            ? NotificationCompat.PRIORITY_HIGH : NotificationCompat.PRIORITY_DEFAULT)
                     .setSmallIcon(R.drawable.ic_oeffi_directions_grey600_36dp)
                     .setCategory(NotificationCompat.CATEGORY_EVENT)
                     .setGroup(NOTIFICATION_GROUP_EVENTS)
@@ -716,7 +734,7 @@ public class NavigationNotification {
                     .setUsesChronometer(true)
                     // .setAutoCancel(true)
                     .setTimeoutAfter(removeWhen > 0 ? removeWhen : 0)
-                    .setSilent(!(isChangeEvent || showDirectionEventsWithHighPriority))
+                    .setSilent(!(isChangeEvent ? showChangesEventsWithHighPriority : showDirectionEventsWithHighPriority))
                     .setSound(null);
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
                     == PackageManager.PERMISSION_GRANTED) {

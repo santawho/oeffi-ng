@@ -77,8 +77,12 @@
     <string name="navigation_notification_channel_description">Navigation instructions</string>
     <string name="navigation_notification_channel_changes_name">Navigation Changes</string>
     <string name="navigation_notification_channel_changes_description">Warn about important changes</string>
+    <string name="navigation_notification_channel_changes_high_name">Navigation Changes with Pop-up</string>
+    <string name="navigation_notification_channel_changes_high_description">Warn about important changes with banner pop-ups</string>
     <string name="navigation_notification_channel_directions_name">Navigation Directions</string>
     <string name="navigation_notification_channel_directions_description">Show upcoming steps</string>
+    <string name="navigation_notification_channel_directions_high_name">Navigation Directions with Pop-up</string>
+    <string name="navigation_notification_channel_directions_high_description">Show upcoming steps with banner pop-ups</string>
 
     <string name="navigation_notification_subtext">to %1$s</string>
     <string name="navigation_stopnavothers_title">Active Navigations</string>
@@ -155,11 +159,11 @@
         <item>user defined settings</item>
     </string-array>
     <string-array name="navigation_notifications_scenario_values">
-        <item>navigation_notifications_enabled=Bfalse;navigation_notifications_direction_high_priority=Btrue;navigation_notification_changes_show_when=Snever;navigation_notification_changes_remove_when=Snever;navigation_notification_directions_show_when=Snever;navigation_notification_directions_remove_when=Snever</item>
-        <item>navigation_notifications_enabled=Btrue;navigation_notifications_direction_high_priority=Btrue;navigation_notification_changes_show_when=Salways;navigation_notification_changes_remove_when=S10;navigation_notification_directions_show_when=Salways;navigation_notification_directions_remove_when=S10;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_2_minutes_preview=Btrue;navigation_notifications_remind_6_minutes=Btrue;navigation_notifications_remind_6_minutes_preview=Btrue</item>
-        <item>navigation_notifications_enabled=Btrue;navigation_notifications_direction_high_priority=Bfalse;navigation_notification_changes_show_when=Salways;navigation_notification_changes_remove_when=S2;navigation_notification_directions_show_when=Salways;navigation_notification_directions_remove_when=S2;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_2_minutes_preview=Btrue;navigation_notifications_remind_6_minutes=Btrue;navigation_notifications_remind_6_minutes_preview=Btrue</item>
-        <item>navigation_notifications_enabled=Btrue;navigation_notifications_direction_high_priority=Bfalse;navigation_notification_changes_show_when=Swhen-off;navigation_notification_changes_remove_when=S2;navigation_notification_directions_show_when=Swhen-off;navigation_notification_directions_remove_when=S2;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_2_minutes_preview=Btrue;navigation_notifications_remind_6_minutes=Btrue;navigation_notifications_remind_6_minutes_preview=Btrue</item>
-        <item>navigation_notifications_enabled=Btrue;navigation_notifications_direction_high_priority=Btrue;navigation_notification_changes_show_when=Salways;navigation_notification_changes_remove_when=Snever;navigation_notification_directions_show_when=Salways;navigation_notification_directions_remove_when=Snever;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_2_minutes_preview=Btrue;navigation_notifications_remind_6_minutes=Btrue;navigation_notifications_remind_6_minutes_preview=Btrue</item>
+        <item>navigation_notifications_enabled=Bfalse;navigation_notifications_changes_high_priority=Bfalse;navigation_notifications_direction_high_priority=Bfalse;navigation_notification_changes_show_when=Snever;navigation_notification_changes_remove_when=Snever;navigation_notification_directions_show_when=Snever;navigation_notification_directions_remove_when=Snever</item>
+        <item>navigation_notifications_enabled=Btrue;navigation_notifications_changes_high_priority=Btrue;navigation_notifications_direction_high_priority=Btrue;navigation_notification_changes_show_when=Salways;navigation_notification_changes_remove_when=S10;navigation_notification_directions_show_when=Salways;navigation_notification_directions_remove_when=S10;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_2_minutes_preview=Btrue;navigation_notifications_remind_6_minutes=Btrue;navigation_notifications_remind_6_minutes_preview=Btrue</item>
+        <item>navigation_notifications_enabled=Btrue;navigation_notifications_changes_high_priority=Bfalse;navigation_notifications_direction_high_priority=Bfalse;navigation_notification_changes_show_when=Salways;navigation_notification_changes_remove_when=S2;navigation_notification_directions_show_when=Salways;navigation_notification_directions_remove_when=S2;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_2_minutes_preview=Btrue;navigation_notifications_remind_6_minutes=Btrue;navigation_notifications_remind_6_minutes_preview=Btrue</item>
+        <item>navigation_notifications_enabled=Btrue;navigation_notifications_changes_high_priority=Bfalse;navigation_notifications_direction_high_priority=Bfalse;navigation_notification_changes_show_when=Swhen-off;navigation_notification_changes_remove_when=S2;navigation_notification_directions_show_when=Swhen-off;navigation_notification_directions_remove_when=S2;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_2_minutes_preview=Btrue;navigation_notifications_remind_6_minutes=Btrue;navigation_notifications_remind_6_minutes_preview=Btrue</item>
+        <item>navigation_notifications_enabled=Btrue;navigation_notifications_changes_high_priority=Btrue;navigation_notifications_direction_high_priority=Btrue;navigation_notification_changes_show_when=Salways;navigation_notification_changes_remove_when=Snever;navigation_notification_directions_show_when=Salways;navigation_notification_directions_remove_when=Snever;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_2_minutes_preview=Btrue;navigation_notifications_remind_6_minutes=Btrue;navigation_notifications_remind_6_minutes_preview=Btrue</item>
         <item/>
     </string-array>
     <string name="navigation_notifications_changes_category_title">Navigation Changes</string>
@@ -200,7 +204,8 @@
         <item>30</item>
         <item>60</item>
     </string-array>
-    <string name="navigation_notifications_direction_high_priority_title">High importance</string>
+    <string name="navigation_notifications_high_priority_title">Show banner pop-ups</string>
+    <string name="navigation_notifications_high_priority_summary">Use notification channel with high importance, thereby showing banner pop-ups</string>
     <string name="navigation_notifications_remind_2_minutes_title">Show reminder 2 minutes before</string>
     <string name="navigation_notifications_remind_6_minutes_title">Show reminder 6 minutes before</string>
     <string name="navigation_notifications_remind_preview_title">… and preview for transfer</string>

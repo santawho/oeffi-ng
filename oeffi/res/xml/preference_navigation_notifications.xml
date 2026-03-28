@@ -19,6 +19,13 @@
 
     <PreferenceCategory android:title="@string/navigation_notifications_changes_category_title" >
 
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:dependency="navigation_notifications_enabled"
+            android:key="navigation_notifications_changes_high_priority"
+            android:title="@string/navigation_notifications_high_priority_title"
+            android:summary="@string/navigation_notifications_high_priority_summary" />
+
         <ListPreference
             android:defaultValue="never"
             android:dependency="navigation_notifications_enabled"
@@ -42,10 +49,11 @@
     <PreferenceCategory android:title="@string/navigation_notifications_directions_category_title" >
 
         <CheckBoxPreference
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:dependency="navigation_notifications_enabled"
             android:key="navigation_notifications_direction_high_priority"
-            android:title="@string/navigation_notifications_direction_high_priority_title" />
+            android:title="@string/navigation_notifications_high_priority_title"
+            android:summary="@string/navigation_notifications_high_priority_summary" />
 
         <ListPreference
             android:defaultValue="never"
