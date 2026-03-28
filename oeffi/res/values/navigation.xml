@@ -104,6 +104,14 @@
         disabled in bedtime mode settings.
     </string>
 
+    <string name="navigation_never_use_alarms_title">In-exact timing at all times</string>
+    <string name="navigation_never_use_alarms_summary">
+        An in-exact timing is applied at ALL TIMES to wake up the device,
+        check data and issue instructions.
+        WARNING: This setting disables exact timing.
+        Navigation timing may or will be inaccurate.
+    </string>
+
     <string name="navigation_invert_use_foreground_service_title">Invert foreground service</string>
     <string name="navigation_invert_use_foreground_service_summary">
         EXPERT SETTING, TAKE CARE! (requires restart)

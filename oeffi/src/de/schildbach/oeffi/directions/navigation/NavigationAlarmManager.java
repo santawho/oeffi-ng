@@ -26,6 +26,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -49,6 +50,7 @@ import de.schildbach.oeffi.util.ClockUtils;
 
 public class NavigationAlarmManager {
     public static final String PREFS_KEY_FORCE_USE_ALARMS = "navigation_force_use_alarms";
+    public static final String PREFS_KEY_NEVER_USE_ALARMS = "navigation_never_use_alarms";
 
     private final static long MIN_PERIOD_MS = 30000;
     private static NavigationAlarmManager instance;
@@ -235,8 +237,11 @@ public class NavigationAlarmManager {
     }
 
     private boolean canUseRealAlarms() {
-        if (Application.getInstance().getSharedPreferences().getBoolean(PREFS_KEY_FORCE_USE_ALARMS, false))
+        final SharedPreferences prefs = Application.getInstance().getSharedPreferences();
+        if (prefs.getBoolean(PREFS_KEY_FORCE_USE_ALARMS, false))
             return true;
+        if (prefs.getBoolean(PREFS_KEY_NEVER_USE_ALARMS, false))
+            return false;
         final int interruptionFilter = getSystemNotificationManager().getCurrentInterruptionFilter();
         // the filter is determined by DND do-not-disturb mode, aka Zen-mode
         return interruptionFilter == NotificationManager.INTERRUPTION_FILTER_ALL;

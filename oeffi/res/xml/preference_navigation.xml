@@ -24,6 +24,12 @@
         android:title="@string/navigation_force_use_alarms_title"
         android:summary="@string/navigation_force_use_alarms_summary" />
 
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="navigation_never_use_alarms"
+        android:title="@string/navigation_never_use_alarms_title"
+        android:summary="@string/navigation_never_use_alarms_summary" />
+
 <!--
     <CheckBoxPreference
         android:defaultValue="false"
