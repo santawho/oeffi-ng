@@ -20,6 +20,7 @@ package de.schildbach.oeffi.plans;
 import android.app.SearchManager;
 import android.content.ContentProvider;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.CursorWrapper;
 import android.database.MatrixCursor;
@@ -51,10 +52,12 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
@@ -63,6 +66,8 @@ import java.util.stream.Stream;
 import static java.util.Objects.requireNonNull;
 
 public class PlanContentProvider extends ContentProvider {
+    public static float MAX_DISTANCE_NEARBY_PLAN = 25000f; // 25km
+
     public static Uri CONTENT_URI() {
         return Uri.parse("content://" + Application.getApplicationId() + ".plans");
     }
@@ -82,6 +87,16 @@ public class PlanContentProvider extends ContentProvider {
     public static final String KEY_STATION_PLAN_ID = "station_plan_id";
     public static final String KEY_STATION_X = "station_x";
     public static final String KEY_STATION_Y = "station_y";
+
+    public static String getPlanFilename(final String planId) {
+        return planId + ".png";
+    }
+
+    public static File getPlanFile(final String planId) {
+        return new File(
+                Application.getInstance().getDir(Constants.PLANS_DIR, Context.MODE_PRIVATE),
+                getPlanFilename(planId));
+    }
 
     public static class PlanList extends LinkedList<String> {
         @Serial
@@ -227,7 +242,7 @@ public class PlanContentProvider extends ContentProvider {
                 final double lon = Double.parseDouble(latLon[1]);
                 return new DistanceSortingCursorWrapper(cursor, favoritePlans, lat, lon);
             } else {
-                return new DistanceSortingCursorWrapper(cursor, favoritePlans);
+                return new DistanceSortingCursorWrapper(cursor, favoritePlans, null, null);
             }
         } else if (pathSegments.size() == 3) {
             if (pathSegments.get(0).equals("plan") && pathSegments.get(2).equals("stations")) {
@@ -283,7 +298,7 @@ public class PlanContentProvider extends ContentProvider {
                 final String planId = fieldIterator.next();
                 final int rowId = planId.hashCode(); // FIXME colliding hashcodes
                 final String[] coords = fieldIterator.next().split(",");
-                final Point p = Point.fromDouble(Double.parseDouble(coords[0]), Double.parseDouble(coords[1]));
+                final Point centerLocation = Point.fromDouble(Double.parseDouble(coords[0]), Double.parseDouble(coords[1]));
                 final Date planValidFrom = parse(fieldIterator.next(), dateFormat);
                 final String planName = fieldIterator.next();
                 final String planDisclaimer = fieldIterator.hasNext() ? fieldIterator.next() : null;
@@ -299,8 +314,15 @@ public class PlanContentProvider extends ContentProvider {
                     filterMatch = false;
 
                 if (filterMatch) {
-                    cursor.newRow().add(rowId).add(planId).add(planName).add(p.getLatAs1E6()).add(p.getLonAs1E6())
-                            .add(planValidFrom != null ? planValidFrom.getTime() : 0).add(planDisclaimer).add(planUrl)
+                    cursor.newRow()
+                            .add(rowId)
+                            .add(planId)
+                            .add(planName)
+                            .add(centerLocation.getLatAs1E6())
+                            .add(centerLocation.getLonAs1E6())
+                            .add(planValidFrom != null ? planValidFrom.getTime() : 0)
+                            .add(planDisclaimer)
+                            .add(planUrl)
                             .add(planNetworkLogo);
                 }
             }
@@ -411,38 +433,24 @@ public class PlanContentProvider extends ContentProvider {
     private static class DistanceSortingCursorWrapper extends CursorWrapper {
         private List<Integer> mapping;
         private int pos = -1;
+        private final Map<String, Boolean> planFileExistsMap = new HashMap<>();
 
-        public DistanceSortingCursorWrapper(
-                final Cursor cursor,
-                final PlanList favoritePlans) {
-            super(cursor);
-
-            final int planIdColumn = cursor.getColumnIndexOrThrow(KEY_PLAN_ID);
-
-            sort(
-                    (index1, index2) -> {
-                        cursor.moveToPosition(index1);
-                        final String planId1 = cursor.getString(planIdColumn);
-                        final boolean plan1isFavorite = favoritePlans.contains(planId1);
-
-                        cursor.moveToPosition(index2);
-                        final String planId2 = cursor.getString(planIdColumn);
-                        final boolean plan2isFavorite = favoritePlans.contains(planId2);
-
-                        if (plan1isFavorite && !plan2isFavorite)
-                            return -1;
-                        if (!plan1isFavorite && plan2isFavorite)
-                            return 1;
-                        return 0;
-                    },
-                    "");
+        private boolean planFileExists(final String planId) {
+            Boolean b = planFileExistsMap.get(planId);
+            if (b != null)
+                return b;
+            b = getPlanFile(planId).exists();
+            planFileExistsMap.put(planId, b);
+            return b;
         }
 
         public DistanceSortingCursorWrapper(
                 final Cursor cursor,
                 final PlanList favoritePlans,
-                final double lat, final double lon) {
+                final Double lat, final Double lon) {
             super(cursor);
+
+            final boolean hasLocation = lat != null && lon != null;
 
             final int planIdColumn = cursor.getColumnIndexOrThrow(KEY_PLAN_ID);
             final int latColumn = cursor.getColumnIndexOrThrow(KEY_PLAN_LAT);
@@ -454,19 +462,68 @@ public class PlanContentProvider extends ContentProvider {
                         final String planId1 = cursor.getString(planIdColumn);
                         final boolean plan1isFavorite = favoritePlans.contains(planId1);
                         final Point p1 = Point.from1E6(cursor.getInt(latColumn), cursor.getInt(lonColumn));
-                        final float dist1 = GeoUtils.distanceBetween(lat, lon, p1).distanceInMeters;
 
                         cursor.moveToPosition(index2);
                         final String planId2 = cursor.getString(planIdColumn);
                         final boolean plan2isFavorite = favoritePlans.contains(planId2);
                         final Point p2 = Point.from1E6(cursor.getInt(latColumn), cursor.getInt(lonColumn));
+
+                        if (plan1isFavorite) {
+                            if (!plan2isFavorite)
+                                return -1;
+                            // both favorites
+                            if (!hasLocation)
+                                return index1 - index2;
+                        } else if (plan2isFavorite) {
+                            return 1;
+                        } else {
+                            // none is favorite
+                            if (!hasLocation) {
+                                if (planFileExists(planId1)) {
+                                    if (!planFileExists(planId2))
+                                        return -1;
+                                } else if (planFileExists(planId2)) {
+                                    return 1;
+                                }
+                                return index1 - index2;
+                            }
+                        }
+
+                        final float dist1 = GeoUtils.distanceBetween(lat, lon, p1).distanceInMeters;
                         final float dist2 = GeoUtils.distanceBetween(lat, lon, p2).distanceInMeters;
 
-                        if (plan1isFavorite && !plan2isFavorite)
-                            return -1;
-                        if (!plan1isFavorite && plan2isFavorite)
+                        if (dist1 < MAX_DISTANCE_NEARBY_PLAN) {
+                            if (dist2 >= MAX_DISTANCE_NEARBY_PLAN)
+                                return -1;
+
+                            // both nearby
+                            if (planFileExists(planId1)) {
+                                if (!planFileExists(planId2))
+                                    return -1;
+                            } else if (planFileExists(planId2)) {
+                                return 1;
+                            }
+
+                            final int distDiff = Float.compare(dist1, dist2);
+                            if (distDiff != 0)
+                                return distDiff;
+                            return index1 - index2;
+                        } else if (dist2 < MAX_DISTANCE_NEARBY_PLAN) {
                             return 1;
-                        return Float.compare(dist1, dist2);
+                        }
+
+                        // both far away
+                        if (planFileExists(planId1)) {
+                            if (!planFileExists(planId2))
+                                return -1;
+                        } else if (planFileExists(planId2)) {
+                            return 1;
+                        }
+
+                        final int distDiff = Float.compare(dist1, dist2);
+                        if (distDiff != 0)
+                            return distDiff;
+                        return index1 - index2;
                     },
                     "by distance to " + lat + "," + lon);
         }

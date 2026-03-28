@@ -34,6 +34,7 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.URLs;
 import de.schildbach.oeffi.plans.PlanContentProvider;
 import de.schildbach.pte.NetworkId;
+import de.schildbach.pte.dto.Point;
 import okhttp3.Cache;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -69,6 +70,8 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
     private final int validFromColumn;
     private final int networkLogoColumn;
     private final int urlColumn;
+    private final int latColumn;
+    private final int lonColumn;
     private final PlanClickListener clickListener;
     private final PlanContextMenuItemListener contextMenuItemListener;
     private Map<Integer, Plan> plansByPosition = new HashMap<>();
@@ -76,11 +79,14 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
     private final Handler handler = new Handler();
     private final OkHttpClient cachingOkHttpClient;
 
+    private Point location;
+
     public PlansAdapter(
             final Context context,
             final Cursor cursor,
             final Cache thumbCache,
-            final PlanClickListener clickListener, final PlanContextMenuItemListener contextMenuItemListener,
+            final PlanClickListener clickListener,
+            final PlanContextMenuItemListener contextMenuItemListener,
             final OkHttpClient okHttpClient) {
         this.context = context;
         this.res = context.getResources();
@@ -96,10 +102,17 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
         validFromColumn = cursor.getColumnIndexOrThrow(PlanContentProvider.KEY_PLAN_VALID_FROM);
         networkLogoColumn = cursor.getColumnIndexOrThrow(PlanContentProvider.KEY_PLAN_NETWORK_LOGO);
         urlColumn = cursor.getColumnIndexOrThrow(PlanContentProvider.KEY_PLAN_REMOTE_URL);
+        latColumn = cursor.getColumnIndexOrThrow(PlanContentProvider.KEY_PLAN_LAT);
+        lonColumn = cursor.getColumnIndexOrThrow(PlanContentProvider.KEY_PLAN_LON);
 
         setHasStableIds(true);
 
         cachingOkHttpClient = okHttpClient.newBuilder().cache(thumbCache).build();
+    }
+
+    public void setLocation(final Point location) {
+        this.location = location;
+        notifyDataSetChanged();
     }
 
     public void toggleFavorite(final PlansAdapter.Plan plan) {
@@ -133,7 +146,7 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
 
     @Override
     public void onBindViewHolder(final PlanViewHolder holder, final int position) {
-        holder.bind(getPlan(position), clickListener, contextMenuItemListener);
+        holder.bind(getPlan(position), clickListener, contextMenuItemListener, location);
     }
 
     @Override
@@ -214,8 +227,8 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
         final Date validFrom = validFromLong != 0 ? new Date(validFromLong) : null;
         final String networkLogo = cursor.getString(networkLogoColumn);
         final String urlStr = cursor.getString(urlColumn);
+        final Point centerLocation = Point.from1E6(cursor.getInt(latColumn), cursor.getInt(lonColumn));
         final HttpUrl url = urlStr != null ? HttpUrl.parse(urlStr) : null;
-        final File localFile = new File(context.getDir(Constants.PLANS_DIR, Context.MODE_PRIVATE), planId + ".png");
         NetworkId networkId = null;
         if (networkLogo != null) {
             try {
@@ -226,7 +239,9 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
         }
         final Plan newPlan = new Plan(
                 rowId, planId, name, disclaimer,
-                validFrom, networkId, url, localFile,
+                validFrom, networkId, url,
+                PlanContentProvider.getPlanFile(planId),
+                centerLocation,
                 PlanContentProvider.isPlanFavorite(planId));
         plansByPosition.put(position, newPlan);
         return newPlan;
@@ -245,13 +260,14 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
         @Nullable
         public final HttpUrl url;
         public final File localFile;
+        public final Point centerPosition;
         public boolean isFavorite;
         public Drawable thumb;
 
         private Plan(
                 final long rowId, final String planId, final String name, final String disclaimer,
                 final Date validFrom, final NetworkId networkId, final HttpUrl url, final File localFile,
-                final boolean isFavorite) {
+                final Point centerPosition, final boolean isFavorite) {
             this.rowId = rowId;
             this.planId = requireNonNull(planId);
             this.name = requireNonNull(name);
@@ -260,6 +276,7 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
             this.networkId = networkId;
             this.url = url;
             this.localFile = requireNonNull(localFile);
+            this.centerPosition = centerPosition;
             this.isFavorite = isFavorite;
         }
 

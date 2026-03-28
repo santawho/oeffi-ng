@@ -32,7 +32,10 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.network.NetworkResources;
+import de.schildbach.oeffi.plans.PlanContentProvider;
+import de.schildbach.oeffi.util.GeoUtils;
 import de.schildbach.oeffi.util.ViewUtils;
+import de.schildbach.pte.dto.Point;
 import okhttp3.Call;
 
 import javax.annotation.Nullable;
@@ -70,9 +73,19 @@ public class PlanViewHolder extends RecyclerView.ViewHolder {
         favoriteView = itemView.findViewById(R.id.plans_picker_entry_favorite);
     }
 
-    public void bind(final PlansAdapter.Plan plan, final PlanClickListener clickListener,
-            final PlanContextMenuItemListener contextMenuItemListener) {
+    public void bind(
+            final PlansAdapter.Plan plan,
+            final PlanClickListener clickListener,
+            final PlanContextMenuItemListener contextMenuItemListener,
+            final Point location) {
         itemView.setOnClickListener(v -> clickListener.onPlanClick(plan));
+
+        final boolean isNearby = location != null
+                && GeoUtils.distanceBetween(plan.centerPosition, location).distanceInMeters
+                < PlanContentProvider.MAX_DISTANCE_NEARBY_PLAN;
+        itemView.setBackgroundColor(isNearby
+                ? context.getColor(R.color.bg_plan_entry_nearby)
+                : ViewUtils.getAttrColor(context, R.attr.bg_level1));
 
         bindThumb(plan.thumb);
 

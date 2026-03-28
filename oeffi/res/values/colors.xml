@@ -101,6 +101,8 @@
     <color name="bg_bookmarked_trip_fill_upcoming">#f1f2d2</color>
     <color name="bg_bookmarked_trip_fill_current">#fbdec8</color>
 
+    <color name="bg_plan_entry_nearby">#e2f4e3</color>
+
     <item name="alpha_bright_white" format="float" type="dimen">1</item>
 
 </resources>

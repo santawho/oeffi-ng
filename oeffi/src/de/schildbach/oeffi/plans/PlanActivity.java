@@ -183,8 +183,7 @@ public class PlanActivity extends ComponentActivity {
         final String planId = requireNonNull(getIntent().getExtras().getString(INTENT_EXTRA_PLAN_ID), () ->
                 "Required intent extra: " + INTENT_EXTRA_PLAN_ID);
         final Uri planContentUri = PlanContentProvider.planUri(planId);
-        final String planFilename = planId + ".png";
-        final File planFile = new File(getDir(Constants.PLANS_DIR, Context.MODE_PRIVATE), planFilename);
+        final File planFile = PlanContentProvider.getPlanFile(planId);
 
         final Cursor cursor = getContentResolver().query(planContentUri, null, null, null, null);
         cursor.moveToFirst();
@@ -217,7 +216,7 @@ public class PlanActivity extends ComponentActivity {
 
         final Downloader downloader = new Downloader(getCacheDir());
         final HttpUrl remoteUrl = planUrlStr != null ? HttpUrl.parse(planUrlStr)
-                : URLs.getPlansBaseUrl().newBuilder().addEncodedPathSegment(planFilename).build();
+                : URLs.getPlansBaseUrl().newBuilder().addEncodedPathSegment(PlanContentProvider.getPlanFilename(planId)).build();
         final CompletableFuture<Integer> download = downloader.download(application.okHttpClient(), remoteUrl, planFile);
 
         download.whenComplete((status, t) -> {

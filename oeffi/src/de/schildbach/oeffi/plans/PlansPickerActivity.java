@@ -225,6 +225,7 @@ public class PlansPickerActivity extends OeffiMainActivity implements LocationHe
 
     public void onLocation(final Point here) {
         this.location = here;
+        listAdapter.setLocation(here);
         requery();
     }
 
@@ -265,6 +266,7 @@ public class PlansPickerActivity extends OeffiMainActivity implements LocationHe
             uri.appendPath(SearchManager.SUGGEST_URI_PATH_QUERY).appendPath(filter);
         cursor = getContentResolver().query(uri.build(), null, null, null, sortOrder);
         listAdapter = new PlansAdapter(this, cursor, thumbCache, this, this, application.okHttpClient());
+        listAdapter.setLocation(location);
         listView.setAdapter(listAdapter);
 
         findViewById(android.R.id.empty).setVisibility(cursor.getCount() > 0 ? View.GONE : View.VISIBLE);
@@ -304,17 +306,17 @@ public class PlansPickerActivity extends OeffiMainActivity implements LocationHe
     }
 
     private void openPlan(final PlansAdapter.Plan plan) {
-        final String planFilename = plan.planId + ".png";
-        final File planFile = new File(getDir(Constants.PLANS_DIR, MODE_PRIVATE), planFilename);
+        final File planFile = PlanContentProvider.getPlanFile(plan.planId);
 
         if (planFile.exists()) {
             PlanActivity.start(this, plan.planId, null);
         } else {
             final Downloader downloader = new Downloader(getCacheDir());
             final HttpUrl remoteUrl = plan.url != null ? plan.url
-                    : URLs.getPlansBaseUrl().newBuilder().addEncodedPathSegment(planFilename).build();
-            final CompletableFuture<Integer> download = downloader.download(application.okHttpClient(), remoteUrl,
-                    planFile, false, (contentRead, contentLength) -> runOnUiThread(() -> {
+                    : URLs.getPlansBaseUrl().newBuilder().addEncodedPathSegment(PlanContentProvider.getPlanFilename(plan.planId)).build();
+            final CompletableFuture<Integer> download = downloader.download(
+                    application.okHttpClient(), remoteUrl, planFile, false,
+                    (contentRead, contentLength) -> runOnUiThread(() -> {
                         final RecyclerView.ViewHolder holder = listView.findViewHolderForItemId(plan.rowId);
                         if (holder != null) {
                             final int position = holder.getAdapterPosition();

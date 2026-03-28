@@ -77,6 +77,8 @@
     <color name="bg_bookmarked_trip_fill_upcoming">#4c5027</color>
     <color name="bg_bookmarked_trip_fill_current">#402023</color>
 
+    <color name="bg_plan_entry_nearby">#2f410c</color>
+
     <item name="alpha_bright_white" format="float" type="dimen">0.8</item>
 
 </resources>
