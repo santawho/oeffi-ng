@@ -131,12 +131,6 @@ public abstract class OeffiMainActivity extends OeffiActivity {
 
     protected abstract String taskName();
 
-    protected void setActionBarSecondaryTitleFromNetwork() {
-        final NetworkId network = this.network != null ? this.network : prefsGetNetworkId();
-        if (network != null)
-            getMyActionBar().setSecondaryTitle(NetworkResources.instance(this, network).label);
-    }
-
     @Override
     protected Dialog onCreateDialog(final int id, final Bundle bundle) {
         if (id == DIALOG_MESSAGE) {

@@ -26,6 +26,7 @@
     <!-- activity titles -->
     <string name="stations_activity_title">Nahegelegene Haltestellen</string>
     <string name="station_details_activity_title">Haltestellen-Details</string>
+    <string name="station_details_activity_short_title">Abfahrten</string>
     <string name="directions_activity_title">Verbindungsabfrage</string>
     <string name="operations_activity_title">Einsatzplanung</string>
     <string name="trip_details_title">Verbindungsdetails</string>

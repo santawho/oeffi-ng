@@ -40,6 +40,7 @@ import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.mapview.OeffiMapView;
+import de.schildbach.oeffi.network.NetworkPickerActivity;
 import de.schildbach.oeffi.util.locationview.LocationView;
 import de.schildbach.oeffi.stations.list.FavoriteStationsAdapter;
 import de.schildbach.oeffi.stations.list.StationClickListener;
@@ -91,7 +92,6 @@ public class FavoriteStationsActivity extends OeffiActivity
         }
     }
 
-    private NetworkId network;
     boolean shouldReturnResult;
     private ViewAnimator viewAnimator;
     private RecyclerView listView;
@@ -167,6 +167,10 @@ public class FavoriteStationsActivity extends OeffiActivity
         final MyActionBar actionBar = getMyActionBar();
         setPrimaryColor(R.color.bg_action_bar_station_favorites);
         actionBar.setPrimaryTitle(R.string.stations_favorite_stations_title);
+        if (this instanceof Main) {
+            actionBar.setTitlesOnClickListener(
+                    v -> NetworkPickerActivity.start(FavoriteStationsActivity.this));
+        }
         actionBar.setBack(isRootActivity ? null : v -> finish());
         actionBar.addButton(R.drawable.ic_add_white_24dp, R.string.stations_favorite_stations_add_title)
                 .setOnClickListener(view -> viewNewLocation.setVisibility(
@@ -203,6 +207,19 @@ public class FavoriteStationsActivity extends OeffiActivity
     @Override
     protected int getGlobalOptionsId() {
         return R.id.global_options_stations_favorites;
+    }
+
+    @Override
+    protected void onChangeNetwork(final NetworkId network) {
+        resetAdapter();
+        updateGUI();
+        setActionBarSecondaryTitleFromNetwork();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        setActionBarSecondaryTitleFromNetwork();
     }
 
     @Override

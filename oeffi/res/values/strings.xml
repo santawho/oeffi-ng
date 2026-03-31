@@ -25,7 +25,8 @@
 
     <!-- activity titles -->
     <string name="stations_activity_title">Nearby Stations</string>
-    <string name="station_details_activity_title">Station Details</string>
+    <string name="station_details_activity_title">Station Departures</string>
+    <string name="station_details_activity_short_title">Departures</string>
     <string name="directions_activity_title">Directions</string>
     <string name="operations_activity_title">Operations</string>
     <string name="trip_details_title">Connection Details</string>

@@ -238,6 +238,12 @@ public abstract class OeffiActivity extends AppCompatActivity
                 || (isTakeDriverModeFromApplication() && application.isDriverMode());
     }
 
+    protected void setActionBarSecondaryTitleFromNetwork() {
+        final NetworkId network = this.network != null ? this.network : prefsGetNetworkId();
+        if (network != null)
+            getMyActionBar().setSecondaryTitle(NetworkResources.instance(this, network).label);
+    }
+
     public TimeZoneSelector getTimeZoneSelector() {
         return timeZoneSelector;
     }
