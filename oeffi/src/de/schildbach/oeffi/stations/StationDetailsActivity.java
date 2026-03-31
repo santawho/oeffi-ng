@@ -709,7 +709,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         nameView.setText(selectedStation.uniqueShortName());
         idView.setText(selectedStation.displayId != null ? selectedStation.displayId : "");
         if (stations.size() > 1) {
-            headerView.setVisibility(View.VISIBLE);
+            // headerView.setVisibility(View.VISIBLE);
             multiStationsView.setVisibility(View.VISIBLE);
             headerView.setOnClickListener(v -> {
                 final PopupMenu popupMenu = new PopupMenu(v.getContext(), v);
@@ -724,7 +724,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 popupMenu.show();
             });
         } else {
-            headerView.setVisibility(View.GONE);
+            // headerView.setVisibility(View.GONE);
             multiStationsView.setVisibility(View.GONE);
             headerView.setOnClickListener(null);
         }
