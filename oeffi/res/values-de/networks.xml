@@ -122,10 +122,16 @@
     <string name="network_vbl_comment">nur Tram und Bus (TG:VBL)</string>
     <string name="network_zvv_label">Zürich</string>
     <string name="network_zvv_comment">Lokal- und Regionalverkehr</string>
+    <string name="network_bls_label">Bern</string>
+    <string name="network_bls_comment">Lokal- und Regionalverkehr</string>
+    <string name="network_tpg_label">Genf</string>
+    <string name="network_tpg_comment">Lokal- und Regionalverkehr</string>
     <string name="network_lu_label">Luxemburg</string>
     <string name="network_lu_comment">Lokal- und Regionalverkehr</string>
-    <string name="network_ns_label">Niederlande</string>
+    <string name="network_ns_label">Niederlande (NS)</string>
     <string name="network_ns_comment">Fern- und Regionalverkehr, nur Verbindungsplanung</string>
+    <string name="network_rivier_label">Niederlande</string>
+    <string name="network_rivier_comment">Regional- und Fernverkehr</string>
     <string name="network_dsb_label">Dänemark</string>
     <string name="network_dsb_comment">Fern-, Regional und Lokalverkehr (z.B. Kopenhagen)</string>
     <string name="network_se_label">Schweden</string>

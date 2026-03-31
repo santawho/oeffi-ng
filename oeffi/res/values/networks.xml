@@ -122,10 +122,16 @@
     <string name="network_vbl_comment">tram and bus only</string>
     <string name="network_zvv_label">Zurich</string>
     <string name="network_zvv_comment">local and regional</string>
+    <string name="network_bls_label">Bern</string>
+    <string name="network_bls_comment">local and regional</string>
+    <string name="network_tpg_label">Geneva</string>
+    <string name="network_tpg_comment">local and regional</string>
     <string name="network_lu_label">Luxembourg</string>
     <string name="network_lu_comment">local and regional</string>
-    <string name="network_ns_label">Netherlands</string>
+    <string name="network_ns_label">Netherlands (NS)</string>
     <string name="network_ns_comment">long-distance and regional, directions only</string>
+    <string name="network_rivier_label">Netherlands</string>
+    <string name="network_rivier_comment">Regional and long-distance</string>
     <string name="network_dsb_label">Denmark</string>
     <string name="network_dsb_comment">long-distance, regional and local (e.g. Copenhagen)</string>
     <string name="network_se_label">Sweden</string>
