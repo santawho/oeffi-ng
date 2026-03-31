@@ -520,9 +520,9 @@ public class PlanContentProvider extends ContentProvider {
                             return 1;
                         }
 
-                        final int distDiff = Float.compare(dist1, dist2);
-                        if (distDiff != 0)
-                            return distDiff;
+                        // final int distDiff = Float.compare(dist1, dist2);
+                        // if (distDiff != 0)
+                        //     return distDiff;
                         return index1 - index2;
                     },
                     "by distance to " + lat + "," + lon);
