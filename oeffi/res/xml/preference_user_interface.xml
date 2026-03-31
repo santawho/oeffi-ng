@@ -18,6 +18,11 @@
         android:title="@string/user_interface_darkmode_amoled_enabled_title"
         android:summary="@string/user_interface_darkmode_amoled_enabled_summary" />
 
+    <CheckBoxPreference
+        android:key="user_interface_show_data_source_enabled"
+        android:defaultValue="true"
+        android:title="@string/user_interface_show_data_source_enabled_title" />
+
 <!--    <Preference-->
 <!--        android:enabled="false"-->
 <!--        android:key="user_interface_accessibility_settings"-->

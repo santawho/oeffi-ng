@@ -982,23 +982,31 @@ public abstract class OeffiActivity extends AppCompatActivity
         setTaskDescription(new TaskDescription(null, null, color));
     }
 
+    protected boolean isShowDataSourceEnabled() {
+        return prefs.getBoolean("user_interface_show_data_source_enabled", true);
+    }
+
     protected void updateDisclaimerSource(
             final TextView disclaimerSourceView,
             final NetworkId network,
             final CharSequence defaultLabel) {
-        final NetworkResources networkRes = NetworkResources.instance(this, network);
-        final Drawable networkResIcon = networkRes.icon;
-        final String label = getString(R.string.disclaimer_network_and_responsibility, networkRes.label != null ? networkRes.label : defaultLabel);
-        if (networkRes.cooperation && networkResIcon != null) {
-            final Drawable icon = networkResIcon.mutate();
-            final int size = getResources().getDimensionPixelSize(R.dimen.disclaimer_network_icon_size);
-            icon.setBounds(0, 0, size, size);
-            disclaimerSourceView.setCompoundDrawables(icon, null, null, null);
+        if (isShowDataSourceEnabled()) {
+            final NetworkResources networkRes = NetworkResources.instance(this, network);
+            final Drawable networkResIcon = networkRes.icon;
+            final String label = getString(R.string.disclaimer_network_and_responsibility, networkRes.label != null ? networkRes.label : defaultLabel);
+            if (networkRes.cooperation && networkResIcon != null) {
+                final Drawable icon = networkResIcon.mutate();
+                final int size = getResources().getDimensionPixelSize(R.dimen.disclaimer_network_icon_size);
+                icon.setBounds(0, 0, size, size);
+                disclaimerSourceView.setCompoundDrawables(icon, null, null, null);
+            } else {
+                disclaimerSourceView.setCompoundDrawables(null, null, null, null);
+            }
+            disclaimerSourceView.setText(label);
+            disclaimerSourceView.setVisibility(View.VISIBLE);
         } else {
-            disclaimerSourceView.setCompoundDrawables(null, null, null, null);
+            disclaimerSourceView.setVisibility(View.GONE);
         }
-        disclaimerSourceView.setText(label);
-        disclaimerSourceView.setVisibility(View.VISIBLE);
     }
 
     protected final CharSequence product(final ResultHeader header) {

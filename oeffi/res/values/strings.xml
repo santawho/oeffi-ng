@@ -57,7 +57,7 @@
     <!-- global preferences -->
     <string name="global_preferences_title">Common</string>
     <string name="global_preferences_network_provider_title">Transport network</string>
-    <string name="global_preferences_network_provider_summary">Pick transportation network.</string>
+    <string name="global_preferences_network_provider_summary">Select region and source of data to be used.\n[%s]</string>
     <string name="global_preferences_show_hints_title">Show hints</string>
     <string name="global_preferences_show_hints_summary">Show useful hints now and then.</string>
     <string name="global_preferences_check_for_updates_title">Check for updates</string>

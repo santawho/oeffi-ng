@@ -1288,9 +1288,10 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
                                 @Override
                                 protected void onResult(final QueryDeparturesResult result) {
-                                    if (result.header != null)
+                                    if (result.header != null) {
                                         updateDisclaimerSource(disclaimerSourceView, network,
                                                 product(result.header));
+                                    }
 
                                     if (result.status == QueryDeparturesResult.Status.OK) {
                                         final ArrayList<Departure> newDepartures = new ArrayList<>();

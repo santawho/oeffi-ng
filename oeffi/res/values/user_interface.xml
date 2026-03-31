@@ -18,6 +18,8 @@
     <string name="user_interface_darkmode_amoled_enabled_title">Darker colors</string>
     <string name="user_interface_darkmode_amoled_enabled_summary">Use even darker colors in dark mode (e.g. for AMOLED display)</string>
 
+    <string name="user_interface_show_data_source_enabled_title">Show data source</string>
+
     <string name="user_interface_accessibility_settings_title">Shut off screen</string>
     <string name="user_interface_accessibility_settings_summary">
         When the screen is locked, long tap to shut off the screen again.

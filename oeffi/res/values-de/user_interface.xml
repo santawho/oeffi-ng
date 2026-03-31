@@ -13,6 +13,8 @@
     <string name="user_interface_darkmode_amoled_enabled_title">Dunklere Farben</string>
     <string name="user_interface_darkmode_amoled_enabled_summary">Nutze noch dunklere Farben im dunklen Modus (z.B. für AMOLED Display)</string>
 
+    <string name="user_interface_show_data_source_enabled_title">Datenquelle anzeigen</string>
+
     <string name="user_interface_accessibility_settings_title">Bildschirm ausschalten</string>
     <string name="user_interface_accessibility_settings_summary">
         Wenn der Bildschirm gesperrt ist, kann er durch langes Halten wieder ausgeschaltet werden.
