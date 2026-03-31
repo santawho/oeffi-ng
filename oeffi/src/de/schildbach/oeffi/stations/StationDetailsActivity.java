@@ -222,7 +222,8 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         actionBar = getMyActionBar();
         setPrimaryColor(R.color.bg_action_bar_stations);
         actionBar.setBack(isTaskRoot() ? null : v -> finish());
-        actionBar.swapTitles();
+        actionBar.setPrimaryTitle(R.string.station_details_activity_short_title);
+        // actionBar.swapTitles();
         actionBar.addProgressButton().setOnClickListener(v -> requestRefresh());
         nearbyButton = actionBar.addButton(R.drawable.ic_radar_white_24dp, R.string.stations_station_details_action_explore_nearby_title);
         nearbyButton.setOnClickListener(v -> {
@@ -621,8 +622,8 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
         updateGUI();
 
-        actionBar.setPrimaryTitle(selectedStation.name);
-        actionBar.setSecondaryTitle(selectedStation.place);
+        // actionBar.setPrimaryTitle(selectedStation.name);
+        // actionBar.setSecondaryTitle(selectedStation.place);
 
         if (changed) {
             autoRefreshDisabled = false;
