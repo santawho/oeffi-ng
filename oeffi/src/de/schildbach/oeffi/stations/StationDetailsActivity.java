@@ -584,7 +584,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                                     }
 
                                     if ((combinedStation != null && combinedStation.baseStation.location.equals(selectedLocation))
-                                            || selectedAllDepartures == null) {
+                                            || selectedAllDepartures == null || selectedAllDepartures.isEmpty()) {
                                         somethingAdded = true;
                                         newSelectedStation = station;
 //                                        selectedAllDepartures = station.getDepartures();
@@ -592,15 +592,6 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 //                                        selectedFilteredDepartures = null;
                                     }
                                 }
-                            }
-
-                            if (newSelectedStation != null) {
-//                                selectedStation = newSelectedStation;
-//                                if (selectedStation.hasCoord()) {
-//                                    selectedCoord = selectedStation;
-//                                    nearbyButton.setVisibility(View.VISIBLE);
-//                                }
-                                selectStation(newSelectedStation);
                             }
 
                             if (earlier) {
@@ -615,6 +606,15 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                                         maxTime = depTime;
                                 }
                                 nextLaterTime = new Date(maxTime);
+                            }
+
+                            if (newSelectedStation != null) {
+//                                selectedStation = newSelectedStation;
+//                                if (selectedStation.hasCoord()) {
+//                                    selectedCoord = selectedStation;
+//                                    nearbyButton.setVisibility(View.VISIBLE);
+//                                }
+                                selectStation(newSelectedStation);
                             }
 
                             updateGUI();
