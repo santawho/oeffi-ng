@@ -106,6 +106,8 @@ import static de.schildbach.pte.util.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 public class StationDetailsActivity extends OeffiActivity implements StationsAware {
+    private static final boolean COMBINE_STATIONS_BY_IDENTICAL_NAME = true;
+
     public static final String INTENT_EXTRA_NETWORK = StationDetailsActivity.class.getName() + ".network";
     public static final String INTENT_EXTRA_STATION = StationDetailsActivity.class.getName() + ".station";
     public static final String INTENT_EXTRA_PRESETTIME = StationDetailsActivity.class.getName() + ".presettime";
@@ -512,19 +514,29 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                                         final String locationName = location.name;
                                         final String locationPlace = location.place;
                                         for (final CombinedStation cs : combinedStations) {
-                                            if (locationName == null) {
-                                                if (cs.name != null)
-                                                    continue;
+                                            if (COMBINE_STATIONS_BY_IDENTICAL_NAME) {
+                                                if (locationName == null) {
+                                                    if (cs.name != null)
+                                                        continue;
+                                                } else {
+                                                    if (!locationName.equals(cs.name))
+                                                        continue;
+                                                }
+                                                if (locationPlace == null) {
+                                                    if (cs.place != null)
+                                                        continue;
+                                                } else {
+                                                    if (!locationPlace.equals(cs.place))
+                                                        continue;
+                                                }
                                             } else {
-                                                if (!locationName.equals(cs.name))
-                                                    continue;
-                                            }
-                                            if (locationPlace == null) {
-                                                if (cs.place != null)
-                                                    continue;
-                                            } else {
-                                                if (!locationPlace.equals(cs.place))
-                                                    continue;
+                                                if (locationId == null) {
+                                                    if (cs.id != null)
+                                                        continue;
+                                                } else {
+                                                    if (!locationId.equals(cs.id))
+                                                        continue;
+                                                }
                                             }
                                             combinedStation = cs;
                                             break;
