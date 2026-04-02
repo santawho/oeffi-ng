@@ -10,10 +10,10 @@
         <item>Light mode</item>
         <item>Dark mode</item>
     </string-array>
-    <string-array name="user_interface_darkmode_switch_values">
-        <item>system</item>
-        <item>off</item>
-        <item>on</item>
+    <string-array name="user_interface_darkmode_switch_values" translatable="false">
+        <item translatable="false">system</item>
+        <item translatable="false">off</item>
+        <item translatable="false">on</item>
     </string-array>
     <string name="user_interface_darkmode_amoled_enabled_title">Darker colors</string>
     <string name="user_interface_darkmode_amoled_enabled_summary">Use even darker colors in dark mode (e.g. for AMOLED display)</string>
@@ -120,11 +120,11 @@
         <item>4 rows (8 items)</item>
         <item>5 rows (10 items)</item>
     </string-array>
-    <string-array name="user_interface_location_selector_numrows_values">
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
+    <string-array name="user_interface_location_selector_numrows_values" translatable="false">
+        <item translatable="false">2</item>
+        <item translatable="false">3</item>
+        <item translatable="false">4</item>
+        <item translatable="false">5</item>
     </string-array>
 
     <string name="user_interface_location_selector_longholdtime_title">Long hold time (msec)</string>
@@ -145,11 +145,11 @@
         <item>Network Provider</item>
         <item>Location</item>
     </array>
-    <array name="common_preferred_timezone_values">
-        <item>utc</item>
-        <item>system</item>
-        <item>network</item>
-        <item>location</item>
+    <array name="common_preferred_timezone_values" translatable="false">
+        <item translatable="false">utc</item>
+        <item translatable="false">system</item>
+        <item translatable="false">network</item>
+        <item translatable="false">location</item>
     </array>
 
 </resources>

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+<resources>
 
     <integer name="max_departures_per_station">5</integer>
     <integer name="default_max_history_entries">50</integer>
-    <string name="default_stored_trips_retention_hours">24.0</string>
+    <string name="default_stored_trips_retention_hours" translatable="false">24.0</string>
 
 </resources>

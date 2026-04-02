@@ -17,11 +17,11 @@
         <item>Notification (quieter)</item>
         <item>Alarm (louder)</item>
     </string-array>
-    <string-array name="navigation_sound_channel_values">
-        <item>USAGE_ASSISTANCE_NAVIGATION_GUIDANCE</item>
-        <item>USAGE_MEDIA</item>
-        <item>USAGE_NOTIFICATION_EVENT</item>
-        <item>USAGE_ALARM</item>
+    <string-array name="navigation_sound_channel_values" translatable="false">
+        <item translatable="false">USAGE_ASSISTANCE_NAVIGATION_GUIDANCE</item>
+        <item translatable="false">USAGE_MEDIA</item>
+        <item translatable="false">USAGE_NOTIFICATION_EVENT</item>
+        <item translatable="false">USAGE_ALARM</item>
     </string-array>
 
     <string name="navigation_preferences_use_sound_channel_headset_summary">Use dedicated sound channel when headphones (wired or Bluetooth) connected</string>
@@ -34,10 +34,10 @@
         <item>When headphones connected</item>
         <item>Always</item>
     </string-array>
-    <string-array name="navigation_speech_output_values">
-        <item>never</item>
-        <item>headphones</item>
-        <item>always</item>
+    <string-array name="navigation_speech_output_values" translatable="false">
+        <item translatable="false">never</item>
+        <item translatable="false">headphones</item>
+        <item translatable="false">always</item>
     </string-array>
 
     <string name="navigation_preferences_media_channel_summary">Amplify sound volume when played on media channel, e.g. default for headphones</string>
@@ -166,13 +166,13 @@
         <item>show all notifications at all times</item>
         <item>user defined settings</item>
     </string-array>
-    <string-array name="navigation_notifications_scenario_values">
-        <item>navigation_notifications_enabled=Bfalse;navigation_notifications_changes_high_priority=Bfalse;navigation_notifications_direction_high_priority=Bfalse;navigation_notification_changes_show_when=Snever;navigation_notification_changes_remove_when=Snever;navigation_notification_directions_show_when=Snever;navigation_notification_directions_remove_when=Snever</item>
-        <item>navigation_notifications_enabled=Btrue;navigation_notifications_changes_high_priority=Btrue;navigation_notifications_direction_high_priority=Btrue;navigation_notification_changes_show_when=Salways;navigation_notification_changes_remove_when=S10;navigation_notification_directions_show_when=Salways;navigation_notification_directions_remove_when=S10;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_2_minutes_preview=Btrue;navigation_notifications_remind_6_minutes=Btrue;navigation_notifications_remind_6_minutes_preview=Btrue</item>
-        <item>navigation_notifications_enabled=Btrue;navigation_notifications_changes_high_priority=Bfalse;navigation_notifications_direction_high_priority=Bfalse;navigation_notification_changes_show_when=Salways;navigation_notification_changes_remove_when=S2;navigation_notification_directions_show_when=Salways;navigation_notification_directions_remove_when=S2;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_2_minutes_preview=Btrue;navigation_notifications_remind_6_minutes=Btrue;navigation_notifications_remind_6_minutes_preview=Btrue</item>
-        <item>navigation_notifications_enabled=Btrue;navigation_notifications_changes_high_priority=Bfalse;navigation_notifications_direction_high_priority=Bfalse;navigation_notification_changes_show_when=Swhen-off;navigation_notification_changes_remove_when=S2;navigation_notification_directions_show_when=Swhen-off;navigation_notification_directions_remove_when=S2;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_2_minutes_preview=Btrue;navigation_notifications_remind_6_minutes=Btrue;navigation_notifications_remind_6_minutes_preview=Btrue</item>
-        <item>navigation_notifications_enabled=Btrue;navigation_notifications_changes_high_priority=Btrue;navigation_notifications_direction_high_priority=Btrue;navigation_notification_changes_show_when=Salways;navigation_notification_changes_remove_when=Snever;navigation_notification_directions_show_when=Salways;navigation_notification_directions_remove_when=Snever;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_2_minutes_preview=Btrue;navigation_notifications_remind_6_minutes=Btrue;navigation_notifications_remind_6_minutes_preview=Btrue</item>
-        <item/>
+    <string-array name="navigation_notifications_scenario_values" translatable="false">
+        <item translatable="false">navigation_notifications_enabled=Bfalse;navigation_notifications_changes_high_priority=Bfalse;navigation_notifications_direction_high_priority=Bfalse;navigation_notification_changes_show_when=Snever;navigation_notification_changes_remove_when=Snever;navigation_notification_directions_show_when=Snever;navigation_notification_directions_remove_when=Snever</item>
+        <item translatable="false">navigation_notifications_enabled=Btrue;navigation_notifications_changes_high_priority=Btrue;navigation_notifications_direction_high_priority=Btrue;navigation_notification_changes_show_when=Salways;navigation_notification_changes_remove_when=S10;navigation_notification_directions_show_when=Salways;navigation_notification_directions_remove_when=S10;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_2_minutes_preview=Btrue;navigation_notifications_remind_6_minutes=Btrue;navigation_notifications_remind_6_minutes_preview=Btrue</item>
+        <item translatable="false">navigation_notifications_enabled=Btrue;navigation_notifications_changes_high_priority=Bfalse;navigation_notifications_direction_high_priority=Bfalse;navigation_notification_changes_show_when=Salways;navigation_notification_changes_remove_when=S2;navigation_notification_directions_show_when=Salways;navigation_notification_directions_remove_when=S2;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_2_minutes_preview=Btrue;navigation_notifications_remind_6_minutes=Btrue;navigation_notifications_remind_6_minutes_preview=Btrue</item>
+        <item translatable="false">navigation_notifications_enabled=Btrue;navigation_notifications_changes_high_priority=Bfalse;navigation_notifications_direction_high_priority=Bfalse;navigation_notification_changes_show_when=Swhen-off;navigation_notification_changes_remove_when=S2;navigation_notification_directions_show_when=Swhen-off;navigation_notification_directions_remove_when=S2;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_2_minutes_preview=Btrue;navigation_notifications_remind_6_minutes=Btrue;navigation_notifications_remind_6_minutes_preview=Btrue</item>
+        <item translatable="false">navigation_notifications_enabled=Btrue;navigation_notifications_changes_high_priority=Btrue;navigation_notifications_direction_high_priority=Btrue;navigation_notification_changes_show_when=Salways;navigation_notification_changes_remove_when=Snever;navigation_notification_directions_show_when=Salways;navigation_notification_directions_remove_when=Snever;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_2_minutes_preview=Btrue;navigation_notifications_remind_6_minutes=Btrue;navigation_notifications_remind_6_minutes_preview=Btrue</item>
+        <item translatable="false"/>
     </string-array>
     <string name="navigation_notifications_changes_category_title">Navigation Changes</string>
     <string name="navigation_notifications_directions_category_title">Navigation Directions</string>
@@ -184,11 +184,11 @@
         <item>when display is off</item>
         <item>always</item>
     </string-array>
-    <string-array name="navigation_notifications_show_when_values">
-        <item>never</item>
-        <item>when-locked</item>
-        <item>when-off</item>
-        <item>always</item>
+    <string-array name="navigation_notifications_show_when_values" translatable="false">
+        <item translatable="false">never</item>
+        <item translatable="false">when-locked</item>
+        <item translatable="false">when-off</item>
+        <item translatable="false">always</item>
     </string-array>
     <string name="navigation_notifications_remove_when_title">Remove notifications when …</string>
     <string name="navigation_notifications_remove_when_summary">Determine when event notifications shall be removed. [%s]</string>
@@ -202,15 +202,15 @@
         <item>after 30 seconds</item>
         <item>after 1 minute</item>
     </string-array>
-    <string-array name="navigation_notifications_remove_when_values">
-        <item>never</item>
-        <item>when-unlocked</item>
-        <item>when-on</item>
-        <item>2</item>
-        <item>5</item>
-        <item>10</item>
-        <item>30</item>
-        <item>60</item>
+    <string-array name="navigation_notifications_remove_when_values" translatable="false">
+        <item translatable="false">never</item>
+        <item translatable="false">when-unlocked</item>
+        <item translatable="false">when-on</item>
+        <item translatable="false">2</item>
+        <item translatable="false">5</item>
+        <item translatable="false">10</item>
+        <item translatable="false">30</item>
+        <item translatable="false">60</item>
     </string-array>
     <string name="navigation_notifications_high_priority_title">Show banner pop-ups</string>
     <string name="navigation_notifications_high_priority_summary">Use notification channel with high importance, thereby showing banner pop-ups</string>

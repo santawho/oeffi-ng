@@ -34,10 +34,10 @@
         <item>when charging</item>
         <item>always</item>
     </string-array>
-    <string-array name="extras_drivermode_keep_active_values">
-        <item>never</item>
-        <item>when-charging</item>
-        <item>always</item>
+    <string-array name="extras_drivermode_keep_active_values" translatable="false">
+        <item translatable="false">never</item>
+        <item translatable="false">when-charging</item>
+        <item translatable="false">always</item>
     </string-array>
     <string name="extras_drivermode_navigation_scroll_inhibit_interval_title">Automatic scroll</string>
     <string name="extras_drivermode_navigation_scroll_inhibit_interval_summary">Time of user inactivity after which navigation scrolls the view automatically.  [%s seconds, 0=off]</string>

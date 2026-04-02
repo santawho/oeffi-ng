@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+<resources xmlns:tools="http://schemas.android.com/tools">
 
-    <string name="app_name">Öffi</string>
-    <string name="about_donate_bitcoin_uri">bitcoin:bc1q8ruc8hanp7hrzfs48dvtuzz4ukmpe7cgsvvzrt</string>
-    <string name="about_git_url">https://gitlab.com/oeffi/oeffi</string>
-    <string name="about_forum_url">https://matrix.to/#/#öffi:schildbach.de</string>
-    <string name="about_changelog_url" />
-    <string name="about_update_apk_url" />
-    <string name="about_update_manifest_url" />
-    <string name="about_update_modified" />
+    <string name="app_name" translatable="false">Öffi</string>
+    <string name="about_donate_bitcoin_uri" translatable="false">bitcoin:bc1q8ruc8hanp7hrzfs48dvtuzz4ukmpe7cgsvvzrt</string>
+    <string name="about_git_url" translatable="false">https://gitlab.com/oeffi/oeffi</string>
+    <string name="about_forum_url" translatable="false">https://matrix.to/#/#öffi:schildbach.de</string>
+    <string name="about_changelog_url" translatable="false" />
+    <string name="about_update_apk_url" translatable="false" />
+    <string name="about_update_manifest_url" translatable="false" />
+    <string name="about_update_modified" translatable="false" />
 
-    <string name="about_privacy_policy_url">en~https://oeffi.schildbach.de/privacy_policy.txt~~de~https://oeffi.schildbach.de/privacy_policy_de.txt</string>
-    <string name="about_faq_url">en~https://oeffi.schildbach.de/faq.html~~de~https://oeffi.schildbach.de/faq.html</string>
+    <string name="about_privacy_policy_url" translatable="false">en~https://oeffi.schildbach.de/privacy_policy.txt~~de~https://oeffi.schildbach.de/privacy_policy_de.txt</string>
+    <string name="about_faq_url" translatable="false">en~https://oeffi.schildbach.de/faq.html~~de~https://oeffi.schildbach.de/faq.html</string>
 
-    <string name="error_reporter_mail_address">oeffi.app@gmail.com</string>
+    <string name="error_reporter_mail_address" translatable="false">oeffi.app@gmail.com</string>
 
-    <string name="oeffi_base_default_url">https://oeffi.schildbach.de/</string>
-    <string name="plans_base_default_url">https://oeffi.schildbach.de/plans</string>
-    <string name="messages_base_default_url">https://oeffi.schildbach.de/messages</string>
-    <string name="messages_file_url">messages.txt</string>
-    <string name="download_html_url">https://oeffi.schildbach.de/download.html</string>
-    <string name="app_url_host">oeffi.schildbach.de</string>
-    <string name="app_url_path_prefix">app/</string>
+    <string name="oeffi_base_default_url" translatable="false">https://oeffi.schildbach.de/</string>
+    <string name="plans_base_default_url" translatable="false">https://oeffi.schildbach.de/plans</string>
+    <string name="messages_base_default_url" translatable="false">https://oeffi.schildbach.de/messages</string>
+    <string name="messages_file_url" translatable="false">messages.txt</string>
+    <string name="download_html_url" translatable="false">https://oeffi.schildbach.de/download.html</string>
+    <string name="app_url_host" translatable="false">oeffi.schildbach.de</string>
+    <string name="app_url_path_prefix" translatable="false">app/</string>
 
-    <string name="oeffi_original_version_name"></string>
-    <integer name="oeffi_original_version_code">0</integer>
+    <string name="oeffi_original_version_name" translatable="false"></string>
+    <integer name="oeffi_original_version_code" translatable="false">0</integer>
 </resources>

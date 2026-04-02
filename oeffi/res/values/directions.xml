@@ -36,14 +36,14 @@
     <string name="directions_set_time_relative_prompt">Depart in</string>
     <string name="directions_set_time_relative_fixed">fixed time</string>
 
-    <integer-array name="directions_set_time_relative">
-        <item>0</item>
-        <item>5</item>
-        <item>10</item>
-        <item>15</item>
-        <item>30</item>
-        <item>60</item>
-        <item>120</item>
+    <integer-array name="directions_set_time_relative" translatable="false">
+        <item translatable="false">0</item>
+        <item translatable="false">5</item>
+        <item translatable="false">10</item>
+        <item translatable="false">15</item>
+        <item translatable="false">30</item>
+        <item translatable="false">60</item>
+        <item translatable="false">120</item>
     </integer-array>
 
     <string-array name="directions_optimize_trip">
@@ -51,20 +51,20 @@
         <item>Few interchanges</item>
         <item>Little walking</item>
     </string-array>
-    <string-array name="directions_optimize_trip_values" tools:ignore="MissingTranslation">
-        <item>LEAST_DURATION</item>
-        <item>LEAST_CHANGES</item>
-        <item>LEAST_WALKING</item>
+    <string-array name="directions_optimize_trip_values" translatable="false">
+        <item translatable="false">LEAST_DURATION</item>
+        <item translatable="false">LEAST_CHANGES</item>
+        <item translatable="false">LEAST_WALKING</item>
     </string-array>
     <string-array name="directions_walk_speed">
         <item>Slow</item>
         <item>Normal</item>
         <item>Fast</item>
     </string-array>
-    <string-array name="directions_walk_speed_values" tools:ignore="MissingTranslation">
-        <item>SLOW</item>
-        <item>NORMAL</item>
-        <item>FAST</item>
+    <string-array name="directions_walk_speed_values" translatable="false">
+        <item translatable="false">SLOW</item>
+        <item translatable="false">NORMAL</item>
+        <item translatable="false">FAST</item>
     </string-array>
     <string-array name="directions_min_transfer_time">
         <item>I have no preference</item>
@@ -76,25 +76,25 @@
         <item>30 minutes</item>
         <item>60 minutes</item>
     </string-array>
-    <string-array name="directions_min_transfer_time_values" tools:ignore="MissingTranslation">
-        <item>-1</item>
-        <item>0</item>
-        <item>5</item>
-        <item>10</item>
-        <item>15</item>
-        <item>20</item>
-        <item>30</item>
-        <item>60</item>
+    <string-array name="directions_min_transfer_time_values" translatable="false">
+        <item translatable="false">-1</item>
+        <item translatable="false">0</item>
+        <item translatable="false">5</item>
+        <item translatable="false">10</item>
+        <item translatable="false">15</item>
+        <item translatable="false">20</item>
+        <item translatable="false">30</item>
+        <item translatable="false">60</item>
     </string-array>
     <string-array name="directions_accessibility">
         <item>No constraints</item>
         <item>Limited</item>
         <item>Barrier free</item>
     </string-array>
-    <string-array name="directions_accessibility_values" tools:ignore="MissingTranslation">
-        <item>NEUTRAL</item>
-        <item>LIMITED</item>
-        <item>BARRIER_FREE</item>
+    <string-array name="directions_accessibility_values" translatable="false">
+        <item translatable="false">NEUTRAL</item>
+        <item translatable="false">LIMITED</item>
+        <item translatable="false">BARRIER_FREE</item>
     </string-array>
 
 </resources>
