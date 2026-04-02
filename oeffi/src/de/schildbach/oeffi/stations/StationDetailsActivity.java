@@ -90,6 +90,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -155,9 +156,17 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
     public static final int MAX_DEPARTURES = 200;
 
     private final List<Station> stations = new ArrayList<>();
+    private static class CombinedStation {
+        String id, name, place;
+        Station baseStation;
+        final Map<String, Station> stations = new HashMap<>();
+    }
+    private final List<CombinedStation> combinedStations = new ArrayList<>();
 
     private NetworkId selectedNetwork;
-    private Location selectedStation;
+    private Location selectedLocation;
+    private Station selectedStation;
+    private CombinedStation selectedCombinedStation;
     private Location selectedCoord;
     @Nullable
     private List<Departure> selectedAllDepartures = null;
@@ -237,13 +246,13 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         favoriteButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 final Uri rowUri = FavoriteUtils.persist(getContentResolver(),
-                        FavoriteStationsProvider.TYPE_FAVORITE, selectedNetwork, selectedStation);
+                        FavoriteStationsProvider.TYPE_FAVORITE, selectedNetwork, selectedLocation);
                 if (rowUri != null) {
                     selectedFavState = FavoriteStationsProvider.TYPE_FAVORITE;
                     NearestFavoriteStationWidgetService.scheduleImmediate(this); // refresh app-widget
                 }
             } else {
-                final int numRows = FavoriteUtils.delete(getContentResolver(), selectedNetwork, selectedStation.id);
+                final int numRows = FavoriteUtils.delete(getContentResolver(), selectedNetwork, selectedLocation.id);
                 if (numRows > 0) {
                     selectedFavState = null;
                     NearestFavoriteStationWidgetService.scheduleImmediate(this); // refresh app-widget
@@ -369,7 +378,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
                     this, null, queryJourneyRunnable,
                     handler, backgroundHandler,
-                    network, journeyRef, isDriverMode, selectedStation, null,
+                    network, journeyRef, isDriverMode, selectedLocation, null,
                     false);
         }
     }
@@ -452,7 +461,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             nextLaterTime = null;
             nextEarlierTime = new Date(fromTime.getTime() - 30 * 60 * 1000);
         }
-        final String requestedStationId = selectedStation.id;
+        final String requestedStationId = selectedLocation.id;
         final NetworkProvider networkProvider = NetworkProviderFactory.provider(selectedNetwork);
 
         backgroundHandler.removeCallbacksAndMessages(null);
@@ -484,14 +493,63 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                         final Set<Product> productFilter = loadProductFilter();
                         if (result.status == QueryDeparturesResult.Status.OK) {
                             boolean somethingAdded = false;
-                            Location newSelectedStation = null;
+                            Station newSelectedStation = null;
                             for (final StationDepartures stationDepartures : result.stationDepartures) {
                                 final Location location = stationDepartures.location;
                                 if (location.hasId()) {
-                                    Station station = findStation(location.id);
+                                    Station station = null;
+                                    final String locationId = location.id;
+                                    for (final Station s : stations) {
+                                        if (locationId.equals(s.location.id)) {
+                                            station = s;
+                                            break;
+                                        }
+                                    }
+                                    CombinedStation combinedStation = null;
                                     if (station == null) {
                                         station = new Station(selectedNetwork, location);
                                         stations.add(station);
+                                        final String locationName = location.name;
+                                        final String locationPlace = location.place;
+                                        for (final CombinedStation cs : combinedStations) {
+                                            if (locationName == null) {
+                                                if (cs.name != null)
+                                                    continue;
+                                            } else {
+                                                if (!locationName.equals(cs.name))
+                                                    continue;
+                                            }
+                                            if (locationPlace == null) {
+                                                if (cs.place != null)
+                                                    continue;
+                                            } else {
+                                                if (!locationPlace.equals(cs.place))
+                                                    continue;
+                                            }
+                                            combinedStation = cs;
+                                            break;
+                                        }
+                                        if (combinedStation == null) {
+                                            combinedStation = new CombinedStation();
+                                            combinedStation.id = locationId;
+                                            combinedStation.name = locationName;
+                                            combinedStation.place = locationPlace;
+                                            combinedStation.baseStation = station;
+                                            combinedStations.add(combinedStation);
+                                        } else {
+                                            if (locationId != null && combinedStation.id.compareTo(locationId) < 0) {
+                                                combinedStation.id = locationId;
+                                                combinedStation.baseStation = station;
+                                            }
+                                        }
+                                        combinedStation.stations.put(locationId, station);
+                                    } else {
+                                        for (final CombinedStation cs : combinedStations) {
+                                            if (cs.stations.get(locationId) != null) {
+                                                combinedStation = cs;
+                                                break;
+                                            }
+                                        }
                                     }
 
                                     final List<Departure> departures = filterDeparturesByProducts(stationDepartures.departures, productFilter);
@@ -525,22 +583,24 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                                         station.setLines(lines);
                                     }
 
-                                    if (location.equals(selectedStation) || selectedAllDepartures == null) {
+                                    if ((combinedStation != null && combinedStation.baseStation.location.equals(selectedLocation))
+                                            || selectedAllDepartures == null) {
                                         somethingAdded = true;
-                                        newSelectedStation = location;
-                                        selectedAllDepartures = station.getDepartures();
-                                        selectedLines = groupDestinationsByLine(station.getLines());
-                                        selectedFilteredDepartures = null;
+                                        newSelectedStation = station;
+//                                        selectedAllDepartures = station.getDepartures();
+//                                        selectedLines = groupDestinationsByLine(station.getLines());
+//                                        selectedFilteredDepartures = null;
                                     }
                                 }
                             }
 
                             if (newSelectedStation != null) {
-                                selectedStation = newSelectedStation;
-                                if (selectedStation.hasCoord()) {
-                                    selectedCoord = selectedStation;
-                                    nearbyButton.setVisibility(View.VISIBLE);
-                                }
+//                                selectedStation = newSelectedStation;
+//                                if (selectedStation.hasCoord()) {
+//                                    selectedCoord = selectedStation;
+//                                    nearbyButton.setVisibility(View.VISIBLE);
+//                                }
+                                selectStation(newSelectedStation);
                             }
 
                             if (earlier) {
@@ -573,14 +633,6 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                     protected void onAllErrors() {
                         statusMessage(getString(R.string.toast_network_problem));
                     }
-
-                    private Station findStation(final String stationId) {
-                        for (final Station station : stations)
-                            if (stationId.equals(station.location.id))
-                                return station;
-
-                        return null;
-                    }
                 });
     }
 
@@ -600,17 +652,56 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         }
     }
 
-    public void selectStation(final Station station) {
-        if (station == null)
+    public void selectStation(final Station aStation) {
+        if (aStation == null)
             return;
 
-        final boolean changed = !station.location.equals(selectedStation);
+        final String locationId = aStation.location.id;
+
+        Station station = aStation;
+        Collection<Station> stations = null;
+
+        CombinedStation combinedStation = null;
+        for (final CombinedStation cs : combinedStations) {
+            if (cs.stations.get(locationId) != null) {
+                combinedStation = cs;
+                station = cs.baseStation;
+                stations = cs.stations.values();
+                break;
+            }
+        }
+        if (stations == null)
+            stations = Collections.singletonList(station);
+
+        final boolean changed = !station.location.equals(selectedLocation);
+        selectedStation = station;
         selectedNetwork = station.network;
-        selectedStation = station.location;
-        selectedCoord = selectedStation.hasCoord() ? selectedStation : null;
-        selectedAllDepartures = station.getDepartures();
-        selectedLines = groupDestinationsByLine(station.getLines());
-        selectedFavState = FavoriteStationsProvider.favState(getContentResolver(), selectedNetwork, selectedStation);
+        selectedLocation = station.location;
+        selectedCombinedStation = combinedStation;
+        selectedCoord = selectedLocation.hasCoord() ? selectedLocation : null;
+        selectedAllDepartures = new ArrayList<>();
+        final List<LineDestination> allLines = new ArrayList<>();
+        final Set<LineDestination> lineDestinations = new HashSet<>();
+        for (final Station s : stations) {
+            final List<Departure> departures = s.getDepartures();
+            if (departures != null)
+                selectedAllDepartures.addAll(departures);
+            final List<LineDestination> lines = s.getLines();
+            if (lines != null) {
+                for (final LineDestination line : lines) {
+                    if (!lineDestinations.contains(line)) {
+                        lineDestinations.add(line);
+                        allLines.add(line);
+                    }
+                }
+            }
+        }
+        if (selectedAllDepartures != null) {
+            selectedAllDepartures.sort((d1, d2) ->
+                    Math.toIntExact(d1.getTime().getTime() - d2.getTime().getTime()));
+        }
+        selectedLines = groupDestinationsByLine(allLines);
+        selectedFavState = FavoriteStationsProvider.favState(getContentResolver(), selectedNetwork, selectedLocation);
         selectedFilteredDepartures = null;
 
         ViewUtils.setVisibility(nearbyButton, selectedCoord != null);
@@ -632,7 +723,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
     }
 
     public boolean isSelectedStation(final String stationId) {
-        return selectedStation != null && stationId.equals(selectedStation.id);
+        return selectedLocation != null && stationId.equals(selectedLocation.id);
     }
 
     private LinkedHashMap<Line, List<Location>> groupDestinationsByLine(final List<LineDestination> lineDestinations) {
@@ -707,18 +798,20 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
     public void updateHeader() {
         // name and id
-        nameView.setText(selectedStation.uniqueShortName());
-        idView.setText(selectedStation.displayId != null ? selectedStation.displayId : "");
-        if (stations.size() > 1) {
+        nameView.setText(selectedLocation.uniqueShortName());
+        idView.setText(selectedLocation.displayId != null ? selectedLocation.displayId : "");
+        if (combinedStations.size() > 1) {
             // headerView.setVisibility(View.VISIBLE);
             multiStationsView.setVisibility(View.VISIBLE);
             headerView.setOnClickListener(v -> {
                 final PopupMenu popupMenu = new PopupMenu(v.getContext(), v);
                 final Menu menu = popupMenu.getMenu();
-                for (int i = 0; i < stations.size(); i++)
-                    menu.add(Menu.NONE, i, Menu.NONE, stations.get(i).location.uniqueShortName());
+                for (int i = 0; i < combinedStations.size(); i++) {
+                    final CombinedStation combinedStation = combinedStations.get(i);
+                    menu.add(Menu.NONE, i, Menu.NONE, combinedStation.baseStation.location.uniqueShortName());
+                }
                 popupMenu.setOnMenuItemClickListener(item -> {
-                    final Station newStation = stations.get(item.getItemId());
+                    final Station newStation = combinedStations.get(item.getItemId()).baseStation;
                     selectStation(newStation);
                     return true;
                 });
@@ -806,7 +899,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         @Override
         public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, final int position) {
             final Departure departure = getItem(position);
-            ((DepartureViewHolder) holder).bind(selectedNetwork, selectedStation, departure);
+            ((DepartureViewHolder) holder).bind(selectedNetwork, selectedLocation, departure);
         }
     }
 
