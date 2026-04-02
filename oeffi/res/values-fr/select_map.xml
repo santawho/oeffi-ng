@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="map_dialog_maps_internal">Carte interne</string>
+    <string name="map_dialog_maps_external">Carte externe</string>
+
+</resources>

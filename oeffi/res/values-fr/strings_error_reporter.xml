@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="error_reporter_mail_intent_chooser_title">Envoyer un rapport d’erreur avec...</string>
+    <string name="error_reporter_crash_mail_subject">Rapport de crash</string>
+    <string name="error_reporter_bug_mail_subject">Rapport de bug</string>
+    <string name="error_reporter_questions">Pouvez-vous répondre aux questions suivantes \? Les rapports incomplets ne recevront pas de réponse en raison du nombre important de signalements reçus.
+
+• À quel volet applicatif votre problème s’applique-t-il \? (première ligne du titre de la fenêtre)
+
+• Quel réseau de transport avez-vous sélectionné \? (deuxième ligne du titre de la fenêtre)
+
+• Veuillez décrire votre problème ici :
+
+</string>
+    <string name="error_reporter_footer">METTEZ DES COMMENTAIRES SUPPLÉMENTAIRES EN HAUT. ICI, PERSONNE NE REMARQUERA.</string>
+
+</resources>
