@@ -109,21 +109,21 @@ CADRE EXPERT, PRENEZ SOIN DE VOUS ! (nécessite un redémarrage)
     <string name="navigation_travelalarm_notification_start_channel_name">Alarme de voyage, début du voyage</string>
     <string name="navigation_travelalarm_notification_start_channel_description">Alarme pour le début de la navigation</string>
     <string name="navigation_travelalarm_notification_start_title">Le voyage vers 1$ va commencer</string>
-    <string name="navigation_travelalarm_notification_start_message">Départ à 1$ prévu à 2 % aujourd’hui, aujourd’hui environ à 3 $ / 4 % 5 $ à partir de maintenant</string>
+    <string name="navigation_travelalarm_notification_start_message">Départ à %1$s prévu à %2$s, aujourd’hui environ à %3$s / encore %4$s %5$s</string>
     <string name="navigation_travelalarm_notification_departure_channel_name">Alarme de voyage, prochain départ</string>
     <string name="navigation_travelalarm_notification_departure_channel_description">Alarme de départ au changement de ligne</string>
     <string name="navigation_travelalarm_notification_departure_title">Le départ à 1 % approche</string>
-    <string name="navigation_travelalarm_notification_departure_message">Départ à 1$ prévu à 2 % aujourd’hui, aujourd’hui environ à 3 $ / 4 % 5 $ à partir de maintenant</string>
+    <string name="navigation_travelalarm_notification_departure_message">Départ à %1$s prévu à %2$s, aujourd’hui environ à %3$s / encore %4$s %5$s</string>
     <string name="navigation_travelalarm_notification_arrival_channel_name">Alarme de voyage, prochaine arrivée</string>
     <string name="navigation_travelalarm_notification_arrival_channel_description">Alerte d’arrivée</string>
     <string name="navigation_travelalarm_notification_arrival_title">L’arrivée à 1 % approche</string>
-    <string name="navigation_travelalarm_notification_arrival_message">Arrivée à 1$ % prévue à 2 % S, aujourd’hui environ à 3$ % / 4 $ % 5$ dans</string>
+    <string name="navigation_travelalarm_notification_arrival_message">Arrivée à %1$s prévue à %2$s, aujourd’hui environ à %3$s / encore %4$s %5$s</string>
     <string name="navigation_travelalarm_popup_button_dismiss_alarm">Arrêtez l’alarme</string>
 
     <string name="navigation_travelalarm_preferences_title">Alarme de voyage</string>
     <string name="navigation_travelalarm_preferences_summary">Réglages concernant l’alarme de voyage</string>
     <string name="travelalarm_time_ratio_title">Pondération du temps estimé</string>
-    <string name="travelalarm_time_ratio_summary"><![CDATA[La pondération entre le temps estimé et le temps prévu pour calculer l’heure d’alarme (recommandée = 33 %) [ %s %%]]]></string>
+    <string name="travelalarm_time_ratio_summary">La pondération entre le temps estimé et le temps prévu pour calculer l’heure d’alarme (recommandée = 33%%) [%s%%]></string>
     <string name="travelalarm_start_time_category_title">Alarme au début du voyage</string>
     <string name="travelalarm_start_time_default_title">Heure par défaut de début</string>
     <string name="travelalarm_start_time_default_summary"><![CDATA[Temps par défaut en minutes pour que l’alarme soit réglée au début du trajet (0=désactivé). [ %s]]]></string>
@@ -229,9 +229,9 @@ CADRE EXPERT, PRENEZ SOIN DE VOUS ! (nécessite un redémarrage)
     <string name="navigation_event_speak_transfer_start_same_station">aller à départ de %1$s %4$s %3$s, %5$s</string>
     <string name="navigation_event_speak_transfer_still_running">toujours à 1 %</string>
     <string name="navigation_event_speak_transfer_end_reminder">%1$s départ de %2$s %4$s %3$s</string>
-    <string name="navigation_event_speak_transfer_preview_same_location">Voilà les 3 % de dollars. %4$s</string>
-    <string name="navigation_event_speak_transfer_preview_different_location">À partir de là, on va à 2 % et 3 % . %4$s</string>
-    <string name="navigation_event_speak_transfer_preview_different_location_no_position">À partir de là, on part à 2 % de dollars. %3$s</string>
+    <string name="navigation_event_speak_transfer_preview_same_location">Voilà va %3$s . %4$s</string>
+    <string name="navigation_event_speak_transfer_preview_different_location">À partir de là, on va %2$s, %3$s . %4$s</string>
+    <string name="navigation_event_speak_transfer_preview_different_location_no_position">À partir de là, on va %2$s . %3$s</string>
     <string name="navigation_event_speak_final_transfer_start">Enfin, va à 1$S</string>
     <string name="navigation_event_speak_public_leg_start">Voyage par %1$s vers %2$s, arrivée %4$s, %5$s</string>
     <string name="navigation_event_speak_public_leg_still_running">toujours sur %1$s à %2$s</string>
@@ -297,7 +297,7 @@ CADRE EXPERT, PRENEZ SOIN DE VOUS ! (nécessite un redémarrage)
     <string name="navigation_event_notify_final_transfer_start">Enfin, va à 1$S</string>
     <string name="navigation_event_notify_departure_delay_change">Départ retardé. %1$s at %2$s : %3$s, est %4$s, %5$s</string>
     <string name="navigation_event_notify_arrival_delay_change">Arrivée retardée %1$s à %2$s : %3$s, est %4$s, %5$s</string>
-    <string name="navigation_event_notify_departure_position_change">Nouvelle plateforme 1 % départ. %2$s à %3$s, sched %4$s</string>
+    <string name="navigation_event_notify_departure_position_change">Nouvelle plateforme %1$s départ. %2$s à %3$s, sched %4$s</string>
     <string name="navigation_event_notify_arrival_position_change">Nouvelle plateforme %1$s arrivée %2$s à %3$s, programmé %4$s</string>
     <string name="navigation_event_notify_next_transfer_critical">Le prochain transfert est crucial. %1$s</string>
     <string name="navigation_event_notify_any_transfer_critical">Certains transferts sont cruciaux</string>

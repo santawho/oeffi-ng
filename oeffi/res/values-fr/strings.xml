@@ -467,7 +467,7 @@ Les heures <b><i>imprimées en italique</i></b> sont les <b>heures</b> <b>prédi
     <string name="navigation_next_event_action_next_final_transfer">Alors marche</string>
     <string name="directions_trip_details_departure_row_name_format">(Départ) %1$s</string>
     <string name="directions_trip_details_arrival_row_name_format">(Arrivée) %1$s</string>
-    <string name="directions_trip_details_shortened_message"><![CDATA[%1$<br>s... montrer plus ...]]></string>
+    <string name="directions_trip_details_shortened_message">%1$s&lt;br>… montrer plus …></string>
 
     <!-- directions trip connection evaluation -->
     <string name="directions_trip_conneval_with_transfer">%1$s avec %2$s</string>
