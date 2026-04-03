@@ -415,9 +415,9 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
     private void updateGUI() {
         showJourneyMessages = prefs.getBoolean("user_interface_station_departures_show_journey_messages", true);
+        updateHeader();
         final List<Departure> selectedDepartures = this.getFilteredDepartures();
         if (selectedDepartures != null && !selectedDepartures.isEmpty()) {
-            updateHeader();
             viewAnimator.setDisplayedChild(0);
             listAdapter.notifyDataSetChanged();
         } else {
@@ -595,14 +595,27 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                                         station.setLines(lines);
                                     }
 
-                                    if ((combinedStation != null && combinedStation.baseStation.location.equals(selectedLocation))
-                                            || selectedAllDepartures == null || selectedAllDepartures.isEmpty()) {
-                                        somethingAdded = true;
-                                        newSelectedStation = station;
+                                    if (selectedLocation != null) {
+                                        if (combinedStation != null && combinedStation.baseStation.location.equals(selectedLocation)) {
+                                            somethingAdded = true;
+                                            newSelectedStation = station;
+                                        }
+                                    } else {
+                                        if (newSelectedStation == null || newSelectedStation.getDepartures().isEmpty()){
+                                            somethingAdded = true;
+                                            newSelectedStation = station;
+                                        }
+                                    }
+
+//                                    if (...
+//                                    && selectedAllDepartures == null || selectedAllDepartures.isEmpty()
+//                                    ) {
+//                                        somethingAdded = true;
+//                                        newSelectedStation = station;
 //                                        selectedAllDepartures = station.getDepartures();
 //                                        selectedLines = groupDestinationsByLine(station.getLines());
 //                                        selectedFilteredDepartures = null;
-                                    }
+//                                    }
                                 }
                             }
 
