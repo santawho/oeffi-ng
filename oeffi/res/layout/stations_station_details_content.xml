@@ -80,6 +80,7 @@
                                 android:textColor="@color/fg_significant" />
 
                             <TextView
+                                android:visibility="gone"
                                 android:id="@+id/stations_station_details_header_id"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
