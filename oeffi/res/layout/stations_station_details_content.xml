@@ -141,6 +141,7 @@
 
                     <TextView
                         android:id="@+id/stations_station_details_disclaimer_source"
+                        android:visibility="gone"
                         android:layout_width="0px"
                         android:layout_height="wrap_content"
                         android:layout_gravity="bottom"
