@@ -681,7 +681,8 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         if (aStation == null)
             return;
 
-        final String locationId = aStation.location.id;
+        final Location location = aStation.location;
+        final String locationId = location.id;
 
         Station station = aStation;
         Collection<Station> stations = null;
@@ -690,13 +691,21 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         for (final CombinedStation cs : combinedStations) {
             if (cs.stations.get(locationId) != null) {
                 combinedStation = cs;
-                station = cs.baseStation;
-                stations = cs.stations.values();
                 break;
             }
         }
-        if (stations == null)
-            stations = Collections.singletonList(station);
+        if (combinedStation == null) {
+            combinedStation = new CombinedStation();
+            combinedStation.id = locationId;
+            combinedStation.name = location.name;
+            combinedStation.place = location.place;
+            combinedStation.baseStation = station;
+            combinedStations.add(combinedStation);
+            combinedStation.stations.put(locationId, station);
+        }
+
+        station = combinedStation.baseStation;
+        stations = combinedStation.stations.values();
 
         final boolean changed = !station.location.equals(selectedLocation);
         selectedStation = station;
