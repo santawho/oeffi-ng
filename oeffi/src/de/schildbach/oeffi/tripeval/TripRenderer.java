@@ -1044,8 +1044,8 @@ public class TripRenderer {
             final long depDelay = (depTime.getTime() - departureStop.plannedDepartureTime.getTime()) / 60000;
             if (arrDelay != 0 || depDelay != 0) {
                 String explainStr = String.format("(%d", leftMins + arrDelay - depDelay);
-                if (depDelay != 0) explainStr += String.format("%+d", depDelay);
                 if (arrDelay != 0) explainStr += String.format("%+d", -arrDelay);
+                if (depDelay != 0) explainStr += String.format("%+d", depDelay);
                 explainStr += ")";
                 nextEventTransferExplain = explainStr;
             } else {
