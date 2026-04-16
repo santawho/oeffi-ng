@@ -1193,15 +1193,15 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final List<Stop> intermediateStops = publicLeg.intermediateStops;
             if (intermediateStops != null) {
                 for (final Stop stop : intermediateStops) {
-                    departureTime = stop.getDepartureTime();
-                    if (departureTime != null && departureTime.after(now)) {
-                        highlightedTime = departureTime;
-                        return;
-                    }
-
                     arrivalTime = stop.getArrivalTime();
                     if (arrivalTime != null && arrivalTime.after(now)) {
                         highlightedTime = arrivalTime;
+                        return;
+                    }
+
+                    departureTime = stop.getDepartureTime();
+                    if (departureTime != null && departureTime.after(now)) {
+                        highlightedTime = departureTime;
                         return;
                     }
                 }
@@ -1481,7 +1481,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                                     PearlView.Type.ARRIVAL_FOR_INTERMEDIATE_DEPARTURE,
                                     showLongStay,
                                     stopIndex, stop, previousPlace, legC,
-                                    isDepartureTimeHighlighted,
+                                    isArrivalTimeHighlighted,
                                     isHighlightedLocation,
                                     preferPlanTime,
                                     now, collapseColumns, simulatedStop);
