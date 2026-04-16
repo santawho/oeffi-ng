@@ -53,11 +53,11 @@ project.oeffi.CREDENTIALS = CREDENTIALS
 println "applicationId = ${CREDENTIALS.applicationId}"
 
 android {
-    namespace 'de.schildbach.oeffi'
+    namespace = 'de.schildbach.oeffi'
     compileSdk 36
 
     buildFeatures {
-        resValues true
+        resValues = true
     }
 
     defaultConfig {
@@ -131,7 +131,7 @@ android {
     buildTypes {
         configureEach {
             minifyEnabled false
-            signingConfig signingConfigs.oeffi_ng
+            signingConfig = signingConfigs.oeffi_ng
         }
         debug {
             debuggable true
