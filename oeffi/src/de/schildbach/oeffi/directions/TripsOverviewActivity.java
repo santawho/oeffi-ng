@@ -369,25 +369,40 @@ public class TripsOverviewActivity extends OeffiActivity {
                         false);
             }
         } else {
-            final TripDetailsActivity.RenderConfig config = new TripDetailsActivity.RenderConfig();
-            config.queryTripsRequestData = reloadRequestData;
-            if (renderConfig.isAlternativeConnectionSearch) {
-                config.isAlternativeConnectionSearch = true;
-                TripDetailsActivity.startForResult(TripsOverviewActivity.this, DETAILS_NEW_NAVIGATION, network, trip, config);
+            if (isLongClick) {
+                final Long rowId = QueryStoredTripsProvider.getRowId(getContentResolver(),
+                        network, getStoredTripsUsage(), trip.getUniqueId());
+                if (rowId != null) {
+                    QueryStoredTripsProvider.delete(getContentResolver(),
+                            network, getStoredTripsUsage(),
+                            trip.getUniqueId());
+                } else {
+                    QueryStoredTripsProvider.put(getContentResolver(),
+                            network, getStoredTripsUsage(),
+                            trip, reloadRequestData, 0);
+                }
+                barView.invalidate();
             } else {
-                TripDetailsActivity.start(TripsOverviewActivity.this, network, trip, config);
-            }
+                final TripDetailsActivity.RenderConfig config = new TripDetailsActivity.RenderConfig();
+                config.queryTripsRequestData = reloadRequestData;
+                if (renderConfig.isAlternativeConnectionSearch) {
+                    config.isAlternativeConnectionSearch = true;
+                    TripDetailsActivity.startForResult(TripsOverviewActivity.this, DETAILS_NEW_NAVIGATION, network, trip, config);
+                } else {
+                    TripDetailsActivity.start(TripsOverviewActivity.this, network, trip, config);
+                }
 
-            final PTDate firstPublicLegDepartureTime = trip.getFirstPublicLegDepartureTime();
-            final PTDate lastPublicLegArrivalTime = trip.getLastPublicLegArrivalTime();
+                final PTDate firstPublicLegDepartureTime = trip.getFirstPublicLegDepartureTime();
+                final PTDate lastPublicLegArrivalTime = trip.getLastPublicLegArrivalTime();
 
-            // save last trip to history
-            if (firstPublicLegDepartureTime != null && lastPublicLegArrivalTime != null && historyUri != null) {
-                final ContentValues values = new ContentValues();
-                values.put(QueryHistoryProvider.KEY_LAST_DEPARTURE_TIME, firstPublicLegDepartureTime.getTime());
-                values.put(QueryHistoryProvider.KEY_LAST_ARRIVAL_TIME, lastPublicLegArrivalTime.getTime());
-                values.put(QueryHistoryProvider.KEY_LAST_TRIP, Objects.serialize(trip));
-                getContentResolver().update(historyUri, values, null, null);
+                // save last trip to history
+                if (firstPublicLegDepartureTime != null && lastPublicLegArrivalTime != null && historyUri != null) {
+                    final ContentValues values = new ContentValues();
+                    values.put(QueryHistoryProvider.KEY_LAST_DEPARTURE_TIME, firstPublicLegDepartureTime.getTime());
+                    values.put(QueryHistoryProvider.KEY_LAST_ARRIVAL_TIME, lastPublicLegArrivalTime.getTime());
+                    values.put(QueryHistoryProvider.KEY_LAST_TRIP, Objects.serialize(trip));
+                    getContentResolver().update(historyUri, values, null, null);
+                }
             }
         }
     }
