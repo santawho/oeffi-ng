@@ -198,11 +198,13 @@ public class DirectionsShortcutActivity extends OeffiActivity implements Locatio
                     ? Optimize.valueOf(prefs.getString(Constants.PREFS_KEY_OPTIMIZE_TRIP, null)) : null;
             final WalkSpeed walkSpeed = WalkSpeed
                     .valueOf(prefs.getString(Constants.PREFS_KEY_WALK_SPEED, WalkSpeed.NORMAL.name()));
+            final int mwd = Integer.parseInt(prefs.getString(Constants.PREFS_KEY_MAX_WALK_DISTANCE, "-1"));
+            final Integer maxWalkDistance = mwd < 0 ? null : mwd;
             final int mtt = Integer.parseInt(prefs.getString(Constants.PREFS_KEY_MIN_TRANSFER_TIME, "-1"));
             final Integer minTransferTime = mtt < 0 ? null : mtt;
             final Accessibility accessibility = application.prefsGetAccessibility();
             final Set<Product> products =  loadProductFilter();
-            final TripOptions options = new TripOptions(products, optimize, walkSpeed, minTransferTime, accessibility, null);
+            final TripOptions options = new TripOptions(products, optimize, walkSpeed, maxWalkDistance, minTransferTime, accessibility, null);
 
             // old solution: searches within the DirectionsShortcutActivity
             // and then switches to the TripsOverviewActivity

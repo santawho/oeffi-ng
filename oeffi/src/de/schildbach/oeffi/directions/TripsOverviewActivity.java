@@ -1313,6 +1313,7 @@ public class TripsOverviewActivity extends OeffiActivity {
                         options.products,
                         options.optimize,
                         options.walkSpeed,
+                        options.maxWalkDistanceMeters,
                         lastRequestedMinTransferTime,
                         options.accessibility,
                         options.flags);

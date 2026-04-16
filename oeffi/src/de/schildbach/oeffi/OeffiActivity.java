@@ -920,6 +920,7 @@ public abstract class OeffiActivity extends AppCompatActivity
                 products,
                 application.prefsGetOptimizeTrip(),
                 application.prefsGetWalkSpeed(),
+                application.prefsGetMaxWalkDistance(),
                 application.prefsGetMinTransferTime(),
                 application.prefsGetAccessibility(),
                 flags);
