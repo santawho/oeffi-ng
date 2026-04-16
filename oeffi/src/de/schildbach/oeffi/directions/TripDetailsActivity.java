@@ -61,7 +61,6 @@ import android.widget.Chronometer;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.PopupMenu;
 import android.widget.Space;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -71,6 +70,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 import androidx.core.graphics.Insets;
@@ -92,7 +92,6 @@ import de.schildbach.oeffi.tripeval.TripGeoUtils;
 import de.schildbach.oeffi.util.GoogleMapsUtils;
 import de.schildbach.oeffi.util.HorizontalPager;
 import de.schildbach.oeffi.util.KmlProducer;
-import de.schildbach.oeffi.util.PopupHelper;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.util.TimeSpec.DepArr;
 import de.schildbach.oeffi.tripeval.TripRenderer;
@@ -105,7 +104,6 @@ import de.schildbach.oeffi.stations.StationsActivity;
 import de.schildbach.oeffi.util.ClockUtils;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.HtmlUtils;
-import de.schildbach.oeffi.util.LocationHelper;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.ToggleImageButton;
@@ -1333,7 +1331,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             destinationView.setText(Constants.DESTINATION_ARROW_PREFIX + Formats.makeBreakableStationName(destinationName));
             if (destination.hasId()) {
                 destinationView.setOnLongClickListener(v -> {
-                    final PopupMenu contextMenu = new StationContextMenu(TripDetailsActivity.this, v, network, destination, null,
+                    final StationContextMenu contextMenu = new StationContextMenu(TripDetailsActivity.this, v, network, destination, null,
                             false, false, false, true,
                             true, true,
                             false, false,
@@ -1681,7 +1679,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     getMapView().zoomToStations(mapBoundingLocations, 0);
                     return true;
                 });
-                PopupHelper.setForceShowIcon(popupMenu);
+                popupMenu.setForceShowIcon(true);
                 popupMenu.show();
                 return true;
             };
@@ -2893,7 +2891,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
             final boolean isLastPublicStop = stop.location.equals(getLastPublicLocation());
             final boolean showTravelAlarm = isShowTravelAlarm();
-            final PopupMenu contextMenu = new StationContextMenu(
+            final StationContextMenu contextMenu = new StationContextMenu(
                     TripDetailsActivity.this, v, network, stop.location,
                     null, false, false, false,true,
                     true, true,

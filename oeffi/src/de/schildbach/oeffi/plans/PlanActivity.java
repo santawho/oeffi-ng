@@ -32,7 +32,6 @@ import android.os.Process;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.ViewAnimator;
 import androidx.activity.ComponentActivity;
@@ -148,7 +147,7 @@ public class PlanActivity extends ComponentActivity {
         bubble.setVisibility(View.GONE);
         bubble.setOnClickListener(v -> {
             final Station selection = requireNonNull(PlanActivity.this.selection);
-            final PopupMenu contextMenu = new StationContextMenu(
+            final StationContextMenu contextMenu = new StationContextMenu(
                     PlanActivity.this, v, selection.network, selection.location,
                     null, false, false, false, false,
                     true, false,

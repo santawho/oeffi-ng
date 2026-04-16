@@ -94,6 +94,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
     private final int colorArrow;
     private final int colorSignificant, colorLessSignificant, colorInsignificant, colorHighlighted;
     private final int listEntryVerticalPadding;
+    private StationContextMenu contextMenu;
 
     private static final int CONDENSE_LINES_THRESHOLD = 5;
     private static final int MESSAGE_INDEX_COLOR = Color.parseColor("#c08080");
@@ -139,6 +140,11 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
             final Set<Product> productsFilter, final boolean forceShowPlace,
             final Integer favState, final android.location.Location deviceLocation,
             final CompassNeedleView.Callback compassCallback) {
+        if (contextMenu != null) {
+            contextMenu.dismiss();
+            contextMenu = null;
+        }
+
         if (!isVisible) {
             hideableFrameView.setVisibility(View.GONE);
             return;
@@ -497,7 +503,9 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
     }
 
     private void onContextClick(final View contextView, final Station station, final Integer favState) {
-        final PopupMenu contextMenu = new StationContextMenu(context, contextView, station.network, station.location,
+        if (contextMenu != null)
+            return;
+        contextMenu = new StationContextMenu(context, contextView, station.network, station.location,
                 favState, true, true, false, true,
                 true, false,
                 false, false,
@@ -510,6 +518,9 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
                         station.location, station.getDepartures(), item.getItemId());
             }
             return false;
+        });
+        contextMenu.setOnDismissListener(menu -> {
+            contextMenu = null;
         });
         contextMenu.show();
     }

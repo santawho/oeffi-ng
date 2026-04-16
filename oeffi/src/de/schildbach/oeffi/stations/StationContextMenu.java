@@ -31,7 +31,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.PopupMenu;
 import android.widget.RadioButton;
 
 import androidx.core.content.pm.ShortcutInfoCompat;
@@ -43,7 +42,6 @@ import de.schildbach.oeffi.directions.DirectionsShortcutActivity;
 import de.schildbach.oeffi.plans.PlanActivity;
 import de.schildbach.oeffi.plans.PlanContentProvider;
 import de.schildbach.oeffi.util.DialogBuilder;
-import de.schildbach.oeffi.util.PopupHelper;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
@@ -54,7 +52,7 @@ import org.slf4j.LoggerFactory;
 import java.net.URLEncoder;
 import java.util.Locale;
 
-public class StationContextMenu extends PopupMenu {
+public class StationContextMenu extends androidx.appcompat.widget.PopupMenu {
     private static final Logger log = LoggerFactory.getLogger(StationContextMenu.class);
 
     public StationContextMenu(
@@ -93,7 +91,7 @@ public class StationContextMenu extends PopupMenu {
         menu.findItem(R.id.station_context_launcher_shortcut).setVisible(showShortcut);
         menu.findItem(R.id.station_context_directions_alternative_from).setVisible(showAlternativeDirections);
         menu.findItem(R.id.station_context_navigate_to).setVisible(showNavigateTo);
-        PopupHelper.setForceShowIcon(this);
+        setForceShowIcon(true);
     }
 
     public static AlertDialog createLauncherShortcutDialog(final Context context, final NetworkId networkId,

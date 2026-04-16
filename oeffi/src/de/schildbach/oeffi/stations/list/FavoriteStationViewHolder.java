@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.PopupMenu;
 import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 import de.schildbach.oeffi.R;
@@ -41,6 +40,7 @@ public class FavoriteStationViewHolder extends RecyclerView.ViewHolder {
     private final TextView placeView;
     private final TextView nameView;
     private final ImageButton contextButton;
+    private StationContextMenu contextMenu;
 
     public FavoriteStationViewHolder(
             final View itemView, final Context context,
@@ -63,6 +63,11 @@ public class FavoriteStationViewHolder extends RecyclerView.ViewHolder {
             final NetworkId network,
             final Location station, final String nickname,
             final boolean showNetwork, final long selectedRowId) {
+        if (contextMenu != null) {
+            contextMenu.dismiss();
+            contextMenu = null;
+        }
+
         final boolean selected = rowId == selectedRowId;
         itemView.setActivated(selected);
         itemView.setOnClickListener(v -> {
@@ -105,7 +110,9 @@ public class FavoriteStationViewHolder extends RecyclerView.ViewHolder {
     }
 
     private void openContextMenu(final View contextView, final NetworkId network, final Location station) {
-        final PopupMenu contextMenu = new StationContextMenu(
+        if (contextMenu != null)
+            return;
+        contextMenu = new StationContextMenu(
                 context, contextView,
                 network, station,
                 FavoriteStationsProvider.TYPE_FAVORITE,

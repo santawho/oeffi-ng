@@ -41,7 +41,6 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.PopupMenu;
 import android.widget.TextView.OnEditorActionListener;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -49,6 +48,7 @@ import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresPermission;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.ContextCompat;
 
 import org.slf4j.Logger;
@@ -66,7 +66,6 @@ import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GeocoderThread;
 import de.schildbach.oeffi.util.LocationHelper;
 import de.schildbach.oeffi.util.LocationUtils;
-import de.schildbach.oeffi.util.PopupHelper;
 import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.pte.provider.locationsearch.LocationSearchProviderId;
 import de.schildbach.pte.NetworkId;
@@ -284,7 +283,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
             popupMenu.inflate(R.menu.directions_location_context);
             popupMenu.getMenu().findItem(R.id.directions_location_map)
                     .setVisible(listener.getMapPointSelectionProvider() != null);
-            PopupHelper.setForceShowIcon(popupMenu);
+            popupMenu.setForceShowIcon(true);
             popupMenu.setOnMenuItemClickListener(item -> {
                 final int itemId = item.getItemId();
                 if (itemId == R.id.directions_location_current_location)

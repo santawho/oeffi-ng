@@ -17,13 +17,19 @@
 
 package de.schildbach.oeffi.util;
 
-import android.widget.PopupMenu;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 public class PopupHelper {
-    public static void setForceShowIcon(final PopupMenu popupMenu) {
+    public static void setForceShowIcon(final android.widget.PopupMenu popupMenu) {
+        _setForceShowIcon(popupMenu);
+    }
+
+    public static void setForceShowIcon(final androidx.appcompat.widget.PopupMenu popupMenu) {
+        _setForceShowIcon(popupMenu);
+    }
+
+    private static void _setForceShowIcon(final Object popupMenu) {
         try {
             Class<?> classPopupMenu = Class.forName(popupMenu.getClass().getName());
             Field mPopup = null;
@@ -32,7 +38,7 @@ public class PopupHelper {
                 try {
                     mPopup = classPopupMenu.getDeclaredField("mPopup");
                     break;
-                } catch (NoSuchFieldException nsfe) {
+                } catch (final NoSuchFieldException nsfe) {
                     if (firstNsfe == null) firstNsfe = nsfe;
                     classPopupMenu = classPopupMenu.getSuperclass();
                 }
