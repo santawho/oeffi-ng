@@ -50,6 +50,9 @@ CREDENTIALS.forum_url = "https://matrix.to/#/#oeffi-ng:matrix.org"
 
 project.oeffi.CREDENTIALS = CREDENTIALS
 
+// save a copy of project, because project itself cannot be used in Gradle 10
+def projectDefs = project
+
 println "applicationId = ${CREDENTIALS.applicationId}"
 
 android {
@@ -221,19 +224,19 @@ afterEvaluate {
 //                releaseBuildTask.mustRunAfter variant.assembleProvider
 //            }
 //        }
-        createRelease(githubTag, new File("${project.projectDir}/build/outputs/apk/ng/release/oeffi-studio-ng-release.apk"), false, timeInt)
+        createRelease(githubTag, new File("${projectDefs.projectDir}/build/outputs/apk/ng/release/oeffi-studio-ng-release.apk"), false, timeInt)
     }
     assembleNgPreRelease.doLast {
         // runs always after the NG pre-release build
-        createRelease(githubTag, new File("${project.projectDir}/build/outputs/apk/ng/preRelease/oeffi-studio-ng-preRelease.apk"), true, timeInt)
+        createRelease(githubTag, new File("${projectDefs.projectDir}/build/outputs/apk/ng/preRelease/oeffi-studio-ng-preRelease.apk"), true, timeInt)
     }
 }
 
 def githubCreateRelease(String tagName, boolean preRelease) {
-    def conn = ((HttpURLConnection) new URL("https://api.github.com/repos/${project.oeffi.CREDENTIALS.github_user}/${project.oeffi.CREDENTIALS.github_repo}/releases").openConnection())
+    def conn = ((HttpURLConnection) new URL("https://api.github.com/repos/${projectDefs.oeffi.CREDENTIALS.github_user}/${projectDefs.oeffi.CREDENTIALS.github_repo}/releases").openConnection())
     conn.requestMethod = 'POST'
     conn.setRequestProperty('Accept', 'application/vnd.github+json')
-    conn.setRequestProperty('Authorization', "Bearer ${project.oeffi.CREDENTIALS.github_token}")
+    conn.setRequestProperty('Authorization', "Bearer ${projectDefs.oeffi.CREDENTIALS.github_token}")
     conn.setRequestProperty('X-GitHub-Api-Version', '2022-11-28')
     conn.doOutput = true
     conn.outputStream.write("{\"tag_name\":\"${tagName}\",\"prerelease\":${preRelease},\"body\":\"${preRelease ? "pre-release" : "release"} ${tagName}\"}".getBytes('UTF-8'))
@@ -247,13 +250,14 @@ def githubCreateRelease(String tagName, boolean preRelease) {
 }
 
 def uploadToGithub(String releaseId, String assetName, byte[] uploadBytes) {
-    def uploadUrl = "https://uploads.github.com/repos/${project.oeffi.CREDENTIALS.github_user}/${project.oeffi.CREDENTIALS.github_repo}/releases/${releaseId}/assets?name=${assetName}"
+    def uploadUrl = "https://uploads.github.com/repos/${projectDefs.oeffi.CREDENTIALS.github_user}/${projectDefs.oeffi.CREDENTIALS.github_repo}/releases/${releaseId}/assets?name=${assetName}"
     println "upload to ${uploadUrl}"
+    return
     def conn = ((HttpURLConnection) new URL(uploadUrl).openConnection())
     conn.requestMethod = 'POST'
     conn.setRequestProperty('Content-Type', 'application/octet-stream')
     conn.setRequestProperty('Accept', 'application/vnd.github+json')
-    conn.setRequestProperty('Authorization', "Bearer ${project.oeffi.CREDENTIALS.github_token}")
+    conn.setRequestProperty('Authorization', "Bearer ${projectDefs.oeffi.CREDENTIALS.github_token}")
     conn.setRequestProperty('X-GitHub-Api-Version', '2022-11-28')
     conn.doOutput = true
     conn.outputStream.write(uploadBytes)
@@ -266,6 +270,7 @@ def uploadToGithub(String releaseId, String assetName, byte[] uploadBytes) {
 
 def createRelease(String tagName, File apkFile, boolean preRelease, int versionCode) {
     println "Creating ${ preRelease ? "pre-release" : "release" } ${tagName} from ${apkFile.absolutePath}"
+return
     if (!apkFile.exists()) {
         println "${apkFile.absolutePath} does not exist"
         throw "${apkFile.absolutePath} does not exist";
@@ -276,14 +281,14 @@ def createRelease(String tagName, File apkFile, boolean preRelease, int versionC
     def manifestJson = "{\"tag\": \"${tagName}\", \"prerelease\": ${preRelease}, \"versionCode\": ${versionCode}}"
 
     def releaseId = githubCreateRelease(tagName, preRelease)
-    uploadToGithub(releaseId, project.oeffi.CREDENTIALS.asset_name_apk_file, apkFile.readBytes())
-    uploadToGithub(releaseId, project.oeffi.CREDENTIALS.asset_name_manifest, manifestJson.getBytes("UTF-8"))
+    uploadToGithub(releaseId, projectDefs.oeffi.CREDENTIALS.asset_name_apk_file, apkFile.readBytes())
+    uploadToGithub(releaseId, projectDefs.oeffi.CREDENTIALS.asset_name_manifest, manifestJson.getBytes("UTF-8"))
 }
 
 def getCurrentGitBranch() {
     def gitBranch = null
     try {
-        def workingDir = new File("${project.projectDir}")
+        def workingDir = new File("${projectDefs.projectDir}")
         def result = 'git rev-parse --abbrev-ref HEAD'.execute(null, workingDir)
         result.waitFor()
         if (result.exitValue() == 0) {
