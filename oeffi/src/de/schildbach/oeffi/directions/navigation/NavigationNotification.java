@@ -529,6 +529,13 @@ public class NavigationNotification {
             super.onCreate();
         }
 
+        @Override
+        public void onDestroy() {
+            if (instance == this)
+                instance = null;
+            super.onDestroy();
+        }
+
         @Nullable
         @Override
         public IBinder onBind(final Intent intent) {
@@ -552,9 +559,13 @@ public class NavigationNotification {
                                         .putExtra(Settings.EXTRA_CHANNEL_ID, CHANNEL_ID_FOREGROUND_SERVICE),
                                 PendingIntent.FLAG_IMMUTABLE))
                         .build();
-                ServiceCompat.startForeground(MediaPlaybackForegroundService.instance,
-                        NOTIFICATION_ID_BASE - 1, notification,
-                        ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
+                try {
+                    ServiceCompat.startForeground(MediaPlaybackForegroundService.instance,
+                            NOTIFICATION_ID_BASE - 1, notification,
+                            ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
+                } catch (final Exception e) {
+                    log.error("error executing ServiceCompat.startForeground", e);
+                }
             }
 
             return super.onStartCommand(intent, flags, startId);
@@ -562,6 +573,8 @@ public class NavigationNotification {
     }
 
     public static void startForegroundService(final Context context) {
+        if (MediaPlaybackForegroundService.instance != null)
+            return;
         if (useForegroundService || showFixedForegroundNotification) {
             context.startForegroundService(new Intent(context, MediaPlaybackForegroundService.class));
         }

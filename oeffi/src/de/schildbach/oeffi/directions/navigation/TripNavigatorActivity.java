@@ -176,8 +176,6 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         handlePlayAlarm(intent);
 
         stillCheckForOtherNavigations = true;
-
-        NavigationNotification.startForegroundService(this);
     }
 
     @Override
@@ -198,6 +196,8 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         ContextCompat.registerReceiver(this, updateTriggerReceiver,
                 new IntentFilter(NavigationNotification.ACTION_UPDATE_TRIGGER),
                 ContextCompat.RECEIVER_EXPORTED);
+
+        NavigationNotification.startForegroundService(this);
     }
 
     @Override
