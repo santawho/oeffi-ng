@@ -92,7 +92,9 @@ import de.schildbach.pte.dto.Trip;
 public class NavigationNotification {
     public static final String PREFS_KEY_NAVIGATION_SOUND_CHANNEL_RIDE = "navigation_sound_channel_ride";
     public static final String PREFS_KEY_NAVIGATION_SOUND_CHANNEL_TRANSFER = "navigation_sound_channel_transfer";
+    public static final String PREFS_KEY_NAVIGATION_SOUND_CHANNEL_DISPLAY_ON = "navigation_sound_channel_display_on";
     public static final String PREFS_KEY_NAVIGATION_SOUND_CHANNEL_HEADSET = "navigation_sound_channel_headset";
+    public static final String PREFS_KEY_NAVIGATION_USE_SOUND_CHANNEL_DISPLAY_ON = "navigation_use_sound_channel_display_on";
     public static final String PREFS_KEY_NAVIGATION_USE_SOUND_CHANNEL_HEADSET = "navigation_use_sound_channel_headset";
     public static final String PREFS_KEY_NAVIGATION_SPEECH_OUTPUT = "navigation_speech_output";
     public static final String PREFS_KEY_NAVIGATION_REDUCED_SOUNDS = "navigation_reduced_sounds";
@@ -234,7 +236,7 @@ public class NavigationNotification {
         // channel.enableVibration(true);
         channel.setVibrationPattern(VIBRATION_PATTERN_REMIND);
         if (SOUND_REMIND_VIA_NOTIFICATION >= 0) {
-            final int usage = getAudioUsageForSound(SOUND_REMIND_VIA_NOTIFICATION, false);
+            final int usage = getAudioUsageForSound(context, SOUND_REMIND_VIA_NOTIFICATION, false);
             channel.setSound(ResourceUri.fromResource(context, SOUND_REMIND_VIA_NOTIFICATION),
                     new AudioAttributes.Builder().setUsage(usage).build());
         } else {
@@ -298,9 +300,15 @@ public class NavigationNotification {
         return AudioManager.STREAM_NOTIFICATION;
     }
 
-    private static int getAudioUsageForSound(final int soundId, final boolean onRide) {
+    private static int getAudioUsageForSound(final Context context, final int soundId, final boolean onRide) {
         int usage = AudioAttributes.USAGE_NOTIFICATION_EVENT;
         String prefKey = null;
+        final boolean useDisplayOnChannel;
+        if (NavigationNotification.prefs.getBoolean(PREFS_KEY_NAVIGATION_USE_SOUND_CHANNEL_DISPLAY_ON, true)) {
+            useDisplayOnChannel = !((KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE)).isKeyguardLocked();
+        } else {
+            useDisplayOnChannel = false;
+        }
         final boolean useHeadsetChannel;
         if (NavigationNotification.prefs.getBoolean(PREFS_KEY_NAVIGATION_USE_SOUND_CHANNEL_HEADSET, true)) {
             useHeadsetChannel = NotificationSoundManager.getInstance().isHeadsetConnected();
@@ -309,6 +317,8 @@ public class NavigationNotification {
         }
         if (useHeadsetChannel) {
             prefKey = PREFS_KEY_NAVIGATION_SOUND_CHANNEL_HEADSET;
+        } else if (useDisplayOnChannel) {
+            prefKey = PREFS_KEY_NAVIGATION_SOUND_CHANNEL_DISPLAY_ON;
         } else if (soundId == SOUND_REMIND_NORMAL
                 || soundId == SOUND_REMIND_IMPORTANT
                 || soundId == SOUND_ALARM
@@ -323,6 +333,9 @@ public class NavigationNotification {
             switch (prefKey) {
                 case PREFS_KEY_NAVIGATION_SOUND_CHANNEL_HEADSET:
                     usage = AudioAttributes.USAGE_MEDIA;
+                    break;
+                case PREFS_KEY_NAVIGATION_SOUND_CHANNEL_DISPLAY_ON:
+                    usage = AudioAttributes.USAGE_NOTIFICATION_EVENT;
                     break;
                 case PREFS_KEY_NAVIGATION_SOUND_CHANNEL_RIDE:
                     usage = AudioAttributes.USAGE_NOTIFICATION_EVENT;
@@ -597,7 +610,7 @@ public class NavigationNotification {
     private static void onDeviceWakingUp(final Context context) {
         // the screen has just either been turned on or unlocked
         final boolean isScreenOn = ((PowerManager) context.getSystemService(Context.POWER_SERVICE)).isInteractive();
-        final boolean isUnlocked = !((KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE)).inKeyguardRestrictedInputMode();
+        final boolean isUnlocked = !((KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE)).isKeyguardLocked();
         log.info("device waking up, the screen now is {} {}", isScreenOn ? "on" : "off", isUnlocked ? "unlocked" : "locked");
 
         if (prefs.getBoolean(PREFS_KEY_NOTIFICATIONS_ENABLED, false))
@@ -672,7 +685,7 @@ public class NavigationNotification {
 
     private void postEventNotifications(final List<EventNotificationData> dataList) {
         final boolean isScreenOff = !((PowerManager) context.getSystemService(Context.POWER_SERVICE)).isInteractive();
-        final boolean isLocked = ((KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE)).inKeyguardRestrictedInputMode();
+        final boolean isLocked = ((KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE)).isKeyguardLocked();
 
         for (final EventNotificationData data : dataList) {
             final boolean isChangeEvent = data.isChangeEvent;
@@ -1483,7 +1496,7 @@ public class NavigationNotification {
             final boolean onRide,
             final long delayUntil) {
         final int actualSoundId = configuration.soundEnabled ? getActualSound(aSoundId) : 0;
-        final int actualUsage = soundUsage >= 0 ? soundUsage : getAudioUsageForSound(aSoundId, onRide);
+        final int actualUsage = soundUsage >= 0 ? soundUsage : getAudioUsageForSound(context, aSoundId, onRide);
         final NotificationSoundManager soundManager = NotificationSoundManager.getInstance();
         boolean doSpeech = false;
         if (configuration.soundEnabled) {

@@ -11,6 +11,8 @@
     <string name="navigation_preferences_sound_channel_transfer_title">Audio Channel during Transfer</string>
     <string name="navigation_preferences_sound_channel_headset_summary">Audio channel to play navigation reminders when headphones (wired or Bluetooth) connected. [%s]</string>
     <string name="navigation_preferences_sound_channel_headset_title">Audio Channel on Headphones</string>
+    <string name="navigation_preferences_sound_channel_display_on_summary">Audio channel to play navigation reminders when the display is on. [%s]</string>
+    <string name="navigation_preferences_sound_channel_display_on_title">Audio Channel when Display on</string>
     <string-array name="navigation_sound_channel">
         <item>Navigation</item>
         <item>Media (for headphones)</item>
@@ -26,6 +28,9 @@
 
     <string name="navigation_preferences_use_sound_channel_headset_summary">Use dedicated sound channel when headphones (wired or Bluetooth) connected</string>
     <string name="navigation_preferences_use_sound_channel_headset_title">Use Headphones Audio Channel</string>
+
+    <string name="navigation_preferences_use_sound_channel_display_on_summary">Use dedicated sound channel when display is on</string>
+    <string name="navigation_preferences_use_sound_channel_display_on_title">Use Display-On Audio Channel</string>
 
     <string name="navigation_preferences_speech_output_summary">Set when navigation instructions shall be spoken. [%s]</string>
     <string name="navigation_preferences_speech_output_title">Speech Output</string>

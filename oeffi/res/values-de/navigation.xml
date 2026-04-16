@@ -11,6 +11,8 @@
     <string name="navigation_preferences_sound_channel_transfer_title">Audio Kanal während Umsteigen</string>
     <string name="navigation_preferences_sound_channel_headset_summary">Audio Kanal, auf dem Navigations-Erinnerungen gespielt werden, wenn Kopfhörer (per Kabel oder Bluetooth) verbunden sind. [%s]</string>
     <string name="navigation_preferences_sound_channel_headset_title">Audio Kanal auf Kopfhörern</string>
+    <string name="navigation_preferences_sound_channel_display_on_summary">Audio Kanal, auf dem Navigations-Erinnerungen gespielt werden, wenn das Display eingeschaltet ist. [%s]</string>
+    <string name="navigation_preferences_sound_channel_display_on_title">Audio Kanal wenn Display aktiv</string>
     <string-array name="navigation_sound_channel">
         <item>Navigation</item>
         <item>Medien (für Kopfhörer)</item>
@@ -18,8 +20,11 @@
         <item>Alarm (lauter)</item>
     </string-array>
 
-    <string name="navigation_preferences_use_sound_channel_headset_summary">Nutze gesonderten Audio Kanal wenn Kopfhörer (per Kabel oder Bluetooth) verbunden sind</string>
+    <string name="navigation_preferences_use_sound_channel_headset_summary">Nutze gesonderten Audio Kanal, wenn Kopfhörer (per Kabel oder Bluetooth) verbunden sind</string>
     <string name="navigation_preferences_use_sound_channel_headset_title">Nutze Kopfhörer Audio Kanal</string>
+
+    <string name="navigation_preferences_use_sound_channel_display_on_summary">Nutze gesonderten Audio Kanal, wenn das Display aktiv ist</string>
+    <string name="navigation_preferences_use_sound_channel_display_on_title">Nutze Display-aktiv Audio Kanal</string>
 
     <string name="navigation_preferences_speech_output_summary">Wann sollen Navigationsanweisungen gesprochen werden. [%s]</string>
     <string name="navigation_preferences_speech_output_title">Sprachausgabe</string>
