@@ -191,7 +191,6 @@ public class FavoriteStationsActivity extends OeffiActivity
         viewNewLocation = findViewById(R.id.favorites_new);
         viewNewLocation.setVisibility(View.GONE);
         viewNewLocation.setHint(R.string.stations_favorite_stations_add_location_hint);
-        viewNewLocation.setListener(locationListener);
         viewNewLocation.setImeOptions(EditorInfo.IME_ACTION_GO);
         viewNewLocation.setOnEditorActionListener((v, actionId, event) -> {
             final Location location = viewNewLocation.getLocation();
@@ -201,7 +200,18 @@ public class FavoriteStationsActivity extends OeffiActivity
             return true;
         });
 
+        setupLocationViews();
         updateGUI();
+    }
+
+    private void setupLocationViews() {
+        viewNewLocation.setListener(locationListener);
+
+        resetLocationViewsBehaviour();
+    }
+
+    private void resetLocationViewsBehaviour() {
+        viewNewLocation.resetBehaviour();
     }
 
     @Override
@@ -212,6 +222,7 @@ public class FavoriteStationsActivity extends OeffiActivity
     @Override
     protected void onChangeNetwork(final NetworkId network) {
         resetAdapter();
+        setupLocationViews();
         updateGUI();
         setActionBarSecondaryTitleFromNetwork();
     }
