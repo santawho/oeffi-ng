@@ -23,7 +23,7 @@
     <dimen name="dialog_padding">6dp</dimen>
     <dimen name="line_max_width">128dp</dimen>
     <dimen name="line_style_border_stroke">2dp</dimen>
-    <dimen name="position_max_width">48dp</dimen>
+    <dimen name="position_max_width">56dp</dimen>
     <dimen name="text_padding_vertical_cram">2dp</dimen>
     <dimen name="text_padding_vertical">3dp</dimen>
     <dimen name="text_padding_vertical_lax">4dp</dimen>
