@@ -1179,7 +1179,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             if (legC.publicLeg == null)
                 continue;
 
-            final Trip.Public publicLeg = legC.simulatedPublicLeg != null ? legC.simulatedPublicLeg : legC.publicLeg;
+            // final Trip.Public publicLeg = legC.simulatedPublicLeg != null ? legC.simulatedPublicLeg : legC.publicLeg;
+            final Trip.Public publicLeg = legC.publicLeg;
             PTDate arrivalTime, departureTime;
 
             departureTime = publicLeg.getDepartureTime();
