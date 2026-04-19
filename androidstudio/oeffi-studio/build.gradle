@@ -252,7 +252,6 @@ def githubCreateRelease(String tagName, boolean preRelease) {
 def uploadToGithub(String releaseId, String assetName, byte[] uploadBytes) {
     def uploadUrl = "https://uploads.github.com/repos/${projectDefs.oeffi.CREDENTIALS.github_user}/${projectDefs.oeffi.CREDENTIALS.github_repo}/releases/${releaseId}/assets?name=${assetName}"
     println "upload to ${uploadUrl}"
-    return
     def conn = ((HttpURLConnection) new URL(uploadUrl).openConnection())
     conn.requestMethod = 'POST'
     conn.setRequestProperty('Content-Type', 'application/octet-stream')
@@ -270,7 +269,6 @@ def uploadToGithub(String releaseId, String assetName, byte[] uploadBytes) {
 
 def createRelease(String tagName, File apkFile, boolean preRelease, int versionCode) {
     println "Creating ${ preRelease ? "pre-release" : "release" } ${tagName} from ${apkFile.absolutePath}"
-return
     if (!apkFile.exists()) {
         println "${apkFile.absolutePath} does not exist"
         throw "${apkFile.absolutePath} does not exist";
