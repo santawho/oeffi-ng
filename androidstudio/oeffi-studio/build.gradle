@@ -55,6 +55,12 @@ def projectDefs = project
 
 println "applicationId = ${CREDENTIALS.applicationId}"
 
+//allprojects {
+//    tasks.withType(JavaCompile) {
+//        options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+//    }
+//}
+
 android {
     namespace = 'de.schildbach.oeffi'
     compileSdk 36

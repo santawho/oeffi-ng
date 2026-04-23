@@ -17,8 +17,6 @@
 
 package de.schildbach.oeffi.preference;
 
-import static android.preference.PreferenceActivity.EXTRA_SHOW_FRAGMENT;
-
 import android.app.Activity;
 import android.app.ComponentCaller;
 import android.content.Intent;
@@ -40,6 +38,7 @@ import de.schildbach.oeffi.R;
 public class PreferenceActivity extends OeffiActivity {
     public static final String EXTRA_PREFKEY = "prefkey";
     public static final String EXTRA_HANDLER = "handler";
+    public static final String EXTRA_SHOW_FRAGMENT = "show_fragment";
 
     public static void start(final Activity activity) {
         start(activity, SettingsFragment.class);
