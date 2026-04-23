@@ -17,6 +17,10 @@
 
 package de.schildbach.oeffi.util;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
 import org.junit.Assert;
@@ -27,68 +31,68 @@ public class LocationUriParserTest {
     public void contacts() throws Exception {
         final Location[] results = LocationUriParser.parseLocations("geo:0,0?q=Karl-Marx-Allee+84,+Berlin");
 
-        Assert.assertEquals(1, results.length);
+        assertEquals(1, results.length);
         final Location location = results[0];
 
-        Assert.assertEquals(LocationType.ANY, location.type);
-        Assert.assertFalse(location.hasCoord());
-        Assert.assertEquals("Karl-Marx-Allee 84, Berlin", location.name);
+        assertEquals(LocationType.ANY, location.type);
+        assertFalse(location.hasCoord());
+        assertEquals("Karl-Marx-Allee 84, Berlin", location.name);
     }
 
     @Test
     public void contactsMultiline() throws Exception {
         final Location[] resultsNewline = LocationUriParser.parseLocations("geo:0,0?q=Karl-Marx-Allee+84\nBerlin");
 
-        Assert.assertEquals(1, resultsNewline.length);
+        assertEquals(1, resultsNewline.length);
         final Location locationNewline = resultsNewline[0];
 
-        Assert.assertEquals(LocationType.ANY, locationNewline.type);
-        Assert.assertFalse(locationNewline.hasCoord());
-        Assert.assertEquals("Karl-Marx-Allee 84, Berlin", locationNewline.name);
+        assertEquals(LocationType.ANY, locationNewline.type);
+        assertFalse(locationNewline.hasCoord());
+        assertEquals("Karl-Marx-Allee 84, Berlin", locationNewline.name);
 
         final Location[] resultsEncodedNewline = LocationUriParser
                 .parseLocations("geo:0,0?q=Karl-Marx-Allee+84%0aBerlin");
 
-        Assert.assertEquals(1, resultsEncodedNewline.length);
+        assertEquals(1, resultsEncodedNewline.length);
         final Location locationEncodedNewline = resultsEncodedNewline[0];
 
-        Assert.assertEquals(LocationType.ANY, locationEncodedNewline.type);
-        Assert.assertFalse(locationEncodedNewline.hasCoord());
-        Assert.assertEquals("Karl-Marx-Allee 84, Berlin", locationEncodedNewline.name);
+        assertEquals(LocationType.ANY, locationEncodedNewline.type);
+        assertFalse(locationEncodedNewline.hasCoord());
+        assertEquals("Karl-Marx-Allee 84, Berlin", locationEncodedNewline.name);
 
         final Location[] resultsComma = LocationUriParser.parseLocations("geo:0,0?q=Karl-Marx-Allee+84,%0aBerlin");
 
-        Assert.assertEquals(1, resultsComma.length);
+        assertEquals(1, resultsComma.length);
         final Location locationComma = resultsComma[0];
 
-        Assert.assertEquals(LocationType.ANY, locationComma.type);
-        Assert.assertFalse(locationComma.hasCoord());
-        Assert.assertEquals("Karl-Marx-Allee 84, Berlin", locationComma.name);
+        assertEquals(LocationType.ANY, locationComma.type);
+        assertFalse(locationComma.hasCoord());
+        assertEquals("Karl-Marx-Allee 84, Berlin", locationComma.name);
     }
 
     @Test
     public void oldCalendar() throws Exception {
         final Location[] results = LocationUriParser.parseLocations("geo:0,0?q=Prinzenstraße 85, Berlin");
 
-        Assert.assertEquals(1, results.length);
+        assertEquals(1, results.length);
         final Location location = results[0];
 
-        Assert.assertEquals(LocationType.ANY, location.type);
-        Assert.assertFalse(location.hasCoord());
-        Assert.assertEquals("Prinzenstraße 85, Berlin", location.name);
+        assertEquals(LocationType.ANY, location.type);
+        assertFalse(location.hasCoord());
+        assertEquals("Prinzenstraße 85, Berlin", location.name);
     }
 
     @Test
     public void geoVariant() throws Exception {
         final Location[] results = LocationUriParser.parseLocations("geo:52.1333313,11.60000038?z=6");
 
-        Assert.assertEquals(1, results.length);
+        assertEquals(1, results.length);
         final Location location = results[0];
 
-        Assert.assertEquals(LocationType.COORD, location.type);
-        Assert.assertEquals(52133331, location.getLatAs1E6());
-        Assert.assertEquals(11600000, location.getLonAs1E6());
-        Assert.assertNull(location.name);
+        assertEquals(LocationType.COORD, location.type);
+        assertEquals(52133331, location.getLatAs1E6());
+        assertEquals(11600000, location.getLonAs1E6());
+        assertNull(location.name);
     }
 
     @Test(expected = RuntimeException.class)
