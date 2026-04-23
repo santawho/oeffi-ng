@@ -143,9 +143,10 @@ public class SpeechInput {
                         }
                     }
                     if (commandProcessor != null) {
+                        @SuppressWarnings("unchecked") final CmdDef thisAsCmdDef = (CmdDef) this;
                         if (commandProcessor.onVoiceCommandDetected(
                                 activityContext,
-                                (CmdDef) this,
+                                thisAsCmdDef,
                                 fields,
                                 activeLanguage)) {
                             return true;

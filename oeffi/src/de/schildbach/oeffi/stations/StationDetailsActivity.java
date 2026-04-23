@@ -309,8 +309,10 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         final Station station = new Station(network, (Location) Objects.deserializeFromString(stationSerialized));
         this.presetJourneyRef = (JourneyRef) Objects.deserializeFromString(intent.getStringExtra(INTENT_EXTRA_JOURNEYREF));
         if (intent.hasExtra(INTENT_EXTRA_DEPARTURES)) {
+            @SuppressWarnings("unchecked") final List<Departure> uncheckedDepartures = (List<Departure>)
+                    intent.getSerializableExtra(INTENT_EXTRA_DEPARTURES);
             station.setDepartures(filterDeparturesByProducts(
-                    (List<Departure>) intent.getSerializableExtra(INTENT_EXTRA_DEPARTURES),
+                    uncheckedDepartures,
                     loadProductFilter()));
         }
 

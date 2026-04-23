@@ -121,6 +121,7 @@ public final class Objects {
         return deserialize(uncompressFromString(base64));
     }
 
+    @SuppressWarnings("unchecked")
     public static <T extends Serializable> T clone(final T object) {
         if (object == null) return null;
         return (T) deserialize(serialize(object));

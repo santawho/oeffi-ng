@@ -77,7 +77,9 @@ public class NearestFavoriteStationWidgetListService extends RemoteViewsService 
         public RemoteViewsFactory(final Context context, final Intent intent) {
             this.context = context;
             this.timeFormat = DateFormat.getTimeFormat(context);
-            this.departures = (List<Departure>) Objects.deserialize(intent.getByteArrayExtra(INTENT_EXTRA_DEPARTURES));
+            @SuppressWarnings("unchecked") final List<Departure> uncheckedDepartures = (List<Departure>)
+                    Objects.deserialize(intent.getByteArrayExtra(INTENT_EXTRA_DEPARTURES));
+            this.departures = uncheckedDepartures;
             this.canShowJourneys = intent.getBooleanExtra(INTENT_EXTRA_CANSHOWJOURNEYS, false);
         }
 
