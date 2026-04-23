@@ -32,7 +32,9 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ReplacementSpan;
 import android.util.AttributeSet;
-import android.widget.TextView;
+
+import androidx.appcompat.widget.AppCompatTextView;
+
 import de.schildbach.oeffi.R;
 import de.schildbach.pte.Standard;
 import de.schildbach.pte.dto.Line;
@@ -54,7 +56,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class LineView extends TextView {
+public class LineView extends AppCompatTextView {
     private final boolean hideIfEmpty;
     private Collection<Line> lines = null;
     private boolean ghosted = false;
@@ -178,8 +180,11 @@ public class LineView extends TextView {
                 final Line line = lines.iterator().next();
                 final Context context = getContext();
                 final int productResId = getResources().getIdentifier(
-                        "product_" + Character.toLowerCase(line.productCode()), "string", context.getPackageName());
-                final String sheet = Stream.of(line.name, productResId != 0 ? context.getString(productResId) : null,
+                        "product_" + Character.toLowerCase(line.productCode()),
+                        "string", context.getPackageName());
+                final String sheet = Stream.of(
+                                line.name,
+                                productResId != 0 ? context.getString(productResId) : null,
                                 line.network)
                         .filter(Objects::nonNull)
                         .collect(Collectors.joining("\n"));
