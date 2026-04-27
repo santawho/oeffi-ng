@@ -1928,8 +1928,10 @@ public class NavigationNotification {
                 return "";
             return context.getString(R.string.navigation_event_speak_times_nodelay_format, estimatedTime);
         }
-        if (estimatedTime == null || plannedTime.equals(estimatedTime))
+        if (estimatedTime == null)
             return context.getString(R.string.navigation_event_speak_times_nodelay_format, plannedTime);
+        if (estimatedTime.equals(plannedTime))
+            return context.getString(R.string.navigation_event_speak_times_nodelay_ontime_format, estimatedTime);
         return context.getString(R.string.navigation_event_speak_times_delayed_format,
                 plannedTime, estimatedTime, Long.toString(delayMillis / 60000));
     }
