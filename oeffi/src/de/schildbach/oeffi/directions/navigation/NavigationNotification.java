@@ -2661,11 +2661,16 @@ public class NavigationNotification {
                 ? R.string.navigation_event_speak_product_unknown
                 : speakableProductResId);
         final String speakableLineName;
-        final String lineName = line.label;
+        String lineName = line.label;
         if (lineName == null || lineName.isEmpty()) {
             speakableLineName = "";
         } else {
+            lineName = lineName.toLowerCase();
             final StringBuilder builder = new StringBuilder();
+            if (lineName.startsWith("bus ")) {
+                builder.append("Bus ");
+                lineName = lineName.substring(4);
+            }
             char prevChar = lineName.charAt(0);
             builder.append(prevChar);
             for (int pos = 1; pos < lineName.length(); ++pos) {
