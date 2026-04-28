@@ -23,6 +23,7 @@ VBB|de-DE|Brandenburg
 BAYERN|de-DE|Bayern;Würzburg;Regensburg
 AVV_AUGSBURG|de-DE|Augsburg
 MVV|de-DE|Bayern;München
+SBMMVV|de-DE|Bayern;München
 INVG|de-DE|Ingolstadt
 VGN|de-DE|Nürnberg;Fürth;Erlangen
 VVM|de-DE|Schwaben;Mittelschwaben;Krumbach;Günzburg;Memmingen

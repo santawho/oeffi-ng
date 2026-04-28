@@ -43,6 +43,8 @@
     <string name="network_bayern_comment">Lokal- und Regionalverkehr (TG:BEG)</string>
     <string name="network_mvv_label">München</string>
     <string name="network_mvv_comment">Lokal- und Regionalverkehr (TG:MVV)</string>
+    <string name="network_sbmmvv_label">München (SBM)</string>
+    <string name="network_sbmmvv_comment">Lokal- und Regionalverkehr (TG:MVV,S-Bahn-MUC)</string>
     <string name="network_invg_label">Ingolstadt</string>
     <string name="network_invg_comment">Lokal- und Regionalverkehr (TG:INVG)</string>
     <string name="network_avv_augsburg_label">Augsburg</string>

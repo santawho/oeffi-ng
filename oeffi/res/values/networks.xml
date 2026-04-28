@@ -42,6 +42,8 @@
     <string name="network_bayern_comment">local and regional</string>
     <string name="network_mvv_label">Munich</string>
     <string name="network_mvv_comment">local and regional</string>
+    <string name="network_sbmmvv_label">Munich (SBM)</string>
+    <string name="network_sbmmvv_comment">local and regional</string>
     <string name="network_invg_label">Ingolstadt</string>
     <string name="network_invg_comment">local and regional</string>
     <string name="network_avv_augsburg_label">Augsburg</string>

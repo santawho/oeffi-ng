@@ -37,6 +37,7 @@ import de.schildbach.pte.provider.NetworkProvider;
 import de.schildbach.pte.provider.hafas.NvvProvider;
 import de.schildbach.pte.provider.hafas.OebbProvider;
 import de.schildbach.pte.provider.hafas.PlProvider;
+import de.schildbach.pte.provider.hafas.SbmMvvProvider;
 import de.schildbach.pte.provider.hafas.SeProvider;
 import de.schildbach.pte.provider.hafas.ShProvider;
 import de.schildbach.pte.Standard;
@@ -105,6 +106,7 @@ public final class NetworkProviderFactory extends de.schildbach.pte.NetworkProvi
         addConfigurator(VbbProvider.class, () -> new VbbProvider("{\"type\":\"AID\",\"aid\":\"hafas-vbb-apps\"}"));
         addConfigurator(NvvProvider.class, () -> new NvvProvider("{\"type\":\"AID\",\"aid\":\"Kt8eNOH7qjVeSxNA\"}"));
 //        addConfigurator(RmvProvider.class, () -> new RmvProvider("{\"type\":\"AID\",\"aid\":\"ikfr894fkfddXxA0U\"}"));
+        addConfigurator(SbmMvvProvider.class, () -> new SbmMvvProvider("{\"type\":\"AID\",\"aid\":\"d491MVVhz9ZZts23\"}"));
         addConfigurator(InvgProvider.class, () -> new InvgProvider("{\"type\":\"AID\",\"aid\":\"GITvwi3BGOmTQ2a5\"}"));
         addConfigurator(AvvAugsburgProvider.class, () -> new AvvAugsburgProvider("{\"type\":\"AID\",\"aid\":\"jK91AVVZU77xY5oH\"}"));
         addConfigurator(VgnProvider.class, () -> new VgnProvider(HttpUrl.parse("https://efa.vgn.de/vgnExt_oeffi/")));
