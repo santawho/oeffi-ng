@@ -443,7 +443,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
         navigationRefreshRunnable = () -> {
             try {
-                final Trip updatedTrip = navigator.refresh(forceRefreshAll, new Date());
+                final Trip updatedTrip = navigator.refresh(forceRefreshAll, new Date(), 30000);
                 if (updatedTrip == null) {
                     handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));
                 } else {

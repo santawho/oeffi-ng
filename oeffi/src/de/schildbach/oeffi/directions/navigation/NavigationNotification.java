@@ -348,7 +348,7 @@ public class NavigationNotification {
             if (usageName != null) {
                 try {
                     usage = AudioAttributes.class.getField(usageName).getInt(null);
-                } catch (NoSuchFieldException | IllegalAccessException e) {
+                } catch (final NoSuchFieldException | IllegalAccessException e) {
                     log.error("bad sound usage: {}", usageName, e);
                 }
             }
@@ -1623,8 +1623,8 @@ public class NavigationNotification {
             try {
                 log.info("refreshing trip");
                 final Navigator navigator = new Navigator(intentData.network, getTrip());
-                newTrip = navigator.refresh(extraData.refreshAllLegs, now);
-            } catch (IOException e) {
+                newTrip = navigator.refresh(extraData.refreshAllLegs, now, 30000);
+            } catch (final IOException e) {
                 log.error("error while refreshing trip", e);
             }
             if (newTrip != null) {

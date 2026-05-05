@@ -504,7 +504,7 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
         navigationRefreshRunnable = () -> {
             try {
                 final Navigator navigator = new Navigator(network, tripRenderer.trip);
-                Trip updatedTrip = navigator.refresh(forceRefreshAll, new Date());
+                Trip updatedTrip = navigator.refresh(forceRefreshAll, new Date(), 30000);
                 if (updatedTrip == null) {
                     handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));
                 } else {

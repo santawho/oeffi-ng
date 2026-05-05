@@ -658,8 +658,8 @@ public class OperationNotification {
             try {
                 log.info("refreshing trip");
                 final Navigator navigator = new Navigator(intentData.network, getTrip());
-                newTrip = navigator.refresh(extraData.refreshAllLegs, now);
-            } catch (IOException e) {
+                newTrip = navigator.refresh(extraData.refreshAllLegs, now, 30000);
+            } catch (final IOException e) {
                 log.error("error while refreshing trip", e);
             }
             if (newTrip != null) {

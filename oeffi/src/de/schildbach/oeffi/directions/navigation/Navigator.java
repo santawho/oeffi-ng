@@ -58,20 +58,31 @@ public class Navigator {
         return currentTrip;
     }
 
-    public Trip refresh(final boolean forceRefreshAll, final Date now) throws IOException {
+    public Trip refresh(final boolean forceRefreshAll, final Date startedAt, final long timeoutMs) throws IOException {
+        final Long timeoutAt = timeoutMs > 0 ? startedAt.getTime() + timeoutMs : null;
         final List<Trip.Leg> newLegs = new ArrayList<>();
         final Trip latestTrip = getCurrentTrip();
         for (final Trip.Leg leg : latestTrip.legs) {
             Trip.Leg newLeg = leg;
             if (leg instanceof Trip.Public) {
-                newLeg = updatePublicLeg((Trip.Public) leg, forceRefreshAll, now);
+                newLeg = updatePublicLeg((Trip.Public) leg, forceRefreshAll, startedAt);
             }
             if (newLeg == null) {
                 // any error, then full trip is error
                 return null;
             }
+            if (timeoutAt != null) {
+                final long now = System.currentTimeMillis();
+                if (now > timeoutAt) {
+                    // when timeout, then full trip is error
+                    log.error("refreshing trip of {} legs took more than {} secs", latestTrip.legs.size(), (now - startedAt.getTime()) / 1000);
+                    return null;
+                }
+            }
             newLegs.add(newLeg);
         }
+
+        log.info("refreshing trip of {} legs took less than {} secs", latestTrip.legs.size(), (System.currentTimeMillis() - startedAt.getTime()) / 1000 + 1);
 
         currentTrip = new Trip(
                 latestTrip.loadedAt,
@@ -84,7 +95,7 @@ public class Navigator {
                 latestTrip.capacity,
                 latestTrip.getNumChanges());
         // currentTrip.transferDetails = latestTrip.transferDetails; -- do not keep transfer details, they are outdated
-        currentTrip.updatedAt = now;
+        currentTrip.updatedAt = startedAt;
         currentTrip.setUniqueId(latestTrip.getUniqueId());
 
         return currentTrip;
