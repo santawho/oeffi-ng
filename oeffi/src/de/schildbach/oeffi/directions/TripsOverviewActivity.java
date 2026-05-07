@@ -732,6 +732,8 @@ public class TripsOverviewActivity extends OeffiActivity {
     }
 
     private void networkProblem(final boolean initial) {
+        if (isFinishing())
+            return;
         final DialogBuilder builder = DialogBuilder.warn(this, R.string.alert_network_problem_title);
         builder.setMessage(R.string.alert_network_problem_message);
         builder.setPositiveButton(R.string.alert_network_problem_retry, (dialog, which) -> {
