@@ -464,9 +464,14 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
             final int maxGroups, @Nullable final Set<Product> productsFilter) {
         final Map<LineDestination, List<Departure>> departureGroups = new LinkedHashMap<>();
         for (final Departure departure : departures) {
-            if (productsFilter != null && departure.line.product != null
-                    && !productsFilter.contains(departure.line.product))
-                continue;
+            if (productsFilter != null) {
+                final Product product = departure.line.product;
+                if (product != null
+                        && !productsFilter.contains(product)
+                        && !Product.NON_SELECTABLE.contains(product)) {
+                    continue;
+                }
+            }
             final LineDestination lineDestination = new LineDestination(departure.line, departure.destination);
             List<Departure> departureGroup = departureGroups.get(lineDestination);
             if (departureGroup == null) {

@@ -1205,13 +1205,12 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
     private static boolean filter(final Station station, final Collection<Product> productFilter) {
         // if station has products declared, use that for matching
-        final Set<Product> products = station.location.products;
-        if (products != null) {
-            if (products.isEmpty())
-                return false;
-            final Set<Product> copy = EnumSet.copyOf(products);
+        final Set<Product> stationProducts = station.location.products;
+        if (stationProducts != null && !stationProducts.isEmpty()) {
+            final Set<Product> copy = EnumSet.copyOf(stationProducts);
             copy.retainAll(productFilter);
-            return !copy.isEmpty();
+            if (!copy.isEmpty())
+                return true;
         }
 
         // if station has lines, go through them and try to match each
@@ -1219,15 +1218,13 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         if (lines != null) {
             for (final LineDestination line : lines) {
                 final Product product = line.line.product;
-                if (product != null)
-                    for (final Product filterProduct : productFilter)
-                        if (product == filterProduct)
-                            return true;
+                if (product != null && productFilter.contains(product))
+                    return true;
             }
         }
 
         // special case: if station has no metadata suitable for product filtering, match always
-        if (products == null && lines == null)
+        if (stationProducts == null && lines == null)
             return true;
 
         return false;

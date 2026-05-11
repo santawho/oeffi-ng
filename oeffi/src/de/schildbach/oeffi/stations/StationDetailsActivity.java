@@ -432,8 +432,13 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             final Collection<Product> filter) {
         return departures.stream()
                 .filter(departure ->
-                        departure.line.product == null
-                                || filter.contains(departure.line.product))
+                        {
+                            final Product product = departure.line.product;
+                            return product == null
+                                    || filter.contains(product)
+                                    || Product.NON_SELECTABLE.contains(product);
+                        }
+                )
                 .collect(Collectors.toList());
     }
 
