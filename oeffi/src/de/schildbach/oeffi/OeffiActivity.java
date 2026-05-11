@@ -142,6 +142,10 @@ public abstract class OeffiActivity extends AppCompatActivity
          log = LoggerFactory.getLogger(this.getClass());
     }
 
+    public Logger getLog() {
+        return log;
+    }
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         this.application = (Application) getApplication();

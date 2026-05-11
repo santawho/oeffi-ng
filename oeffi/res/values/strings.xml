@@ -120,6 +120,14 @@
     <string name="about_participate_title">Participate</string>
     <string name="about_market_app_title">Rate or Review Öffi</string>
 
+    <!-- preferences backup -->
+    <string name="backup_title">Backup &amp; Restore</string>
+    <string name="backup_save_title">Save settings to file</string>
+    <string name="backup_restore_title">Restore settings from file</string>
+    <string name="backup_save_ok">Settings saved to file</string>
+    <string name="backup_error">An error occurred</string>
+    <string name="backup_restore_ok">Settings restored. App restarting.</string>
+
     <!-- preferences extras -->
     <string name="extras_title">Special Functions</string>
     <string name="extras_tripextrainfo_enabled_title">Acquire extra info for trips</string>

@@ -66,6 +66,7 @@ import de.schildbach.oeffi.stations.FavoriteStationsProvider;
 import de.schildbach.oeffi.stations.StationsActivity;
 import de.schildbach.oeffi.util.AppInstaller;
 import de.schildbach.oeffi.util.ErrorReporter;
+import de.schildbach.oeffi.util.SettingsUtil;
 import de.schildbach.oeffi.util.SpeechInput;
 import de.schildbach.oeffi.util.TimeZoneSelector;
 import de.schildbach.pte.NetworkId;
@@ -79,7 +80,6 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class Application extends android.app.Application {
@@ -264,6 +264,12 @@ public class Application extends android.app.Application {
         }
     }
 
+    public void restart() {
+        startActivity(new Intent(this, DirectionsActivity.class)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        System.exit(0);
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -271,6 +277,8 @@ public class Application extends android.app.Application {
 
         systemTimeZoneSelector = new TimeZoneSelector(this);
         initLogging();
+
+        new SettingsUtil(this).restoreIfRequested();
 
         ErrorReporter.getInstance().init(this);
 

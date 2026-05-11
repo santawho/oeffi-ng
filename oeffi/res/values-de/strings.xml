@@ -120,6 +120,14 @@
     <string name="about_participate_title">Mitmachen</string>
     <string name="about_market_app_title">Öffi bewerten oder rezensieren</string>
 
+    <!-- preferences backup -->
+    <string name="backup_title">Backup &amp; Restore</string>
+    <string name="backup_save_title">Einstellungen in Datei speichern</string>
+    <string name="backup_restore_title">Einstellungen aus Datei wieder herstellen</string>
+    <string name="backup_save_ok">Einstellungen gespeichert</string>
+    <string name="backup_error">Ein Fehler ist aufgetreten</string>
+    <string name="backup_restore_ok">Einstellungen geladen. App startet neu.</string>
+
     <!-- preferences extras -->
     <string name="extras_title">Sonderfunktionen</string>
     <string name="extras_tripextrainfo_enabled_title">Lade Zusatzinfos für Verbindungen</string>
