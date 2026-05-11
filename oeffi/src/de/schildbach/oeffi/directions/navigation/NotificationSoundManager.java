@@ -108,9 +108,7 @@ public class NotificationSoundManager {
         textToSpeech = new TextToSpeech(getContext(), status -> {
             isTextToSpeechUp = status == TextToSpeech.SUCCESS;
             if (isTextToSpeechUp) {
-                final String localeName = Application.getInstance().getString(R.string.locale);
-                final Locale locale = new Locale(localeName);
-                textToSpeech.setLanguage(locale);
+                textToSpeech.setLanguage(new Locale(Application.getInstance().getApplicationLanguage()));
                 textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
                     @Override
                     public void onStart(final String utteranceId) {

@@ -91,7 +91,7 @@ public final class NetworkProviderFactory extends de.schildbach.pte.NetworkProvi
             final NetworkApiProvider networkApiProvider = (NetworkApiProvider) networkProvider;
             if (networkId != NetworkId.PL)
                 networkApiProvider.setUserAgent(Application.getUserAgent());
-            networkApiProvider.setUserInterfaceLanguage(Locale.getDefault().getLanguage());
+            networkApiProvider.setUserInterfaceLanguage(Application.getInstance().getApplicationLanguage());
             networkApiProvider.setMessagesAsSimpleHtml(true);
         }
         providerCache.put(networkId, networkProvider);

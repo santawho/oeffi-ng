@@ -146,9 +146,14 @@ public class Application extends android.app.Application {
         }, 500);
     }
 
+    public String getApplicationLanguage() {
+        // return Locale.getDefault().getLanguage();
+        return getString(R.string.locale);
+    }
+
     public String getTranslatedString(final int resId) {
         final String mappedString = getString(resId);
-        final String translatedString = getTranslatedString(mappedString, Locale.getDefault().getLanguage());
+        final String translatedString = getTranslatedString(mappedString, getApplicationLanguage());
         if (translatedString != null)
             return translatedString;
         return getTranslatedString(mappedString, "en");
@@ -156,7 +161,7 @@ public class Application extends android.app.Application {
 
     public static String getTranslatedString(final String mappedString, final String language) {
         final String[] languageValues = mappedString.split("~~");
-        for (String languageValue : languageValues) {
+        for (final String languageValue : languageValues) {
             final String[] languageAndValue = languageValue.split("~");
             final String lang = languageAndValue[0];
             final String value = languageAndValue[1];

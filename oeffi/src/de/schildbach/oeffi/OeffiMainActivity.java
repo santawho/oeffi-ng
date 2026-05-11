@@ -243,7 +243,7 @@ public abstract class OeffiMainActivity extends OeffiActivity {
                     if (network == null || !value.equalsIgnoreCase(network.name()))
                         return false;
                 } else if (name.equals("lang")) {
-                    if (!value.equalsIgnoreCase(Locale.getDefault().getLanguage()))
+                    if (!value.equalsIgnoreCase(application.getApplicationLanguage()))
                         return false;
                 } else if (name.equals("task")) {
                     if (!(taskName().equalsIgnoreCase(value)))
@@ -313,7 +313,7 @@ public abstract class OeffiMainActivity extends OeffiActivity {
         // fetch and show message
         if ("info".equals(action) || "warning".equals(action) || "error".equals(action)) {
             final HttpUrl.Builder url = URLs.getMessagesBaseUrl().newBuilder()
-                    .addEncodedPathSegment(id + (Locale.getDefault().getLanguage().equals("de") ? "-de" : "") + ".txt");
+                    .addEncodedPathSegment(id + (application.getApplicationLanguage().equals("de") ? "-de" : "") + ".txt");
             final Request.Builder request = new Request.Builder();
             request.url(url.build());
             final Call call = application.okHttpClient().newCall(request.build());
