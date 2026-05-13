@@ -46,16 +46,18 @@ public class BackupFragment extends PreferenceFragment {
             final AtomicBoolean isOk = new AtomicBoolean(false);
             context.registerForActivityResult(
                     new ActivityResultContracts.CreateDocument("application/zip"), uri -> {
-                        try (final OutputStream os = context.getContentResolver().openOutputStream(uri)) {
-                            final SettingsUtil settingsUtil = new SettingsUtil(Application.getInstance());
-                            isOk.set(settingsUtil.backup(os));
-                        } catch (final IOException ioe) {
-                            context.getLog().error("SaveActionHandler openOutputStream", ioe);
-                        }
-                        if (isOk.get()) {
-                            new Toast(context).longToast(R.string.backup_save_ok);
-                        } else {
-                            new Toast(context).longToast(R.string.backup_error);
+                        if (uri != null) {
+                            try (final OutputStream os = context.getContentResolver().openOutputStream(uri)) {
+                                final SettingsUtil settingsUtil = new SettingsUtil(Application.getInstance());
+                                isOk.set(settingsUtil.backup(os));
+                            } catch (final IOException ioe) {
+                                context.getLog().error("SaveActionHandler openOutputStream", ioe);
+                            }
+                            if (isOk.get()) {
+                                new Toast(context).longToast(R.string.backup_save_ok);
+                            } else {
+                                new Toast(context).longToast(R.string.backup_error);
+                            }
                         }
                         dismissParentingActivity(context);
                     }).launch("oeffi-settings.zip");
@@ -69,19 +71,21 @@ public class BackupFragment extends PreferenceFragment {
             final AtomicBoolean isOk = new AtomicBoolean(false);
             context.registerForActivityResult(
                     new ActivityResultContracts.OpenDocument(), uri -> {
-                        try (final InputStream is = context.getContentResolver().openInputStream(uri)) {
-                            final SettingsUtil settingsUtil = new SettingsUtil(Application.getInstance());
-                            isOk.set(settingsUtil.prepareRestore(is));
-                        } catch (final IOException ioe) {
-                            context.getLog().error("RestoreActionHandler openInputStream", ioe);
-                        }
-                        if (isOk.get()) {
-                            new Toast(context).longToast(R.string.backup_restore_ok);
-                            context.runOnUiThread(() -> {
-                                Application.getInstance().restart();
-                            });
-                        } else {
-                            new Toast(context).longToast(R.string.backup_error);
+                        if (uri != null) {
+                            try (final InputStream is = context.getContentResolver().openInputStream(uri)) {
+                                final SettingsUtil settingsUtil = new SettingsUtil(Application.getInstance());
+                                isOk.set(settingsUtil.prepareRestore(is));
+                            } catch (final IOException ioe) {
+                                context.getLog().error("RestoreActionHandler openInputStream", ioe);
+                            }
+                            if (isOk.get()) {
+                                new Toast(context).longToast(R.string.backup_restore_ok);
+                                context.runOnUiThread(() -> {
+                                    Application.getInstance().restart();
+                                });
+                            } else {
+                                new Toast(context).longToast(R.string.backup_error);
+                            }
                         }
                         dismissParentingActivity(context);
                     }).launch(new String[]{"application/zip"});
