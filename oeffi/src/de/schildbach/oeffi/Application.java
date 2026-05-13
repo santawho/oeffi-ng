@@ -70,6 +70,7 @@ import de.schildbach.oeffi.util.SettingsUtil;
 import de.schildbach.oeffi.util.SpeechInput;
 import de.schildbach.oeffi.util.TimeZoneSelector;
 import de.schildbach.pte.NetworkId;
+import de.schildbach.pte.provider.ApiProvider;
 import de.schildbach.pte.provider.NetworkProvider;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -85,7 +86,8 @@ import java.util.concurrent.TimeUnit;
 public class Application extends android.app.Application {
     public static final Logger log = LoggerFactory.getLogger(Application.class);
 
-    private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0";
+    private String APP_USER_AGENT;
+    private static final String BROWSER_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0";
 
     private static Application instance;
 
@@ -114,8 +116,26 @@ public class Application extends android.app.Application {
         return logFile;
     }
 
-    public static String getUserAgent() {
-        return USER_AGENT;
+    public String getUserAgent(final ApiProvider.UserAgentType userAgentType) {
+        switch (userAgentType) {
+            case NONE:
+                return null;
+            case APP:
+                return getAppUserAgent();
+            case ANY:
+            case BROWSER:
+            default:
+                return BROWSER_USER_AGENT;
+        }
+    }
+
+    public String getAppUserAgent() {
+        if (APP_USER_AGENT == null) {
+            // see https://scientiamobile.com/how-to-correctly-form-user-agents-for-mobile-apps/
+            APP_USER_AGENT = getApplicationId() + "/" + packageInfo.versionName
+                    + " " + System.getProperty("http.agent");
+        }
+        return APP_USER_AGENT;
     }
 
     public SpeechInput getSpeechInput() {

@@ -44,7 +44,6 @@ import de.schildbach.pte.Standard;
 import de.schildbach.pte.provider.hafas.VbbProvider;
 import de.schildbach.pte.provider.hafas.VbnProvider;
 import de.schildbach.pte.provider.efa.VgnProvider;
-import de.schildbach.pte.provider.hafas.SaarVVProvider;
 import de.schildbach.pte.provider.hafas.VmtProvider;
 import de.schildbach.pte.provider.other.VrsProvider;
 import de.schildbach.pte.provider.efa.VvoProvider;
@@ -53,7 +52,6 @@ import okhttp3.HttpUrl;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 public final class NetworkProviderFactory extends de.schildbach.pte.NetworkProviderFactory {
@@ -89,9 +87,9 @@ public final class NetworkProviderFactory extends de.schildbach.pte.NetworkProvi
         final NetworkProvider networkProvider = super.getNetworkProvider(networkId);
         if (networkProvider instanceof NetworkApiProvider) {
             final NetworkApiProvider networkApiProvider = (NetworkApiProvider) networkProvider;
-            if (networkId != NetworkId.PL)
-                networkApiProvider.setUserAgent(Application.getUserAgent());
-            networkApiProvider.setUserInterfaceLanguage(Application.getInstance().getApplicationLanguage());
+            final Application application = Application.getInstance();
+            networkApiProvider.setUserAgent(application.getUserAgent(networkApiProvider.getUserAgentType()));
+            networkApiProvider.setUserInterfaceLanguage(application.getApplicationLanguage());
             networkApiProvider.setMessagesAsSimpleHtml(true);
         }
         providerCache.put(networkId, networkProvider);

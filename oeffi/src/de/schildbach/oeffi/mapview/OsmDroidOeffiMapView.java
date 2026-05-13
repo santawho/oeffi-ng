@@ -80,6 +80,7 @@ import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.Point;
 import de.schildbach.pte.dto.Product;
 import de.schildbach.pte.dto.Trip.Public;
+import de.schildbach.pte.provider.ApiProvider;
 
 public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implementation {
     private static final Logger log = LoggerFactory.getLogger(OsmDroidOeffiMapView.class);
@@ -92,7 +93,7 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
             final Application application = Application.getInstance();
             final IConfigurationProvider config = Configuration.getInstance();
             config.setOsmdroidBasePath(new File(application.getCacheDir(), "org.osmdroid"));
-            config.setUserAgentValue(application.getPackageName());
+            config.setUserAgentValue(application.getUserAgent(ApiProvider.UserAgentType.APP));
         }
 
         @Override

@@ -36,8 +36,9 @@ public class LocationSearchProviderFactory {
             return cachedProvider;
 
         final LocationSearchApiProvider provider = forId(locationSearchProviderId);
-        provider.setUserAgent(Application.getUserAgent());
-        provider.setUserInterfaceLanguage(Application.getInstance().getApplicationLanguage());
+        final Application application = Application.getInstance();
+        provider.setUserAgent(application.getUserAgent(provider.getUserAgentType()));
+        provider.setUserInterfaceLanguage(application.getApplicationLanguage());
         provider.setMessagesAsSimpleHtml(true);
         providerCache.put(locationSearchProviderId, provider);
         return provider;
