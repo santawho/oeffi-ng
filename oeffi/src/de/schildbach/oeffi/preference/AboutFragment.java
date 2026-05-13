@@ -116,8 +116,10 @@ public class AboutFragment extends PreferenceFragment {
         final Provider.Description networkProviderDescription = networkProvider.getDescription();
         providerText.append(getString(R.string.about_data_provider_summary_pattern1, networkProviderDescription.getName()));
         final String networkProviderDescriptionUrl = networkProviderDescription.getUrl();
-        if (networkProviderDescriptionUrl != null)
+        if (networkProviderDescriptionUrl != null) {
             providerText.append(String.format("\n(%s)", networkProviderDescriptionUrl));
+            prefDataProvider.setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(networkProviderDescriptionUrl)));
+        }
         if (prefs.getBoolean(Constants.KEY_EXTRAS_TRIPEXTRAINFO_ENABLED, false)) {
             try {
                 final TransferEvaluationProvider transferEvaluationProvider = networkProvider.getTransferEvaluationProvider();
