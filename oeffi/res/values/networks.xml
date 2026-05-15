@@ -84,6 +84,8 @@
     <string name="network_mvg_comment">local and regional</string>
     <string name="network_vrn_label">Rhineland-Palatinate, Rhine-Neckar &amp; Baden-Württemberg</string>
     <string name="network_vrn_comment">local and regional</string>
+    <string name="network_nwexrnv_label">Rhine-Neckar</string>
+    <string name="network_nwexrnv_comment">local and regional</string>
     <string name="network_saarvv_label">Saarland (Saarbrücken, Neunkirchen, Homburg, ...)</string>
     <string name="network_saarvv_comment">local and regional</string>
     <string name="network_vvs_label">Stuttgart</string>

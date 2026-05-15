@@ -85,6 +85,8 @@
     <string name="network_mvg_comment">Lokal- und Regionalverkehr (TG:MVG)</string>
     <string name="network_vrn_label">Rheinland-Pfalz, Rhein-Neckar &amp; Baden-Württemberg</string>
     <string name="network_vrn_comment">Lokal- und Regionalverkehr (TG:VRN)</string>
+    <string name="network_nwexrnv_label">Rhein-Neckar</string>
+    <string name="network_nwexrnv_comment">Lokal- und Regionalverkehr (TG:networkException,RNV)</string>
     <string name="network_saarvv_label">Saarland (Saarbrücken, Neunkirchen, Homburg, …)</string>
     <string name="network_saarvv_comment">Lokal- und Regionalverkehr (TG:SaarVV)</string>
     <string name="network_vvs_label">Stuttgart</string>
