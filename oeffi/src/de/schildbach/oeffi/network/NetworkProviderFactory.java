@@ -27,6 +27,7 @@ import de.schildbach.pte.provider.hafas.AvvAugsburgProvider;
 import de.schildbach.pte.provider.hafas.BartProvider;
 import de.schildbach.pte.provider.hafas.BvgProvider;
 import de.schildbach.pte.provider.db.DbHafasProvider;
+import de.schildbach.pte.provider.hafas.CflProvider;
 import de.schildbach.pte.provider.hafas.InvgProvider;
 import de.schildbach.pte.provider.efa.KvvProvider;
 import de.schildbach.pte.provider.hafas.LuProvider;
@@ -119,6 +120,7 @@ public final class NetworkProviderFactory extends de.schildbach.pte.NetworkProvi
         addConfigurator(OebbProvider.class, () -> new OebbProvider("{\"type\":\"AID\",\"aid\":\"OWDL4fE4ixNiPBBm\"}"));
         addConfigurator(ZvvProvider.class, () -> new ZvvProvider("{\"type\":\"AID\",\"aid\":\"hf7mcf9bv3nv8g5f\"}"));
         addConfigurator(LuProvider.class, () -> new LuProvider("{\"type\":\"AID\",\"aid\":\"SkC81GuwuzL4e0\"}"));
+        addConfigurator(CflProvider.class, () -> new CflProvider("{\"type\":\"AID\",\"aid\":\"ALT2vl7LAFDFu2dz\"}"));
 //        addConfigurator(DsbProvider.class, () -> new DsbProvider("{\"type\":\"AID\",\"aid\":\"irkmpm9mdznstenr-android\"}"));
         addConfigurator(SeProvider.class, () -> new SeProvider("{\"type\":\"AID\",\"aid\":\"h5o3n7f4t2m8l9x1\"}"));
         addConfigurator(PlProvider.class, () -> new PlProvider("{\"type\":\"AID\",\"aid\":\"DrxJYtYZQpEBCtcb\"}"));

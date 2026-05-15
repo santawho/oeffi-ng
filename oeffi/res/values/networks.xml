@@ -134,6 +134,8 @@
     <string name="network_tpg_comment">local and regional</string>
     <string name="network_lu_label">Luxembourg</string>
     <string name="network_lu_comment">local and regional</string>
+    <string name="network_cfl_label">CFL</string>
+    <string name="network_cfl_comment">long-distance and regional</string>
     <string name="network_ns_label">Netherlands (NS)</string>
     <string name="network_ns_comment">long-distance and regional, directions only</string>
     <string name="network_rivier_label">Netherlands</string>
