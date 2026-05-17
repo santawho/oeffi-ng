@@ -119,6 +119,7 @@ public class Application extends android.app.Application {
     public String getUserAgent(final ApiProvider.UserAgentType userAgentType) {
         switch (userAgentType) {
             case NONE:
+            case PROVIDER_SPECIFIC:
                 return null;
             case APP:
                 return getAppUserAgent();
