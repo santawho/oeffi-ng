@@ -40,7 +40,8 @@ public enum Installer {
 
     public static Installer from(final String installerPackageName) {
         if ("org.fdroid.fdroid".equals(installerPackageName)
-                || "org.fdroid.fdroid.privileged".equals(installerPackageName))
+                || "org.fdroid.fdroid.privileged".equals(installerPackageName)
+                || "org.fdroid.basic".equals(installerPackageName))
             return F_DROID;
         if ("com.android.vending".equals(installerPackageName))
             return GOOGLE_PLAY;

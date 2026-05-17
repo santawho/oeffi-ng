@@ -14,17 +14,17 @@ configurations {
 
 dependencies {
     implementation project(':public-transport-enabler')
-    implementation 'androidx.annotation:annotation:1.9.1'
+    implementation 'androidx.annotation:annotation:1.10.0'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
     implementation 'androidx.coordinatorlayout:coordinatorlayout:1.3.0'
     implementation 'androidx.drawerlayout:drawerlayout:1.2.0'
-    implementation 'androidx.core:core:1.17.0'
-    implementation 'androidx.activity:activity:1.12.4'
+    implementation 'androidx.core:core:1.18.0'
+    implementation 'androidx.activity:activity:1.13.0'
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
     implementation 'org.osmdroid:osmdroid-android:6.1.20'
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
-    implementation 'org.slf4j:slf4j-api:2.0.17'
+    implementation 'org.slf4j:slf4j-api:2.0.18'
     implementation 'com.github.tony19:logback-android:3.0.0'
     testImplementation 'junit:junit:4.13.2'
 }
