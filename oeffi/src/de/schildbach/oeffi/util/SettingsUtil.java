@@ -63,17 +63,20 @@ public class SettingsUtil {
                 final Path subDir = dataDir.resolve(subDirName);
                 try (final Stream<Path> stream = Files.walk(subDir)) {
                     stream.forEach(path -> {
-                        log.info("backup: {}", path.toString());
-                        final Path zipPath = dataDir.relativize(path);
-                        try (final FileInputStream fis = new FileInputStream(path.toFile())) {
-                            final ZipEntry zipEntry = new ZipEntry(zipPath.toString());
-                            zipEntry.setTime(path.toFile().lastModified());
-                            zos.putNextEntry(zipEntry);
-                            copyStream(fis, zos, buffer);
-                            zos.closeEntry();
-                        } catch (final IOException ioe) {
-                            log.error("backup {}", path, ioe);
-                            anyError.set(true);
+                        final File file = path.toFile();
+                        if (file.isFile()) {
+                            log.info("backup: {}", path.toString());
+                            final Path zipPath = dataDir.relativize(path);
+                            try (final FileInputStream fis = new FileInputStream(file)) {
+                                final ZipEntry zipEntry = new ZipEntry(zipPath.toString());
+                                zipEntry.setTime(file.lastModified());
+                                zos.putNextEntry(zipEntry);
+                                copyStream(fis, zos, buffer);
+                                zos.closeEntry();
+                            } catch (final IOException ioe) {
+                                log.error("backup {}", path, ioe);
+                                anyError.set(true);
+                            }
                         }
                     });
                 } catch (final IOException ioe) {
@@ -128,6 +131,7 @@ public class SettingsUtil {
                         copyStream(zis, fos, buffer);
                     } catch (final IOException ioe) {
                         log.error("restore {}", file, ioe);
+                        anyError.set(true);
                     }
                     file.setLastModified(time);
                 }
@@ -135,7 +139,7 @@ public class SettingsUtil {
                 log.error("restore", ioe);
                 anyError.set(true);
             }
-            return true;
+            return !anyError.get();
         } catch (final IOException ioe) {
             log.error("restore", ioe);
             return false;
