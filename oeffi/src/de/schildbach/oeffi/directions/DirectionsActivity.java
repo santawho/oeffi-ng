@@ -420,6 +420,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             viewProductToggles.add(findViewById(R.id.directions_products_t));
             viewProductToggles.add(findViewById(R.id.directions_products_b));
             viewProductToggles.add(findViewById(R.id.directions_products_p));
+            viewProductToggles.add(findViewById(R.id.directions_products_h));
             viewProductToggles.add(findViewById(R.id.directions_products_f));
             viewProductToggles.add(findViewById(R.id.directions_products_c));
 

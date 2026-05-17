@@ -1196,6 +1196,8 @@ public class TripRenderer {
                 20, 2 * 60, 60, 100));
         productInfoSuppliers.put(Product.BUS, new BasicInfoSupplier(
                 15, 2 * 60, 2 * 60, 100));
+        productInfoSuppliers.put(Product.COACH, new BasicInfoSupplier(
+                30, 3 * 60, 2 * 60, 150));
         productInfoSuppliers.put(Product.REPLACEMENT_SERVICE, new BasicInfoSupplier(
                 15, 2 * 60, 2 * 60, 100));
     }

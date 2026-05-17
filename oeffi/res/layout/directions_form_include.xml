@@ -129,6 +129,15 @@
                         android:tag="P" />
 
                     <de.schildbach.oeffi.util.ToggleImageButton
+                        android:id="@+id/directions_products_h"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@string/product_h"
+                        android:minWidth="@dimen/action_bar_button_width"
+                        android:src="@drawable/ic_menu_product_coach"
+                        android:tag="H" />
+
+                    <de.schildbach.oeffi.util.ToggleImageButton
                         android:id="@+id/directions_products_f"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"

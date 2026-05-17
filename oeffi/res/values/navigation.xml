@@ -294,6 +294,7 @@
     <string name="navigation_event_speak_product_subway">subway</string>
     <string name="navigation_event_speak_product_tram">tram</string>
     <string name="navigation_event_speak_product_bus">bus</string>
+    <string name="navigation_event_speak_product_coach">coach</string>
     <string name="navigation_event_speak_product_ferry">ferry</string>
     <string name="navigation_event_speak_product_cablecar">cable car</string>
     <string name="navigation_event_speak_product_ondemand">on-demand service</string>
@@ -305,6 +306,7 @@
     <string name="navigation_event_speak_to_station_subway">to subway station %1$s</string>
     <string name="navigation_event_speak_to_station_tram">to tram stop %1$s</string>
     <string name="navigation_event_speak_to_station_bus">to bus stop %1$s</string>
+    <string name="navigation_event_speak_to_station_coach">to coach stop %1$s</string>
     <string name="navigation_event_speak_to_station_ferry">to ferry dock %1$s</string>
     <string name="navigation_event_speak_to_station_cablecar">to cable car station %1$s</string>
     <string name="navigation_event_speak_to_station_ondemand">to on-demand service stop %1$s</string>
@@ -351,6 +353,7 @@
     <string name="navigation_event_notify_product_subway">subway</string>
     <string name="navigation_event_notify_product_tram">tram</string>
     <string name="navigation_event_notify_product_bus">bus</string>
+    <string name="navigation_event_notify_product_coach">coach</string>
     <string name="navigation_event_notify_product_ferry">ferry</string>
     <string name="navigation_event_notify_product_cablecar">cable car</string>
     <string name="navigation_event_notify_product_ondemand">on demand service</string>
@@ -362,6 +365,7 @@
     <string name="navigation_event_notify_to_station_subway">to %1$s (subway)</string>
     <string name="navigation_event_notify_to_station_tram">to %1$s (tram)</string>
     <string name="navigation_event_notify_to_station_bus">to %1$s (bus)</string>
+    <string name="navigation_event_notify_to_station_coach">to %1$s (coach)</string>
     <string name="navigation_event_notify_to_station_ferry">to %1$s (ferry)</string>
     <string name="navigation_event_notify_to_station_cablecar">to %1$s (cable car)</string>
     <string name="navigation_event_notify_to_station_ondemand">to %1$s (on-demand service)</string>

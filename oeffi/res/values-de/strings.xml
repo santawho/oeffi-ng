@@ -580,6 +580,7 @@
     <string name="product_u">U-Bahn</string>
     <string name="product_t">Tram</string>
     <string name="product_b">Bus</string>
+    <string name="product_h">Fernbus</string>
     <string name="product_p">Bedarfsverkehr</string>
     <string name="product_f">Fähre</string>
     <string name="product_c">Seilbahn</string>

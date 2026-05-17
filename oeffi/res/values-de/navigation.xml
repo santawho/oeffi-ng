@@ -259,6 +259,7 @@
     <string name="navigation_event_speak_product_subway">U-Bahn</string>
     <string name="navigation_event_speak_product_tram">Straßenbahn</string>
     <string name="navigation_event_speak_product_bus">Bus</string>
+    <string name="navigation_event_speak_product_coach">Fernbus</string>
     <string name="navigation_event_speak_product_ferry">Fähre</string>
     <string name="navigation_event_speak_product_cablecar">Seilbahn</string>
     <string name="navigation_event_speak_product_ondemand">Bedarfsverkehr</string>
@@ -270,6 +271,7 @@
     <string name="navigation_event_speak_to_station_subway">zur U-Bahn-Station %1$s</string>
     <string name="navigation_event_speak_to_station_tram">zur Straßenbahn-Haltestelle %1$s</string>
     <string name="navigation_event_speak_to_station_bus">zur Bus-Haltestelle %1$s</string>
+    <string name="navigation_event_speak_to_station_coach">zur Fernbus-Haltestelle %1$s</string>
     <string name="navigation_event_speak_to_station_ferry">zum Fähranleger %1$s</string>
     <string name="navigation_event_speak_to_station_cablecar">zur Seilbahn-Station %1$s</string>
     <string name="navigation_event_speak_to_station_ondemand">zur Bedarfsverkehr-Haltestelle %1$s</string>
@@ -316,6 +318,7 @@
     <string name="navigation_event_notify_product_subway">U-Bahn</string>
     <string name="navigation_event_notify_product_tram">Tram</string>
     <string name="navigation_event_notify_product_bus">Bus</string>
+    <string name="navigation_event_notify_product_coach">Fernbus</string>
     <string name="navigation_event_notify_product_ferry">Fähre</string>
     <string name="navigation_event_notify_product_cablecar">Seilbahn</string>
     <string name="navigation_event_notify_product_ondemand">Bedarfsverkehr</string>
@@ -327,6 +330,7 @@
     <string name="navigation_event_notify_to_station_subway">nach %1$s (U-Bahn)</string>
     <string name="navigation_event_notify_to_station_tram">nach %1$s (Tram)</string>
     <string name="navigation_event_notify_to_station_bus">nach %1$s (Bus)</string>
+    <string name="navigation_event_notify_to_station_coach">nach %1$s (Fernbus)</string>
     <string name="navigation_event_notify_to_station_ferry">nach %1$s (Fähre)</string>
     <string name="navigation_event_notify_to_station_cablecar">nach %1$s (Seilbahn)</string>
     <string name="navigation_event_notify_to_station_ondemand">nach %1$s (Bedarfsverkehr)</string>

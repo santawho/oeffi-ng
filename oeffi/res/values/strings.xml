@@ -581,6 +581,7 @@
     <string name="product_u">Metro</string>
     <string name="product_t">Tram</string>
     <string name="product_b">Bus</string>
+    <string name="product_h">Coach</string>
     <string name="product_p">On-Demand</string>
     <string name="product_f">Ferry</string>
     <string name="product_c">Cablecar</string>

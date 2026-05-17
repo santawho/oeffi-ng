@@ -126,6 +126,18 @@
             android:text="@string/product_t"
             android:textColor="@color/fg_significant"
             android:textSize="@dimen/font_size_large" />
+
+        <CheckBox
+            android:background="?android:attr/selectableItemBackground"
+            android:button="@null"
+            android:checked="true"
+            android:drawableLeft="@drawable/ic_menu_product_coach"
+            android:drawablePadding="@dimen/text_padding_horizontal_lax"
+            android:padding="@dimen/dialog_padding"
+            android:tag="H"
+            android:text="@string/product_h"
+            android:textColor="@color/fg_significant"
+            android:textSize="@dimen/font_size_large" />
     </TableRow>
 
 </TableLayout>

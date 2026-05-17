@@ -444,6 +444,7 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
         final Drawable stationSubwayIcon = drawableCenter(R.drawable.product_subway_color_22dp, 2);
         final Drawable stationTramIcon = drawableCenter(R.drawable.product_tram_color_22dp, 2);
         final Drawable stationBusIcon = drawableCenter(R.drawable.product_bus_color_22dp, 2);
+        final Drawable stationCoachIcon = drawableCenter(R.drawable.product_coach_color_22dp, 2);
         final Drawable stationFerryIcon = drawableCenter(R.drawable.product_ferry_color_22dp, 2);
         final Drawable stationCablecarIcon = drawableCenter(R.drawable.product_cablecar_color_22dp, 2);
         final Drawable stationCallIcon = drawableCenter(R.drawable.product_call_color_22dp, 2);
@@ -679,6 +680,8 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
                                     iconDrawable = stationTramIcon;
                                 else if (product == Product.BUS)
                                     iconDrawable = stationBusIcon;
+                                else if (product == Product.COACH)
+                                    iconDrawable = stationCoachIcon;
                                 else if (product == Product.FERRY)
                                     iconDrawable = stationFerryIcon;
                                 else if (product == Product.CABLECAR)

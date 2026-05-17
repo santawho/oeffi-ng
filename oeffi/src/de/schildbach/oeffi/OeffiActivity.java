@@ -865,7 +865,9 @@ public abstract class OeffiActivity extends AppCompatActivity
 
     protected boolean productsAreNetworkDefault(final Collection<Product> products) {
         final Collection<Product> networkDefaultProducts = getNetworkDefaultProducts();
-        return products.size() == networkDefaultProducts.size() && products.containsAll(networkDefaultProducts);
+        return // products.size() == networkDefaultProducts.size() &&
+                networkDefaultProducts.containsAll(products) &&
+                products.containsAll(networkDefaultProducts);
     }
 
     protected String getProductsPrefsKey() {

@@ -2627,6 +2627,7 @@ public class NavigationNotification {
         notificationProducts.put(Product.SUBWAY, R.string.navigation_event_notify_product_subway);
         notificationProducts.put(Product.TRAM, R.string.navigation_event_notify_product_tram);
         notificationProducts.put(Product.BUS, R.string.navigation_event_notify_product_bus);
+        notificationProducts.put(Product.COACH, R.string.navigation_event_notify_product_coach);
         notificationProducts.put(Product.FERRY, R.string.navigation_event_notify_product_ferry);
         notificationProducts.put(Product.CABLECAR, R.string.navigation_event_notify_product_cablecar);
         notificationProducts.put(Product.ON_DEMAND, R.string.navigation_event_notify_product_ondemand);
@@ -2651,6 +2652,7 @@ public class NavigationNotification {
         speakableProducts.put(Product.SUBWAY, R.string.navigation_event_speak_product_subway);
         speakableProducts.put(Product.TRAM, R.string.navigation_event_speak_product_tram);
         speakableProducts.put(Product.BUS, R.string.navigation_event_speak_product_bus);
+        speakableProducts.put(Product.COACH, R.string.navigation_event_speak_product_coach);
         speakableProducts.put(Product.FERRY, R.string.navigation_event_speak_product_ferry);
         speakableProducts.put(Product.CABLECAR, R.string.navigation_event_speak_product_cablecar);
         speakableProducts.put(Product.ON_DEMAND, R.string.navigation_event_speak_product_ondemand);
@@ -2705,6 +2707,7 @@ public class NavigationNotification {
         notificationDestinations.put(Product.SUBWAY, R.string.navigation_event_notify_to_station_subway);
         notificationDestinations.put(Product.TRAM, R.string.navigation_event_notify_to_station_tram);
         notificationDestinations.put(Product.BUS, R.string.navigation_event_notify_to_station_bus);
+        notificationDestinations.put(Product.COACH, R.string.navigation_event_notify_to_station_coach);
         notificationDestinations.put(Product.FERRY, R.string.navigation_event_notify_to_station_ferry);
         notificationDestinations.put(Product.CABLECAR, R.string.navigation_event_notify_to_station_cablecar);
         notificationDestinations.put(Product.ON_DEMAND, R.string.navigation_event_notify_to_station_ondemand);
@@ -2728,6 +2731,7 @@ public class NavigationNotification {
         speakableDestinations.put(Product.SUBWAY, R.string.navigation_event_speak_to_station_subway);
         speakableDestinations.put(Product.TRAM, R.string.navigation_event_speak_to_station_tram);
         speakableDestinations.put(Product.BUS, R.string.navigation_event_speak_to_station_bus);
+        speakableDestinations.put(Product.COACH, R.string.navigation_event_speak_to_station_coach);
         speakableDestinations.put(Product.FERRY, R.string.navigation_event_speak_to_station_ferry);
         speakableDestinations.put(Product.CABLECAR, R.string.navigation_event_speak_to_station_cablecar);
         speakableDestinations.put(Product.ON_DEMAND, R.string.navigation_event_speak_to_station_ondemand);
