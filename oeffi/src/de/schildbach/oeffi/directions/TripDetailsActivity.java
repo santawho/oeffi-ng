@@ -91,7 +91,9 @@ import de.schildbach.oeffi.TripAware;
 import de.schildbach.oeffi.tripeval.TripGeoUtils;
 import de.schildbach.oeffi.util.GoogleMapsUtils;
 import de.schildbach.oeffi.util.HorizontalPager;
-import de.schildbach.oeffi.util.KmlProducer;
+import de.schildbach.oeffi.util.geofiles.GeoFileProducer;
+import de.schildbach.oeffi.util.geofiles.GpxProducer;
+import de.schildbach.oeffi.util.geofiles.KmlProducer;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.util.TimeSpec.DepArr;
 import de.schildbach.oeffi.tripeval.TripRenderer;
@@ -462,8 +464,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                                 });
                             }
                             return true;
-                        } else if (itemId == R.id.directions_trip_details_action_open_external_maps_app) {
-                            intentSupplier = () -> showKmlInExternalMapsApp();
+                        } else if (itemId == R.id.directions_trip_details_action_open_external_kml_maps_app) {
+                            intentSupplier = () -> showInExternalMapsApp(new KmlProducer(), R.string.directions_trip_details_action_open_external_kml_maps_app_title);
+                        } else if (itemId == R.id.directions_trip_details_action_open_external_gpx_maps_app) {
+                            intentSupplier = () -> showInExternalMapsApp(new GpxProducer(), R.string.directions_trip_details_action_open_external_gpx_maps_app_title);
                         } else if (itemId == R.id.directions_trip_details_action_add_to_calendar) {
                             shareCalendarEntry(isShareCalendarWithLink);
                             return true;
@@ -3025,14 +3029,18 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         return intent;
     }
 
-    private Intent showKmlInExternalMapsApp() {
+    private Intent showInExternalMapsApp(final GeoFileProducer producer, final int titleId) {
+        String extension = "?";
         try {
-            final File kmlFile = new File(Application.getInstance().getShareDir(), "shareroute.kml");
-            new KmlProducer(application).writeTrip(tripRenderer.trip, kmlFile);
-            final Intent kmlIntent = GoogleMapsUtils.getOpenKmlIntent(kmlFile);
-            return Intent.createChooser(kmlIntent, "xxx");
-        } catch (Exception e) {
-            log.error("cannot create shared KML file", e);
+            producer.setApplication(application);
+            extension = producer.getFilenameExtension();
+            final File geoFile = new File(Application.getInstance().getShareDir(),
+                    "shareroute." + extension);
+            producer.writeTrip(tripRenderer.trip, geoFile);
+            final Intent kmlIntent = GoogleMapsUtils.getOpenGeoFileIntent(geoFile);
+            return Intent.createChooser(kmlIntent, getString(titleId));
+        } catch (final Exception e) {
+            log.error("cannot create shared {} file", extension, e);
             return null;
         }
     }

@@ -1,11 +1,22 @@
-package de.schildbach.oeffi.util;
+/*
+ * Copyright the original author or authors.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
-import org.xmlpull.v1.XmlSerializer;
+package de.schildbach.oeffi.util.geofiles;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -13,13 +24,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.util.Formats;
 import de.schildbach.pte.dto.Point;
 import de.schildbach.pte.dto.Stop;
 import de.schildbach.pte.dto.Trip;
 
-public class KmlProducer {
+public class KmlProducer extends GeoXmlProducer {
     private static final String STYLE_PUBLIC_LEG_NAME = "publeg";
     public static final int STYLE_PUBLIC_LEG_COLOR = 0x60ff00ff;
     public static final int STYLE_PUBLIC_LEG_WIDTH = 6;
@@ -27,25 +38,12 @@ public class KmlProducer {
     public static final int STYLE_INDIVIDUAL_LEG_COLOR = 0x6000ffff;
     public static final int STYLE_INDIVIDUAL_LEG_WIDTH = 8;
 
-    private final Application application;
-    private final XmlSerializer xs;
-
-    public KmlProducer(final Application application) {
-        this.application = application;
-        try {
-            this.xs = XmlPullParserFactory.newInstance().newSerializer();
-        } catch (XmlPullParserException e) {
-            throw new RuntimeException(e);
-        }
+    @Override
+    public String getFilenameExtension() {
+        return "kml";
     }
 
-    public void writeTrip(final Trip trip, final File kmlFile) throws IOException {
-        final FileOutputStream fos = new FileOutputStream(kmlFile);
-        writeTrip(trip, fos);
-        fos.close();
-    }
-
-    public void writeTrip(final Trip trip, final OutputStream outputStream) throws IOException {
+    protected void writeTrip(final Trip trip, final OutputStream outputStream) throws IOException {
         xs.setOutput(outputStream, StandardCharsets.UTF_8.name());
         xs.startDocument(null, null);
 
@@ -54,12 +52,12 @@ public class KmlProducer {
         final String tripName = application.getString(R.string.kml_trip_name,
                 Formats.fullLocationName(trip.from),
                 Formats.fullLocationName(trip.to));
-        kmlTextNode("name", tripName);
+        xmlTextNode("name", tripName);
 
         kmlLineStyle(STYLE_PUBLIC_LEG_NAME, STYLE_PUBLIC_LEG_COLOR, STYLE_PUBLIC_LEG_WIDTH);
         kmlLineStyle(STYLE_INDIVIDUAL_LEG_NAME, STYLE_INDIVIDUAL_LEG_COLOR, STYLE_INDIVIDUAL_LEG_WIDTH);
 
-        for (Trip.Leg leg : trip.legs) {
+        for (final Trip.Leg leg : trip.legs) {
             if (leg instanceof Trip.Public) {
                 kmlPlacemarkForPublicLeg((Trip.Public) leg);
             } else if (leg instanceof Trip.Individual) {
@@ -75,19 +73,13 @@ public class KmlProducer {
         outputStream.close();
     }
 
-    private void kmlTextNode(final String name, final String value) throws IOException {
-        xs.startTag(null, name);
-        xs.text(value);
-        xs.endTag(null, name);
-    }
-
     private void kmlLineStyle(final String id, final int color, final int width) throws IOException {
         xs.startTag(null, "Style");
         xs.attribute(null, "id", id);
         xs.startTag(null, "LineStyle");
-        kmlTextNode("width", Integer.toString(width));
-        kmlTextNode("color", kmlColor(color));
-        kmlTextNode("colorMode", "normal");
+        xmlTextNode("width", Integer.toString(width));
+        xmlTextNode("color", kmlColor(color));
+        xmlTextNode("colorMode", "normal");
         xs.endTag(null, "LineStyle");
         xs.endTag(null, "Style");
     }
@@ -114,7 +106,7 @@ public class KmlProducer {
         points.add(leg.departureStop.location.coord);
         final List<Stop> intermediateStops = leg.intermediateStops;
         if (intermediateStops != null) {
-            for (Stop stop : intermediateStops)
+            for (final Stop stop : intermediateStops)
                 points.add(stop.location.coord);
         }
         points.add(leg.arrivalStop.location.coord);
@@ -122,13 +114,12 @@ public class KmlProducer {
     }
 
     private void kmlPlacemarkForIndividualLeg(final Trip.Individual leg) throws IOException {
-        final Trip.Individual.Type type = leg.type;
         final int typeResId;
         switch (leg.type) {
             case WALK: typeResId =  R.string.kml_individual_type_walk; break;
-            case CAR: typeResId =  R.string.kml_individual_type_walk; break;
-            case BIKE: typeResId =  R.string.kml_individual_type_walk; break;
-            default: typeResId =  R.string.kml_individual_type_walk; break;
+            case CAR: typeResId =  R.string.kml_individual_type_car; break;
+            case BIKE: typeResId =  R.string.kml_individual_type_bike; break;
+            default: typeResId =  R.string.kml_individual_type_transfer; break;
         }
         final String legName = application.getString(R.string.kml_individual_leg_name,
                 application.getString(typeResId),
@@ -142,13 +133,13 @@ public class KmlProducer {
 
     private void kmlLineStringPlacemark(final String name, final String style, final List<Point> points) throws IOException {
         xs.startTag(null, "Placemark");
-        kmlTextNode("name", name);
-        kmlTextNode("visibility", "1");
-        kmlTextNode("styleUrl", "#" + style);
+        xmlTextNode("name", name);
+        xmlTextNode("visibility", "1");
+        xmlTextNode("styleUrl", "#" + style);
         xs.startTag(null, "LineString");
         xs.startTag(null, "coordinates");
 
-        for (Point point : points)
+        for (final Point point : points)
             kmlCoordinateForPoint(point);
 
         xs.endTag(null, "coordinates");

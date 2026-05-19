@@ -44,7 +44,7 @@ public class GoogleMapsUtils {
     public static final String GMAPS_SHORT_LOCATION_URL_PREFIX = "https://maps.app.goo.gl/";
 
     public static Location resolveLocationUrl(final String gmapsShortUrl) {
-        try (Response response = new OkHttpClient.Builder().followRedirects(false).build()
+        try (final Response response = new OkHttpClient.Builder().followRedirects(false).build()
                 .newCall(new Request.Builder().head().url(gmapsShortUrl).build())
                 .execute()) {
             final int code = response.code();
@@ -77,7 +77,7 @@ public class GoogleMapsUtils {
         final String dataValue = lastSegment.substring(5);
         final String[] dataElements = dataValue.split("!");
         String lon = null, lat = null;
-        for (String dataElement : dataElements) {
+        for (final String dataElement : dataElements) {
             if (dataElement.length() < 2)
                 continue;
             final String id = dataElement.substring(0, 2);
@@ -98,15 +98,20 @@ public class GoogleMapsUtils {
             if (placeName == null)
                 return LocationUtils.locationFromCoord(point);
             return new Location(LocationType.ADDRESS, null, point, null, placeName);
-        } catch (NumberFormatException nfe) {
+        } catch (final NumberFormatException nfe) {
             return null;
         }
     }
 
-    public static Intent getOpenKmlIntent(final File kmlFile) {
+    public static Intent getOpenGeoFileIntent(final File geoFile) {
         final Application application = Application.getInstance();
-        final Uri contentUri = application.getSharedFileContentUri(kmlFile);
-        String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension("kml");
+        final Uri contentUri = application.getSharedFileContentUri(geoFile);
+        final String fileName = geoFile.getName();
+        final int lastDot = fileName.lastIndexOf('.');
+        final String ext = lastDot < 0 ? "" : fileName.substring(lastDot + 1);
+        String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
+        if (mimeType == null)
+            mimeType = "application/" + ext + "+xml";
         final Intent intent = new Intent(Intent.ACTION_VIEW)
                 .setDataAndType(contentUri, mimeType)
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
