@@ -54,6 +54,7 @@ import android.text.style.RelativeSizeSpan;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -415,10 +416,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         actionBar.addButton(R.drawable.ic_share_white_24dp, R.string.directions_trip_details_action_share_title)
                 .setOnClickListener(v -> {
                     final PopupMenu popupMenu = new PopupMenu(TripDetailsActivity.this, v);
-                    popupMenu.inflate(R.menu.directions_trip_details_action_share);
+                    final Menu menu = popupMenu.getMenu();
+                    new MenuInflater(this).inflate(R.menu.directions_trip_details_action_share, menu);
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
                         popupMenu.setForceShowIcon(true);
-                    final Menu menu = popupMenu.getMenu();
                     if (isShareCalendarVisible)
                         menu.findItem(R.id.directions_trip_details_action_add_to_calendar).setVisible(true);
                     popupMenu.setOnMenuItemClickListener(item -> {
