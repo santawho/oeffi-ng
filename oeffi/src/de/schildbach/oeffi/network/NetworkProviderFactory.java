@@ -101,7 +101,7 @@ public final class NetworkProviderFactory extends de.schildbach.pte.NetworkProvi
         addConfigurator(VrsProvider.class, () -> new VrsProvider(VRS_CLIENT_CERTIFICATE));
         addConfigurator(DbHafasProvider.Fernverkehr.class, () -> new DbHafasProvider.Fernverkehr("{\"type\":\"AID\",\"aid\":\"n91dB8Z77MLdoR0K\"}", "bdI8UVj40K5fvxwf".getBytes(StandardCharsets.UTF_8)));
         addConfigurator(DbHafasProvider.Regio.class, () -> new DbHafasProvider.Regio("{\"type\":\"AID\",\"aid\":\"n91dB8Z77MLdoR0K\"}", "bdI8UVj40K5fvxwf".getBytes(StandardCharsets.UTF_8)));
-        addConfigurator(BvgProvider.class, () -> new BvgProvider("{\"aid\":\"1Rxs112shyHLatUX4fofnmdxK\",\"type\":\"AID\"}"));
+        addConfigurator(BvgProvider.Legacy.class, () -> new BvgProvider.Legacy("{\"aid\":\"1Rxs112shyHLatUX4fofnmdxK\",\"type\":\"AID\"}"));
         addConfigurator(VbbProvider.class, () -> new VbbProvider("{\"type\":\"AID\",\"aid\":\"hafas-vbb-apps\"}"));
         addConfigurator(NvvProvider.class, () -> new NvvProvider("{\"type\":\"AID\",\"aid\":\"Kt8eNOH7qjVeSxNA\"}"));
 //        addConfigurator(RmvProvider.class, () -> new RmvProvider("{\"type\":\"AID\",\"aid\":\"ikfr894fkfddXxA0U\"}"));
