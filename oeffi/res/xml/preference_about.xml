@@ -67,9 +67,14 @@
             android:title="@string/about_download_apk_title">
         </Preference>
         <Preference
-            android:key="about_share"
-            android:summary="@string/about_share_summary"
-            android:title="@string/about_share_title" >
+            android:key="about_share_installation_instructions"
+            android:summary="@string/about_share_installation_instructions_summary"
+            android:title="@string/about_share_installation_instructions_title" >
+        </Preference>
+        <Preference
+            android:key="about_share_apk"
+            android:summary="@string/about_share_apk_summary"
+            android:title="@string/about_share_apk_title" >
         </Preference>
         <Preference
             android:key="about_show_qr"

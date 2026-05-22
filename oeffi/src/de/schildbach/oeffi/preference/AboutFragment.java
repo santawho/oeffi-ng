@@ -17,13 +17,10 @@
 
 package de.schildbach.oeffi.preference;
 
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.preference.Preference;
-import androidx.preference.PreferenceManager;
-import androidx.preference.PreferenceScreen;
 
 import java.io.IOException;
 
@@ -51,7 +48,8 @@ public class AboutFragment extends PreferenceFragment {
     private static final String KEY_ABOUT_DOWNLOAD_APK = "about_download_apk";
     private static final String KEY_ABOUT_CHECK_UPDATE = "about_check_update";
     private static final String KEY_ABOUT_UPDATE = "about_update";
-    private static final String KEY_ABOUT_SHARE = "about_share";
+    private static final String KEY_ABOUT_SHARE_APK = "about_share_apk";
+    private static final String KEY_ABOUT_SHARE_INSTRUCTIONS = "about_share_installation_instructions";
     private static final String KEY_ABOUT_SHOW_QR = "about_show_qr";
 
     @Override
@@ -85,13 +83,15 @@ public class AboutFragment extends PreferenceFragment {
             setupActionPreference(KEY_ABOUT_CHECK_UPDATE, AboutFragment.class, CheckUpdateHandler.class);
             setupActionPreference(KEY_ABOUT_UPDATE, AboutFragment.class, InstallHandler.class);
             setupActionPreference(KEY_ABOUT_DOWNLOAD_APK, AboutFragment.class, DownloadApkHandler.class);
-            setupActionPreference(KEY_ABOUT_SHARE, AboutFragment.class, ShareActionHandler.class);
+            setupActionPreference(KEY_ABOUT_SHARE_APK, AboutFragment.class, ShareApkFileActionHandler.class);
+            setupActionPreference(KEY_ABOUT_SHARE_INSTRUCTIONS, AboutFragment.class, ShareInstallationInstructionsActionHandler.class);
             setupActionPreference(KEY_ABOUT_SHOW_QR, AboutFragment.class, ShowQrActionHandler.class);
         } else {
             removeOrDisablePreference(KEY_ABOUT_CHECK_UPDATE);
             removeOrDisablePreference(KEY_ABOUT_UPDATE);
             removeOrDisablePreference(KEY_ABOUT_DOWNLOAD_APK);
-            removeOrDisablePreference(KEY_ABOUT_SHARE);
+            removeOrDisablePreference(KEY_ABOUT_SHARE_APK);
+            removeOrDisablePreference(KEY_ABOUT_SHARE_INSTRUCTIONS);
             removeOrDisablePreference(KEY_ABOUT_SHOW_QR);
             removeOrDisablePreference(KEY_ABOUT_SHOW_QR);
             removeOrDisablePreference(KEY_ABOUT_APP_UPDATE_CATEGORY);
@@ -149,10 +149,18 @@ public class AboutFragment extends PreferenceFragment {
         }
     }
 
-    public static class ShareActionHandler extends ActionHandler {
+    public static class ShareApkFileActionHandler extends ActionHandler {
         @Override
         public boolean handleAction(final PreferenceActivity context, final String prefkey) {
-            Application.getInstance().shareApp(context);
+            Application.getInstance().shareApp(context, true);
+            return true;
+        }
+    }
+
+    public static class ShareInstallationInstructionsActionHandler extends ActionHandler {
+        @Override
+        public boolean handleAction(final PreferenceActivity context, final String prefkey) {
+            Application.getInstance().shareApp(context, false);
             return true;
         }
     }
@@ -160,7 +168,7 @@ public class AboutFragment extends PreferenceFragment {
     public static class ShowQrActionHandler extends ActionHandler {
         @Override
         public boolean handleAction(final PreferenceActivity context, final String prefkey) {
-            Application.getInstance().showImageDialog(context, R.drawable.qr_update,
+            Application.getInstance().showImageDialog(context, R.drawable.qr_wiki,
                     dialog -> dismissParentingActivity(context));
             return false;
         }

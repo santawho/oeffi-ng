@@ -6,6 +6,7 @@
     <string name="about_git_url" translatable="false">https://gitlab.com/oeffi/oeffi</string>
     <string name="about_forum_url" translatable="false">https://matrix.to/#/#öffi:schildbach.de</string>
     <string name="about_changelog_url" translatable="false" />
+    <string name="about_install_instructions_url" translatable="false" />
     <string name="about_update_apk_url" translatable="false" />
     <string name="about_update_manifest_url" translatable="false" />
     <string name="about_update_modified" translatable="false" />

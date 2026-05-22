@@ -51,6 +51,13 @@ public class AppInstaller {
         return apkUrl;
     }
 
+    public static String getInstructionsUrl() {
+        final Application application = Application.getInstance();
+        final String url = application.getString(R.string.about_install_instructions_url);
+        log.info("instructions url = {}", url);
+        return url;
+    }
+
     public static String getInstallerPackageName() {
         final Application application = Application.getInstance();
         return application.getPackageManager().getInstallerPackageName(application.getPackageName());

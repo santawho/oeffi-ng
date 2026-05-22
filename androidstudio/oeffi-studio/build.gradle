@@ -102,6 +102,7 @@ android {
             resValue "string", "about_git_url", "${CREDENTIALS.github_url}"
             resValue "string", "about_forum_url", "${CREDENTIALS.forum_url}"
             resValue "string", "about_changelog_url", "${CREDENTIALS.github_url}/wiki"
+            resValue "string", "about_install_instructions_url", "${CREDENTIALS.github_url}/wiki"
             resValue "string", "about_update_apk_url", "${CREDENTIALS.github_release_url}/${CREDENTIALS.asset_name_apk_file}"
             resValue "string", "about_update_manifest_url", "${CREDENTIALS.github_release_url}/${CREDENTIALS.asset_name_manifest}"
             resValue "string", "about_update_modified", timeModifiedStr  // If-Modified-Since: xxx, 25 Feb 2025 17:10:00 GMT
@@ -114,7 +115,7 @@ android {
             resValue "string", "plans_base_default_url", "https://santawho.github.io/oeffi-web/plans"
             resValue "string", "messages_base_default_url", "https://santawho.github.io/oeffi-web/messages"
             resValue "string", "messages_file_url", "messages-ng.txt"
-            resValue "string", "download_html_url", "https://github.com/santawho/oeffi-ng/wiki"
+            resValue "string", "download_html_url", "${CREDENTIALS.github_url}/wiki"
             resValue "string", "oeffi_original_version_name", "${CREDENTIALS.oeffiOriginalVersionName}"
             resValue "integer", "oeffi_original_version_code", "${CREDENTIALS.oeffiOriginalVersionCode}"
             resValue "bool", "flags_show_twitter", "false"

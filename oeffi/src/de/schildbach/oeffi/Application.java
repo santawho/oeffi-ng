@@ -620,12 +620,13 @@ public class Application extends android.app.Application {
         return configuration;
     }
 
-    public void shareApp(final Activity contextActivity) {
+    public void shareApp(final Activity contextActivity, final boolean apkFile) {
         if (!AppInstaller.isApkUrlAvailable())
             return;
         final String shareTitle = getShareTitle();
+        final String url = apkFile ? AppInstaller.getApkUrl() : AppInstaller.getInstructionsUrl();
         final String shareText = getString(R.string.global_options_share_app_text,
-                Application.getInstance().getAppName(), AppInstaller.getApkUrl());
+                Application.getInstance().getAppName(), url);
         final Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);

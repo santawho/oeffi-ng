@@ -655,11 +655,11 @@ public abstract class OeffiActivity extends AppCompatActivity
             ((TextView) findViewById(R.id.navigation_drawer_share_title)).setText(application.getShareTitle());
             drawerView.setOnClickListener(v -> {
                 closeNavigation();
-                application.shareApp(this);
+                application.shareApp(this, false);
             });
             findViewById(R.id.navigation_drawer_share_qrcode).setOnClickListener(v -> {
                 closeNavigation();
-                application.showImageDialog(this, R.drawable.qr_update, null);
+                application.showImageDialog(this, R.drawable.qr_wiki, null);
             });
         }
 

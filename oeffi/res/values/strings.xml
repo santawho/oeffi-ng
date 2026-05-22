@@ -113,8 +113,10 @@
     <string name="about_update_summary">Download and install latest version</string>
     <string name="about_download_apk_title">Download APK</string>
     <string name="about_download_apk_summary">Download latest APK file</string>
-    <string name="about_share_title">Share</string>
-    <string name="about_share_summary">Send link to share the app with remote friends</string>
+    <string name="about_share_installation_instructions_title">Share Installation Instructions</string>
+    <string name="about_share_installation_instructions_summary">Send link to share installation instructions with remote friends</string>
+    <string name="about_share_apk_title">Share APK File</string>
+    <string name="about_share_apk_summary">Send link to share the APK file with remote friends</string>
     <string name="about_show_qr_title">Show QR</string>
     <string name="about_show_qr_summary">Show QR code to share the app with a local friend</string>
     <string name="about_participate_title">Participate</string>

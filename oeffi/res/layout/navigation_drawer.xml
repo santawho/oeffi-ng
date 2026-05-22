@@ -108,7 +108,7 @@
                 android:scaleType="fitCenter"
                 android:adjustViewBounds="true"
                 android:gravity="center"
-                android:src="@drawable/qr_update"/>
+                android:src="@drawable/qr_wiki"/>
         </LinearLayout>
         <LinearLayout
             android:id="@+id/navigation_drawer_footer"

@@ -113,8 +113,10 @@
     <string name="about_update_summary">Herunterladen und installieren der aktuellen Version</string>
     <string name="about_download_apk_title">APK herunterladen</string>
     <string name="about_download_apk_summary">Download der aktuellen APK Datei</string>
-    <string name="about_share_title">Teilen</string>
-    <string name="about_share_summary">Sende einen Link zum Teilen der App an entfernte Freunde</string>
+    <string name="about_share_installation_instructions_title">Installations-Anweisung teilen</string>
+    <string name="about_share_installation_instructions_summary">Sende einen Link zum Teilen der Installations-Anweisung an entfernte Freunde</string>
+    <string name="about_share_apk_title">APK-Datei teilen</string>
+    <string name="about_share_apk_summary">Sende einen Link zum Teilen der APK-Datei an entfernte Freunde</string>
     <string name="about_show_qr_title">Zeige QR</string>
     <string name="about_show_qr_summary">Zeige einen QR Code zum Teilen der App mit einem Freund vor Ort</string>
     <string name="about_participate_title">Mitmachen</string>
