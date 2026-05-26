@@ -128,6 +128,9 @@ public class FavoriteStationViewHolder extends RecyclerView.ViewHolder {
             }
             return false;
         });
+        contextMenu.setOnDismissListener(menu -> {
+            contextMenu = null;
+        });
         contextMenu.show();
     }
 }
