@@ -29,6 +29,7 @@ import java.util.List;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.pte.NetworkId;
+import de.schildbach.pte.dto.PTDate;
 import de.schildbach.pte.dto.Point;
 import de.schildbach.pte.provider.NetworkProvider;
 import de.schildbach.pte.dto.JourneyRef;
@@ -103,90 +104,87 @@ public class Navigator {
 
     private Trip.Public updatePublicLeg(final Trip.Public oldLeg, final boolean forceRefresh, final Date now) throws IOException {
         final NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
-        Trip.Public newLeg = oldLeg;
         final JourneyRef journeyRef = oldLeg.journeyRef;
-        if (journeyRef != null) {
-            final long nowTime = now.getTime();
-            final long legLoadedAt = oldLeg.loadedAt.getTime();
-            final long legBeginMinTime = oldLeg.departureStop.getDepartureTime(true).getTime();
-            final long legBeginMaxTime = oldLeg.departureStop.getDepartureTime(false).getTime();
-            final long legEndMinTime = oldLeg.arrivalStop.getArrivalTime(true).getTime();
-            final long legEndMaxTime = oldLeg.arrivalStop.getArrivalTime(false).getTime();
+        if (journeyRef == null)
+            return oldLeg;
+        final long nowTime = now.getTime();
+        final long legLoadedAt = oldLeg.loadedAt.getTime();
+        final long legBeginMinTime = oldLeg.departureStop.getDepartureTime(true).getTime();
+        final long legBeginMaxTime = oldLeg.departureStop.getDepartureTime(false).getTime();
+        final long legEndMinTime = oldLeg.arrivalStop.getArrivalTime(true).getTime();
+        final long legEndMaxTime = oldLeg.arrivalStop.getArrivalTime(false).getTime();
 
-            boolean doRefresh = forceRefresh;
-            if (!doRefresh) {
-                final long nextEventTime;
-                long nextRefreshTimeA = Long.MAX_VALUE;
-                if (nowTime < legBeginMinTime) {
-                    // leg yet to begin
-                    nextEventTime = legBeginMinTime;
-                } else if (nowTime < legEndMaxTime) {
-                    // leg active
-                    if (nowTime < legBeginMaxTime + 300000) {
-                        // still within 5 minutes after begin
-                        nextRefreshTimeA = legLoadedAt + 60000;
-                    }
-                    nextEventTime = legEndMinTime;
-                } else {
-                    // leg over
-                    if (nowTime < legEndMaxTime + 300000) {
-                        // still within 5 minutes after end
-                        nextRefreshTimeA = legLoadedAt + 60000;
-                    }
-                    nextEventTime = 0;
+        boolean doRefresh = forceRefresh;
+        if (!doRefresh) {
+            final long nextEventTime;
+            long nextRefreshTimeA = Long.MAX_VALUE;
+            if (nowTime < legBeginMinTime) {
+                // leg yet to begin
+                nextEventTime = legBeginMinTime;
+            } else if (nowTime < legEndMaxTime) {
+                // leg active
+                if (nowTime < legBeginMaxTime + 300000) {
+                    // still within 5 minutes after begin
+                    nextRefreshTimeA = legLoadedAt + 60000;
                 }
-
-                long nextRefreshTime = Long.MAX_VALUE;
-                if (nextEventTime > 0) {
-                    final long timeLeft = nextEventTime - nowTime;
-                    if (timeLeft < 240000) {
-                        // last 4 minutes and after, 30 secs refresh interval
-                        nextRefreshTime = legLoadedAt + 30000;
-                    } else if (timeLeft < 600000) {
-                        // last 10 minutes and after, 60 secs refresh interval
-                        nextRefreshTime = legLoadedAt + 60000;
-                    } else {
-                        // approaching, refresh after 25% of the remaining time
-                        nextRefreshTime = nowTime + timeLeft / 4;
-                    }
-                }
-                if (nextRefreshTimeA < nextRefreshTime)
-                    nextRefreshTime = nextRefreshTimeA;
-
-                if (nextRefreshTime <= nowTime)
-                    doRefresh = true;
-
-                if (doRefresh) {
-                    log.info("updating leg loaded {} secs ago, required since {} secs ago, begin at {}/{}, end at {}/{}",
-                            (nowTime - legLoadedAt) / 1000, (nowTime - nextRefreshTime) / 1000,
-                            LOG_TIME_FORMAT.format(new Date(legBeginMinTime)), LOG_TIME_FORMAT.format(new Date(legBeginMaxTime)),
-                            LOG_TIME_FORMAT.format(new Date(legEndMinTime)), LOG_TIME_FORMAT.format(new Date(legEndMaxTime)));
-                } else {
-                    oldLeg.updateDelayedUntil = new Date(nextRefreshTime);
-                    log.info("not updating leg loaded {} secs ago, required in {} secs, begin at {}/{}, end at {}/{}",
-                            (nowTime - legLoadedAt) / 1000, (nextRefreshTime - nowTime) / 1000,
-                            LOG_TIME_FORMAT.format(new Date(legBeginMinTime)), LOG_TIME_FORMAT.format(new Date(legBeginMaxTime)),
-                            LOG_TIME_FORMAT.format(new Date(legEndMinTime)), LOG_TIME_FORMAT.format(new Date(legEndMaxTime)));
-                }
+                nextEventTime = legEndMinTime;
             } else {
-                log.info("force updating leg, begin at {}/{}, end at {}/{}",
+                // leg over
+                if (nowTime < legEndMaxTime + 300000) {
+                    // still within 5 minutes after end
+                    nextRefreshTimeA = legLoadedAt + 60000;
+                }
+                nextEventTime = 0;
+            }
+
+            long nextRefreshTime = Long.MAX_VALUE;
+            if (nextEventTime > 0) {
+                final long timeLeft = nextEventTime - nowTime;
+                if (timeLeft < 240000) {
+                    // last 4 minutes and after, 30 secs refresh interval
+                    nextRefreshTime = legLoadedAt + 30000;
+                } else if (timeLeft < 600000) {
+                    // last 10 minutes and after, 60 secs refresh interval
+                    nextRefreshTime = legLoadedAt + 60000;
+                } else {
+                    // approaching, refresh after 25% of the remaining time
+                    nextRefreshTime = nowTime + timeLeft / 4;
+                }
+            }
+            if (nextRefreshTimeA < nextRefreshTime)
+                nextRefreshTime = nextRefreshTimeA;
+
+            if (nextRefreshTime <= nowTime)
+                doRefresh = true;
+
+            if (doRefresh) {
+                log.info("updating leg loaded {} secs ago, required since {} secs ago, begin at {}/{}, end at {}/{}",
+                        (nowTime - legLoadedAt) / 1000, (nowTime - nextRefreshTime) / 1000,
+                        LOG_TIME_FORMAT.format(new Date(legBeginMinTime)), LOG_TIME_FORMAT.format(new Date(legBeginMaxTime)),
+                        LOG_TIME_FORMAT.format(new Date(legEndMinTime)), LOG_TIME_FORMAT.format(new Date(legEndMaxTime)));
+            } else {
+                oldLeg.updateDelayedUntil = new Date(nextRefreshTime);
+                log.info("not updating leg loaded {} secs ago, required in {} secs, begin at {}/{}, end at {}/{}",
+                        (nowTime - legLoadedAt) / 1000, (nextRefreshTime - nowTime) / 1000,
                         LOG_TIME_FORMAT.format(new Date(legBeginMinTime)), LOG_TIME_FORMAT.format(new Date(legBeginMaxTime)),
                         LOG_TIME_FORMAT.format(new Date(legEndMinTime)), LOG_TIME_FORMAT.format(new Date(legEndMaxTime)));
             }
-            if (doRefresh) {
-                final boolean mustLoadPath = oldLeg.getPath() == null;
-                final QueryJourneyResult result = networkProvider.queryJourney(journeyRef, mustLoadPath);
-                if (result != null
-                        && result.status == QueryJourneyResult.Status.OK
-                        && result.journeyLeg != null) {
-                    newLeg = buildUpdatedLeg(oldLeg, result.journeyLeg, now);
-                } else {
-                    // signal error
-                    newLeg = null;
-                }
-            }
+        } else {
+            log.info("force updating leg, begin at {}/{}, end at {}/{}",
+                    LOG_TIME_FORMAT.format(new Date(legBeginMinTime)), LOG_TIME_FORMAT.format(new Date(legBeginMaxTime)),
+                    LOG_TIME_FORMAT.format(new Date(legEndMinTime)), LOG_TIME_FORMAT.format(new Date(legEndMaxTime)));
         }
-        return newLeg;
+        if (!doRefresh)
+            return oldLeg;
+        final boolean mustLoadPath = oldLeg.getPath() == null;
+        final QueryJourneyResult result = networkProvider.queryJourney(journeyRef, mustLoadPath);
+        if (result == null
+                || result.status != QueryJourneyResult.Status.OK
+                || result.journeyLeg == null) {
+            // signal error
+            return null;
+        }
+        return buildUpdatedLeg(oldLeg, result.journeyLeg, now);
     }
 
     public static Trip.Public buildUpdatedLeg(
@@ -200,15 +198,27 @@ public class Navigator {
         journeyStops.add(journeyLeg.arrivalStop);
 
         final int numStops = journeyStops.size();
+
+        final long initialDepartureTime = initialLeg.departureStop.getDepartureTime(true).getTime();
         int departureIndex = -1;
         final String depId = initialLeg.departureStop.location.id;
         if (depId != null) {
             // find original departure by ID
+            long minTimeDiff = Long.MAX_VALUE;
             for (int index = 0; index < numStops; ++index) {
                 final Stop stop = journeyStops.get(index);
-                if (depId.equals(stop.location.id)) {
-                    departureIndex = index;
-                    break;
+                if (!depId.equals(stop.location.id))
+                    continue;
+                final PTDate depTime = stop.getDepartureTime(true);
+                if (depTime == null) {
+                    if (departureIndex < 0)
+                        departureIndex = index;
+                } else {
+                    final long timeDiff = Math.abs(depTime.getTime() - initialDepartureTime);
+                    if (timeDiff < minTimeDiff) {
+                        departureIndex = index;
+                        minTimeDiff = timeDiff;
+                    }
                 }
             }
         }
@@ -222,13 +232,19 @@ public class Navigator {
                 for (int index = 0; index < numStops; ++index) {
                     final Stop stop = journeyStops.get(index);
                     final Point locCoord = stop.location.coord;
-                    if (locCoord != null) {
-                        final double dist = GeoUtils.geoDistanceInMeters(depCoord, locCoord);
-                        if (dist < minDist) {
-                            departureIndex = index;
-                            minDist = dist;
-                        }
+                    if (locCoord == null)
+                        continue;
+                    final double dist = GeoUtils.geoDistanceInMeters(depCoord, locCoord);
+                    if (dist >= minDist)
+                        continue;
+                    final PTDate depTime = stop.getDepartureTime(true);
+                    if (depTime != null) {
+                        final long timeDiff = Math.abs(depTime.getTime() - initialDepartureTime);
+                        if (timeDiff > 120000)
+                            continue;
                     }
+                    departureIndex = index;
+                    minDist = dist;
                 }
             }
         }
@@ -242,15 +258,26 @@ public class Navigator {
             throw new RuntimeException("unable to find departure stop in reloaded journey");
         }
 
+        final long initialArrivalTime = initialLeg.arrivalStop.getArrivalTime(true).getTime();
         int arrivalIndex = -1;
         final String arrId = initialLeg.arrivalStop.location.id;
         if (arrId != null) {
             // find original arrival by ID
+            long minTimeDiff = Long.MAX_VALUE;
             for (int index = departureIndex + 1; index < numStops; ++index) {
                 final Stop stop = journeyStops.get(index);
-                if (arrId.equals(stop.location.id)) {
-                    arrivalIndex = index;
-                    break;
+                if (!arrId.equals(stop.location.id))
+                    continue;
+                final PTDate arrTime = stop.getArrivalTime(true);
+                if (arrTime == null) {
+                    if (arrivalIndex < 0)
+                        arrivalIndex = index;
+                } else {
+                    final long timeDiff = Math.abs(arrTime.getTime() - initialArrivalTime);
+                    if (timeDiff < minTimeDiff) {
+                        arrivalIndex = index;
+                        minTimeDiff = timeDiff;
+                    }
                 }
             }
         }
@@ -262,13 +289,19 @@ public class Navigator {
                 for (int index = 0; index < numStops; ++index) {
                     final Stop stop = journeyStops.get(index);
                     final Point locCoord = stop.location.coord;
-                    if (locCoord != null) {
-                        final double dist = GeoUtils.geoDistanceInMeters(arrCoord, locCoord);
-                        if (dist < minDist) {
-                            arrivalIndex = index;
-                            minDist = dist;
-                        }
+                    if (locCoord == null)
+                        continue;
+                    final double dist = GeoUtils.geoDistanceInMeters(arrCoord, locCoord);
+                    if (dist >= minDist)
+                        continue;
+                    final PTDate arrTime = stop.getArrivalTime(true);
+                    if (arrTime != null) {
+                        final long timeDiff = Math.abs(arrTime.getTime() - initialArrivalTime);
+                        if (timeDiff > 120000)
+                            continue;
                     }
+                    arrivalIndex = index;
+                    minDist = dist;
                 }
             }
         }
