@@ -2467,7 +2467,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                         : pearlType == PearlView.Type.ARRIVAL_FOR_INTERMEDIATE_DEPARTURE
                         ? getString(R.string.directions_trip_details_arrival_row_name_format, uniqueShortName)
                         : uniqueShortName), Html.FROM_HTML_MODE_COMPACT));
-        setStrikeThru(stopNameView, isCancelled);
+        ViewUtils.setCanceledStrikeThru(stopNameView, isCancelled);
         if (highlightLocation) {
             stopNameView.setTextColor(colorHighlighted);
             stopNameView.setTypeface(null, Typeface.BOLD);
@@ -2572,7 +2572,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
             final String timeText = Formats.formatTime(timeZoneSelector, displayTime);
             stopTimeProvidedView.setText(isTimeDeparture ? timeText + "°" : timeText);
-            setStrikeThru(stopTimeProvidedView, isCancelled);
+            ViewUtils.setCanceledStrikeThru(stopTimeProvidedView, isCancelled);
             stopDateProvidedView.setTextColor(stopTimeColor);
             stopTimeProvidedView.setTextColor(stopTimeColor);
             final boolean stopTimeBold = highlightTime || (renderConfig.isJourney ? isEntryOrExit
@@ -2594,7 +2594,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
             final String timeText = Formats.formatTime(timeZoneSelector, displayTime);
             stopTimeSimulatedView.setText(isTimeDeparture ? timeText + "°" : timeText);
-            setStrikeThru(stopTimeSimulatedView, isCancelled);
+            ViewUtils.setCanceledStrikeThru(stopTimeSimulatedView, isCancelled);
             final boolean stopTimeBold = highlightTime || (renderConfig.isJourney ? isEntryOrExit
                     : (pearlType == PearlView.Type.DEPARTURE || pearlType == PearlView.Type.ARRIVAL));
             stopDateSimulatedView.setTypeface(null, (highlightTime ? Typeface.BOLD : 0) + (isTimePredicted ? Typeface.ITALIC : 0));
@@ -2829,13 +2829,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         pearlView.setFontMetrics(stopNameView.getPaint().getFontMetrics());
 
         return row;
-    }
-
-    private void setStrikeThru(final TextView view, final boolean strikeThru) {
-        if (strikeThru)
-            view.setPaintFlags(view.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-        else
-            view.setPaintFlags(view.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
     }
 
     protected StopClickListener newStopClickListener(

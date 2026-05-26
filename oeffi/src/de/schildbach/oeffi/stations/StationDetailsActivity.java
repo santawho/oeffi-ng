@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
-import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
@@ -90,7 +89,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1016,7 +1014,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             // time rel
             timeRelView.setText(Formats.formatTimeDiff(context, referenceTime, timeMillis, refIsNow));
             timeRelView.setTypeface(Typeface.DEFAULT, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
-            setStrikeThru(timeRelView, cancelled);
+            ViewUtils.setCanceledStrikeThru(timeRelView, cancelled);
 
             // time abs
             final PTDate displayTime = timeZoneSelector.getDisplay(time);
@@ -1026,7 +1024,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             timeAbs.append(Formats.formatTime(timeZoneSelector, displayTime));
             timeAbsView.setText(timeAbs);
             timeAbsView.setTypeface(Typeface.DEFAULT, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
-            setStrikeThru(timeAbsView, cancelled);
+            ViewUtils.setCanceledStrikeThru(timeAbsView, cancelled);
 
             // delay
             final long delay = predictedTime != null && plannedTime != null
@@ -1034,11 +1032,11 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             final long delayMins = delay / DateUtils.MINUTE_IN_MILLIS;
             delayView.setText(delayMins != 0 ? String.format(Locale.US, "(%+d)", delayMins) + ' ' : "");
             delayView.setTypeface(Typeface.DEFAULT, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
-            setStrikeThru(delayView, cancelled);
+            ViewUtils.setCanceledStrikeThru(delayView, cancelled);
 
             // line
             lineView.setLine(departure.line);
-            setStrikeThru(lineView, cancelled);
+            ViewUtils.setCanceledStrikeThru(lineView, cancelled);
 
             // destination
             final Location destination = departure.destination;
@@ -1046,8 +1044,8 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 destinationView.setText(Constants.DESTINATION_ARROW_PREFIX + Formats.fullLocationNameIfDifferentPlace(destination, station));
 //                itemView.setOnClickListener(destination.id == null ? null : v ->
 //                        start(context, network, destination, null, null));
-                setStrikeThru(destinationView, cancelled);
-                setStrikeThru(destinationOverflowView, cancelled);
+                ViewUtils.setCanceledStrikeThru(destinationView, cancelled);
+                ViewUtils.setCanceledStrikeThru(destinationOverflowView, cancelled);
             } else {
                 destinationView.setText(null);
 //                itemView.setOnClickListener(null);
@@ -1079,7 +1077,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                         position.equals(departure.plannedPosition)
                                 ? R.color.bg_position
                                 : R.color.bg_position_changed));
-                setStrikeThru(positionView, cancelled);
+                ViewUtils.setCanceledStrikeThru(positionView, cancelled);
             } else {
                 positionView.setVisibility(View.GONE);
             }
@@ -1125,13 +1123,6 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             final Spanned html = Html.fromHtml(HtmlUtils.makeLinksClickableInHtml(displayMessage), Html.FROM_HTML_MODE_COMPACT);
             msgView.setText(html);
             msgView.setMovementMethod(LinkMovementMethod.getInstance());
-        }
-
-        private void setStrikeThru(final TextView view, final boolean strikeThru) {
-            if (strikeThru)
-                view.setPaintFlags(view.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-            else
-                view.setPaintFlags(view.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
         }
 
         private void capacity(final TextView capacityView, final int capacity) {

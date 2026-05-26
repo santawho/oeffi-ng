@@ -106,6 +106,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
     private final Paint publicTimePaint = new Paint();
     private final Paint publicTimeDiffPaint = new Paint();
     private final Paint positionPaint = new Paint();
+    private final Paint strikeThruPaint = new Paint();
     private final Paint plannedPositionPaintBackground = new Paint();
     private final Paint changedPositionPaintBackground = new Paint();
     private final Paint feederStrokePaint = new Paint();
@@ -217,6 +218,8 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         positionPaint.setTextSize(res.getDimension(R.dimen.font_size_large));
         positionPaint.setAntiAlias(true);
         positionPaint.setTextAlign(Align.CENTER);
+
+        strikeThruPaint.setColor(res.getColor(R.color.fg_canceled_strikethru));
 
         feederStrokePaint.setStyle(Paint.Style.STROKE);
         feederStrokePaint.setColor(res.getColor(R.color.fg_trip_leg_frame_feeder));
@@ -873,23 +876,20 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                         scale = 1f;
                     publicLabelPaint.setTextSize(24f / scale * density);
                     publicLabelPaint.setTextScaleX(scale);
-
-                    if (departureCancelled || arrivalCancelled)
-                        publicLabelPaint.setFlags(publicLabelPaint.getFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                    else
-                        publicLabelPaint.setFlags(publicLabelPaint.getFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
+                    final boolean cancelled = departureCancelled || arrivalCancelled;
+                    publicLabelPaint.setStrikeThruText(cancelled);
 
                     // draw really centered on line box
                     if (scale < 4f) {
                         publicLabelPaint.getTextBounds(lineLabels[0], 0, lineLabels[0].length(), bounds);
                         if (lineLabels.length == 1) {
                             final int halfHeight = -bounds.centerY();
-                            canvas.drawText(lineLabels[0], legBox.centerX(), legBox.centerY() + halfHeight,
+                            drawText(canvas, lineLabels[0], legBox.centerX(), legBox.centerY() + halfHeight,
                                     publicLabelPaint);
                         } else {
-                            canvas.drawText(lineLabels[0], legBox.centerX(), legBox.centerY() - lineSpacing / 2,
+                            drawText(canvas, lineLabels[0], legBox.centerX(), legBox.centerY() - lineSpacing / 2,
                                     publicLabelPaint);
-                            canvas.drawText(lineLabels[1], legBox.centerX(),
+                            drawText(canvas, lineLabels[1], legBox.centerX(),
                                     legBox.centerY() + bounds.height() + lineSpacing / 2, publicLabelPaint);
                         }
                     }
@@ -921,28 +921,25 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         private int drawTime(
                 final Canvas canvas, final int centerX, final int aY, final int height, final boolean above,
                 final Paint paint, final boolean strikeThru, final PTDate time) {
-            final String str = Formats.formatTime(context.getTimeZoneSelector(), time);
+            paint.setStrikeThruText(strikeThru);
 
+            final String str = Formats.formatTime(context.getTimeZoneSelector(), time);
             final FontMetrics metrics = paint.getFontMetrics();
             final float fontHeight = (-metrics.ascent + metrics.descent); // + 4 * density;
 
-            if (strikeThru)
-                paint.setFlags(paint.getFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-            else
-                paint.setFlags(paint.getFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
-
             final float y = aY;
             if (above) {
-                canvas.drawText(str, centerX, y - metrics.descent, paint);
+                drawText(canvas, str, centerX, y - metrics.descent, paint);
                 return (int) (y - fontHeight);
             } else {
-                canvas.drawText(str, centerX, y  - metrics.ascent, paint);
+                drawText(canvas, str, centerX, y  - metrics.ascent, paint);
                 return (int) (y + fontHeight);
             }
         }
 
         private int drawRemaining(final Canvas canvas, final int centerX, final int y, final int height, final boolean above,
                               final Paint paint, final boolean strikeThru, final long timeDiff) {
+            paint.setStrikeThruText(strikeThru);
             final FontMetrics metrics = paint.getFontMetrics();
 
             String str;
@@ -954,17 +951,12 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             }
             str = (timeDiff >= 0 ? "+" : "-") + str;
 
-            if (strikeThru)
-                paint.setFlags(paint.getFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-            else
-                paint.setFlags(paint.getFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
-
             final float fontHeight = (-metrics.ascent + metrics.descent); // + 4 * density;
             if (above) {
-                canvas.drawText(str, centerX, y - metrics.descent, paint);
+                drawText(canvas, str, centerX, y - metrics.descent, paint);
                 return (int) (y - fontHeight);
             } else {
-                canvas.drawText(str, centerX, y - metrics.ascent, paint);
+                drawText(canvas, str, centerX, y - metrics.ascent, paint);
                 return (int) (y + fontHeight);
             }
         }
@@ -977,9 +969,9 @@ public final class TripsGalleryAdapter extends BaseAdapter {
                 final int direction,
                 final String name,
                 final boolean isChanged) {
+            // positionPaint.setStrikeThruText(false);
             final FontMetrics metrics = positionPaint.getFontMetrics();
 
-            positionPaint.setFlags(positionPaint.getFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
             final float fontHeight = (-metrics.ascent + metrics.descent); // + 4 * density;
             positionPaint.getTextBounds(name, 0, name.length(), bounds);
             bounds.inset(-positionPaddingHorizontal, -positionPaddingVertical);
@@ -987,18 +979,18 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             if (direction <= -2) {
                 bounds.offsetTo(centerX - bounds.width() / 2, (int) (y - fontHeight));
                 canvas.drawRect(bounds, positionPaintBackground);
-                canvas.drawText(name, centerX, y - metrics.descent, positionPaint);
+                drawText(canvas, name, centerX, y - metrics.descent, positionPaint);
                 return (int) (y - fontHeight);
             } else if (direction >= 2) {
                 bounds.offsetTo(centerX - bounds.width() / 2, y);
                 canvas.drawRect(bounds, positionPaintBackground);
-                canvas.drawText(name, centerX, y + fontHeight - metrics.descent, positionPaint);
+                drawText(canvas, name, centerX, y + fontHeight - metrics.descent, positionPaint);
                 return (int) (y + fontHeight);
             } else {
                 final int fh = (int) (fontHeight / 2);
                 bounds.offsetTo(centerX - bounds.width() / 2, y - fh);
                 canvas.drawRect(bounds, positionPaintBackground);
-                canvas.drawText(name, centerX, y + fh - metrics.descent, positionPaint);
+                drawText(canvas, name, centerX, y + fh - metrics.descent, positionPaint);
                 return direction < 0 ? y - fh : y + fh;
             }
         }
@@ -1041,6 +1033,30 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             final int height = MeasureSpec.getSize(hMeasureSpec);
 
             setMeasuredDimension(width, height);
+        }
+    }
+
+    private void drawText(
+            final Canvas canvas,
+            final String text,
+            final float x,
+            final float y,
+            final Paint paint) {
+        canvas.drawText(text, x, y, paint);
+        if (paint.isStrikeThruText()) {
+            final FontMetrics fontMetrics = paint.getFontMetrics();
+            final float height = fontMetrics.descent - fontMetrics.ascent;
+            final float width = paint.measureText(text);
+            // final float center = y - height / 2;
+            final float center = y + fontMetrics.ascent / 2 + fontMetrics.descent / 2;
+            final float halfThickness = (height / 6) / 2;
+            final float halfWidth = width / 2;
+            canvas.drawRect(
+                    x - halfWidth,
+                    center - halfThickness,
+                    x + halfWidth,
+                    center + halfThickness,
+                    strikeThruPaint);
         }
     }
 

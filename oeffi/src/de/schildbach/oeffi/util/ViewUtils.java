@@ -2,9 +2,15 @@ package de.schildbach.oeffi.util;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Canvas;
+import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.view.View;
 import android.view.ViewParent;
 import android.widget.RemoteViews;
+import android.widget.TextView;
+
+import de.schildbach.oeffi.R;
 
 public class ViewUtils {
     public static void setVisibility(final View view, final boolean visible) {
@@ -39,5 +45,28 @@ public class ViewUtils {
             final RemoteViews remoteViews,
             final int viewId, final int color) {
         remoteViews.setInt(viewId, "setBackgroundColor", color);
+    }
+
+    public static void setCanceledStrikeThru(final TextView view, final boolean strikeThru) {
+        view.getPaint().setStrikeThruText(strikeThru);
+        if (strikeThru) {
+            view.setForeground(new ColorDrawable() {
+                {
+                    setColor(view.getResources().getColor(R.color.fg_canceled_strikethru));
+                }
+
+                @Override
+                public void draw(final Canvas canvas) {
+                    final CharSequence text = view.getText();
+                    final Rect bounds = new Rect();
+                    view.getPaint().getTextBounds(text, 0, text.length(), bounds);
+                    final int height = view.getHeight();
+                    final int center = height / 2;
+                    final int halfThickness = (height / 6) / 2;
+                    setBounds(bounds.left, center - halfThickness, bounds.right, center + halfThickness);
+                    super.draw(canvas);
+                }
+            });
+        }
     }
 }

@@ -59,7 +59,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBaseline="@id/stations_station_entry_time_rel"
-            android:textColor="#f00" />
+            android:textColor="@color/fg_highlighted" />
 
         <TextView
             android:id="@+id/stations_station_entry_time_rel"
