@@ -118,7 +118,7 @@ public final class NetworkProviderFactory extends de.schildbach.pte.NetworkProvi
 //        addConfigurator(SaarVVProvider.class, () -> new SaarVVProvider("{\"type\":\"AID\",\"aid\":\"yCW9qZFSye1wIv3gCzm5r7d2kJ3LIF\"}"));
         addConfigurator(KvvProvider.class, () -> new KvvProvider(HttpUrl.parse("https://projekte.kvv-efa.de/oeffi/")));
         addConfigurator(OebbProvider.class, () -> new OebbProvider("{\"type\":\"AID\",\"aid\":\"OWDL4fE4ixNiPBBm\"}"));
-        addConfigurator(ZvvProvider.class, () -> new ZvvProvider("{\"type\":\"AID\",\"aid\":\"hf7mcf9bv3nv8g5f\"}"));
+//        addConfigurator(ZvvProvider.class, () -> new ZvvProvider("{\"type\":\"AID\",\"aid\":\"hf7mcf9bv3nv8g5f\"}"));
         addConfigurator(LuProvider.class, () -> new LuProvider("{\"type\":\"AID\",\"aid\":\"SkC81GuwuzL4e0\"}"));
         addConfigurator(CflProvider.class, () -> new CflProvider("{\"type\":\"AID\",\"aid\":\"ALT2vl7LAFDFu2dz\"}"));
 //        addConfigurator(DsbProvider.class, () -> new DsbProvider("{\"type\":\"AID\",\"aid\":\"irkmpm9mdznstenr-android\"}"));
