@@ -219,7 +219,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         positionPaint.setAntiAlias(true);
         positionPaint.setTextAlign(Align.CENTER);
 
-        strikeThruPaint.setColor(res.getColor(R.color.fg_canceled_strikethru));
+        strikeThruPaint.setColor(res.getColor(R.color.fg_cancelled_strikethru));
 
         feederStrokePaint.setStyle(Paint.Style.STROKE);
         feederStrokePaint.setColor(res.getColor(R.color.fg_trip_leg_frame_feeder));

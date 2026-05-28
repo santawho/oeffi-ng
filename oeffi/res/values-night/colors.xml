@@ -10,6 +10,8 @@
     <color name="fg_less_significant">#cccccc</color>
     <color name="fg_insignificant">#888888</color>
     <color name="fg_highlighted">#ff9966</color>
+    <color name="fg_cancelled">#f82200</color>
+    <color name="fg_cancelled_strikethru">#c0ee4422</color>
     <color name="fg_simulated">#cc00ff</color>
     <color name="fg_operation_time_good">#44ff44</color>
     <color name="fg_operation_time_early">#ff4444</color>

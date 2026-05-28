@@ -14,7 +14,8 @@
     <color name="fg_insignificant">#999999</color>
     <color name="fg_insignificant_darkdefault">#888888</color>
     <color name="fg_highlighted">#dd9055</color>
-    <color name="fg_canceled_strikethru">#c0ee4422</color>
+    <color name="fg_cancelled">#f82200</color>
+    <color name="fg_cancelled_strikethru">#c0ee4422</color>
     <color name="fg_highlighted_darkdefault">#ff9966</color>
     <color name="fg_simulated">#8800cc</color>
     <color name="fg_operation_time_good">#22aa22</color>

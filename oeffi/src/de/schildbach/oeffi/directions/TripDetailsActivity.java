@@ -252,6 +252,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     protected int colorSignificant;
     protected int colorInsignificant;
     protected int colorHighlighted;
+    protected int colorCancelled;
     protected int colorSimulated;
     protected int colorPosition, colorPositionBackground, colorPositionBackgroundChanged;
     protected int colorLegPublicPastBackground, colorLegPublicNowBackground, colorLegPublicFutureBackground;
@@ -309,6 +310,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         colorSignificant = res.getColor(R.color.fg_significant);
         colorInsignificant = res.getColor(R.color.fg_insignificant);
         colorHighlighted = res.getColor(R.color.fg_highlighted);
+        colorCancelled = res.getColor(R.color.fg_cancelled);
         colorSimulated = res.getColor(R.color.fg_simulated);
         colorPosition = res.getColor(R.color.fg_position);
         colorPositionBackground = res.getColor(R.color.bg_position);
@@ -2467,7 +2469,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                         : pearlType == PearlView.Type.ARRIVAL_FOR_INTERMEDIATE_DEPARTURE
                         ? getString(R.string.directions_trip_details_arrival_row_name_format, uniqueShortName)
                         : uniqueShortName), Html.FROM_HTML_MODE_COMPACT));
-        ViewUtils.setCanceledStrikeThru(stopNameView, isCancelled);
+        ViewUtils.setCancelledStrikeThru(stopNameView, isCancelled);
         if (highlightLocation) {
             stopNameView.setTextColor(colorHighlighted);
             stopNameView.setTypeface(null, Typeface.BOLD);
@@ -2550,7 +2552,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final boolean isShowSimulatedLine;
 
         if (providedTime != null) {
-            int stopTimeColor = highlightTime ? colorHighlighted : colorSignificant;
+            int stopTimeColor = highlightTime ? colorHighlighted
+                    : isCancelled ? colorCancelled
+                    : colorSignificant;
             if (simulatedTime == null) {
                 isShowSimulatedLine = false;
             } else if (isShowCompactTimes) {
@@ -2572,10 +2576,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
             final String timeText = Formats.formatTime(timeZoneSelector, displayTime);
             stopTimeProvidedView.setText(isTimeDeparture ? timeText + "°" : timeText);
-            ViewUtils.setCanceledStrikeThru(stopTimeProvidedView, isCancelled);
+            ViewUtils.setCancelledStrikeThru(stopDateProvidedView, isCancelled);
+            ViewUtils.setCancelledStrikeThru(stopTimeProvidedView, isCancelled);
             stopDateProvidedView.setTextColor(stopTimeColor);
             stopTimeProvidedView.setTextColor(stopTimeColor);
-            final boolean stopTimeBold = highlightTime || (renderConfig.isJourney ? isEntryOrExit
+            final boolean stopTimeBold = highlightTime || isCancelled || (renderConfig.isJourney ? isEntryOrExit
                     : (pearlType == PearlView.Type.DEPARTURE || pearlType == PearlView.Type.ARRIVAL));
             stopDateProvidedView.setTypeface(null, (highlightTime ? Typeface.BOLD : 0) + (isTimePredicted ? Typeface.ITALIC : 0));
             stopTimeProvidedView.setTypeface(null, (stopTimeBold ? Typeface.BOLD : 0) + (isTimePredicted ? Typeface.ITALIC : 0));
@@ -2594,7 +2599,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
             final String timeText = Formats.formatTime(timeZoneSelector, displayTime);
             stopTimeSimulatedView.setText(isTimeDeparture ? timeText + "°" : timeText);
-            ViewUtils.setCanceledStrikeThru(stopTimeSimulatedView, isCancelled);
+            // ViewUtils.setCancelledStrikeThru(stopTimeSimulatedView, isCancelled);
             final boolean stopTimeBold = highlightTime || (renderConfig.isJourney ? isEntryOrExit
                     : (pearlType == PearlView.Type.DEPARTURE || pearlType == PearlView.Type.ARRIVAL));
             stopDateSimulatedView.setTypeface(null, (highlightTime ? Typeface.BOLD : 0) + (isTimePredicted ? Typeface.ITALIC : 0));

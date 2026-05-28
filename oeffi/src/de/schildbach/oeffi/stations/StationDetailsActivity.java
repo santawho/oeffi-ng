@@ -993,7 +993,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
             final PTDate predictedTime = departure.predictedTime;
             final PTDate plannedTime = departure.plannedTime;
-            final boolean cancelled = departure.cancelled;
+            final boolean isCancelled = departure.cancelled;
 
             final PTDate time;
             final boolean isPredicted = predictedTime != null;
@@ -1014,7 +1014,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             // time rel
             timeRelView.setText(Formats.formatTimeDiff(context, referenceTime, timeMillis, refIsNow));
             timeRelView.setTypeface(Typeface.DEFAULT, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
-            ViewUtils.setCanceledStrikeThru(timeRelView, cancelled);
+            ViewUtils.setCancelledStrikeThru(timeRelView, isCancelled);
 
             // time abs
             final PTDate displayTime = timeZoneSelector.getDisplay(time);
@@ -1023,8 +1023,9 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 timeAbs.append(',').append(Constants.CHAR_HAIR_SPACE);
             timeAbs.append(Formats.formatTime(timeZoneSelector, displayTime));
             timeAbsView.setText(timeAbs);
-            timeAbsView.setTypeface(Typeface.DEFAULT, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
-            ViewUtils.setCanceledStrikeThru(timeAbsView, cancelled);
+            timeAbsView.setTypeface(Typeface.DEFAULT, (isPredicted ? Typeface.ITALIC : 0) + (isCancelled ? Typeface.BOLD : 0));
+            ViewUtils.setCancelledStrikeThru(timeAbsView, isCancelled);
+            timeAbsView.setTextColor(getColor(isCancelled ? R.color.fg_cancelled : R.color.fg_significant));
 
             // delay
             final long delay = predictedTime != null && plannedTime != null
@@ -1032,11 +1033,11 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             final long delayMins = delay / DateUtils.MINUTE_IN_MILLIS;
             delayView.setText(delayMins != 0 ? String.format(Locale.US, "(%+d)", delayMins) + ' ' : "");
             delayView.setTypeface(Typeface.DEFAULT, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
-            ViewUtils.setCanceledStrikeThru(delayView, cancelled);
+            ViewUtils.setCancelledStrikeThru(delayView, isCancelled);
 
             // line
             lineView.setLine(departure.line);
-            ViewUtils.setCanceledStrikeThru(lineView, cancelled);
+            ViewUtils.setCancelledStrikeThru(lineView, isCancelled);
 
             // destination
             final Location destination = departure.destination;
@@ -1044,8 +1045,8 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 destinationView.setText(Constants.DESTINATION_ARROW_PREFIX + Formats.fullLocationNameIfDifferentPlace(destination, station));
 //                itemView.setOnClickListener(destination.id == null ? null : v ->
 //                        start(context, network, destination, null, null));
-                ViewUtils.setCanceledStrikeThru(destinationView, cancelled);
-                ViewUtils.setCanceledStrikeThru(destinationOverflowView, cancelled);
+                ViewUtils.setCancelledStrikeThru(destinationView, isCancelled);
+                ViewUtils.setCancelledStrikeThru(destinationOverflowView, isCancelled);
             } else {
                 destinationView.setText(null);
 //                itemView.setOnClickListener(null);
@@ -1077,7 +1078,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                         position.equals(departure.plannedPosition)
                                 ? R.color.bg_position
                                 : R.color.bg_position_changed));
-                ViewUtils.setCanceledStrikeThru(positionView, cancelled);
+                ViewUtils.setCancelledStrikeThru(positionView, isCancelled);
             } else {
                 positionView.setVisibility(View.GONE);
             }
