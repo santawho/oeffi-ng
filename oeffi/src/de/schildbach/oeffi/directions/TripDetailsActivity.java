@@ -2345,7 +2345,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     private void addStopRow(
             final TableLayout tableLayout,
-            final PearlView.Type pearlType,
+            final PearlView.Type aPearlType,
             final boolean isLongStay,
             final int stopIndex,
             final Stop stop,
@@ -2361,6 +2361,14 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         final Trip.Public leg = legC.publicLeg;
         final int nearestStopIndex = legC.nearestStopIndex;
+
+        final PearlView.Type pearlType;
+        if (aPearlType == PearlView.Type.INTERMEDIATE_DEPARTURE && stop.departureCancelled && !stop.arrivalCancelled)
+            pearlType = PearlView.Type.INTERMEDIATE_ARRIVAL;
+        else if (aPearlType == PearlView.Type.INTERMEDIATE_ARRIVAL && stop.arrivalCancelled && !stop.departureCancelled)
+            pearlType = PearlView.Type.INTERMEDIATE_DEPARTURE;
+        else
+            pearlType = aPearlType;
 
         final boolean isTimePredicted;
         final PTDate providedTime;
