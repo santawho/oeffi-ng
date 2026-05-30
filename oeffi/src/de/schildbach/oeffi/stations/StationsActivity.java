@@ -1066,10 +1066,12 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
                             for (final Location location : result.locations) {
                                 if (location.type == LocationType.STATION) {
-                                    final Station station = new Station(network, location);
-                                    if (deviceLocation != null)
-                                        station.setDistanceAndBearing(GeoUtils.distanceBetween(referenceLocation.coord, location.coord));
-                                    freshStations.add(station);
+                                    final Point coord = location.coord;
+                                    if (coord != null) {
+                                        final Station station = new Station(network, location);
+                                        station.setDistanceAndBearing(GeoUtils.distanceBetween(referenceLocation.coord, coord));
+                                        freshStations.add(station);
+                                    }
                                 }
                             }
 
