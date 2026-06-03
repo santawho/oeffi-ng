@@ -89,6 +89,7 @@ import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.TripAware;
+import de.schildbach.oeffi.trampoline.AppLinkActivity;
 import de.schildbach.oeffi.tripeval.TripGeoUtils;
 import de.schildbach.oeffi.util.GoogleMapsUtils;
 import de.schildbach.oeffi.util.HorizontalPager;

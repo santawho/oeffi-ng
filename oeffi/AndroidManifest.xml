@@ -138,8 +138,9 @@
         <activity-alias
             android:name=".stations.StationsActivity.NEARBY"
             android:targetActivity=".stations.StationsActivity"
-            android:exported="true"
-            android:label="@string/stations_intentfilter_nearby_title">
+            android:exported="false"
+            android:label="@string/stations_intentfilter_nearby_title"
+            tools:ignore="AppLinkUrlError">
             <!-- thrown by google now gesture -->
 <!--            <intent-filter>-->
 <!--                <action android:name="android.intent.action.ASSIST" />-->
@@ -307,8 +308,9 @@
         <activity-alias
             android:name=".directions.DirectionsActivity.TO"
             android:targetActivity=".directions.DirectionsActivity"
-            android:exported="true"
-            android:label="@string/directions_intentfilter_to_title">
+            android:exported="false"
+            android:label="@string/directions_intentfilter_to_title"
+            tools:ignore="AppLinkUrlError">
             <!-- thrown by google calendar for contacts, and qype radar -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -325,8 +327,9 @@
         <activity-alias
             android:name=".directions.DirectionsActivity.FROM"
             android:targetActivity=".directions.DirectionsActivity"
-            android:exported="true"
-            android:label="@string/directions_intentfilter_from_title">
+            android:exported="false"
+            android:label="@string/directions_intentfilter_from_title"
+            tools:ignore="AppLinkUrlError">
             <!-- thrown by google calendar for contacts, and qype radar -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -411,7 +414,7 @@
         </activity>
 
         <activity
-            android:name=".directions.AppLinkActivity"
+            android:name=".trampoline.AppLinkActivity"
             android:exported="true"
             android:launchMode="singleTask">
             <intent-filter android:autoVerify="true">
@@ -424,6 +427,24 @@
                 <data android:scheme="https" />
                 <data android:host="@string/app_url_host" />
                 <data android:pathPrefix="@string/app_url_path_prefix" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".trampoline.GeoLinkActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="geo" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
 

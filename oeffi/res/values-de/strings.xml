@@ -162,6 +162,7 @@
 
     <!-- stations -->
     <string name="stations_intentfilter_nearby_title">Nahegelegene Haltestellen der öffentlichen Verkehrsmittel</string>
+    <string name="stations_nearby_geo_link_title">Zeige nahegelegene &lt;b>Haltestellen&lt;/b></string>
 
     <!-- station list -->
     <string name="stations_list_entry_no_departures">(Keine Abfahrten)</string>
@@ -269,7 +270,9 @@
 
     <!-- directions -->
     <string name="directions_intentfilter_to_title">Reise hierher mit öffentlichen Verkehrsmitteln</string>
+    <string name="directions_to_geo_link_title">Reise &lt;b>dorthin&lt;/b></string>
     <string name="directions_intentfilter_from_title">Reise von hier mit öffentlichen Verkehrsmitteln</string>
+    <string name="directions_from_geo_link_title">Reise &lt;b>von dort&lt;/b></string>
 
     <!-- directions options -->
     <string name="directions_options_clear_history_title">Gespeicherte Anfragen löschen</string>

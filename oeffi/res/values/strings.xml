@@ -163,6 +163,7 @@
 
     <!-- stations -->
     <string name="stations_intentfilter_nearby_title">Nearby Stops or Stations</string>
+    <string name="stations_nearby_geo_link_title">Show Nearby &lt;b>Stops&lt;/b></string>
 
     <!-- station list -->
     <string name="stations_list_entry_no_departures">(No departures)</string>
@@ -270,7 +271,9 @@
 
     <!-- directions -->
     <string name="directions_intentfilter_to_title">Travel to here by Public Transport</string>
+    <string name="directions_to_geo_link_title">Travel &lt;b>to there&lt;/b></string>
     <string name="directions_intentfilter_from_title">Travel from here by Public Transport</string>
+    <string name="directions_from_geo_link_title">Travel &lt;b>from there&lt;/b></string>
 
     <!-- directions options -->
     <string name="directions_options_clear_history_title">Clear saved queries</string>

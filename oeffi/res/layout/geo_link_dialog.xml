@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingVertical="@dimen/text_padding_vertical_verylax"
+        android:paddingHorizontal="@dimen/text_padding_horizontal_verylax"
+        android:textSize="@dimen/font_size_2xlarge"
+        android:textStyle="bold"
+        android:textAlignment="center"
+        android:text="@string/app_name" />
+
+    <Button
+        android:id="@+id/geo_link_stations_nearby"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/text_padding_vertical_verylax"
+        android:paddingVertical="@dimen/text_padding_vertical_verylax"
+        android:layout_marginHorizontal="@dimen/text_padding_horizontal_verylax"
+        android:paddingStart="@dimen/text_padding_horizontal_cram"
+        android:paddingEnd="@dimen/text_padding_horizontal_verylax"
+        style="@style/My.Widget.Button.Border"
+        android:drawableStart="@drawable/ic_oeffi_ng_stations_color_48dp"
+        android:text="@string/stations_nearby_geo_link_title" />
+
+    <Button
+        android:id="@+id/geo_link_directions_from"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/text_padding_vertical_verylax"
+        android:paddingVertical="@dimen/text_padding_vertical_verylax"
+        android:layout_marginHorizontal="@dimen/text_padding_horizontal_verylax"
+        android:paddingStart="@dimen/text_padding_horizontal_cram"
+        android:paddingEnd="@dimen/text_padding_horizontal_verylax"
+        style="@style/My.Widget.Button.Border"
+        android:drawableStart="@drawable/ic_oeffi_ng_directions_color_48dp"
+        android:text="@string/directions_from_geo_link_title" />
+
+    <Button
+        android:id="@+id/geo_link_directions_to"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/text_padding_vertical_verylax"
+        android:paddingVertical="@dimen/text_padding_vertical_verylax"
+        android:layout_marginHorizontal="@dimen/text_padding_horizontal_verylax"
+        android:paddingStart="@dimen/text_padding_horizontal_cram"
+        android:paddingEnd="@dimen/text_padding_horizontal_verylax"
+        style="@style/My.Widget.Button.Border"
+        android:drawableStart="@drawable/ic_oeffi_ng_directions_color_48dp"
+        android:text="@string/directions_to_geo_link_title" />
+
+</LinearLayout>

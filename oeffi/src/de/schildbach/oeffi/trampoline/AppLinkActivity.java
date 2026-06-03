@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package de.schildbach.oeffi.directions;
+package de.schildbach.oeffi.trampoline;
 
 import android.content.Context;
 import android.content.Intent;
@@ -28,6 +28,7 @@ import java.util.List;
 
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.pte.NetworkId;
 
 public class AppLinkActivity extends OeffiActivity {
