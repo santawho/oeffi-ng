@@ -447,6 +447,7 @@
     <string name="directions_trip_details_departure_row_name_format">(Departure) %1$s</string>
     <string name="directions_trip_details_arrival_row_name_format">(Arrival) %1$s</string>
     <string name="directions_trip_details_shortened_message">%1$s&lt;br>… show more …</string>
+    <string name="directions_trip_details_extra_data_error">Zusätzliche Information kann nicht geladen werden.</string>
 
     <!-- directions trip connection evaluation -->
     <string name="directions_trip_conneval_with_transfer">%1$s with %2$s</string>

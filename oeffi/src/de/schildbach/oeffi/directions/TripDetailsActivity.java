@@ -680,6 +680,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             return provider.queryTripDetails(tripRenderer.trip, null);
         } catch (final IOException e) {
             log.error("loadTripDetails", e);
+            new Toast(this).longToast(R.string.directions_trip_details_extra_data_error);
             return trip;
         }
     }
