@@ -584,7 +584,10 @@ public class TripRenderer {
 
     public boolean isFeasible() {
         if (feasible == null) {
-            feasible = trip.isTravelable();
+            if (isJourney)
+                feasible = true;
+            else
+                feasible = trip.isTravelable();
         }
         return feasible;
     }
