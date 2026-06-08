@@ -728,6 +728,9 @@ public class TripRenderer {
             return -1;
         }
 
+        final Trip.Public simulatedLeg = legC.simulatedPublicLeg;
+        final Stop simulatedArrivalStop = simulatedLeg == null ? null : simulatedLeg.arrivalStop;
+
         // leg is now
         setNextEventType(true, false);
         setPrevEventLatestTime(beginTime, plannedBeginTime);
@@ -747,6 +750,7 @@ public class TripRenderer {
         final Position plannedDepPos = (nextPublicLeg != null) ? nextDepartureStop.plannedDeparturePosition : null;
         setNextEventPositions(
                 arrivalStop, arrPos, arrPos != null && !arrPos.equals(arrivalStop.plannedArrivalPosition),
+                simulatedArrivalStop,
                 nextDepartureStop, depPos, depPos != null && !depPos.equals(plannedDepPos));
         setNextEventTransport(nextPublicLeg);
         setNextEventTransferTimes(walkLegC, false, now);
@@ -818,6 +822,7 @@ public class TripRenderer {
         final Position plannedDepPos = transferTo != null ? transferTo.plannedDeparturePosition : null;
         setNextEventPositions(
                 transferFrom, arrPos, arrPos != null && !arrPos.equals(plannedArrPos),
+                null,
                 transferTo, depPos, depPos != null && !depPos.equals(plannedDepPos));
         setNextEventTransport(nextPublicLeg);
         setNextEventTransferTimes(legC, true, now);
@@ -964,6 +969,7 @@ public class TripRenderer {
 
     public boolean nextEventPositionsAvailable;
     public Stop nextEventArrivalStop;
+    public Stop nextEventSimulatedArrivalStop;
     public Stop nextEventDepartureStop;
     public boolean nextEventStopChange;
     public String nextEventArrivalPosName;
@@ -973,8 +979,10 @@ public class TripRenderer {
 
     private void setNextEventPositions(
             final Stop arrStop, final Position arrPos, final boolean arrChanged,
+            final Stop simulatedArrivalStop,
             final Stop depStop, final Position depPos, final boolean depChanged) {
         nextEventArrivalStop = arrStop;
+        nextEventSimulatedArrivalStop = simulatedArrivalStop;
         nextEventDepartureStop = depStop;
         nextEventStopChange = (arrStop != null && depStop != null) && !arrStop.location.id.equals(depStop.location.id);
         nextEventPositionsAvailable = arrPos != null || depPos != null;

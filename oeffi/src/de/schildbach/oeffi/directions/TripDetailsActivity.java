@@ -2091,8 +2091,16 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final Point deviceCoord = getDeviceLocation();
         if (locationCoord != null && deviceCoord != null) {
             distanceView.setVisibility(View.VISIBLE);
-            distanceView.setText(Formats.formatDistance(
+            final StringBuilder builder = new StringBuilder();
+            final Stop simulatedStop = tripRenderer.nextEventSimulatedArrivalStop;
+            if (simulatedStop != null) {
+                final long remainingTime = simulatedStop.getArrivalTime().getTime() - System.currentTimeMillis();
+                builder.append(Formats.formatTimeSpanMorS(remainingTime, false));
+                builder.append("  ");
+            }
+            builder.append(Formats.formatDistance(
                     TripGeoUtils.geoDistanceInMeters(locationCoord, deviceCoord), true));
+            distanceView.setText(builder.toString());
         } else {
             distanceView.setVisibility(View.GONE);
         }
