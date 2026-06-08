@@ -1095,7 +1095,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         updateHighlightedTime(now);
         updateDeveloperInfo();
 
-        ViewUtils.setVisibility(findViewById(R.id.directions_trip_details_not_feasible), !tripRenderer.isFeasible());
+        final boolean isFeasible = tripRenderer.isJourney || tripRenderer.isFeasible();
+        ViewUtils.setVisibility(findViewById(R.id.directions_trip_details_not_feasible), !isFeasible);
 
         TripRenderer.LegContainer currentLeg = null;
         int i = LEGSGROUP_INSERT_INDEX;

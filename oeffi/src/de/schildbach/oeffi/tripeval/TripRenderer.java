@@ -534,7 +534,7 @@ public class TripRenderer {
     }
 
     public final Trip trip;
-    private final boolean isJourney;
+    public final boolean isJourney;
 
     public List<LegContainer> legs = new ArrayList<>();
     public LegContainer currentLeg;
