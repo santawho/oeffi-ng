@@ -136,7 +136,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         reloadRequestData.options = options;
         TripsOverviewActivity.start(context,
                 networkProvider.id(),
-                TimeSpec.DepArr.DEPART,
+                timeSpec.depArr,
                 null, null, reloadRequestData, renderConfig);
     }
 
