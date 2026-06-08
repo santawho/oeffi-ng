@@ -35,8 +35,8 @@ public final class HtmlUtils {
 
         // find all phone numbers
         text = makeLinksClickableInHtml(text,
-                "\\+?[0-9(][-0-9() ]{6,}[0-9)]",
-                (s) -> "<a href=\"tel:" + s + "\">&#9742;&nbsp;" + s + "</a>");
+                "\\+?[0-9(][-0-9() /]{6,}[0-9)]",
+                (s) -> "<a href=\"tel:" + s.replaceAll("[^0-9]", "") + "\">&#9742;&nbsp;" + s + "</a>");
 
         return text;
     }
