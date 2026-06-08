@@ -21,8 +21,16 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.schildbach.oeffi.Application;
+import de.schildbach.oeffi.Constants;
+
 public final class HtmlUtils {
     public static String makeLinksClickableInHtml(String text) {
+        if (!Application.getInstance().getSharedPreferences()
+                .getBoolean(Constants.PREFS_KEY_USER_INTERFACE_REMARK_LINKS_CLICKABLE_ENABLED, true)) {
+            return text;
+        }
+
         // find all URLs with http
         text = makeLinksClickableInHtml(text,
                 "(http[s]?)://(www\\.)?([\\S&&[^.@<]]+)(\\.[\\S&&[^@<]]+)",

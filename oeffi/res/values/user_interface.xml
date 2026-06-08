@@ -38,6 +38,8 @@
     <string name="user_interface_results_preferpredefinedcolors_enabled_summary">Use software defined colors, even when network provides specific colors for lines</string>
     <string name="user_interface_results_highlight_cancelled_enabled_title">Highlight cancelled events</string>
     <string name="user_interface_results_highlight_cancelled_enabled_summary">Show cancelled events with a red line</string>
+    <string name="user_interface_results_remark_links_clickable_enabled_title">Make links clickable</string>
+    <string name="user_interface_results_remark_links_clickable_enabled_summary">Show clickable links (like http:// and phone numbers) to open the web browser or telephone app</string>
 
     <string name="user_interface_category_station_departures_title">Station Departures</string>
     <string name="user_interface_station_departures_show_journey_messages_title">Show journey messages</string>
