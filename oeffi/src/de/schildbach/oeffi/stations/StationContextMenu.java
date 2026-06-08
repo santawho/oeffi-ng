@@ -17,6 +17,7 @@
 
 package de.schildbach.oeffi.stations;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
@@ -39,6 +40,7 @@ import androidx.core.graphics.drawable.IconCompat;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.directions.DirectionsShortcutActivity;
+import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.plans.PlanActivity;
 import de.schildbach.oeffi.plans.PlanContentProvider;
 import de.schildbach.oeffi.util.DialogBuilder;
@@ -75,7 +77,8 @@ public class StationContextMenu extends androidx.appcompat.widget.PopupMenu {
         menu.findItem(R.id.station_context_remove_favorite).setVisible(showFavorite && isFavorite);
         menu.findItem(R.id.station_context_add_ignore).setVisible(showIgnore && !isIgnored);
         menu.findItem(R.id.station_context_remove_ignore).setVisible(showIgnore && isIgnored);
-        menu.findItem(R.id.station_context_infopage).setVisible(station.infoUrl != null);
+        final String infoUrl = NetworkProviderFactory.provider(network).getLocationInfoUrl(station);
+        menu.findItem(R.id.station_context_infopage).setVisible(infoUrl != null);
         final MenuItem mapItem = menu.findItem(R.id.station_context_map);
         if (showMap && station.hasCoord())
             prepareMapMenu(context, mapItem.getSubMenu(), network, station);
@@ -155,11 +158,13 @@ public class StationContextMenu extends androidx.appcompat.widget.PopupMenu {
         final MenuItem mapsItemExternal = menu.findItem(R.id.station_map_context_maps_external);
         final MenuItem mapsItemInfoUrl = menu.findItem(R.id.station_map_context_info_url);
 
-        final String infoUrl = location.infoUrl;
+        final String infoUrl = NetworkProviderFactory.provider(network).getLocationInfoUrl(location);
         if (infoUrl != null) {
             mapsItemInfoUrl.setVisible(true);
             mapsItemInfoUrl.setOnMenuItemClickListener(item -> {
-                context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(infoUrl)));
+                @SuppressLint("UnsafeImplicitIntentLaunch")
+                final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(infoUrl));
+                context.startActivity(intent);
                 return true;
             });
         } else {
@@ -171,6 +176,7 @@ public class StationContextMenu extends androidx.appcompat.widget.PopupMenu {
             final double lon = location.getLonAsDouble();
             final String name = location.name;
 
+            @SuppressLint("UnsafeImplicitIntentLaunch")
             final Intent mapsIntent = new Intent(Intent.ACTION_VIEW,
                     Uri.parse(String.format(Locale.ENGLISH, "geo:%.6f,%.6f?q=%.6f,%.6f%s", lat, lon, lat, lon,
                             name != null ? '(' + URLEncoder.encode(name.replaceAll("[()]", "")) + ')' : "")));

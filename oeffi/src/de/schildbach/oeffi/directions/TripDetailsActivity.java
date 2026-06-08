@@ -441,6 +441,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                                     try {
                                         final String link = provider.getOpenLink(tripRenderer.trip);
                                         runOnUiThread(() -> {
+                                            @SuppressLint("UnsafeImplicitIntentLaunch")
                                             final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
                                             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                             startActivity(intent);
@@ -458,6 +459,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                                     try {
                                         final String link = provider.getShareLink(tripRenderer.trip);
                                         runOnUiThread(() -> {
+                                            @SuppressLint("UnsafeImplicitIntentLaunch")
                                             final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
                                             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                             startActivity(intent);
@@ -2950,9 +2952,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                             currentJourneyRef, feederJourneyRef, connectionJourneyRef,
                             renderConfig.queryTripsRequestData, null);
                 } else if (menuItemId == R.id.station_context_infopage) {
-                    final String infoUrl = stop.location.infoUrl;
+                    final String infoUrl = NetworkProviderFactory.provider(network).getLocationInfoUrl(stop.location);
                     if (infoUrl != null) {
-                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(infoUrl)));
+                        @SuppressLint("UnsafeImplicitIntentLaunch")
+                        final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(infoUrl));
+                        startActivity(intent);
                     }
                     return true;
                 } else if (menuItemId == R.id.station_context_set_departure_travel_alarm) {

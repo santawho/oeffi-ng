@@ -17,6 +17,7 @@
 
 package de.schildbach.oeffi.stations;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -41,6 +42,7 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.mapview.OeffiMapView;
 import de.schildbach.oeffi.network.NetworkPickerActivity;
+import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.locationview.LocationView;
 import de.schildbach.oeffi.stations.list.FavoriteStationsAdapter;
 import de.schildbach.oeffi.stations.list.StationClickListener;
@@ -315,6 +317,14 @@ public class FavoriteStationsActivity extends OeffiActivity
             return true;
         } else if (menuItemId == R.id.station_context_launcher_shortcut) {
             StationContextMenu.createLauncherShortcutDialog(FavoriteStationsActivity.this, network, station).show();
+            return true;
+        } else if (menuItemId == R.id.station_context_infopage) {
+            final String infoUrl = NetworkProviderFactory.provider(network).getLocationInfoUrl(station);
+            if (infoUrl != null) {
+                @SuppressLint("UnsafeImplicitIntentLaunch")
+                final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(infoUrl));
+                startActivity(intent);
+            }
             return true;
         } else if (menuItemId == R.id.station_map_context_maps_internal) {
             // no map on this activity, sorry

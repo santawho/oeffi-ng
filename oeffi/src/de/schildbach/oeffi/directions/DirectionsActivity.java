@@ -39,6 +39,7 @@ import android.view.KeyEvent;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnLongClickListener;
@@ -1306,6 +1307,11 @@ public class DirectionsActivity extends OeffiMainActivity implements
             menu.findItem(R.id.directions_location_selector_context_pin).setVisible(false);
         else
             menu.findItem(R.id.directions_location_selector_context_unpin).setVisible(false);
+        final MenuItem mapMenuItem = menu.findItem(R.id.directions_location_selector_context_map);
+        if (location.hasCoord())
+            StationContextMenu.prepareMapMenu(this, mapMenuItem.getSubMenu(), network, location);
+        else
+            mapMenuItem.setVisible(false);
         contextMenu.setOnDismissListener((popupMenu) -> {
             locationSelector.clearSelection();
         });
@@ -1315,6 +1321,11 @@ public class DirectionsActivity extends OeffiMainActivity implements
             if (itemId == R.id.directions_location_selector_context_delete) {
                 locationSelector.removeLocation(location);
                 locationSelector.persist();
+                return true;
+            }
+            if (itemId == R.id.station_map_context_maps_internal && location != null) {
+                setMapVisible(true);
+                getMapView().zoomToStations(List.of(location), 0);
                 return true;
             }
             if (itemId == R.id.directions_location_selector_context_pin) {

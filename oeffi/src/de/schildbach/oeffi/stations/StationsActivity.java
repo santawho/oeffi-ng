@@ -18,6 +18,7 @@
 package de.schildbach.oeffi.stations;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.SearchManager;
@@ -1620,9 +1621,11 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
             StationContextMenu.createLauncherShortcutDialog(StationsActivity.this, network, station).show();
             return true;
         } else if (menuItemId == R.id.station_context_infopage) {
-            final String infoUrl = station.infoUrl;
+            final String infoUrl = NetworkProviderFactory.provider(network).getLocationInfoUrl(station);
             if (infoUrl != null) {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(infoUrl)));
+                @SuppressLint("UnsafeImplicitIntentLaunch")
+                final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(infoUrl));
+                startActivity(intent);
             }
             return true;
         } else if (menuItemId == R.id.station_map_context_maps_internal) {

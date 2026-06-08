@@ -23,6 +23,11 @@
         android:title="@string/station_context_nearby_departures_title"
         android:icon="@drawable/ic_station_grey600_24dp" />
     <item
+        android:id="@+id/directions_location_selector_context_map"
+        android:title="@string/station_context_map_title">
+        <menu />
+    </item>
+    <item
         android:id="@+id/directions_location_selector_context_pin"
         android:title="@string/directions_location_selector_context_pin_title"
         android:icon="@drawable/ic_star_grey600_24dp" />
