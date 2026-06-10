@@ -2087,20 +2087,28 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
 
         final TextView distanceView = findViewById(R.id.navigation_next_event_time_distance);
-        final Stop nextEventArrivalStop = tripRenderer.nextEventArrivalStop;
-        final Point locationCoord = nextEventArrivalStop == null ? null : nextEventArrivalStop.location.coord;
+        final Location nextEventSimulatedArrivalLocation = tripRenderer.nextEventSimulatedArrivalLocation;
+        final Point locationCoord = nextEventSimulatedArrivalLocation == null ? null : nextEventSimulatedArrivalLocation.coord;
         final Point deviceCoord = getDeviceLocation();
-        if (locationCoord != null && deviceCoord != null) {
+        final String distance = locationCoord == null || deviceCoord == null ? null :
+                Formats.formatDistance(
+                        TripGeoUtils.geoDistanceInMeters(locationCoord, deviceCoord),
+                        true);
+        final Date nextEventSimulatedArrivalTime = tripRenderer.nextEventSimulatedArrivalTime;
+        final String remainingTime = nextEventSimulatedArrivalTime == null ? null :
+                Formats.formatTimeSpanMorS(
+                        nextEventSimulatedArrivalTime.getTime() - System.currentTimeMillis(),
+                        false);
+        if (distance != null || remainingTime != null) {
             distanceView.setVisibility(View.VISIBLE);
             final StringBuilder builder = new StringBuilder();
-            final Stop simulatedStop = tripRenderer.nextEventSimulatedArrivalStop;
-            if (simulatedStop != null) {
-                final long remainingTime = simulatedStop.getArrivalTime().getTime() - System.currentTimeMillis();
-                builder.append(Formats.formatTimeSpanMorS(remainingTime, false));
-                builder.append("  ");
+            if (remainingTime != null) {
+                builder.append(remainingTime);
+                if (distance != null)
+                    builder.append("  ");
             }
-            builder.append(Formats.formatDistance(
-                    TripGeoUtils.geoDistanceInMeters(locationCoord, deviceCoord), true));
+            if (distance != null)
+                builder.append(distance);
             distanceView.setText(builder.toString());
         } else {
             distanceView.setVisibility(View.GONE);

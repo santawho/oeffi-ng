@@ -90,7 +90,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center"
-                        android:layout_marginTop="-12dp"
+                        android:layout_marginTop="-6dp"
                         android:textColor="@color/fg_simulated"
                         android:textStyle="bold"
                         android:textSize="@dimen/navigation_next_event_time_fontsize_distance"/>
