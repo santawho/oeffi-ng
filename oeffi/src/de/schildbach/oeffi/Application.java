@@ -221,34 +221,25 @@ public class Application extends android.app.Application {
         return new TimeZoneSelector(this, prefs.getString(Constants.PREFS_KEY_PREFERRED_TIMEZONE, "location"), network);
     }
 
-    public String prefsGetNetworkName() {
-        final String networkName = prefs.getString(Constants.PREFS_KEY_NETWORK_PROVIDER, null);
-        if (networkName != null)
-            return networkName;
-
-        final String defaultNetworkName = getDefaultNetworkName();
-        if (defaultNetworkName == null)
-            return null;
-
-        prefs.edit().putString(Constants.PREFS_KEY_NETWORK_PROVIDER, defaultNetworkName).apply();
-        return defaultNetworkName;
-    }
-
-    public String getDefaultNetworkName() {
-        return NetworkId.DEUTSCHLANDTICKET.name();
+    public NetworkId getDefaultNetwork() {
+        return NetworkId.DEUTSCHLANDTICKET;
     }
 
     public NetworkId prefsGetNetworkId() {
-        final String id = prefsGetNetworkName();
-        if (id == null)
+        final String networkName = prefs.getString(Constants.PREFS_KEY_NETWORK_PROVIDER, null);
+        if (networkName != null) {
+            try {
+                return NetworkId.valueOf(networkName);
+            } catch (final IllegalArgumentException x) {
+                log.warn("Unknown selected network: {}, falling back to default", networkName);
+            }
+        }
+        final NetworkId defaultNetwork = getDefaultNetwork();
+        if (defaultNetwork == null)
             return null;
 
-        try {
-            return NetworkId.valueOf(id);
-        } catch (final IllegalArgumentException x) {
-            log.warn("Ignoring unkown selected network: {}", id);
-            return null;
-        }
+        prefs.edit().putString(Constants.PREFS_KEY_NETWORK_PROVIDER, defaultNetwork.name()).apply();
+        return defaultNetwork;
     }
 
     public NetworkProvider.Optimize prefsGetOptimizeTrip() {
