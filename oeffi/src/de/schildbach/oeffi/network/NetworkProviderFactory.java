@@ -114,5 +114,6 @@ public final class NetworkProviderFactory extends de.schildbach.pte.NetworkProvi
 //        addConfigurator(VvtProvider.class, NetworkId.State.unselectable);
 //        addConfigurator(SvvProvider.class, NetworkId.State.unselectable);
 //        addConfigurator(VmobilProvider.class, NetworkId.State.unselectable);
+//        addConfigurator(StvProvider.class, () -> new StvProvider("{\"type\":\"AID\",\"aid\":\"wf7mcf9bv3nv8g5f\"}"));
     }
 }
