@@ -67,8 +67,8 @@
     <string name="network_bsvag_comment">Lokal- und Regionalverkehr (TG:BSVAG)</string>
     <string name="network_vbn_label">Hamburg, Bremen, Rostock &amp; Südniedersachsen</string>
     <string name="network_vbn_comment">Lokal- und Regionalverkehr (TG:VBN)</string>
-    <string name="network_nasa_label">Leipzig, Halle &amp; Sachsen-Anhalt</string>
-    <string name="network_nasa_comment">Lokal- und Regionalverkehr (TG:NASA)</string>
+    <string name="network_insa_label">Leipzig, Halle &amp; Sachsen-Anhalt</string>
+    <string name="network_insa_comment">Lokal- und Regionalverkehr (TG:NASA)</string>
     <string name="network_vmt_label">Erfurt, Jena &amp; Mittelthüringen</string>
     <string name="network_vmt_comment">Lokal- und Regionalverkehr (TG:VMT)</string>
     <string name="network_vvo_label">Sachsen</string>
