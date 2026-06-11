@@ -22,36 +22,20 @@ import android.util.Base64;
 
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
-import de.schildbach.pte.provider.hafas.AvvAachenProvider;
-import de.schildbach.pte.provider.hafas.AvvAugsburgProvider;
-import de.schildbach.pte.provider.hafas.BartProvider;
 import de.schildbach.pte.provider.hafas.BvgProvider;
-import de.schildbach.pte.provider.db.DbHafasProvider;
 import de.schildbach.pte.provider.hafas.CflProvider;
-import de.schildbach.pte.provider.hafas.InvgProvider;
 import de.schildbach.pte.provider.efa.KvvProvider;
-import de.schildbach.pte.provider.hafas.LuProvider;
-import de.schildbach.pte.provider.hafas.NasaProvider;
 import de.schildbach.pte.provider.NetworkApiProvider;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.provider.NetworkProvider;
-import de.schildbach.pte.provider.hafas.NvvProvider;
-import de.schildbach.pte.provider.hafas.OebbProvider;
 import de.schildbach.pte.provider.hafas.PlProvider;
 import de.schildbach.pte.provider.hafas.SbmMvvProvider;
-import de.schildbach.pte.provider.hafas.SeProvider;
-import de.schildbach.pte.provider.hafas.ShProvider;
 import de.schildbach.pte.Standard;
-import de.schildbach.pte.provider.hafas.VbbProvider;
-import de.schildbach.pte.provider.hafas.VbnProvider;
 import de.schildbach.pte.provider.efa.VgnProvider;
-import de.schildbach.pte.provider.hafas.VmtProvider;
 import de.schildbach.pte.provider.other.VrsProvider;
 import de.schildbach.pte.provider.efa.VvoProvider;
-import de.schildbach.pte.provider.hafas.ZvvProvider;
 import okhttp3.HttpUrl;
 
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -99,32 +83,32 @@ public final class NetworkProviderFactory extends de.schildbach.pte.NetworkProvi
 
     {
         addConfigurator(VrsProvider.class, () -> new VrsProvider(VRS_CLIENT_CERTIFICATE));
-        addConfigurator(DbHafasProvider.Fernverkehr.class, () -> new DbHafasProvider.Fernverkehr("{\"type\":\"AID\",\"aid\":\"n91dB8Z77MLdoR0K\"}", "bdI8UVj40K5fvxwf".getBytes(StandardCharsets.UTF_8)));
-        addConfigurator(DbHafasProvider.Regio.class, () -> new DbHafasProvider.Regio("{\"type\":\"AID\",\"aid\":\"n91dB8Z77MLdoR0K\"}", "bdI8UVj40K5fvxwf".getBytes(StandardCharsets.UTF_8)));
+//        addConfigurator(DbHafasProvider.Fernverkehr.class, () -> new DbHafasProvider.Fernverkehr("{\"type\":\"AID\",\"aid\":\"n91dB8Z77MLdoR0K\"}", "bdI8UVj40K5fvxwf".getBytes(StandardCharsets.UTF_8)));
+//        addConfigurator(DbHafasProvider.Regio.class, () -> new DbHafasProvider.Regio("{\"type\":\"AID\",\"aid\":\"n91dB8Z77MLdoR0K\"}", "bdI8UVj40K5fvxwf".getBytes(StandardCharsets.UTF_8)));
         addConfigurator(BvgProvider.Legacy.class, () -> new BvgProvider.Legacy("{\"aid\":\"1Rxs112shyHLatUX4fofnmdxK\",\"type\":\"AID\"}"));
-        addConfigurator(VbbProvider.class, () -> new VbbProvider("{\"type\":\"AID\",\"aid\":\"hafas-vbb-apps\"}"));
-        addConfigurator(NvvProvider.class, () -> new NvvProvider("{\"type\":\"AID\",\"aid\":\"Kt8eNOH7qjVeSxNA\"}"));
+//        addConfigurator(VbbProvider.class, () -> new VbbProvider("{\"type\":\"AID\",\"aid\":\"hafas-vbb-apps\"}"));
+//        addConfigurator(NvvProvider.class, () -> new NvvProvider("{\"type\":\"AID\",\"aid\":\"Kt8eNOH7qjVeSxNA\"}"));
 //        addConfigurator(RmvProvider.class, () -> new RmvProvider("{\"type\":\"AID\",\"aid\":\"ikfr894fkfddXxA0U\"}"));
-        addConfigurator(SbmMvvProvider.class, () -> new SbmMvvProvider("{\"type\":\"AID\",\"aid\":\"d491MVVhz9ZZts23\"}"));
-        addConfigurator(InvgProvider.class, () -> new InvgProvider("{\"type\":\"AID\",\"aid\":\"GITvwi3BGOmTQ2a5\"}"));
-        addConfigurator(AvvAugsburgProvider.class, () -> new AvvAugsburgProvider("{\"type\":\"AID\",\"aid\":\"jK91AVVZU77xY5oH\"}"));
+        addConfigurator(SbmMvvProvider.class, () -> new SbmMvvProvider("{\"type\":\"AID\",\"aid\":\"d491MVVhz9ZZts23\"}")); // no webapp
+//        addConfigurator(InvgProvider.class, () -> new InvgProvider("{\"type\":\"AID\",\"aid\":\"GITvwi3BGOmTQ2a5\"}"));
+//        addConfigurator(AvvAugsburgProvider.class, () -> new AvvAugsburgProvider("{\"type\":\"AID\",\"aid\":\"jK91AVVZU77xY5oH\"}"));
         addConfigurator(VgnProvider.class, () -> new VgnProvider(HttpUrl.parse("https://efa.vgn.de/vgnExt_oeffi/")));
-        addConfigurator(ShProvider.class, () -> new ShProvider("{\"aid\":\"r0Ot9FLFNAFxijLW\",\"type\":\"AID\"}"));
-        addConfigurator(VbnProvider.class, () -> new VbnProvider("{\"aid\":\"rnOHBWhesvc7gFkd\",\"type\":\"AID\"}"));
-        addConfigurator(NasaProvider.class, () -> new NasaProvider("{\"type\":\"AID\",\"aid\":\"nasa-apps\"}"));
-        addConfigurator(VmtProvider.class, () -> new VmtProvider("{\"aid\":\"vj5d7i3g9m5d7e3\",\"type\":\"AID\"}"));
+//        addConfigurator(ShProvider.class, () -> new ShProvider("{\"aid\":\"r0Ot9FLFNAFxijLW\",\"type\":\"AID\"}"));
+//        addConfigurator(VbnProvider.class, () -> new VbnProvider("{\"aid\":\"rnOHBWhesvc7gFkd\",\"type\":\"AID\"}"));
+//        addConfigurator(InsaProvider.class, () -> new InsaProvider("{\"type\":\"AID\",\"aid\":\"nasa-apps\"}"));
+//        addConfigurator(VmtProvider.class, () -> new VmtProvider("{\"aid\":\"vj5d7i3g9m5d7e3\",\"type\":\"AID\"}"));
         addConfigurator(VvoProvider.class, () -> new VvoProvider(HttpUrl.parse("https://efa.vvo-online.de/Oeffi/")));
-        addConfigurator(AvvAachenProvider.class, () -> new AvvAachenProvider("{\"id\":\"AVV_AACHEN\",\"l\":\"vs_oeffi\",\"type\":\"WEB\"}","{\"type\":\"AID\",\"aid\":\"4vV1AcH3N511icH\"}"));
+//        addConfigurator(AvvAachenProvider.class, () -> new AvvAachenProvider("{\"id\":\"AVV_AACHEN\",\"l\":\"vs_oeffi\",\"type\":\"WEB\"}","{\"type\":\"AID\",\"aid\":\"4vV1AcH3N511icH\"}"));
 //        addConfigurator(SaarVVProvider.class, () -> new SaarVVProvider("{\"type\":\"AID\",\"aid\":\"yCW9qZFSye1wIv3gCzm5r7d2kJ3LIF\"}"));
         addConfigurator(KvvProvider.class, () -> new KvvProvider(HttpUrl.parse("https://projekte.kvv-efa.de/oeffi/")));
-        addConfigurator(OebbProvider.class, () -> new OebbProvider("{\"type\":\"AID\",\"aid\":\"OWDL4fE4ixNiPBBm\"}"));
+//        addConfigurator(OebbProvider.class, () -> new OebbProvider("{\"type\":\"AID\",\"aid\":\"OWDL4fE4ixNiPBBm\"}"));
 //        addConfigurator(ZvvProvider.class, () -> new ZvvProvider("{\"type\":\"AID\",\"aid\":\"hf7mcf9bv3nv8g5f\"}"));
-        addConfigurator(LuProvider.class, () -> new LuProvider("{\"type\":\"AID\",\"aid\":\"SkC81GuwuzL4e0\"}"));
-        addConfigurator(CflProvider.class, () -> new CflProvider("{\"type\":\"AID\",\"aid\":\"ALT2vl7LAFDFu2dz\"}"));
+//        addConfigurator(LuProvider.class, () -> new LuProvider("{\"type\":\"AID\",\"aid\":\"SkC81GuwuzL4e0\"}"));
+        addConfigurator(CflProvider.class, () -> new CflProvider("{\"type\":\"AID\",\"aid\":\"ALT2vl7LAFDFu2dz\"}")); // no webapp
 //        addConfigurator(DsbProvider.class, () -> new DsbProvider("{\"type\":\"AID\",\"aid\":\"irkmpm9mdznstenr-android\"}"));
-        addConfigurator(SeProvider.class, () -> new SeProvider("{\"type\":\"AID\",\"aid\":\"h5o3n7f4t2m8l9x1\"}"));
-        addConfigurator(PlProvider.class, () -> new PlProvider("{\"type\":\"AID\",\"aid\":\"DrxJYtYZQpEBCtcb\"}"));
-        addConfigurator(BartProvider.class, () -> new BartProvider("{\"type\":\"AID\",\"aid\":\"kEwHkFUCIL500dym\"}"));
+//        addConfigurator(SeProvider.class, () -> new SeProvider("{\"type\":\"AID\",\"aid\":\"h5o3n7f4t2m8l9x1\"}"));
+        addConfigurator(PlProvider.class, () -> new PlProvider("{\"type\":\"AID\",\"aid\":\"DrxJYtYZQpEBCtcb\"}")); // no webapp
+//        addConfigurator(BartProvider.class, () -> new BartProvider("{\"type\":\"AID\",\"aid\":\"kEwHkFUCIL500dym\"}"));
 //        addConfigurator(VorProvider.class, NetworkId.State.unselectable);
 //        addConfigurator(OoevvProvider.class, NetworkId.State.unselectable);
 //        addConfigurator(VvtProvider.class, NetworkId.State.unselectable);
