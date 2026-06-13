@@ -181,15 +181,25 @@ public class Application extends android.app.Application {
     }
 
     public static String getTranslatedString(final String mappedString, final String language) {
+        String defaultValue = null;
         final String[] languageValues = mappedString.split("~~");
         for (final String languageValue : languageValues) {
             final String[] languageAndValue = languageValue.split("~");
-            final String lang = languageAndValue[0];
-            final String value = languageAndValue[1];
-            if (lang.equals(language))
+            final String lang;
+            final String value;
+            if (languageAndValue.length < 2) {
+                lang = null;
+                value = languageAndValue[0];
+            } else {
+                lang = languageAndValue[0];
+                value = languageAndValue[1];
+            }
+            if (language.equals(lang))
                 return value;
+            if (defaultValue == null)
+                defaultValue = value;
         }
-        return null;
+        return defaultValue;
     }
 
     public File getShareDir() throws IOException {

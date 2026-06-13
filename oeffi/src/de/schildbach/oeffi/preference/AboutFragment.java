@@ -44,6 +44,7 @@ public class AboutFragment extends PreferenceFragment {
     private static final String KEY_ABOUT_CHANGELOG = "about_changelog";
     private static final String KEY_ABOUT_POLICY = "about_policy";
     private static final String KEY_ABOUT_FAQ = "about_faq";
+    private static final String KEY_ABOUT_FORUM = "about_forum";
     private static final String KEY_ABOUT_APP_UPDATE_CATEGORY = "about_update_category";
     private static final String KEY_ABOUT_DOWNLOAD_APK = "about_download_apk";
     private static final String KEY_ABOUT_CHECK_UPDATE = "about_check_update";
@@ -67,7 +68,7 @@ public class AboutFragment extends PreferenceFragment {
         if (installer != null) {
             final Uri marketUri = installer.appMarketUriFor(application);
             prefMarketApp.setSummary(marketUri.toString());
-            prefMarketApp.setIntent(new Intent(Intent.ACTION_VIEW, marketUri));
+            prefMarketApp.setIntent(getViewUrlIntent(marketUri.toString()));
         } else {
             removeOrDisablePreference(prefMarketApp);
         }
@@ -76,7 +77,7 @@ public class AboutFragment extends PreferenceFragment {
         if (!changeLogUrl.isEmpty()) {
             final Preference prefChangeLog = findPreference(KEY_ABOUT_CHANGELOG);
             prefChangeLog.setSummary(changeLogUrl);
-            prefChangeLog.setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(changeLogUrl)));
+            prefChangeLog.setIntent(getViewUrlIntent(changeLogUrl));
         }
 
         if (AppInstaller.isApkUrlAvailable()) {
@@ -103,12 +104,17 @@ public class AboutFragment extends PreferenceFragment {
         final String policyUrl = application.getTranslatedString(R.string.about_privacy_policy_url);
         final Preference prefPolicy = findPreference(KEY_ABOUT_POLICY);
         prefPolicy.setSummary(policyUrl);
-        prefPolicy.setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(policyUrl)));
+        prefPolicy.setIntent(getViewUrlIntent(policyUrl));
 
         final String faqUrl = application.getTranslatedString(R.string.about_faq_url);
         final Preference prefFaq = findPreference(KEY_ABOUT_FAQ);
         prefFaq.setSummary(faqUrl);
-        prefFaq.setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(faqUrl)));
+        prefFaq.setIntent(getViewUrlIntent(faqUrl));
+
+        final String forumUrl = application.getTranslatedString(R.string.about_forum_url);
+        final Preference prefForum = findPreference(KEY_ABOUT_FORUM);
+        prefForum.setSummary(forumUrl);
+        prefForum.setIntent(getViewUrlIntent(forumUrl));
 
         final Preference prefDataProvider = findPreference(KEY_ABOUT_DATA_PROVIDER);
         final StringBuilder providerText = new StringBuilder();
@@ -118,7 +124,7 @@ public class AboutFragment extends PreferenceFragment {
         final String networkProviderDescriptionUrl = networkProviderDescription.getUrl();
         if (networkProviderDescriptionUrl != null) {
             providerText.append(String.format("\n(%s)", networkProviderDescriptionUrl));
-            prefDataProvider.setIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(networkProviderDescriptionUrl)));
+            prefDataProvider.setIntent(getViewUrlIntent(networkProviderDescriptionUrl));
         }
         if (prefs.getBoolean(Constants.KEY_EXTRAS_TRIPEXTRAINFO_ENABLED, false)) {
             try {
@@ -135,6 +141,11 @@ public class AboutFragment extends PreferenceFragment {
             }
         }
         prefDataProvider.setSummary(providerText);
+    }
+
+    private static Intent getViewUrlIntent(final String url) {
+        return new Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     }
 
     public static class EnableExtrasActionHandler extends ActionHandler {
