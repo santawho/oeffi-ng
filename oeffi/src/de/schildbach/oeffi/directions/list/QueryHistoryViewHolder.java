@@ -242,6 +242,10 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder
             contextMenu.dismiss();
             contextMenu = null;
         }
+
+        handWasReleased = false;
+        starWasOpened = false;
+        removeWasOpened = false;
     }
 
     private boolean handWasReleased;
@@ -259,6 +263,11 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder
         removeOpened = false;
 
         swipeLayout.close();
+    }
+
+    @Override
+    public boolean onLongClick(final SwipeLayout layout) {
+        return !(starOpened || removeOpened);
     }
 
     @Override

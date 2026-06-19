@@ -303,6 +303,10 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder
             contextMenu.dismiss();
             contextMenu = null;
         }
+
+        handWasReleased = false;
+        navigationWasOpened = false;
+        removeWasOpened = false;
     }
 
     private boolean handWasReleased;
@@ -320,6 +324,11 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder
         removeOpened = false;
 
         swipeLayout.close();
+    }
+
+    @Override
+    public boolean onLongClick(final SwipeLayout layout) {
+        return !(navigationOpened || removeOpened);
     }
 
     @Override

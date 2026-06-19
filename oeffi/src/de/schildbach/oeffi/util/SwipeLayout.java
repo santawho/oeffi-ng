@@ -311,6 +311,8 @@ public class SwipeLayout extends FrameLayout {
         default void onUpdate(final SwipeLayout layout, final int leftOffset, final int topOffset) {}
 
         default void onHandRelease(final SwipeLayout layout, final float xvel, final float yvel) {}
+
+        default boolean onLongClick(final SwipeLayout layout) { return false; }
     }
 
     public void addSwipeListener(final SwipeListener l) {
@@ -975,10 +977,10 @@ public class SwipeLayout extends FrameLayout {
 
         switch (action) {
             case MotionEvent.ACTION_DOWN:
+                wasLongClick = false;
                 mDragHelper.processTouchEvent(event);
                 sX = event.getRawX();
                 sY = event.getRawY();
-
 
             case MotionEvent.ACTION_MOVE:
                 //the drag state and the direction are already judged at onInterceptTouchEvent
@@ -1176,7 +1178,7 @@ public class SwipeLayout extends FrameLayout {
         }
     }
 
-    OnClickListener clickListener;
+    private OnClickListener clickListener;
 
     @Override
     public void setOnClickListener(final OnClickListener l) {
@@ -1184,17 +1186,26 @@ public class SwipeLayout extends FrameLayout {
         clickListener = l;
     }
 
-    OnLongClickListener longClickListener;
-    boolean wasLongClick;
+    private OnLongClickListener longClickListener;
+    private boolean wasLongClick;
 
     @Override
     public void setOnLongClickListener(final OnLongClickListener l) {
-        super.setOnLongClickListener((v) -> {
-            wasLongClick = true;
-            close();
-            return l.onLongClick(v);
-        });
         longClickListener = l;
+        super.setOnLongClickListener((v) -> {
+            boolean blockLongClick = false;
+            for (final SwipeListener s : mSwipeListeners) {
+                if (!s.onLongClick(SwipeLayout.this))
+                    blockLongClick = true;
+            }
+            if (blockLongClick) {
+                wasLongClick = false;
+            } else {
+                close();
+                wasLongClick = longClickListener.onLongClick(v);
+            }
+            return wasLongClick;
+        });
     }
 
     private Rect hitSurfaceRect;
@@ -1213,7 +1224,7 @@ public class SwipeLayout extends FrameLayout {
 
     private final GestureDetector gestureDetector = new GestureDetector(getContext(), new SwipeDetector());
 
-    class SwipeDetector extends GestureDetector.SimpleOnGestureListener {
+    protected class SwipeDetector extends GestureDetector.SimpleOnGestureListener {
         @Override
         public boolean onSingleTapUp(@NonNull final MotionEvent e) {
             if (mClickToClose && isTouchOnSurface(e)) {
