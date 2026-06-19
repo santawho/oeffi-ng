@@ -63,7 +63,8 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder
     private final View viaContainerView;
     private final Button tripView;
     private final ImageButton contextButton;
-    public ContextMenuItemListener contextMenuItemListener;
+    private QueryHistoryClickListener clickListener;
+    private ContextMenuItemListener contextMenuItemListener;
     private Location from;
     private Location to;
     private Location via;
@@ -116,6 +117,7 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder
             final long savedTripDepartureTime, final byte[] serializedSavedTrip, final Integer fromFavState,
             final Integer toFavState, final long selectedRowId, final QueryHistoryClickListener clickListener,
             final ContextMenuItemListener contextMenuItemListener) {
+        this.clickListener = clickListener;
         this.contextMenuItemListener = contextMenuItemListener;
         this.from = from;
         this.to = to;
@@ -157,12 +159,9 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder
 
         final boolean selected = rowId == selectedRowId;
         itemView.setActivated(selected);
-        itemView.setOnClickListener(v -> {
-            final int position = getAdapterPosition();
-            if (position != RecyclerView.NO_POSITION)
-                clickListener.onEntryClick(position, from, to, via);
-        });
         itemView.setOnLongClickListener(v -> {
+            if (starOpened || removeOpened)
+                return false;
             showContextMenu(v);
             return true;
         });
@@ -245,13 +244,33 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder
         }
     }
 
+    private boolean handWasReleased;
+    private boolean starWasOpened;
+    private boolean removeWasOpened;
+
     @Override
     public void onHandRelease(final SwipeLayout layout, final float xvel, final float yvel) {
+        handWasReleased = true;
+
+        starWasOpened = starOpened;
+        starOpened = false;
+
+        removeWasOpened = removeOpened;
+        removeOpened = false;
+
         swipeLayout.close();
+    }
+
+    @Override
+    public void onEndClose(final SwipeLayout layout) {
+        if (!handWasReleased)
+            return;
+        handWasReleased = false;
+
         final int position = getAdapterPosition();
 
-        if (starOpened) {
-            starOpened = false;
+        if (starWasOpened) {
+            starWasOpened = false;
             isFavorite = !isFavorite;
             setStarDrawable();
             contextMenuItemListener.onQueryHistoryContextMenuItemClick(
@@ -261,15 +280,15 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder
                         ? R.id.directions_query_history_context_add_favorite
                         : R.id.directions_query_history_context_remove_favorite,
                     null);
-        }
-
-        if (removeOpened) {
-            removeOpened = false;
+        } else if (removeWasOpened) {
+            removeWasOpened = false;
             contextMenuItemListener.onQueryHistoryContextMenuItemClick(
                     position, from, to, via,
                     serializedSavedTrip,
                     R.id.directions_query_history_context_remove_entry,
                     null);
+        } else {
+            clickListener.onEntryClick(position, from, to, via);
         }
     }
 

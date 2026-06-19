@@ -78,6 +78,9 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder
     private int stateFlags;
     private PopupMenu contextMenu;
 
+    private boolean navigationOpened;
+    private boolean removeOpened;
+
     public QueryStoredTripViewHolder(
             final OeffiActivity context,
             final NetworkId network,
@@ -210,52 +213,10 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder
 
         final boolean selected = rowId == selectedRowId;
         itemView.setActivated(selected);
-        itemView.setOnClickListener(v -> {
-            swipeLayout.close(true, false);
-            final int position = getAdapterPosition();
-            if (navigationOpened) {
-                navigationOpened = false;
-                startNavigation(position, clickListener);
-            } else if (removeOpened) {
-                removeOpened = false;
-                if (tripId != null) {
-                    if (canBeMarkedAsDone && (stateFlags & QueryStoredTripsProvider.STATE_FLAG_DONE) == 0) {
-                        this.stateFlags |= QueryStoredTripsProvider.STATE_FLAG_DONE;
-                        QueryStoredTripsProvider.updateStateFlags(context.getContentResolver(), network, usage, tripId, stateFlags);
-                    } else {
-                        QueryStoredTripsProvider.delete(context.getContentResolver(), network, usage, tripId);
-                    }
-                }
-            } else if (position != RecyclerView.NO_POSITION) {
-                if (contextListener.isTripUnderNavigation(context, tripId)) {
-                    startNavigation(position, clickListener);
-                } else {
-                    clickListener.onSavedTripClick(position,
-                            from, to, via,
-                            tripDepartureTime, tripArrivalTime,
-                            serializedSavedTrip, tripId,
-                            serializedReloadRequest);
-                }
-            }
-        });
         itemView.setOnLongClickListener(v -> {
-            final int position = getAdapterPosition();
-            if (navigationOpened) {
-                navigationOpened = false;
-                startNavigation(position, clickListener);
-            } else if (removeOpened) {
-                removeOpened = false;
-                if (tripId != null) {
-                    if (canBeMarkedAsDone && (stateFlags & QueryStoredTripsProvider.STATE_FLAG_DONE) == 0) {
-                        this.stateFlags |= QueryStoredTripsProvider.STATE_FLAG_DONE;
-                        QueryStoredTripsProvider.updateStateFlags(context.getContentResolver(), network, usage, tripId, stateFlags);
-                    } else {
-                        QueryStoredTripsProvider.delete(context.getContentResolver(), network, usage, tripId);
-                    }
-                }
-            } else {
-                showContextMenu(v, clickListener);
-            }
+            if (navigationOpened || removeOpened)
+                return false;
+            showContextMenu(v, clickListener);
             return true;
         });
 
@@ -336,9 +297,6 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder
         this.contextMenu = contextMenu;
     }
 
-    boolean navigationOpened;
-    boolean removeOpened;
-
     @Override
     public void onStartOpen(final SwipeLayout layout) {
         if (contextMenu != null) {
@@ -347,8 +305,54 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder
         }
     }
 
+    private boolean handWasReleased;
+    private boolean navigationWasOpened;
+    private boolean removeWasOpened;
+
     @Override
     public void onHandRelease(final SwipeLayout layout, final float xvel, final float yvel) {
+        handWasReleased = true;
+
+        navigationWasOpened = navigationOpened;
+        navigationOpened = false;
+
+        removeWasOpened = removeOpened;
+        removeOpened = false;
+
         swipeLayout.close();
+    }
+
+    @Override
+    public void onEndClose(final SwipeLayout layout) {
+        if (!handWasReleased)
+            return;
+        handWasReleased = false;
+
+        final int position = getAdapterPosition();
+
+        if (navigationWasOpened) {
+            navigationWasOpened = false;
+            startNavigation(position, clickListener);
+        } else if (removeWasOpened) {
+            removeWasOpened = false;
+            if (tripId != null) {
+                if (canBeMarkedAsDone && (stateFlags & QueryStoredTripsProvider.STATE_FLAG_DONE) == 0) {
+                    this.stateFlags |= QueryStoredTripsProvider.STATE_FLAG_DONE;
+                    QueryStoredTripsProvider.updateStateFlags(context.getContentResolver(), network, usage, tripId, stateFlags);
+                } else {
+                    QueryStoredTripsProvider.delete(context.getContentResolver(), network, usage, tripId);
+                }
+            }
+        } else {
+            if (contextListener.isTripUnderNavigation(context, tripId)) {
+                startNavigation(position, clickListener);
+            } else {
+                clickListener.onSavedTripClick(position,
+                        from, to, via,
+                        tripDepartureTime, tripArrivalTime,
+                        serializedSavedTrip, tripId,
+                        serializedReloadRequest);
+            }
+        }
     }
 }

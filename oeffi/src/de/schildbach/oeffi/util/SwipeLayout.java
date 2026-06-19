@@ -20,9 +20,6 @@ import androidx.annotation.NonNull;
 import androidx.core.view.GravityCompat;
 import androidx.customview.widget.ViewDragHelper;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -206,8 +203,12 @@ public class SwipeLayout extends FrameLayout {
             public void onViewReleased(@NonNull final View releasedChild, final float xvel, final float yvel) {
                 super.onViewReleased(releasedChild, xvel, yvel);
                 processHandRelease(xvel, yvel, isCloseBeforeDrag);
-                for (final SwipeListener l : mSwipeListeners) {
-                    l.onHandRelease(SwipeLayout.this, xvel, yvel);
+                if (wasLongClick) {
+                    wasLongClick = false;
+                } else {
+                    for (final SwipeListener l : mSwipeListeners) {
+                        l.onHandRelease(SwipeLayout.this, xvel, yvel);
+                    }
                 }
 
                 invalidate();
@@ -304,6 +305,8 @@ public class SwipeLayout extends FrameLayout {
         default void onStartClose(final SwipeLayout layout) {}
 
         default void onClose(final SwipeLayout layout) {}
+
+        default void onEndClose(final SwipeLayout layout) {}
 
         default void onUpdate(final SwipeLayout layout, final int leftOffset, final int topOffset) {}
 
@@ -672,6 +675,10 @@ public class SwipeLayout extends FrameLayout {
         super.computeScroll();
         if (mDragHelper.continueSettling(true)) {
             postInvalidateOnAnimation();
+        } else {
+            for (final SwipeListener l : mSwipeListeners) {
+                l.onEndClose(SwipeLayout.this);
+            }
         }
     }
 
@@ -973,7 +980,7 @@ public class SwipeLayout extends FrameLayout {
                 sY = event.getRawY();
 
 
-            case MotionEvent.ACTION_MOVE: {
+            case MotionEvent.ACTION_MOVE:
                 //the drag state and the direction are already judged at onInterceptTouchEvent
                 checkCanDrag(event);
                 if (mIsBeingDragged) {
@@ -981,8 +988,18 @@ public class SwipeLayout extends FrameLayout {
                     mDragHelper.processTouchEvent(event);
                 }
                 break;
-            }
+
             case MotionEvent.ACTION_UP:
+                if (mIsBeingDragged) {
+                    final MotionEvent fakeFinalMoveEvent = MotionEvent.obtain(event);
+                    fakeFinalMoveEvent.setAction(MotionEvent.ACTION_MOVE);
+                    mDragHelper.processTouchEvent(fakeFinalMoveEvent);
+                    fakeFinalMoveEvent.recycle();
+                }
+                mIsBeingDragged = false;
+                mDragHelper.processTouchEvent(event);
+                break;
+
             case MotionEvent.ACTION_CANCEL:
                 mIsBeingDragged = false;
                 mDragHelper.processTouchEvent(event);
@@ -1092,15 +1109,8 @@ public class SwipeLayout extends FrameLayout {
     }
 
     private boolean insideAdapterView() {
-        return getAdapterView() != null;
-    }
-
-    private AdapterView getAdapterView() {
         final ViewParent t = getParent();
-        if (t instanceof AdapterView) {
-            return (AdapterView) t;
-        }
-        return null;
+        return t instanceof AdapterView;
     }
 
     private void performAdapterViewItemClick() {
@@ -1175,10 +1185,15 @@ public class SwipeLayout extends FrameLayout {
     }
 
     OnLongClickListener longClickListener;
+    boolean wasLongClick;
 
     @Override
     public void setOnLongClickListener(final OnLongClickListener l) {
-        super.setOnLongClickListener(l);
+        super.setOnLongClickListener((v) -> {
+            wasLongClick = true;
+            close();
+            return l.onLongClick(v);
+        });
         longClickListener = l;
     }
 
@@ -1431,11 +1446,11 @@ public class SwipeLayout extends FrameLayout {
      * smoothly close surface.
      */
     public void close() {
-        close(true, true);
+        close(true, false);
     }
 
     public void close(final boolean smooth) {
-        close(smooth, true);
+        close(smooth, false);
     }
 
     /**
@@ -1454,6 +1469,7 @@ public class SwipeLayout extends FrameLayout {
         if (smooth)
             mDragHelper.smoothSlideViewTo(getSurfaceView(), getPaddingLeft(), getPaddingTop());
         else {
+            mDragHelper.cancel();
             final Rect rect = computeSurfaceLayoutArea(false);
             dx = rect.left - surface.getLeft();
             dy = rect.top - surface.getTop();
