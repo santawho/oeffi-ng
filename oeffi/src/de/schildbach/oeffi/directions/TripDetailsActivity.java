@@ -680,7 +680,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         if (!provider.hasCapabilities(NetworkProvider.Capability.TRIP_DETAILS))
             return trip;
         try {
-            return provider.queryTripDetails(tripRenderer.trip, null);
+            return provider.queryTripDetails(trip, null);
         } catch (final IOException e) {
             log.error("loadTripDetails", e);
             new Toast(this).longToast(R.string.directions_trip_details_extra_data_error);
@@ -3247,7 +3247,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     public void onTripUpdated(final Trip updatedTrip) {
-        if (updatedTrip == null) return;
+        if (updatedTrip == null)
+            return;
         setupFromTrip(updatedTrip);
         final List<Trip.Leg> updatedPublicLegs = new ArrayList<>();
         for (final Trip.Leg leg : updatedTrip.legs) {

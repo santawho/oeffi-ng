@@ -457,11 +457,13 @@ public class TravelAlarmManager {
     }
 
     public void showConfigureTravelAlarmDialog(
+            final Activity contextActivity,
             final TripRenderer.LegContainer legContainer,
             final boolean alarmIsForDeparture,
             final Intent navigationNotificationIntent,
             final TravelAlarmDialogFinishedListener finishedListener) {
         final ConfigureTravelAlarmDialog dialog = new ConfigureTravelAlarmDialog(
+                contextActivity,
                 legContainer, alarmIsForDeparture, navigationNotificationIntent, finishedListener);
         dialog.show();
     }
@@ -479,11 +481,13 @@ public class TravelAlarmManager {
         private CheckBox saveDefaultCheckBox;
 
         public ConfigureTravelAlarmDialog(
+                final Activity contextActivity,
                 final TripRenderer.LegContainer legContainer,
                 final boolean alarmIsForDeparture,
                 final Intent navigationNotificationIntent,
                 final TravelAlarmDialogFinishedListener finishedListener) {
-            super(context);
+            super(contextActivity);
+            setOwnerActivity(contextActivity);
             this.legContainer = legContainer;
             this.alarmIsForDeparture = alarmIsForDeparture;
             this.navigationNotificationIntent = navigationNotificationIntent;
@@ -587,7 +591,7 @@ public class TravelAlarmManager {
                         else
                             configuration.setTravelAlarmExplicitMsForLegArrival(travelAlarmState.legIndex, timeValue);
 
-                        NavigationNotification.updateFromForeground(getContext(),
+                        NavigationNotification.updateFromForeground(getOwnerActivity(),
                                 navigationNotificationIntent, configuration,
                                 () -> context.runOnUiThread(this::dismiss));
                     });
@@ -599,7 +603,7 @@ public class TravelAlarmManager {
                 else
                     configuration.setTravelAlarmExplicitMsForLegArrival(travelAlarmState.legIndex, 0);
 
-                NavigationNotification.updateFromForeground(getContext(),
+                NavigationNotification.updateFromForeground(getOwnerActivity(),
                         navigationNotificationIntent, configuration,
                         () -> context.runOnUiThread(this::dismiss));
             });

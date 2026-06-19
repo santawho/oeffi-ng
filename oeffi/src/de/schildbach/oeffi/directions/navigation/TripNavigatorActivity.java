@@ -252,7 +252,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
                 R.string.directions_trip_navigation_action_sound);
         soundButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             soundEnabled = isChecked;
-            updateNotification(null);
+            updateNotification();
         });
         soundButton.setChecked(soundEnabled);
     }
@@ -376,7 +376,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
                 .setNegativeButton(R.string.navigation_stopnav_continue, (dialogInterface, i) -> {
                     navigationNotificationBeingDeleted = false;
                     doCheckAutoRefresh(true);
-                    updateNotification(null);
+                    updateNotification();
                 })
                 .create().show();
     }
@@ -397,7 +397,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         }
         if (granted) {
             permissionRequestRunning = false;
-            updateNotification(null);
+            updateNotification();
         } else {
             // warning ??
         }
@@ -447,12 +447,11 @@ public class TripNavigatorActivity extends TripDetailsActivity {
                 if (updatedTrip == null) {
                     handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));
                 } else {
+                    final Trip detailedTrip = refreshTripDetails ? loadTripDetails(updatedTrip) : updatedTrip;
                     if (doNotificationUpdate) {
                         isStartupComplete = true;
-                        runOnUiThread(() -> updateNotification(updatedTrip));
+                        runOnUiThread(() -> updateNotification(detailedTrip, () -> onTripUpdated(detailedTrip)));
                     }
-                    final Trip detailedTrip = refreshTripDetails ? loadTripDetails(updatedTrip) : updatedTrip;
-                    runOnUiThread(() -> onTripUpdated(detailedTrip));
                 }
             } catch (final IOException e) {
                 handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));
@@ -577,17 +576,19 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         return true;
     }
 
-    private void updateNotification(final Trip aTrip) {
+    private void updateNotification() {
+        updateNotification(tripRenderer.trip, this::updateGUI);
+    }
+
+    private void updateNotification(final @NonNull Trip trip, final Runnable doneListener) {
         if (!isStartupComplete)
             return;
 
-        final Trip trip = aTrip != null ? aTrip : tripRenderer.trip;
         final Intent intent = getIntent();
         final NavigationNotification navigationNotification = new NavigationNotification(intent);
         final NavigationNotification.Configuration configuration = Objects.clone(navigationNotification.getConfiguration());
         configuration.soundEnabled = soundEnabled;
-        NavigationNotification.updateFromForeground(this, intent, trip, configuration,
-                () -> runOnUiThread(this::updateGUI));
+        NavigationNotification.updateFromForeground(this, intent, trip, configuration, doneListener);
     }
 
     @Override
@@ -653,7 +654,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
         bellButton.setVisibility(View.VISIBLE);
         bellButton.setOnClickListener(v -> {
-            new TravelAlarmManager(this).showConfigureTravelAlarmDialog(
+            new TravelAlarmManager(this).showConfigureTravelAlarmDialog(this,
                     legC, alarmIsForDeparture, getIntent(), this::updateGUI);
         });
 
@@ -693,7 +694,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
         alarmView.setVisibility(View.VISIBLE);
         alarmView.setOnClickListener(v -> {
-            new TravelAlarmManager(this).showConfigureTravelAlarmDialog(
+            new TravelAlarmManager(this).showConfigureTravelAlarmDialog(this,
                     legContainer, alarmIsForDeparture,
                     getIntent(), this::updateGUI);
         });
@@ -776,13 +777,15 @@ public class TripNavigatorActivity extends TripDetailsActivity {
             final int menuItemId, final TripRenderer.LegContainer legC, final Stop stop) {
         if (menuItemId == R.id.station_context_set_departure_travel_alarm) {
             new TravelAlarmManager(this)
-                    .showConfigureTravelAlarmDialog(legC, true, getIntent(), this::updateGUI);
+                    .showConfigureTravelAlarmDialog(this,
+                            legC, true, getIntent(), this::updateGUI);
             return true;
         }
 
         if (menuItemId == R.id.station_context_set_arrival_travel_alarm) {
             new TravelAlarmManager(this)
-                    .showConfigureTravelAlarmDialog(legC, false, getIntent(), this::updateGUI);
+                    .showConfigureTravelAlarmDialog(this,
+                            legC, false, getIntent(), this::updateGUI);
             return true;
         }
 

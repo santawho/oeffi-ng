@@ -949,21 +949,21 @@ public class NavigationNotification {
     }
 
     public static void updateFromForeground(
-            final Context context, final Intent intent,
+            final Activity contextActivity, final Intent intent,
             final Configuration configuration,
             final Runnable doneListener) {
-        updateFromForeground(context, intent, null, configuration, doneListener);
+        updateFromForeground(contextActivity, intent, null, configuration, doneListener);
     }
 
     public static void updateFromForeground(
-            final Context context, final Intent intent,
+            final Activity contextActivity, final Intent intent,
             final Trip trip, final Configuration configuration,
             final Runnable doneListener) {
         NavigationAlarmManager.runOnHandlerThread(() -> {
             final NavigationNotification navigationNotification = new NavigationNotification(intent);
             navigationNotification.internUpdateFromForeground(trip, configuration);
             if (doneListener != null)
-                doneListener.run();
+                contextActivity.runOnUiThread(doneListener);
         });
     }
 
