@@ -47,6 +47,8 @@ CREDENTIALS.github_release_url = "${CREDENTIALS.github_url}/releases/latest/down
 CREDENTIALS.asset_name_apk_file = "oeffi-ng.apk"
 CREDENTIALS.asset_name_manifest = "manifest.json"
 CREDENTIALS.forum_url = "https://matrix.to/#/#oeffi-ng:matrix.org"
+// CREDENTIALS.app_url_host = "santawho.de"
+CREDENTIALS.app_url_host = "santawho.github.io"
 
 project.oeffi.CREDENTIALS = CREDENTIALS
 
@@ -107,7 +109,7 @@ android {
             resValue "string", "about_update_manifest_url", "${CREDENTIALS.github_release_url}/${CREDENTIALS.asset_name_manifest}"
             resValue "string", "about_update_modified", timeModifiedStr  // If-Modified-Since: xxx, 25 Feb 2025 17:10:00 GMT
             resValue "string", "error_reporter_mail_address", "${CREDENTIALS.report_email}"
-            resValue "string", "app_url_host", "santawho.de"
+            resValue "string", "app_url_host", "${CREDENTIALS.app_url_host}"
             resValue "string", "app_url_path_prefix", "/@apps/oeffi-ng${CREDENTIALS.editionName ? "-${CREDENTIALS.editionName}" : ''}"
             resValue "string", "about_faq_url", "en~${CREDENTIALS.github_url}/wiki/faq~~de~${CREDENTIALS.github_url}/wiki/faq"
             resValue "string", "about_privacy_policy_url", "en~${CREDENTIALS.github_url}/wiki/privacy-policy~~de~${CREDENTIALS.github_url}/wiki/privacy-policy"
