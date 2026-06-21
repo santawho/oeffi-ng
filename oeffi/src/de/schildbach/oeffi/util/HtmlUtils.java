@@ -17,6 +17,8 @@
 
 package de.schildbach.oeffi.util;
 
+import android.content.SharedPreferences;
+
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,8 +28,15 @@ import de.schildbach.oeffi.Constants;
 
 public final class HtmlUtils {
     public static String makeLinksClickableInHtml(String text) {
-        if (!Application.getInstance().getSharedPreferences()
-                .getBoolean(Constants.PREFS_KEY_USER_INTERFACE_REMARK_LINKS_CLICKABLE_ENABLED, true)) {
+        final SharedPreferences preferences = Application.getInstance().getSharedPreferences();
+
+        if (preferences.getBoolean(
+                Constants.PREFS_KEY_USER_INTERFACE_REMARK_WITHOUT_LINKS_ENABLED, false)) {
+            return removeClickableLinksFromHtml(text);
+        }
+
+        if (!preferences.getBoolean(
+                Constants.PREFS_KEY_USER_INTERFACE_REMARK_LINKS_CLICKABLE_ENABLED, true)) {
             return text;
         }
 
@@ -49,7 +58,25 @@ public final class HtmlUtils {
         return text;
     }
 
-    public static String makeLinksClickableInHtml(final String text, final String linkStyleRegex, final Function<String, String> makeLinkClickable) {
+    private static String removeClickableLinksFromHtml(final String text) {
+        // remove all links not within <a href"...">...</a> clickable
+        final Pattern pattern = Pattern.compile("<a href=\".*?\">(.*)?</a>");
+        final Matcher matcher = pattern.matcher(text);
+        final StringBuilder builder = new StringBuilder();
+        int pos = 0;
+        while (matcher.find(pos)) {
+            final int start = matcher.start();
+            final int end = matcher.end();
+            final String linkText = matcher.group(1);
+            builder.append(text.substring(pos, start));
+            builder.append(linkText);
+            pos = end;
+        }
+        builder.append(text.substring(pos));
+        return builder.toString();
+    }
+
+    private static String makeLinksClickableInHtml(final String text, final String linkStyleRegex, final Function<String, String> makeLinkClickable) {
         // make all links not within <a href"...">...</a> clickable
         final Pattern pattern = Pattern.compile("<a href=\".*?\">.*?</a>");
         final Matcher matcher = pattern.matcher(text);
