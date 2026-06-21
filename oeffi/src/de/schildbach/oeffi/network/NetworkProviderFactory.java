@@ -95,7 +95,7 @@ public final class NetworkProviderFactory extends de.schildbach.pte.NetworkProvi
         addConfigurator(VgnProvider.class, () -> new VgnProvider(HttpUrl.parse("https://efa.vgn.de/vgnExt_oeffi/")));
 //        addConfigurator(ShProvider.class, () -> new ShProvider("{\"aid\":\"r0Ot9FLFNAFxijLW\",\"type\":\"AID\"}"));
 //        addConfigurator(VbnProvider.class, () -> new VbnProvider("{\"aid\":\"rnOHBWhesvc7gFkd\",\"type\":\"AID\"}"));
-//        addConfigurator(InsaProvider.class, () -> new InsaProvider("{\"type\":\"AID\",\"aid\":\"nasa-apps\"}"));
+//        addConfigurator(InsaProvider.Nasa.class, () -> new InsaProvider.Nasa("{\"type\":\"AID\",\"aid\":\"nasa-apps\"}"));
 //        addConfigurator(VmtProvider.class, () -> new VmtProvider("{\"aid\":\"vj5d7i3g9m5d7e3\",\"type\":\"AID\"}"));
         addConfigurator(VvoProvider.class, () -> new VvoProvider(HttpUrl.parse("https://efa.vvo-online.de/Oeffi/")));
 //        addConfigurator(AvvAachenProvider.class, () -> new AvvAachenProvider("{\"id\":\"AVV_AACHEN\",\"l\":\"vs_oeffi\",\"type\":\"WEB\"}","{\"type\":\"AID\",\"aid\":\"4vV1AcH3N511icH\"}"));
