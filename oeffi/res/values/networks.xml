@@ -66,8 +66,12 @@
     <string name="network_bsvag_comment">local and regional</string>
     <string name="network_vbn_label">Hamburg, Bremen, Rostock &amp; South Lower Saxony</string>
     <string name="network_vbn_comment">local and regional</string>
+    <string name="network_vvw_label">Rostock &amp; Warnow</string>
+    <string name="network_vvw_comment">local and regional</string>
     <string name="network_nasa_label">Leipzig, Halle &amp; Saxony-Anhalt</string>
     <string name="network_nasa_comment">local and regional</string>
+    <string name="network_mdv_label">Leipzig &amp; Halle</string>
+    <string name="network_mdv_comment">local and regional</string>
     <string name="network_vmt_label">Erfurt, Jena &amp; Central Thuringia</string>
     <string name="network_vmt_comment">local and regional</string>
     <string name="network_vvo_label">Saxony</string>
