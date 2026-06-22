@@ -1159,20 +1159,12 @@ public class SwipeLayout extends FrameLayout {
         super.onAttachedToWindow();
         if (insideAdapterView()) {
             if (clickListener == null) {
-                setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(final View v) {
-                        performAdapterViewItemClick();
-                    }
-                });
+                super.setOnClickListener(v -> performAdapterViewItemClick());
             }
             if (longClickListener == null) {
-                setOnLongClickListener(new OnLongClickListener() {
-                    @Override
-                    public boolean onLongClick(final View v) {
-                        performAdapterViewItemLongClick();
-                        return true;
-                    }
+                super.setOnLongClickListener(v -> {
+                    performAdapterViewItemLongClick();
+                    return true;
                 });
             }
         }

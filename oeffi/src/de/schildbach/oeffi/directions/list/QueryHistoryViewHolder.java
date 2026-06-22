@@ -159,6 +159,14 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder
 
         final boolean selected = rowId == selectedRowId;
         itemView.setActivated(selected);
+        itemView.setOnClickListener(v -> {
+            if (starWasOpened || removeWasOpened)
+                return;
+            final int position = getAdapterPosition();
+            if (position != RecyclerView.NO_POSITION) {
+                clickListener.onEntryClick(position, from, to, via);
+            }
+        });
         itemView.setOnLongClickListener(v -> {
             if (starOpened || removeOpened)
                 return false;
@@ -296,8 +304,8 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder
                     serializedSavedTrip,
                     R.id.directions_query_history_context_remove_entry,
                     null);
-        } else {
-            clickListener.onEntryClick(position, from, to, via);
+//        } else {
+//            clickListener.onEntryClick(position, from, to, via);
         }
     }
 

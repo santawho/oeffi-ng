@@ -213,6 +213,22 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder
 
         final boolean selected = rowId == selectedRowId;
         itemView.setActivated(selected);
+        itemView.setOnClickListener(v -> {
+            if (navigationWasOpened || removeWasOpened)
+                return;
+            final int position = getAdapterPosition();
+            if (position != RecyclerView.NO_POSITION) {
+                if (contextListener.isTripUnderNavigation(context, tripId)) {
+                    startNavigation(position, clickListener);
+                } else {
+                    clickListener.onSavedTripClick(position,
+                            from, to, via,
+                            tripDepartureTime, tripArrivalTime,
+                            serializedSavedTrip, tripId,
+                            serializedReloadRequest);
+                }
+            }
+        });
         itemView.setOnLongClickListener(v -> {
             if (navigationOpened || removeOpened)
                 return false;
@@ -352,16 +368,16 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder
                     QueryStoredTripsProvider.delete(context.getContentResolver(), network, usage, tripId);
                 }
             }
-        } else {
-            if (contextListener.isTripUnderNavigation(context, tripId)) {
-                startNavigation(position, clickListener);
-            } else {
-                clickListener.onSavedTripClick(position,
-                        from, to, via,
-                        tripDepartureTime, tripArrivalTime,
-                        serializedSavedTrip, tripId,
-                        serializedReloadRequest);
-            }
+//        } else {
+//            if (contextListener.isTripUnderNavigation(context, tripId)) {
+//                startNavigation(position, clickListener);
+//            } else {
+//                clickListener.onSavedTripClick(position,
+//                        from, to, via,
+//                        tripDepartureTime, tripArrivalTime,
+//                        serializedSavedTrip, tripId,
+//                        serializedReloadRequest);
+//            }
         }
     }
 }
