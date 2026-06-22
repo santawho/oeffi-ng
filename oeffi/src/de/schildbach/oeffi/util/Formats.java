@@ -258,20 +258,23 @@ public final class Formats {
         return fullLocationNameIfDifferentPlace(location, refLocation, false);
     }
 
-    public static String fullLocationNameIfDifferentPlace(final Location location, final Location refLocation, boolean placeLast) {
-        return location == null ? null
-                : (refLocation == null || refLocation.place == null || location.place == null || location.name == null)
-                ? location.uniqueShortName()
-                : location.place.equals(refLocation.place)
-                ? location.name
-                : fullLocationName(location, placeLast);
+    public static String fullLocationNameIfDifferentPlace(final Location location, final Location refLocation, final boolean placeLast) {
+        if (location == null)
+            return null;
+        if (refLocation != null
+                && refLocation.place != null && location.place != null
+                && location.name == null
+                && location.place.equals(refLocation.place)) {
+            return location.name;
+        }
+        return fullLocationName(location, placeLast);
     }
 
     public static String fullLocationName(final Location location) {
         return fullLocationName(location, false);
     }
 
-    public static String fullLocationName(final Location location, boolean placeLast) {
+    public static String fullLocationName(final Location location, final boolean placeLast) {
         return location == null ? null
                 : location.place == null || location.name == null
                 ? location.uniqueShortName()
