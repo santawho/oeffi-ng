@@ -126,7 +126,8 @@ public class TripsOverviewActivity extends OeffiActivity {
             final Location from, final Location via, final Location to,
             final TripOptions options, final RenderConfig renderConfig) {
         final TimeSpec timeSpec = renderConfig.referenceTime;
-        final Date date = new Date(timeSpec.timeInMillis());
+        final Date date = timeSpec instanceof TimeSpec.Relative && ((TimeSpec.Relative) timeSpec).diffMs == 0 ? null
+                : new Date(timeSpec.timeInMillis());
         final QueryTripsRunnable.TripRequestData reloadRequestData = new QueryTripsRunnable.TripRequestData();
         reloadRequestData.from = from;
         reloadRequestData.via = via;
@@ -1346,13 +1347,13 @@ public class TripsOverviewActivity extends OeffiActivity {
 
         public TripRequestData getNextRequestData() {
             if (currentRound <= 0) {
-                final Date now = new Date();
-                if (reloadRequestData.date.after(now))
-                    return reloadRequestData;
-
-                final TripRequestData clone = reloadRequestData.clone();
-                clone.date = now;
-                return clone;
+                // null means now
+                if (reloadRequestData.date == null) {
+                    final TripRequestData clone = reloadRequestData.clone();
+                    clone.date = new Date();
+                    return clone;
+                }
+                return reloadRequestData;
             }
 
             return nextRequestData;
