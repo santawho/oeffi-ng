@@ -19,6 +19,7 @@ package de.schildbach.oeffi.network.list;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.text.Html;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -99,7 +100,7 @@ public class NetworkViewHolder extends RecyclerView.ViewHolder {
             stateView.setText(null);
         }
 
-        commentView.setText(networkRes.comment);
+        commentView.setText(Html.fromHtml(networkRes.comment, Html.FROM_HTML_MODE_COMPACT));
         commentView.setTextColor(isEnabled ? colorSignificant : colorLessSignificant);
 
         if (dbFileLength > 0) {
