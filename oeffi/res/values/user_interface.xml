@@ -18,6 +18,9 @@
     <string name="user_interface_darkmode_amoled_enabled_title">Darker colors</string>
     <string name="user_interface_darkmode_amoled_enabled_summary">Use even darker colors in dark mode (e.g. for AMOLED display)</string>
 
+    <string name="user_interface_trip_details_on_lockscreen_title">Trip details on lock screen</string>
+    <string name="user_interface_trip_details_on_lockscreen_summary">Show trip details on lock screen\nNote: must also be enabled in the settings of your operating system.</string>
+
     <string name="user_interface_show_data_source_enabled_title">Show data source</string>
 
     <string name="user_interface_accessibility_settings_title">Shut off screen</string>

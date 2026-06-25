@@ -13,6 +13,9 @@
     <string name="user_interface_darkmode_amoled_enabled_title">Dunklere Farben</string>
     <string name="user_interface_darkmode_amoled_enabled_summary">Nutze noch dunklere Farben im dunklen Modus (z.B. für AMOLED Display)</string>
 
+    <string name="user_interface_trip_details_on_lockscreen_title">Reisedetails im Sperrbildschirm</string>
+    <string name="user_interface_trip_details_on_lockscreen_summary">Zeige die Reisedetails im Sperrbildschirm\nHinweis: muss auch in den Einstellungen des Betriebssystems aktiviert werden.</string>
+
     <string name="user_interface_show_data_source_enabled_title">Datenquelle anzeigen</string>
 
     <string name="user_interface_accessibility_settings_title">Bildschirm ausschalten</string>

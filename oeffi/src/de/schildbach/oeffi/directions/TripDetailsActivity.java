@@ -302,6 +302,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1
+                && prefs.getBoolean("user_interface_trip_details_on_lockscreen_enabled", false)) {
+            setShowWhenLocked(true);
+        }
+
         backgroundThread = new HandlerThread("TripDetails.queryTripsThread", Process.THREAD_PRIORITY_BACKGROUND);
         backgroundThread.start();
         backgroundHandler = new Handler(backgroundThread.getLooper());
