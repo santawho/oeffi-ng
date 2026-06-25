@@ -263,7 +263,7 @@ public final class Formats {
             return null;
         if (refLocation != null
                 && refLocation.place != null && location.place != null
-                && location.name == null
+                && location.name != null
                 && location.place.equals(refLocation.place)) {
             return location.name;
         }
