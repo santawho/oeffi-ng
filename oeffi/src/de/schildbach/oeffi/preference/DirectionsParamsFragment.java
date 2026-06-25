@@ -26,5 +26,7 @@ public class DirectionsParamsFragment extends PreferenceFragment {
             @androidx.annotation.Nullable final Bundle savedInstanceState,
             @androidx.annotation.Nullable final String rootKey) {
         addPreferencesFromResource(R.xml.preference_directions_params);
+
+        setupDynamicSummary("walk_distance", R.string.directions_preferences_walk_distance_summary);
     }
 }

@@ -513,15 +513,15 @@
     <string name="directions_params_preferences_title">Parameter für die Verbindungssuche</string>
     <string name="directions_params_preferences_summary">Diese Einstellungen wirken sich nicht auf alle Verkehrsnetze in der gleichen Weise aus.</string>
     <string name="directions_preferences_optimize_trip_title">Optimierung</string>
-    <string name="directions_preferences_optimize_trip_summary">Was ist dir am wichtigsten?</string>
+    <string name="directions_preferences_optimize_trip_summary">Was ist dir am wichtigsten?  [%s]</string>
     <string name="directions_preferences_walk_speed_title">Gehgeschwindigkeit</string>
-    <string name="directions_preferences_walk_speed_summary">Wie schnell kannst du laufen?</string>
+    <string name="directions_preferences_walk_speed_summary">Wie schnell kannst du laufen?  [%s]</string>
     <string name="directions_preferences_walk_distance_title">Maximale Distanz für Fußwege</string>
-    <string name="directions_preferences_walk_distance_summary">Wie weit kannst du laufen?</string>
+    <string name="directions_preferences_walk_distance_summary">Wie weit kannst du laufen?  [%sm]</string>
     <string name="directions_preferences_min_transfer_time_title">Minimale Umsteigezeit</string>
-    <string name="directions_preferences_min_transfer_time_summary">Wie lange benötigst du zum umsteigen?</string>
+    <string name="directions_preferences_min_transfer_time_summary">Wie lange benötigst du zum umsteigen?  [%s]</string>
     <string name="directions_preferences_accessibility_title">Barrierefreiheit</string>
-    <string name="directions_preferences_accessibility_summary">Wie barrierefrei muss die Route sein?</string>
+    <string name="directions_preferences_accessibility_summary">Wie barrierefrei muss die Route sein?  [%s]</string>
     <string name="directions_preferences_bicycle_carriage_title">Reise mit Fahrrad</string>
     <string name="directions_preferences_bicycle_carriage_summary">Zeigt nützliche Information für Reisende mit Fahrrad.</string>
 
