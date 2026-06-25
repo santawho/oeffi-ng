@@ -306,7 +306,9 @@
     <string name="directions_message_no_trips">No connections found for query</string>
     <string name="directions_message_invalid_date">Query date needs to be inside the timetable period</string>
     <string name="directions_message_ambiguous_location">Location is ambiguous</string>
-    <string name="directions_query_progress">Getting directions…</string>
+    <string name="directions_query_directions_progress">Getting directions …</string>
+    <string name="directions_query_travel_info_progress">Updating travel information …</string>
+    <string name="directions_query_journey_progress">Getting journey information …</string>
     <string name="directions_message_missing_capability">The selected transportation network cannot do directions.\nConsider selecting another network.</string>
     <string name="directions_connectivity_warning">Offline mode: Your device is not connected.\nHowever, already saved trips can be viewed.</string>
     <string name="directions_alert_redirect_title">Redirect</string>

@@ -23,12 +23,15 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
+import android.text.SpannableStringBuilder;
 import android.text.format.DateUtils;
+import android.text.style.StyleSpan;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
@@ -43,7 +46,7 @@ import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
-import de.schildbach.oeffi.directions.QueryTripsRunnable.TripRequestData;
+import de.schildbach.oeffi.directions.QueryTripRunnable.TripRequestData;
 import de.schildbach.oeffi.directions.navigation.Navigator;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.DialogBuilder;
@@ -74,7 +77,6 @@ import javax.annotation.Nullable;
 import javax.net.ssl.SSLException;
 
 import java.io.IOException;
-import java.io.Serial;
 import java.io.Serializable;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
@@ -128,7 +130,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         final TimeSpec timeSpec = renderConfig.referenceTime;
         final Date date = timeSpec instanceof TimeSpec.Relative && ((TimeSpec.Relative) timeSpec).diffMs == 0 ? null
                 : new Date(timeSpec.timeInMillis());
-        final QueryTripsRunnable.TripRequestData reloadRequestData = new QueryTripsRunnable.TripRequestData();
+        final QueryTripRunnable.TripRequestData reloadRequestData = new QueryTripRunnable.TripRequestData();
         reloadRequestData.from = from;
         reloadRequestData.via = via;
         reloadRequestData.to = to;
@@ -522,6 +524,59 @@ public class TripsOverviewActivity extends OeffiActivity {
         }
     };
 
+    private SpannableStringBuilder getDirectionsProgressMessage(final TripOptions options) {
+        final SpannableStringBuilder progressMessage;
+        progressMessage = new SpannableStringBuilder(getString(R.string.directions_query_directions_progress));
+        progressMessage.setSpan(new StyleSpan(Typeface.BOLD), 0, progressMessage.length(),
+                SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        final boolean hasOptimize;
+        final boolean hasWalkSpeed;
+        final boolean hasAccessibility;
+        if (options == null) {
+            hasOptimize = false;
+            hasWalkSpeed = false;
+            hasAccessibility = false;
+        } else {
+            hasOptimize = options.optimize != null;
+            hasWalkSpeed = options.walkSpeed != null && options.walkSpeed != NetworkProvider.WalkSpeed.NORMAL;
+            hasAccessibility = options.accessibility != null && options.accessibility != NetworkProvider.Accessibility.NEUTRAL;
+        }
+        if (hasOptimize || hasWalkSpeed || hasAccessibility) {
+            progressMessage.append('\n');
+            if (hasOptimize) {
+                progressMessage.append('\n')
+                        .append(getString(R.string.directions_preferences_optimize_trip_title))
+                        .append(": ");
+                final int begin = progressMessage.length();
+                progressMessage.append(
+                        getResources().getStringArray(R.array.directions_optimize_trip)[options.optimize.ordinal()]);
+                progressMessage.setSpan(new StyleSpan(Typeface.BOLD), begin, progressMessage.length(),
+                        SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+            if (hasWalkSpeed) {
+                progressMessage.append('\n')
+                        .append(getString(R.string.directions_preferences_walk_speed_title)).append(": ");
+                final int begin = progressMessage.length();
+                progressMessage
+                        .append(getResources().getStringArray(R.array.directions_walk_speed)[options.walkSpeed.ordinal()]);
+                progressMessage.setSpan(new StyleSpan(Typeface.BOLD), begin, progressMessage.length(),
+                        SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+            if (hasAccessibility) {
+                progressMessage.append('\n')
+                        .append(getString(R.string.directions_preferences_accessibility_title))
+                        .append(": ");
+                final int begin = progressMessage.length();
+                progressMessage.append(
+                        getResources().getStringArray(R.array.directions_accessibility)[options.accessibility.ordinal()]);
+                progressMessage.setSpan(new StyleSpan(Typeface.BOLD), begin, progressMessage.length(),
+                        SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+        }
+        return progressMessage;
+    }
+
     private class QueryMoreTripsRunnable implements Runnable {
         final private MyActionBar actionBar = getMyActionBar();
         final private QueryTripsContext context;
@@ -547,13 +602,13 @@ public class TripsOverviewActivity extends OeffiActivity {
             cancelled.set(false);
             runOnUiThread(() -> {
                 if (initial) {
-                    progressDialog = ProgressDialog.show(TripsOverviewActivity.this, null,
-                            getString(R.string.directions_query_progress), true, true, dialog -> {
+                    progressDialog = ProgressDialog.show(TripsOverviewActivity.this,
+                            null, getDirectionsProgressMessage(searchMoreContext.reloadRequestData.options),
+                            true, true, dialog -> {
                                 cancelled.set(true);
                                 TripsOverviewActivity.this.finish();
                             });
                     progressDialog.setCanceledOnTouchOutside(false);
-                    QueryTripsRunnable.startProgressDialog(progressDialog, getResources(), reloadRequestData.options);
                 } else {
                     actionBar.startProgress();
                 }

@@ -85,8 +85,9 @@ public class QueryJourneyRunnable implements Runnable {
             final JourneyRef journeyRef, final boolean isOperation,
             final Location entryLocation, final Location exitLocation,
             final boolean openInNewWindow) {
-        final ProgressDialog progressDialog = ProgressDialog.show(parentActivity, null,
-                parentActivity.getString(R.string.directions_query_progress), true, true, dialog -> {
+        final ProgressDialog progressDialog = ProgressDialog.show(parentActivity,
+                null, parentActivity.getString(R.string.directions_query_journey_progress),
+                true, true, dialog -> {
                     if (prevInstance != null)
                         prevInstance.cancel();
                 });
@@ -199,13 +200,6 @@ public class QueryJourneyRunnable implements Runnable {
 
     private void postOnPreExecute() {
         handler.post(() -> {
-            final SpannableStringBuilder progressMessage = new SpannableStringBuilder(
-                    res.getString(R.string.directions_query_progress));
-            progressMessage.setSpan(new StyleSpan(Typeface.BOLD), 0, progressMessage.length(),
-                    SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-            progressDialog.setMessage(progressMessage);
-
             onPreExecute();
         });
     }

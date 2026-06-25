@@ -28,7 +28,7 @@ import java.util.Set;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.directions.QueryStoredTripsProvider;
-import de.schildbach.oeffi.directions.QueryTripsRunnable;
+import de.schildbach.oeffi.directions.QueryTripRunnable;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
 import de.schildbach.oeffi.directions.TripUtils;
 import de.schildbach.oeffi.directions.TripsOverviewActivity;
@@ -135,7 +135,7 @@ public class OperationsActivity extends DirectionsActivity {
         loadTripByTripRef(trip.tripRef, (loadedTrip) -> {
             final Trip useTrip = loadedTrip != null ? loadedTrip : trip;
             final OperationDetailsActivity.RenderConfig config = new OperationDetailsActivity.RenderConfig();
-            config.queryTripsRequestData = (QueryTripsRunnable.TripRequestData) Objects.deserialize(serializedReloadRequest, true);
+            config.queryTripsRequestData = (QueryTripRunnable.TripRequestData) Objects.deserialize(serializedReloadRequest, true);
             setupTripDetailsRenderConfig(config);
             final Trip.Public journeyLeg = useTrip.getFirstPublicLeg();
             OperationDetailsActivity.startOperation(OperationsActivity.this, network, journeyLeg, new Date(), 0);
@@ -146,7 +146,7 @@ public class OperationsActivity extends DirectionsActivity {
     public void onSavedTripStartNavigation(
             final int adapterPosition,
             final Trip trip,
-            final QueryTripsRunnable.TripRequestData queryTripsRequestData) {
+            final QueryTripRunnable.TripRequestData queryTripsRequestData) {
         final TripDetailsActivity.RenderConfig renderConfig = new TripDetailsActivity.RenderConfig();
         renderConfig.isOperation = true;
         renderConfig.isJourney = true;

@@ -19,7 +19,6 @@ package de.schildbach.oeffi.directions;
 
 import android.animation.LayoutTransition;
 import android.app.DatePickerDialog;
-import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -166,7 +165,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
     private boolean timeIsToday;
     private TripsOverviewActivity.RenderConfig renderConfig;
 
-    private QueryTripsRunnable queryTripsRunnable;
+    private QueryTripRunnable queryTripRunnable;
     private HandlerThread backgroundThread;
     private Handler backgroundHandler;
     private final Handler handler = new Handler();
@@ -1468,7 +1467,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
     public void onSavedTripStartNavigation(
             final int adapterPosition,
             final Trip trip,
-            final QueryTripsRunnable.TripRequestData queryTripsRequestData) {
+            final QueryTripRunnable.TripRequestData queryTripsRequestData) {
         final TripDetailsActivity.RenderConfig renderConfig = new TripDetailsActivity.RenderConfig();
         renderConfig.queryTripsRequestData = queryTripsRequestData;
         TripNavigatorActivity.startNavigation(this, network, trip, renderConfig, false);
@@ -1478,7 +1477,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
     public void onSearchAgainClick(
             final int adapterPosition,
             final PTDate tripDepartureTime, final PTDate tripArrivalTime,
-            final QueryTripsRunnable.TripRequestData reloadRequest) {
+            final QueryTripRunnable.TripRequestData reloadRequest) {
         viewFromLocation.setLocation(reloadRequest.from);
         viewToLocation.setLocation(reloadRequest.to);
         viewViaLocation.setLocation(reloadRequest.via);
@@ -1572,7 +1571,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         loadTripByTripRef(trip.tripRef, (loadedTrip) -> {
             final Trip useTrip = loadedTrip != null ? loadedTrip : trip;
             final TripDetailsActivity.RenderConfig config = new TripDetailsActivity.RenderConfig();
-            config.queryTripsRequestData = (QueryTripsRunnable.TripRequestData) Objects.deserialize(serializedReloadRequest, true);
+            config.queryTripsRequestData = (QueryTripRunnable.TripRequestData) Objects.deserialize(serializedReloadRequest, true);
             setupTripDetailsRenderConfig(config);
             TripDetailsActivity.start(DirectionsActivity.this, network, useTrip, config);
         });
@@ -1588,7 +1587,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             tripHandler.accept(null);
             return;
         }
-        queryTripsRunnable = new MyQueryTripsRunnable(networkProvider, tripRef, getTripOptionsFromPrefs()) {
+        queryTripRunnable = new MyQueryTripsRunnable(networkProvider, tripRef) {
             @Override
             protected void onResultOk(final QueryTripsResult result, final TripRequestData reloadRequestData) {
                 final List<Trip> trips = result.trips;
@@ -1601,7 +1600,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
                 tripHandler.accept(null);
             }
         };
-        backgroundHandler.post(queryTripsRunnable);
+        backgroundHandler.post(queryTripRunnable);
     }
 
     private void loadTripByTripShare(final TripShare tripShare, final Consumer<Trip> tripHandler) {
@@ -1614,7 +1613,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             tripHandler.accept(null);
             return;
         }
-        queryTripsRunnable = new MyQueryTripsRunnable(networkProvider, tripShare, getTripOptionsFromPrefs()) {
+        queryTripRunnable = new MyQueryTripsRunnable(networkProvider, tripShare) {
             @Override
             protected void onResultOk(final QueryTripsResult result, final TripRequestData reloadRequestData) {
                 final List<Trip> trips = result.trips;
@@ -1627,7 +1626,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
                 tripHandler.accept(null);
             }
         };
-        backgroundHandler.post(queryTripsRunnable);
+        backgroundHandler.post(queryTripRunnable);
     }
 
     private boolean saneLocation(final @Nullable Location location, final boolean allowIncompleteAddress) {
@@ -1728,46 +1727,6 @@ public class DirectionsActivity extends OeffiMainActivity implements
         TripsOverviewActivity.start(this, networkProvider, from, via, to, options, newRenderConfig);
     }
 
-    private void query(
-            final NetworkProvider networkProvider,
-            final Location from, final Location via, final Location to,
-            final TripOptions options) {
-        queryTripsRunnable = new MyQueryTripsRunnable(networkProvider, from, via, to, timeSpec, options) {
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                viewGo.setClickable(false);
-            }
-
-            @Override
-            protected void onPostExecute() {
-                super.onPostExecute();
-                viewGo.setClickable(true);
-            }
-
-            @Override
-            protected void onResultOk(final QueryTripsResult result, final TripRequestData reloadRequestData) {
-                final Uri historyUri;
-                if (result.from != null && result.from.name != null && result.to != null && result.to.name != null)
-                    historyUri = queryHistoryListAdapter.putEntry(result.from, result.to, result.via);
-                else
-                    historyUri = null;
-
-                final TripsOverviewActivity.RenderConfig newRenderConfig = Objects.clone(renderConfig);
-                newRenderConfig.referenceTime = time;
-                setupTripsOverviewRenderConfig(newRenderConfig);
-                TripsOverviewActivity.start(DirectionsActivity.this,
-                        network, time.depArr, result, historyUri, reloadRequestData,
-                        newRenderConfig);
-            }
-
-            @Override
-            protected void onResultFailed(final QueryTripsResult result, final TripRequestData reloadRequestData) {
-            }
-        };
-        backgroundHandler.post(queryTripsRunnable);
-    }
-
     private static class AmbiguousLocationAdapter extends ArrayAdapter<Location> {
         public AmbiguousLocationAdapter(final Context context, final List<Location> autocompletes) {
             super(context, R.layout.directions_location_list_entry, autocompletes);
@@ -1784,35 +1743,21 @@ public class DirectionsActivity extends OeffiMainActivity implements
         }
     }
 
-    public abstract class MyQueryTripsRunnable extends QueryTripsRunnable {
+    public abstract class MyQueryTripsRunnable extends QueryTripRunnable {
         public MyQueryTripsRunnable(
                 final NetworkProvider networkProvider,
-                final Location from, final Location via, final Location to, final TimeSpec time,
-                final TripOptions options) {
-            super(DirectionsActivity.this.getResources(),
-                    DirectionsActivity.this.getProgressDialog(),
+                final TripRef tripRef) {
+            super(DirectionsActivity.this,
                     DirectionsActivity.this.handler,
-                    networkProvider, from, via, to, time, options);
+                    networkProvider, tripRef);
         }
 
         public MyQueryTripsRunnable(
                 final NetworkProvider networkProvider,
-                final TripRef tripRef,
-                final TripOptions options) {
-            super(DirectionsActivity.this.getResources(),
-                    DirectionsActivity.this.getProgressDialog(),
+                final TripShare tripShare) {
+            super(DirectionsActivity.this,
                     DirectionsActivity.this.handler,
-                    networkProvider, tripRef, options);
-        }
-
-        public MyQueryTripsRunnable(
-                final NetworkProvider networkProvider,
-                final TripShare tripShare,
-                final TripOptions options) {
-            super(DirectionsActivity.this.getResources(),
-                    DirectionsActivity.this.getProgressDialog(),
-                    DirectionsActivity.this.handler,
-                    networkProvider, tripShare, options);
+                    networkProvider, tripShare);
         }
 
         @Override
@@ -1925,15 +1870,5 @@ public class DirectionsActivity extends OeffiMainActivity implements
             builder.setOnCancelListener(dialog -> dialog.dismiss());
             builder.show();
         }
-    }
-
-    private ProgressDialog getProgressDialog() {
-        final ProgressDialog progressDialog = ProgressDialog.show(this, null,
-                getString(R.string.directions_query_progress), true, true, dialog -> {
-                    if (queryTripsRunnable != null)
-                        queryTripsRunnable.cancel();
-                });
-        progressDialog.setCanceledOnTouchOutside(false);
-        return progressDialog;
     }
 }

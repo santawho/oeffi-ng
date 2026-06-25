@@ -56,7 +56,7 @@ import java.util.List;
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.DirectionsActivity;
-import de.schildbach.oeffi.directions.QueryTripsRunnable;
+import de.schildbach.oeffi.directions.QueryTripRunnable;
 import de.schildbach.oeffi.tripeval.TripRenderer;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
@@ -93,9 +93,9 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         rc.isNavigation = true;
         rc.isOperation = renderConfig.isOperation;
         rc.isJourney = renderConfig.isJourney;
-        QueryTripsRunnable.TripRequestData reloadRequestData = renderConfig.queryTripsRequestData;
+        QueryTripRunnable.TripRequestData reloadRequestData = renderConfig.queryTripsRequestData;
         if (rc.queryTripsRequestData == null) {
-            reloadRequestData = new QueryTripsRunnable.TripRequestData();
+            reloadRequestData = new QueryTripRunnable.TripRequestData();
             reloadRequestData.from = trip.from;
             reloadRequestData.to = trip.to;
             reloadRequestData.via = null;
@@ -476,7 +476,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
             final JourneyRef currentJourneyRef,
             final JourneyRef feederJourneyRef,
             final JourneyRef connectionJourneyRef,
-            final QueryTripsRunnable.TripRequestData queryTripsRequestData) {
+            final QueryTripRunnable.TripRequestData queryTripsRequestData) {
         final TimeSpec time;
         if (isLegDeparture) {
             time = new TimeSpec.Relative(TimeSpec.DepArr.DEPART, 0);

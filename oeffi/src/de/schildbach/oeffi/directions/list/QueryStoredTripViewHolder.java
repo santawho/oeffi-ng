@@ -33,7 +33,7 @@ import de.schildbach.oeffi.util.SwipeLayout;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.QueryStoredTripsProvider;
-import de.schildbach.oeffi.directions.QueryTripsRunnable;
+import de.schildbach.oeffi.directions.QueryTripRunnable;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.Toast;
@@ -249,9 +249,9 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder
             new Toast(context).longToast(R.string.directions_query_history_invalid_blob);
             return;
         }
-        final QueryTripsRunnable.TripRequestData queryTripsRequestData =
-                (QueryTripsRunnable.TripRequestData) Objects.deserialize(serializedReloadRequest, true);
-        clickListener.onSavedTripStartNavigation(position, trip, queryTripsRequestData);
+        final QueryTripRunnable.TripRequestData requestData =
+                (QueryTripRunnable.TripRequestData) Objects.deserialize(serializedReloadRequest, true);
+        clickListener.onSavedTripStartNavigation(position, trip, requestData);
     }
 
     private void showContextMenu(
@@ -286,7 +286,7 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder
                     return true;
                 }
                 if (menuItemId == R.id.directions_query_stored_trip_context_search) {
-                    final QueryTripsRunnable.TripRequestData requestData = (QueryTripsRunnable.TripRequestData)
+                    final QueryTripRunnable.TripRequestData requestData = (QueryTripRunnable.TripRequestData)
                             Objects.deserialize(serializedReloadRequest, true);
                     if (requestData != null)
                         clickListener.onSearchAgainClick(position,

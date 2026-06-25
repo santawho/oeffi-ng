@@ -93,7 +93,7 @@ public class QueryStoredTripsProvider extends ForNetworkContentProvider {
     public static Uri put(
             final ContentResolver contentResolver, final NetworkId network, final String usage,
             final Trip trip,
-            final QueryTripsRunnable.TripRequestData reloadRequestData,
+            final QueryTripRunnable.TripRequestData reloadRequestData,
             final int stateFlags) {
         final String tripId = trip.getUniqueId();
         final Long rowId = getRowId(contentResolver, network, usage, tripId);

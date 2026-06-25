@@ -44,7 +44,7 @@ import java.util.List;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.QueryStoredTripsProvider;
-import de.schildbach.oeffi.directions.QueryTripsRunnable;
+import de.schildbach.oeffi.directions.QueryTripRunnable;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
 import de.schildbach.oeffi.directions.TripUtils;
 import de.schildbach.oeffi.directions.navigation.NavigationAlarmManager;
@@ -77,9 +77,9 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
         rc.isNavigation = true;
         rc.isOperation = renderConfig.isOperation;
         rc.isJourney = renderConfig.isJourney;
-        QueryTripsRunnable.TripRequestData reloadRequestData = renderConfig.queryTripsRequestData;
+        QueryTripRunnable.TripRequestData reloadRequestData = renderConfig.queryTripsRequestData;
         if (rc.queryTripsRequestData == null) {
-            reloadRequestData = new QueryTripsRunnable.TripRequestData();
+            reloadRequestData = new QueryTripRunnable.TripRequestData();
             reloadRequestData.from = trip.from;
             reloadRequestData.to = trip.to;
             reloadRequestData.via = null;
@@ -403,7 +403,7 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
     }
 
     private Trip nextTrip;
-    private QueryTripsRunnable.TripRequestData nextTripsRequestData;
+    private QueryTripRunnable.TripRequestData nextTripsRequestData;
 
     private void loadNextOperation() {
         final String currentTripId = tripRenderer.trip.getUniqueId();
@@ -422,7 +422,7 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
                     continue;
                 nextTrip = (Trip) Objects.deserialize(cursor.getBlob(
                         cursor.getColumnIndexOrThrow(QueryStoredTripsProvider.KEY_TRIP)), true);
-                nextTripsRequestData = (QueryTripsRunnable.TripRequestData) Objects.deserialize(cursor.getBlob(
+                nextTripsRequestData = (QueryTripRunnable.TripRequestData) Objects.deserialize(cursor.getBlob(
                         cursor.getColumnIndexOrThrow(QueryStoredTripsProvider.KEY_RELOAD_REQUEST_DATA)), true);
                 break;
             }
@@ -431,7 +431,7 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
 
     private void startNextNavigation(
             final Trip trip,
-            final QueryTripsRunnable.TripRequestData tripsRequestData) {
+            final QueryTripRunnable.TripRequestData tripsRequestData) {
         final TripDetailsActivity.RenderConfig renderConfig = new TripDetailsActivity.RenderConfig();
         renderConfig.isOperation = true;
         renderConfig.isJourney = true;

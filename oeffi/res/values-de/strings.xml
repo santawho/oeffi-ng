@@ -305,7 +305,9 @@
     <string name="directions_message_no_trips">Zu deinem Verbindungswunsch konnte keine Verbindung gefunden werden</string>
     <string name="directions_message_invalid_date">Das Verbindungsdatum liegt außerhalb der Fahrplanperiode</string>
     <string name="directions_message_ambiguous_location">Ein Punkt ist nicht eindeutig</string>
-    <string name="directions_query_progress">Route wird abgerufen…</string>
+    <string name="directions_query_directions_progress">Route wird abgerufen…</string>
+    <string name="directions_query_travel_info_progress">Reiseinformation wird aktualisiert …</string>
+    <string name="directions_query_journey_progress">Fahrtinformation wird abgerufen …</string>
     <string name="directions_message_missing_capability">Verbindungsanfragen sind in dem gewählten Verkehrsnetz nicht möglich.\nWähle ggf. ein anderes Netz.</string>
     <string name="directions_connectivity_warning">Offline-Modus: Dein Gerät ist nicht verbunden.\nGespeicherte Verbindungen können aber angezeigt werden.</string>
     <string name="directions_alert_redirect_title">Weiterleitung</string>

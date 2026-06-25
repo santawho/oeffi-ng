@@ -157,7 +157,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         public boolean isNavigation;
         public boolean isAlternativeConnectionSearch;
         public int actionBarColorId;
-        public QueryTripsRunnable.TripRequestData queryTripsRequestData;
+        public QueryTripRunnable.TripRequestData queryTripsRequestData;
     }
 
     public static final String INTENT_EXTRA_NETWORK = TripDetailsActivity.class.getName() + ".network";
@@ -3272,7 +3272,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final JourneyRef currentJourneyRef,
             final JourneyRef feederJourneyRef,
             final JourneyRef connectionJourneyRef,
-            final QueryTripsRunnable.TripRequestData queryTripsRequestData) {
+            final QueryTripRunnable.TripRequestData queryTripsRequestData) {
         // override if implemented
         return false;
     }
@@ -3304,7 +3304,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final JourneyRef currentJourneyRef,
             final JourneyRef feederJourneyRef,
             final JourneyRef connectionJourneyRef,
-            final QueryTripsRunnable.TripRequestData queryTripsRequestData,
+            final QueryTripRunnable.TripRequestData queryTripsRequestData,
             final TripsOverviewActivity.RenderConfig overviewConfig) {
         final PTDate arrivalTime = stop.getArrivalTime();
         final TimeSpec time = new TimeSpec.Absolute(DepArr.DEPART,
@@ -3328,7 +3328,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final JourneyRef currentJourneyRef,
             final JourneyRef feederJourneyRef,
             final JourneyRef connectionJourneyRef,
-            final QueryTripsRunnable.TripRequestData queryTripsRequestData,
+            final QueryTripRunnable.TripRequestData queryTripsRequestData,
             final TripsOverviewActivity.RenderConfig overviewConfig) {
         final Location entry;
         final TimeSpec time;
@@ -3362,7 +3362,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final JourneyRef currentJourneyRef,
             final JourneyRef feederJourneyRef,
             final JourneyRef connectionJourneyRef,
-            final QueryTripsRunnable.TripRequestData queryTripsRequestData,
+            final QueryTripRunnable.TripRequestData queryTripsRequestData,
             final TripsOverviewActivity.RenderConfig overviewConfig) {
         final Location exit;
         final TimeSpec time;

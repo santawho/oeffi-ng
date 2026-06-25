@@ -17,22 +17,17 @@
 
 package de.schildbach.oeffi.directions;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.res.Resources;
-import android.graphics.Typeface;
 import android.os.Handler;
 import android.text.SpannableStringBuilder;
-import android.text.style.StyleSpan;
 
 import androidx.annotation.NonNull;
 
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.Objects;
-import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.pte.provider.NetworkProvider;
-import de.schildbach.pte.provider.NetworkProvider.Accessibility;
-import de.schildbach.pte.provider.NetworkProvider.WalkSpeed;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.QueryTripsResult;
 import de.schildbach.pte.dto.TripOptions;
@@ -56,7 +51,7 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public abstract class QueryTripsRunnable implements Runnable {
+public abstract class QueryTripRunnable implements Runnable {
     public static class TripRequestData implements Serializable {
         private static final long serialVersionUID = -7668471328026069655L;
 
@@ -73,90 +68,60 @@ public abstract class QueryTripsRunnable implements Runnable {
         }
     }
 
-    protected final Resources res;
-    protected final ProgressDialog progressDialog;
+    protected final Activity contextActivity;
+    protected final SpannableStringBuilder progressMessage;
+    protected ProgressDialog progressDialog;
     private final Handler handler;
 
     private final NetworkProvider networkProvider;
 
-    protected final Location from;
-    protected final Location via;
-    protected final Location to;
-    protected final TimeSpec time;
-    protected final TripOptions options;
     protected final TripRef tripRef;
     protected final TripShare tripShare;
 
     private AtomicBoolean cancelled = new AtomicBoolean(false);
 
-    private static final Logger log = LoggerFactory.getLogger(QueryTripsRunnable.class);
+    private static final Logger log = LoggerFactory.getLogger(QueryTripRunnable.class);
 
-    public QueryTripsRunnable(
-            final Resources res, final ProgressDialog dialog, final Handler handler,
+    protected QueryTripRunnable(
+            final Activity contextActivity, final Handler handler,
             final NetworkProvider networkProvider,
-            final Location from, final Location via, final Location to, final TimeSpec time,
-            final TripOptions options) {
-        this.res = res;
-        this.progressDialog = dialog;
+            final TripRef tripRef) {
+        this.contextActivity = contextActivity;
         this.handler = handler;
+        this.progressMessage = new SpannableStringBuilder(contextActivity
+                .getString(R.string.directions_query_travel_info_progress));
 
         this.networkProvider = networkProvider;
-        this.options = options;
-
-        this.from = from;
-        this.via = via;
-        this.to = to;
-        this.time = time;
-
-        this.tripRef = null;
-        this.tripShare = null;
-    }
-
-    public QueryTripsRunnable(
-            final Resources res, final ProgressDialog dialog, final Handler handler,
-            final NetworkProvider networkProvider,
-            final TripRef tripRef,
-            final TripOptions options) {
-        this.res = res;
-        this.progressDialog = dialog;
-        this.handler = handler;
-
-        this.networkProvider = networkProvider;
-        this.options = options;
 
         this.tripRef = tripRef;
         this.tripShare = null;
-
-        this.from = null;
-        this.via = null;
-        this.to = null;
-        this.time = null;
-
     }
 
-    public QueryTripsRunnable(
-            final Resources res, final ProgressDialog dialog, final Handler handler,
+    protected QueryTripRunnable(
+            final Activity contextActivity, final Handler handler,
             final NetworkProvider networkProvider,
-            final TripShare tripShare,
-            final TripOptions options) {
-        this.res = res;
-        this.progressDialog = dialog;
+            final TripShare tripShare) {
+        this.contextActivity = contextActivity;
         this.handler = handler;
+        this.progressMessage = new SpannableStringBuilder(contextActivity
+                .getString(R.string.directions_query_travel_info_progress));
 
         this.networkProvider = networkProvider;
-        this.options = options;
 
         this.tripRef = null;
         this.tripShare = tripShare;
-
-        this.from = null;
-        this.via = null;
-        this.to = null;
-        this.time = null;
     }
 
     public void run() {
         postOnPreExecute();
+
+        contextActivity.runOnUiThread(() -> {
+            progressDialog = ProgressDialog.show(contextActivity,
+                    null, progressMessage, true, true, dialog -> {
+                        QueryTripRunnable.this.cancel();
+                    });
+            progressDialog.setCanceledOnTouchOutside(false);
+        });
 
         int tries = 0;
 
@@ -169,20 +134,9 @@ public abstract class QueryTripsRunnable implements Runnable {
                 if (tripShare != null) {
                     result = networkProvider.loadSharedTrip(tripShare, true);
                     reloadRequestData = null;
-                } else if (tripRef != null) {
+                } else {
                     result = networkProvider.queryReloadTrip(tripRef, true);
                     reloadRequestData = null;
-                } else {
-                    final boolean depArr = time.depArr == TimeSpec.DepArr.DEPART;
-                    final Date date = new Date(time.timeInMillis());
-                    reloadRequestData = new TripRequestData();
-                    reloadRequestData.from = from;
-                    reloadRequestData.via = via;
-                    reloadRequestData.to = to;
-                    reloadRequestData.date = date;
-                    reloadRequestData.dep = depArr;
-                    reloadRequestData.options = options;
-                    result = networkProvider.queryTrips(from, via, to, date, depArr, options, false);
                 }
 
                 if (!cancelled.get())
@@ -244,55 +198,8 @@ public abstract class QueryTripsRunnable implements Runnable {
 
     private void postOnPreExecute() {
         handler.post(() -> {
-            startProgressDialog(progressDialog, res, options);
             onPreExecute();
         });
-    }
-
-    public static void startProgressDialog(final ProgressDialog progressDialog, final Resources res, final TripOptions options) {
-        final boolean hasOptimize = options.optimize != null;
-        final boolean hasWalkSpeed = options.walkSpeed != null && options.walkSpeed != WalkSpeed.NORMAL;
-        final boolean hasAccessibility = options.accessibility != null
-                && options.accessibility != Accessibility.NEUTRAL;
-
-        final SpannableStringBuilder progressMessage = new SpannableStringBuilder(
-                res.getString(R.string.directions_query_progress));
-        progressMessage.setSpan(new StyleSpan(Typeface.BOLD), 0, progressMessage.length(),
-                SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE);
-        if (hasOptimize || hasWalkSpeed || hasAccessibility) {
-            progressMessage.append('\n');
-            if (hasOptimize) {
-                progressMessage.append('\n')
-                        .append(res.getString(R.string.directions_preferences_optimize_trip_title))
-                        .append(": ");
-                final int begin = progressMessage.length();
-                progressMessage.append(
-                        res.getStringArray(R.array.directions_optimize_trip)[options.optimize.ordinal()]);
-                progressMessage.setSpan(new StyleSpan(Typeface.BOLD), begin, progressMessage.length(),
-                        SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE);
-            }
-            if (hasWalkSpeed) {
-                progressMessage.append('\n')
-                        .append(res.getString(R.string.directions_preferences_walk_speed_title)).append(": ");
-                final int begin = progressMessage.length();
-                progressMessage
-                        .append(res.getStringArray(R.array.directions_walk_speed)[options.walkSpeed.ordinal()]);
-                progressMessage.setSpan(new StyleSpan(Typeface.BOLD), begin, progressMessage.length(),
-                        SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE);
-            }
-            if (hasAccessibility) {
-                progressMessage.append('\n')
-                        .append(res.getString(R.string.directions_preferences_accessibility_title))
-                        .append(": ");
-                final int begin = progressMessage.length();
-                progressMessage.append(
-                        res.getStringArray(R.array.directions_accessibility)[options.accessibility.ordinal()]);
-                progressMessage.setSpan(new StyleSpan(Typeface.BOLD), begin, progressMessage.length(),
-                        SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE);
-            }
-        }
-
-        progressDialog.setMessage(progressMessage);
     }
 
     protected void onPreExecute() {
@@ -346,17 +253,5 @@ public abstract class QueryTripsRunnable implements Runnable {
     }
 
     protected void onCancelled() {
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder builder = new StringBuilder();
-        builder.append(getClass().getName()).append('[');
-        builder.append("f:").append(from).append('|');
-        builder.append("v:").append(via).append('|');
-        builder.append("t:").append(to).append('|');
-        builder.append(time).append('|');
-        builder.append(options).append(']');
-        return builder.toString();
     }
 }

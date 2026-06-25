@@ -23,7 +23,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Criteria;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -49,13 +48,8 @@ import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.Point;
 import de.schildbach.pte.dto.Product;
-import de.schildbach.pte.dto.QueryTripsResult;
 import de.schildbach.pte.dto.TripOptions;
-import okhttp3.HttpUrl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.SSLException;
 import java.util.Set;
 
 public class DirectionsShortcutActivity extends OeffiActivity implements LocationHelper.Callback {
@@ -84,13 +78,6 @@ public class DirectionsShortcutActivity extends OeffiActivity implements Locatio
     private LocationHelper locationHelper;
     private ProgressDialog progressDialog;
 
-    private HandlerThread backgroundThread;
-    private Handler backgroundHandler;
-    private final Handler handler = new Handler();
-    private QueryTripsRunnable queryTripsRunnable;
-
-    private static final Logger log = LoggerFactory.getLogger(DirectionsShortcutActivity.class);
-
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
                 if (granted)
@@ -105,22 +92,11 @@ public class DirectionsShortcutActivity extends OeffiActivity implements Locatio
 
         locationHelper = new LocationHelper(this, this);
 
-        backgroundThread = new HandlerThread("DirectionsShortcut.queryTripsThread", Process.THREAD_PRIORITY_BACKGROUND);
-        backgroundThread.start();
-        backgroundHandler = new Handler(backgroundThread.getLooper());
-
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
             maybeStartLocation();
         else
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
-    }
-
-    @Override
-    protected void onDestroy() {
-        backgroundThread.getLooper().quit();
-
-        super.onDestroy();
     }
 
     public void maybeStartLocation() {
@@ -144,10 +120,6 @@ public class DirectionsShortcutActivity extends OeffiActivity implements Locatio
         progressDialog = ProgressDialog.show(DirectionsShortcutActivity.this, null,
                 getString(R.string.acquire_location_start, provider), true, true, dialog -> {
                     locationHelper.stop();
-
-                    if (queryTripsRunnable != null)
-                        queryTripsRunnable.cancel();
-
                     finish();
                 });
         progressDialog.setCanceledOnTouchOutside(false);
@@ -219,120 +191,6 @@ public class DirectionsShortcutActivity extends OeffiActivity implements Locatio
         } else {
             errorDialog(R.string.directions_shortcut_error_message_network);
         }
-    }
-
-    private void query(
-            final NetworkProvider networkProvider,
-            final Location from, final Location to,
-            final TripOptions options) {
-        queryTripsRunnable = new QueryTripsRunnable(getResources(), progressDialog, handler, networkProvider, from,
-                null, to, new TimeSpec.Relative(0), options) {
-            @Override
-            protected void onPostExecute() {
-                progressDialog.dismiss();
-            }
-
-            @Override
-            protected void onResult(final QueryTripsResult result, final TripRequestData reloadRequestData) {
-                if (result.status == QueryTripsResult.Status.OK) {
-                    log.debug("Got {}", result.toShortString());
-
-                    final int maxHistoryEntries = Integer.parseInt(prefs.getString(
-                            Constants.PREFS_KEY_MAX_HISTORY_ENTRIES,
-                            Integer.toString(getResources().getInteger(R.integer.default_max_history_entries))));
-
-                    final Uri historyUri;
-                    if (result.from != null && result.from.name != null && result.to != null && result.to.name != null)
-                        historyUri = QueryHistoryProvider.put(
-                                getContentResolver(),
-                                networkProvider.id(), null,
-                                result.from, result.to, result.via,
-                                null, true,
-                                maxHistoryEntries);
-                    else
-                        historyUri = null;
-
-                    final TripsOverviewActivity.RenderConfig renderConfig = new TripsOverviewActivity.RenderConfig();
-                    renderConfig.referenceTime = time;
-                    TripsOverviewActivity.start(DirectionsShortcutActivity.this, networkProvider.id(),
-                            TimeSpec.DepArr.DEPART, result, historyUri, reloadRequestData, renderConfig);
-                    finish();
-                } else if (result.status == QueryTripsResult.Status.UNKNOWN_FROM) {
-                    errorDialog(R.string.directions_message_unknown_from);
-                } else if (result.status == QueryTripsResult.Status.UNKNOWN_VIA) {
-                    errorDialog(R.string.directions_message_unknown_via);
-                } else if (result.status == QueryTripsResult.Status.UNKNOWN_TO) {
-                    errorDialog(R.string.directions_message_unknown_to);
-                } else if (result.status == QueryTripsResult.Status.UNKNOWN_LOCATION) {
-                    errorDialog(R.string.directions_message_unknown_location);
-                } else if (result.status == QueryTripsResult.Status.TOO_CLOSE) {
-                    errorDialog(R.string.directions_message_too_close);
-                } else if (result.status == QueryTripsResult.Status.UNRESOLVABLE_ADDRESS) {
-                    errorDialog(R.string.directions_message_unresolvable_address);
-                } else if (result.status == QueryTripsResult.Status.NO_TRIPS) {
-                    errorDialog(R.string.directions_message_no_trips);
-                } else if (result.status == QueryTripsResult.Status.INVALID_DATE) {
-                    errorDialog(R.string.directions_message_invalid_date);
-                } else if (result.status == QueryTripsResult.Status.SERVICE_DOWN) {
-                    throw new RuntimeException("network problem");
-                } else if (result.status == QueryTripsResult.Status.AMBIGUOUS) {
-                    errorDialog(R.string.directions_message_ambiguous_location);
-                }
-            }
-
-            @Override
-            protected void onRedirect(final HttpUrl url) {
-                final DialogBuilder builder = DialogBuilder.warn(DirectionsShortcutActivity.this,
-                        R.string.directions_alert_redirect_title);
-                builder.setMessage(getString(R.string.directions_alert_redirect_message, url.host()));
-                builder.setPositiveButton(R.string.directions_alert_redirect_button_follow,
-                        (dialog, which) -> {
-                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url.toString())));
-                            finish();
-                        });
-                builder.setNegativeButton(R.string.directions_alert_redirect_button_dismiss,
-                        (dialog, which) -> finish());
-                builder.setOnCancelListener(dialog -> finish());
-                builder.show();
-            }
-
-            @Override
-            protected void onBlocked(final HttpUrl url) {
-                final DialogBuilder builder = DialogBuilder.warn(DirectionsShortcutActivity.this,
-                        R.string.directions_alert_blocked_title);
-                builder.setMessage(getString(R.string.directions_alert_blocked_message, url.host()));
-                builder.setNeutralButton(R.string.directions_alert_blocked_button_dismiss,
-                        (dialog, which) -> finish());
-                builder.setOnCancelListener(dialog -> finish());
-                builder.show();
-            }
-
-            @Override
-            protected void onInternalError(final HttpUrl url) {
-                final DialogBuilder builder = DialogBuilder.warn(DirectionsShortcutActivity.this,
-                        R.string.directions_alert_internal_error_title);
-                builder.setMessage(getString(R.string.directions_alert_internal_error_message, url.host()));
-                builder.setNeutralButton(R.string.directions_alert_internal_error_button_dismiss,
-                        (dialog, which) -> finish());
-                builder.setOnCancelListener(dialog -> finish());
-                builder.show();
-            }
-
-            @Override
-            protected void onSSLException(final SSLException x) {
-                final DialogBuilder builder = DialogBuilder.warn(DirectionsShortcutActivity.this,
-                        R.string.directions_alert_ssl_exception_title);
-                builder.setMessage(getString(R.string.directions_alert_ssl_exception_message, x.getMessage()));
-                builder.setNeutralButton(R.string.directions_alert_ssl_exception_button_dismiss,
-                        (dialog, which) -> finish());
-                builder.setOnCancelListener(dialog -> finish());
-                builder.show();
-            }
-        };
-
-        log.info("Executing: {}", queryTripsRunnable);
-
-        backgroundHandler.post(queryTripsRunnable);
     }
 
     private void errorDialog(final int resId) {

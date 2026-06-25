@@ -17,7 +17,7 @@
 
 package de.schildbach.oeffi.directions.list;
 
-import de.schildbach.oeffi.directions.QueryTripsRunnable;
+import de.schildbach.oeffi.directions.QueryTripRunnable;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.PTDate;
 import de.schildbach.pte.dto.Trip;
@@ -35,10 +35,10 @@ public interface QueryHistoryClickListener {
     void onSavedTripStartNavigation(
             int adapterPosition,
             Trip trip,
-            QueryTripsRunnable.TripRequestData queryTripsRequestData);
+            QueryTripRunnable.TripRequestData queryTripsRequestData);
 
     void onSearchAgainClick(
             int adapterPosition,
             final PTDate tripDepartureTime, final PTDate tripArrivalTime,
-            QueryTripsRunnable.TripRequestData reloadRequest);
+            QueryTripRunnable.TripRequestData reloadRequest);
 }
