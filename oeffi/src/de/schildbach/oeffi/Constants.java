@@ -69,6 +69,7 @@ public class Constants {
     public static final String PREFS_KEY_USER_INTERFACE_NOPROVIDERCOLORS_ENABLED = "user_interface_results_noprovidercolors_enabled";
     public static final String PREFS_KEY_USER_INTERFACE_PREFERPREDEFINEDCOLORS_ENABLED = "user_interface_results_preferpredefinedcolors_enabled";
     public static final String PREFS_KEY_USER_INTERFACE_HIGHLIGHT_CANCELLED_ENABLED = "user_interface_results_highlight_cancelled_enabled";
+    public static final String PREFS_KEY_USER_INTERFACE_DIRECTIONS_SPECIAL_RENDERING_ENABLED = "user_interface_results_directions_special_rendering_enabled";
     public static final String PREFS_KEY_USER_INTERFACE_REMARK_WITHOUT_LINKS_ENABLED = "user_interface_results_remark_without_links_enabled";
     public static final String PREFS_KEY_USER_INTERFACE_REMARK_LINKS_CLICKABLE_ENABLED = "user_interface_results_remark_links_clickable_enabled";
     public static final String PREFS_KEY_USER_INTERFACE_MAINMENU_SHAREAPP_ENABLED = "user_interface_mainmenu_shareapp_enabled";

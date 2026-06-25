@@ -38,6 +38,8 @@
     <string name="user_interface_results_preferpredefinedcolors_enabled_summary">Use software defined colors, even when network provides specific colors for lines</string>
     <string name="user_interface_results_highlight_cancelled_enabled_title">Highlight cancelled events</string>
     <string name="user_interface_results_highlight_cancelled_enabled_summary">Show cancelled events with a red line</string>
+    <string name="user_interface_results_directions_special_rendering_enabled_title">Highlight destination of journey</string>
+    <string name="user_interface_results_directions_special_rendering_enabled_summary">Show destination of a journey in <i>italic</i> if used as a substitute for the direction</string>
     <string name="user_interface_results_remark_without_links_enabled_title">Remove clickable links</string>
     <string name="user_interface_results_remark_without_links_enabled_summary">Remove clickable links from remark texts</string>
     <string name="user_interface_results_remark_links_clickable_enabled_title">Make links clickable</string>

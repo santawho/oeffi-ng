@@ -22,6 +22,12 @@
         android:summary="@string/user_interface_results_highlight_cancelled_enabled_summary" />
 
     <CheckBoxPreference
+        android:key="user_interface_results_directions_special_rendering_enabled"
+        android:defaultValue="true"
+        android:title="@string/user_interface_results_directions_special_rendering_enabled_title"
+        android:summary="@string/user_interface_results_directions_special_rendering_enabled_summary" />
+
+    <CheckBoxPreference
         android:key="user_interface_results_remark_without_links_enabled"
         android:disableDependentsState="true"
         android:defaultValue="false"

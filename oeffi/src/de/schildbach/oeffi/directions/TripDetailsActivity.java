@@ -114,6 +114,7 @@ import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.oeffi.util.locationview.LocationTextView;
 import de.schildbach.pte.NetworkId;
+import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.provider.NetworkProvider;
 import de.schildbach.pte.dto.Fare;
 import de.schildbach.pte.dto.JourneyRef;
@@ -1341,6 +1342,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         if (destination != null) {
             destinationView.setVisibility(View.VISIBLE);
             destinationView.setText(Constants.DESTINATION_ARROW_PREFIX + Formats.makeBreakableStationName(destinationName));
+            if (destination.type == LocationType.STATION
+                    && Application.getInstance().getSharedPreferences()
+                    .getBoolean(Constants.PREFS_KEY_USER_INTERFACE_DIRECTIONS_SPECIAL_RENDERING_ENABLED, true)) {
+                destinationView.setTypeface(null, Typeface.ITALIC);
+            }
             if (destination.hasId()) {
                 destinationView.setOnLongClickListener(v -> {
                     final StationContextMenu contextMenu = new StationContextMenu(TripDetailsActivity.this, v, network, destination, null,

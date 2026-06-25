@@ -34,6 +34,8 @@ import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
+
+import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.StationsAware;
@@ -51,6 +53,7 @@ import de.schildbach.pte.dto.Departure;
 import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.LineDestination;
 import de.schildbach.pte.dto.Location;
+import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.Position;
 import de.schildbach.pte.dto.Product;
 import de.schildbach.pte.dto.QueryDeparturesResult;
@@ -304,6 +307,11 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
                                     final String text = destinationName == null ? null :
                                             Constants.DESTINATION_ARROW_PREFIX + destinationName;
                                     destinationView.setText(text);
+                                    if (destination.type == LocationType.STATION
+                                            && Application.getInstance().getSharedPreferences()
+                                                .getBoolean(Constants.PREFS_KEY_USER_INTERFACE_DIRECTIONS_SPECIAL_RENDERING_ENABLED, true)) {
+                                        destinationView.setTypeface(null, Typeface.ITALIC);
+                                    }
                                 } else {
                                     destinationView.setText(null);
                                 }
