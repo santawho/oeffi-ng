@@ -87,9 +87,9 @@
     <string name="network_mvg_label">Märkischer Kreis</string>
     <string name="network_mvg_comment">Lüdenscheid, Iserlohn, Hemer, …&lt;br>local and regional</string>
     <string name="network_vrn_label">Rhine-Neckar</string>
-    <string name="network_vrn_comment">Rhineland-Palatinate, Hesse &amp; Baden-Württemberg&lt;br>Mannheim, Ludgwigshafen, Heidelberg…&lt;br>local and regional</string>
+    <string name="network_vrn_comment">Rhineland-Palatinate, Hesse &amp; Baden-Württemberg&lt;br>Mannheim, Ludwigshafen, Heidelberg…&lt;br>local and regional</string>
     <string name="network_nwexrnv_label">Rhine-Neckar (NWEX)</string>
-    <string name="network_nwexrnv_comment">RNV (by networkException)&lt;br>Mannheim, Ludgwigshafen, Heidelberg…&lt;br>local and regional</string>
+    <string name="network_nwexrnv_comment">RNV (by networkException)&lt;br>Mannheim, Ludwigshafen, Heidelberg…&lt;br>local and regional</string>
     <string name="network_saarvv_label">Saarland</string>
     <string name="network_saarvv_comment">Saarbrücken, Neunkirchen, Homburg, …&lt;br>local and regional</string>
     <string name="network_vvs_label">Stuttgart</string>

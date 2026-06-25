@@ -88,9 +88,9 @@
     <string name="network_mvg_label">Märkischer Kreis</string>
     <string name="network_mvg_comment">Lüdenscheid, Iserlohn, Hemer, …&lt;br>Lokal- und Regionalverkehr (TG:MVG)</string>
     <string name="network_vrn_label">Rhein-Neckar</string>
-    <string name="network_vrn_comment">Rheinland-Pfalz, Hessen &amp; Baden-Württemberg&lt;br>Mannheim, Ludgwigshafen, Heidelberg…&lt;br>Lokal- und Regionalverkehr (TG:VRN)</string>
+    <string name="network_vrn_comment">Rheinland-Pfalz, Hessen &amp; Baden-Württemberg&lt;br>Mannheim, Ludwigshafen, Heidelberg…&lt;br>Lokal- und Regionalverkehr (TG:VRN)</string>
     <string name="network_nwexrnv_label">Rhein-Neckar (NWEX)</string>
-    <string name="network_nwexrnv_comment">RNV (durch networkException)&lt;br>Mannheim, Ludgwigshafen, Heidelberg…&lt;br>Lokal- und Regionalverkehr (TG:networkException,RNV)</string>
+    <string name="network_nwexrnv_comment">RNV (durch networkException)&lt;br>Mannheim, Ludwigshafen, Heidelberg…&lt;br>Lokal- und Regionalverkehr (TG:networkException,RNV)</string>
     <string name="network_saarvv_label">Saarland</string>
     <string name="network_saarvv_comment">Saarbrücken, Neunkirchen, Homburg, …&lt;br>Lokal- und Regionalverkehr (TG:SaarVV)</string>
     <string name="network_vvs_label">Stuttgart</string>
