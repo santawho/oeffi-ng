@@ -1346,14 +1346,26 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 .findViewById(R.id.directions_trip_details_public_entry_destination);
         if (destination != null) {
             destinationView.setVisibility(View.VISIBLE);
-            if (destination.type == LocationType.STATION) {
-                destinationView.setText(Constants.DESTINATION_STATION_ARROW_PREFIX + Formats.makeBreakableStationName(destinationName));
-                if (Application.getInstance().getSharedPreferences()
-                    .getBoolean(Constants.PREFS_KEY_USER_INTERFACE_DIRECTIONS_SPECIAL_RENDERING_ENABLED, false)) {
-                    destinationView.setTypeface(null, Typeface.ITALIC);
+            if (tripRenderer.isJourney) {
+                if (destination.type == LocationType.STATION) {
+                    destinationView.setText(Constants.DESTINATION_ARROW_PREFIX + Formats.makeBreakableStationName(destinationName));
+                } else {
+                    destinationView.setText(Constants.DESTINATION_DIRECTION_ARROW_PREFIX + Formats.makeBreakableStationName(destinationName));
+                    if (Application.getInstance().getSharedPreferences()
+                            .getBoolean(Constants.PREFS_KEY_USER_INTERFACE_DIRECTIONS_SPECIAL_RENDERING_ENABLED, false)) {
+                        destinationView.setTypeface(null, Typeface.ITALIC);
+                    }
                 }
             } else {
-                destinationView.setText(Constants.DESTINATION_ARROW_PREFIX + Formats.makeBreakableStationName(destinationName));
+                if (destination.type == LocationType.STATION) {
+                    destinationView.setText(Constants.DESTINATION_STATION_ARROW_PREFIX + Formats.makeBreakableStationName(destinationName));
+                    if (Application.getInstance().getSharedPreferences()
+                            .getBoolean(Constants.PREFS_KEY_USER_INTERFACE_DIRECTIONS_SPECIAL_RENDERING_ENABLED, false)) {
+                        destinationView.setTypeface(null, Typeface.ITALIC);
+                    }
+                } else {
+                    destinationView.setText(Constants.DESTINATION_ARROW_PREFIX + Formats.makeBreakableStationName(destinationName));
+                }
             }
             if (destination.hasId()) {
                 destinationView.setOnLongClickListener(v -> {
