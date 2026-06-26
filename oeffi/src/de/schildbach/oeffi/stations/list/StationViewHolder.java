@@ -31,7 +31,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageButton;
-import android.widget.PopupMenu;
 import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -300,21 +299,26 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
                                 lineView.setGhosted(isGhosted);
 
                                 destinationView.setVisibility(View.VISIBLE);
+                                final String text;
                                 final Location destination = lineDestination.destination;
-                                if (destination != null) {
+                                if (destination == null) {
+                                    text = null;
+                                } else {
                                     final String destinationName = Formats.makeBreakableStationName(
                                             Formats.fullLocationNameIfDifferentPlace(destination, station.location));
-                                    final String text = destinationName == null ? null :
-                                            Constants.DESTINATION_ARROW_PREFIX + destinationName;
-                                    destinationView.setText(text);
-                                    if (destination.type == LocationType.STATION
-                                            && Application.getInstance().getSharedPreferences()
-                                                .getBoolean(Constants.PREFS_KEY_USER_INTERFACE_DIRECTIONS_SPECIAL_RENDERING_ENABLED, true)) {
-                                        destinationView.setTypeface(null, Typeface.ITALIC);
+                                    if (destinationName == null) {
+                                        text = null;
+                                    } else if (destination.type == LocationType.STATION) {
+                                        text = Constants.DESTINATION_ARROW_PREFIX + destinationName;
+                                        if (Application.getInstance().getSharedPreferences()
+                                                .getBoolean(Constants.PREFS_KEY_USER_INTERFACE_DIRECTIONS_SPECIAL_RENDERING_ENABLED, false)) {
+                                            destinationView.setTypeface(null, Typeface.ITALIC);
+                                        }
+                                    } else {
+                                        text = Constants.DESTINATION_DIRECTION_ARROW_PREFIX + destinationName;
                                     }
-                                } else {
-                                    destinationView.setText(null);
                                 }
+                                destinationView.setText(text);
                                 destinationView.setTextColor(colorSignificant);
                             } else if (iDeparture == 1 && interval > 0) {
                                 lineView.setVisibility(View.INVISIBLE);

@@ -1346,11 +1346,14 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 .findViewById(R.id.directions_trip_details_public_entry_destination);
         if (destination != null) {
             destinationView.setVisibility(View.VISIBLE);
-            destinationView.setText(Constants.DESTINATION_ARROW_PREFIX + Formats.makeBreakableStationName(destinationName));
-            if (destination.type == LocationType.STATION
-                    && Application.getInstance().getSharedPreferences()
-                    .getBoolean(Constants.PREFS_KEY_USER_INTERFACE_DIRECTIONS_SPECIAL_RENDERING_ENABLED, true)) {
-                destinationView.setTypeface(null, Typeface.ITALIC);
+            if (destination.type == LocationType.STATION) {
+                destinationView.setText(Constants.DESTINATION_STATION_ARROW_PREFIX + Formats.makeBreakableStationName(destinationName));
+                if (Application.getInstance().getSharedPreferences()
+                    .getBoolean(Constants.PREFS_KEY_USER_INTERFACE_DIRECTIONS_SPECIAL_RENDERING_ENABLED, false)) {
+                    destinationView.setTypeface(null, Typeface.ITALIC);
+                }
+            } else {
+                destinationView.setText(Constants.DESTINATION_ARROW_PREFIX + Formats.makeBreakableStationName(destinationName));
             }
             if (destination.hasId()) {
                 destinationView.setOnLongClickListener(v -> {
@@ -3121,7 +3124,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 final String lineStr = publicLeg.line.label;
                 final Location lineDestination = publicLeg.destination;
                 final String lineDestinationStr = lineDestination != null
-                        ? " " + Constants.CHAR_RIGHTWARDS_ARROW + " " + lineDestination.uniqueShortName() : "";
+                        ? Constants.CHAR_THIN_SPACE + Constants.CHAR_RIGHTWARDS_ARROW + Constants.CHAR_THIN_SPACE
+                          + lineDestination.uniqueShortName()
+                        : "";
 
                 final PTDate departureTime = timeZoneSelector.getDisplay(publicLeg.getDepartureTime(true));
                 final String departureDateStr = Formats.formatDate(timeZoneSelector, departureTime);

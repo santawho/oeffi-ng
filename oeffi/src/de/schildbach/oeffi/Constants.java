@@ -81,9 +81,20 @@ public class Constants {
     public static final char CHAR_THIN_SPACE = '\u2009';
     public static final char CHAR_HAIR_SPACE = '\u200a';
     public static final char CHAR_RIGHTWARDS_ARROW = '\u279d';
+    public static final char CHAR_CIRCLED_H = '\u24bd';
+    public static final char CHAR_WHITE_CIRCLED = '\u25cb';
     public static final char CHAR_LEFT_RIGHT_ARROW = '\u21c4';
-    public static final String DESTINATION_ARROW_PREFIX = Character.toString(Constants.CHAR_RIGHTWARDS_ARROW)
-            + Constants.CHAR_THIN_SPACE;
+    public static final String DESTINATION_DIRECTION_ARROW_PREFIX =
+            Character.toString(CHAR_RIGHTWARDS_ARROW)
+                    + CHAR_WHITE_CIRCLED
+                    + CHAR_THIN_SPACE;
+    public static final String DESTINATION_STATION_ARROW_PREFIX =
+            Character.toString(CHAR_RIGHTWARDS_ARROW)
+                    + CHAR_CIRCLED_H
+                    + CHAR_THIN_SPACE;
+    public static final String DESTINATION_ARROW_PREFIX =
+            Character.toString(CHAR_RIGHTWARDS_ARROW)
+                    + CHAR_THIN_SPACE;
     public static final String DESTINATION_ARROW_INVISIBLE_PREFIX = "     ";
 
     public static final SystemBarStyle STATUS_BAR_STYLE = SystemBarStyle.dark(Color.TRANSPARENT);

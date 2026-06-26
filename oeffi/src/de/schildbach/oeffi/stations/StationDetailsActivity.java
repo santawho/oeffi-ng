@@ -886,9 +886,11 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                         .findViewById(R.id.stations_station_details_header_line_destination);
                 final StringBuilder text = new StringBuilder();
                 for (final Location destination : destinations) {
-                    if (text.length() > 0)
-                        text.append(Constants.CHAR_THIN_SPACE).append(Constants.CHAR_LEFT_RIGHT_ARROW)
+                    if (text.length() > 0) {
+                        text.append(Constants.CHAR_THIN_SPACE)
+                                .append(Constants.CHAR_LEFT_RIGHT_ARROW)
                                 .append(Constants.CHAR_THIN_SPACE);
+                    }
                     text.append(destination.uniqueShortName());
                 }
                 destinationView.setText(text);
@@ -1043,11 +1045,14 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             // destination
             final Location destination = departure.destination;
             if (destination != null) {
-                destinationView.setText(Constants.DESTINATION_ARROW_PREFIX + Formats.fullLocationNameIfDifferentPlace(destination, station));
-                if (destination.type == LocationType.STATION
-                        && Application.getInstance().getSharedPreferences()
-                        .getBoolean(Constants.PREFS_KEY_USER_INTERFACE_DIRECTIONS_SPECIAL_RENDERING_ENABLED, true)) {
-                    destinationView.setTypeface(null, Typeface.ITALIC);
+                if (destination.type == LocationType.STATION) {
+                    destinationView.setText(Constants.DESTINATION_ARROW_PREFIX + Formats.fullLocationNameIfDifferentPlace(destination, station));
+                    if (Application.getInstance().getSharedPreferences()
+                            .getBoolean(Constants.PREFS_KEY_USER_INTERFACE_DIRECTIONS_SPECIAL_RENDERING_ENABLED, false)) {
+                        destinationView.setTypeface(null, Typeface.ITALIC);
+                    }
+                } else {
+                    destinationView.setText(Constants.DESTINATION_DIRECTION_ARROW_PREFIX + Formats.fullLocationNameIfDifferentPlace(destination, station));
                 }
 //                itemView.setOnClickListener(destination.id == null ? null : v ->
 //                        start(context, network, destination, null, null));
