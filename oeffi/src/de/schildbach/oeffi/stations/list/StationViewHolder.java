@@ -310,10 +310,6 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
                                         text = null;
                                     } else if (destination.type == LocationType.STATION) {
                                         text = Constants.DESTINATION_ARROW_PREFIX + destinationName;
-                                        if (Application.getInstance().getSharedPreferences()
-                                                .getBoolean(Constants.PREFS_KEY_USER_INTERFACE_DIRECTIONS_SPECIAL_RENDERING_ENABLED, false)) {
-                                            destinationView.setTypeface(null, Typeface.ITALIC);
-                                        }
                                     } else {
                                         text = Constants.DESTINATION_DIRECTION_ARROW_PREFIX + destinationName;
                                     }

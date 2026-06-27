@@ -1351,18 +1351,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     destinationView.setText(Constants.DESTINATION_ARROW_PREFIX + Formats.makeBreakableStationName(destinationName));
                 } else {
                     destinationView.setText(Constants.DESTINATION_DIRECTION_ARROW_PREFIX + Formats.makeBreakableStationName(destinationName));
-                    if (Application.getInstance().getSharedPreferences()
-                            .getBoolean(Constants.PREFS_KEY_USER_INTERFACE_DIRECTIONS_SPECIAL_RENDERING_ENABLED, false)) {
-                        destinationView.setTypeface(null, Typeface.ITALIC);
-                    }
                 }
             } else {
                 if (destination.type == LocationType.STATION) {
                     destinationView.setText(Constants.DESTINATION_STATION_ARROW_PREFIX + Formats.makeBreakableStationName(destinationName));
-                    if (Application.getInstance().getSharedPreferences()
-                            .getBoolean(Constants.PREFS_KEY_USER_INTERFACE_DIRECTIONS_SPECIAL_RENDERING_ENABLED, false)) {
-                        destinationView.setTypeface(null, Typeface.ITALIC);
-                    }
                 } else {
                     destinationView.setText(Constants.DESTINATION_ARROW_PREFIX + Formats.makeBreakableStationName(destinationName));
                 }

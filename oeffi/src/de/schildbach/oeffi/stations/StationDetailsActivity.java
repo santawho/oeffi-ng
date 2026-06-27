@@ -1047,10 +1047,6 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             if (destination != null) {
                 if (destination.type == LocationType.STATION) {
                     destinationView.setText(Constants.DESTINATION_ARROW_PREFIX + Formats.fullLocationNameIfDifferentPlace(destination, station));
-                    if (Application.getInstance().getSharedPreferences()
-                            .getBoolean(Constants.PREFS_KEY_USER_INTERFACE_DIRECTIONS_SPECIAL_RENDERING_ENABLED, false)) {
-                        destinationView.setTypeface(null, Typeface.ITALIC);
-                    }
                 } else {
                     destinationView.setText(Constants.DESTINATION_DIRECTION_ARROW_PREFIX + Formats.fullLocationNameIfDifferentPlace(destination, station));
                 }
