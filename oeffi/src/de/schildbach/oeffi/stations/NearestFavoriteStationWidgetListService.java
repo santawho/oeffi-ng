@@ -34,6 +34,7 @@ import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.pte.dto.Departure;
+import de.schildbach.pte.dto.Destination;
 import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Position;
 import de.schildbach.pte.dto.Style;
@@ -136,7 +137,7 @@ public class NearestFavoriteStationWidgetListService extends RemoteViewsService 
             }
 
             // destination
-            final de.schildbach.pte.dto.Location destination = departure.destination;
+            final Destination destination = departure.destination;
             if (destination != null) {
                 views.setTextViewText(R.id.station_widget_entry_destination,
                         Constants.DESTINATION_ARROW_PREFIX + destination.uniqueShortName());

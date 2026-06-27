@@ -54,6 +54,7 @@ import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.pte.NetworkId;
+import de.schildbach.pte.dto.Destination;
 import de.schildbach.pte.dto.Trip;
 
 public class OperationNavigatorActivity extends OperationDetailsActivity {
@@ -381,8 +382,9 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
             final LineView lineView = menuView.findViewById(R.id.operation_menu_next_operation_line);
             lineView.setLine(journeyLeg.line);
             final TextView destinationView = menuView.findViewById(R.id.operation_menu_next_operation_destination);
-            destinationView.setText(Constants.DESTINATION_ARROW_PREFIX
-                    + Formats.makeBreakableStationName(Formats.fullLocationName(journeyLeg.destination)));
+            final Destination destination = journeyLeg.destination;
+            destinationView.setText(destination == null ? null : Constants.DESTINATION_ARROW_PREFIX
+                    + Formats.makeBreakableStationName(Formats.fullLocationName(destination.location)));
 
             final View.OnClickListener onClickListener = v -> {
                 alertDialog.dismiss();

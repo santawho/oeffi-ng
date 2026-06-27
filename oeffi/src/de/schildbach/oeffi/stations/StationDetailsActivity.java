@@ -68,6 +68,7 @@ import de.schildbach.oeffi.util.OverflowTextView;
 import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.pte.NetworkId;
+import de.schildbach.pte.dto.Destination;
 import de.schildbach.pte.provider.NetworkProvider;
 import de.schildbach.pte.dto.Departure;
 import de.schildbach.pte.dto.JourneyRef;
@@ -175,7 +176,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
     @Nullable
     private Integer selectedFavState = null;
     @Nullable
-    private LinkedHashMap<Line, List<Location>> selectedLines = null;
+    private LinkedHashMap<Line, List<Destination>> selectedLines = null;
 
     private MyActionBar actionBar;
     private ImageButton loadLaterButton, loadEarlierButton;
@@ -766,14 +767,14 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         return selectedLocation != null && stationId.equals(selectedLocation.id);
     }
 
-    private LinkedHashMap<Line, List<Location>> groupDestinationsByLine(final List<LineDestination> lineDestinations) {
+    private LinkedHashMap<Line, List<Destination>> groupDestinationsByLine(final List<LineDestination> lineDestinations) {
         if (lineDestinations == null)
             return null;
 
-        final LinkedHashMap<Line, List<Location>> groups = new LinkedHashMap<>();
+        final LinkedHashMap<Line, List<Destination>> groups = new LinkedHashMap<>();
         for (final LineDestination lineDestination : lineDestinations) {
             if (lineDestination.destination != null) {
-                List<Location> list = groups.get(lineDestination.line);
+                List<Destination> list = groups.get(lineDestination.line);
                 if (list == null) {
                     list = new ArrayList<>(2); // A typical line will have two destinations.
                     groups.put(lineDestination.line, list);
@@ -871,9 +872,9 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                     selectedLines.size() < 6
                             ? LinearLayout.LayoutParams.WRAP_CONTENT
                             : (int) getResources().getDimension(R.dimen.stations_station_details_header_lines_scroll_max_height)));
-            for (final Map.Entry<Line, List<Location>> linesEntry : selectedLines.entrySet()) {
+            for (final Map.Entry<Line, List<Destination>> linesEntry : selectedLines.entrySet()) {
                 final Line line = linesEntry.getKey();
-                final List<Location> destinations = linesEntry.getValue();
+                final List<Destination> destinations = linesEntry.getValue();
 
                 final View lineRow = getLayoutInflater().inflate(R.layout.stations_station_details_header_line, null);
                 linesGroup.addView(lineRow, LINES_LAYOUT_PARAMS);
@@ -885,7 +886,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 final TextView destinationView = lineRow
                         .findViewById(R.id.stations_station_details_header_line_destination);
                 final StringBuilder text = new StringBuilder();
-                for (final Location destination : destinations) {
+                for (final Destination destination : destinations) {
                     if (text.length() > 0) {
                         text.append(Constants.CHAR_THIN_SPACE)
                                 .append(Constants.CHAR_LEFT_RIGHT_ARROW)
@@ -1043,13 +1044,17 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             ViewUtils.setCancelledStrikeThru(lineView, isCancelled);
 
             // destination
-            final Location destination = departure.destination;
+            final Destination destination = departure.destination;
+            final String prefix;
             if (destination != null) {
-                if (destination.type == LocationType.STATION) {
-                    destinationView.setText(Constants.DESTINATION_ARROW_PREFIX + Formats.fullLocationNameIfDifferentPlace(destination, station));
+                if (!destination.isNotCommonType) {
+                    prefix = Constants.DESTINATION_ARROW_PREFIX;
+                } else if (destination.location.type == LocationType.STATION) {
+                    prefix = Constants.DESTINATION_STATION_ARROW_PREFIX;
                 } else {
-                    destinationView.setText(Constants.DESTINATION_DIRECTION_ARROW_PREFIX + Formats.fullLocationNameIfDifferentPlace(destination, station));
+                    prefix = Constants.DESTINATION_DIRECTION_ARROW_PREFIX;
                 }
+                destinationView.setText(prefix + Formats.fullLocationNameIfDifferentPlace(destination.location, station));
 //                itemView.setOnClickListener(destination.id == null ? null : v ->
 //                        start(context, network, destination, null, null));
                 ViewUtils.setCancelledStrikeThru(destinationView, isCancelled);

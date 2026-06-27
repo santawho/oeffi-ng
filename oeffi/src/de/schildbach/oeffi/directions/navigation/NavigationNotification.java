@@ -78,6 +78,7 @@ import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.ResourceUri;
 import de.schildbach.oeffi.util.TimeZoneSelector;
 import de.schildbach.oeffi.util.ViewUtils;
+import de.schildbach.pte.dto.Destination;
 import de.schildbach.pte.provider.db.DbProvider;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.JourneyRef;
@@ -2634,8 +2635,9 @@ public class NavigationNotification {
         notificationProducts.put(Product.REPLACEMENT_SERVICE, R.string.navigation_event_notify_product_replacement);
     }
 
-    private String makeNotificationLineName(final Line line, final Location destination, final Location refLocation) {
-        final String destinationName = Formats.fullLocationNameIfDifferentPlace(destination, refLocation);
+    private String makeNotificationLineName(final Line line, final Destination destination, final Location refLocation) {
+        final String destinationName = destination == null ? null
+                : Formats.fullLocationNameIfDifferentPlace(destination.location, refLocation);
         final Integer notificationProductResId = notificationProducts.get(line.product);
         final String notificationProduct = context.getString(notificationProductResId == null
                 ? R.string.navigation_event_notify_product_unknown
@@ -2659,7 +2661,7 @@ public class NavigationNotification {
         speakableProducts.put(Product.REPLACEMENT_SERVICE, R.string.navigation_event_speak_product_replacement);
     }
 
-    private String makeSpeakableLineName(final Line line, final Location destination, final Location refLocation) {
+    private String makeSpeakableLineName(final Line line, final Destination destination, final Location refLocation) {
         final Integer speakableProductResId = speakableProducts.get(line.product);
         final String speakableProduct = context.getString(speakableProductResId == null
                 ? R.string.navigation_event_speak_product_unknown
@@ -2691,8 +2693,9 @@ public class NavigationNotification {
             }
             speakableLineName = builder.toString();
         }
-        final String destinationName = makeSpeakableLocationName(
-                Formats.fullLocationNameIfDifferentPlace(destination, refLocation));
+        final String destinationName = destination == null ? null
+                : makeSpeakableLocationName(Formats.fullLocationNameIfDifferentPlace(
+                        destination.location, refLocation));
         return context.getString(R.string.navigation_event_speak_linename,
                 speakableProduct.isEmpty() ? "" : (speakableProduct + " "),
                 speakableLineName,

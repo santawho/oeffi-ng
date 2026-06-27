@@ -32,6 +32,7 @@ import javax.annotation.Nullable;
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.Formats;
+import de.schildbach.pte.dto.Destination;
 import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.Point;
@@ -1022,10 +1023,10 @@ public class TripRenderer {
             nextEventTransportDestinationName = null;
         } else {
             nextEventTransportLine = leg.line;
-            final Location dest = leg.destination;
-            nextEventTransportDestinationName = dest == null ? null :
+            final Destination destination = leg.destination;
+            nextEventTransportDestinationName = destination == null ? null :
                     Formats.makeBreakableStationName(
-                            Formats.fullLocationNameIfDifferentPlace(dest, leg.departure));
+                            Formats.fullLocationNameIfDifferentPlace(destination.location, leg.departure));
         }
     }
 

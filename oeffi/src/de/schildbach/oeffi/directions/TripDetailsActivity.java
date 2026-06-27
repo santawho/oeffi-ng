@@ -114,6 +114,7 @@ import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.oeffi.util.locationview.LocationTextView;
 import de.schildbach.pte.NetworkId;
+import de.schildbach.pte.dto.Destination;
 import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.provider.NetworkProvider;
 import de.schildbach.pte.dto.Fare;
@@ -1316,8 +1317,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final int highlightedLocationIndex = isHighlightedLeg ? nearestPublicLeg.nearestStopIndex : -1;
         final Trip.Public leg = legC.publicLeg;
         final Trip.Public simulatedLeg = legC.simulatedPublicLeg;
-        final Location destination = leg.destination;
-        final String destinationName = Formats.fullLocationName(destination);
+        final Destination destination = leg.destination;
+        final Location destinationLocation = destination == null ? null : destination.location;
+        final String destinationName = Formats.fullLocationName(destinationLocation);
         final boolean showDestination = destinationName != null;
         final boolean showAccessibility = leg.line.hasAttr(Line.Attr.WHEEL_CHAIR_ACCESS)
                 && !NetworkProvider.Accessibility.NEUTRAL.equals(application.prefsGetAccessibility());
@@ -1344,24 +1346,19 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         final TextView destinationView = row
                 .findViewById(R.id.directions_trip_details_public_entry_destination);
-        if (destination != null) {
+        if (destinationLocation != null) {
             destinationView.setVisibility(View.VISIBLE);
-            if (tripRenderer.isJourney) {
-                if (destination.type == LocationType.STATION) {
-                    destinationView.setText(Constants.DESTINATION_ARROW_PREFIX + Formats.makeBreakableStationName(destinationName));
-                } else {
-                    destinationView.setText(Constants.DESTINATION_DIRECTION_ARROW_PREFIX + Formats.makeBreakableStationName(destinationName));
-                }
-            } else {
-                if (destination.type == LocationType.STATION) {
-                    destinationView.setText(Constants.DESTINATION_STATION_ARROW_PREFIX + Formats.makeBreakableStationName(destinationName));
-                } else {
-                    destinationView.setText(Constants.DESTINATION_ARROW_PREFIX + Formats.makeBreakableStationName(destinationName));
-                }
-            }
-            if (destination.hasId()) {
+            final String prefix;
+            if (!destination.isNotCommonType)
+                prefix = Constants.DESTINATION_ARROW_PREFIX;
+            else if (destinationLocation.type == LocationType.STATION)
+                prefix = Constants.DESTINATION_STATION_ARROW_PREFIX;
+            else
+                prefix = Constants.DESTINATION_DIRECTION_ARROW_PREFIX;
+            destinationView.setText(prefix + Formats.makeBreakableStationName(destinationName));
+            if (destinationLocation.hasId()) {
                 destinationView.setOnLongClickListener(v -> {
-                    final StationContextMenu contextMenu = new StationContextMenu(TripDetailsActivity.this, v, network, destination, null,
+                    final StationContextMenu contextMenu = new StationContextMenu(TripDetailsActivity.this, v, network, destinationLocation, null,
                             false, false, false, true,
                             true, true,
                             false, false,
@@ -1371,15 +1368,15 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     contextMenu.setOnMenuItemClickListener(item -> {
                         final int itemId = item.getItemId();
                         if (itemId == R.id.station_context_show_departures) {
-                            StationDetailsActivity.start(TripDetailsActivity.this, network, destination, leg.getArrivalTime(), null,
+                            StationDetailsActivity.start(TripDetailsActivity.this, network, destinationLocation, leg.getArrivalTime(), null,
                                     shallShowChildActivitiesInNewTask());
                             return true;
                         } else if (itemId == R.id.station_context_nearby_departures) {
-                            StationsActivity.start(TripDetailsActivity.this, network, destination, leg.getArrivalTime());
+                            StationsActivity.start(TripDetailsActivity.this, network, destinationLocation, leg.getArrivalTime());
                             return true;
                         } else if (itemId == R.id.station_map_context_maps_internal) {
                             setMapVisible(true);
-                            getMapView().zoomToStations(List.of(destination), 0);
+                            getMapView().zoomToStations(List.of(destinationLocation), 0);
                             return true;
                         } else {
                             return false;
@@ -3126,11 +3123,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 final Trip.Public publicLeg = (Trip.Public) leg;
 
                 final String lineStr = publicLeg.line.label;
-                final Location lineDestination = publicLeg.destination;
-                final String lineDestinationStr = lineDestination != null
-                        ? Constants.CHAR_THIN_SPACE + Constants.CHAR_RIGHTWARDS_ARROW + Constants.CHAR_THIN_SPACE
-                          + lineDestination.uniqueShortName()
-                        : "";
+                final Destination destination = publicLeg.destination;
+                final String lineDestinationStr = destination == null ? ""
+                        : Constants.CHAR_THIN_SPACE + Constants.CHAR_RIGHTWARDS_ARROW + Constants.CHAR_THIN_SPACE
+                          + destination.uniqueShortName();
 
                 final PTDate departureTime = timeZoneSelector.getDisplay(publicLeg.getDepartureTime(true));
                 final String departureDateStr = Formats.formatDate(timeZoneSelector, departureTime);
@@ -3243,7 +3239,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 intermediateStops.add(stop);
         }
         final Trip.Public leg = new Trip.Public(
-                journeyLeg.line, exitLocation, entryStop, exitStop,
+                journeyLeg.line, new Destination(exitLocation), entryStop, exitStop,
                 intermediateStops,
                 journeyLeg.message,
                 journeyLeg.journeyRef, journeyLeg.loadedAt);

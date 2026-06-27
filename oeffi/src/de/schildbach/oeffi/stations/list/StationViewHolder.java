@@ -34,7 +34,6 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
-import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.StationsAware;
@@ -49,9 +48,9 @@ import de.schildbach.oeffi.util.HtmlUtils;
 import de.schildbach.oeffi.util.OverflowTextView;
 import de.schildbach.pte.Standard;
 import de.schildbach.pte.dto.Departure;
+import de.schildbach.pte.dto.Destination;
 import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.LineDestination;
-import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.Position;
 import de.schildbach.pte.dto.Product;
@@ -300,16 +299,18 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
 
                                 destinationView.setVisibility(View.VISIBLE);
                                 final String text;
-                                final Location destination = lineDestination.destination;
+                                final Destination destination = lineDestination.destination;
                                 if (destination == null) {
                                     text = null;
                                 } else {
                                     final String destinationName = Formats.makeBreakableStationName(
-                                            Formats.fullLocationNameIfDifferentPlace(destination, station.location));
+                                            Formats.fullLocationNameIfDifferentPlace(destination.location, station.location));
                                     if (destinationName == null) {
                                         text = null;
-                                    } else if (destination.type == LocationType.STATION) {
+                                    } else if (!destination.isNotCommonType) {
                                         text = Constants.DESTINATION_ARROW_PREFIX + destinationName;
+                                    } else if (destination.location.type == LocationType.STATION) {
+                                        text = Constants.DESTINATION_STATION_ARROW_PREFIX + destinationName;
                                     } else {
                                         text = Constants.DESTINATION_DIRECTION_ARROW_PREFIX + destinationName;
                                     }

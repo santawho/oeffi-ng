@@ -43,6 +43,7 @@ import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.stations.StationDetailsActivity;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.pte.NetworkId;
+import de.schildbach.pte.dto.Destination;
 import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.PTDate;
@@ -462,9 +463,9 @@ public class OperationDetailsActivity extends TripDetailsActivity {
         final LineView lineView = findViewById(R.id.operation_next_event_line);
         lineView.setLine(simulatedLeg.line);
         final TextView destinationView = findViewById(R.id.operation_next_event_destination);
-        destinationView.setText(Constants.DESTINATION_ARROW_PREFIX
-                + Formats.makeBreakableStationName(Formats.fullLocationName(
-                        simulatedLeg.destination)));
+        final Destination destination = simulatedLeg.destination;
+        destinationView.setText(destination == null ? null : Constants.DESTINATION_ARROW_PREFIX
+                + Formats.makeBreakableStationName(Formats.fullLocationName(destination.location)));
 
         final boolean sectionIsAfterNearestStop = operationLegC.sectionIsAfterNearestStop;
         final boolean isAtNearestStop = operationLegC.isAtNearestStop;
