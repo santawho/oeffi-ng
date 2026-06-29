@@ -36,25 +36,27 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import de.schildbach.oeffi.Application;
+
 public class SettingsUtil {
     public static final Logger log = LoggerFactory.getLogger(SettingsUtil.class);
 
     public static String RESTORE_FILENAME_PATTERN = "settings-restore.zip";
-    private final Context context;
+    private final Application applicationContext;
 
-    public SettingsUtil(final Context context) {
-        this.context = context;
+    public SettingsUtil(final Application applicationContext) {
+        this.applicationContext = applicationContext;
     }
 
     private File getRestoreFile() {
-        return new File(context.getCacheDir(), RESTORE_FILENAME_PATTERN);
+        return new File(applicationContext.getCacheDir(), RESTORE_FILENAME_PATTERN);
     }
 
     public boolean backup(final OutputStream outputStream) {
         final byte[] buffer = new byte[4096];
         final AtomicBoolean anyError = new AtomicBoolean(false);
         try (final ZipOutputStream zos = new ZipOutputStream(outputStream)) {
-            final Path dataDir = context.getDataDir().toPath();
+            final Path dataDir = applicationContext.getDataDir().toPath();
             for (final String subDirName : new String[]{
                     "shared_prefs",
                     "databases",
@@ -114,7 +116,7 @@ public class SettingsUtil {
         if (!restoreFile.exists())
             return false;
         log.info("restoring from previously selected settings");
-        final Path dataDir = context.getDataDir().toPath();
+        final Path dataDir = applicationContext.getDataDir().toPath();
         final byte[] buffer = new byte[4096];
         final AtomicBoolean anyError = new AtomicBoolean(false);
         try (final FileInputStream fis = new FileInputStream(restoreFile)) {

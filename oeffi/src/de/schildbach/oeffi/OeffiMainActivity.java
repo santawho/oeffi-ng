@@ -155,7 +155,7 @@ public abstract class OeffiMainActivity extends OeffiActivity {
         remoteUrl.addQueryParameter("sdk", Integer.toString(Build.VERSION.SDK_INT));
         remoteUrl.addQueryParameter("task", taskName());
         final File localFile = new File(getFilesDir(), "messages.txt");
-        final Downloader downloader = new Downloader(getCacheDir());
+        final Downloader downloader = new Downloader(application.getCacheDir());
         final CompletableFuture<Integer> download = downloader.download(application.okHttpClient(), remoteUrl.build(),
                 localFile);
         download.whenComplete((status, t) -> {

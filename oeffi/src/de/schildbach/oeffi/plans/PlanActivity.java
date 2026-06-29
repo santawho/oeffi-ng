@@ -213,7 +213,7 @@ public class PlanActivity extends ComponentActivity {
             stationsCursor.close();
         }
 
-        final Downloader downloader = new Downloader(getCacheDir());
+        final Downloader downloader = new Downloader(application.getCacheDir());
         final HttpUrl remoteUrl = planUrlStr != null ? HttpUrl.parse(planUrlStr)
                 : URLs.getPlansBaseUrl().newBuilder().addEncodedPathSegment(PlanContentProvider.getPlanFilename(planId)).build();
         final CompletableFuture<Integer> download = downloader.download(application.okHttpClient(), remoteUrl, planFile);

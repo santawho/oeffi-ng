@@ -116,6 +116,16 @@ public class Application extends android.app.Application {
         return logFile;
     }
 
+    @Override
+    public File getCacheDir() {
+        return super.getCacheDir();
+    }
+
+    @Override
+    public File getDataDir() {
+        return super.getDataDir();
+    }
+
     public String getUserAgent(final ApiProvider.UserAgentType userAgentType) {
         switch (userAgentType) {
             case NONE:

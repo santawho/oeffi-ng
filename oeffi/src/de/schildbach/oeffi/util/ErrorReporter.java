@@ -89,29 +89,29 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
         this.networkId = networkId;
     }
 
-    public void init(final Context context) {
+    public void init(final Application application) {
         previousHandler = Thread.getDefaultUncaughtExceptionHandler();
         Thread.setDefaultUncaughtExceptionHandler(this);
 
-        filesDir = context.getFilesDir();
-        cacheDir = context.getCacheDir();
+        filesDir = application.getFilesDir();
+        cacheDir = application.getCacheDir();
 
         stackTraceFile = new File(cacheDir, STACKTRACE_FILENAME);
 
         report.append("=== collected at launch time ===\n\n");
         report.append("Network: " + (networkId != null ? networkId.name() : "-") + "\n\n");
-        appendReport(report, context);
+        appendReport(report, application);
     }
 
-    private static void appendReport(final StringBuilder report, final Context context) {
+    private static void appendReport(final StringBuilder report, final Application application) {
         try {
-            final PackageManager pm = context.getPackageManager();
-            final PackageInfo pi = pm.getPackageInfo(context.getPackageName(), 0);
+            final PackageManager pm = application.getPackageManager();
+            final PackageInfo pi = pm.getPackageInfo(application.getPackageName(), 0);
 
             report.append("Date: " + new Date() + "\n");
             report.append("Version: " + pi.versionName + " (" + pi.versionCode + ")\n");
             report.append("Package: " + pi.packageName + "\n");
-            final String installerPackageName = Installer.installerPackageName(context);
+            final String installerPackageName = Installer.installerPackageName(application);
             final Installer installer = Installer.from(installerPackageName);
             if (installer != null)
                 report.append("Installer: " + installer.displayName + " (" + installerPackageName + ")\n");
@@ -122,7 +122,7 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
         }
 
         try {
-            appendDeviceInfo(report, context);
+            appendDeviceInfo(report, application);
         } catch (final IOException x) {
             report.append("Exception while adding device info: ").append(x.getMessage()).append('\n');
         }
