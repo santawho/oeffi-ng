@@ -477,52 +477,52 @@ public class TripsOverviewActivity extends OeffiActivity {
         foregroundHandler.postDelayed(checkMoreRunnable, delayed ? 50 : 0);
     }
 
-    private final Runnable checkMoreRunnable = new Runnable() {
-        public void run() {
-            if (queryMoreTripsRunning || backgroundHandler == null)
-                return;
+    private final Runnable checkMoreRunnable = this::checkForMore;
 
-            if (System.currentTimeMillis() < queryMoreTripsEnabledAfterTime)
-                return;
+    private void checkForMore() {
+        if (queryMoreTripsRunning || backgroundHandler == null)
+            return;
 
-            final int positionOffset = queryTripsContextEarlier != null && queryTripsContextEarlier.canQueryEarlier() ? 0 : 1;
-            final int lastVisiblePosition = barView.getLastVisiblePosition() - positionOffset;
-            final int firstVisiblePosition = barView.getFirstVisiblePosition() - positionOffset;
+        if (System.currentTimeMillis() < queryMoreTripsEnabledAfterTime)
+            return;
 
-            Runnable queryTripsRunnable = null;
-            if (initialRequested) {
-                initialRequested = false;
-                searchMoreContext.reset();
-                queryTripsRunnable = new QueryMoreTripsRunnable(null, true, false, false, true, searchMoreContext);
-            } else if (reloadRequested) {
-                reloadRequested = false;
-                searchMoreContext.reset();
-                queryTripsRunnable = new QueryMoreTripsRunnable(null, false, false, false, true, searchMoreContext);
-            } else if (searchMoreRequested) {
-                searchMoreRequested = false;
-                final SearchMoreContext.NextRoundInfo nextRoundInfo = searchMoreContext.prepareNextRound(TripsOverviewActivity.this);
-                if (nextRoundInfo != null) {
-                    queryTripsRunnable = new QueryMoreTripsRunnable(null, false, false, false, false, searchMoreContext);
-                    if (nextRoundInfo.infoText != null)
-                        runOnUiThread(() -> new Toast(TripsOverviewActivity.this).toast(nextRoundInfo.infoText));
-                }
-            } else if (queryTripsContextEarlier != null && queryTripsContextEarlier.canQueryEarlier()
-                    && (firstVisiblePosition == AdapterView.INVALID_POSITION || firstVisiblePosition <= 0)) {
-                queryTripsRunnable = new QueryMoreTripsRunnable(queryTripsContextEarlier, false, true, false, false, searchMoreContext);
-            } else if (queryTripsContextLater != null && queryTripsContextLater.canQueryLater()
-                    && (lastVisiblePosition == AdapterView.INVALID_POSITION || lastVisiblePosition + 1 >= trips.size())) {
-                queryTripsRunnable = new QueryMoreTripsRunnable(queryTripsContextLater, false, false, true, false, searchMoreContext);
-            } else if (searchMoreContext.searchMorePossible()) {
-                runOnUiThread(() -> setSearchMoreButtonEnabled(true));
+        final int positionOffset = queryTripsContextEarlier != null && queryTripsContextEarlier.canQueryEarlier() ? 0 : 1;
+        final int lastVisiblePosition = barView.getLastVisiblePosition() - positionOffset;
+        final int firstVisiblePosition = barView.getFirstVisiblePosition() - positionOffset;
+
+        Runnable queryTripsRunnable = null;
+        if (initialRequested) {
+            initialRequested = false;
+            searchMoreContext.reset();
+            queryTripsRunnable = new QueryMoreTripsRunnable(null, true, false, false, true, searchMoreContext);
+        } else if (reloadRequested) {
+            reloadRequested = false;
+            searchMoreContext.reset();
+            queryTripsRunnable = new QueryMoreTripsRunnable(null, false, false, false, true, searchMoreContext);
+        } else if (searchMoreRequested) {
+            searchMoreRequested = false;
+            final SearchMoreContext.NextRoundInfo nextRoundInfo = searchMoreContext.prepareNextRound(TripsOverviewActivity.this);
+            if (nextRoundInfo != null) {
+                queryTripsRunnable = new QueryMoreTripsRunnable(null, false, false, false, false, searchMoreContext);
+                if (nextRoundInfo.infoText != null)
+                    runOnUiThread(() -> new Toast(TripsOverviewActivity.this).toast(nextRoundInfo.infoText));
             }
-
-            if (queryTripsRunnable != null && backgroundHandler != null) {
-                queryMoreTripsRunning = true;
-//                log.info("backgroundHandler.post(queryTripsRunnable)");
-                backgroundHandler.post(queryTripsRunnable);
-            }
+        } else if (queryTripsContextEarlier != null && queryTripsContextEarlier.canQueryEarlier()
+                && (firstVisiblePosition == AdapterView.INVALID_POSITION || firstVisiblePosition <= 0)) {
+            queryTripsRunnable = new QueryMoreTripsRunnable(queryTripsContextEarlier, false, true, false, false, searchMoreContext);
+        } else if (queryTripsContextLater != null && queryTripsContextLater.canQueryLater()
+                && (lastVisiblePosition == AdapterView.INVALID_POSITION || lastVisiblePosition + 1 >= trips.size())) {
+            queryTripsRunnable = new QueryMoreTripsRunnable(queryTripsContextLater, false, false, true, false, searchMoreContext);
+        } else if (searchMoreContext.searchMorePossible()) {
+            runOnUiThread(() -> setSearchMoreButtonEnabled(true));
         }
-    };
+
+        if (queryTripsRunnable != null && backgroundHandler != null) {
+            queryMoreTripsRunning = true;
+//                log.info("backgroundHandler.post(queryTripsRunnable)");
+            backgroundHandler.post(queryTripsRunnable);
+        }
+    }
 
     private SpannableStringBuilder getDirectionsProgressMessage(final TripOptions options) {
         final SpannableStringBuilder progressMessage;
