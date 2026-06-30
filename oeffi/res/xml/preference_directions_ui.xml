@@ -49,6 +49,12 @@
         android:title="@string/user_interface_directions_show_clear_button_enabled_title"
         android:summary="@string/user_interface_directions_show_clear_button_enabled_summary" />
 
+    <CheckBoxPreference
+        android:key="user_interface_directions_tripextrainfo_enabled"
+        android:defaultValue="false"
+        android:title="@string/user_interface_directions_tripextrainfo_enabled_title"
+        android:summary="@string/user_interface_directions_tripextrainfo_enabled_summary" />
+
     <PreferenceCategory android:title="@string/user_interface_location_selector_category_title">
         <Preference
             android:key="user_interface_location_selector_help"

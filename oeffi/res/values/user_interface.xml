@@ -59,6 +59,11 @@
     <string name="user_interface_directions_autogo_enabled_summary">Start directions search automatically when origin and destination have been entered</string>
     <string name="user_interface_directions_compact_times_enabled_title">Compact times</string>
     <string name="user_interface_directions_compact_times_enabled_summary">Show predicted times (from location and from network) in one row if identical</string>
+    <string name="user_interface_directions_tripextrainfo_enabled_title">Load extra info for trips</string>
+    <string name="user_interface_directions_tripextrainfo_enabled_summary">So far only for
+        DB-based providers: show connection score in trip details
+        with data provided by Bahn-Vorhersage (https://bahnvorhersage.de).
+    </string>
     <string name="user_interface_max_history_entries_title">History size</string>
     <string name="user_interface_max_history_entries_summary">Maximum number of history entries to keep. [%s]</string>
     <string name="user_interface_directions_history_show_saved_trip_enabled_title">Recent trips in history</string>

@@ -126,7 +126,7 @@ public class AboutFragment extends PreferenceFragment {
             providerText.append(String.format("\n(%s)", networkProviderDescriptionUrl));
             prefDataProvider.setIntent(getViewUrlIntent(networkProviderDescriptionUrl));
         }
-        if (prefs.getBoolean(Constants.KEY_EXTRAS_TRIPEXTRAINFO_ENABLED, false)) {
+        if (prefs.getBoolean(Constants.PREFS_KEY_USER_INTERFACE_DIRECTIONS_TRIPEXTRAINFO_ENABLED, false)) {
             try {
                 final TransferEvaluationProvider transferEvaluationProvider = networkProvider.getTransferEvaluationProvider();
                 if (transferEvaluationProvider != null) {

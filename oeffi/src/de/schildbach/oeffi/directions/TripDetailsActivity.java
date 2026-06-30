@@ -679,7 +679,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     protected boolean isTripDetailsLoadingEnabled() {
-        return prefs.getBoolean(Constants.KEY_EXTRAS_TRIPEXTRAINFO_ENABLED, false);
+        return prefs.getBoolean(Constants.PREFS_KEY_USER_INTERFACE_DIRECTIONS_TRIPEXTRAINFO_ENABLED, false);
     }
 
     protected Trip loadTripDetails(final Trip trip) {

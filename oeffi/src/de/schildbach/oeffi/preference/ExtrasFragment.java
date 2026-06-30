@@ -57,10 +57,10 @@ public class ExtrasFragment extends PreferenceFragment {
         if (!isMoreExtrasEnabled())
             return;
 
-        final CheckBoxPreference tripExtraInfoPreference = new CheckBoxPreference(preferenceActivity);
-        tripExtraInfoPreference.setKey(Constants.KEY_EXTRAS_TRIPEXTRAINFO_ENABLED);
-        tripExtraInfoPreference.setTitle(R.string.extras_tripextrainfo_enabled_title);
-        tripExtraInfoPreference.setDefaultValue(false);
-        addPreference(tripExtraInfoPreference);
+        // final CheckBoxPreference tripExtraInfoPreference = new CheckBoxPreference(preferenceActivity);
+        // tripExtraInfoPreference.setKey(Constants.KEY_EXTRAS_TRIPEXTRAINFO_ENABLED);
+        // tripExtraInfoPreference.setTitle(R.string.extras_tripextrainfo_enabled_title);
+        // tripExtraInfoPreference.setDefaultValue(false);
+        // addPreference(tripExtraInfoPreference);
     }
 }

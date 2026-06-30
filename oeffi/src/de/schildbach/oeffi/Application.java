@@ -72,6 +72,7 @@ import de.schildbach.oeffi.util.TimeZoneSelector;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.provider.ApiProvider;
 import de.schildbach.pte.provider.NetworkProvider;
+import de.schildbach.pte.util.HttpClient;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import org.slf4j.Logger;
@@ -334,6 +335,7 @@ public class Application extends android.app.Application {
         NavigationNotification.startup(this);
         OperationNotification.startup(this);
 
+        HttpClient.setUserAgentFactory(this::getUserAgent);
         final OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.followRedirects(true);
         builder.followSslRedirects(false);
@@ -518,7 +520,7 @@ public class Application extends android.app.Application {
     }
 
     public boolean isDriverMode() {
-        return prefs.getBoolean(Constants.KEY_EXTRAS_DRIVERMODE_ENABLED, false);
+        return prefs.getBoolean(Constants.PREFS_KEY_EXTRAS_DRIVERMODE_ENABLED, false);
     }
 
     public String versionName() {

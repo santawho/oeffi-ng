@@ -132,7 +132,6 @@
 
     <!-- preferences extras -->
     <string name="extras_title">Special Functions</string>
-    <string name="extras_tripextrainfo_enabled_title">Acquire extra info for trips</string>
 
     <string name="preference_changes_require_restart_title">Restart?</string>
     <string name="preference_changes_require_restart_message">
