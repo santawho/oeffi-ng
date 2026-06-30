@@ -124,6 +124,7 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder
             final boolean canBeMarkedAsDone, final int stateFlags,
             final long selectedRowId, final QueryHistoryClickListener clickListener,
             final ContextListener contextListener) {
+        swipeLayout.resetCaches();
         this.rowId = rowId;
         this.from = from;
         this.to = to;

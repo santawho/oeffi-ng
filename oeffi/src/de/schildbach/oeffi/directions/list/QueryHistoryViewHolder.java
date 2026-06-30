@@ -117,6 +117,7 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder
             final long savedTripDepartureTime, final byte[] serializedSavedTrip, final Integer fromFavState,
             final Integer toFavState, final long selectedRowId, final QueryHistoryClickListener clickListener,
             final ContextMenuItemListener contextMenuItemListener) {
+        swipeLayout.resetCaches();
         this.clickListener = clickListener;
         this.contextMenuItemListener = contextMenuItemListener;
         this.from = from;

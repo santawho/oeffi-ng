@@ -51,8 +51,6 @@ public class SwipeLayout extends FrameLayout {
     private final List<SwipeListener> mSwipeListeners = new ArrayList<>();
     private final List<SwipeDenier> mSwipeDeniers = new ArrayList<>();
     private final Map<View, ArrayList<OnRevealListener>> mRevealListeners = new HashMap<>();
-    private final Map<View, Boolean> mShowEntirely = new HashMap<>();
-    private final Map<View, Rect> mViewBoundCache = new HashMap<>();//save all children's bound, restore in onLayout
 
     private DoubleClickListener mDoubleClickListener;
 
@@ -61,6 +59,14 @@ public class SwipeLayout extends FrameLayout {
     private boolean mClickToClose = false;
     private float mWillOpenPercentAfterOpen = 0.75f;
     private float mWillOpenPercentAfterClose = 0.25f;
+
+    private Map<View, Boolean> mShowEntirely;
+    private Map<View, Rect> mViewBoundCache; //save all children's bound, restore in onLayout
+
+    public void resetCaches() {
+        mShowEntirely = new HashMap<>();
+        mViewBoundCache = new HashMap<>();
+    }
 
     public enum DragEdge {
         Left,
@@ -84,6 +90,7 @@ public class SwipeLayout extends FrameLayout {
 
     public SwipeLayout(final Context context, final AttributeSet attrs, final int defStyle) {
         super(context, attrs, defStyle);
+        resetCaches();
         final ViewDragHelper.Callback mDragHelperCallback = new ViewDragHelper.Callback() {
             @Override
             public int clampViewPositionHorizontal(@NonNull final View child, final int left, final int dx) {
@@ -389,13 +396,20 @@ public class SwipeLayout extends FrameLayout {
             addRevealListener(i, l);
     }
 
-    public void removeRevealListener(final int childId, final OnRevealListener l) {
+    public void removeRevealListener(final int childId, final OnRevealListener listener) {
         final View child = findViewById(childId);
-
-        if (child == null) return;
+        if (child == null)
+            return;
 
         mShowEntirely.remove(child);
-        if (mRevealListeners.containsKey(child)) mRevealListeners.get(child).remove(l);
+        final ArrayList<OnRevealListener> revealListeners = mRevealListeners.get(child);
+        if (revealListeners != null) {
+            revealListeners.remove(listener);
+            if (revealListeners.isEmpty()) {
+                mRevealListeners.remove(child);
+                mShowEntirely.remove(child);
+            }
+        }
     }
 
     public void removeAllRevealListeners(final int childId) {
@@ -435,9 +449,14 @@ public class SwipeLayout extends FrameLayout {
      * makes the view may not always get the event when the view is totally
      * show( fraction = 1), so , we need to calculate every time.
      */
-    protected boolean isViewTotallyFirstShowed(final View child, final Rect relativePosition, final DragEdge edge, final int surfaceLeft,
-                                               final int surfaceTop, final int surfaceRight, final int surfaceBottom) {
-        if (mShowEntirely.get(child)) return false;
+    protected boolean isViewTotallyFirstShowed(
+            final View child,
+            final Rect relativePosition,
+            final DragEdge edge,
+            final int surfaceLeft, final int surfaceTop,
+            final int surfaceRight, final int surfaceBottom) {
+        if (Boolean.TRUE.equals(mShowEntirely.get(child)))
+            return false;
         final int childLeft = relativePosition.left;
         final int childRight = relativePosition.right;
         final int childTop = relativePosition.top;
