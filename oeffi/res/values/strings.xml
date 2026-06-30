@@ -493,7 +493,7 @@
 
     <!-- directions trip details options schedule -->
     <string name="directions_trip_details_text_long_title">Trip: %1$s ➝ %2$s</string>
-    <string name="directions_trip_details_text_long_public">%1$s\ndep: %2$s, %3$s  %4$s %5$s\narr: %6$s, %7$s  %8$s %9$s</string>
+    <string name="directions_trip_details_text_long_public">%1$s ➝ %2$s\ndep: %3$s, %4$s  %5$s %6$s\narr: %7$s, %8$s  %9$s %10$s</string>
     <string name="directions_trip_details_text_long_walk">walk of %1$d minutes %2$sto %3$s</string>
     <string name="directions_trip_details_text_long_bike">bike ride of %1$d minutes %2$sto %3$s</string>
     <string name="directions_trip_details_text_long_car">car ride of %1$d minutes %2$sto %3$s</string>

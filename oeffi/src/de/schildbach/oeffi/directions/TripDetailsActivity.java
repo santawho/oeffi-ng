@@ -3124,9 +3124,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
                 final String lineStr = publicLeg.line.label;
                 final Destination destination = publicLeg.destination;
-                final String lineDestinationStr = destination == null ? ""
-                        : Constants.CHAR_THIN_SPACE + Constants.CHAR_RIGHTWARDS_ARROW + Constants.CHAR_THIN_SPACE
-                          + destination.uniqueShortName();
+                final String lineDestinationStr = destination == null ? "" : destination.uniqueShortName();
 
                 final PTDate departureTime = timeZoneSelector.getDisplay(publicLeg.getDepartureTime(true));
                 final String departureDateStr = Formats.formatDate(timeZoneSelector, departureTime);
@@ -3142,9 +3140,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 final String arrivalPositionStr = publicLeg.getArrivalPosition() != null
                         ? publicLeg.getArrivalPosition().toString() : "";
 
-                legStr = getString(R.string.directions_trip_details_text_long_public, lineStr + lineDestinationStr,
-                        departureDateStr, departureTimeStr, departurePositionStr, departureNameStr, arrivalDateStr,
-                        arrivalTimeStr, arrivalPositionStr, arrivalNameStr);
+                legStr = getString(R.string.directions_trip_details_text_long_public,
+                        lineStr, lineDestinationStr,
+                        departureDateStr, departureTimeStr, departurePositionStr, departureNameStr,
+                        arrivalDateStr, arrivalTimeStr, arrivalPositionStr, arrivalNameStr);
             } else if (leg instanceof Trip.Individual) {
                 final Trip.Individual individualLeg = (Trip.Individual) leg;
 
