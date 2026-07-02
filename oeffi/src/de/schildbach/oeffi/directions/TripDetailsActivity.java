@@ -686,13 +686,17 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final NetworkProvider provider = NetworkProviderFactory.provider(network);
         if (!provider.hasCapabilities(NetworkProvider.Capability.TRIP_DETAILS))
             return trip;
+        Trip tripWithDetails = null;
         try {
-            return provider.queryTripDetails(trip, null);
+            tripWithDetails = provider.queryTripDetails(trip, null);
         } catch (final IOException e) {
             log.error("loadTripDetails", e);
+        }
+        if (tripWithDetails == null) {
             new Toast(this).longToast(R.string.directions_trip_details_extra_data_error);
             return trip;
         }
+        return tripWithDetails;
     }
 
     private void shareCalendarEntry(final boolean withLink) {
