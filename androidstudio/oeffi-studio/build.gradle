@@ -65,7 +65,7 @@ println "applicationId = ${CREDENTIALS.applicationId}"
 
 android {
     namespace = 'de.schildbach.oeffi'
-    compileSdk 36
+    compileSdk 37
 
     buildFeatures {
         resValues = true
