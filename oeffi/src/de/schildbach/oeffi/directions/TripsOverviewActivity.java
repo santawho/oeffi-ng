@@ -115,7 +115,6 @@ public class TripsOverviewActivity extends OeffiActivity {
         public int actionBarColor;
     }
 
-    private static final String INTENT_EXTRA_NETWORK = TripsOverviewActivity.class.getName() + ".network";
     private static final String INTENT_EXTRA_RESULT = TripsOverviewActivity.class.getName() + ".result";
     private static final String INTENT_EXTRA_ARR_DEP = TripsOverviewActivity.class.getName() + ".arr_dep";
     private static final String INTENT_EXTRA_HISTORY_URI = TripsOverviewActivity.class.getName() + ".history";
@@ -149,7 +148,7 @@ public class TripsOverviewActivity extends OeffiActivity {
             final QueryTripsResult result, final Uri historyUri, final TripRequestData reloadRequestData,
             final RenderConfig renderConfig) {
         final Intent intent = new Intent(context, TripsOverviewActivity.class);
-        intent.putExtra(INTENT_EXTRA_NETWORK, requireNonNull(network));
+        intent.putExtra(INTENT_EXTRA_NETWORK_NAME, requireNonNull(network).name());
         if (result != null) {
             if (result.queryUri != null)
                 intent.setData(Uri.parse(result.queryUri));
@@ -163,7 +162,6 @@ public class TripsOverviewActivity extends OeffiActivity {
         context.startActivity(intent);
     }
 
-    private NetworkId network;
     private SearchMoreContext searchMoreContext;
     private RenderConfig renderConfig;
 
@@ -250,7 +248,6 @@ public class TripsOverviewActivity extends OeffiActivity {
 
         final Intent intent = getIntent();
         renderConfig = (RenderConfig) intent.getSerializableExtra(INTENT_EXTRA_RENDERCONFIG);
-        network = (NetworkId) intent.getSerializableExtra(INTENT_EXTRA_NETWORK);
         final QueryTripsResult queryTripsResult = preprocessResult((QueryTripsResult) intent.getSerializableExtra(INTENT_EXTRA_RESULT));
         final boolean dep = intent.getBooleanExtra(INTENT_EXTRA_ARR_DEP, true);
         reloadRequestData = (TripRequestData) intent.getSerializableExtra(INTENT_EXTRA_RELOAD_REQUEST_DATA);

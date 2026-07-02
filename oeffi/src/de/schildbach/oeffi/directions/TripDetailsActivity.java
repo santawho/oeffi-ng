@@ -116,6 +116,7 @@ import de.schildbach.oeffi.util.locationview.LocationTextView;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Destination;
 import de.schildbach.pte.dto.LocationType;
+import de.schildbach.pte.dto.TripRef;
 import de.schildbach.pte.provider.NetworkProvider;
 import de.schildbach.pte.dto.Fare;
 import de.schildbach.pte.dto.JourneyRef;
@@ -162,7 +163,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         public QueryTripRunnable.TripRequestData queryTripsRequestData;
     }
 
-    public static final String INTENT_EXTRA_NETWORK = TripDetailsActivity.class.getName() + ".network";
     public static final String INTENT_EXTRA_TRIP = TripDetailsActivity.class.getName() + ".trip";
     public static final String INTENT_EXTRA_RENDERCONFIG = TripDetailsActivity.class.getName() + ".config";
 
@@ -184,7 +184,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         public IntentData(final Intent intent) {
             this(
-                    (NetworkId) intent.getSerializableExtra(INTENT_EXTRA_NETWORK),
+                    NetworkId.valueOf(intent.getStringExtra(INTENT_EXTRA_NETWORK_NAME)),
                     (Trip) intent.getSerializableExtra(INTENT_EXTRA_TRIP),
                     (RenderConfig) intent.getSerializableExtra(INTENT_EXTRA_RENDERCONFIG));
         }
@@ -241,7 +241,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final Class<? extends TripDetailsActivity> activityClass, final Context context,
             final NetworkId network, final Trip trip, final RenderConfig renderConfig) {
         final Intent intent = new Intent(context, activityClass);
-        intent.putExtra(INTENT_EXTRA_NETWORK, requireNonNull(network));
+        intent.putExtra(INTENT_EXTRA_NETWORK_NAME, requireNonNull(network).name());
         intent.putExtra(INTENT_EXTRA_TRIP, requireNonNull(trip));
         intent.putExtra(INTENT_EXTRA_RENDERCONFIG, requireNonNull(renderConfig));
         return intent;
@@ -273,7 +273,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private ToggleImageButton trackButton;
     protected boolean mustEnableTrackButton;
 
-    protected NetworkId network;
     protected TripRenderer tripRenderer;
     protected RenderConfig renderConfig;
     private PTDate highlightedTime;
@@ -3317,6 +3316,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         return overviewConfig;
     }
 
+    protected NetworkId getRequestedNetwork() {
+        final TripRef tripRef = tripRenderer.trip.tripRef;
+        return tripRef == null ? this.network : tripRef.network;
+    }
+
     protected boolean onDirectionsFrom(
             final Stop stop,
             final boolean isLegDeparture,
@@ -3329,6 +3333,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final TimeSpec time = new TimeSpec.Absolute(DepArr.DEPART,
                 arrivalTime != null ? arrivalTime.getTime() : stop.getDepartureTime().getTime());
         DirectionsActivity.start(TripDetailsActivity.this,
+                getRequestedNetwork(),
                 stop.location,
                 renderConfig.isJourney
                         ? ((Trip.Public) tripRenderer.trip.legs.get(0)).exitLocation
@@ -3365,6 +3370,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     arrivalTime != null ? arrivalTime.getTime() : stop.getDepartureTime().getTime());
         }
         DirectionsActivity.start(this,
+                getRequestedNetwork(),
                 entry,
                 stop.location,
                 null,
@@ -3399,6 +3405,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     departureTime != null ? departureTime.getTime() : stop.getArrivalTime().getTime());
         }
         DirectionsActivity.start(this,
+                getRequestedNetwork(),
                 null,
                 exit,
                 stop.location,

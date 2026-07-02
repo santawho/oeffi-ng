@@ -566,6 +566,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 //
 //        backgroundHandler.post(queryTripsRunnable);
         DirectionsActivity.start(TripNavigatorActivity.this,
+                getRequestedNetwork(),
                 stop.location,
                 tripRenderer.trip.to,
                 null,

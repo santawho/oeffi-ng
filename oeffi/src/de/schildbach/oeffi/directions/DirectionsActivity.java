@@ -190,6 +190,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
     public static void start(
             final Context context,
+            final NetworkId networkId,
             @Nullable final Location fromLocation,
             @Nullable final Location toLocation,
             @Nullable final Location viaLocation,
@@ -198,6 +199,8 @@ public class DirectionsActivity extends OeffiMainActivity implements
             final boolean autoGo,
             final int intentFlags) {
         final Intent intent = new Intent(context, DirectionsActivity.class).addFlags(intentFlags);
+        if (networkId != null)
+            intent.putExtra(DirectionsActivity.INTENT_EXTRA_NETWORK_NAME, networkId.name());
         if (fromLocation != null)
             intent.putExtra(DirectionsActivity.INTENT_EXTRA_FROM_LOCATION, fromLocation);
         if (toLocation != null)
@@ -277,6 +280,13 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
     protected boolean isForceDirectOption() {
         return false;
+    }
+
+    @Override
+    protected boolean acceptNetworkChanges() {
+        if (renderConfig.isAlternativeConnectionSearch)
+            return false;
+        return super.acceptNetworkChanges();
     }
 
     @Override

@@ -1605,7 +1605,7 @@ public class NavigationNotification {
                 .authority(ActionReceiver.class.getName())
                 .path(intentData.network.name() + "/" + trip.getUniqueId())
                 .build());
-        intent.putExtra(TripDetailsActivity.INTENT_EXTRA_NETWORK, intentData.network);
+        intent.putExtra(TripDetailsActivity.INTENT_EXTRA_NETWORK_NAME, intentData.network.name());
         intent.putExtra(TripDetailsActivity.INTENT_EXTRA_TRIP, trip);
         intent.putExtra(TripDetailsActivity.INTENT_EXTRA_RENDERCONFIG, intentData.renderConfig);
         intent.putExtra(INTENT_EXTRA_ACTION, action);

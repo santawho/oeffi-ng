@@ -104,7 +104,7 @@ import javax.annotation.Nullable;
 public abstract class OeffiActivity extends AppCompatActivity
         implements OeffiMapView.MapPointSelectionProvider {
     protected static final String INTENT_EXTRA_LINK_ARGS = OeffiActivity.class.getName() + ".link_args";
-    protected static final String INTENT_EXTRA_NETWORK_NAME = OeffiActivity.class.getName() + ".network";
+    public static final String INTENT_EXTRA_NETWORK_NAME = OeffiActivity.class.getName() + ".network";
 
     protected static final String PREFS_KEY_VOICE_CONTROL_MODE = "user_interface_voice_control_mode";
     protected static final String PREFS_KEY_VOICE_TOGGLE_STATE = "user_interface_voice_control_toggle";
@@ -932,7 +932,14 @@ public abstract class OeffiActivity extends AppCompatActivity
                 flags);
     }
 
+    protected boolean acceptNetworkChanges() {
+        return false;
+    }
+
     protected void checkChangeNetwork() {
+        if (!acceptNetworkChanges())
+            return;
+
         final boolean haveChanges;
 
         final NetworkId newNetwork = prefsGetNetworkId();

@@ -1609,12 +1609,12 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
             return true;
         } else if (menuItemId == R.id.station_context_directions_from) {
             DirectionsActivity.start(StationsActivity.this,
-                    station, null, null, null, null, false,
+                    network, station, null, null, null, null, false,
                     Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             return true;
         } else if (menuItemId == R.id.station_context_directions_to) {
             DirectionsActivity.start(StationsActivity.this,
-                    null, station, null, null, null, false,
+                    network, null, station, null, null, null, false,
                     Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             return true;
         } else if (menuItemId == R.id.station_context_launcher_shortcut) {

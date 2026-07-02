@@ -72,6 +72,10 @@ public abstract class OeffiMainActivity extends OeffiActivity {
 
     private static final Logger log = LoggerFactory.getLogger(OeffiMainActivity.class);
 
+    protected boolean acceptNetworkChanges() {
+        return true;
+    }
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
