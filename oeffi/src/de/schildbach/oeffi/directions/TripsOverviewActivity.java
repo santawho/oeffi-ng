@@ -288,13 +288,7 @@ public class TripsOverviewActivity extends OeffiActivity {
 
         barView = findViewById(R.id.trips_bar_view);
         barView.setRenderConfig(renderConfig);
-        barView.setOnItemClickListener((parent, v, position, id) -> {
-            onBarViewItemClicked(position, false);
-        });
-        barView.setOnItemLongClickListener((parent, v, position, id) -> {
-            onBarViewItemClicked(position, true);
-            return true;
-        });
+        barView.setOnItemClickListener(TripsOverviewActivity.this::onBarViewItemClicked);
         barView.setOnScrollListener(() -> {
 //            log.info("barView.onScrollListener -> foregroundHandler.post(checkMoreRunnable)");
             postCheckMoreRunnable(true);

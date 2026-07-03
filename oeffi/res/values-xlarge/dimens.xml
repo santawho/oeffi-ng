@@ -27,6 +27,7 @@
     <dimen name="directions_form_location_min_height">60dp</dimen>
     <dimen name="directions_form_location_divider_padding">42dp</dimen>
     <dimen name="trips_overview_entry_width">128dp</dimen>
+    <dimen name="trips_overview_cannotscroll_width">160dp</dimen>
 
     <item name="trips_overview_entry_public_box_fraction" type="fraction">70%</item>
 

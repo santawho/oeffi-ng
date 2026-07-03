@@ -20,7 +20,7 @@
                     android:id="@+id/trips_bar_view"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:scrollbars="horizontal"
+                    android:scrollbars="none"
                     android:spacing="0px"
                     android:unselectedAlpha="1" />
 

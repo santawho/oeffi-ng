@@ -62,6 +62,8 @@
     <color name="bg_trip_details_public_future">#222222</color>
     <color name="bg_trip_details_individual_future">#2a432a</color>
     <color name="bg_trip_details_individual_transfer_critical">#831a1a</color>
+    <color name="bg_trip_overview">#000000</color>
+    <color name="bg_trip_overview_cannotscroll">#383838</color>
     <color name="bg_trip_overview_initial_trip">#3A2828</color>
     <color name="bg_trip_overview_stored_trip">#3C143C</color>
     <color name="bg_trip_overview_earlierorlater_trip">#383838</color>

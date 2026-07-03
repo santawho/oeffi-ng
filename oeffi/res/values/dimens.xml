@@ -42,6 +42,7 @@
     <dimen name="trips_overview_stroke_width">2dp</dimen>
     <dimen name="trips_overview_stroke_width_darkdefault">1dp</dimen>
     <dimen name="trips_overview_entry_width">72dp</dimen>
+    <dimen name="trips_overview_cannotscroll_width">96dp</dimen>
 
     <item name="trips_overview_entry_public_box_fraction" type="fraction">80%</item>
     <item name="trips_overview_entry_individual_box_fraction" type="fraction">30%</item>

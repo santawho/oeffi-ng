@@ -74,8 +74,15 @@ import static de.schildbach.pte.util.Preconditions.checkArgument;
 
 import androidx.appcompat.content.res.AppCompatResources;
 
-public final class TripsGalleryAdapter extends BaseAdapter {
+public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.Adapter<TripsGalleryAdapter.ViewHolder> {
     private static final Logger log = LoggerFactory.getLogger(TripsGallery.class);
+
+//@@@
+//    public static class ViewHolder extends RecyclerView.ViewHolder {
+//        public ViewHolder(@NonNull final View itemView, final int type) {
+//            super(itemView);
+//        }
+//    }
 
     private List<TripInfo> trips = Collections.emptyList();
     private NetworkId networkId;
@@ -116,16 +123,20 @@ public final class TripsGalleryAdapter extends BaseAdapter {
     private final Paint cannotScrollPaint = new Paint();
     private final int colorSignificantInverse;
     private final int colorDelayed;
+    private final int colorBackground;
     private final int colorNormalTripBackground;
     private final int colorStoredTripBackground;
     private final int colorEarlierOrLaterTripBackground;
     private final int colorAdditionalTripBackground;
     private final int colorAdditionalFeederBackground;
+    private final int colorCannotScrollBackground;
     private final int colorTripPressed;
 
     private static final float ROUNDED_CORNER_RADIUS = 8f;
     private static final float CIRCLE_CORNER_RADIUS = 16f;
     private final int tripWidth;
+    private final int cannotScrollWidth;
+//@@@    private TripsGallery.ItemClickListener itemClickListener;
 
     private final Drawable
             walkIcon, stayIcon, bikeIcon, carIcon,
@@ -167,6 +178,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         positionPaddingVertical = res.getDimensionPixelSize(R.dimen.text_padding_vertical);
 
         tripWidth = res.getDimensionPixelSize(R.dimen.trips_overview_entry_width);
+        cannotScrollWidth = res.getDimensionPixelSize(R.dimen.trips_overview_cannotscroll_width);
 
         publicFillPaint.setStyle(Paint.Style.FILL);
 
@@ -252,10 +264,11 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         // colorNormalTripBackground = makeBackgroundColor(ta.getColor(0, context.getColor(R.color.bg_level0)));
         colorTripPressed = makeBackgroundColor(ta.getColor(1, 0x80000000));
         ta.recycle();
-        // colorNormalTripBackground = makeBackgroundColorFromId(R.color.bg_level0);
+        colorBackground = makeBackgroundColorFromId(R.color.bg_trip_overview);
         colorNormalTripBackground = makeBackgroundColorFromId(R.color.bg_trip_overview_initial_trip);
         colorStoredTripBackground = makeBackgroundColorFromId(R.color.bg_trip_overview_stored_trip);
         colorEarlierOrLaterTripBackground = makeBackgroundColorFromId(R.color.bg_trip_overview_earlierorlater_trip);
+        colorCannotScrollBackground = makeBackgroundColorFromId(R.color.bg_trip_overview_cannotscroll);
         colorAdditionalTripBackground = makeBackgroundColorFromId(R.color.bg_trip_overview_additional_trip);
         colorAdditionalFeederBackground = makeBackgroundColorFromId(R.color.bg_trip_overview_additional_feeder);
 
@@ -269,7 +282,12 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         bookmarkedIcon = getColoredIcon(R.drawable.ic_bookmarked_white_24dp, colorLessSignificant);
         bookmarkableIcon = getColoredIcon(R.drawable.ic_bookmarkable_white_24dp, colorLessSignificant);
     }
-    
+
+//@@@
+//    public void setOnItemClickListener(final TripsGallery.ItemClickListener listener) {
+//        itemClickListener = listener;
+//    }
+
     private Drawable getColoredIcon(final int iconResId, final int color) {
         final Drawable drawable = AppCompatResources.getDrawable(context, iconResId).mutate();
         drawable.setTint(color);
@@ -313,17 +331,21 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         this.showBicycleCarriage = showBicycleCarriage;
         this.maxWalkDistance = maxWalkDistance;
 
-        notifyDataSetChanged();
+        notifyDataSetHasChanged();
     }
 
     public void setCanScrollEarlier(final boolean canScrollEarlier) {
         this.canScrollEarlier = canScrollEarlier;
-        notifyDataSetChanged();
+        notifyDataSetHasChanged();
     }
 
     public void setCanScrollLater(final boolean canScrollLater) {
         this.canScrollLater = canScrollLater;
-        notifyDataSetChanged();
+        notifyDataSetHasChanged();
+    }
+
+    public void notifyDataSetHasChanged() {
+        super.notifyDataSetChanged();
     }
 
     public void setMinMaxTimes(final long minTime, final long maxTime) {
@@ -356,6 +378,43 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         return (time - minTime) * height / (float) timeDiff;
     }
 
+//@@@
+//    @NonNull
+//    @Override
+//    public ViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int type) {
+//        final View view;
+//        if (type == VIEW_TYPE_TRIP) {
+//            view = new TripView(context);
+//        } else if (type == VIEW_TYPE_CANNOT_SCROLL_EARLIER) {
+//            view = new CannotScrollView(context, false);
+//        } else if (type == VIEW_TYPE_CANNOT_SCROLL_LATER) {
+//            view = new CannotScrollView(context, true);
+//        } else {
+//            throw new IllegalStateException();
+//        }
+//        return new ViewHolder(view, type);
+//    }
+//
+//    @Override
+//    public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
+//        final View view = holder.itemView;
+//        if (view instanceof TripView) {
+//            final TripView tripView = (TripView) view;
+//            tripView.setTripInfo(getItem(position));
+//            tripView.setOnClickListener(v -> {
+//                if (itemClickListener != null)
+//                    itemClickListener.onItemClick(position, false);
+//            });
+//            tripView.setOnLongClickListener(v -> {
+//                if (itemClickListener != null) {
+//                    itemClickListener.onItemClick(position, true);
+//                    return true;
+//                }
+//                return false;
+//            });
+//        }
+//    }
+
     public View getView(final int position, View view, final ViewGroup parent) {
         final int type = getItemViewType(position);
 
@@ -375,6 +434,9 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         }
     }
 
+//@@@
+//    @Override
+//    public int getItemCount() {
     public int getCount() {
         int count = trips.size();
 
@@ -397,10 +459,11 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             position--;
         }
 
-        if (position < trips.size())
+        final int numTrips = trips.size();
+        if (position < numTrips)
             return trips.get(position);
 
-        position -= trips.size();
+        position -= numTrips;
 
         if (!canScrollLater) {
             if (position == 0)
@@ -410,7 +473,7 @@ public final class TripsGalleryAdapter extends BaseAdapter {
         }
 
         log.error("cannot getItem at position={}, canScrollEarlier={}, canScrollLater={}, #trips={}",
-                aPosition, canScrollEarlier, canScrollLater, trips.size());
+                aPosition, canScrollEarlier, canScrollLater, numTrips);
         throw new IllegalStateException();
     }
 
@@ -1063,8 +1126,6 @@ public final class TripsGalleryAdapter extends BaseAdapter {
     private class CannotScrollView extends View {
         private final boolean later;
 
-        private final int COLOR = Color.parseColor("#80303030");
-
         private CannotScrollView(final Context context, final boolean later) {
             super(context);
 
@@ -1080,9 +1141,9 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             if (wMode == MeasureSpec.EXACTLY)
                 width = wSize;
             else if (wMode == MeasureSpec.AT_MOST)
-                width = Math.min(tripWidth * 2, wSize);
+                width = Math.min(cannotScrollWidth, wSize);
             else
-                width = tripWidth * 2;
+                width = cannotScrollWidth;
 
             final int height = MeasureSpec.getSize(hMeasureSpec);
 
@@ -1102,13 +1163,19 @@ public final class TripsGalleryAdapter extends BaseAdapter {
             final LinearGradient gradient;
 
             if (later) {
-                left = width * 0.1f;
+                left = 0;
                 right = width;
-                gradient = new LinearGradient(left, 0, right, 0, COLOR, Color.TRANSPARENT, TileMode.CLAMP);
+                gradient = new LinearGradient(
+                        left, 0, right, 0,
+                        colorCannotScrollBackground, colorBackground,
+                        TileMode.CLAMP);
             } else {
                 left = 0;
-                right = width * 0.9f;
-                gradient = new LinearGradient(left, 0, right, 0, Color.TRANSPARENT, COLOR, TileMode.CLAMP);
+                right = width;
+                gradient = new LinearGradient(
+                        left, 0, right, 0,
+                        colorBackground, colorCannotScrollBackground,
+                        TileMode.CLAMP);
             }
 
             box.set(left, 0, right, height);

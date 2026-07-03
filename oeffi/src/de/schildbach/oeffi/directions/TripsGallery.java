@@ -33,6 +33,8 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Gallery;
 
+import androidx.annotation.NonNull;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +51,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-public class TripsGallery extends Gallery {
+public class TripsGallery extends Gallery { //@@@ RecyclerView {
     private static final Logger log = LoggerFactory.getLogger(TripsGallery.class);
 
     private TripsOverviewActivity.RenderConfig renderConfig;
@@ -58,12 +60,34 @@ public class TripsGallery extends Gallery {
     private final Paint gridPaint = new Paint();
     private final Paint gridLabelPaint = new Paint();
 
+    public interface ItemClickListener {
+        void onItemClick(int position, boolean isLongClick);
+    }
+
+    public void setOnItemClickListener(final ItemClickListener listener) {
+        //@@@ adapter.setOnItemClickListener(listener);
+        if (listener == null) {
+            super.setOnItemClickListener(null);
+            super.setOnItemLongClickListener(null);
+        } else {
+            super.setOnItemClickListener((parent, view, position, id) -> {
+                listener.onItemClick(position, false);
+            });
+            super.setOnItemLongClickListener((parent, view, position, id) -> {
+                listener.onItemClick(position, true);
+                return true;
+            });
+        }
+    }
+
     private class TimeLine {
         private final Paint paint = new Paint();
         private final Paint labelBackgroundPaint = new Paint();
         private final Paint labelTextPaint = new Paint();
 
-        TimeLine(int fgColor, int bgColor, float strokeWidth, float textSize) {
+        TimeLine(
+                final int fgColor, final int bgColor,
+                final float strokeWidth, final float textSize) {
             paint.setColor(fgColor);
             paint.setStyle(Paint.Style.FILL_AND_STROKE);
             paint.setStrokeWidth(strokeWidth);
@@ -81,7 +105,11 @@ public class TripsGallery extends Gallery {
             labelTextPaint.setTextAlign(Align.CENTER);
         }
 
-        public void draw(Canvas canvas, long time, int height, int width, boolean labelRight, boolean labelUp) {
+        public void draw(
+                final Canvas canvas,
+                final long time,
+                final int height, final int width,
+                final boolean labelRight, final boolean labelUp) {
             if (!adapter.isRangeDefined())
                 return;
             final int offset = context.getTimeZoneSelector().getOffset(time, PTDate.NETWORK_OFFSET);
@@ -110,13 +138,14 @@ public class TripsGallery extends Gallery {
             canvas.drawText(label, boundsF.centerX(), boundsF.bottom - timeLabelPaddingVertical, labelTextPaint);
         }
     }
-    private TimeLine currentTimeLine;
-    private TimeLine referenceTimeLine;
+    private final TimeLine currentTimeLine;
+    private final TimeLine referenceTimeLine;
 
     private final OeffiActivity context;
     private final int paddingHorizontal, paddingHorizontalCram;
     private final int timeLabelPaddingHorizontal, timeLabelPaddingVertical;
 
+    //@@@ private final LinearLayoutManager layoutManager;
     private final TripsGalleryAdapter adapter;
 
     private final Handler handler = new Handler();
@@ -134,6 +163,11 @@ public class TripsGallery extends Gallery {
 
         this.context = (OeffiActivity) context;
 
+//@@@
+//        this.layoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
+//        setLayoutManager(layoutManager);
+//        setItemAnimator(null);
+
         final Resources res = getResources();
         paddingHorizontal = res.getDimensionPixelSize(R.dimen.text_padding_horizontal);
         paddingHorizontalCram = res.getDimensionPixelSize(R.dimen.text_padding_horizontal_cram);
@@ -146,6 +180,7 @@ public class TripsGallery extends Gallery {
         final int colorSignificantInverse = res.getColor(R.color.fg_significant_inverse_darkdefault);
         final int colorCurrentTime = res.getColor(R.color.bg_current_time_darkdefault);
         final int colorReferenceTime = res.getColor(R.color.bg_reference_time_darkdefault);
+        setBackgroundColor(res.getColor(R.color.bg_trip_overview));
 
         gridPaint.setColor(colorInsignificant);
         gridPaint.setStyle(Paint.Style.STROKE);
@@ -164,6 +199,7 @@ public class TripsGallery extends Gallery {
         setHorizontalFadingEdgeEnabled(false);
 
         adapter = new TripsGalleryAdapter(context);
+//@@@        adapter.setStateRestorationPolicy(Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY);
         setAdapter(adapter);
 
         setOnHierarchyChangeListener(new OnHierarchyChangeListener() {
@@ -210,6 +246,9 @@ public class TripsGallery extends Gallery {
 
     @Override
     public void invalidate() {
+//@@@
+//        if (!isComputingLayout())
+//            adapter.notifyDataSetChanged();
         adapter.notifyDataSetChanged();
         super.invalidate();
     }
@@ -226,6 +265,27 @@ public class TripsGallery extends Gallery {
         else
             handler.post(this::onChildViewChanged);
     }
+
+//@@@
+//    public void setSelection(final int position) {
+//        scrollToPosition(position);
+//        // smoothScrollToPosition(position);
+//        // layoutManager.scrollToPosition(position);
+//    }
+//
+//    public int getFirstVisiblePosition() {
+//        return layoutManager.findFirstVisibleItemPosition();
+//    }
+//
+//    public int getLastVisiblePosition() {
+//        return layoutManager.findLastVisibleItemPosition();
+//    }
+//
+//    @Nullable
+//    @Override
+//    public TripsGalleryAdapter getAdapter() {
+//        return adapter;
+//    }
 
     public void onChildViewChanged() {
         final long currentTime = System.currentTimeMillis();
@@ -314,7 +374,7 @@ public class TripsGallery extends Gallery {
     private final Path path = new Path();
 
     @Override
-    protected void onDraw(final Canvas canvas) {
+    public void onDraw(@NonNull final Canvas canvas) {
         if (!adapter.isRangeDefined())
             return;
 
@@ -372,7 +432,7 @@ public class TripsGallery extends Gallery {
         long firstGrid = 0;
         boolean hasDateBorder = false;
 
-        final TimeZoneSelector timeZoneSelector = ((OeffiActivity) context).getTimeZoneSelector();
+        final TimeZoneSelector timeZoneSelector = context.getTimeZoneSelector();
 
         while (gridPtr.getTimeInMillis() < maxTime) {
             final long timeInMillis = gridPtr.getTimeInMillis();
