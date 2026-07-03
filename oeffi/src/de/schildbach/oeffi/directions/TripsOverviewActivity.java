@@ -734,7 +734,7 @@ public class TripsOverviewActivity extends OeffiActivity {
                         queryMoreTripsRunning = false;
 
                         // fetch more
-                        if (countNew > 0)
+                        if (countNew > 0 || searchMoreContext.searchMorePossible())
                             postCheckMoreRunnable(false);
                     });
                     return true;
@@ -1362,7 +1362,6 @@ public class TripsOverviewActivity extends OeffiActivity {
                 lastRequestedFirstTransferStationId = location.id;
                 firstTransferStations.remove(lastRequestedFirstTransferStationId);
 
-                nextRequestData = reloadRequestData.clone();
                 nextRequestData.to = location;
                 nextRequestData.via = null;
 
@@ -1377,7 +1376,6 @@ public class TripsOverviewActivity extends OeffiActivity {
                 lastRequestedMinTransferTime = attemptableTransferTimes.get(0);
                 attemptableTransferTimes.remove(0);
 
-                nextRequestData = reloadRequestData.clone();
                 final TripOptions options = nextRequestData.options;
                 nextRequestData.options = new TripOptions(
                         options.products,
@@ -1399,15 +1397,10 @@ public class TripsOverviewActivity extends OeffiActivity {
 
         public TripRequestData getNextRequestData() {
             if (currentRound <= 0) {
-                // null means now
-                if (reloadRequestData.date == null) {
-                    final TripRequestData clone = reloadRequestData.clone();
-                    clone.date = new Date();
-                    return clone;
-                }
-                return reloadRequestData;
+                nextRequestData = reloadRequestData.clone();
+                if (reloadRequestData.date == null) // null means now
+                    nextRequestData.date = new Date();
             }
-
             return nextRequestData;
         }
     }
