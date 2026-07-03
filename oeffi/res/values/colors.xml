@@ -46,6 +46,8 @@
     <color name="bg_selected">#bbbbbb</color>
     <color name="bg_divider">#dddddd</color>
     <color name="bg_divider_highlight">#bbbbbb</color>
+    <color name="bg_toast">#e8303048</color>
+    <color name="bg_toast_border">#88303048</color>
     <color name="bg_action_bar">#555555</color>
     <color name="bg_action_bar_settings">#777777</color>
     <color name="bg_action_bar_stations">#777700</color>

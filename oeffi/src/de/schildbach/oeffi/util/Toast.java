@@ -17,7 +17,17 @@
 
 package de.schildbach.oeffi.util;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.text.Html;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.TextView;
+
+import androidx.core.view.LayoutInflaterCompat;
+
+import de.schildbach.oeffi.R;
+import okhttp3.internal.http.HttpMethod;
 
 public class Toast {
     private final Context context;
@@ -48,7 +58,12 @@ public class Toast {
     }
 
     private void customToast(final CharSequence text, final int duration) {
-        final android.widget.Toast toast = android.widget.Toast.makeText(context, text, duration);
+        final android.widget.Toast toast = new android.widget.Toast(context);
+        toast.setDuration(duration);
+        final View toastView = LayoutInflater.from(context).inflate(R.layout.toast, null);
+        toast.setView(toastView);
+        final TextView textView = toastView.findViewById(R.id.toast_text);
+        textView.setText(Html.fromHtml(text.toString()));
         toast.show();
     }
 }
