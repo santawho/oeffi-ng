@@ -596,7 +596,7 @@ public class LocationSelector extends LinearLayout implements
     private void setItemStationName(final Item item, final String stationName) {
         final TextView textView = item.textView;
         if (stationName != null) {
-            final ColorHash colorHash = darkMode ? ColorHash.COLORHASH_DARK_MODE : ColorHash.COLORHASH_LIGHT_MODE;
+            final ColorHash colorHash = ColorHash.getExtendedColorHash(darkMode);
             textView.setText(Html.fromHtml(Formats.makeBreakableStationName(stationName), Html.FROM_HTML_MODE_COMPACT));
             final int color = isColorized ? colorHash.toARGB(stationName) : getResources().getColor(R.color.fg_significant);
             textView.setTextColor(color);

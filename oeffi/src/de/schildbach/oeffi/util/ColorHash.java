@@ -22,7 +22,6 @@ import android.graphics.Color;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 // compare to https://github.com/unhappychoice/color-hash.kt
@@ -37,27 +36,89 @@ import java.util.List;
 //   ); // returns Android Color class
 
 public class ColorHash {
-    public static final ColorHash COLORHASH_LIGHT_MODE = new ColorHash(
-            Arrays.asList(0.15, 0.22, 0.29, 0.35, 0.39), // available lightness values
-            Arrays.asList(0.50, 0.60, 0.70, 0.80, 0.90), // available saturation values
-            75, 45,                 // hue range, exclude yellow at 60 degrees
-            ColorHash::md5Hash      // try ColorHash::javaHash  or  ColorHash::bkdrHash
-    );
-    public static final ColorHash COLORHASH_DARK_MODE = new ColorHash(
-            Arrays.asList(0.85, 0.78, 0.71, 0.65, 0.61), // available lightness values
-            Arrays.asList(0.50, 0.60, 0.70, 0.80, 0.90), // available saturation values
-            255, 225,               // hue range, exclude blue at 240 degrees
-            ColorHash::md5Hash      // try ColorHash::javaHash  or  ColorHash::bkdrHash
-    );
+    public static final ColorHash COLORHASH_GENERAL = new ColorHash(
+            new double[]{ // available hue values
+                    0.0, // red
+                    20.0, 32.0, 45.0,
+                    //except: 60.0, // yellow
+                    75.0, 95.0,
+                    120.0, // green
+                    160.0, 175.0, 185.0, 200.0, 215.0,
+                    240.0, // blue
+                    265.0, 280.0, 300.0, 320.0},
+            new double[]{0.30, 0.45, 0.60, 0.70},
+            new double[]{0.20, 0.30, 0.40, 0.50});
+
+    public static final double[] SATURATION_VALUES = {0.30, 0.45, 0.60, 0.70};
+    public static final double[] LIGHTNESS_VALUES_LIGHT_MODE = {0.20, 0.30, 0.40, 0.50};
+    public static final double[] LIGHTNESS_VALUES_DARK_MODE = {0.60, 0.70, 0.80, 0.90};
+
+    public static final ColorHash COLORHASH_STANDARD_LIGHT_MODE = new ColorHash(
+            new double[]{ // available hue values
+                    0.0, // red
+                    30.0,
+                    //except: 60.0, // yellow
+                    75.0,
+                    120.0, // green
+                    160.0,
+                    180.0, 200.0,
+                    240.0, // blue
+                    280.0, 310.0},
+            SATURATION_VALUES,
+            LIGHTNESS_VALUES_LIGHT_MODE);
+    public static final ColorHash COLORHASH_STANDARD_DARK_MODE = new ColorHash(
+            new double[]{ // available hue values
+                    0.0, // red
+                    30.0,
+                    60.0, // yellow
+                    75.0,
+                    120.0, // green
+                    160.0,
+                    180.0, 200.0,
+                    //except: 240.0, // blue
+                    280.0, 310.0},
+            SATURATION_VALUES,
+            LIGHTNESS_VALUES_DARK_MODE);
+    public static ColorHash getStandardColorHash(final boolean darkMode) {
+        return darkMode ? COLORHASH_STANDARD_DARK_MODE : COLORHASH_STANDARD_LIGHT_MODE;
+    }
+
+    public static final ColorHash COLORHASH_EXTENDED_LIGHT_MODE = new ColorHash(
+            new double[]{ // available hue values
+                    0.0, // red
+                    20.0, 32.0, 45.0,
+                    //except: 60.0, // yellow
+                    75.0, 95.0,
+                    120.0, // green
+                    160.0, 175.0, 185.0, 200.0, 215.0,
+                    240.0, // blue
+                    265.0, 280.0, 300.0, 320.0},
+            SATURATION_VALUES,
+            LIGHTNESS_VALUES_LIGHT_MODE);
+    public static final ColorHash COLORHASH_EXTENDED_DARK_MODE = new ColorHash(
+            new double[]{ // available hue values
+                    0.0, // red
+                    20.0, 32.0, 45.0,
+                    60.0, // yellow
+                    75.0, 95.0,
+                    120.0, // green
+                    160.0, 175.0, 185.0, 200.0, 215.0,
+                    //except: 240.0, // blue
+                    265.0, 280.0, 300.0, 320.0},
+            SATURATION_VALUES,
+            LIGHTNESS_VALUES_DARK_MODE);
+    public static ColorHash getExtendedColorHash(final boolean darkMode) {
+        return darkMode ? COLORHASH_EXTENDED_DARK_MODE : COLORHASH_EXTENDED_LIGHT_MODE;
+    }
 
     public interface StringHasher {
         long stringToHash(String string);
     }
 
     public static class RGB {
-        private final int red;
-        private final int green;
-        private final int blue;
+        public final int red;
+        public final int green;
+        public final int blue;
 
         public RGB(final int red, final int green, final int blue) {
             this.red = red;
@@ -92,9 +153,9 @@ public class ColorHash {
     }
 
     public static class HSL {
-        private final double hue;
-        private final double saturation;
-        private final double lightness;
+        public final double hue;
+        public final double saturation;
+        public final double lightness;
 
         public HSL(final double hue, final double saturation, final double lightness) {
             this.hue = hue;
@@ -147,10 +208,9 @@ public class ColorHash {
         }
     }
 
-    private final List<Double> lightness;
-    private final List<Double> saturation;
-    private final int minHue;
-    private final int maxHue;
+    private final double[] hueValues;
+    private final double[] saturationValues;
+    private final double[] lightnessValues;
     private final StringHasher stringHasher;
 
     public static final long SEED = 131L;
@@ -159,48 +219,44 @@ public class ColorHash {
 
     public ColorHash() {
         this(
-                Arrays.asList(0.35, 0.5, 0.65),
-                Arrays.asList(0.35, 0.5, 0.65),
-                0, 360,
-                ColorHash::javaHash
-        );
+                new double[]{0.0, 120.0, 240.0},
+                new double[]{0.35, 0.5, 0.65},
+                new double[]{0.35, 0.5, 0.65});
     }
 
     public ColorHash(
-            final List<Double> lightness,
-            final List<Double> saturation,
-            final int minHue,
-            final int maxHue) {
-        this(lightness, saturation, minHue, maxHue, ColorHash::javaHash);
+            final double[] hueValues,
+            final double[] saturationValues,
+            final double[] lightnessValues) {
+        this(hueValues, saturationValues, lightnessValues, ColorHash::md5Hash);
     }
 
     public ColorHash(
-            final List<Double> lightness,
-            final List<Double> saturation,
-            final int minHue,
-            final int maxHue,
+            final double[] hueValues,
+            final double[] saturationValues,
+            final double[] lightnessValues,
             final StringHasher stringHasher) {
-        this.lightness = lightness;
-        this.saturation = saturation;
-        this.minHue = minHue;
-        this.maxHue = maxHue < minHue ? maxHue + 360 : maxHue;
+        this.hueValues = hueValues;
+        this.saturationValues = saturationValues;
+        this.lightnessValues = lightnessValues;
         this.stringHasher = stringHasher;
     }
 
     public HSL toHSL(final String string) {
         long hash = stringHasher.stringToHash(string) & Long.MAX_VALUE;
 
-        final long hueVal = hash % 997;
-        final double hue = (((double) hueVal / 997.0) * (double)(maxHue - minHue) + (double)minHue) % 360.0;
-        hash = hash / 997;
+        final long numHueValues = hueValues.length;
+        final int hueIndex = (int)(hash % numHueValues);
+        hash = hash / numHueValues;
+        final long numSatValues = saturationValues.length;
+        final int satIndex = (int)(hash % numSatValues);
+        hash = hash / numSatValues;
+        final long numLightnessValues = lightnessValues.length;
+        final int lightIndex = (int) (hash % numLightnessValues);
 
-        final int numSaturation = saturation.size();
-        final double sat = saturation.get((int) (hash % numSaturation));
-        hash = hash / numSaturation;
-
-        final int numLightness = lightness.size();
-        final double light = lightness.get((int) (hash % numLightness));
-
+        final double hue = hueValues[hueIndex];
+        final double sat = saturationValues[satIndex];
+        final double light = lightnessValues[lightIndex];
         return new HSL(hue, sat, light);
     }
 

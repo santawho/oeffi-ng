@@ -9,25 +9,34 @@ public class ColorHashTest {
     }
 
     private void print(final boolean dark, final String stationName) {
-        final ColorHash colorHash;
-        final String label;
-        if (dark) {
-            colorHash = ColorHash.COLORHASH_DARK_MODE;
-            label = "dark";
-        } else {
-            colorHash = ColorHash.COLORHASH_LIGHT_MODE;
-            label = "light";
-        }
-        print(label, colorHash, stationName);
+        final ColorHash colorHash = ColorHash.getExtendedColorHash(dark);
+        final String label = dark ? "dark" : "light";
+        print(dark, label, colorHash, stationName);
     }
 
-    private void print(final String label, final ColorHash colorHash, final String stationName) {
-        final String color = colorHash.toHexString(stationName);
-        System.out.printf("\"%s\": %s = %s%n", stationName, label, color);
+    private void print(final boolean dark, final String label, final ColorHash colorHash, final String stationName) {
+        final ColorHash.HSL hsl = colorHash.toHSL(stationName);
+        final ColorHash.RGB rgb = hsl.toRGB();
+        final String color = rgb.toHex();
+        System.out.printf("\"%s\": %s = %s h=%.0f s=%.2f l=%.2f \033[%s;38;2;%d;%d;%dmXXXXXXXXX\033[39;49m \n",
+                stationName, label, color,
+                hsl.hue, hsl.saturation, hsl.lightness,
+                dark ? "40" : "49",
+                rgb.red, rgb.green, rgb.blue);
+    }
+
+    public void runTests(final boolean dark) {
+        for (char n='A'; n<='Z'; ++n)
+            print(dark, "" + n);
     }
 
     @Test
-    public void t1() {
-        print("Bonn, Ippendorf Ippendorfer Allee");
+    public void testLightMode() {
+        runTests(false);
+    }
+
+    @Test
+    public void testDarkMode() {
+        runTests(true);
     }
 }

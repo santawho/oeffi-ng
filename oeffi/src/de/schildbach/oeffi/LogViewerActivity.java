@@ -55,13 +55,6 @@ public class LogViewerActivity extends OeffiActivity {
 
     private static final int BLOCK_SIZE = 200000;
 
-    private static final ColorHash colorHash = new ColorHash(
-            Arrays.asList(0.25, 0.27, 0.35, 0.40, 0.45), // available lightness values
-            Arrays.asList(0.50, 0.60, 0.70, 0.80, 0.90), // available saturation values
-            0, 360,                  // hue range
-            ColorHash::md5Hash              // try ColorHash::javaHash  or  ColorHash::bkdrHash
-    );
-
     public static void start(final Context context) {
         final Intent intent = new Intent(context, LogViewerActivity.class);
         context.startActivity(intent);
@@ -193,6 +186,7 @@ public class LogViewerActivity extends OeffiActivity {
             final String loggerName = line.substring(loggerNameStart + 1, loggerNameEnd);
             String color = colorMap.get(loggerName);
             if (color == null) {
+                final ColorHash colorHash = ColorHash.getStandardColorHash(Application.isDarkMode(this));
                 color = colorHash.toHexString(loggerName);
                 colorMap.put(loggerName, color);
             }
