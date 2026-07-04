@@ -55,21 +55,6 @@ public class LocationSelector extends LinearLayout implements
         void onSingleLocationContextOperation(Location location, boolean isLongHold, View selectedView);
     }
 
-    private static final ColorHash colorHashLightMode = new ColorHash(
-            Arrays.asList(0.25, 0.32, 0.39, 0.45, 0.49), // available lightness values
-            Arrays.asList(0.50, 0.60, 0.70, 0.80, 0.90), // available saturation values
-//            Arrays.asList(0.30, 0.45, 0.60, 0.75, 0.90), // available saturation values
-            0, 360,                  // hue range
-            ColorHash::md5Hash              // try ColorHash::javaHash  or  ColorHash::bkdrHash
-    );
-    private static final ColorHash colorHashDarkMode = new ColorHash(
-            Arrays.asList(0.85, 0.78, 0.71, 0.65, 0.61), // available lightness values
-            Arrays.asList(0.50, 0.60, 0.70, 0.80, 0.90), // available saturation values
-//            Arrays.asList(0.30, 0.45, 0.60, 0.75, 0.90), // available saturation values
-            0, 360,                  // hue range
-            ColorHash::md5Hash              // try ColorHash::javaHash  or  ColorHash::bkdrHash
-    );
-
     private static final String PREFS_ENABLED = "user_interface_location_selector_enabled";
     private static final String PREFS_COLORIZED = "user_interface_location_selector_colorized";
     private static final String PREFS_NUMROWS = "user_interface_location_selector_numrows";
@@ -611,7 +596,7 @@ public class LocationSelector extends LinearLayout implements
     private void setItemStationName(final Item item, final String stationName) {
         final TextView textView = item.textView;
         if (stationName != null) {
-            final ColorHash colorHash = darkMode ? colorHashDarkMode : colorHashLightMode;
+            final ColorHash colorHash = darkMode ? ColorHash.COLORHASH_DARK_MODE : ColorHash.COLORHASH_LIGHT_MODE;
             textView.setText(Html.fromHtml(Formats.makeBreakableStationName(stationName), Html.FROM_HTML_MODE_COMPACT));
             final int color = isColorized ? colorHash.toARGB(stationName) : getResources().getColor(R.color.fg_significant);
             textView.setTextColor(color);
