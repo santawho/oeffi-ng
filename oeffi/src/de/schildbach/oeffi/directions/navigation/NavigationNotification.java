@@ -1250,7 +1250,7 @@ public class NavigationNotification {
                 newNotified.eventTime = lastNotified.eventTime;
             }
         }
-        int numTransferCriticalChanged = 0;
+        int numTransfersCriticalChanged = 0;
         if (!newNotified.transfersCritical.equals(lastNotified.transfersCritical)) {
             final String lastTransfersCritical = lastNotified.transfersCritical;
             final String nextTransfersCritical = newNotified.transfersCritical;
@@ -1259,18 +1259,14 @@ public class NavigationNotification {
             if (lastTransfersCritical == null || length != lastTransfersCritical.length()) {
                 for (int i = 0; i < length; i += 1) {
                     final char next = nextTransfersCritical.charAt(i);
-                    if (next != '-') {
-                        numTransferCriticalChanged += 1;
-                        break;
-                    }
+                    if (next != '-')
+                        numTransfersCriticalChanged += 1;
                 }
             } else {
                 for (int i = 0; i < length; i += 1) {
                     final char next = nextTransfersCritical.charAt(i);
-                    if (next != '-' && next != lastTransfersCritical.charAt(i)) {
-                        numTransferCriticalChanged += 1;
-                        break;
-                    }
+                    if (next != '-' && next != lastTransfersCritical.charAt(i))
+                        numTransfersCriticalChanged += 1;
                 }
             }
         }
@@ -1279,8 +1275,8 @@ public class NavigationNotification {
             log.info("transferCritical switching to {}", newNotified.nextTransferCritical);
             nextTransferCriticalChanged = newNotified.nextTransferCritical;
         }
-        if (numTransferCriticalChanged > 0) {
-            if (!nextTransferCriticalChanged || numTransferCriticalChanged > 1)
+        if (numTransfersCriticalChanged > 0) {
+            if (!nextTransferCriticalChanged || numTransfersCriticalChanged > 1)
                 addEventOutputAnyTransferCritical();
         }
         if (nextTransferCriticalChanged)
@@ -1357,9 +1353,9 @@ public class NavigationNotification {
             }
         }
 
-        anyImportantIssues |= timeChanged || posChanged || nextTransferCriticalChanged || numTransferCriticalChanged > 0;
-        log.info("timeChanged={}, posChanged={} nextTransferCriticalChanged={} numTransferCriticalChanged={} reminderSoundId={}",
-                timeChanged, posChanged, nextTransferCriticalChanged, numTransferCriticalChanged, reminderSoundId);
+        anyImportantIssues |= timeChanged || posChanged || nextTransferCriticalChanged || numTransfersCriticalChanged > 0;
+        log.info("timeChanged={}, posChanged={} nextTransferCriticalChanged={} numTransfersCriticalChanged={} reminderSoundId={}",
+                timeChanged, posChanged, nextTransferCriticalChanged, numTransfersCriticalChanged, reminderSoundId);
 
         if (nextTripReloadTimeMs > 0 && nextTripReloadTimeMs < nextRefreshTimeMs) {
             nextRefreshTimeReason = String.format("#10, nextRefreshTimeMs=%d, nextTripReloadTimeMs=%d", nextRefreshTimeMs, nextTripReloadTimeMs);
@@ -1620,9 +1616,11 @@ public class NavigationNotification {
         if (nowTime < refreshRequiredAt)
             return refreshRequiredAt; // ignore multiple alarms in short time
         Trip newTrip = null;
-        if (lastNotified.refreshTripRequiredAt > 0 && nowTime >= lastNotified.refreshTripRequiredAt) {
+        final long refreshTripRequiredAt = lastNotified.refreshTripRequiredAt;
+        final long refreshTripRequiredFromNow = refreshTripRequiredAt - nowTime;
+        if (refreshTripRequiredAt > 0 && refreshTripRequiredFromNow <= 0) {
+            log.info("refreshing trip");
             try {
-                log.info("refreshing trip");
                 final Navigator navigator = new Navigator(intentData.network, getTrip());
                 newTrip = navigator.refresh(extraData.refreshAllLegs, now, 30000);
             } catch (final IOException e) {
@@ -1630,7 +1628,7 @@ public class NavigationNotification {
             }
             if (newTrip != null) {
                 final boolean alarmPlayed = update(newTrip, false);
-                context.sendBroadcast(new Intent(ACTION_UPDATE_TRIGGER));
+                sendUpdateTriggerBroadcast();
                 if (!alarmPlayed && prefs.getBoolean(PREFS_KEY_NAVIGATION_REFRESH_BEEP, false)) {
                     playAlarmSoundAndVibration(
                             AudioAttributes.USAGE_NOTIFICATION, R.raw.nav_refresh_beep,
@@ -1643,10 +1641,18 @@ public class NavigationNotification {
                 update(null, false);
             }
         } else {
+            log.info("not refreshing trip, required in {} msec", refreshTripRequiredFromNow);
             update(null, false);
-            context.sendBroadcast(new Intent(ACTION_UPDATE_TRIGGER));
+            sendUpdateTriggerBroadcast();
         }
         return lastNotified.refreshNotificationRequiredAt;
+    }
+
+    private void sendUpdateTriggerBroadcast() {
+        final Intent intent = new Intent()
+                .setAction(ACTION_UPDATE_TRIGGER)
+                .setPackage(Application.getApplicationId());
+        context.sendBroadcast(intent);
     }
 
     private void setupNotificationView(

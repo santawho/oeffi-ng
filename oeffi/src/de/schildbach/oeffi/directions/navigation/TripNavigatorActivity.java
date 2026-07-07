@@ -141,7 +141,6 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         return intent;
     }
 
-    private Navigator navigator;
     private Runnable navigationRefreshRunnable;
     private long nextNavigationRefreshTime = 0;
     private boolean navigationNotificationBeingDeleted;
@@ -195,7 +194,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         };
         ContextCompat.registerReceiver(this, updateTriggerReceiver,
                 new IntentFilter(NavigationNotification.ACTION_UPDATE_TRIGGER),
-                ContextCompat.RECEIVER_EXPORTED);
+                ContextCompat.RECEIVER_NOT_EXPORTED);
 
         NavigationNotification.startForegroundService(this);
     }
@@ -213,13 +212,6 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     protected boolean allowScreenLock() {
 //        return true;
         return false;
-    }
-
-    @Override
-    protected void setupFromTrip(final Trip trip) {
-        final Trip tripFromPresentNotification = new NavigationNotification(getIntent()).getTrip();
-        navigator = new Navigator(network, tripFromPresentNotification);
-        super.setupFromTrip(navigator.getCurrentTrip());
     }
 
     @Override
@@ -443,6 +435,8 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
         navigationRefreshRunnable = () -> {
             try {
+                final Trip tripFromPresentNotification = new NavigationNotification(getIntent()).getTrip();
+                final Navigator navigator = new Navigator(network, tripFromPresentNotification);
                 final Trip updatedTrip = navigator.refresh(forceRefreshAll, new Date(), 30000);
                 if (updatedTrip == null) {
                     handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));
@@ -451,6 +445,8 @@ public class TripNavigatorActivity extends TripDetailsActivity {
                     if (doNotificationUpdate) {
                         isStartupComplete = true;
                         runOnUiThread(() -> updateNotification(detailedTrip, () -> onTripUpdated(detailedTrip)));
+                    } else {
+                        runOnUiThread(() -> onTripUpdated(detailedTrip));
                     }
                 }
             } catch (final IOException e) {
