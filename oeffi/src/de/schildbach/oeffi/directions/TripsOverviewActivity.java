@@ -47,7 +47,6 @@ import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.QueryTripRunnable.TripRequestData;
-import de.schildbach.oeffi.directions.navigation.Navigator;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.Formats;
@@ -826,7 +825,7 @@ public class TripsOverviewActivity extends OeffiActivity {
                             switch (result.status) {
                                 case OK:
                                     if (result.journeyLeg != null)
-                                        publicLeg = Navigator.buildUpdatedLeg(publicLeg, result.journeyLeg, now);
+                                        publicLeg = TripUtils.buildUpdatedLeg(publicLeg, result.journeyLeg, now);
                                     break;
                                 case NO_JOURNEY:
                                 case SERVICE_DOWN:

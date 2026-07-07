@@ -71,6 +71,7 @@ import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
+import de.schildbach.oeffi.directions.TripUtils;
 import de.schildbach.oeffi.tripeval.TripRenderer;
 import de.schildbach.oeffi.util.ClockUtils;
 import de.schildbach.oeffi.util.Formats;
@@ -1621,8 +1622,7 @@ public class NavigationNotification {
         if (refreshTripRequiredAt > 0 && refreshTripRequiredFromNow <= 0) {
             log.info("refreshing trip");
             try {
-                final Navigator navigator = new Navigator(intentData.network, getTrip());
-                newTrip = navigator.refresh(extraData.refreshAllLegs, now, 30000);
+                newTrip = TripUtils.refreshTrip(intentData.network, getTrip(), extraData.refreshAllLegs, false, now, 30000);
             } catch (final IOException e) {
                 log.error("error while refreshing trip", e);
             }

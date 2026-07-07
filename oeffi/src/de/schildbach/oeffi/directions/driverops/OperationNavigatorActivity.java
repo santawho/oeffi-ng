@@ -48,7 +48,6 @@ import de.schildbach.oeffi.directions.QueryTripRunnable;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
 import de.schildbach.oeffi.directions.TripUtils;
 import de.schildbach.oeffi.directions.navigation.NavigationAlarmManager;
-import de.schildbach.oeffi.directions.navigation.Navigator;
 import de.schildbach.oeffi.stations.LineView;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
@@ -505,21 +504,19 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
 
         navigationRefreshRunnable = () -> {
             try {
-                final Navigator navigator = new Navigator(network, tripRenderer.trip);
-                Trip updatedTrip = navigator.refresh(forceRefreshAll, new Date(), 30000);
+                final Trip updatedTrip = forceRefreshAll
+                    ? TripUtils.refreshTrip(network, tripRenderer.trip, forceRefreshAll, refreshTripDetails, new Date(), 30000)
+                    : tripRenderer.trip;
                 if (updatedTrip == null) {
                     handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));
                 } else {
-                    if (refreshTripDetails)
-                        updatedTrip = loadTripDetails(updatedTrip);
                     if (doNotificationUpdate) {
                         isStartupComplete = true;
                         updateNotification(updatedTrip);
                     }
-                    final Trip finalUpdatedTrip = updatedTrip;
-                    runOnUiThread(() -> onTripUpdated(finalUpdatedTrip));
+                    runOnUiThread(() -> onTripUpdated(updatedTrip));
                 }
-            } catch (IOException e) {
+            } catch (final IOException ioe) {
                 handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));
             } finally {
                 navigationRefreshRunnable = null;

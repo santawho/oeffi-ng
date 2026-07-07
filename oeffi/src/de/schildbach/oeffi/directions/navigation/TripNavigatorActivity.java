@@ -57,6 +57,7 @@ import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.directions.QueryTripRunnable;
+import de.schildbach.oeffi.directions.TripUtils;
 import de.schildbach.oeffi.tripeval.TripRenderer;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
@@ -402,7 +403,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         return doCheckAutoRefresh(true);
     }
 
-    private boolean doCheckAutoRefresh(final boolean doNotifcationUpdate) {
+    private boolean doCheckAutoRefresh(final boolean doNotificationUpdate) {
         if (isPaused)
             return false;
         if (nextNavigationRefreshTime < 0)
@@ -410,7 +411,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         final long now = new Date().getTime();
         if (now < nextNavigationRefreshTime)
             return false;
-        refreshNavigation(doNotifcationUpdate, false, false);
+        refreshNavigation(doNotificationUpdate, false, false);
         return true;
     }
 
@@ -436,20 +437,20 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         navigationRefreshRunnable = () -> {
             try {
                 final Trip tripFromPresentNotification = new NavigationNotification(getIntent()).getTrip();
-                final Navigator navigator = new Navigator(network, tripFromPresentNotification);
-                final Trip updatedTrip = navigator.refresh(forceRefreshAll, new Date(), 30000);
+                final Trip updatedTrip = forceRefreshAll
+                        ? TripUtils.refreshTrip(network, tripFromPresentNotification, forceRefreshAll, refreshTripDetails, new Date(), 30000)
+                        : tripFromPresentNotification;
                 if (updatedTrip == null) {
                     handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));
                 } else {
-                    final Trip detailedTrip = refreshTripDetails ? loadTripDetails(updatedTrip) : updatedTrip;
                     if (doNotificationUpdate) {
                         isStartupComplete = true;
-                        runOnUiThread(() -> updateNotification(detailedTrip, () -> onTripUpdated(detailedTrip)));
+                        runOnUiThread(() -> updateNotification(updatedTrip, () -> onTripUpdated(updatedTrip)));
                     } else {
-                        runOnUiThread(() -> onTripUpdated(detailedTrip));
+                        runOnUiThread(() -> onTripUpdated(updatedTrip));
                     }
                 }
-            } catch (final IOException e) {
+            } catch (final IOException ioe) {
                 handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));
             } finally {
                 navigationRefreshRunnable = null;

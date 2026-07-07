@@ -57,8 +57,8 @@ import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
+import de.schildbach.oeffi.directions.TripUtils;
 import de.schildbach.oeffi.directions.navigation.NavigationAlarmManager;
-import de.schildbach.oeffi.directions.navigation.Navigator;
 import de.schildbach.oeffi.tripeval.TripRenderer;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
@@ -70,7 +70,6 @@ import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.PTDate;
 import de.schildbach.pte.dto.Stop;
 import de.schildbach.pte.dto.Trip;
-import de.schildbach.pte.provider.db.DbProvider;
 
 public class OperationNotification {
     private static final String CHANNEL_ID_GUIDE = "operation";
@@ -657,22 +656,28 @@ public class OperationNotification {
         if (lastNotified.refreshTripRequiredAt > 0 && nowTime >= lastNotified.refreshTripRequiredAt) {
             try {
                 log.info("refreshing trip");
-                final Navigator navigator = new Navigator(intentData.network, getTrip());
-                newTrip = navigator.refresh(extraData.refreshAllLegs, now, 30000);
+                newTrip = TripUtils.refreshTrip(intentData.network, getTrip(), extraData.refreshAllLegs, false, now, 30000);
             } catch (final IOException e) {
                 log.error("error while refreshing trip", e);
             }
             if (newTrip != null) {
                 update(newTrip);
-                context.sendBroadcast(new Intent(ACTION_UPDATE_TRIGGER));
+                sendUpdateTriggerBroadcast();
             } else {
                 update(null);
             }
         } else {
             update(null);
-            context.sendBroadcast(new Intent(ACTION_UPDATE_TRIGGER));
+            sendUpdateTriggerBroadcast();
         }
         return lastNotified.refreshNotificationRequiredAt;
+    }
+
+    private void sendUpdateTriggerBroadcast() {
+        final Intent intent = new Intent()
+                .setAction(ACTION_UPDATE_TRIGGER)
+                .setPackage(Application.getApplicationId());
+        context.sendBroadcast(intent);
     }
 
     private int setupNotificationView(

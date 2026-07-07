@@ -137,7 +137,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -645,9 +644,17 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         if (isTripDetailsLoadingEnabled()) {
             backgroundHandler.post(() -> {
-                final Trip newTrip = loadTripDetails(tripRenderer.trip);
+                final Trip rawTrip = tripRenderer.trip;
+                final Trip tripWithDetails = TripUtils.loadTripDetails(network, baseTrip);
+                final Trip finalTrip;
+                if (tripWithDetails == null) {
+                    finalTrip = rawTrip;
+                    new Toast(this).longToast(R.string.directions_trip_details_extra_data_error);
+                } else {
+                    finalTrip = tripWithDetails;
+                }
                 runOnUiThread(() -> {
-                    setupFromTrip(newTrip);
+                    setupFromTrip(finalTrip);
                     updateGUI();
                 });
             });
@@ -679,23 +686,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     protected boolean isTripDetailsLoadingEnabled() {
         return prefs.getBoolean(Constants.PREFS_KEY_USER_INTERFACE_DIRECTIONS_TRIPEXTRAINFO_ENABLED, false);
-    }
-
-    protected Trip loadTripDetails(final Trip trip) {
-        final NetworkProvider provider = NetworkProviderFactory.provider(network);
-        if (!provider.hasCapabilities(NetworkProvider.Capability.TRIP_DETAILS))
-            return trip;
-        Trip tripWithDetails = null;
-        try {
-            tripWithDetails = provider.queryTripDetails(trip, null);
-        } catch (final IOException e) {
-            log.error("loadTripDetails", e);
-        }
-        if (tripWithDetails == null) {
-            new Toast(this).longToast(R.string.directions_trip_details_extra_data_error);
-            return trip;
-        }
-        return tripWithDetails;
     }
 
     private void shareCalendarEntry(final boolean withLink) {
