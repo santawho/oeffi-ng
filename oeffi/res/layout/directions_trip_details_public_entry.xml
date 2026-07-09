@@ -29,7 +29,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:baselineAligned="true"
-            android:paddingStart="@dimen/text_padding_horizontal_lax"
+            android:paddingStart="@dimen/text_padding_horizontal"
             android:paddingEnd="0px">
 
             <TextView
