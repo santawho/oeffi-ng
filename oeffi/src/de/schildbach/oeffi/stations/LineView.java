@@ -33,6 +33,7 @@ import android.text.SpannableStringBuilder;
 import android.text.style.ReplacementSpan;
 import android.util.AttributeSet;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatTextView;
 
 import de.schildbach.oeffi.R;
@@ -44,11 +45,9 @@ import de.schildbach.pte.dto.Style;
 import de.schildbach.pte.dto.Style.Shape;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -89,7 +88,7 @@ public class LineView extends AppCompatTextView {
     }
 
     public void setLine(final Line line) {
-        setLines(Arrays.asList(line));
+        setLines(Collections.singletonList(line));
     }
 
     public void setLines(final Collection<Line> lines) {
@@ -105,6 +104,11 @@ public class LineView extends AppCompatTextView {
     public void setCondenseThreshold(final int condenseThreshold) {
         this.condenseThreshold = condenseThreshold;
         update();
+    }
+
+    @Override
+    protected void onMeasure(final int widthMeasureSpec, final int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
     private void update() {
@@ -124,17 +128,13 @@ public class LineView extends AppCompatTextView {
 
                 // sort by count
                 final List<Entry<Product, Integer>> sortedEntries = new ArrayList<>(productCounts.entrySet());
-                Collections.sort(sortedEntries, (entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue()));
+                sortedEntries.sort((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue()));
 
                 // condense
                 for (final Map.Entry<Product, Integer> entry : sortedEntries) {
                     // condense lines of product to just one label
                     final Product productToRemove = entry.getKey();
-                    for (final Iterator<Line> i = lines.iterator(); i.hasNext();) {
-                        final Line line = i.next();
-                        if (line.product == productToRemove)
-                            i.remove();
-                    }
+                    lines.removeIf(line -> line.product == productToRemove);
                     lines.add(new Line(null, null, productToRemove, null, Standard.STYLES.get(productToRemove)));
 
                     // stop condensing if few enough lines in total
@@ -219,13 +219,20 @@ public class LineView extends AppCompatTextView {
         }
 
         @Override
-        public void draw(final Canvas canvas, final CharSequence text, final int start, final int end, final float x,
-                final int top, final int y, final int bottom, final Paint paint) {
+        public void draw(
+                @NonNull final Canvas canvas,
+                final CharSequence text, final int start, final int end,
+                final float x, final int top, final int y, final int bottom,
+                final Paint paint) {
             final FontMetrics fontMetrics = paint.getFontMetrics();
             final float height = fontMetrics.bottom - fontMetrics.top;
             final float radius = radius(height);
             final float padding = padding(paint, height);
-            box.set(x, y + fontMetrics.top, x + Math.round(paint.measureText(text, start, end) + padding * 2),
+            final float textWidth = paint.measureText(text, start, end);
+            box.set(
+                    x,
+                    y + fontMetrics.top,
+                    x + Math.round(textWidth + padding * 2),
                     y + fontMetrics.bottom);
 
             // Background
@@ -264,30 +271,31 @@ public class LineView extends AppCompatTextView {
         }
 
         @Override
-        public int getSize(final Paint paint, final CharSequence text, final int start, final int end,
+        public int getSize(
+                final Paint paint,
+                final CharSequence text, final int start, final int end,
                 final Paint.FontMetricsInt fm) {
             final FontMetrics fontMetrics = paint.getFontMetrics();
             final float height = fontMetrics.bottom - fontMetrics.top;
             final float padding = padding(paint, height);
-            return Math.round(paint.measureText(text, start, end) + padding * 2);
+            final float textWidth = paint.measureText(text, start, end);
+            return Math.round(textWidth + padding * 2);
         }
 
         private float radius(final float height) {
-            if (style.shape == Shape.RECT)
-                return 0;
-            else if (style.shape == Shape.CIRCLE)
+            if (style.shape == Shape.CIRCLE)
                 return height / 2;
-            else
+            if (style.shape == Shape.ROUNDED)
                 return height / 4;
+            return 0;
         }
 
         private float padding(final Paint paint, final float height) {
-            if (style.shape == Shape.RECT)
-                return paint.measureText("i");
-            else if (style.shape == Shape.CIRCLE)
+            if (style.shape == Shape.CIRCLE)
                 return height / 3;
-            else
+            if (style.shape == Shape.ROUNDED)
                 return height / 5;
+            return paint.measureText("i");
         }
     }
 }
