@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package de.schildbach.oeffi.stations;
+package de.schildbach.oeffi.util;
 
 import android.content.Context;
 import android.content.res.Resources;

@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:baselineAligned="true" >
 
-    <de.schildbach.oeffi.stations.LineView
+    <de.schildbach.oeffi.util.LineView
         android:id="@+id/departure_entry_line"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

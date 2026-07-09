@@ -20,7 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
 
-        <de.schildbach.oeffi.stations.LineView
+        <de.schildbach.oeffi.util.LineView
             android:id="@+id/stations_station_entry_line"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

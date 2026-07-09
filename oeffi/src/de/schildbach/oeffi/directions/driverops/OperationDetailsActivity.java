@@ -36,7 +36,7 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.QueryStoredTripsProvider;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
 import de.schildbach.oeffi.directions.TripUtils;
-import de.schildbach.oeffi.stations.LineView;
+import de.schildbach.oeffi.util.LineView;
 import de.schildbach.oeffi.tripeval.TripGeoUtils;
 import de.schildbach.oeffi.tripeval.TripRenderer;
 import de.schildbach.oeffi.network.NetworkProviderFactory;

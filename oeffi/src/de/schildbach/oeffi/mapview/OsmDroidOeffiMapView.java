@@ -67,7 +67,7 @@ import de.schildbach.oeffi.DeviceLocationAware;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.StationsAware;
 import de.schildbach.oeffi.TripAware;
-import de.schildbach.oeffi.stations.LineView;
+import de.schildbach.oeffi.util.LineView;
 import de.schildbach.oeffi.stations.Station;
 import de.schildbach.oeffi.util.GeoUtils;
 import de.schildbach.oeffi.util.GeocoderThread;

@@ -52,7 +52,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiActivity;
@@ -63,6 +62,7 @@ import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.DividerItemDecoration;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.HtmlUtils;
+import de.schildbach.oeffi.util.LineView;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.OverflowTextView;
 import de.schildbach.oeffi.util.ToggleImageButton;

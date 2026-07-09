@@ -7,7 +7,7 @@
     android:orientation="horizontal"
     android:paddingTop="@dimen/text_padding_vertical_cram">
 
-    <de.schildbach.oeffi.stations.LineView
+    <de.schildbach.oeffi.util.LineView
         android:id="@+id/stations_station_details_header_line_line"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

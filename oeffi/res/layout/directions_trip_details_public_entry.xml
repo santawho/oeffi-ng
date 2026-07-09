@@ -16,7 +16,7 @@
         android:paddingEnd="0px"
         style="?android:attr/buttonBarStyle">
 
-        <de.schildbach.oeffi.stations.LineView
+        <de.schildbach.oeffi.util.LineView
             android:id="@+id/directions_trip_details_public_entry_line"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

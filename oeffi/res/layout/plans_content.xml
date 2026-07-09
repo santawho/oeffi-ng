@@ -59,7 +59,7 @@
                     android:textColor="@color/fg_significant_on_light"
                     android:textStyle="bold" />
 
-                <de.schildbach.oeffi.stations.LineView
+                <de.schildbach.oeffi.util.LineView
                     android:id="@+id/plans_bubble_lines"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

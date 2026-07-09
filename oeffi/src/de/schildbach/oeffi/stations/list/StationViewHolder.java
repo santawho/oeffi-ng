@@ -39,7 +39,7 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.StationsAware;
 import de.schildbach.oeffi.stations.CompassNeedleView;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
-import de.schildbach.oeffi.stations.LineView;
+import de.schildbach.oeffi.util.LineView;
 import de.schildbach.oeffi.stations.QueryDeparturesRunnable;
 import de.schildbach.oeffi.stations.Station;
 import de.schildbach.oeffi.stations.StationContextMenu;

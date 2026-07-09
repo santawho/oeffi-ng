@@ -101,7 +101,7 @@ import de.schildbach.oeffi.util.TimeSpec.DepArr;
 import de.schildbach.oeffi.tripeval.TripRenderer;
 import de.schildbach.oeffi.directions.navigation.TripNavigatorActivity;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
-import de.schildbach.oeffi.stations.LineView;
+import de.schildbach.oeffi.util.LineView;
 import de.schildbach.oeffi.stations.StationContextMenu;
 import de.schildbach.oeffi.stations.StationDetailsActivity;
 import de.schildbach.oeffi.stations.StationsActivity;

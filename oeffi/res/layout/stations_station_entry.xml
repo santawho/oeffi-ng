@@ -61,7 +61,7 @@
                         android:ellipsize="none"
                         android:breakStrategy="high_quality" />
 
-                    <de.schildbach.oeffi.stations.LineView
+                    <de.schildbach.oeffi.util.LineView
                         android:id="@+id/station_entry_lines"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -132,7 +132,7 @@
                         android:textColor="@color/fg_insignificant"
                         android:textStyle="bold" />
 
-                    <de.schildbach.oeffi.stations.LineView
+                    <de.schildbach.oeffi.util.LineView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:paddingBottom="@dimen/text_padding_vertical_cram"

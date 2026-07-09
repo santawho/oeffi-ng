@@ -134,7 +134,7 @@
                 android:paddingVertical="@dimen/text_padding_vertical_lax"
                 android:paddingHorizontal="@dimen/text_padding_horizontal_lax">
 
-                <de.schildbach.oeffi.stations.LineView
+                <de.schildbach.oeffi.util.LineView
                     android:id="@+id/operation_menu_next_operation_line"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
