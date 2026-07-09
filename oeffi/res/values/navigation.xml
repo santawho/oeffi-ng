@@ -50,6 +50,8 @@
 
     <string name="navigation_preferences_reduced_sounds_summary">Play reduced sounds (shorter and lower volume) as navigation reminders</string>
     <string name="navigation_preferences_reduced_sounds_title">Reduced Sounds</string>
+    <string name="navigation_preferences_full_sounds_when_speaking_summary">Play full, non-reduced sounds as navigation reminders, even when speech output follows</string>
+    <string name="navigation_preferences_full_sounds_when_speaking_title">Full Sounds when speaking</string>
 
     <string name="navigation_preferences_vibrate_summary">Use vibration as navigation reminders</string>
     <string name="navigation_preferences_vibrate_title">Vibrate</string>

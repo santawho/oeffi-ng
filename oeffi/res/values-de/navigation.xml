@@ -39,6 +39,8 @@
 
     <string name="navigation_preferences_reduced_sounds_summary">Nutze reduzierte Töne (kürzer und geringer Lautstärke) als Navigations-Erinnerungen</string>
     <string name="navigation_preferences_reduced_sounds_title">Reduzierte Töne</string>
+    <string name="navigation_preferences_full_sounds_when_speaking_summary">Nutze volle, nicht-reduzierte Töne als Navigations-Erinnerungen, auch wenn eine Sprachausgabe folgt</string>
+    <string name="navigation_preferences_full_sounds_when_speaking_title">Volle Töne bei Sprachausgabe</string>
 
     <string name="navigation_preferences_vibrate_summary">Nutze Vibration als Navigations-Erinnerungen</string>
     <string name="navigation_preferences_vibrate_title">Vibrieren</string>

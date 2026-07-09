@@ -62,9 +62,16 @@
         android:title="@string/navigation_preferences_media_channel_title" />
     <CheckBoxPreference
         android:defaultValue="false"
+        android:disableDependentsState="true"
         android:key="navigation_reduced_sounds"
         android:summary="@string/navigation_preferences_reduced_sounds_summary"
         android:title="@string/navigation_preferences_reduced_sounds_title" />
+    <CheckBoxPreference
+        android:dependency="navigation_reduced_sounds"
+        android:defaultValue="false"
+        android:key="navigation_full_sounds_when_speaking"
+        android:summary="@string/navigation_preferences_full_sounds_when_speaking_summary"
+        android:title="@string/navigation_preferences_full_sounds_when_speaking_title" />
     <CheckBoxPreference
         android:defaultValue="false"
         android:key="navigation_vibrate"

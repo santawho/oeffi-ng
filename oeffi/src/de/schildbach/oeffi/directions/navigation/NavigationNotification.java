@@ -100,6 +100,7 @@ public class NavigationNotification {
     public static final String PREFS_KEY_NAVIGATION_USE_SOUND_CHANNEL_HEADSET = "navigation_use_sound_channel_headset";
     public static final String PREFS_KEY_NAVIGATION_SPEECH_OUTPUT = "navigation_speech_output";
     public static final String PREFS_KEY_NAVIGATION_REDUCED_SOUNDS = "navigation_reduced_sounds";
+    public static final String PREFS_KEY_NAVIGATION_FULL_SOUNDS_WHEN_SPEAKING = "navigation_full_sounds_when_speaking";
     public static final String PREFS_KEY_NAVIGATION_REFRESH_BEEP = "navigation_refresh_beep";
     public static final String PREFS_KEY_NOTIFICATIONS_ENABLED = "navigation_notifications_enabled";
     public static final String PREFS_KEY_NOTIFICATIONS_CHANGES_SHOW_WHEN = "navigation_notification_changes_show_when";
@@ -122,19 +123,24 @@ public class NavigationNotification {
     private static String notificationTitleForChanges;
     private static String notificationTitleForDirections;
 
-    private static int getActualSound(final int soundId) {
+    private static int getActualSound(final int soundId, final boolean withSpeech) {
         int newId = soundId;
         if (soundId == SOUND_PREVIEW) {
             newId = 0;
-        } else if (prefs.getBoolean(PREFS_KEY_NAVIGATION_REDUCED_SOUNDS, false)) {
-            if (soundId == SOUND_ALARM)
-                newId = R.raw.nav_lowvolume_alarm;
-            else if (soundId == SOUND_REMIND_NORMAL)
-                newId = R.raw.nav_lowvolume_remind_down;
-            else if (soundId == SOUND_REMIND_IMPORTANT)
-                newId = R.raw.nav_lowvolume_remind_downup;
-            else if (soundId == SOUND_REMIND_NEXTLEG)
-                newId = R.raw.nav_lowvolume_remind_up;
+        } else {
+            final boolean reducedSounds =
+                    prefs.getBoolean(PREFS_KEY_NAVIGATION_REDUCED_SOUNDS, false)
+                    || (withSpeech && !prefs.getBoolean(PREFS_KEY_NAVIGATION_FULL_SOUNDS_WHEN_SPEAKING, false));
+            if (reducedSounds) {
+                if (soundId == SOUND_ALARM)
+                    newId = R.raw.nav_lowvolume_alarm;
+                else if (soundId == SOUND_REMIND_NORMAL)
+                    newId = R.raw.nav_lowvolume_remind_down;
+                else if (soundId == SOUND_REMIND_IMPORTANT)
+                    newId = R.raw.nav_lowvolume_remind_downup;
+                else if (soundId == SOUND_REMIND_NEXTLEG)
+                    newId = R.raw.nav_lowvolume_remind_up;
+            }
         }
         return newId;
     }
@@ -1506,8 +1512,6 @@ public class NavigationNotification {
             final List<String> speakTexts,
             final boolean onRide,
             final long delayUntil) {
-        final int actualSoundId = configuration.soundEnabled ? getActualSound(aSoundId) : 0;
-        final int actualUsage = soundUsage >= 0 ? soundUsage : getAudioUsageForSound(context, aSoundId, onRide);
         final NotificationSoundManager soundManager = NotificationSoundManager.getInstance();
         boolean doSpeech = false;
         if (configuration.soundEnabled) {
@@ -1515,6 +1519,9 @@ public class NavigationNotification {
             if ("always".equals(when) || ("headphones".equals(when) && soundManager.isHeadsetConnected()))
                 doSpeech = true;
         }
+        final int actualSoundId = !configuration.soundEnabled ? 0
+                : getActualSound(aSoundId, doSpeech && speakTexts != null && !speakTexts.isEmpty());
+        final int actualUsage = soundUsage >= 0 ? soundUsage : getAudioUsageForSound(context, aSoundId, onRide);
         if (delayUntil > 0) {
             final long sleepMs = delayUntil - System.currentTimeMillis();
             if (sleepMs > 50) {
