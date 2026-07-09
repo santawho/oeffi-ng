@@ -1325,8 +1325,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         final LineView lineView = row.findViewById(R.id.directions_trip_details_public_entry_line);
         lineView.setLine(leg.line);
-        if (showDestination || showAccessibility)
-            lineView.setMaxWidth(res.getDimensionPixelSize(R.dimen.line_max_width));
+        // why clipping width ???
+        // if (showDestination || showAccessibility)
+        //     lineView.setMaxWidth(res.getDimensionPixelSize(R.dimen.line_max_width));
 
         final LinearLayout lineGroup = row
                 .findViewById(R.id.directions_trip_details_public_entry_line_group);
@@ -1402,11 +1403,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             destinationView.setOnClickListener(onClickListener);
         }
 
-        final ToggleImageButton expandButton = row
-                .findViewById(R.id.directions_trip_details_public_entry_expand);
         final Integer legExpandStates = tripRenderer.legExpandStates.get(new TripRenderer.LegKey(leg));
         final boolean isStopsExpanded = legExpandStates != null && (legExpandStates & TripRenderer.LEG_EXPAND_STATE_STOPS) != 0;
         final boolean isMessagesExpanded = legExpandStates != null && (legExpandStates & TripRenderer.LEG_EXPAND_STATE_MESSAGES) != 0;
+
+        final ToggleImageButton expandButton = row
+                .findViewById(R.id.directions_trip_details_public_entry_expand);
         ViewUtils.setVisibility(expandButton, !renderConfig.isJourney
                 && ((intermediateStops != null && !intermediateStops.isEmpty()) || (message != null)));
         expandButton.setChecked(isStopsExpanded || isMessagesExpanded);
