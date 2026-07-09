@@ -7,64 +7,58 @@
     android:paddingBottom="8dp">
 
     <LinearLayout
-        style="?android:attr/buttonBarStyle"
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/text_padding_horizontal_lax"
-        android:orientation="horizontal">
+        android:paddingBottom="@dimen/text_padding_vertical_lax"
+        android:paddingTop="6dp"
+        android:paddingStart="@dimen/text_padding_horizontal"
+        android:paddingEnd="0px"
+        style="?android:attr/buttonBarStyle">
+
+        <de.schildbach.oeffi.stations.LineView
+            android:id="@+id/directions_trip_details_public_entry_line"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/font_size_xlarge" />
 
         <LinearLayout
-            android:layout_width="0px"
+            android:orientation="vertical"
+            android:id="@+id/directions_trip_details_public_entry_line_group"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:baselineAligned="true"
-            android:orientation="horizontal"
-            android:paddingBottom="@dimen/text_padding_vertical_lax"
-            android:paddingTop="6dp">
+            android:paddingStart="@dimen/text_padding_horizontal_lax"
+            android:paddingEnd="0px">
 
-            <de.schildbach.oeffi.stations.LineView
-                android:id="@+id/directions_trip_details_public_entry_line"
-                android:layout_width="wrap_content"
+            <TextView
+                android:id="@+id/directions_trip_details_public_entry_destination"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="@dimen/font_size_xlarge" />
+                android:drawablePadding="@dimen/text_padding_horizontal"
+                android:textColor="@color/fg_significant"
+                android:textSize="@dimen/font_size_large" />
 
-            <LinearLayout
-                android:id="@+id/directions_trip_details_public_entry_line_group"
-                android:layout_width="0dp"
+            <TextView
+                android:id="@+id/directions_trip_details_public_entry_accessibility"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:paddingBottom="4dp"
-                android:paddingLeft="@dimen/text_padding_horizontal_lax">
+                android:drawableLeft="@drawable/ic_accessible_grey600_18dp"
+                android:drawablePadding="@dimen/text_padding_horizontal"
+                android:text="@string/directions_trip_details_public_entry_accessibility"
+                android:textColor="@color/fg_insignificant"
+                android:visibility="gone" />
 
-                <TextView
-                    android:id="@+id/directions_trip_details_public_entry_destination"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:drawablePadding="@dimen/text_padding_horizontal"
-                    android:textColor="@color/fg_significant"
-                    android:textSize="@dimen/font_size_large" />
-
-                <TextView
-                    android:id="@+id/directions_trip_details_public_entry_accessibility"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:drawableLeft="@drawable/ic_accessible_grey600_18dp"
-                    android:drawablePadding="@dimen/text_padding_horizontal"
-                    android:text="@string/directions_trip_details_public_entry_accessibility"
-                    android:textColor="@color/fg_insignificant"
-                    android:visibility="gone" />
-
-                <TextView
-                    android:id="@+id/directions_trip_details_public_entry_bicycle_carriage"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:drawableLeft="@drawable/ic_directions_bike_grey600_18dp"
-                    android:drawablePadding="@dimen/text_padding_horizontal"
-                    android:text="@string/directions_trip_details_public_entry_bicycle_carriage"
-                    android:textColor="@color/fg_insignificant"
-                    android:visibility="gone" />
-            </LinearLayout>
+            <TextView
+                android:id="@+id/directions_trip_details_public_entry_bicycle_carriage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/ic_directions_bike_grey600_18dp"
+                android:drawablePadding="@dimen/text_padding_horizontal"
+                android:text="@string/directions_trip_details_public_entry_bicycle_carriage"
+                android:textColor="@color/fg_insignificant"
+                android:visibility="gone" />
         </LinearLayout>
 
         <de.schildbach.oeffi.util.ToggleImageButton
