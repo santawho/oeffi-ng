@@ -108,10 +108,14 @@ public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.
     private final Paint publicLabelPaint = new Paint();
     private final Paint individualFillPaint = new Paint();
     // private final Paint individualLabelPaint = new Paint();
-    private final Paint individualTimePaint = new Paint();
-    private final Paint individualTimeDiffPaint = new Paint();
-    private final Paint publicTimePaint = new Paint();
-    private final Paint publicTimeDiffPaint = new Paint();
+    private final Paint individualPlannedTimePaint = new Paint();
+    private final Paint individualPlannedTimeDiffPaint = new Paint();
+    private final Paint individualPredictedTimePaint = new Paint();
+    private final Paint individualPredictedTimeDiffPaint = new Paint();
+    private final Paint publicPlannedTimePaint = new Paint();
+    private final Paint publicPlannedTimeDiffPaint = new Paint();
+    private final Paint publicPredictedTimePaint = new Paint();
+    private final Paint publicPredictedTimeDiffPaint = new Paint();
     private final Paint positionPaint = new Paint();
     private final Paint strikeThruPaint = new Paint();
     private final Paint plannedPositionPaintBackground = new Paint();
@@ -199,29 +203,53 @@ public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.
         // individualLabelPaint.setTextSize(res.getDimension(R.dimen.font_size_xlarge));
         // individualLabelPaint.setTextAlign(Align.CENTER);
 
-        individualTimePaint.setColor(colorLessSignificant);
-        individualTimePaint.setTypeface(Typeface.DEFAULT);
-        individualTimePaint.setTextSize(res.getDimension(R.dimen.font_size_normal));
-        individualTimePaint.setAntiAlias(true);
-        individualTimePaint.setTextAlign(Align.CENTER);
+        individualPlannedTimePaint.setColor(colorLessSignificant);
+        individualPlannedTimePaint.setTypeface(Typeface.DEFAULT);
+        individualPlannedTimePaint.setTextSize(res.getDimension(R.dimen.font_size_normal));
+        individualPlannedTimePaint.setAntiAlias(true);
+        individualPlannedTimePaint.setTextAlign(Align.CENTER);
 
-        individualTimeDiffPaint.setColor(colorLessSignificant);
-        individualTimeDiffPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.ITALIC));
-        individualTimeDiffPaint.setTextSize(res.getDimension(R.dimen.font_size_normal));
-        individualTimeDiffPaint.setAntiAlias(true);
-        individualTimeDiffPaint.setTextAlign(Align.CENTER);
+        individualPredictedTimePaint.setColor(colorLessSignificant);
+        individualPredictedTimePaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.ITALIC));
+        individualPredictedTimePaint.setTextSize(res.getDimension(R.dimen.font_size_normal));
+        individualPredictedTimePaint.setAntiAlias(true);
+        individualPredictedTimePaint.setTextAlign(Align.CENTER);
 
-        publicTimePaint.setColor(colorSignificant);
-        publicTimePaint.setTypeface(Typeface.DEFAULT_BOLD);
-        publicTimePaint.setTextSize(res.getDimension(R.dimen.font_size_normal));
-        publicTimePaint.setAntiAlias(true);
-        publicTimePaint.setTextAlign(Align.CENTER);
+        individualPlannedTimeDiffPaint.setColor(colorLessSignificant);
+        individualPlannedTimeDiffPaint.setTypeface(Typeface.DEFAULT);
+        individualPlannedTimeDiffPaint.setTextSize(res.getDimension(R.dimen.font_size_normal));
+        individualPlannedTimeDiffPaint.setAntiAlias(true);
+        individualPlannedTimeDiffPaint.setTextAlign(Align.CENTER);
 
-        publicTimeDiffPaint.setColor(colorSignificant);
-        publicTimeDiffPaint.setTypeface(Typeface.create(Typeface.DEFAULT_BOLD, Typeface.ITALIC));
-        publicTimeDiffPaint.setTextSize(res.getDimension(R.dimen.font_size_normal));
-        publicTimeDiffPaint.setAntiAlias(true);
-        publicTimeDiffPaint.setTextAlign(Align.CENTER);
+        individualPredictedTimeDiffPaint.setColor(colorLessSignificant);
+        individualPredictedTimeDiffPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.ITALIC));
+        individualPredictedTimeDiffPaint.setTextSize(res.getDimension(R.dimen.font_size_normal));
+        individualPredictedTimeDiffPaint.setAntiAlias(true);
+        individualPredictedTimeDiffPaint.setTextAlign(Align.CENTER);
+
+        publicPlannedTimePaint.setColor(colorSignificant);
+        publicPlannedTimePaint.setTypeface(Typeface.DEFAULT_BOLD);
+        publicPlannedTimePaint.setTextSize(res.getDimension(R.dimen.font_size_normal));
+        publicPlannedTimePaint.setAntiAlias(true);
+        publicPlannedTimePaint.setTextAlign(Align.CENTER);
+
+        publicPredictedTimePaint.setColor(colorSignificant);
+        publicPredictedTimePaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD_ITALIC));
+        publicPredictedTimePaint.setTextSize(res.getDimension(R.dimen.font_size_normal));
+        publicPredictedTimePaint.setAntiAlias(true);
+        publicPredictedTimePaint.setTextAlign(Align.CENTER);
+
+        publicPlannedTimeDiffPaint.setColor(colorSignificant);
+        publicPlannedTimeDiffPaint.setTypeface(Typeface.DEFAULT);
+        publicPlannedTimeDiffPaint.setTextSize(res.getDimension(R.dimen.font_size_normal));
+        publicPlannedTimeDiffPaint.setAntiAlias(true);
+        publicPlannedTimeDiffPaint.setTextAlign(Align.CENTER);
+
+        publicPredictedTimeDiffPaint.setColor(colorSignificant);
+        publicPredictedTimeDiffPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.ITALIC));
+        publicPredictedTimeDiffPaint.setTextSize(res.getDimension(R.dimen.font_size_normal));
+        publicPredictedTimeDiffPaint.setAntiAlias(true);
+        publicPredictedTimeDiffPaint.setTextAlign(Align.CENTER);
 
         plannedPositionPaintBackground.setColor(colorSignificant);
         changedPositionPaintBackground.setColor(colorPositionChanged);
@@ -784,8 +812,10 @@ public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.
             Position departurePosition;
             final Public firstPublicLeg = trip.getFirstPublicLeg();
             final PTDate publicDepartureTime;
+            final boolean isPublicDeparturePredicted;
             if (firstPublicLeg != null) {
                 final Stop publicDepartureStop = firstPublicLeg.departureStop;
+                isPublicDeparturePredicted = publicDepartureStop.predictedDepartureTime != null;
                 final boolean publicDepartureCancelled = publicDepartureStop.departureCancelled;
                 publicDepartureTime = publicDepartureStop.getDepartureTime();
                 if (publicDepartureTime != null) {
@@ -800,12 +830,16 @@ public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.
                         }
                     }
                     startYabs = drawTime(canvas, centerX, startYabs, height, true,
-                            publicTimePaint, publicDepartureCancelled, publicDepartureTime);
+                            isPublicDeparturePredicted ? publicPredictedTimePaint : publicPlannedTimePaint,
+                            publicDepartureCancelled, publicDepartureTime);
                     final long diff = publicDepartureTime.getTime() - baseTime;
-                    startYabs = drawRemaining(canvas, centerX, startYabs, height, true, publicTimeDiffPaint, startCancelled, diff);
+                    startYabs = drawRemaining(canvas, centerX, startYabs, height, true,
+                            isPublicDeparturePredicted ? publicPredictedTimeDiffPaint : publicPlannedTimeDiffPaint,
+                            startCancelled, diff);
                 }
             } else {
                 publicDepartureTime = null;
+                isPublicDeparturePredicted = false;
             }
 
             final PTDate individualDepartureTime = trip.getFirstDepartureTime();
@@ -814,9 +848,12 @@ public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.
                 if (timeYAbs < startYabs)
                     startYabs = timeYAbs;
                 startYabs = drawTime(canvas, centerX, startYabs, height, true,
-                        individualTimePaint, false, individualDepartureTime);
+                        isPublicDeparturePredicted ? individualPredictedTimePaint : individualPlannedTimePaint,
+                        false, individualDepartureTime);
                 final long diff = individualDepartureTime.getTime() - baseTime;
-                startYabs = drawRemaining(canvas, centerX, startYabs, height, true, individualTimeDiffPaint, startCancelled, diff);
+                startYabs = drawRemaining(canvas, centerX, startYabs, height, true,
+                        isPublicDeparturePredicted ? individualPredictedTimeDiffPaint : individualPlannedTimeDiffPaint,
+                        startCancelled, diff);
             }
 
             final boolean isArrivalBased = referenceTime != null && referenceTime.depArr == TimeSpec.DepArr.ARRIVE;
@@ -825,22 +862,28 @@ public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.
             int endYabs = 0;
             final Public lastPublicLeg = trip.getLastPublicLeg();
             final PTDate publicArrivalTime;
+            final boolean isPublicArrivalPredicted;
             if (lastPublicLeg != null) {
                 final Stop publicArrivalStop = lastPublicLeg.arrivalStop;
                 final boolean publicArrivalCancelled = publicArrivalStop.arrivalCancelled;
-                publicArrivalTime = trip.getLastPublicLegArrivalTime();
+                publicArrivalTime = lastPublicLeg.getArrivalTime();
+                isPublicArrivalPredicted = publicArrivalStop.predictedArrivalTime != null;
                 if (publicArrivalTime != null) {
                     endCancelled = publicArrivalCancelled;
                     endYabs = (int) timeToCoord(publicArrivalTime.getTime(), height);
                     endYabs = drawTime(canvas, centerX, endYabs, height, false,
-                            publicTimePaint, publicArrivalCancelled, publicArrivalTime);
+                            isPublicArrivalPredicted ? publicPredictedTimePaint : publicPlannedTimePaint,
+                            publicArrivalCancelled, publicArrivalTime);
                     if (isArrivalBased) {
                         final long diff = refTime - publicArrivalTime.getTime();
-                        endYabs = drawRemaining(canvas, centerX, endYabs, height, false, publicTimeDiffPaint, endCancelled, diff);
+                        endYabs = drawRemaining(canvas, centerX, endYabs, height, false,
+                                isPublicArrivalPredicted ? publicPredictedTimeDiffPaint : publicPlannedTimeDiffPaint,
+                                endCancelled, diff);
                     }
                 }
             } else {
                 publicArrivalTime = null;
+                isPublicArrivalPredicted = false;
             }
 
             final PTDate individualArrivalTime = trip.getLastArrivalTime();
@@ -849,10 +892,13 @@ public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.
                 if (timeYAbs > endYabs)
                     endYabs = timeYAbs;
                 endYabs = drawTime(canvas, centerX, endYabs, height, false,
-                        individualTimePaint, false, individualArrivalTime);
+                        isPublicArrivalPredicted ? individualPredictedTimePaint : individualPlannedTimePaint,
+                        false, individualArrivalTime);
                 if (isArrivalBased) {
                     final long diff = refTime - individualArrivalTime.getTime();
-                    endYabs = drawRemaining(canvas, centerX, endYabs, height, false, individualTimeDiffPaint, endCancelled, diff);
+                    endYabs = drawRemaining(canvas, centerX, endYabs, height, false,
+                            isPublicArrivalPredicted ? individualPredictedTimeDiffPaint : individualPlannedTimeDiffPaint,
+                            endCancelled, diff);
                 }
             }
 
@@ -887,6 +933,7 @@ public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.
                     final Stop departureStop = publicLeg.departureStop;
                     final boolean departureCancelled = departureStop.departureCancelled;
                     final long tDeparture = departureStop.getDepartureTime().getTime();
+                    final boolean isDeparturePredicted = departureStop.predictedDepartureTime != null;
                     final float yDeparture = timeToCoord(tDeparture, height);
                     final Stop arrivalStop = publicLeg.arrivalStop;
                     final boolean arrivalCancelled = arrivalStop.arrivalCancelled;
@@ -972,7 +1019,9 @@ public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.
                                 final long millisFromRequestedTime = tDeparture - baseTime;
                                 final long minutesFromRequestedTime = millisFromRequestedTime / 60000;
                                 if (minutesFromRequestedTime > -10 && minutesFromRequestedTime < 30) {
-                                    startYabs = drawRemaining(canvas, centerX, startYabs, height, true, publicTimeDiffPaint, false, millisFromRequestedTime);
+                                    startYabs = drawRemaining(canvas, centerX, startYabs, height, true,
+                                            isDeparturePredicted ? publicPredictedTimeDiffPaint : publicPlannedTimeDiffPaint,
+                                            false, millisFromRequestedTime);
                                 }
                             }
                         }
