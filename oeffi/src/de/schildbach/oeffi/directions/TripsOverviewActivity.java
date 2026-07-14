@@ -801,21 +801,26 @@ public class TripsOverviewActivity extends OeffiActivity {
         return out;
     }
 
+    private Trip prependTrip;
+    private Location prependFrom;
     private List<Trip.Leg> prependLegs;
     private int prependNumChanges;
 
     private void setupPrepend(final boolean doRefresh) {
         prependLegs = new LinkedList<>();
-        if (renderConfig == null || renderConfig.prependTrip == null) {
+        prependTrip = renderConfig == null ? null : renderConfig.prependTrip;
+        if (prependTrip == null) {
+            prependFrom = null;
             prependNumChanges = 0;
             return;
         }
+        prependFrom = prependTrip.from;
         final JourneyRef prependToJourneyRef = renderConfig.prependToJourneyRef;
         Trip.Public foundLeg = null;
         prependNumChanges = -1;
         final NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
         final Date now = new Date();
-        for (final Trip.Leg leg : renderConfig.prependTrip.legs) {
+        for (final Trip.Leg leg : prependTrip.legs) {
             if (leg instanceof Trip.Public) {
                 Trip.Public publicLeg = (Trip.Public) leg;
                 if (doRefresh) {
@@ -991,8 +996,8 @@ public class TripsOverviewActivity extends OeffiActivity {
         return new Trip(
                 trip.loadedAt,
                 trip.getId(),
-                networkProvider.createTripRefFromPreviousTripWithNewLegs(trip, newLegs),
-                trip.from,
+                networkProvider.createTripRefFromPreviousTripWithNewLegs(prependTrip, newLegs, trip.to),
+                prependFrom,
                 trip.to,
                 newLegs,
                 trip.fares,
@@ -1332,7 +1337,7 @@ public class TripsOverviewActivity extends OeffiActivity {
             return new Trip(
                     baseTrip.loadedAt,
                     null,
-                    provider.createTripRefFromPreviousTripWithNewLegs(feedingTrip, legs),
+                    provider.createTripRefFromPreviousTripWithNewLegs(feedingTrip, legs, null),
                     feedingTrip.from,
                     baseTrip.to,
                     legs,
