@@ -368,7 +368,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
                     log.error("cannot get contact from result", e);
                     DialogBuilder.get(activity)
                             .setMessage(activity.getString(R.string.acquire_location_contacts_app_failed_return_data))
-                            .create().show();
+                            .show();
                 }
             });
 
@@ -380,7 +380,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
             log.error("contact app not accessible", e);
             DialogBuilder.get(activity)
                     .setMessage(activity.getString(R.string.acquire_location_contacts_app_not_supported))
-                    .create().show();
+                    .show();
         }
     }
 

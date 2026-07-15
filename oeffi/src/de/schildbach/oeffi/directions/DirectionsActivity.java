@@ -367,23 +367,23 @@ public class DirectionsActivity extends OeffiMainActivity implements
                                     viewToLocation.reset();
                                 });
                         builder.setNegativeButton(R.string.directions_query_history_clear_confirm_button_cancel, null);
-                        builder.create().show();
+                        builder.show();
                     }
                     return true;
                 } else if (itemId == R.id.directions_options_clear_bookmarks) {
                     if (network != null) {
-                        final DialogBuilder builder = DialogBuilder.get(this);
-                        builder.setMessage(R.string.directions_query_stored_trips_clear_confirm_message);
-                        builder.setPositiveButton(R.string.directions_query_stored_trips_clear_confirm_button_clear_expired_only,
-                                (dialog, which) -> {
-                                    queryHistoryListAdapter.removeAllStoredTrips(true);
-                                });
-                        builder.setNeutralButton(R.string.directions_query_stored_trips_clear_confirm_button_clear_all,
-                                (dialog, which) -> {
-                                    queryHistoryListAdapter.removeAllStoredTrips(false);
-                                });
-                        builder.setNegativeButton(R.string.directions_query_stored_trips_clear_confirm_button_cancel, null);
-                        builder.create().show();
+                        DialogBuilder.get(this)
+                                .setMessage(R.string.directions_query_stored_trips_clear_confirm_message)
+                                .setPositiveButton(R.string.directions_query_stored_trips_clear_confirm_button_clear_expired_only,
+                                        (dialog, which) -> {
+                                            queryHistoryListAdapter.removeAllStoredTrips(true);
+                                        })
+                                .setNeutralButton(R.string.directions_query_stored_trips_clear_confirm_button_clear_all,
+                                        (dialog, which) -> {
+                                            queryHistoryListAdapter.removeAllStoredTrips(false);
+                                        })
+                                .setNegativeButton(R.string.directions_query_stored_trips_clear_confirm_button_cancel, null)
+                                .show();
                     }
                     return true;
                 } else {
@@ -1197,22 +1197,22 @@ public class DirectionsActivity extends OeffiMainActivity implements
                 relativeTimeStrings[i] = getString(R.string.directions_time_relative,
                         Formats.formatTimeDiff(this, relativeTimeValues[i] * DateUtils.MINUTE_IN_MILLIS));
         }
-        final DialogBuilder builder = DialogBuilder.get(this);
-        builder.setTitle(R.string.directions_set_time_relative_prompt);
-        builder.setItems(relativeTimeStrings, (dialog, which) -> {
-            if (which < relativeTimeValues.length) {
-                final int mins = relativeTimeValues[which];
-                timeSpec = new TimeSpec.Relative(mins * DateUtils.MINUTE_IN_MILLIS);
-            } else {
-                // set to depart at ...
-                timeSpec = new TimeSpec.Absolute(DepArr.DEPART, timeSpec.timeInMillis());
-                timeIsToday = true;
-                //  ... and ask for time
-                timeClicked();
-            }
-            updateGUI();
-        });
-        builder.show();
+        DialogBuilder.get(this)
+            .setTitle(R.string.directions_set_time_relative_prompt)
+            .setItems(relativeTimeStrings, (dialog, which) -> {
+                if (which < relativeTimeValues.length) {
+                    final int mins = relativeTimeValues[which];
+                    timeSpec = new TimeSpec.Relative(mins * DateUtils.MINUTE_IN_MILLIS);
+                } else {
+                    // set to depart at ...
+                    timeSpec = new TimeSpec.Absolute(DepArr.DEPART, timeSpec.timeInMillis());
+                    timeIsToday = true;
+                    //  ... and ask for time
+                    timeClicked();
+                }
+                updateGUI();
+            })
+            .show();
     }
 
     @Override
@@ -1549,7 +1549,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         }
         if (menuItemId == R.id.directions_query_history_location_context_launcher_shortcut
                 && menuItemLocation != null) {
-            StationContextMenu.createLauncherShortcutDialog(DirectionsActivity.this, network, menuItemLocation).show();
+            StationContextMenu.showLauncherShortcutDialog(DirectionsActivity.this, network, menuItemLocation);
             return true;
         }
         if (menuItemId == R.id.station_map_context_maps_internal && menuItemLocation != null) {
@@ -1809,17 +1809,17 @@ public class DirectionsActivity extends OeffiMainActivity implements
                 final List<Location> autocompletes = result.ambiguousFrom != null ? result.ambiguousFrom
                         : (result.ambiguousVia != null ? result.ambiguousVia : result.ambiguousTo);
                 if (autocompletes != null) {
-                    final DialogBuilder builder = DialogBuilder.get(DirectionsActivity.this);
-                    builder.setTitle(getString(R.string.ambiguous_address_title));
-                    builder.setAdapter(new AmbiguousLocationAdapter(DirectionsActivity.this, autocompletes),
-                            (dialog, which) -> {
-                                final LocationView locationView = result.ambiguousFrom != null
-                                        ? viewFromLocation
-                                        : (result.ambiguousVia != null ? viewViaLocation : viewToLocation);
-                                locationView.setLocation(autocompletes.get(which));
-                                viewGo.performClick();
-                            });
-                    builder.create().show();
+                    DialogBuilder.get(DirectionsActivity.this)
+                        .setTitle(getString(R.string.ambiguous_address_title))
+                        .setAdapter(new AmbiguousLocationAdapter(DirectionsActivity.this, autocompletes),
+                                (dialog, which) -> {
+                                    final LocationView locationView = result.ambiguousFrom != null
+                                            ? viewFromLocation
+                                            : (result.ambiguousVia != null ? viewViaLocation : viewToLocation);
+                                    locationView.setLocation(autocompletes.get(which));
+                                    viewGo.performClick();
+                                })
+                        .show();
                 } else {
                     new Toast(DirectionsActivity.this).longToast(R.string.directions_message_ambiguous_location);
                 }
@@ -1829,56 +1829,49 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
         @Override
         protected void onRedirect(final HttpUrl url) {
-            final DialogBuilder builder = DialogBuilder.warn(DirectionsActivity.this,
-                    R.string.directions_alert_redirect_title);
-            builder.setMessage(getString(R.string.directions_alert_redirect_message, url.host()));
-            builder.setPositiveButton(R.string.directions_alert_redirect_button_follow,
-                    (dialog, which) -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url.toString()))));
-            builder.setNegativeButton(R.string.directions_alert_redirect_button_dismiss, null);
-            builder.show();
+            DialogBuilder.warn(DirectionsActivity.this, R.string.directions_alert_redirect_title)
+                .setMessage(getString(R.string.directions_alert_redirect_message, url.host()))
+                .setPositiveButton(R.string.directions_alert_redirect_button_follow, (dialog, which) ->
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url.toString()))))
+                .setNegativeButton(R.string.directions_alert_redirect_button_dismiss, null)
+                .show();
         }
 
         @Override
         protected void onBlocked(final HttpUrl url) {
-            final DialogBuilder builder = DialogBuilder.warn(DirectionsActivity.this,
-                    R.string.directions_alert_blocked_title);
-            builder.setMessage(getString(R.string.directions_alert_blocked_message, url.host()));
-            builder.setPositiveButton(R.string.directions_alert_blocked_button_retry,
-                    (dialog, which) -> viewGo.performClick());
-            builder.setNegativeButton(R.string.directions_alert_blocked_button_dismiss, null);
-            builder.show();
+            DialogBuilder.warn(DirectionsActivity.this, R.string.directions_alert_blocked_title)
+                .setMessage(getString(R.string.directions_alert_blocked_message, url.host()))
+                .setPositiveButton(R.string.directions_alert_blocked_button_retry, (dialog, which) -> viewGo.performClick())
+                .setNegativeButton(R.string.directions_alert_blocked_button_dismiss, null)
+                .show();
         }
 
         @Override
         protected void onInternalError(final HttpUrl url) {
-            final DialogBuilder builder = DialogBuilder.warn(DirectionsActivity.this,
-                    R.string.directions_alert_internal_error_title);
-            builder.setMessage(getString(R.string.directions_alert_internal_error_message, url.host()));
-            builder.setPositiveButton(R.string.directions_alert_internal_error_button_retry,
-                    (dialog, which) -> viewGo.performClick());
-            builder.setNegativeButton(R.string.directions_alert_internal_error_button_dismiss, null);
-            builder.show();
+            DialogBuilder.warn(DirectionsActivity.this, R.string.directions_alert_internal_error_title)
+                .setMessage(getString(R.string.directions_alert_internal_error_message, url.host()))
+                .setPositiveButton(R.string.directions_alert_internal_error_button_retry, (dialog, which) -> viewGo.performClick())
+                .setNegativeButton(R.string.directions_alert_internal_error_button_dismiss, null)
+                .show();
         }
 
         @Override
         protected void onSSLException(final SSLException x) {
-            final DialogBuilder builder = DialogBuilder.warn(DirectionsActivity.this,
-                    R.string.directions_alert_ssl_exception_title);
-            builder.setMessage(getString(R.string.directions_alert_ssl_exception_message, x.getMessage()));
-            builder.setNeutralButton(R.string.directions_alert_ssl_exception_button_dismiss, null);
-            builder.show();
+            DialogBuilder.warn(DirectionsActivity.this, R.string.directions_alert_ssl_exception_title)
+                .setMessage(getString(R.string.directions_alert_ssl_exception_message, x.getMessage()))
+                .setNeutralButton(R.string.directions_alert_ssl_exception_button_dismiss, null)
+                .show();
         }
 
         private void networkProblem() {
-            final DialogBuilder builder = DialogBuilder.warn(DirectionsActivity.this,
-                    R.string.alert_network_problem_title);
-            builder.setMessage(R.string.alert_network_problem_message);
-            builder.setPositiveButton(R.string.alert_network_problem_retry, (dialog, which) -> {
-                dialog.dismiss();
-                viewGo.performClick();
-            });
-            builder.setOnCancelListener(dialog -> dialog.dismiss());
-            builder.show();
+            DialogBuilder.warn(DirectionsActivity.this, R.string.alert_network_problem_title)
+                .setMessage(R.string.alert_network_problem_message)
+                .setPositiveButton(R.string.alert_network_problem_retry, (dialog, which) -> {
+                    dialog.dismiss();
+                    viewGo.performClick();
+                })
+                .setOnCancelListener(dialog -> dialog.dismiss())
+                .show();
         }
     }
 }

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:paddingVertical="@dimen/text_padding_vertical_verylax"
+    android:paddingHorizontal="@dimen/text_padding_horizontal_verylax">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/navigation_stopnavothers_title"
+            android:textSize="@dimen/font_size_2xlarge"
+            android:gravity="center"
+            android:paddingVertical="@dimen/text_padding_vertical_verylax"
+            android:paddingHorizontal="@dimen/text_padding_horizontal_verylax"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/navigation_stopnavothers_text"
+            android:textSize="@dimen/font_size_large" />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#558B2F"
+            android:layout_marginTop="@dimen/operation_menu_button_spacing"
+            android:paddingHorizontal="@dimen/text_padding_horizontal_lax"
+            android:paddingVertical="@dimen/operation_menu_button_frame" >
+
+            <Button
+                android:id="@+id/navigation_stop_others_stop"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_stack_off_black_24dp"
+                android:drawablePadding="@dimen/text_padding_horizontal_verylax"
+                android:drawableTint="#FFFFFF"
+                android:textColor="#FFFFFF"
+                android:text="@string/navigation_stopnavothers_stop"
+                android:gravity="start|center_vertical"
+                android:textStyle="bold"
+                android:textSize="@dimen/font_size_2xlarge"
+                android:paddingVertical="@dimen/text_padding_vertical_verylax"
+                android:paddingHorizontal="@dimen/text_padding_horizontal_verylax"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#EF6C00"
+            android:layout_marginTop="@dimen/operation_menu_button_spacing"
+            android:paddingHorizontal="@dimen/text_padding_horizontal_lax"
+            android:paddingVertical="@dimen/operation_menu_button_frame" >
+
+            <Button
+                android:id="@+id/navigation_stop_others_continue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_stack_on_black_24dp"
+                android:drawablePadding="@dimen/text_padding_horizontal_verylax"
+                android:drawableTint="#FFFFFF"
+                android:textColor="#FFFFFF"
+                android:text="@string/navigation_stopnavothers_continue"
+                android:gravity="start|center_vertical"
+                android:textStyle="bold"
+                android:textSize="@dimen/font_size_2xlarge"
+                android:paddingVertical="@dimen/text_padding_vertical_verylax"
+                android:paddingHorizontal="@dimen/text_padding_horizontal_verylax"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</FrameLayout>

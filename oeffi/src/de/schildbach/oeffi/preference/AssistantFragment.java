@@ -17,7 +17,6 @@
 
 package de.schildbach.oeffi.preference;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -42,6 +41,7 @@ import java.util.Objects;
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.assistant.AssistantActivity;
+import de.schildbach.oeffi.util.DialogBuilder;
 
 public class AssistantFragment extends PreferenceFragment {
     public static final String ACTION_VOICE_ASSIST = "android.intent.action.VOICE_ASSIST";
@@ -164,7 +164,7 @@ public class AssistantFragment extends PreferenceFragment {
             final int horzPad = (int) resources.getDimension(R.dimen.text_padding_horizontal_verylax);
             final int vertPad = (int) resources.getDimension(R.dimen.text_padding_vertical_lax);
             longTitle.setPadding(horzPad, vertPad, horzPad, vertPad);
-            new AlertDialog.Builder(context)
+            DialogBuilder.get(context)
                     .setCustomTitle(longTitle)
                     .setSingleChoiceItems(items, selectedIndex, (dialog, which) -> {
                         final String assistantPackageName = assistantInfos.get(which).packageName;
@@ -174,7 +174,7 @@ public class AssistantFragment extends PreferenceFragment {
                     .setOnDismissListener(dialog -> {
                         dismissParentingActivity(context);
                     })
-                    .create().show();
+                    .show();
             return true;
         }
     }

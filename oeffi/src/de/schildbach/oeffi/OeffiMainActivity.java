@@ -116,7 +116,7 @@ public abstract class OeffiMainActivity extends OeffiActivity {
                 })
                 .setNegativeButton(R.string.no, null)
                 .setCancelable(true)
-                .create().show();
+                .show();
     }
 
     @Override
@@ -416,9 +416,9 @@ public abstract class OeffiMainActivity extends OeffiActivity {
         else
             builder.setNegativeButton(R.string.alert_message_button_dismiss, messageButtonListener("dismiss", stopAppOnDismiss));
 
-        final Dialog dialog = builder.create();
-        dialog.setCanceledOnTouchOutside(false);
-        return dialog;
+        return builder
+                .setCanceledOnTouchOutside(false)
+                .create();
     }
 
     private String messageButtonText(final String buttonSpec) {

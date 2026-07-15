@@ -101,12 +101,12 @@ public class AppInstaller {
                 if (t != null) {
                     progressDialog.dismiss();
                     log.error("download {} failed", remoteUrl, t);
-                    new AlertDialog.Builder(context)
+                    DialogBuilder.get(context)
                             .setTitle(R.string.app_installer_download_failed_title)
                             .setMessage(R.string.app_installer_download_failed_message)
                             .setPositiveButton(android.R.string.ok, null)
                             .setOnDismissListener(dialog -> done(false))
-                            .create().show();
+                            .show();
                 } else if (status == HttpURLConnection.HTTP_OK) {
                     progressDialog.dismiss();
                     installApk(localFile);
@@ -186,13 +186,13 @@ public class AppInstaller {
                             return;
                         if (isNewVersionAvailable) {
                             if (hasExternalInstaller()) {
-                                new AlertDialog.Builder(context)
+                                DialogBuilder.get(context)
                                         .setTitle(R.string.alert_update_available_title)
                                         .setMessage(R.string.alert_update_available_message_external_installer)
                                         .setPositiveButton(android.R.string.ok, (d, i) -> done(false))
-                                        .create().show();
+                                        .show();
                             } else {
-                                new AlertDialog.Builder(context)
+                                DialogBuilder.get(context)
                                         .setTitle(R.string.alert_update_available_title)
                                         .setMessage(R.string.alert_update_available_message)
                                         .setPositiveButton(R.string.alert_update_available_button_yes, (d, i) -> {
@@ -202,14 +202,14 @@ public class AppInstaller {
                                             showExternalDownloader();
                                         })
                                         .setNegativeButton(R.string.alert_update_available_button_no, (d, i) -> done(false))
-                                        .create().show();
+                                        .show();
                             }
                         } else if (force) {
-                            new AlertDialog.Builder(context)
+                            DialogBuilder.get(context)
                                     .setTitle(R.string.alert_update_not_available_title)
                                     .setMessage(R.string.alert_update_not_available_message)
                                     .setPositiveButton(android.R.string.ok, (d, i) -> done(false))
-                                    .create().show();
+                                    .show();
                         }
                     });
                 }

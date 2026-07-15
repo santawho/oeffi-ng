@@ -19,7 +19,6 @@ package de.schildbach.oeffi.stations;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -97,57 +96,56 @@ public class StationContextMenu extends androidx.appcompat.widget.PopupMenu {
         setForceShowIcon(true);
     }
 
-    public static AlertDialog createLauncherShortcutDialog(final Context context, final NetworkId networkId,
+    public static void showLauncherShortcutDialog(
+            final Context context,
+            final NetworkId networkId,
             final Location location) {
-        final View view = LayoutInflater.from(context).inflate(R.layout.create_launcher_shortcut_dialog, null);
-
-        final DialogBuilder builder = DialogBuilder.get(context);
-        builder.setTitle(R.string.station_context_launcher_shortcut_title);
-        final EditText nameView = view.findViewById(R.id.create_launcher_shortcut_dialog_name);
+        final DialogBuilder builder = DialogBuilder.get(context, R.layout.create_launcher_shortcut_dialog);
+        final EditText nameView = builder.findViewById(R.id.create_launcher_shortcut_dialog_name);
         nameView.setText(location.uniqueShortName());
-        final RadioButton departuresRadioButton = view.findViewById(R.id.create_launcher_shortcut_dialog_departures);
+        final RadioButton departuresRadioButton = builder.findViewById(R.id.create_launcher_shortcut_dialog_departures);
         departuresRadioButton.setEnabled(location.type == LocationType.STATION);
-        builder.setView(view);
-        builder.setPositiveButton(R.string.create_launcher_shortcut_dialog_button_ok,
-                (dialog, which) -> {
-                    final boolean departuresChecked = departuresRadioButton.isChecked();
-                    final String shortcutName = nameView.getText().toString();
-                    final String shortcutId;
-                    final Intent shortcutIntent;
-                    final int iconId;
-                    final int defaultNameId;
-                    final Class<? extends Activity> activityClass;
-                    if (departuresChecked) {
-                        shortcutId = "departures-at-" + networkId.name() + "-" + location.id + "-" + shortcutName;
-                        shortcutIntent = StationDetailsActivity.fillIntent(
-                                new Intent(Intent.ACTION_MAIN, null, context, StationDetailsActivity.class)
-                                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK),
-                                networkId, location, null);
-                        iconId = R.mipmap.ic_oeffi_ng_stations_color_48dp;
-                        defaultNameId = R.string.departures_shortcut_default_name;
-                        activityClass = StationDetailsActivity.class;
-                    } else {
-                        shortcutId = "directions-to-" + networkId.name() + "-" + location.id + "-" + shortcutName;
-                        shortcutIntent = DirectionsShortcutActivity.fillIntent(
-                                new Intent(Intent.ACTION_MAIN, null, context, DirectionsShortcutActivity.class)
+        builder
+            .setTitle(R.string.station_context_launcher_shortcut_title)
+            .setPositiveButton(R.string.create_launcher_shortcut_dialog_button_ok, (dialog, which) -> {
+                final boolean departuresChecked = departuresRadioButton.isChecked();
+                final String shortcutName = nameView.getText().toString();
+                final String shortcutId;
+                final Intent shortcutIntent;
+                final int iconId;
+                final int defaultNameId;
+                final Class<? extends Activity> activityClass;
+                if (departuresChecked) {
+                    shortcutId = "departures-at-" + networkId.name() + "-" + location.id + "-" + shortcutName;
+                    shortcutIntent = StationDetailsActivity.fillIntent(
+                            new Intent(Intent.ACTION_MAIN, null, context, StationDetailsActivity.class)
                                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK),
-                                networkId, location);
-                        iconId = R.mipmap.ic_oeffi_ng_directions_color_48dp;
-                        defaultNameId = R.string.directions_shortcut_default_name;
-                        activityClass = DirectionsActivity.class;
-                    }
-                    log.info("creating launcher shortcut {} to {}", shortcutId, location);
-                    final String shortLabel = !shortcutName.isEmpty() ? shortcutName : context.getString(defaultNameId);
-                    ShortcutManagerCompat.requestPinShortcut(context,
-                            new ShortcutInfoCompat.Builder(context, shortcutId)
-                                    .setActivity(new ComponentName(context, activityClass))
-                                    .setShortLabel(shortLabel)
-                                    .setIcon(IconCompat.createWithResource(context, iconId))
-                                    .setIntent(shortcutIntent).build(),
-                            null);
-                });
-        builder.setNegativeButton(R.string.button_cancel, null);
-        return builder.create();
+                            networkId, location, null);
+                    iconId = R.mipmap.ic_oeffi_ng_stations_color_48dp;
+                    defaultNameId = R.string.departures_shortcut_default_name;
+                    activityClass = StationDetailsActivity.class;
+                } else {
+                    shortcutId = "directions-to-" + networkId.name() + "-" + location.id + "-" + shortcutName;
+                    shortcutIntent = DirectionsShortcutActivity.fillIntent(
+                            new Intent(Intent.ACTION_MAIN, null, context, DirectionsShortcutActivity.class)
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK),
+                            networkId, location);
+                    iconId = R.mipmap.ic_oeffi_ng_directions_color_48dp;
+                    defaultNameId = R.string.directions_shortcut_default_name;
+                    activityClass = DirectionsActivity.class;
+                }
+                log.info("creating launcher shortcut {} to {}", shortcutId, location);
+                final String shortLabel = !shortcutName.isEmpty() ? shortcutName : context.getString(defaultNameId);
+                ShortcutManagerCompat.requestPinShortcut(context,
+                        new ShortcutInfoCompat.Builder(context, shortcutId)
+                                .setActivity(new ComponentName(context, activityClass))
+                                .setShortLabel(shortLabel)
+                                .setIcon(IconCompat.createWithResource(context, iconId))
+                                .setIntent(shortcutIntent).build(),
+                        null);
+            })
+            .setNegativeButton(R.string.button_cancel, null)
+            .show();
     }
 
     public static void prepareMapMenu(

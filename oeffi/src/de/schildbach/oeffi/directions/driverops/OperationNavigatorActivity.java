@@ -48,6 +48,7 @@ import de.schildbach.oeffi.directions.QueryTripRunnable;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
 import de.schildbach.oeffi.directions.TripUtils;
 import de.schildbach.oeffi.directions.navigation.NavigationAlarmManager;
+import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.LineView;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
@@ -305,7 +306,7 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
             taskIntents.add(taskInfo.baseIntent);
         }
         if (!taskIntents.isEmpty()) {
-            new AlertDialog.Builder(this)
+            DialogBuilder.get(this)
                     .setTitle(R.string.operation_stopnavothers_title)
                     .setMessage(R.string.operation_stopnavothers_text)
                     .setPositiveButton(R.string.operation_stopnavothers_stop, (dialogInterface, i) -> {
@@ -315,7 +316,7 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
                         }
                     })
                     .setNegativeButton(R.string.operation_stopnavothers_continue, null)
-                    .create().show();
+                    .show();
         }
     }
 
@@ -351,22 +352,21 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
 
     private void askStopNavigation() {
         OperationNotificationBeingDeleted = true;
-        final View menuView = inflater.inflate(R.layout.operation_menu, null);
-        final AlertDialog alertDialog = new AlertDialog.Builder(this)
-                .setView(menuView)
+        final DialogBuilder dialogBuilder = DialogBuilder.get(this, R.layout.operation_menu);
+        final AlertDialog alertDialog = dialogBuilder
                 .setOnCancelListener(dialog -> cancelStopNavigation())
                 .setCancelable(true)
                 .create();
-        menuView.findViewById(R.id.operation_menu_continue).setOnClickListener(v -> {
+        dialogBuilder.findViewById(R.id.operation_menu_continue).setOnClickListener(v -> {
             alertDialog.dismiss();
             cancelStopNavigation();
         });
-        menuView.findViewById(R.id.operation_menu_stop_for_later).setOnClickListener(v -> {
+        dialogBuilder.findViewById(R.id.operation_menu_stop_for_later).setOnClickListener(v -> {
             alertDialog.dismiss();
             stopNavigation(false);
             OperationsActivity.start(this);
         });
-        menuView.findViewById(R.id.operation_menu_terminate).setOnClickListener(v -> {
+        dialogBuilder.findViewById(R.id.operation_menu_terminate).setOnClickListener(v -> {
             alertDialog.dismiss();
             stopNavigation(true);
             OperationsActivity.start(this);
@@ -376,11 +376,11 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
 
         final Trip.Public journeyLeg = nextTrip == null ? null : nextTrip.getFirstPublicLeg();
         if (journeyLeg == null) {
-            menuView.findViewById(R.id.operation_menu_next_operation_container).setVisibility(View.GONE);
+            dialogBuilder.findViewById(R.id.operation_menu_next_operation_container).setVisibility(View.GONE);
         } else {
-            final LineView lineView = menuView.findViewById(R.id.operation_menu_next_operation_line);
+            final LineView lineView = dialogBuilder.findViewById(R.id.operation_menu_next_operation_line);
             lineView.setLine(journeyLeg.line);
-            final TextView destinationView = menuView.findViewById(R.id.operation_menu_next_operation_destination);
+            final TextView destinationView = dialogBuilder.findViewById(R.id.operation_menu_next_operation_destination);
             final Destination destination = journeyLeg.destination;
             destinationView.setText(destination == null ? null : Constants.DESTINATION_ARROW_PREFIX
                     + Formats.makeBreakableStationName(Formats.fullLocationName(destination.location)));
@@ -390,8 +390,8 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
                 stopNavigation(true);
                 startNextNavigation(nextTrip, nextTripsRequestData);
             };
-            menuView.findViewById(R.id.operation_menu_next_operation).setOnClickListener(onClickListener);
-            menuView.findViewById(R.id.operation_menu_next_operation_info).setOnClickListener(onClickListener);
+            dialogBuilder.findViewById(R.id.operation_menu_next_operation).setOnClickListener(onClickListener);
+            dialogBuilder.findViewById(R.id.operation_menu_next_operation_info).setOnClickListener(onClickListener);
         }
 
         alertDialog.show();

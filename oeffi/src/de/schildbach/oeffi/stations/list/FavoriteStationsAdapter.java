@@ -17,7 +17,6 @@
 
 package de.schildbach.oeffi.stations.list;
 
-import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -33,6 +32,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
+import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
 
@@ -99,7 +99,7 @@ public class FavoriteStationsAdapter extends RecyclerView.Adapter<FavoriteStatio
         final String defaultName = place == null ? name : name + ", " + place;
         editText.setText(nickName != null ? nickName : defaultName);
         editText.setHint(defaultName);
-        new AlertDialog.Builder(context)
+        DialogBuilder.get(context)
                 .setTitle(context.getString(R.string.stations_favorite_stations_rename_title, defaultName))
                 .setView(editText)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {
@@ -121,7 +121,7 @@ public class FavoriteStationsAdapter extends RecyclerView.Adapter<FavoriteStatio
                     cursor.requery();
                 })
                 .setNegativeButton(android.R.string.cancel, null)
-                .create().show();
+                .show();
     }
 
     public void removeEntry(final int position) {

@@ -316,7 +316,7 @@ public class FavoriteStationsActivity extends OeffiActivity
                     Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             return true;
         } else if (menuItemId == R.id.station_context_launcher_shortcut) {
-            StationContextMenu.createLauncherShortcutDialog(FavoriteStationsActivity.this, network, station).show();
+            StationContextMenu.showLauncherShortcutDialog(FavoriteStationsActivity.this, network, station);
             return true;
         } else if (menuItemId == R.id.station_context_infopage) {
             final String infoUrl = NetworkProviderFactory.provider(network).getLocationInfoUrl(station);

@@ -20,7 +20,6 @@ package de.schildbach.oeffi.directions;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -91,6 +90,7 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.TripAware;
 import de.schildbach.oeffi.trampoline.AppLinkActivity;
 import de.schildbach.oeffi.tripeval.TripGeoUtils;
+import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.GoogleMapsUtils;
 import de.schildbach.oeffi.util.HorizontalPager;
 import de.schildbach.oeffi.util.geofiles.GeoFileProducer;
@@ -390,11 +390,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                         enableTracking();
                     else {
                         trackButton.setChecked(false);
-                        new AlertDialog.Builder(this)
+                        DialogBuilder.get(this)
                                 .setTitle(R.string.stations_list_cannot_acquire_location)
                                 .setMessage(R.string.stations_list_cannot_acquire_location_hint)
                                 .setPositiveButton(android.R.string.ok, null)
-                                .create().show();
+                                .show();
                     }
                 });
 
@@ -2677,9 +2677,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         if (providedTime != null || simulatedTime != null) {
             final View.OnClickListener onClickListener = v -> {
                 final Spanned tooltip = getTooltipForStop(stop, simulatedStop, now.getTime());
-                new AlertDialog.Builder(this)
+                DialogBuilder.get(this)
                         .setMessage(tooltip)
-                        .create().show();
+                        .show();
             };
             stopDateFrameView.setOnClickListener(onClickListener);
             stopTimeFrameView.setOnClickListener(onClickListener);

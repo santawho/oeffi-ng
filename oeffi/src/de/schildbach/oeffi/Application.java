@@ -65,6 +65,7 @@ import de.schildbach.oeffi.plans.PlansPickerActivity;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
 import de.schildbach.oeffi.stations.StationsActivity;
 import de.schildbach.oeffi.util.AppInstaller;
+import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.ErrorReporter;
 import de.schildbach.oeffi.util.SettingsUtil;
 import de.schildbach.oeffi.util.SpeechInput;
@@ -670,9 +671,9 @@ public class Application extends android.app.Application {
         //        dialog.setContentView(imageView);
         //        dialog.setOnDismissListener(onDismissListener);
         //        dialog.show();
-        new AlertDialog.Builder(contextActivity)
+        DialogBuilder.get(contextActivity)
                 .setView(imageView)
                 .setOnDismissListener(onDismissListener)
-                .create().show();
+                .show();
     }
 }

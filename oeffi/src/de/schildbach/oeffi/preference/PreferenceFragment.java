@@ -1,6 +1,5 @@
 package de.schildbach.oeffi.preference;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 
@@ -12,6 +11,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import de.schildbach.oeffi.Application;
+import de.schildbach.oeffi.util.DialogBuilder;
 
 public abstract class PreferenceFragment extends androidx.preference.PreferenceFragmentCompat
         implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -148,7 +148,7 @@ public abstract class PreferenceFragment extends androidx.preference.PreferenceF
             final CharSequence helpText = getHelpText();
             if (helpText == null)
                 return true;
-            new AlertDialog.Builder(context)
+            DialogBuilder.get(context)
                     .setMessage(helpText)
                     .setPositiveButton(android.R.string.ok, null)
                     .setOnDismissListener(dialog1 -> dismissParentingActivity(context))

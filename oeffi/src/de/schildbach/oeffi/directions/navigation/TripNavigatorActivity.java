@@ -59,6 +59,7 @@ import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.directions.QueryTripRunnable;
 import de.schildbach.oeffi.directions.TripUtils;
 import de.schildbach.oeffi.tripeval.TripRenderer;
+import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.TimeSpec;
@@ -305,17 +306,21 @@ public class TripNavigatorActivity extends TripDetailsActivity {
             taskIntents.add(taskInfo.baseIntent);
         }
         if (!taskIntents.isEmpty()) {
-            new AlertDialog.Builder(this)
-                    .setTitle(R.string.navigation_stopnavothers_title)
-                    .setMessage(R.string.navigation_stopnavothers_text)
-                    .setPositiveButton(R.string.navigation_stopnavothers_stop, (dialogInterface, i) -> {
+            final DialogBuilder dialogBuilder = DialogBuilder.get(this, R.layout.navigation_stop_others_dialog);
+            final AlertDialog dialog = dialogBuilder.create();
+            dialogBuilder.findViewById(R.id.navigation_stop_others_stop)
+                    .setOnClickListener(v -> {
                         for (final Intent taskIntent : taskIntents) {
                             taskIntent.putExtra(INTENT_EXTRA_DELETEREQUEST, DELETEREQUEST_FORCE);
                             startActivity(taskIntent);
                         }
-                    })
-                    .setNegativeButton(R.string.navigation_stopnavothers_continue, null)
-                    .create().show();
+                        dialog.dismiss();
+                    });
+            dialogBuilder.findViewById(R.id.navigation_stop_others_continue)
+                    .setOnClickListener(v -> {
+                        dialog.dismiss();
+                    });
+            dialog.show();
         }
     }
 
@@ -360,7 +365,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
     private void askStopNavigation() {
         navigationNotificationBeingDeleted = true;
-        new AlertDialog.Builder(this)
+        DialogBuilder.get(this)
                 .setTitle(R.string.navigation_stopnav_title)
                 .setMessage(R.string.navigation_stopnav_text)
                 .setPositiveButton(R.string.navigation_stopnav_stop, (dialogInterface, i) -> {
@@ -371,7 +376,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
                     doCheckAutoRefresh(true);
                     updateNotification();
                 })
-                .create().show();
+                .show();
     }
 
     @Override
