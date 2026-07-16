@@ -32,8 +32,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
+import android.text.Html;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
+import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.Gravity;
 import android.view.Menu;
@@ -439,8 +441,14 @@ public class DirectionsActivity extends OeffiMainActivity implements
             final OnLongClickListener productLongClickListener = clickedView -> {
                 final Product product = Product.fromCode(((String) clickedView.getTag()).charAt(0));
                 final String productName = ResourceUtil.getProductName(product);
+                final TextView titleView = new TextView(this);
+                final int hPad = getResources().getDimensionPixelSize(R.dimen.text_padding_horizontal_lax);
+                final int vPad = getResources().getDimensionPixelSize(R.dimen.text_padding_vertical_lax);
+                titleView.setPadding(hPad, vPad, hPad, vPad);
+                titleView.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimensionPixelSize(R.dimen.font_size_large));
+                titleView.setText(Html.fromHtml(getString(R.string.directions_products_prompt, productName), Html.FROM_HTML_MODE_COMPACT));
                 DialogBuilder.get(DirectionsActivity.this)
-                    .setTitle(getString(R.string.directions_products_prompt, productName))
+                    .setCustomTitle(titleView)
                     .setItems(ResourceUtil.getStringArray(R.array.directions_products, productName),
                             (dialog, which) -> {
                                 final Set<Product> networkDefaultProducts = getNetworkDefaultProducts();

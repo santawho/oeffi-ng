@@ -8,7 +8,7 @@
     <string name="directions_location_context_favorite_station">Favorite station</string>
     <string name="directions_location_context_alternate_search">Use alternate search</string>
     <string name="directions_location_context_using_alternate_search">… using %1$s</string>
-    <string name="directions_products_prompt">%1$s … Pick means of transport</string>
+    <string name="directions_products_prompt">&lt;b>%1$s&lt;/b> …&lt;br>Pick means of transport</string>
 
     <string-array name="directions_products">
         <item>only %1$s</item>
