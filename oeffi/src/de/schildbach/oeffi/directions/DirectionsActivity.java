@@ -466,15 +466,21 @@ public class DirectionsActivity extends OeffiMainActivity implements
                                     default:
                                         return;
                                 }
-                                for (final ToggleImageButton view : viewProductToggles)
-                                    view.setChecked(checkedStateFunction.apply(view));
+                                for (final ToggleImageButton view : viewProductToggles) {
+                                    final Boolean checked = checkedStateFunction.apply(view);
+                                    setProductToggle(view, checked);
+                                }
                             })
                     .setCancelable(true)
                     .show().setCanceledOnTouchOutside(true);
                 return true;
             };
-            for (final View view : viewProductToggles)
+            for (final ToggleImageButton view : viewProductToggles) {
                 view.setOnLongClickListener(productLongClickListener);
+                view.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                    setProductToggle(buttonView, isChecked);
+                });
+            }
 
             viewDirectOption = findViewById(R.id.directions_option_direct);
             if (isForceDirectOption()) {
@@ -968,9 +974,20 @@ public class DirectionsActivity extends OeffiMainActivity implements
         for (final ToggleImageButton view : viewProductToggles) {
             final Product product = Product.fromCode(((String) view.getTag()).charAt(0));
             final boolean checked = setProducts.contains(product);
-            view.setChecked(checked);
+            setProductToggle(view, checked);
         }
         return !productsAreNetworkDefault(setProducts);
+    }
+
+    private void setProductToggle(final ToggleImageButton view, final boolean checked) {
+        final boolean defaultChecked = getNetworkDefaultProducts().contains(
+                Product.fromCode(((String) view.getTag()).charAt(0)));
+        view.setChecked(checked);
+        if (checked != defaultChecked) {
+            view.setBackgroundResource(R.drawable.product_toggle_non_default_background);
+        } else {
+            view.setBackground(null);
+        }
     }
 
     private Set<Product> getProductToggles() {
