@@ -40,6 +40,7 @@ public class AutoCompleteLocationAdapter extends BaseAdapter implements Filterab
     private final LocationView locationView;
     private final NetworkId network;
     private final String usage;
+    private final boolean stationsOnly;
     private LocationSearchProviderId searchProviderId;
 
     private ImageButton filterStationButton;
@@ -52,10 +53,12 @@ public class AutoCompleteLocationAdapter extends BaseAdapter implements Filterab
     public AutoCompleteLocationAdapter(
             final LocationView locationView,
             final NetworkId network,
-            final String usage) {
+            final String usage,
+            final boolean stationsOnly) {
         this.locationView = locationView;
         this.network = network;
         this.usage = usage;
+        this.stationsOnly = stationsOnly;
     }
 
     public Activity getActivity() {
@@ -92,7 +95,7 @@ public class AutoCompleteLocationAdapter extends BaseAdapter implements Filterab
             row = (LinearLayout) aRow;
         } else {
             row = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.location_dropdown_entry, null);
-            if (position == 0) {
+            if (position == 0 && !stationsOnly) {
                 filterStationButton = row.findViewById(R.id.location_view_filter_station);
                 filterAddressButton = row.findViewById(R.id.location_view_filter_address);
                 filterPoiButton = row.findViewById(R.id.location_view_filter_poi);
@@ -142,9 +145,13 @@ public class AutoCompleteLocationAdapter extends BaseAdapter implements Filterab
         protected FilterResults performFiltering(final CharSequence constraint) {
             final FilterResults filterResults = new FilterResults();
             final EnumSet<LocationType> suggestedLocationTypes = EnumSet.noneOf(LocationType.class);
-            if (filterStations) suggestedLocationTypes.add(LocationType.STATION);
-            if (filterAddresses) suggestedLocationTypes.add(LocationType.ADDRESS);
-            if (filterPois) suggestedLocationTypes.add(LocationType.POI);
+            if (stationsOnly) {
+                suggestedLocationTypes.add(LocationType.STATION);
+            } else {
+                if (filterStations) suggestedLocationTypes.add(LocationType.STATION);
+                if (filterAddresses) suggestedLocationTypes.add(LocationType.ADDRESS);
+                if (filterPois) suggestedLocationTypes.add(LocationType.POI);
+            }
             final List<Location> results = LocationSuggestionsCollector.collectSuggestions(
                     constraint, suggestedLocationTypes, network, usage, searchProviderId);
             if (results != null) {

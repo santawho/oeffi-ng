@@ -22,6 +22,8 @@ import android.app.ProgressDialog;
 import android.location.Criteria;
 import android.os.Handler;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -70,7 +72,15 @@ public class AutoCompleteLocationsHandler {
         this.preferredProducts = preferredProducts;
     }
 
-    public void addJob(final CharSequence constraint, final LocationView locationView) {
+    public void addJob(final CharSequence constraint, final @NonNull LocationView locationView) {
+        addJob(constraint, locationView, locationView.isStationsOnly());
+    }
+
+    public void addJob(final CharSequence constraint, final boolean stationsOnly) {
+        addJob(constraint, null, stationsOnly);
+    }
+
+    private void addJob(final CharSequence constraint, final LocationView locationView, final boolean stationsOnly) {
         if (locationView != null)
             locationView.reset();
         if (constraint == null)
@@ -135,7 +145,9 @@ public class AutoCompleteLocationsHandler {
             } else {
                 final List<Location> locations = LocationSuggestionsCollector.collectSuggestions(
                         constraint,
-                        EnumSet.of(LocationType.STATION, LocationType.ADDRESS, LocationType.POI),
+                        stationsOnly
+                                ? EnumSet.of(LocationType.STATION)
+                                : EnumSet.of(LocationType.STATION, LocationType.ADDRESS, LocationType.POI),
                         network, usage, null);
                 final Location location = getMatchingLocation(locations);
                 if (location != null) {

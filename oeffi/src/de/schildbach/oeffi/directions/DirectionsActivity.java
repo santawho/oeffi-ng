@@ -403,6 +403,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             viewFromLocation.setStationAsAddressEnabled(true);
 
             viewViaLocation = findViewById(R.id.directions_via);
+            viewViaLocation.setStationsOnly(true);
 
             viewToLocation = findViewById(R.id.directions_to);
             viewToLocation.setOnEditorActionListener((v, actionId, event) -> {

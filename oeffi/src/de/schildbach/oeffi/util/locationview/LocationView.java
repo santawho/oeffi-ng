@@ -112,6 +112,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
 
     private Location location;
     private LocationType locationType = LocationType.ANY;
+    private boolean stationsOnly;
     private boolean stationAsAddress;
     private boolean stationAsAddressEnabled;
     private String id = null;
@@ -140,6 +141,20 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         locationHelper = new LocationHelper(context, this);
 
         setup(context);
+    }
+
+    public void setStationsOnly(final boolean stationsOnly) {
+        this.stationsOnly = stationsOnly;
+        if (mapButton != null)
+            ViewUtils.setVisibility(mapButton, !stationsOnly);
+        if (currentLocationButton != null)
+            ViewUtils.setVisibility(currentLocationButton, !stationsOnly);
+        if (contactButton != null)
+            ViewUtils.setVisibility(contactButton, !stationsOnly);
+    }
+
+    public boolean isStationsOnly() {
+        return stationsOnly;
     }
 
     public void setStationAsAddressEnabled(final boolean stationAsAddressEnabled) {
@@ -174,6 +189,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         final Bundle state = new Bundle();
         state.putParcelable("super_state", super.onSaveInstanceState());
         state.putSerializable("location_type", locationType);
+        state.putBoolean("stations_only", stationsOnly);
         state.putBoolean("station_as_address", stationAsAddress);
         state.putBoolean("station_as_address_enabled", stationAsAddressEnabled);
         state.putString("location_id", id);
@@ -193,6 +209,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
             final Bundle bundle = (Bundle) state;
             super.onRestoreInstanceState(bundle.getParcelable("super_state"));
             locationType = ((LocationType) bundle.getSerializable("location_type"));
+            stationsOnly = bundle.getBoolean("stations_only");
             stationAsAddress = bundle.getBoolean("station_as_address");
             stationAsAddressEnabled = bundle.getBoolean("station_as_address_enabled");
             id = bundle.getString("location_id");
@@ -448,6 +465,8 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
             menuButton.setEnabled(enabled);
         if (contactButton != null)
             contactButton.setEnabled(enabled);
+        if (mapButton != null)
+            mapButton.setEnabled(enabled);
         if (alternateSearchButton != null)
             alternateSearchButton.setEnabled(enabled);
         if (favoriteStationButton != null)
@@ -492,8 +511,8 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
 
     public void setListener(final Listener listener) {
         this.listener = listener;
-        ViewUtils.setVisibility(mapButton, listener != null && listener.getMapPointSelectionProvider() != null);
-        setAdapter(new AutoCompleteLocationAdapter(this, listener.getNetwork(), listener.getUsage()));
+        ViewUtils.setVisibility(mapButton, listener != null && !stationsOnly && listener.getMapPointSelectionProvider() != null);
+        setAdapter(new AutoCompleteLocationAdapter(this, listener.getNetwork(), listener.getUsage(), stationsOnly));
     }
 
     @RequiresPermission(allOf = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
