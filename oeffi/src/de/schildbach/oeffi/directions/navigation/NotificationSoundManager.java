@@ -256,31 +256,34 @@ public class NotificationSoundManager {
             currentAudioFocusRequest = null;
         }
 
-        if (exclusive && audioAttributes.getUsage() == AudioAttributes.USAGE_MEDIA) {
-            log.info("playing exclusive on media channel");
-            if (savedVolume < 0) {
-                final int amplification = Application.getInstance().getSharedPreferences()
-                        .getInt(PREF_KEY_MEDIA_CHANNEL_AMPLIFICATION, 0);
-                if (amplification > 0) {
-                    try {
-                        Thread.sleep(200);
-                    } catch (final InterruptedException rte) {
-                        // ignore
-                    }
-                    final int volumeBeforePlaying = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-                    final int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-                    savedVolume = volumeBeforePlaying;
-                    final int playVolume = (int) ((float) (maxVolume - volumeBeforePlaying)
-                            * (float) amplification / 100.0
-                            + (float) volumeBeforePlaying
-                            + 0.49);
-                    log.info("set volume {}, saving = {}", playVolume, savedVolume);
-                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, playVolume, 0);
-                } else {
-                    log.info("do not set volume, ammplification={}", amplification);
-                }
-            } else {
+        if (currentAudioFocusRequest != null
+                && exclusive
+                && audioAttributes.getUsage() == AudioAttributes.USAGE_MEDIA) {
+            log.info("playing exclusively on media channel");
+            final int amplification = Application.getInstance().getSharedPreferences()
+                    .getInt(PREF_KEY_MEDIA_CHANNEL_AMPLIFICATION, 0);
+            final int audioManagerMode = audioManager.getMode();
+            if (savedVolume >= 0) {
                 log.info("do not set volume, previous still in progress");
+            } else if (amplification <= 0) {
+                log.info("do not set volume, ammplification={}", amplification);
+            } else if (audioManagerMode != AudioManager.MODE_NORMAL) {
+                log.info("do not set volume, we are in a call or something ({})", audioManagerMode);
+            } else {
+                try {
+                    Thread.sleep(200);
+                } catch (final InterruptedException rte) {
+                    // ignore
+                }
+                final int volumeBeforePlaying = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+                final int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+                savedVolume = volumeBeforePlaying;
+                final int playVolume = (int) ((float) (maxVolume - volumeBeforePlaying)
+                        * (float) amplification / 100.0
+                        + (float) volumeBeforePlaying
+                        + 0.49);
+                log.info("set volume {}, saving = {}", playVolume, savedVolume);
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, playVolume, 0);
             }
         }
     }
