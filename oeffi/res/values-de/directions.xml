@@ -7,11 +7,11 @@
     <string name="directions_location_context_favorite_station">Haltestellen-Favorit</string>
     <string name="directions_location_context_alternate_search">Alternative Suche verwenden</string>
     <string name="directions_location_context_using_alternate_search">… mit %1$s</string>
-    <string name="directions_products_prompt">Verkehrsmittel auswählen</string>
+    <string name="directions_products_prompt">%1$s … Verkehrsmittel auswählen</string>
 
     <string-array name="directions_products">
-        <item>nur dieses</item>
-        <item>alle bis auf dieses</item>
+        <item>nur %1$s</item>
+        <item>alle außer %1$s</item>
         <item>zurücksetzen auf Standardprodukte</item>
         <item>alle Verkehrsmittel</item>
         <item>nur Nahverkehr</item>

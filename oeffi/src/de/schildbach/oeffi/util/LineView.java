@@ -178,13 +178,9 @@ public class LineView extends AppCompatTextView {
             setText(text);
             if (lines.size() == 1) {
                 final Line line = lines.iterator().next();
-                final Context context = getContext();
-                final int productResId = getResources().getIdentifier(
-                        "product_" + Character.toLowerCase(line.productCode()),
-                        "string", context.getPackageName());
                 final String sheet = Stream.of(
                                 line.name,
-                                productResId != 0 ? context.getString(productResId) : null,
+                                ResourceUtil.getProductName(line.product),
                                 line.network)
                         .filter(Objects::nonNull)
                         .collect(Collectors.joining("\n"));

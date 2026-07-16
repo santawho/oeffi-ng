@@ -72,6 +72,7 @@ import de.schildbach.oeffi.directions.navigation.TripNavigatorActivity;
 import de.schildbach.oeffi.mapview.OeffiMapView;
 import de.schildbach.oeffi.preference.DirectionsParamsFragment;
 import de.schildbach.oeffi.preference.PreferenceActivity;
+import de.schildbach.oeffi.util.ResourceUtil;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.util.TimeSpec.DepArr;
 import de.schildbach.oeffi.directions.list.QueryHistoryAdapter;
@@ -436,36 +437,40 @@ public class DirectionsActivity extends OeffiMainActivity implements
             viewProductToggles.add(findViewById(R.id.directions_products_c));
 
             final OnLongClickListener productLongClickListener = clickedView -> {
-                final DialogBuilder builder = DialogBuilder.get(DirectionsActivity.this);
-                builder.setTitle(R.string.directions_products_prompt);
-                builder.setItems(R.array.directions_products, (dialog, which) -> {
-                    final Set<Product> networkDefaultProducts = getNetworkDefaultProducts();
-                    final Function<View, Boolean> checkedStateFunction;
-                    switch (which) {
-                        case 0: // only this
-                            checkedStateFunction = (view) -> view.equals(clickedView);
-                            break;
-                        case 1: // all except this
-                            checkedStateFunction = (view) -> !view.equals(clickedView);
-                            break;
-                        case 2: // network defaults
-                            checkedStateFunction = (view) -> networkDefaultProducts.contains(
-                                    Product.fromCode(((String) view.getTag()).charAt(0)));
-                            break;
-                        case 3: // all true
-                            checkedStateFunction = (view) -> true;
-                            break;
-                        case 4: // only local products
-                            checkedStateFunction = (view) -> Product.LOCAL_PRODUCTS.contains(
-                                    Product.fromCode(((String) view.getTag()).charAt(0)));
-                            break;
-                        default:
-                            return;
-                    }
-                    for (final ToggleImageButton view : viewProductToggles)
-                        view.setChecked(checkedStateFunction.apply(view));
-                });
-                builder.show();
+                final Product product = Product.fromCode(((String) clickedView.getTag()).charAt(0));
+                final String productName = ResourceUtil.getProductName(product);
+                DialogBuilder.get(DirectionsActivity.this)
+                    .setTitle(getString(R.string.directions_products_prompt, productName))
+                    .setItems(ResourceUtil.getStringArray(R.array.directions_products, productName),
+                            (dialog, which) -> {
+                                final Set<Product> networkDefaultProducts = getNetworkDefaultProducts();
+                                final Function<View, Boolean> checkedStateFunction;
+                                switch (which) {
+                                    case 0: // only this
+                                        checkedStateFunction = (view) -> view.equals(clickedView);
+                                        break;
+                                    case 1: // all except this
+                                        checkedStateFunction = (view) -> !view.equals(clickedView);
+                                        break;
+                                    case 2: // network defaults
+                                        checkedStateFunction = (view) -> networkDefaultProducts.contains(
+                                                Product.fromCode(((String) view.getTag()).charAt(0)));
+                                        break;
+                                    case 3: // all true
+                                        checkedStateFunction = (view) -> true;
+                                        break;
+                                    case 4: // only local products
+                                        checkedStateFunction = (view) -> Product.LOCAL_PRODUCTS.contains(
+                                                Product.fromCode(((String) view.getTag()).charAt(0)));
+                                        break;
+                                    default:
+                                        return;
+                                }
+                                for (final ToggleImageButton view : viewProductToggles)
+                                    view.setChecked(checkedStateFunction.apply(view));
+                            })
+                    .setCancelable(true)
+                    .show().setCanceledOnTouchOutside(true);
                 return true;
             };
             for (final View view : viewProductToggles)

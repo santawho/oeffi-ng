@@ -25,6 +25,7 @@ import java.util.List;
 
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.Formats;
+import de.schildbach.oeffi.util.ResourceUtil;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.Point;
 import de.schildbach.pte.dto.Stop;
@@ -84,10 +85,7 @@ public class GpxProducer extends GeoXmlProducer {
     }
 
     private void gpxRteForPublicLeg(final Trip.Public leg) throws IOException {
-        final int productResId = application.getResources().getIdentifier(
-                "product_" + Character.toLowerCase(leg.line.productCode()),
-                "string", application.getPackageName());
-        final String typeName = productResId != 0 ? application.getString(productResId) : null;
+        final String typeName = ResourceUtil.getProductName(leg.line.product);
         final String legName = application.getString(R.string.kml_public_leg_name,
                 leg.line.label,
                 Formats.fullLocationName(leg.departure),
