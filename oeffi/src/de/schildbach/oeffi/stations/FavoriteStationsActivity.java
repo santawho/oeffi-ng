@@ -63,8 +63,6 @@ import static java.util.Objects.requireNonNull;
 
 public class FavoriteStationsActivity extends OeffiActivity
         implements StationClickListener, StationContextMenuItemListener {
-    private static final String INTENT_EXTRA_NETWORK = FavoriteStationsActivity.class.getName() + ".network";
-
     public static class Main extends FavoriteStationsActivity {
         public static void start(final Context context) {
             final Intent intent = new Intent(context, Main.class);
@@ -81,7 +79,7 @@ public class FavoriteStationsActivity extends OeffiActivity
         @Override
         public Intent createIntent(final Context context, final NetworkId network) {
             final Intent intent = new Intent(context, FavoriteStationsActivity.class);
-            intent.putExtra(INTENT_EXTRA_NETWORK, requireNonNull(network));
+            intent.putExtra(INTENT_EXTRA_NETWORK_NAME, requireNonNull(network).name());
             return intent;
         }
 
@@ -145,18 +143,14 @@ public class FavoriteStationsActivity extends OeffiActivity
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        final Intent intent = getIntent();
-        network = (NetworkId) intent.getSerializableExtra(INTENT_EXTRA_NETWORK);
-        if (network == null)
-            network = prefsGetNetworkId();
-        else
+        if (getIntent().getStringExtra(INTENT_EXTRA_NETWORK_NAME) != null)
             shouldReturnResult = true; // TODO a bit hacky
 
         backgroundThread = new HandlerThread("FavoriteStations", Process.THREAD_PRIORITY_BACKGROUND);
         backgroundThread.start();
         backgroundHandler = new Handler(backgroundThread.getLooper());
 
-        final boolean isRootActivity = isTaskRoot();
+        final boolean isRootActivity = isTaskRoot() && !shouldReturnResult;
 
         setContentView(R.layout.favorites_content, isRootActivity);
         final View contentView = findViewById(android.R.id.content);
@@ -219,6 +213,11 @@ public class FavoriteStationsActivity extends OeffiActivity
     @Override
     protected int getGlobalOptionsId() {
         return R.id.global_options_stations_favorites;
+    }
+
+    @Override
+    protected boolean acceptNetworkChanges() {
+        return !shouldReturnResult;
     }
 
     @Override
