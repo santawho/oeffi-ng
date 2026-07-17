@@ -35,6 +35,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.SparseArray;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -298,8 +299,13 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         menuButton.setOnClickListener((view) -> {
             final PopupMenu popupMenu = new PopupMenu(getContext(), view);
             popupMenu.inflate(R.menu.directions_location_context);
-            popupMenu.getMenu().findItem(R.id.directions_location_map)
-                    .setVisible(listener.getMapPointSelectionProvider() != null);
+            final Menu menu = popupMenu.getMenu();
+            menu.findItem(R.id.directions_location_map)
+                    .setVisible(!stationsOnly && listener.getMapPointSelectionProvider() != null);
+            menu.findItem(R.id.directions_location_contact)
+                    .setVisible(!stationsOnly);
+            menu.findItem(R.id.directions_location_current_location)
+                    .setVisible(!stationsOnly);
             popupMenu.setForceShowIcon(true);
             popupMenu.setOnMenuItemClickListener(item -> {
                 final int itemId = item.getItemId();
