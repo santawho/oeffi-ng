@@ -9,6 +9,7 @@ core = "1.19.0"
 coreSplashscreen = "1.2.0"
 drawerlayout = "1.2.0"
 json = "5.0.7"
+orgJson = "20260522"
 jsr305 = "3.0.2"
 junit = "4.13.2"
 #swipelayout = "1.2.0"
@@ -37,6 +38,7 @@ core = { module = "androidx.core:core", version.ref = "core" }
 core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 drawerlayout = { module = "androidx.drawerlayout:drawerlayout", version.ref = "drawerlayout" }
 json = { module = 'org.apache.groovy:groovy-json', version.ref = "json" }
+org-json = { module = "org.json:json", version.ref = "orgJson" }
 jsr305 = { module = "com.google.code.findbugs:jsr305", version.ref = "jsr305" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 #swipelayout = { module = "com.daimajia.swipelayout:library", version.ref = "swipelayout" }

@@ -196,6 +196,7 @@ dependencies {
     implementation libs.okhttp3.logging.interceptor
     implementation libs.okhttp3.zstandard.interceptor
     implementation libs.okhttp3.brotli.interceptor
+    // provided by android ... implementation libs.org.json
     implementation libs.osmdroid.android
     // implementation libs.maplibre.gl --- for MapLibre !!!
     //noinspection GradleDependency
