@@ -19,11 +19,13 @@ package de.schildbach.oeffi.stations.list;
 
 import android.view.View;
 
-import de.schildbach.pte.NetworkId;
+import java.util.Date;
+
 import de.schildbach.pte.dto.JourneyRef;
-import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Location;
 
 public interface JourneyClickListener {
-    void onJourneyClick(View clickedView, final JourneyRef journeyRef, final Location entryLocation);
+    void onJourneyClick(
+            View clickedView, JourneyRef journeyRef,
+            Location entryLocation, Date entryTime);
 }

@@ -192,10 +192,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     public static void startJourney(
             final Context context,
             final NetworkId network,
-            final Trip.Public journeyLeg,
+            final List<Trip.Public> journeyLegs,
             final Date loadedAt,
             final int intentFlags) {
-        final Trip trip = TripUtils.createTripFromJourney(loadedAt, journeyLeg);
+        final Trip trip = TripUtils.createTripFromJourneys(loadedAt, journeyLegs);
         final RenderConfig renderConfig = new RenderConfig();
         renderConfig.isJourney = true;
         renderConfig.isOperation = false;
@@ -767,7 +767,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                             handler, backgroundHandler,
                             network, journeyLeg.journeyRef,
                             true,
-                            journeyLeg.departure, journeyLeg.arrival,
+                            journeyLeg.departureStop.location, journeyLeg.departureStop.plannedDepartureTime,
+                            journeyLeg.arrivalStop.location, journeyLeg.arrivalStop.plannedArrivalTime,
+                            false,
                             false);
                 }
             });
@@ -1396,7 +1398,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
                         this, clickedView, queryJourneyRunnable,
                         handler, backgroundHandler,
-                        network, leg.journeyRef, false, leg.departure, leg.arrival,
+                        network, leg.journeyRef, false,
+                        leg.departureStop.location, leg.departureStop.plannedDepartureTime,
+                        leg.arrivalStop.location, leg.arrivalStop.plannedArrivalTime,
+                        true,
                         mustOpenActivityInNewTask());
             };
             lineView.setOnClickListener(onClickListener);
@@ -2429,8 +2434,17 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
 
         final boolean isEntryOrExit =
-                ((leg.entryLocation != null && location.id.equals(leg.entryLocation.id))
-                    || (leg.exitLocation != null && location.id.equals(leg.exitLocation.id)))
+                ((
+                    leg.entryLocation != null &&
+                    location.id.equals(leg.entryLocation.id) &&
+                    stop.plannedDepartureTime != null &&
+                    (leg.entryTime == null || stop.plannedDepartureTime.getTime() == leg.entryTime.getTime())
+                ) || (
+                    leg.exitLocation != null &&
+                    location.id.equals(leg.exitLocation.id) &&
+                    stop.plannedArrivalTime != null &&
+                    (leg.exitTime == null || stop.plannedArrivalTime.getTime() == leg.exitTime.getTime())
+                ))
                 && !(pearlType == PearlView.Type.DEPARTURE_FOR_INTERMEDIATE_ARRIVAL
                     || pearlType == PearlView.Type.ARRIVAL_FOR_INTERMEDIATE_DEPARTURE);
 
@@ -3218,19 +3232,21 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final Trip.Public journeyLeg = (Trip.Public) tripRenderer.trip.legs.get(0);
         final Location entryLocation = journeyLeg.entryLocation;
         final Location exitLocation = exitStop.location;
-        final Stop entryStop = journeyLeg.findStopByLocation(entryLocation);
+        final Stop entryStop = journeyLeg.findStopByLocationAndTime(entryLocation, journeyLeg.entryTime, false);
         final String entryId = entryLocation.id;
         final String exitId = exitLocation.id;
         final List<Stop> intermediateStops = new ArrayList<>();
         boolean inIntermediates = false;
-        for (final Stop stop: journeyLeg.intermediateStops) {
-            final String stopId = stop.location.id;
-            if (stopId.equals(entryId))
-                inIntermediates = true;
-            else if (stopId.equals(exitId))
-                break;
-            else if (inIntermediates)
-                intermediateStops.add(stop);
+        if (journeyLeg.intermediateStops != null) {
+            for (final Stop stop : journeyLeg.intermediateStops) {
+                final String stopId = stop.location.id;
+                if (stopId != null && stopId.equals(entryId))
+                    inIntermediates = true;
+                else if (stopId != null && stopId.equals(exitId))
+                    break;
+                else if (inIntermediates)
+                    intermediateStops.add(stop);
+            }
         }
         final Trip.Public leg = new Trip.Public(
                 journeyLeg.line, new Destination(exitLocation), entryStop, exitStop,
@@ -3351,7 +3367,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         if (renderConfig.isJourney) {
             final Trip.Public journeyLeg = (Trip.Public) tripRenderer.trip.legs.get(0);
             entry = journeyLeg.entryLocation;
-            final Stop entryStop = journeyLeg.findStopByLocation(entry);
+            final Stop entryStop = journeyLeg.findStopByLocationAndTime(entry, journeyLeg.entryTime, false);
             final PTDate arrivalTime = entryStop.getArrivalTime();
             time = new TimeSpec.Absolute(DepArr.DEPART,
                     arrivalTime != null ? arrivalTime.getTime() : entryStop.getDepartureTime().getTime());
@@ -3386,7 +3402,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         if (renderConfig.isJourney) {
             final Trip.Public journeyLeg = (Trip.Public) tripRenderer.trip.legs.get(0);
             exit = journeyLeg.exitLocation;
-            final Stop exitStop = journeyLeg.findStopByLocation(exit);
+            final Stop exitStop = journeyLeg.findStopByLocationAndTime(exit, journeyLeg.exitTime, true);
             final PTDate departureTime = exitStop.getDepartureTime();
             time = new TimeSpec.Absolute(DepArr.DEPART,
                     departureTime != null ? departureTime.getTime() : exitStop.getArrivalTime().getTime());

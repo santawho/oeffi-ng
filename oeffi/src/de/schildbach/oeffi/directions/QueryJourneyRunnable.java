@@ -36,6 +36,7 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -48,6 +49,7 @@ import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.pte.NetworkId;
+import de.schildbach.pte.dto.Stop;
 import de.schildbach.pte.provider.NetworkProvider;
 import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.Location;
@@ -71,10 +73,13 @@ public class QueryJourneyRunnable implements Runnable {
 
     private final JourneyRef journeyRef;
     private final boolean isOperation;
-    private Location entryLocation;
-    private Location exitLocation;
+    private final Location entryLocation;
+    private final Date entryTime;
+    private final Location exitLocation;
+    private final Date exitTime;
+    private final boolean splitSubJourneys;
 
-    private AtomicBoolean cancelled = new AtomicBoolean(false);
+    private final AtomicBoolean cancelled = new AtomicBoolean(false);
 
     private static final Logger log = LoggerFactory.getLogger(QueryJourneyRunnable.class);
 
@@ -83,7 +88,9 @@ public class QueryJourneyRunnable implements Runnable {
             final QueryJourneyRunnable prevInstance, final Handler handler, final Handler backgroundHandler,
             final NetworkId networkId,
             final JourneyRef journeyRef, final boolean isOperation,
-            final Location entryLocation, final Location exitLocation,
+            final Location entryLocation, final Date entryTime,
+            final Location exitLocation, final Date exitTime,
+            final boolean splitSubJourneys,
             final boolean openInNewWindow) {
         final ProgressDialog progressDialog = ProgressDialog.show(parentActivity,
                 null, parentActivity.getString(R.string.directions_query_journey_progress),
@@ -98,7 +105,9 @@ public class QueryJourneyRunnable implements Runnable {
                 parentActivity, clickedView,
                 progressDialog, handler, networkProvider,
                 journeyRef, isOperation,
-                entryLocation, exitLocation,
+                entryLocation, entryTime,
+                exitLocation, exitTime,
+                splitSubJourneys,
                 openInNewWindow);
 
         log.info("Executing: {}", queryJourneyRunnable);
@@ -113,11 +122,14 @@ public class QueryJourneyRunnable implements Runnable {
             final NetworkProvider networkProvider,
             final JourneyRef journeyRef,
             final boolean isOperation,
-            final Location entryLocation, final Location exitLocation,
+            final Location entryLocation, final Date entryTime,
+            final Location exitLocation, final Date exitTime,
+            final boolean splitSubJourneys,
             final boolean openInNewWindow) {
         this.parentActivity = parentActivity;
         this.clickedView = clickedView;
         this.openInNewWindow = openInNewWindow;
+        this.splitSubJourneys = splitSubJourneys;
         this.res = parentActivity.getResources();
         this.progressDialog = progressDialog;
         this.handler = handler;
@@ -127,7 +139,9 @@ public class QueryJourneyRunnable implements Runnable {
         this.journeyRef = journeyRef;
         this.isOperation = isOperation;
         this.entryLocation = entryLocation;
+        this.entryTime = entryTime;
         this.exitLocation = exitLocation;
+        this.exitTime = exitTime;
     }
 
     public void run() {
@@ -139,7 +153,7 @@ public class QueryJourneyRunnable implements Runnable {
             tries++;
 
             try {
-                final QueryJourneyResult result = networkProvider.queryJourney(journeyRef, false);
+                final QueryJourneyResult result = networkProvider.queryJourney(journeyRef, splitSubJourneys, false);
 
                 if (!cancelled.get())
                     postOnResult(result);
@@ -231,17 +245,18 @@ public class QueryJourneyRunnable implements Runnable {
         } else if (result.status == QueryJourneyResult.Status.OK) {
             log.debug("Got {}", result.toShortString());
 
-            final Trip.Public journeyLeg = result.journeyLeg;
-            journeyLeg.setEntryAndExit(entryLocation, exitLocation);
+            final List<Trip.Public> journeyLegs = result.journeyLegs;
+            journeyLegs.forEach(leg ->
+                    leg.setEntryAndExit(entryLocation, entryTime, exitLocation, exitTime));
             if (isOperation) {
                 OperationDetailsActivity.startOperation(
                         parentActivity,
-                        networkProvider.id(), journeyLeg, new Date(),
+                        networkProvider.id(), journeyLegs, new Date(),
                         openInNewWindow ? Intent.FLAG_ACTIVITY_NEW_TASK : 0);
             } else {
                 TripDetailsActivity.startJourney(
                         parentActivity,
-                        networkProvider.id(), journeyLeg, new Date(),
+                        networkProvider.id(), journeyLegs, new Date(),
                         openInNewWindow ? Intent.FLAG_ACTIVITY_NEW_TASK : 0);
             }
         } else if (result.status == QueryJourneyResult.Status.SERVICE_DOWN) {
