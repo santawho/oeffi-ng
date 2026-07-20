@@ -357,8 +357,8 @@ public class TripUtils {
         }
 
         final Trip.Public newLeg = new Trip.Public(
-                journeyLeg.line,
-                journeyLeg.destination,
+                initialLeg.line,
+                initialLeg.destination,
                 departureStop, arrivalStop, intermediateStops,
                 journeyLeg.message,
                 initialLeg.journeyRef,
