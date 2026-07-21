@@ -1686,7 +1686,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final ImageButton mapView = row.findViewById(R.id.directions_trip_details_individual_entry_map);
         final Location transferFromLocation = transferFrom == null ? null : transferFrom.location;
         final Location transferToLocation = transferTo == null ? null : transferTo.location;
-        if (transferFromLocation != null || transferToLocation != null) {
+        if ((transferFromLocation != null || transferToLocation != null)
+                && !(renderConfig.isJourney && legC.legContainerIndex != 0)) {
             mapView.setVisibility(View.VISIBLE);
             final List<Location> mapBoundingLocations = new ArrayList<>();
             if (transferFromLocation != null && transferFromLocation.hasCoord())
@@ -1741,7 +1742,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             progressText.setText(endTime == null ? "???" : getLeftTimeFormatted(now, endTime));
         }
 
-        if (renderConfig.isJourney && !isNow) {
+        if (renderConfig.isJourney && legC.legContainerIndex == 0 && !isNow) {
+            // hide "start of journey" if already in the past
             mainElement.setVisibility(View.GONE);
             simulatedElement.setVisibility(View.GONE);
         }
@@ -1813,6 +1815,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
         } else if (transferTo == null) {
             // walk at the end
+        } else if (renderConfig.isJourney) {
+            // fake change between sub-journeys
+            iconResId = R.drawable.ic_sitting_black_24;
+            legText = getString(R.string.directions_trip_details_continue_journey);
         } else {
             final boolean isWalkIcon;
             isSamePlatform = requiredSecs == 0 && Stop.isSamePlatform(transferFrom, transferTo);
