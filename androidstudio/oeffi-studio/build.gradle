@@ -159,6 +159,11 @@ android {
 //            shrinkResources false
 //            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+        mainRelease {
+//            minifyEnabled true
+//            shrinkResources false
+//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
         release {
 //            minifyEnabled true
 //            shrinkResources false
@@ -223,8 +228,8 @@ dependencies {
 //}
 
 afterEvaluate {
-    assembleNgRelease.doLast {
-        // runs always after the NG release build. Why the following ??
+    assembleNgMainRelease.doLast {
+        // runs always after the NG main release build. Why the following ??
 //        android.applicationVariants.all { variant ->
 //            println "variant.buildType.name = ${variant.buildType.name}"
 //            if (variant.buildType.name == 'release') {
