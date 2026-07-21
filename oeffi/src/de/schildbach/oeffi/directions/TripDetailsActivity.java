@@ -2678,6 +2678,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final View.OnClickListener onClickListener = v -> {
                 final Spanned tooltip = getTooltipForStop(stop, simulatedStop, now.getTime());
                 DialogBuilder.get(this)
+                        .setCanceledOnTouchOutside(true)
                         .setMessage(tooltip)
                         .show();
             };
