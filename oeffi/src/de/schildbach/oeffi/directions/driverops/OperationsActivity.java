@@ -21,8 +21,10 @@ import android.content.Context;
 import android.content.Intent;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import de.schildbach.oeffi.R;
@@ -137,8 +139,8 @@ public class OperationsActivity extends DirectionsActivity {
             final OperationDetailsActivity.RenderConfig config = new OperationDetailsActivity.RenderConfig();
             config.queryTripsRequestData = (QueryTripRunnable.TripRequestData) Objects.deserialize(serializedReloadRequest, true);
             setupTripDetailsRenderConfig(config);
-            final Trip.Public journeyLeg = useTrip.getFirstPublicLeg();
-            OperationDetailsActivity.startOperation(OperationsActivity.this, network, journeyLeg, new Date(), 0);
+            final List<Trip.Public> journeyLegs = Collections.singletonList(useTrip.getFirstPublicLeg());
+            OperationDetailsActivity.startOperation(OperationsActivity.this, network, journeyLegs, new Date(), 0);
         });
     }
 

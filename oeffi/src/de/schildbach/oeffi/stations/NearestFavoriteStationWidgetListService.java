@@ -124,7 +124,8 @@ public class NearestFavoriteStationWidgetListService extends RemoteViewsService 
 
             if (canShowJourneys) {
                 views.setOnClickFillInIntent(R.id.station_widget_entry, new Intent()
-                        .putExtra(StationDetailsActivity.INTENT_EXTRA_JOURNEYREF, Objects.serializeToString(departure.journeyRef)));
+                        .putExtra(StationDetailsActivity.INTENT_EXTRA_JOURNEYREF, Objects.serializeToString(departure.journeyRef))
+                        .putExtra(StationDetailsActivity.INTENT_EXTRA_DEPARTURETIME, departure.plannedTime));
             }
 
             // line

@@ -332,7 +332,8 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
                             if (isActivated && departure.journeyRef != null && journeyClickListener != null) {
                                 View.OnClickListener onClickListener = clickedView ->
                                         journeyClickListener.onJourneyClick(
-                                                clickedView, departure.journeyRef, station.location);
+                                                clickedView, departure.journeyRef,
+                                                station.location, departure.plannedTime);
                                 lineView.setClickable(true);
                                 lineView.setOnClickListener(onClickListener);
                                 destinationView.setClickable(true);

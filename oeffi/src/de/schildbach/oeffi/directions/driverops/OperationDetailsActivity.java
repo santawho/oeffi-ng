@@ -30,6 +30,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import java.util.Date;
+import java.util.List;
 
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
@@ -57,10 +58,10 @@ public class OperationDetailsActivity extends TripDetailsActivity {
     public static void startOperation(
             final Context context,
             final NetworkId network,
-            final Trip.Public journeyLeg,
+            final List<Trip.Public> journeyLegs,
             final Date loadedAt,
             final int intentFlags) {
-        final Trip trip = TripUtils.createTripFromJourney(loadedAt, journeyLeg);
+        final Trip trip = TripUtils.createTripFromJourneys(loadedAt, journeyLegs);
         final RenderConfig renderConfig = new RenderConfig();
         renderConfig.isJourney = true;
         renderConfig.isOperation = true;

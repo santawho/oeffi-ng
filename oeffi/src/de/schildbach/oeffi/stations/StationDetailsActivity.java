@@ -113,6 +113,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
     public static final String INTENT_EXTRA_PRESETTIME = StationDetailsActivity.class.getName() + ".presettime";
     public static final String INTENT_EXTRA_DEPARTURES = StationDetailsActivity.class.getName() + ".departures";
     public static final String INTENT_EXTRA_JOURNEYREF = StationDetailsActivity.class.getName() + ".journeyref";
+    public static final String INTENT_EXTRA_DEPARTURETIME = StationDetailsActivity.class.getName() + ".departuretime";
 
     public static void start(
             final Context context, final NetworkId networkId,
@@ -196,6 +197,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
     private Date nextLaterTime, nextEarlierTime;
     private Date presetTime;
     private JourneyRef presetJourneyRef;
+    private Date presetDepartureTime;
 
     private QueryJourneyRunnable queryJourneyRunnable;
     private final Handler handler = new Handler();
@@ -308,6 +310,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         final String stationSerialized = intent.getStringExtra(INTENT_EXTRA_STATION);
         final Station station = new Station(network, (Location) Objects.deserializeFromString(stationSerialized));
         this.presetJourneyRef = (JourneyRef) Objects.deserializeFromString(intent.getStringExtra(INTENT_EXTRA_JOURNEYREF));
+        this.presetDepartureTime = (Date) Objects.deserializeFromString(intent.getStringExtra(INTENT_EXTRA_DEPARTURETIME));
         if (intent.hasExtra(INTENT_EXTRA_DEPARTURES)) {
             @SuppressWarnings("unchecked") final List<Departure> uncheckedDepartures = (List<Departure>)
                     intent.getSerializableExtra(INTENT_EXTRA_DEPARTURES);
@@ -377,12 +380,18 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         super.onResume();
 
         final JourneyRef journeyRef = presetJourneyRef;
+        final Date departureTime = presetDepartureTime;
         presetJourneyRef = null;
+        presetDepartureTime = null;
         if (journeyRef != null) {
+            // we come here, when a departure has been clicked in the launcher widget
             queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
                     this, null, queryJourneyRunnable,
                     handler, backgroundHandler,
-                    network, journeyRef, isDriverMode, selectedLocation, null,
+                    network, journeyRef, isDriverMode,
+                    selectedLocation, departureTime,
+                    null, null,
+                    true,
                     false);
         }
     }
@@ -1070,7 +1079,10 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                     context.queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
                             context, clickedView, context.queryJourneyRunnable,
                             context.handler, context.backgroundHandler,
-                            network, departure.journeyRef, isDriverMode, station, null,
+                            network, departure.journeyRef, isDriverMode,
+                            station, departure.plannedTime,
+                            null, null,
+                            true,
                             false);
                 };
                 itemView.setOnClickListener(onClickListener);

@@ -1639,11 +1639,16 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     }
 
     @Override
-    public void onJourneyClick(final View clickedView, final JourneyRef journeyRef, final Location entryLocation) {
+    public void onJourneyClick(
+            final View clickedView, final JourneyRef journeyRef,
+            final Location entryLocation, final Date entryTime) {
         queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
                 this, clickedView, queryJourneyRunnable,
                 handler, backgroundHandler,
-                network, journeyRef, isDriverMode, entryLocation, null,
+                network, journeyRef, isDriverMode,
+                entryLocation, entryTime,
+                null, null,
+                true,
                 false);
     }
 

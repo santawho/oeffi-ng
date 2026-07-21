@@ -347,7 +347,9 @@ public class TripsOverviewActivity extends OeffiActivity {
                             trip.getUniqueId());
                 } else {
                     final Trip journeyTrip = TripUtils.createTripFromJourneyTrip(trip);
-                    journeyTrip.getFirstPublicLeg().setEntryAndExit(publicLeg.departure, publicLeg.arrival);
+                    journeyTrip.getFirstPublicLeg().setEntryAndExit(
+                            publicLeg.departureStop.location, publicLeg.departureStop.plannedDepartureTime,
+                            publicLeg.arrivalStop.location, publicLeg.arrivalStop.plannedArrivalTime);
                     QueryStoredTripsProvider.put(getContentResolver(),
                             network, getStoredTripsUsage(),
                             journeyTrip, reloadRequestData, 0);
@@ -358,7 +360,9 @@ public class TripsOverviewActivity extends OeffiActivity {
                         this, null, queryJourneyRunnable,
                         handler, backgroundHandler,
                         network, publicLeg.journeyRef, true,
-                        publicLeg.departure, publicLeg.arrival,
+                        publicLeg.departureStop.location, publicLeg.departureStop.plannedDepartureTime,
+                        publicLeg.arrivalStop.location, publicLeg.arrivalStop.plannedArrivalTime,
+                        false,
                         false);
             }
         } else {
@@ -825,12 +829,12 @@ public class TripsOverviewActivity extends OeffiActivity {
                 Trip.Public publicLeg = (Trip.Public) leg;
                 if (doRefresh) {
                     try {
-                        final QueryJourneyResult result = networkProvider.queryJourney(publicLeg.journeyRef, false);
+                        final QueryJourneyResult result = networkProvider.queryJourney(publicLeg.journeyRef, false, false);
                         if (result != null) {
                             switch (result.status) {
                                 case OK:
-                                    if (result.journeyLeg != null)
-                                        publicLeg = TripUtils.buildUpdatedLeg(publicLeg, result.journeyLeg, now);
+                                    if (result.journeyLegs != null)
+                                        publicLeg = TripUtils.buildUpdatedLeg(publicLeg, result.journeyLegs.get(0), now);
                                     break;
                                 case NO_JOURNEY:
                                 case SERVICE_DOWN:

@@ -46,14 +46,24 @@ public class TripUtils {
         return trip;
     }
 
-    public static Trip createTripFromJourney(
+    public static Trip createTripFromJourneys(
             final Date loadedAt,
-            final Trip.Public journeyLeg) {
-        return createTripFromJourney(
+            final List<Trip.Public> journeyLegs) {
+        final Trip.Public firstLeg = journeyLegs.get(0);
+        final Trip.Public lastLeg = journeyLegs.get(journeyLegs.size() - 1);
+        final Trip trip = new Trip(
                 loadedAt,
-                journeyLeg,
-                journeyLeg.entryLocation != null ? journeyLeg.entryLocation : journeyLeg.departure,
-                journeyLeg.exitLocation != null ? journeyLeg.exitLocation : journeyLeg.arrival);
+                null,
+                null,
+                firstLeg.entryLocation != null ? firstLeg.entryLocation : firstLeg.departure,
+                lastLeg.exitLocation != null ? lastLeg.exitLocation : lastLeg.arrival,
+                journeyLegs,
+                null,
+                null,
+                0);
+        if (firstLeg.journeyRef != null)
+            trip.setUniqueId(firstLeg.journeyRef.getUniqueId());
+        return trip;
     }
 
     public static Trip createTripFromJourneyTrip(final Trip trip) {
@@ -62,7 +72,7 @@ public class TripUtils {
                 || publicLeg.journeyRef == null) {
             return trip;
         }
-        return createTripFromJourney(trip.loadedAt, publicLeg);
+        return createTripFromJourneys(trip.loadedAt, Collections.singletonList(publicLeg));
     }
 
     public static Trip refreshTrip(
@@ -199,14 +209,14 @@ public class TripUtils {
         if (!doRefresh)
             return oldLeg;
         final boolean mustLoadPath = oldLeg.getPath() == null;
-        final QueryJourneyResult result = networkProvider.queryJourney(journeyRef, mustLoadPath);
+        final QueryJourneyResult result = networkProvider.queryJourney(journeyRef, false, mustLoadPath);
         if (result == null
                 || result.status != QueryJourneyResult.Status.OK
-                || result.journeyLeg == null) {
+                || result.journeyLegs == null) {
             // signal error
             return null;
         }
-        return buildUpdatedLeg(oldLeg, result.journeyLeg, now);
+        return buildUpdatedLeg(oldLeg, result.journeyLegs.get(0), now);
     }
 
     public static Trip.Public buildUpdatedLeg(
@@ -347,15 +357,17 @@ public class TripUtils {
         }
 
         final Trip.Public newLeg = new Trip.Public(
-                journeyLeg.line,
-                journeyLeg.destination,
+                initialLeg.line,
+                initialLeg.destination,
                 departureStop, arrivalStop, intermediateStops,
                 journeyLeg.message,
                 initialLeg.journeyRef,
                 loadedAt);
         final List<Point> journeyLegPath = journeyLeg.getPath();
         newLeg.setPath(journeyLegPath != null ? journeyLegPath : initialLeg.getPath());
-        newLeg.setEntryAndExit(initialLeg.entryLocation, initialLeg.exitLocation);
+        newLeg.setEntryAndExit(
+                initialLeg.entryLocation, initialLeg.entryTime,
+                initialLeg.exitLocation, initialLeg.exitTime);
         return newLeg;
     }
 
