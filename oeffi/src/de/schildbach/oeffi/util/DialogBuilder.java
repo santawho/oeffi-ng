@@ -20,7 +20,16 @@ package de.schildbach.oeffi.util;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.util.DisplayMetrics;
 import android.view.View;
+import android.widget.ImageView;
+
+import androidx.appcompat.content.res.AppCompatResources;
+
+import java.util.Objects;
 
 import de.schildbach.oeffi.R;
 
@@ -60,6 +69,19 @@ public class DialogBuilder extends AlertDialog.Builder {
 
     public <T extends View> T findViewById(final int resId) {
         return customView.findViewById(resId);
+    }
+
+    public DialogBuilder setImage(final int imageResId) {
+        final DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
+        final int sizePixels = (Math.min(displayMetrics.widthPixels, displayMetrics.heightPixels) * 3) / 4;
+        final int margin = sizePixels / 15;
+        final ImageView imageView = new ImageView(getContext());
+        imageView.setImageBitmap(Bitmap.createScaledBitmap(
+                ((BitmapDrawable) Objects.requireNonNull(AppCompatResources.getDrawable(getContext(), imageResId))).getBitmap(),
+                sizePixels, sizePixels, false));
+        imageView.setPadding(margin, margin, margin, margin);
+        setView(imageView);
+        return this;
     }
 
     private boolean canceledOnTouchOutside;

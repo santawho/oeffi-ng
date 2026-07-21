@@ -353,24 +353,24 @@ public class DirectionsActivity extends OeffiMainActivity implements
                 final int itemId = item.getItemId();
                 if (itemId == R.id.directions_options_clear_history) {
                     if (network != null) {
-                        final DialogBuilder builder = DialogBuilder.get(this);
-                        builder.setMessage(R.string.directions_query_history_clear_confirm_message);
-                        builder.setPositiveButton(R.string.directions_query_history_clear_confirm_button_clear_non_favorite,
-                                (dialog, which) -> {
-                                    queryHistoryListAdapter.removeAllHistoryEntries(true);
-                                    viewFromLocation.reset();
-                                    viewViaLocation.reset();
-                                    viewToLocation.reset();
-                                });
-                        builder.setNeutralButton(R.string.directions_query_history_clear_confirm_button_clear_all,
-                                (dialog, which) -> {
-                                    queryHistoryListAdapter.removeAllHistoryEntries(false);
-                                    viewFromLocation.reset();
-                                    viewViaLocation.reset();
-                                    viewToLocation.reset();
-                                });
-                        builder.setNegativeButton(R.string.directions_query_history_clear_confirm_button_cancel, null);
-                        builder.show();
+                        DialogBuilder.get(this)
+                            .setMessage(R.string.directions_query_history_clear_confirm_message)
+                            .setPositiveButton(R.string.directions_query_history_clear_confirm_button_clear_non_favorite,
+                                    (dialog, which) -> {
+                                        queryHistoryListAdapter.removeAllHistoryEntries(true);
+                                        viewFromLocation.reset();
+                                        viewViaLocation.reset();
+                                        viewToLocation.reset();
+                                    })
+                            .setNeutralButton(R.string.directions_query_history_clear_confirm_button_clear_all,
+                                    (dialog, which) -> {
+                                        queryHistoryListAdapter.removeAllHistoryEntries(false);
+                                        viewFromLocation.reset();
+                                        viewViaLocation.reset();
+                                        viewToLocation.reset();
+                                    })
+                            .setNegativeButton(R.string.directions_query_history_clear_confirm_button_cancel, null)
+                            .show();
                     }
                     return true;
                 } else if (itemId == R.id.directions_options_clear_bookmarks) {
@@ -448,6 +448,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
                 titleView.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimensionPixelSize(R.dimen.font_size_large));
                 titleView.setText(Html.fromHtml(getString(R.string.directions_products_prompt, productName), Html.FROM_HTML_MODE_COMPACT));
                 DialogBuilder.get(DirectionsActivity.this)
+                    .setCanceledOnTouchOutside(true)
                     .setCustomTitle(titleView)
                     .setItems(ResourceUtil.getStringArray(R.array.directions_products, productName),
                             (dialog, which) -> {
@@ -480,7 +481,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
                                 }
                             })
                     .setCancelable(true)
-                    .show().setCanceledOnTouchOutside(true);
+                    .show();
                 return true;
             };
             for (final ToggleImageButton view : viewProductToggles) {
@@ -503,31 +504,31 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
             viewTimeDepArr = timeAndGo.findViewById(R.id.directions_time_dep_arr);
             viewTimeDepArr.setOnClickListener(v -> {
-                final DialogBuilder builder = DialogBuilder.get(DirectionsActivity.this);
-                builder.setTitle(R.string.directions_set_time_prompt);
-                builder.setItems(R.array.directions_set_time, (dialog, which) -> {
-                    final String[] parts = getResources().getStringArray(R.array.directions_set_time_values)[which]
-                            .split("_");
-                    final DepArr depArr = DepArr.valueOf(parts[0]);
-                    if (parts[1].equals("AT")) {
-                        timeSpec = new TimeSpec.Absolute(depArr, timeSpec.timeInMillis());
-                        timeIsToday = false;
-                        // and immediately ask for date and then time
-                        dateClicked();
-                    } else if (parts[1].equals("IN")) {
-                        if (parts.length > 2) {
-                            timeSpec = new TimeSpec.Relative(depArr,
-                                    Long.parseLong(parts[2]) * DateUtils.MINUTE_IN_MILLIS);
+                DialogBuilder.get(DirectionsActivity.this)
+                    .setTitle(R.string.directions_set_time_prompt)
+                    .setItems(R.array.directions_set_time, (dialog, which) -> {
+                        final String[] parts = getResources().getStringArray(R.array.directions_set_time_values)[which]
+                                .split("_");
+                        final DepArr depArr = DepArr.valueOf(parts[0]);
+                        if (parts[1].equals("AT")) {
+                            timeSpec = new TimeSpec.Absolute(depArr, timeSpec.timeInMillis());
+                            timeIsToday = false;
+                            // and immediately ask for date and then time
+                            dateClicked();
+                        } else if (parts[1].equals("IN")) {
+                            if (parts.length > 2) {
+                                timeSpec = new TimeSpec.Relative(depArr,
+                                        Long.parseLong(parts[2]) * DateUtils.MINUTE_IN_MILLIS);
+                            } else {
+                                timeSpec = new TimeSpec.Relative(depArr, 0);
+                                handleDiffClick();
+                            }
                         } else {
-                            timeSpec = new TimeSpec.Relative(depArr, 0);
-                            handleDiffClick();
+                            throw new IllegalStateException(parts[1]);
                         }
-                    } else {
-                        throw new IllegalStateException(parts[1]);
-                    }
-                    updateGUI();
-                });
-                builder.show();
+                        updateGUI();
+                    })
+                    .show();
             });
             viewTimeDepArr.setOnLongClickListener(v -> {
                 final boolean isSetToNow = timeSpec instanceof TimeSpec.Relative && ((TimeSpec.Relative) timeSpec).diffMs == 0;

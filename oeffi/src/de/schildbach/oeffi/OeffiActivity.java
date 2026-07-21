@@ -77,6 +77,7 @@ import de.schildbach.oeffi.preference.AboutFragment;
 import de.schildbach.oeffi.preference.PreferenceActivity;
 import de.schildbach.oeffi.stations.FavoriteStationsActivity;
 import de.schildbach.oeffi.stations.StationsActivity;
+import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.DividerItemDecoration;
 import de.schildbach.oeffi.util.ErrorReporter;
 import de.schildbach.oeffi.util.NavigationMenuAdapter;
@@ -659,7 +660,10 @@ public abstract class OeffiActivity extends AppCompatActivity
             });
             findViewById(R.id.navigation_drawer_share_qrcode).setOnClickListener(v -> {
                 closeNavigation();
-                application.showImageDialog(this, R.drawable.qr_wiki, null);
+                DialogBuilder.get(this)
+                        .setCanceledOnTouchOutside(true)
+                        .setImage(R.drawable.qr_wiki)
+                        .show();
             });
         }
 
