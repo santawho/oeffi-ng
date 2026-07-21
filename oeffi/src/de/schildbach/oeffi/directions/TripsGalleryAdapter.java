@@ -502,16 +502,20 @@ public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.
 
         log.error("cannot getItem at position={}, canScrollEarlier={}, canScrollLater={}, #trips={}",
                 aPosition, canScrollEarlier, canScrollLater, numTrips);
-        throw new IllegalStateException();
+        // throw new IllegalStateException();
+        return null;
     }
 
     public long getItemId(final int position) {
         // FIXME small chance of possible collisions
         final int type = getItemViewType(position);
-        if (type == VIEW_TYPE_TRIP)
-            return getItem(position).hashCode();
-        else
-            return type;
+        if (type == VIEW_TYPE_TRIP) {
+            final TripInfo item = getItem(position);
+            if (item == null)
+                return Adapter.IGNORE_ITEM_VIEW_TYPE;
+            return item.hashCode();
+        }
+        return type;
     }
 
     @Override
