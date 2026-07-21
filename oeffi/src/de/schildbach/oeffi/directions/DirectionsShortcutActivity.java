@@ -194,11 +194,11 @@ public class DirectionsShortcutActivity extends OeffiActivity implements Locatio
     }
 
     private void errorDialog(final int resId) {
-        final DialogBuilder builder = DialogBuilder.warn(this, R.string.directions_shortcut_error_title);
-        builder.setMessage(resId);
-        builder.setPositiveButton("Ok", (dialog, which) -> finish());
-        builder.setOnCancelListener(dialog -> finish());
-        builder.show();
+        DialogBuilder.warn(this, R.string.directions_shortcut_error_title)
+            .setMessage(resId)
+            .setPositiveButton("Ok", (dialog, which) -> finish())
+            .setOnCancelListener(dialog -> finish())
+            .show();
     }
 
     private NetworkProvider getNetworkExtra(final Intent intent) {

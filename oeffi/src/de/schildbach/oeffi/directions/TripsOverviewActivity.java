@@ -780,18 +780,18 @@ public class TripsOverviewActivity extends OeffiActivity {
     private void networkProblem(final boolean initial) {
         if (isFinishing())
             return;
-        final DialogBuilder builder = DialogBuilder.warn(this, R.string.alert_network_problem_title);
-        builder.setMessage(R.string.alert_network_problem_message);
-        builder.setPositiveButton(R.string.alert_network_problem_retry, (dialog, which) -> {
-            dialog.dismiss();
-            if (initial)
-                initialRequested = true;
-            else
-                reloadRequested = true;
-            postCheckMoreRunnable(false);
-        });
-        builder.setOnCancelListener(dialog -> dialog.dismiss());
-        builder.show();
+        DialogBuilder.warn(this, R.string.alert_network_problem_title)
+            .setMessage(R.string.alert_network_problem_message)
+            .setPositiveButton(R.string.alert_network_problem_retry, (dialog, which) -> {
+                dialog.dismiss();
+                if (initial)
+                    initialRequested = true;
+                else
+                    reloadRequested = true;
+                postCheckMoreRunnable(false);
+            })
+            .setOnCancelListener(dialog -> dialog.dismiss())
+            .show();
     }
 
     private QueryTripsResult preprocessResult(final QueryTripsResult in) {

@@ -653,27 +653,4 @@ public class Application extends android.app.Application {
     public String getShareTitle() {
         return getString(R.string.global_options_share_app_title, Application.getInstance().getAppName());
     }
-
-    public void showImageDialog(
-            final Activity contextActivity,
-            final int imageResId,
-            final DialogInterface.OnDismissListener onDismissListener) {
-        final DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
-        final int sizePixels = (Math.min(displayMetrics.widthPixels, displayMetrics.heightPixels) * 3) / 4;
-        final int margin = sizePixels / 15;
-        final ImageView imageView = new ImageView(this);
-        imageView.setImageBitmap(Bitmap.createScaledBitmap(
-                ((BitmapDrawable) getDrawable(imageResId)).getBitmap(),
-                sizePixels, sizePixels, false));
-        imageView.setPadding(margin, margin, margin, margin);
-        // ... user AlertDialog, because it uses a nicer theme
-        //        final Dialog dialog = new Dialog(contextActivity);
-        //        dialog.setContentView(imageView);
-        //        dialog.setOnDismissListener(onDismissListener);
-        //        dialog.show();
-        DialogBuilder.get(contextActivity)
-                .setView(imageView)
-                .setOnDismissListener(onDismissListener)
-                .show();
-    }
 }

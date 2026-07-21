@@ -254,13 +254,12 @@ public class QueryJourneyRunnable implements Runnable {
     }
 
     protected void onRedirect(final HttpUrl url) {
-        final DialogBuilder builder = DialogBuilder.warn(parentActivity,
-                R.string.directions_alert_redirect_title);
-        builder.setMessage(parentActivity.getString(R.string.directions_alert_redirect_message, url.host()));
-        builder.setPositiveButton(R.string.directions_alert_redirect_button_follow,
-                (dialog, which) -> parentActivity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url.toString()))));
-        builder.setNegativeButton(R.string.directions_alert_redirect_button_dismiss, null);
-        builder.show();
+        DialogBuilder.warn(parentActivity, R.string.directions_alert_redirect_title)
+            .setMessage(parentActivity.getString(R.string.directions_alert_redirect_message, url.host()))
+            .setPositiveButton(R.string.directions_alert_redirect_button_follow, (dialog, which) ->
+                    parentActivity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url.toString()))))
+            .setNegativeButton(R.string.directions_alert_redirect_button_dismiss, null)
+            .show();
     }
 
     private void postOnBlocked(final HttpUrl url) {
@@ -268,13 +267,11 @@ public class QueryJourneyRunnable implements Runnable {
     }
 
     protected void onBlocked(final HttpUrl url) {
-        final DialogBuilder builder = DialogBuilder.warn(parentActivity,
-                R.string.directions_alert_blocked_title);
-        builder.setMessage(parentActivity.getString(R.string.directions_alert_blocked_message, url.host()));
-        builder.setPositiveButton(R.string.directions_alert_blocked_button_retry,
-                (dialog, which) -> clickedView.performClick());
-        builder.setNegativeButton(R.string.directions_alert_blocked_button_dismiss, null);
-        builder.show();
+        DialogBuilder.warn(parentActivity, R.string.directions_alert_blocked_title)
+            .setMessage(parentActivity.getString(R.string.directions_alert_blocked_message, url.host()))
+            .setPositiveButton(R.string.directions_alert_blocked_button_retry, (dialog, which) -> clickedView.performClick())
+            .setNegativeButton(R.string.directions_alert_blocked_button_dismiss, null)
+            .show();
     }
 
     private void postOnInternalError(final HttpUrl url) {
@@ -282,13 +279,11 @@ public class QueryJourneyRunnable implements Runnable {
     }
 
     protected void onInternalError(final HttpUrl url) {
-        final DialogBuilder builder = DialogBuilder.warn(parentActivity,
-                R.string.directions_alert_internal_error_title);
-        builder.setMessage(parentActivity.getString(R.string.directions_alert_internal_error_message, url.host()));
-        builder.setPositiveButton(R.string.directions_alert_internal_error_button_retry,
-                (dialog, which) -> clickedView.performClick());
-        builder.setNegativeButton(R.string.directions_alert_internal_error_button_dismiss, null);
-        builder.show();
+        DialogBuilder.warn(parentActivity, R.string.directions_alert_internal_error_title)
+            .setMessage(parentActivity.getString(R.string.directions_alert_internal_error_message, url.host()))
+            .setPositiveButton(R.string.directions_alert_internal_error_button_retry, (dialog, which) -> clickedView.performClick())
+            .setNegativeButton(R.string.directions_alert_internal_error_button_dismiss, null)
+            .show();
     }
 
     private void postOnSSLException(final SSLException x) {
@@ -296,11 +291,10 @@ public class QueryJourneyRunnable implements Runnable {
     }
 
     protected void onSSLException(final SSLException x) {
-        final DialogBuilder builder = DialogBuilder.warn(parentActivity,
-                R.string.directions_alert_ssl_exception_title);
-        builder.setMessage(parentActivity.getString(R.string.directions_alert_ssl_exception_message, x.getMessage()));
-        builder.setNeutralButton(R.string.directions_alert_ssl_exception_button_dismiss, null);
-        builder.show();
+        DialogBuilder.warn(parentActivity, R.string.directions_alert_ssl_exception_title)
+            .setMessage(parentActivity.getString(R.string.directions_alert_ssl_exception_message, x.getMessage()))
+            .setNeutralButton(R.string.directions_alert_ssl_exception_button_dismiss, null)
+            .show();
     }
 
     public void cancel() {
@@ -313,15 +307,14 @@ public class QueryJourneyRunnable implements Runnable {
     }
 
     private void networkProblem() {
-        final DialogBuilder builder = DialogBuilder.warn(parentActivity,
-                R.string.alert_network_problem_title);
-        builder.setMessage(R.string.alert_network_problem_message);
-        builder.setPositiveButton(R.string.alert_network_problem_retry, (dialog, which) -> {
-            dialog.dismiss();
-            clickedView.performClick();
-        });
-        builder.setOnCancelListener(dialog -> dialog.dismiss());
-        builder.show();
+        DialogBuilder.warn(parentActivity, R.string.alert_network_problem_title)
+            .setMessage(R.string.alert_network_problem_message)
+            .setPositiveButton(R.string.alert_network_problem_retry, (dialog, which) -> {
+                dialog.dismiss();
+                clickedView.performClick();
+            })
+            .setOnCancelListener(dialog -> dialog.dismiss())
+            .show();
     }
 
     @Override

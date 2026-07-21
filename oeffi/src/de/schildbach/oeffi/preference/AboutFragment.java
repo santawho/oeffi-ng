@@ -28,6 +28,7 @@ import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
+import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.Installer;
 import de.schildbach.oeffi.util.AppInstaller;
 import de.schildbach.pte.provider.NetworkProvider;
@@ -179,8 +180,11 @@ public class AboutFragment extends PreferenceFragment {
     public static class ShowQrActionHandler extends ActionHandler {
         @Override
         public boolean handleAction(final PreferenceActivity context, final String prefkey) {
-            Application.getInstance().showImageDialog(context, R.drawable.qr_wiki,
-                    dialog -> dismissParentingActivity(context));
+            DialogBuilder.get(context)
+                    .setCanceledOnTouchOutside(true)
+                    .setImage(R.drawable.qr_wiki)
+                    .setOnDismissListener(dialog -> dismissParentingActivity(context))
+                    .show();
             return false;
         }
     }
