@@ -1322,7 +1322,16 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 && application.prefsIsBicycleTravel();
         final List<Stop> intermediateStops = leg.intermediateStops;
         final List<Stop> intermediateSimulatedStops = simulatedLeg == null ? null : simulatedLeg.intermediateStops;
-        final String message = leg.message != null ? leg.message : leg.line.message;
+        String message = leg.message != null ? leg.message : leg.line.message;
+        if (message != null && renderConfig.isJourney) {
+            final Trip.Public nextSubJourney = nextLegC == null ? null : nextLegC.publicLeg;
+            if (nextSubJourney != null) {
+                final String nextMessage = nextSubJourney.message != null ? nextSubJourney.message : nextSubJourney.line.message;
+                if (message.equals(nextMessage)) {
+                    message = getString(R.string.directions_trip_details_see_below_message);
+                }
+            }
+        }
         boolean isRowSimulated = false;
 
         final LineView lineView = row.findViewById(R.id.directions_trip_details_public_entry_line);

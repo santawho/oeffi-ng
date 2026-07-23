@@ -451,6 +451,7 @@
     <string name="directions_trip_details_departure_row_name_format">(Weiterfahrt) %1$s</string>
     <string name="directions_trip_details_arrival_row_name_format">(Ankunft) %1$s</string>
     <string name="directions_trip_details_shortened_message">%1$s&lt;br>… mehr anzeigen …</string>
+    <string name="directions_trip_details_see_below_message">Siehe Hinweise unten …</string>
     <string name="directions_trip_details_extra_data_error">Zusätzliche Informationen können nicht geladen werden.</string>
 
     <!-- directions trip connection evaluation -->
