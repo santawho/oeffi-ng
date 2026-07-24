@@ -239,7 +239,7 @@ afterEvaluate {
 //                releaseBuildTask.mustRunAfter variant.assembleProvider
 //            }
 //        }
-        createRelease(projectDefs, githubTag, new File("${projectDefs.projectDir}/build/outputs/apk/ng/release/oeffi-studio-ng-release.apk"), false, timeInt)
+        createRelease(projectDefs, githubTag, new File("${projectDefs.projectDir}/build/outputs/apk/ng/mainRelease/oeffi-studio-ng-mainRelease.apk"), false, timeInt)
     }
     assembleNgPreRelease.doLast {
         // runs always after the NG pre-release build
