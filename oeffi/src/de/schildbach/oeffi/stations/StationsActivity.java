@@ -184,7 +184,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private TextView disclaimerSourceView;
     private View filterActionButton;
     private ViewGroup locationProvidersView;
-    private LocationView viewLocation;
+    private ViewGroup searchBoxView;
+    private LocationView locationView;
     private SwipeRefreshLayout swipeRefresh;
 
     private QueryJourneyRunnable queryJourneyRunnable;
@@ -219,7 +220,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
         @Override
         public void changed(final LocationView view) {
-            final Location location = viewLocation.getLocation();
+            final Location location = locationView.getLocation();
             if (location != null)
                 setLocationByUser(location);
         }
@@ -231,13 +232,13 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     };
 
     private void setupLocationViews() {
-        viewLocation.setListener(locationViewListener);
+        locationView.setListener(locationViewListener);
 
         resetLocationViewsBehaviour();
     }
 
     private void resetLocationViewsBehaviour() {
-        viewLocation.resetBehaviour();
+        locationView.resetBehaviour();
     }
 
     private static final int DIALOG_NEARBY_STATIONS_ERROR = 1;
@@ -319,15 +320,18 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                     if (DO_FILTER_BY_SEARCH_ON_NETWORK) {
                         onSearchRequested();
                     } else {
-                        findViewById(R.id.stations_search_box).setVisibility(View.VISIBLE);
+                        ViewUtils.setVisibility(locationView, false);
+                        ViewUtils.setVisibility(searchBoxView, true);
                     }
                 });
-        ViewUtils.setVisibility(findViewById(R.id.stations_search_box), false);
+        searchBoxView = findViewById(R.id.stations_search_box);
+        ViewUtils.setVisibility(searchBoxView, false);
         ViewUtils.setVisibility(findViewById(R.id.stations_search_text), DO_FILTER_BY_SEARCH_ON_NETWORK);
         final EditText searchEditView = findViewById(R.id.stations_search_edit);
         findViewById(R.id.stations_search_clear).setOnClickListener(v -> {
             if (!DO_FILTER_BY_SEARCH_ON_NETWORK) {
-                findViewById(R.id.stations_search_box).setVisibility(View.GONE);
+                ViewUtils.setVisibility(locationView, true);
+                ViewUtils.setVisibility(searchBoxView, false);
                 searchEditView.setText(null);
             }
             setListFilter(null);
@@ -406,13 +410,13 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         final Button missingCapabilityButton = findViewById(R.id.stations_network_missing_capability_button);
         missingCapabilityButton.setOnClickListener(selectNetworkListener);
 
-        viewLocation = findViewById(R.id.stations_location);
-        viewLocation.setHint(R.string.stations_location_hint);
+        locationView = findViewById(R.id.stations_location);
+        locationView.setHint(R.string.stations_location_hint);
         setupLocationViews();
 
         getMapView().setStationsAware(this);
         getMapView().setDeviceLocationAware(this);
-        getMapView().setStationsOverlay(viewLocation);
+        getMapView().setStationsOverlay(locationView);
 
         connectivityWarningView = findViewById(R.id.stations_connectivity_warning_box);
         final View disclaimerView = findViewById(R.id.stations_disclaimer_group);
@@ -821,7 +825,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     }
 
     private void setFixedLocation(final Location location, final Date presetTime) {
-        viewLocation.setLocation(location);
+        locationView.setLocation(location);
         this.presetTime = presetTime;
         stationListAdapter.setBaseTime(presetTime);
     }
@@ -941,13 +945,15 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                     : String.format(Locale.ENGLISH, "%.6f, %.6f", fixedLocation.getLatAsDouble(), fixedLocation.getLonAsDouble());
             final String text = presetTime == null ? locationName
                     : String.format("%s @ %s", locationName, Formats.formatTime(timeZoneSelector, presetTime, PTDate.NETWORK_OFFSET));
-            viewLocation.setText(text);
+            locationView.setText(text);
         }
 
         // search box
         if (DO_FILTER_BY_SEARCH_ON_NETWORK) {
-            findViewById(R.id.stations_search_box).setVisibility(filterByText != null ? View.VISIBLE : View.GONE);
-            if (filterByText != null)
+            final boolean haveFilterText = filterByText != null;
+            ViewUtils.setVisibility(locationView, !haveFilterText);
+            ViewUtils.setVisibility(findViewById(R.id.stations_search_box), haveFilterText);
+            if (haveFilterText)
                 ((TextView) findViewById(R.id.stations_search_text)).setText(filterByText);
         }
     }

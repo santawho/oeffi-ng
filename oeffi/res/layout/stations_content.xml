@@ -50,13 +50,14 @@
                             android:visibility="gone" />
 
                         <LinearLayout
+                            android:visibility="gone"
+                            android:orientation="horizontal"
                             android:id="@+id/stations_search_box"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:background="@color/bg_action_bar_appendix"
                             android:gravity="center_vertical"
-                            android:orientation="horizontal"
-                            android:visibility="gone">
+                            android:paddingVertical="@dimen/text_padding_vertical"
+                            android:background="@color/bg_action_bar_appendix" >
 
                             <TextView
                                 android:id="@+id/stations_search_text"
