@@ -185,6 +185,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private View filterActionButton;
     private ViewGroup locationProvidersView;
     private ViewGroup searchBoxView;
+    private EditText searchEditView;
     private LocationView locationView;
     private SwipeRefreshLayout swipeRefresh;
 
@@ -320,14 +321,22 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                     if (DO_FILTER_BY_SEARCH_ON_NETWORK) {
                         onSearchRequested();
                     } else {
-                        ViewUtils.setVisibility(locationView, false);
-                        ViewUtils.setVisibility(searchBoxView, true);
+                        if (searchBoxView.getVisibility() == View.VISIBLE) {
+                            final Editable text = searchEditView.getText();
+                            if (text == null || text.length() == 0) {
+                                ViewUtils.setVisibility(locationView, true);
+                                ViewUtils.setVisibility(searchBoxView, false);
+                            }
+                        } else {
+                            ViewUtils.setVisibility(locationView, false);
+                            ViewUtils.setVisibility(searchBoxView, true);
+                        }
                     }
                 });
         searchBoxView = findViewById(R.id.stations_search_box);
         ViewUtils.setVisibility(searchBoxView, false);
         ViewUtils.setVisibility(findViewById(R.id.stations_search_text), DO_FILTER_BY_SEARCH_ON_NETWORK);
-        final EditText searchEditView = findViewById(R.id.stations_search_edit);
+        searchEditView = findViewById(R.id.stations_search_edit);
         findViewById(R.id.stations_search_clear).setOnClickListener(v -> {
             if (!DO_FILTER_BY_SEARCH_ON_NETWORK) {
                 ViewUtils.setVisibility(locationView, true);
