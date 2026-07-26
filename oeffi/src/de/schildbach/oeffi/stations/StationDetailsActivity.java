@@ -69,6 +69,7 @@ import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Destination;
+import de.schildbach.pte.provider.ApiProvider;
 import de.schildbach.pte.provider.NetworkProvider;
 import de.schildbach.pte.dto.Departure;
 import de.schildbach.pte.dto.JourneyRef;
@@ -818,7 +819,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         }
     }
 
-    private final Map<LocationDepartureKey, Boolean> expandedStates = new HashMap<>();
+    private final Map<LocationDepartureKey, Integer> expandedStates = new HashMap<>();
 
     private LocationDepartureKey getKey(final Location station, final Departure departure) {
         final String identityId = station.identityId;
@@ -830,20 +831,20 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         return new LocationDepartureKey(identityId, journeyRef);
     }
 
-    private boolean getExpandedState(final Location station, final Departure departure) {
+    private int getExpandedState(final Location station, final Departure departure) {
         final LocationDepartureKey key = getKey(station, departure);
         if (key != null) {
-            final Boolean expanded = expandedStates.get(key);
-            if (expanded != null)
-                return expanded;
+            final Integer nExpanded = expandedStates.get(key);
+            if (nExpanded != null)
+                return nExpanded;
         }
-        return false;
+        return 0;
     }
 
-    private void saveExpandedState(final Location station, final Departure departure, final boolean isExpanded) {
+    private void saveExpandedState(final Location station, final Departure departure, final int nExpanded) {
         final LocationDepartureKey key = getKey(station, departure);
         if (key != null)
-            expandedStates.put(key, isExpanded);
+            expandedStates.put(key, nExpanded);
     }
 
     public void updateHeader() {
@@ -969,7 +970,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         private Location station;
         private Departure departure;
         private String msgViewMessageText;
-        private boolean msgViewExpanded;
+        private int msgViewExpanded;
 
         private final StationDetailsActivity context;
 
@@ -986,10 +987,12 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             capacity1stView = itemView.findViewById(R.id.stations_station_entry_capacity_1st_class);
             capacity2ndView = itemView.findViewById(R.id.stations_station_entry_capacity_2nd_class);
             msgView = itemView.findViewById(R.id.stations_station_entry_msg);
-            msgViewExpanded = false;
+            msgViewExpanded = 0;
             msgViewMessageText = null;
             msgView.setOnClickListener(v -> {
-                msgViewExpanded = !msgViewExpanded;
+                msgViewExpanded += 1;
+                if (msgViewExpanded >= 3)
+                    msgViewExpanded = 0;
                 saveExpandedState(station, departure, msgViewExpanded);
                 renderMsgView();
             });
@@ -1137,16 +1140,39 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
             msgView.setVisibility(View.VISIBLE);
             final String displayMessage;
-            if (msgViewExpanded || msgViewMessageText.length() < 80) {
+            final int colorResId;
+            if (msgViewExpanded >= 2 || msgViewMessageText.length() < 80) {
                 displayMessage = msgViewMessageText;
-                msgView.setTextColor(context.getColor(R.color.fg_significant));
+                colorResId = R.color.fg_significant;
             } else {
-                displayMessage = context.getString(R.string.directions_trip_details_shortened_message,
-                        msgViewMessageText.substring(0, Math.min(msgViewMessageText.length(), 60)));
-                msgView.setTextColor(context.getColor(R.color.fg_insignificant));
+                if (msgViewExpanded == 1) {
+                    final int splitIndex = msgViewMessageText.indexOf(ApiProvider.LESS_IMPORTANT_HTML_SPLIT_MARKER);
+                    if (splitIndex < 0) {
+                        displayMessage = msgViewMessageText;
+                        colorResId = R.color.fg_significant;
+                    } else if (splitIndex == 0) {
+                        displayMessage = msgViewMessageText.replace(
+                                ApiProvider.LESS_IMPORTANT_HTML_SPLIT_MARKER + "<br>",
+                                ApiProvider.LESS_IMPORTANT_HTML_SPLIT_MARKER);
+                        colorResId = R.color.fg_significant;
+                    } else if (splitIndex + ApiProvider.LESS_IMPORTANT_HTML_SPLIT_MARKER.length()
+                            >= msgViewMessageText.length()) {
+                        displayMessage = msgViewMessageText;
+                        colorResId = R.color.fg_significant;
+                    } else {
+                        displayMessage = context.getString(R.string.directions_trip_details_shortened_message,
+                                msgViewMessageText.substring(0, splitIndex));
+                        colorResId = R.color.fg_significant;
+                    }
+                } else {
+                    displayMessage = context.getString(R.string.directions_trip_details_shortened_message,
+                            msgViewMessageText.substring(0, Math.min(msgViewMessageText.length(), 60)));
+                    colorResId = R.color.fg_insignificant;
+                }
             };
             final Spanned html = Html.fromHtml(HtmlUtils.makeLinksClickableInHtml(displayMessage), Html.FROM_HTML_MODE_COMPACT);
             msgView.setText(html);
+            msgView.setTextColor(context.getColor(colorResId));
             msgView.setMovementMethod(LinkMovementMethod.getInstance());
         }
 
