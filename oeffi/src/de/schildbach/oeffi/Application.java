@@ -62,6 +62,7 @@ import de.schildbach.oeffi.directions.navigation.NavigationNotification;
 import de.schildbach.oeffi.directions.navigation.NotificationSoundManager;
 import de.schildbach.oeffi.mapview.OeffiMapView;
 import de.schildbach.oeffi.plans.PlansPickerActivity;
+import de.schildbach.oeffi.stations.FavoriteStationsActivity;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
 import de.schildbach.oeffi.stations.StationsActivity;
 import de.schildbach.oeffi.util.AppInstaller;
@@ -547,6 +548,12 @@ public class Application extends android.app.Application {
                 StationsActivity.class,
                 R.string.stations_activity_title,
                 R.drawable.ic_oeffi_stations_grey600_36dp,
+                null);
+        createLauncherShortcut("idDF",
+                DirectionsActivity.class,
+                FavoriteStationsActivity.Main.class,
+                R.string.stations_favorite_stations_title,
+                R.drawable.ic_oeffi_favorites_grey600_36dp,
                 null);
         createLauncherShortcut("idDP",
                 DirectionsActivity.class,
