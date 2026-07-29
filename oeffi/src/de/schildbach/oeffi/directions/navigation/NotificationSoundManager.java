@@ -47,9 +47,7 @@ import java.util.List;
 import java.util.Locale;
 
 import de.schildbach.oeffi.Application;
-import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.ResourceUri;
-import de.schildbach.pte.dto.Location;
 
 public class NotificationSoundManager {
     public static final String PREF_KEY_MEDIA_CHANNEL_AMPLIFICATION = "navigation_media_channel_amplification";
