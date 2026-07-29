@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/extras_drivermode_announcements_preferences_title" >
+
+    <Preference
+        android:summary="@string/extras_drivermode_announcements_preferences_summary" />
+
+    <CheckBoxPreference
+        android:key="extras_drivermode_announcements_enabled"
+        android:defaultValue="false"
+        android:title="@string/extras_drivermode_announcements_enabled_title" />
+
+    <CheckBoxPreference
+        android:key="extras_drivermode_announcements_initially_active_enabled"
+        android:dependency="extras_drivermode_announcements_enabled"
+        android:defaultValue="true"
+        android:title="@string/extras_drivermode_announcements_initially_active_enabled_title"
+        android:summary="@string/extras_drivermode_announcements_initially_active_enabled_summary" />
+
+    <CheckBoxPreference
+        android:key="extras_drivermode_announcements_play_gong_enabled"
+        android:dependency="extras_drivermode_announcements_enabled"
+        android:defaultValue="true"
+        android:title="@string/extras_drivermode_announcements_play_gong_enabled_title"
+        android:summary="@string/extras_drivermode_announcements_play_gong_enabled_summary" />
+
+    <CheckBoxPreference
+        android:key="extras_drivermode_announcements_this_stop_enabled"
+        android:dependency="extras_drivermode_announcements_enabled"
+        android:defaultValue="false"
+        android:title="@string/extras_drivermode_announcements_this_stop_enabled_title"
+        android:summary="@string/extras_drivermode_announcements_this_stop_enabled_summary" />
+
+</PreferenceScreen>

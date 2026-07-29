@@ -411,6 +411,13 @@ public class OperationDetailsActivity extends TripDetailsActivity {
         return R.layout.operation_next_event;
     }
 
+    protected void processNearestStop(
+            final Stop nearestStop,
+            final boolean isEndOfJourney,
+            final long timeLeftToStopMillis) {
+        // nothing to do here, see sub-classes
+    }
+
     @Override
     protected void updateNavigationInstructions() {
         final TripRenderer.LegContainer initialWalkLegC;
@@ -480,6 +487,7 @@ public class OperationDetailsActivity extends TripDetailsActivity {
             return;
 
         final long now = System.currentTimeMillis();
+        final boolean isEndOfJourney = nextStop == null;
 
         PTDate tPlan, tPred;
         final Long nearestArrivalDelay;
@@ -494,27 +502,31 @@ public class OperationDetailsActivity extends TripDetailsActivity {
             tPlan = nearestStop.plannedDepartureTime;
             nearestDepartureDelay = tPlan == null ? null : now - tPlan.getTime();
             nearestDepartureDelayIsNowBased = true;
+            processNearestStop(nearestStop, isEndOfJourney, 0);
+        } else if (sectionIsAfterNearestStop) {
+            // leaving nearest stop
+            nearestArrivalDelay = null;
+            nearestArrivalDelayIsNowBased = false;
+            tPlan = nearestStop.plannedDepartureTime;
+            nearestDepartureDelay = tPlan == null ? null : now - tPlan.getTime();
+            nearestDepartureDelayIsNowBased = true;
+            processNearestStop(nearestStop, isEndOfJourney, -1);
         } else {
-            if (sectionIsAfterNearestStop) {
-                nearestArrivalDelay = null;
-                nearestArrivalDelayIsNowBased = false;
-                tPlan = nearestStop.plannedDepartureTime;
-                nearestDepartureDelay = tPlan == null ? null : now - tPlan.getTime();
-                nearestDepartureDelayIsNowBased = true;
-            } else {
-                tPlan = nearestStop.plannedArrivalTime;
-                tPred = nearestStop.predictedArrivalTime;
-                nearestArrivalDelay = tPlan == null ? null : tPred == null ? 0 : tPred.getTime() - tPlan.getTime();
-                nearestArrivalDelayIsNowBased = false;
-                tPlan = nearestStop.plannedDepartureTime;
-                tPred = nearestStop.predictedDepartureTime;
-                nearestDepartureDelay = tPlan == null ? null : tPred == null ? 0 : tPred.getTime() - tPlan.getTime();
-                nearestDepartureDelayIsNowBased = false;
-            }
+            // approaching nearest stop
+            tPlan = nearestStop.plannedArrivalTime;
+            tPred = nearestStop.predictedArrivalTime;
+            nearestArrivalDelay = tPlan == null ? null : tPred == null ? 0 : tPred.getTime() - tPlan.getTime();
+            nearestArrivalDelayIsNowBased = false;
+            processNearestStop(nearestStop, isEndOfJourney, tPred == null ? 1 : tPred.getTime() - now);
+
+            tPlan = nearestStop.plannedDepartureTime;
+            tPred = nearestStop.predictedDepartureTime;
+            nearestDepartureDelay = tPlan == null ? null : tPred == null ? 0 : tPred.getTime() - tPlan.getTime();
+            nearestDepartureDelayIsNowBased = false;
         }
         final Long nextArrivalDelay;
         final boolean nextArrivalDelayIsNowBased;
-        if (nextStop == null) {
+        if (isEndOfJourney) {
             nextArrivalDelay = null;
             nextArrivalDelayIsNowBased = false;
         } else {

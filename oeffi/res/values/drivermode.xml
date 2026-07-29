@@ -42,4 +42,24 @@
     <string name="extras_drivermode_navigation_scroll_inhibit_interval_title">Automatic scroll</string>
     <string name="extras_drivermode_navigation_scroll_inhibit_interval_summary">Time of user inactivity after which navigation scrolls the view automatically.  [%s seconds, 0=off]</string>
 
+    <!-- preferences driver mode announcements -->
+    <string name="extras_drivermode_announcements_preferences_title">Announcements</string>
+    <string name="extras_drivermode_announcements_preferences_summary">Settings regarding passenger announcements played during operation</string>
+    <string name="extras_drivermode_announcements_enabled_title">Announcements enabled</string>
+    <string name="extras_drivermode_announcements_initially_active_enabled_title">Automatic Activation</string>
+    <string name="extras_drivermode_announcements_initially_active_enabled_summary">Activate announcements automatically at start of each new operation</string>
+    <string name="extras_drivermode_announcements_play_gong_enabled_title">Play Gong</string>
+    <string name="extras_drivermode_announcements_play_gong_enabled_summary">Play a gong sound before each announcement</string>
+    <string name="extras_drivermode_announcements_this_stop_enabled_title">Announce "this" stop</string>
+    <string name="extras_drivermode_announcements_this_stop_enabled_summary">Say "This is XXX" when stopping</string>
+
+    <!-- navigation -->
+    <string name="drivermode_navigation_action_cancel">Stop operation</string>
+    <string name="drivermode_navigation_action_annoucements">Toggle announcements</string>
+
+    <!-- announcements -->
+    <string name="drivermode_announcement_next_stop">next stop, %1$s</string>
+    <string name="drivermode_announcement_this_stop">this is %1$s</string>
+    <string name="drivermode_announcement_journey_end">End of line. Take care and goodbye!</string>
+
 </resources>

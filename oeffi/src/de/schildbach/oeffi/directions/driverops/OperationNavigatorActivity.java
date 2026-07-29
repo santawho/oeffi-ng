@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -38,6 +39,7 @@ import androidx.annotation.RequiresApi;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -48,13 +50,16 @@ import de.schildbach.oeffi.directions.QueryTripRunnable;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
 import de.schildbach.oeffi.directions.TripUtils;
 import de.schildbach.oeffi.directions.navigation.NavigationAlarmManager;
+import de.schildbach.oeffi.directions.navigation.NotificationSoundManager;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.LineView;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.Toast;
+import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Destination;
+import de.schildbach.pte.dto.Stop;
 import de.schildbach.pte.dto.Trip;
 
 public class OperationNavigatorActivity extends OperationDetailsActivity {
@@ -128,6 +133,7 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
     private long nextNavigationRefreshTime = 0;
     private boolean OperationNotificationBeingDeleted;
     private boolean permissionRequestRunning;
+    private boolean announcementsEnabled = true;
     private boolean isStartupComplete = false;
     private boolean stillCheckForOtherNavigations;
     private long autoScrollInhibitTimeMs;
@@ -234,8 +240,20 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
 
     @Override
     protected void addActionBarButtons() {
-        actionBar.addButton(R.drawable.ic_clear_white_24dp, R.string.directions_trip_navigation_action_cancel)
+        actionBar.addButton(R.drawable.ic_clear_white_24dp, R.string.drivermode_navigation_action_cancel)
                 .setOnClickListener(view -> askStopNavigation());
+
+        if (prefs.getBoolean("extras_drivermode_announcements_enabled", false)) {
+            announcementsEnabled = prefs.getBoolean("extras_drivermode_announcements_initially_active_enabled", true);
+            final ToggleImageButton soundButton = actionBar.addToggleButton(R.drawable.ic_sound_white_24dp,
+                    R.string.drivermode_navigation_action_annoucements);
+            soundButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                announcementsEnabled = isChecked;
+            });
+            soundButton.setChecked(announcementsEnabled);
+        } else {
+            announcementsEnabled = false;
+        }
     }
 
     private void stopNavigation(final boolean markAsDone) {
@@ -569,5 +587,103 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
         final int style = isShowSeconds() ? DateFormat.MEDIUM : DateFormat.SHORT;
         final String clockStr = DateFormat.getTimeInstance(style).format(new Date());
         ((TextView) findViewById(R.id.navigation_next_event_clock)).setText(clockStr);
+    }
+
+    private String lastNearestStopIdentityId;
+    private boolean nextStopHasBeenAnnounced;
+    private boolean thisStopHasBeenAnnounced;
+    private boolean loggedLeaving, loggedHere;
+    private long loggedApproachingMillis;
+
+    @Override
+    protected void processNearestStop(
+            final Stop nearestStop,
+            final boolean isEndOfJourney,
+            final long timeLeftToStopMillis) {
+        final String stopName = nearestStop.location.name;
+        final String identityId = nearestStop.location.identityId;
+        final boolean isNewStop = identityId != null && !identityId.equals(lastNearestStopIdentityId);
+
+        if (isNewStop) {
+            loggedLeaving = false;
+            loggedHere = false;
+            loggedApproachingMillis = 999999;
+            nextStopHasBeenAnnounced = false;
+            thisStopHasBeenAnnounced = false;
+            lastNearestStopIdentityId = identityId;
+        }
+
+        if (timeLeftToStopMillis < 0) {
+            if (!loggedLeaving) {
+                loggedLeaving = true;
+                loggedHere = false;
+                loggedApproachingMillis = 999999;
+                log.debug("leaving stop {}", stopName);
+            }
+        } else if (timeLeftToStopMillis == 0) {
+            if (!loggedHere) {
+                loggedHere = true;
+                loggedLeaving = false;
+                loggedApproachingMillis = 999999;
+                log.debug("at stop {}", stopName);
+            }
+            announceNextStop(stopName, 0, isEndOfJourney);
+            announceThisStop(stopName, isEndOfJourney);
+        } else {
+            final long secsLeft = timeLeftToStopMillis / 1000;
+            if (Math.abs(loggedApproachingMillis - timeLeftToStopMillis) > 15000) {
+                loggedApproachingMillis = timeLeftToStopMillis;
+                loggedHere = false;
+                loggedLeaving = false;
+                log.debug("approaching stop {}, arrival in {} sec", stopName, secsLeft);
+            }
+            announceNextStop(stopName, secsLeft, isEndOfJourney);
+        }
+    }
+
+    private void announceNextStop(final String stopName, final long secsLeft, final boolean isEndOfJourney) {
+        if (!nextStopHasBeenAnnounced && secsLeft <= 60) {
+            nextStopHasBeenAnnounced = true;
+            log.debug("now near stop {}", stopName);
+            announceStop(false, stopName, isEndOfJourney);
+        }
+    }
+
+    private void announceThisStop(final String stopName, final boolean isEndOfJourney) {
+        if (!thisStopHasBeenAnnounced) {
+            thisStopHasBeenAnnounced = true;
+            log.info("now at stop {}", stopName);
+            if (prefs.getBoolean("extras_drivermode_announcements_this_stop_enabled", false)) {
+                announceStop(true, stopName, isEndOfJourney);
+            }
+        }
+    }
+
+    private void announceStop(final boolean atStop, final String stopName, final boolean isEndOfJourney) {
+        final StringBuilder sb = new StringBuilder(getString(
+                atStop ? R.string.drivermode_announcement_this_stop : R.string.drivermode_announcement_next_stop,
+                makeSpeakableLocationName(stopName)));
+        if (isEndOfJourney) {
+            sb.append(" . ");
+            sb.append(getString(R.string.drivermode_announcement_journey_end));
+        }
+
+        final int gongSoundId = prefs.getBoolean("extras_drivermode_announcements_play_gong_enabled", true)
+                ? R.raw.announcement_gong : 0;
+        NotificationSoundManager.getInstance().playAlarmSoundAndVibration(
+                AudioAttributes.USAGE_MEDIA,
+                gongSoundId,
+                null,
+                Collections.singletonList(sb.toString()));
+    }
+
+    private String makeSpeakableLocationName(final String locationName) {
+        if (locationName == null)
+            return null;
+        return removeDisturbingInterpunctuationFromSpeakableName(locationName);
+    }
+
+    private String removeDisturbingInterpunctuationFromSpeakableName(final String name) {
+        return name.replaceAll("[,.][ .]*", " ");
     }
 }
