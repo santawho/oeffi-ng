@@ -616,7 +616,7 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
             loggedLeaving = false;
             loggedHere = false;
             loggedApproachingMillis = 999999;
-            nextStopHasBeenAnnounced = isFirstStop;
+            nextStopHasBeenAnnounced = isFirstStop && timeLeftToStopMillis <= 0;
             thisStopHasBeenAnnounced = false;
             lastNearestStopIdentityId = identityId;
         }
