@@ -6,6 +6,7 @@
     <string name="default_drivermode_navigation_refresh_battery_interval" translatable="false">15</string>
     <string name="default_drivermode_navigation_refresh_charging_interval" translatable="false">1</string>
     <string name="default_drivermode_navigation_scroll_inhibit_interval" translatable="false">10</string>
+    <string name="default_drivermode_announcements_lead_time" translatable="false">60</string>
 
     <!-- preferences driver mode -->
     <string name="extras_drivermode_title">Drivers\' Mode</string>
@@ -50,8 +51,10 @@
     <string name="extras_drivermode_announcements_initially_active_enabled_summary">Activate announcements automatically at start of each new operation</string>
     <string name="extras_drivermode_announcements_play_gong_enabled_title">Play Gong</string>
     <string name="extras_drivermode_announcements_play_gong_enabled_summary">Play a gong sound before each announcement</string>
-    <string name="extras_drivermode_announcements_this_stop_enabled_title">Announce "this" stop</string>
-    <string name="extras_drivermode_announcements_this_stop_enabled_summary">Say "This is XXX" when stopping</string>
+    <string name="extras_drivermode_announcements_this_stop_enabled_title">Announce \"this\" stop</string>
+    <string name="extras_drivermode_announcements_this_stop_enabled_summary">Say \"This is XXX\" when stopping</string>
+    <string name="extras_drivermode_announcements_lead_time_title">Lead time</string>
+    <string name="extras_drivermode_announcements_lead_time_summary">How much time in advance shall the annpouncement be given  [%s secs]</string>
 
     <!-- navigation -->
     <string name="drivermode_navigation_action_cancel">Stop operation</string>

@@ -135,6 +135,7 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
     private boolean OperationNotificationBeingDeleted;
     private boolean permissionRequestRunning;
     private boolean announcementsEnabled = true;
+    private int announcementLeadTimeSecs = 60;
     private boolean isStartupComplete = false;
     private boolean stillCheckForOtherNavigations;
     private long autoScrollInhibitTimeMs;
@@ -245,6 +246,7 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
                 .setOnClickListener(view -> askStopNavigation());
 
         if (prefs.getBoolean("extras_drivermode_announcements_enabled", false)) {
+            announcementLeadTimeSecs = prefs.getInt("extras_drivermode_announcements_lead_time", 60);
             announcementsEnabled = prefs.getBoolean("extras_drivermode_announcements_initially_active_enabled", true);
             final ToggleImageButton soundButton = actionBar.addToggleButton(R.drawable.ic_sound_white_24dp,
                     R.string.drivermode_navigation_action_annoucements);
@@ -587,7 +589,9 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
 
         final int style = isShowSeconds() ? DateFormat.MEDIUM : DateFormat.SHORT;
         final String clockStr = DateFormat.getTimeInstance(style).format(new Date());
-        ((TextView) findViewById(R.id.navigation_next_event_clock)).setText(clockStr);
+        final int splitPos = clockStr.indexOf(':', clockStr.indexOf(':') + 1);
+        ((TextView) findViewById(R.id.operation_next_event_clock_min)).setText(clockStr.substring(0, splitPos));
+        ((TextView) findViewById(R.id.operation_next_event_clock_sec)).setText(clockStr.substring(splitPos));
     }
 
     private String lastNearestStopIdentityId;
@@ -604,12 +608,13 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
         final Location location = nearestStop.location;
         final String identityId = nearestStop.location.identityId;
         final boolean isNewStop = identityId != null && !identityId.equals(lastNearestStopIdentityId);
+        final boolean isFirstStop = lastNearestStopIdentityId == null;
 
         if (isNewStop) {
             loggedLeaving = false;
             loggedHere = false;
             loggedApproachingMillis = 999999;
-            nextStopHasBeenAnnounced = false;
+            nextStopHasBeenAnnounced = isFirstStop;
             thisStopHasBeenAnnounced = false;
             lastNearestStopIdentityId = identityId;
         }
@@ -628,8 +633,8 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
                 loggedApproachingMillis = 999999;
                 log.debug("at stop {}", location.name);
             }
-            announceNextStop(location, 0, isEndOfJourney);
-            announceThisStop(location, isEndOfJourney);
+            if (!announceThisStop(location, isEndOfJourney))
+                announceNextStop(location, 0, isEndOfJourney);
         } else {
             final long secsLeft = timeLeftToStopMillis / 1000;
             if (Math.abs(loggedApproachingMillis - timeLeftToStopMillis) > 15000) {
@@ -642,22 +647,24 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
         }
     }
 
-    private void announceNextStop(final Location location, final long secsLeft, final boolean isEndOfJourney) {
-        if (!nextStopHasBeenAnnounced && secsLeft <= 60) {
-            nextStopHasBeenAnnounced = true;
-            log.debug("now near stop {}", location.name);
-            announceStop(false, location, isEndOfJourney);
-        }
+    private boolean announceNextStop(final Location location, final long secsLeft, final boolean isEndOfJourney) {
+        if (!(announcementsEnabled && !nextStopHasBeenAnnounced && secsLeft <= announcementLeadTimeSecs))
+            return false;
+        nextStopHasBeenAnnounced = true;
+        log.debug("now near stop {}", location.name);
+        announceStop(false, location, isEndOfJourney);
+        return true;
     }
 
-    private void announceThisStop(final Location location, final boolean isEndOfJourney) {
-        if (!thisStopHasBeenAnnounced) {
-            thisStopHasBeenAnnounced = true;
-            log.info("now at stop {}", location.name);
-            if (prefs.getBoolean("extras_drivermode_announcements_this_stop_enabled", false)) {
-                announceStop(true, location, isEndOfJourney);
-            }
-        }
+    private boolean announceThisStop(final Location location, final boolean isEndOfJourney) {
+        if (!(announcementsEnabled && !thisStopHasBeenAnnounced))
+            return false;
+        thisStopHasBeenAnnounced = true;
+        log.info("now at stop {}", location.name);
+        if (!prefs.getBoolean("extras_drivermode_announcements_this_stop_enabled", false))
+            return false;
+        announceStop(true, location, isEndOfJourney);
+        return true;
     }
 
     private void announceStop(final boolean atStop, final Location location, final boolean isEndOfJourney) {

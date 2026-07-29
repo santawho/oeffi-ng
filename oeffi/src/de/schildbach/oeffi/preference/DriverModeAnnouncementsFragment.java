@@ -25,5 +25,7 @@ public class DriverModeAnnouncementsFragment extends PreferenceFragment {
     @Override
     public void onCreatePreferences(@androidx.annotation.Nullable final Bundle savedInstanceState, @androidx.annotation.Nullable final String rootKey) {
         addPreferencesFromResource(R.xml.preference_drivermode_announcements);
+
+        setupDynamicSummary("extras_drivermode_announcements_lead_time", R.string.extras_drivermode_announcements_lead_time_summary);
     }
 }

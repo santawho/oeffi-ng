@@ -25,18 +25,33 @@
             android:paddingVertical="@dimen/text_padding_vertical"
             android:src="@drawable/ic_arrow_back_white_24dp"/>
 
-        <TextView
-            android:id="@+id/navigation_next_event_clock"
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
             android:layout_marginTop="8dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="right"
-            android:textStyle="bold"
-            android:textSize="@dimen/operation_next_event_clock_fontsize"
-            android:textColor="@color/fg_less_significant">
-        </TextView>
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true">
+            <TextView
+                android:id="@+id/operation_next_event_clock_min"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textSize="@dimen/operation_next_event_clock_fontsize_min"
+                android:textColor="@color/fg_less_significant">
+            </TextView>
+            <TextView
+                android:id="@+id/operation_next_event_clock_sec"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textSize="@dimen/operation_next_event_clock_fontsize_sec"
+                android:textColor="@color/fg_less_significant">
+            </TextView>
+        </LinearLayout>
 
         <LinearLayout
             android:orientation="vertical"
