@@ -393,24 +393,35 @@ public class NotificationSoundManager {
         // split sections of [~lang:XX[part]~] and speak part using language XX
         final String text = speakable.text;
         int pos = 0;
+        StringBuilder sb = new StringBuilder();
         int langIndex;
         while ((langIndex = text.indexOf("[~lang:", pos)) >= 0) {
             if (langIndex > pos)
-                res &= queueSpeak(text.substring(pos, langIndex), params);
+                sb.append(text.substring(pos, langIndex));
             final int langStartIndex = langIndex + 7;
             final int langEndIndex = text.indexOf("[", langStartIndex);
             final String lang = text.substring(langStartIndex, langEndIndex);
             pos = langEndIndex + 1;
             final int textEndIndex = text.indexOf("]~]", pos);
             final String langText = text.substring(pos, textEndIndex);
-            final Locale locale = Locale.forLanguageTag(lang);
-            textToSpeech.setLanguage(locale);
-            res &= queueSpeak(langText, params);
-            textToSpeech.setLanguage(DEFAULT_LOCALE);
+            if (lang.equals(DEFAULT_LOCALE.getLanguage())) {
+                sb.append(langText);
+            } else {
+                if (sb.length() > 0) {
+                    res &= queueSpeak(sb.toString(), params);
+                    sb = new StringBuilder();
+                }
+                final Locale locale = Locale.forLanguageTag(lang);
+                textToSpeech.setLanguage(locale);
+                res &= queueSpeak(langText, params);
+                textToSpeech.setLanguage(DEFAULT_LOCALE);
+            }
             pos = textEndIndex + 3;
         }
         if (pos < text.length())
-            res &= queueSpeak(text.substring(pos), params);
+            sb.append(text.substring(pos));
+        if (sb.length() > 0)
+            res &= queueSpeak(sb.toString(), params);
 
         return res;
     }
