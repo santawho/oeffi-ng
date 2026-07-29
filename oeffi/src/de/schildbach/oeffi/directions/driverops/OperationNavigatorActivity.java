@@ -246,7 +246,9 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
                 .setOnClickListener(view -> askStopNavigation());
 
         if (prefs.getBoolean("extras_drivermode_announcements_enabled", false)) {
-            announcementLeadTimeSecs = prefs.getInt("extras_drivermode_announcements_lead_time", 60);
+            announcementLeadTimeSecs = getIntegerValueFromPrefs(
+                    "extras_drivermode_announcements_lead_time",
+                    R.string.default_drivermode_announcements_lead_time);
             announcementsEnabled = prefs.getBoolean("extras_drivermode_announcements_initially_active_enabled", true);
             final ToggleImageButton soundButton = actionBar.addToggleButton(R.drawable.ic_sound_white_24dp,
                     R.string.drivermode_navigation_action_annoucements);
