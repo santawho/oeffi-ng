@@ -59,6 +59,7 @@ import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Destination;
+import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.Stop;
 import de.schildbach.pte.dto.Trip;
 
@@ -600,7 +601,7 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
             final Stop nearestStop,
             final boolean isEndOfJourney,
             final long timeLeftToStopMillis) {
-        final String stopName = nearestStop.location.name;
+        final Location location = nearestStop.location;
         final String identityId = nearestStop.location.identityId;
         final boolean isNewStop = identityId != null && !identityId.equals(lastNearestStopIdentityId);
 
@@ -618,53 +619,53 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
                 loggedLeaving = true;
                 loggedHere = false;
                 loggedApproachingMillis = 999999;
-                log.debug("leaving stop {}", stopName);
+                log.debug("leaving stop {}", location.name);
             }
         } else if (timeLeftToStopMillis == 0) {
             if (!loggedHere) {
                 loggedHere = true;
                 loggedLeaving = false;
                 loggedApproachingMillis = 999999;
-                log.debug("at stop {}", stopName);
+                log.debug("at stop {}", location.name);
             }
-            announceNextStop(stopName, 0, isEndOfJourney);
-            announceThisStop(stopName, isEndOfJourney);
+            announceNextStop(location, 0, isEndOfJourney);
+            announceThisStop(location, isEndOfJourney);
         } else {
             final long secsLeft = timeLeftToStopMillis / 1000;
             if (Math.abs(loggedApproachingMillis - timeLeftToStopMillis) > 15000) {
                 loggedApproachingMillis = timeLeftToStopMillis;
                 loggedHere = false;
                 loggedLeaving = false;
-                log.debug("approaching stop {}, arrival in {} sec", stopName, secsLeft);
+                log.debug("approaching stop {}, arrival in {} sec", location.name, secsLeft);
             }
-            announceNextStop(stopName, secsLeft, isEndOfJourney);
+            announceNextStop(location, secsLeft, isEndOfJourney);
         }
     }
 
-    private void announceNextStop(final String stopName, final long secsLeft, final boolean isEndOfJourney) {
+    private void announceNextStop(final Location location, final long secsLeft, final boolean isEndOfJourney) {
         if (!nextStopHasBeenAnnounced && secsLeft <= 60) {
             nextStopHasBeenAnnounced = true;
-            log.debug("now near stop {}", stopName);
-            announceStop(false, stopName, isEndOfJourney);
+            log.debug("now near stop {}", location.name);
+            announceStop(false, location, isEndOfJourney);
         }
     }
 
-    private void announceThisStop(final String stopName, final boolean isEndOfJourney) {
+    private void announceThisStop(final Location location, final boolean isEndOfJourney) {
         if (!thisStopHasBeenAnnounced) {
             thisStopHasBeenAnnounced = true;
-            log.info("now at stop {}", stopName);
+            log.info("now at stop {}", location.name);
             if (prefs.getBoolean("extras_drivermode_announcements_this_stop_enabled", false)) {
-                announceStop(true, stopName, isEndOfJourney);
+                announceStop(true, location, isEndOfJourney);
             }
         }
     }
 
-    private void announceStop(final boolean atStop, final String stopName, final boolean isEndOfJourney) {
+    private void announceStop(final boolean atStop, final Location location, final boolean isEndOfJourney) {
         final StringBuilder sb = new StringBuilder(getString(
                 atStop ? R.string.drivermode_announcement_this_stop : R.string.drivermode_announcement_next_stop,
-                makeSpeakableLocationName(stopName)));
+                NotificationSoundManager.makeSpeakableLocationName(location.name, location.language)));
         if (isEndOfJourney) {
-            sb.append(" . ");
+            sb.append(" - ");
             sb.append(getString(R.string.drivermode_announcement_journey_end));
         }
 
@@ -675,15 +676,5 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
                 gongSoundId,
                 null,
                 Collections.singletonList(sb.toString()));
-    }
-
-    private String makeSpeakableLocationName(final String locationName) {
-        if (locationName == null)
-            return null;
-        return removeDisturbingInterpunctuationFromSpeakableName(locationName);
-    }
-
-    private String removeDisturbingInterpunctuationFromSpeakableName(final String name) {
-        return name.replaceAll("[,.][ .]*", " ");
     }
 }

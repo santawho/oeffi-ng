@@ -49,6 +49,7 @@ import java.util.Locale;
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.ResourceUri;
+import de.schildbach.pte.dto.Location;
 
 public class NotificationSoundManager {
     public static final String PREF_KEY_MEDIA_CHANNEL_AMPLIFICATION = "navigation_media_channel_amplification";
@@ -63,6 +64,7 @@ public class NotificationSoundManager {
         return instance;
     }
 
+    private final Locale DEFAULT_LOCALE;
     private final HandlerThread backgroundThread;
     private final Handler backgroundHandler;
     private TextToSpeech textToSpeech;
@@ -105,10 +107,12 @@ public class NotificationSoundManager {
         backgroundThread.start();
         backgroundHandler = new Handler(backgroundThread.getLooper());
 
+        DEFAULT_LOCALE = new Locale(Application.getInstance().getApplicationLanguage());
+
         textToSpeech = new TextToSpeech(getContext(), status -> {
             isTextToSpeechUp = status == TextToSpeech.SUCCESS;
             if (isTextToSpeechUp) {
-                textToSpeech.setLanguage(new Locale(Application.getInstance().getApplicationLanguage()));
+                textToSpeech.setLanguage(DEFAULT_LOCALE);
                 textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
                     @Override
                     public void onStart(final String utteranceId) {
@@ -380,13 +384,64 @@ public class NotificationSoundManager {
         return true;
     }
 
+    private static long utteranceIdCounter = 0;
+
     private boolean speakSync(final Speakable speakable) {
         final Bundle params = new Bundle();
         params.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, speakable.stream);
 
-        final String utteranceId = NotificationSoundManager.class.getName();
+        boolean res = true;
 
-        return TextToSpeech.SUCCESS ==
-                textToSpeech.speak(speakable.text, TextToSpeech.QUEUE_ADD, params, utteranceId);
+        // split sections of [~lang:XX[part]~] and speak part using language XX
+        final String text = speakable.text;
+        int pos = 0;
+        int langIndex;
+        while ((langIndex = text.indexOf("[~lang:", pos)) >= 0) {
+            if (langIndex > pos)
+                res &= queueSpeak(text.substring(pos, langIndex), params);
+            final int langStartIndex = langIndex + 7;
+            final int langEndIndex = text.indexOf("[", langStartIndex);
+            final String lang = text.substring(langStartIndex, langEndIndex);
+            pos = langEndIndex + 1;
+            final int textEndIndex = text.indexOf("]~]", pos);
+            final String langText = text.substring(pos, textEndIndex);
+            final Locale locale = Locale.forLanguageTag(lang);
+            textToSpeech.setLanguage(locale);
+            res &= queueSpeak(langText, params);
+            textToSpeech.setLanguage(DEFAULT_LOCALE);
+            pos = textEndIndex + 3;
+        }
+        if (pos < text.length())
+            res &= queueSpeak(text.substring(pos), params);
+
+        return res;
+    }
+
+    private boolean queueSpeak(final String text, final Bundle params) {
+        if (text == null || text.isEmpty())
+            return true;
+        final String utteranceId = NotificationSoundManager.class.getName() + ":" + utteranceIdCounter;
+        utteranceIdCounter += 1;
+        return TextToSpeech.SUCCESS == textToSpeech.speak(text, TextToSpeech.QUEUE_ADD, params, utteranceId);
+    }
+
+    public static String speakableTextForLanguage(final String text, final String languageCode) {
+        if (text == null)
+            return null;
+        if (languageCode == null)
+            return text;
+        return String.format("[~lang:%s[%s]~]", languageCode, text);
+    }
+
+    public static String makeSpeakableLocationName(final String locationName, final String languageCode) {
+        if (locationName == null)
+            return null;
+        return NotificationSoundManager.speakableTextForLanguage(
+                removeDisturbingInterpunctuationFromSpeakableName(locationName),
+                languageCode);
+    }
+
+    public static String removeDisturbingInterpunctuationFromSpeakableName(final String name) {
+        return name.replaceAll("[,.][ .]*", " ");
     }
 }
