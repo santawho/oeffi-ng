@@ -81,6 +81,7 @@ import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.DividerItemDecoration;
 import de.schildbach.oeffi.util.ErrorReporter;
 import de.schildbach.oeffi.util.NavigationMenuAdapter;
+import de.schildbach.oeffi.util.ResourcesInterceptor;
 import de.schildbach.oeffi.util.SpeechInput;
 import de.schildbach.oeffi.util.TimeZoneSelector;
 import de.schildbach.oeffi.util.Toast;
@@ -230,7 +231,8 @@ public abstract class OeffiActivity extends AppCompatActivity
         final Configuration overrideConfiguration = Application.getInstance().updateOverrideConfiguration(this, initialConfiguration);
         // applyOverrideConfiguration(overrideConfiguration);
         // super.attachBaseContext(base);
-        super.attachBaseContext(base.createConfigurationContext(overrideConfiguration));
+        super.attachBaseContext(ResourcesInterceptor.getContext(
+                base.createConfigurationContext(overrideConfiguration)));
     }
 
     protected boolean isTakeDriverModeFromApplication() {

@@ -18,10 +18,8 @@
 package de.schildbach.oeffi;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
@@ -29,15 +27,11 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
-import android.util.DisplayMetrics;
-import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -66,8 +60,8 @@ import de.schildbach.oeffi.stations.FavoriteStationsActivity;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
 import de.schildbach.oeffi.stations.StationsActivity;
 import de.schildbach.oeffi.util.AppInstaller;
-import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.ErrorReporter;
+import de.schildbach.oeffi.util.ResourcesInterceptor;
 import de.schildbach.oeffi.util.SettingsUtil;
 import de.schildbach.oeffi.util.SpeechInput;
 import de.schildbach.oeffi.util.TimeZoneSelector;
@@ -113,6 +107,15 @@ public class Application extends android.app.Application {
 
     public Application() {
         instance = this;
+    }
+
+    private Context resourcesInterceptorContext;
+
+    @Override
+    public Resources getResources() {
+        if (resourcesInterceptorContext == null)
+            resourcesInterceptorContext = ResourcesInterceptor.getContext(this, super.getResources());
+        return resourcesInterceptorContext.getResources();
     }
 
     public File getLogFile() {
