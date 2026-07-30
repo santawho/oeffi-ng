@@ -42,8 +42,9 @@
     <color name="bg_action_bar_operation_navigation">#441135</color>
     <color name="bg_action_alternative_directions">#662222</color>
     <color name="bg_action_bar_directions">#114411</color>
-    <color name="bg_action_bar_operations">#114444</color>
+    <color name="bg_action_bar_connection_details">#115511</color>
     <color name="bg_action_bar_journey">#116611</color>
+    <color name="bg_action_bar_operations">#114444</color>
     <color name="bg_action_bar_operation">#114444</color>
     <color name="bg_action_bar_appendix">#555555</color>
     <color name="bg_selected_entry">#284028</color>

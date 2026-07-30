@@ -12,7 +12,7 @@
 
     <!-- background -->
     <color name="bg_level0_darkdefault">#f7f7f7</color>
-    <color name="bg_action_bar_directions_darkdefault">#227722</color>
+    <color name="bg_action_bar_directions_overview">#227722</color>
     <color name="bg_action_bar_operations_darkdefault">#227777</color>
     <color name="bg_individual_darkdefault">#cccccc</color>
     <color name="bg_delayed_darkdefault">#cccccc</color>

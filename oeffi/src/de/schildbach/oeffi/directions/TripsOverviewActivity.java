@@ -268,7 +268,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         final MyActionBar actionBar = getMyActionBar();
         setPrimaryColor(renderConfig.actionBarColor > 0 ? renderConfig.actionBarColor
                 : renderConfig.isOperationsPlanning ? R.color.bg_action_bar_operations_darkdefault
-                : R.color.bg_action_bar_directions_darkdefault);
+                : R.color.bg_action_bar_directions_overview);
         actionBar.setBack(v -> finish());
         actionBar.setCustomTitles(R.layout.directions_trip_overview_custom_title);
         if (searchMoreContext.canProvideSearchMore()) {
