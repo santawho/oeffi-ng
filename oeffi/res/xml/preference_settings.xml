@@ -52,6 +52,9 @@
         android:title="@string/shortcuts_preferences_title"
         android:summary="@string/shortcuts_preferences_summary"/>
     <PreferenceScreen
+        android:fragment="de.schildbach.oeffi.preference.CustomizeFragment"
+        android:title="@string/customize_title" />
+    <PreferenceScreen
         android:fragment="de.schildbach.oeffi.preference.BackupFragment"
         android:title="@string/backup_title" />
 <!--    <header-->

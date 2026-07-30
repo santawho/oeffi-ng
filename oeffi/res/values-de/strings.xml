@@ -122,6 +122,13 @@
     <string name="about_participate_title">Mitmachen</string>
     <string name="about_market_app_title">Öffi bewerten oder rezensieren</string>
 
+    <!-- preferences customize -->
+    <string name="customize_title">Personalisieren</string>
+    <string name="customize_load_title">Personalisierung aus Datei laden</string>
+    <string name="customize_clear_title">Personalisierung entfernen</string>
+    <string name="customize_ok">Konfiguration geladen. App startet neu.</string>
+    <string name="customize_error">Ein Fehler ist aufgetreten.</string>
+
     <!-- preferences backup -->
     <string name="backup_title">Backup &amp; Restore</string>
     <string name="backup_save_title">Einstellungen in Datei speichern</string>

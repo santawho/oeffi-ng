@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/customize_title" >
+
+    <Preference
+        android:key="customize_load"
+        android:title="@string/customize_load_title" />
+
+    <Preference
+        android:key="customize_clear"
+        android:title="@string/customize_clear_title" />
+
+</PreferenceScreen>

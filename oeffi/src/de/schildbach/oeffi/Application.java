@@ -77,7 +77,10 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.nio.file.Files;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 public class Application extends android.app.Application {
@@ -109,12 +112,38 @@ public class Application extends android.app.Application {
         instance = this;
     }
 
+    private static final String CUSTOMIZATION_PREFS_KEY = Application.class.getName() + ".CustomizationConfiguration";
+
+    public void setCustomizationConfiguration(final Properties properties) throws IOException {
+        if (properties == null) {
+            prefs.edit().remove(CUSTOMIZATION_PREFS_KEY).commit();
+        } else {
+            final StringWriter sw = new StringWriter();
+            properties.store(sw, "");
+            sw.close();
+            final String prefValue = sw.toString();
+            prefs.edit().putString(CUSTOMIZATION_PREFS_KEY, prefValue).commit();
+        }
+    }
+
     private Context resourcesInterceptorContext;
 
     @Override
     public Resources getResources() {
-        if (resourcesInterceptorContext == null)
+        if (resourcesInterceptorContext == null) {
             resourcesInterceptorContext = ResourcesInterceptor.getContext(this, super.getResources());
+            prefs = PreferenceManager.getDefaultSharedPreferences(this);
+            final String prefValue = prefs.getString(CUSTOMIZATION_PREFS_KEY, null);
+            if (prefValue != null) {
+                try {
+                    final Properties properties = new Properties();
+                    properties.load(new StringReader(prefValue));
+                    ResourcesInterceptor.setConfiguration(properties);
+                } catch (final IOException ioe) {
+                    log.error("cannot load properties: {}", ioe.getMessage());
+                }
+            }
+        }
         return resourcesInterceptorContext.getResources();
     }
 
@@ -328,7 +357,6 @@ public class Application extends android.app.Application {
 
         this.appName = getString(R.string.app_name);
         log.info("=== Starting app version {} ({})", packageInfo.versionName, packageInfo.versionCode);
-        prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         final String dimensionSelector = getString(R.string.dimension_selector);
 

@@ -47,7 +47,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-
+import java.util.Properties;
 
 public class ResourcesInterceptor extends Resources {
     public static Context getContext(final Context baseContext) {
@@ -56,6 +56,10 @@ public class ResourcesInterceptor extends Resources {
 
     public static Context getContext(final Context baseContext, final Resources resources) {
         return new ContextWrapper(baseContext, resources);
+    }
+
+    public static void setConfiguration(final Properties properties) {
+        mapper.setConfiguration(properties);
     }
 
     public static class ContextWrapper extends android.content.ContextWrapper {
@@ -79,31 +83,36 @@ public class ResourcesInterceptor extends Resources {
     private static class ResourcesMapper {
         private final Resources resources;
 
-        private Map<String, String> configuredValues = new HashMap<>();
-
-//        {
-//            configuredValues.put("bg_action_bar_directions", "#FF0000");
-//            configuredValues.put("trip_details_title", "HELLO");
-//        }
+        private Properties configuredValues;
 
         public ResourcesMapper(final Resources resources) {
             requireNonNull(resources);
             this.resources = resources;
         }
 
+        public void setConfiguration(final Properties properties) {
+            configuredValues = properties;
+            overloadedString.clear();
+            overloadedInteger.clear();
+            overloadedBoolean.clear();
+            overloadedColor.clear();
+        }
+
         private String getConfiguredValue(final int resId) {
             try {
+                if (configuredValues == null)
+                    return null;
                 final String entryName = resources.getResourceEntryName(resId);
                 if (entryName == null)
                     return null;
-                return configuredValues.get(entryName);
+                return configuredValues.getProperty(entryName);
             } catch (final NotFoundException nfe) {
                 return null;
             }
         }
 
         private static class MapValue<T> {
-            private T value;
+            private final T value;
             MapValue(final T value) {
                 this.value = value;
             }
