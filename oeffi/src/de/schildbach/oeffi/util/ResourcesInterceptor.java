@@ -67,7 +67,8 @@ public class ResourcesInterceptor extends Resources {
 
         private ContextWrapper(final Context baseContext, final Resources resources) {
             super(baseContext);
-            this.resources = resources;
+            if (resources != null)
+                this.resources = new ResourcesInterceptor(resources);
             if (mapper == null)
                 mapper = new ResourcesMapper(resources);
         }
