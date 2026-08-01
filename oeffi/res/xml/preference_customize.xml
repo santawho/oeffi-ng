@@ -18,4 +18,8 @@
         android:key="customize_clear"
         android:title="@string/customize_clear_title" />
 
+    <Preference
+        android:key="customize_write_reference"
+        android:title="@string/customize_write_reference_title" />
+
 </PreferenceScreen>

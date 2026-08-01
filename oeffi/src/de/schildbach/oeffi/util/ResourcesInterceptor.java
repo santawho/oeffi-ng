@@ -45,9 +45,18 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serial;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+
+import de.schildbach.oeffi.R;
 
 public class ResourcesInterceptor extends Resources {
     public static Context getContext(final Context baseContext) {
@@ -65,12 +74,12 @@ public class ResourcesInterceptor extends Resources {
     public static class ContextWrapper extends android.content.ContextWrapper {
         private Resources resources;
 
-        private ContextWrapper(final Context baseContext, final Resources resources) {
+        private ContextWrapper(final Context baseContext, final Resources explicitResources) {
             super(baseContext);
-            if (resources != null)
-                this.resources = new ResourcesInterceptor(resources);
+            if (explicitResources != null)
+                this.resources = new ResourcesInterceptor(explicitResources);
             if (mapper == null)
-                mapper = new ResourcesMapper(resources);
+                mapper = new ResourcesMapper(explicitResources);
         }
 
         @Override
@@ -97,6 +106,10 @@ public class ResourcesInterceptor extends Resources {
             overloadedInteger.clear();
             overloadedBoolean.clear();
             overloadedColor.clear();
+        }
+
+        private Properties getAllResourcesAsProperties() throws IllegalAccessException {
+            return ResourcesInterceptor.getAllResourcesAsProperties(resources);
         }
 
         private String getConfiguredValue(final int resId) {
@@ -497,5 +510,85 @@ public class ResourcesInterceptor extends Resources {
     @Override
     public void updateConfiguration(final Configuration config, final DisplayMetrics metrics) {
         baseResources.updateConfiguration(config, metrics);
+    }
+
+    public static Properties getAllResourcesAsProperties() {
+        try {
+            return mapper.getAllResourcesAsProperties();
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private interface ResourceAsStringResolver {
+        String getAsString(Resources resources, int id);
+    }
+
+    private static Properties getAllResourcesAsProperties(final Resources resources) throws IllegalAccessException {
+        final Properties properties = new Properties() {
+            @Serial
+            private static final long serialVersionUID = 1458631718343670066L;
+
+            final List<String> keys = new ArrayList<>();
+
+            @Override
+            public synchronized Object put(final Object key, final Object value) {
+                keys.add(key.toString());
+                return super.put(key, value);
+            }
+
+            @Override
+            public Set<Entry<Object, Object>> entrySet() {
+                final Set<Entry<Object, Object>> set = new LinkedHashSet<>();
+                for (final String key : keys) {
+                    final Object value = get(key);
+                    set.add(new Entry<>() {
+                        @Override
+                        public Object getKey() {
+                            return key;
+                        }
+
+                        @Override
+                        public Object getValue() {
+                            return value;
+                        }
+
+                        @Override
+                        public Object setValue(final Object value) {
+                            return null;
+                        }
+                    });
+                }
+                return Collections.synchronizedSet(set);
+            }
+        };
+        addAllResourcesToProperties(properties, resources, R.string.class, (r, id) -> r.getString(id));
+        addAllResourcesToProperties(properties, resources, R.integer.class, (r, id) -> Integer.toString(r.getInteger(id)));
+        addAllResourcesToProperties(properties, resources, R.bool.class, (r, id) -> Boolean.toString(r.getBoolean(id)));
+        addAllResourcesToProperties(properties, resources, R.color.class, (r, id) -> String.format("#%08x", r.getColor(id)));
+        return properties;
+    }
+
+    private static void addAllResourcesToProperties(
+            final Properties properties, final Resources resources,
+            final Class<?> resourcesClass, final ResourceAsStringResolver resolver)
+            throws IllegalAccessException {
+        final int[] stringIds = getAllIdsForResourcesClass(resourcesClass);
+        for (final int id : stringIds) {
+            final String name = resources.getResourceEntryName(id);
+            final String value = resolver.getAsString(resources, id);
+            properties.put(name, value);
+        }
+    }
+
+    private static int[] getAllIdsForResourcesClass(final Class<?> resourcesClass) throws IllegalAccessException {
+        final Field[] declaredFields = resourcesClass.getDeclaredFields();
+        final int size = declaredFields.length;
+        final int[] ids = new int[size];
+        for (int index = 0; index < declaredFields.length; index++) {
+            final Field field = declaredFields[index];
+            ids[index] = field.getInt(null);
+        }
+        return ids;
     }
 }

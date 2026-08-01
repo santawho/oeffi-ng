@@ -130,7 +130,9 @@
     </string>
     <string name="customize_load_title">Personalisierung aus Datei laden</string>
     <string name="customize_clear_title">Personalisierung entfernen</string>
+    <string name="customize_write_reference_title">Erstelle Musterdatei von allen Originalwerten</string>
     <string name="customize_ok">Konfiguration geladen. App startet neu.</string>
+    <string name="customize_write_ok">Konfiguration gespeichert.</string>
     <string name="customize_error">Ein Fehler ist aufgetreten.</string>
 
     <!-- preferences backup -->

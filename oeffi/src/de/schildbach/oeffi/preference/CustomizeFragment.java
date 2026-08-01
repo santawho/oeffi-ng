@@ -23,11 +23,13 @@ import androidx.activity.result.contract.ActivityResultContracts;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.util.ResourcesInterceptor;
 import de.schildbach.oeffi.util.Toast;
 
 public class CustomizeFragment extends PreferenceFragment {
@@ -41,6 +43,8 @@ public class CustomizeFragment extends PreferenceFragment {
             setupActionPreference("customize_clear", ClearActionHandler.class);
         else
             disablePreference("customize_clear");
+
+        setupActionPreference("customize_write_reference", WriteReferenceActionHandler.class);
     }
 
     public static class LoadActionHandler extends ActionHandler {
@@ -68,11 +72,7 @@ public class CustomizeFragment extends PreferenceFragment {
                         } else {
                             new Toast(context).longToast(R.string.customize_error);
                         }
-                    }).launch(new String[] {
-                            "text/plain",
-                            // "text/x-java-properties",
-                            // "application/octet-stream",
-                    });
+                    }).launch(new String[] { "text/plain" });
             return false;
         }
     }
@@ -87,6 +87,36 @@ public class CustomizeFragment extends PreferenceFragment {
             }
             new Toast(context).longToast(R.string.customize_ok);
             Application.getInstance().postTerminate(context);
+            return false;
+        }
+    }
+
+    public static class WriteReferenceActionHandler extends ActionHandler {
+        @Override
+        boolean handleAction(final PreferenceActivity context, final String prefkey) {
+            final AtomicBoolean isOk = new AtomicBoolean(false);
+            context.registerForActivityResult(
+                    new ActivityResultContracts.CreateDocument("text/plain"),
+                    uri -> {
+                        if (uri != null) {
+                            try (final OutputStreamWriter wr = new OutputStreamWriter(context.getContentResolver().openOutputStream(uri))) {
+                                final Properties properties = ResourcesInterceptor.getAllResourcesAsProperties();
+                                final Application application = Application.getInstance();
+                                final String comment = application.getString(R.string.customize_properties_comment,
+                                        application.getAppName(), application.packageInfo().versionName);
+                                properties.store(wr, comment);
+                                isOk.set(true);
+                            } catch (final IOException ioe) {
+                                context.getLog().error("WriteReferenceActionHandler openOutputStream", ioe);
+                            }
+                            if (isOk.get()) {
+                                new Toast(context).longToast(R.string.customize_write_ok);
+                            } else {
+                                new Toast(context).longToast(R.string.customize_error);
+                            }
+                        }
+                        dismissParentingActivity(context);
+                    }).launch("oeffi-resource-values.template.txt");
             return false;
         }
     }
