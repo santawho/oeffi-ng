@@ -648,6 +648,10 @@ public class Application extends android.app.Application {
                 .build());
     }
 
+    public static boolean isDarkMode() {
+        return isDarkMode(instance);
+    }
+
     public static boolean isDarkMode(final Context context) {
         return context.getResources().getBoolean(R.bool.isNightMode);
     }

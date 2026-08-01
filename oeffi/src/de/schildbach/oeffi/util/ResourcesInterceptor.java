@@ -56,6 +56,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
 
 public class ResourcesInterceptor extends Resources {
@@ -105,7 +106,7 @@ public class ResourcesInterceptor extends Resources {
             overloadedString.clear();
             overloadedInteger.clear();
             overloadedBoolean.clear();
-            overloadedColor.clear();
+            overloadedColorIsForDarkMode = null;
         }
 
         private Properties getAllResourcesAsProperties() throws IllegalAccessException {
@@ -140,7 +141,7 @@ public class ResourcesInterceptor extends Resources {
                 return mapValue.value;
             final String configuredValue = getConfiguredValue(id);
             if (configuredValue == null) {
-                overloadedColor.put(id, null);
+                overloadedString.put(id, null);
                 return null;
             }
             overloadedString.put(id, new MapValue<>(configuredValue));
@@ -184,9 +185,15 @@ public class ResourcesInterceptor extends Resources {
             return configuredInteger;
         }
 
-        private Map<Integer, MapValue<Integer>> overloadedColor = new HashMap<>();
+        private Map<Integer, MapValue<Integer>> overloadedColor;
+        private Boolean overloadedColorIsForDarkMode;
 
         public Integer getColor(final int id) {
+            final boolean darkMode = Application.isDarkMode();
+            if (overloadedColorIsForDarkMode == null || darkMode != overloadedColorIsForDarkMode) {
+                overloadedColorIsForDarkMode = darkMode;
+                overloadedColor = new HashMap<>();
+            }
             final MapValue<Integer> mapValue = overloadedColor.get(id);
             if (mapValue != null)
                 return mapValue.value;
@@ -195,7 +202,8 @@ public class ResourcesInterceptor extends Resources {
                 overloadedColor.put(id, null);
                 return null;
             }
-            final int configuredColor = Color.parseColor(configuredValue);
+            final String[] split = configuredValue.split(",");
+            final int configuredColor = Color.parseColor(split[(split.length > 1 && darkMode) ? 1 : 0]);
             overloadedColor.put(id, new MapValue<>(configuredColor));
             return configuredColor;
         }
@@ -253,7 +261,7 @@ public class ResourcesInterceptor extends Resources {
     @NonNull
     @Override
     public ColorStateList getColorStateList(final int id) throws NotFoundException {
-        return baseResources.getColorStateList(id);
+        return super.getColorStateList(id);
     }
 
     @NonNull
@@ -290,25 +298,26 @@ public class ResourcesInterceptor extends Resources {
     @Deprecated
     @Override
     public Drawable getDrawable(final int id) throws NotFoundException {
-        return baseResources.getDrawable(id);
+        return super.getDrawable(id);
     }
 
     @Override
     public Drawable getDrawable(final int id, @Nullable final Theme theme) throws NotFoundException {
-        return baseResources.getDrawable(id, theme);
+        return super.getDrawable(id, theme);
     }
 
     @Deprecated
     @Nullable
     @Override
     public Drawable getDrawableForDensity(final int id, final int density) throws NotFoundException {
-        return baseResources.getDrawableForDensity(id, density);
+        return super.getDrawableForDensity(id, density);
     }
 
     @Nullable
     @Override
     public Drawable getDrawableForDensity(final int id, final int density, @Nullable final Theme theme) {
-        return baseResources.getDrawableForDensity(id, density, theme);
+//        return baseResources.getDrawableForDensity(id, density, theme);
+        return super.getDrawableForDensity(id, density, theme);
     }
 
     @Override
@@ -401,10 +410,15 @@ public class ResourcesInterceptor extends Resources {
     @NonNull
     @Override
     public String getString(final int id) throws NotFoundException {
-        final String string = mapper.getString(id);
-        if (string != null)
-            return string;
-        return baseResources.getString(id);
+        // return baseResources.getString(id);
+        return super.getString(id);
+    }
+
+    @NonNull
+    @Override
+    public String getString(final int id, final Object... formatArgs) throws NotFoundException {
+        // return baseResources.getString(id, formatArgs);
+        return super.getString(id, formatArgs);
     }
 
     @NonNull
@@ -413,19 +427,19 @@ public class ResourcesInterceptor extends Resources {
         return baseResources.getStringArray(id);
     }
 
-    public static Resources getSystem() {
-        return Resources.getSystem();
-    }
-
     @NonNull
     @Override
     public CharSequence getText(final int id) throws NotFoundException {
+        final String string = mapper.getString(id);
+        if (string != null)
+            return string;
         return baseResources.getText(id);
     }
 
     @Override
     public CharSequence getText(final int id, final CharSequence def) {
-        return baseResources.getText(id, def);
+        final CharSequence res = id != 0 ? getText(id) : null;
+        return res != null ? res : def;
     }
 
     @NonNull
