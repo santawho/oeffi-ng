@@ -36,7 +36,7 @@
     <string name="extras_drivermode_announcements_preferences_summary">Einstellungen zu Ankündigungen für Passagiere während der Fahrt</string>
     <string name="extras_drivermode_announcements_enabled_title">Ankündigungen aktiviert</string>
     <string name="extras_drivermode_announcements_initially_active_enabled_title">Automatisch einschalten</string>
-    <string name="extras_drivermode_announcements_initially_active_enabled_summary">Schalte die Ankündigungen zu Beginn jeder neuen Fahrt autmatisch ein</string>
+    <string name="extras_drivermode_announcements_initially_active_enabled_summary">Schalte die Ankündigungen zu Beginn jeder neuen Fahrt automatisch ein</string>
     <string name="extras_drivermode_announcements_play_gong_enabled_title">Spiele Gong</string>
     <string name="extras_drivermode_announcements_play_gong_enabled_summary">Spielt einen Gong-Ton ab vor jeder Ankündigung</string>
     <string name="extras_drivermode_announcements_this_stop_enabled_title">\"Diesen\" Halt ankündigen</string>
