@@ -360,7 +360,7 @@ public class Application extends android.app.Application {
         }
 
         this.appName = getString(R.string.app_name);
-        log.info("=== Starting app version {} ({})", packageInfo.versionName, packageInfo.versionCode);
+        log.info("=== Starting app {} version {} ({})", appName, packageInfo.versionName, packageInfo.versionCode);
 
         final String dimensionSelector = getString(R.string.dimension_selector);
 
