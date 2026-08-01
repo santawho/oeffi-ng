@@ -733,7 +733,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     protected int getActionBarColorId() {
         return renderConfig.isJourney ? R.color.bg_action_bar_journey
-                : renderConfig.isAlternativeConnectionSearch ? R.color.bg_action_alternative_directions
+                : renderConfig.isAlternativeConnectionSearch ? R.color.bg_action_bar_alternative_directions
                 : R.color.bg_action_bar_connection_details;
     }
 

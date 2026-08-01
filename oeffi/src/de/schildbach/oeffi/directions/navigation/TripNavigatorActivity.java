@@ -604,7 +604,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
             final TimeSpec time) {
         final TripsOverviewActivity.RenderConfig overviewConfig = super.getOverviewConfig(
                 stop, isLegDeparture, currentJourneyRef, feederJourneyRef, connectionJourneyRef, time);
-        overviewConfig.actionBarColor = R.color.bg_action_alternative_directions;
+        overviewConfig.actionBarColor = R.color.bg_action_bar_alternative_directions;
         return overviewConfig;
     }
 
