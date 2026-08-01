@@ -2381,12 +2381,14 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final int backgroundColor,
             final PearlView.Type pearlType,
             final Style style,
+            final boolean highlighted,
             final Paint.FontMetrics fontMetrics) {
         // pearl
         final PearlView pearlView = tableRow.findViewById(R.id.directions_trip_details_public_entry_stop_pearl);
         pearlView.setType(pearlType);
         pearlView.setStyle(style);
         pearlView.setFontMetrics(fontMetrics);
+        pearlView.setHighlighted(highlighted);
 
         tableLayout.addView(tableRow);
 
@@ -2762,19 +2764,20 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
 
         final Paint.FontMetrics fontMetrics = stopNameView.getPaint().getFontMetrics();
+        final boolean highlight = highlightLocation || highlightTime;
 
         if (arrivalRow != null)
-            addStopRow(tableLayout, arrivalRow, backgroundColor, PearlView.Type.PASSING, style, fontMetrics);
+            addStopRow(tableLayout, arrivalRow, backgroundColor, PearlView.Type.PASSING, style, highlight, fontMetrics);
 
-        addStopRow(tableLayout, row, backgroundColor, pearlType, style, fontMetrics);
+        addStopRow(tableLayout, row, backgroundColor, pearlType, style, highlight, fontMetrics);
 
         if (departureRow != null)
-            addStopRow(tableLayout, departureRow, backgroundColor, PearlView.Type.PASSING, style, fontMetrics);
+            addStopRow(tableLayout, departureRow, backgroundColor, PearlView.Type.PASSING, style, highlight, fontMetrics);
 
         if (isShowSimulatedLine && pearlType != PearlView.Type.ARRIVAL) {
             // add a divider row
             final TableRow divider = (TableRow) inflater.inflate(R.layout.directions_trip_details_public_entry_stop_divider, null);
-            addStopRow(tableLayout, divider, backgroundColor, PearlView.Type.PASSING, style, fontMetrics);
+            addStopRow(tableLayout, divider, backgroundColor, PearlView.Type.PASSING, style, highlight, fontMetrics);
         }
     }
 

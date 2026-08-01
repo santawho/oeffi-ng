@@ -123,4 +123,7 @@
     <bool name="layout_map_show_toggleable">false</bool>
     <bool name="layout_navigation_drawer_footer_show">false</bool>
 
+    <integer name="pearl_endmarker_size_percent">70</integer>
+    <integer name="pearl_highlight_size_percent">90</integer>
+
 </resources>
