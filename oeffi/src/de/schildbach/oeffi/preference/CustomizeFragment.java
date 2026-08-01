@@ -36,7 +36,11 @@ public class CustomizeFragment extends PreferenceFragment {
         addPreferencesFromResource(R.xml.preference_customize);
 
         setupActionPreference("customize_load", LoadActionHandler.class);
-        setupActionPreference("customize_clear", ClearActionHandler.class);
+
+        if (Application.getInstance().isCustomizationConfigurationSet())
+            setupActionPreference("customize_clear", ClearActionHandler.class);
+        else
+            disablePreference("customize_clear");
     }
 
     public static class LoadActionHandler extends ActionHandler {

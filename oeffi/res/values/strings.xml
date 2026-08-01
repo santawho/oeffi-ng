@@ -95,7 +95,7 @@
     <string name="about_version_title">Version</string>
     <string name="about_original_version_title">Original app version</string>
     <string name="about_copyright_title">Copyright</string>
-    <string name="about_copyright_summary">© 2010-2026, the Öffi developers</string>
+    <string name="about_copyright_summary">© 2010–2026, the Öffi developers</string>
     <string name="about_license_title">License</string>
     <string name="about_data_provider_title">Data Supplier</string>
     <string name="about_data_provider_summary_pattern1">Data is supplied by %1$s</string>
@@ -124,6 +124,10 @@
 
     <!-- preferences customize -->
     <string name="customize_title">Customize</string>
+    <string name="customize_summary">
+        Customize the app by changing colors, labels, etc. See
+        https://github.com/santawho/oeffi-ng/wiki/Customization
+    </string>
     <string name="customize_load_title">Load customization from file</string>
     <string name="customize_clear_title">Remove customization</string>
     <string name="customize_ok">Configuration loaded. App restarting.</string>

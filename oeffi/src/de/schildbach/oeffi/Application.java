@@ -126,6 +126,10 @@ public class Application extends android.app.Application {
         }
     }
 
+    public boolean isCustomizationConfigurationSet() {
+        return prefs.contains(CUSTOMIZATION_PREFS_KEY);
+    }
+
     private Context resourcesInterceptorContext;
 
     @Override

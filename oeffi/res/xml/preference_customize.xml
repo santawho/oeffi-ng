@@ -4,6 +4,13 @@
     android:title="@string/customize_title" >
 
     <Preference
+        android:summary="@string/customize_summary" >
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="https://github.com/santawho/oeffi-ng/wiki/Customization" />
+    </Preference>
+
+    <Preference
         android:key="customize_load"
         android:title="@string/customize_load_title" />
 
