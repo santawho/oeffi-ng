@@ -97,11 +97,22 @@ public abstract class PreferenceFragment extends androidx.preference.PreferenceF
         onPreferenceChangeListener.onPreferenceChange(preference, newValue);
     }
 
-    protected void removeOrDisablePreference(final String preferenceName) {
-        removeOrDisablePreference(findPreference(preferenceName));
+    protected void disablePreference(final String preferenceName) {
+        disablePreference(findPreference(preferenceName));
     }
 
-    protected void removeOrDisablePreference(final Preference preference) {
+    protected void disablePreference(final Preference preference) {
+        if (preference == null)
+            return;
+
+        preference.setEnabled(false);
+    }
+
+    protected void removePreference(final String preferenceName) {
+        removePreference(findPreference(preferenceName));
+    }
+
+    protected void removePreference(final Preference preference) {
         if (preference == null)
             return;
 

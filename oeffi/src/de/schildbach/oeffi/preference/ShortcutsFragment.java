@@ -55,7 +55,7 @@ public class ShortcutsFragment extends PreferenceFragment {
         if (Application.getInstance().isDriverMode())
             setupActionPreference(KEY_SHORTCUTS_OPERATIONS, OperationsShortcutActionHandler.class);
         else
-            removeOrDisablePreference(KEY_SHORTCUTS_OPERATIONS);
+            removePreference(KEY_SHORTCUTS_OPERATIONS);
     }
 
     public static class DirectionsShortcutActionHandler extends ActionHandler {

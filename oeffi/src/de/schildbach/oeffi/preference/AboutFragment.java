@@ -71,7 +71,7 @@ public class AboutFragment extends PreferenceFragment {
             prefMarketApp.setSummary(marketUri.toString());
             prefMarketApp.setIntent(getViewUrlIntent(marketUri.toString()));
         } else {
-            removeOrDisablePreference(prefMarketApp);
+            removePreference(prefMarketApp);
         }
 
         final String changeLogUrl = application.getString(R.string.about_changelog_url);
@@ -89,14 +89,14 @@ public class AboutFragment extends PreferenceFragment {
             setupActionPreference(KEY_ABOUT_SHARE_INSTRUCTIONS, AboutFragment.class, ShareInstallationInstructionsActionHandler.class);
             setupActionPreference(KEY_ABOUT_SHOW_QR, AboutFragment.class, ShowQrActionHandler.class);
         } else {
-            removeOrDisablePreference(KEY_ABOUT_CHECK_UPDATE);
-            removeOrDisablePreference(KEY_ABOUT_UPDATE);
-            removeOrDisablePreference(KEY_ABOUT_DOWNLOAD_APK);
-            removeOrDisablePreference(KEY_ABOUT_SHARE_APK);
-            removeOrDisablePreference(KEY_ABOUT_SHARE_INSTRUCTIONS);
-            removeOrDisablePreference(KEY_ABOUT_SHOW_QR);
-            removeOrDisablePreference(KEY_ABOUT_SHOW_QR);
-            removeOrDisablePreference(KEY_ABOUT_APP_UPDATE_CATEGORY);
+            removePreference(KEY_ABOUT_CHECK_UPDATE);
+            removePreference(KEY_ABOUT_UPDATE);
+            removePreference(KEY_ABOUT_DOWNLOAD_APK);
+            removePreference(KEY_ABOUT_SHARE_APK);
+            removePreference(KEY_ABOUT_SHARE_INSTRUCTIONS);
+            removePreference(KEY_ABOUT_SHOW_QR);
+            removePreference(KEY_ABOUT_SHOW_QR);
+            removePreference(KEY_ABOUT_APP_UPDATE_CATEGORY);
         }
 
         setupActionPreference(KEY_ABOUT_VERSION, AboutFragment.class, EnableExtrasActionHandler.class);

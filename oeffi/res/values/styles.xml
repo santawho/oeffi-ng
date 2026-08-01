@@ -44,7 +44,14 @@
     </style>
 
     <style name="My.Theme.Preference" parent="@style/My.Theme">
+        <!-- reset the textViewStyle to the system default and override especially for AndroidX preferences -->
+        <item name="android:textViewStyle">@style/My.Preference.Widget.TextView</item>
 <!--        <item name="android:actionBarStyle">@style/My.Widget.ActionBar</item>-->
+    </style>
+
+    <style name="My.Preference.Widget.TextView" parent="Widget.AppCompat.TextView">
+        <!-- WARNING: do not attempt to override the textColor, it will break AndroidX internal state selector -->
+        <item name="android:textSize">@dimen/font_size_large</item>
     </style>
 
     <style name="My.Theme.Translucent" parent="@style/My.Theme">
