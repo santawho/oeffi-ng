@@ -231,8 +231,9 @@ public abstract class OeffiActivity extends AppCompatActivity
         final Configuration overrideConfiguration = Application.getInstance().updateOverrideConfiguration(this, initialConfiguration);
         // applyOverrideConfiguration(overrideConfiguration);
         // super.attachBaseContext(base);
-        super.attachBaseContext(ResourcesInterceptor.getContext(
-                base.createConfigurationContext(overrideConfiguration)));
+        final Context configurationContext = base.createConfigurationContext(overrideConfiguration);
+        final Context interceptorContext = ResourcesInterceptor.getContext(configurationContext);
+        super.attachBaseContext(interceptorContext);
     }
 
     protected boolean isTakeDriverModeFromApplication() {

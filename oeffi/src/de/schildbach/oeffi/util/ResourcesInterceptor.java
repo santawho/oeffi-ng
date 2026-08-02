@@ -20,7 +20,6 @@ package de.schildbach.oeffi.util;
 import static java.util.Objects.requireNonNull;
 
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
@@ -89,6 +88,54 @@ public class ResourcesInterceptor extends Resources {
                 resources = new ResourcesInterceptor(getBaseContext().getResources());
             return resources;
         }
+
+//        private LayoutInflater layoutInflaterInterceptor;
+//
+//        @Override
+//        public Object getSystemService(final String name) {
+//            if (Context.LAYOUT_INFLATER_SERVICE.equals(name)) {
+//                if (layoutInflaterInterceptor == null) {
+//                    final LayoutInflater original = LayoutInflater.from(getBaseContext());
+//                    layoutInflaterInterceptor = new LayoutInflaterInterceptor(original, this);
+//                }
+//                return layoutInflaterInterceptor;
+//            }
+//            return super.getSystemService(name);
+//        }
+//    }
+//
+//    public static class LayoutInflaterInterceptor extends LayoutInflater {
+//        final Context newContext;
+//
+//        protected LayoutInflaterInterceptor(final LayoutInflater original, final Context newContext) {
+//            super(original, newContext);
+//            this.newContext = newContext;
+//        }
+//
+//        @Override
+//        public LayoutInflater cloneInContext(final Context newContext) {
+//            return new LayoutInflaterInterceptor(this, newContext);
+//        }
+//
+//        private static final String[] classPrefixes = {
+//                "android.widget.",
+//                "android.view.",
+//                "android.webkit."
+//        };
+//
+//        @Override
+//        protected View onCreateView(final String name, final AttributeSet attrs) throws ClassNotFoundException {
+//            for (final String prefix : classPrefixes) {
+//                try {
+//                    final View view = createView(name, prefix, attrs);
+//                    if (view != null)
+//                        return view;
+//                } catch (ClassNotFoundException e) {
+//                    // loop
+//                }
+//            }
+//            return super.onCreateView(name, attrs);
+//        }
     }
 
     private static class ResourcesMapper {
@@ -316,6 +363,15 @@ public class ResourcesInterceptor extends Resources {
     @Nullable
     @Override
     public Drawable getDrawableForDensity(final int id, final int density, @Nullable final Theme theme) {
+//example ..
+//        if (id == R.drawable.list_entry_background) {
+//            final StateListDrawable stateListDrawable = new StateListDrawable();
+//            stateListDrawable.addState(new int[] {android.R.attr.state_activated}, new ColorDrawable(getColor(R.color.bg_selected_entry)));
+//            try (final TypedArray ta = theme.obtainStyledAttributes(new int[]{R.attr.bg_level0})) {
+//                stateListDrawable.addState(new int[] {}, new ColorDrawable(getColor(ta.getResourceId(0, android.R.color.black))));
+//            }
+//            return stateListDrawable;
+//        }
 //        return baseResources.getDrawableForDensity(id, density, theme);
         return super.getDrawableForDensity(id, density, theme);
     }
@@ -505,12 +561,6 @@ public class ResourcesInterceptor extends Resources {
     @Override
     public void parseBundleExtras(final XmlResourceParser parser, final Bundle outBundle) throws IOException, XmlPullParserException {
         baseResources.parseBundleExtras(parser, outBundle);
-    }
-
-    public static void registerResourcePaths(@NonNull final String uniqueId, @NonNull final ApplicationInfo appInfo) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM)
-            return;
-        Resources.registerResourcePaths(uniqueId, appInfo);
     }
 
     @Override
