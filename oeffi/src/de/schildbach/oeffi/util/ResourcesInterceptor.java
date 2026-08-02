@@ -59,16 +59,18 @@ import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
 
 public class ResourcesInterceptor extends Resources {
-    public static Context getContext(final Context baseContext) {
-        return new ContextWrapper(baseContext, null);
-    }
-
-    public static Context getContext(final Context baseContext, final Resources resources) {
+    public static Context getApplicationContext(final Context baseContext, final Resources resources, final Properties properties) {
+        if (properties == null)
+            return baseContext;
+        mapper = new ResourcesMapper(resources);
+        mapper.setConfiguration(properties);
         return new ContextWrapper(baseContext, resources);
     }
 
-    public static void setConfiguration(final Properties properties) {
-        mapper.setConfiguration(properties);
+    public static Context getActivityContext(final Context baseContext) {
+        if (mapper == null)
+            return baseContext;
+        return new ContextWrapper(baseContext, null);
     }
 
     public static class ContextWrapper extends android.content.ContextWrapper {
@@ -78,8 +80,6 @@ public class ResourcesInterceptor extends Resources {
             super(baseContext);
             if (explicitResources != null)
                 this.resources = new ResourcesInterceptor(explicitResources);
-            if (mapper == null)
-                mapper = new ResourcesMapper(explicitResources);
         }
 
         @Override

@@ -134,19 +134,23 @@ public class Application extends android.app.Application {
 
     @Override
     public Resources getResources() {
+        if (resourcesInterceptorContext == this)
+            return super.getResources();
         if (resourcesInterceptorContext == null) {
-            resourcesInterceptorContext = ResourcesInterceptor.getContext(this, super.getResources());
             prefs = PreferenceManager.getDefaultSharedPreferences(this);
             final String prefValue = prefs.getString(CUSTOMIZATION_PREFS_KEY, null);
+            Properties properties = null;
             if (prefValue != null) {
                 try {
-                    final Properties properties = new Properties();
+                    properties = new Properties();
                     properties.load(new StringReader(prefValue));
-                    ResourcesInterceptor.setConfiguration(properties);
                 } catch (final IOException ioe) {
                     log.error("cannot load properties: {}", ioe.getMessage());
+                    properties = null;
                 }
             }
+            resourcesInterceptorContext = ResourcesInterceptor.getApplicationContext(
+                    this, super.getResources(), properties);
         }
         return resourcesInterceptorContext.getResources();
     }

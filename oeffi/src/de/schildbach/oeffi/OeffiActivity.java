@@ -232,7 +232,7 @@ public abstract class OeffiActivity extends AppCompatActivity
         // applyOverrideConfiguration(overrideConfiguration);
         // super.attachBaseContext(base);
         final Context configurationContext = base.createConfigurationContext(overrideConfiguration);
-        final Context interceptorContext = ResourcesInterceptor.getContext(configurationContext);
+        final Context interceptorContext = ResourcesInterceptor.getActivityContext(configurationContext);
         super.attachBaseContext(interceptorContext);
     }
 
