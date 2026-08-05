@@ -99,9 +99,13 @@ public class PlanViewHolder extends RecyclerView.ViewHolder {
 
         final Date now = new Date();
         final Date validFrom = plan.validFrom;
-        final boolean valid = validFrom == null || validFrom.before(now);
-        validFromView.setText(
-                valid ? null : context.getString(R.string.plans_picker_entry_valid_from, dateFormat.format(validFrom)));
+        if (validFrom == null) {
+            validFromView.setText(null);
+        } else {
+            validFromView.setText(context.getString(R.string.plans_picker_entry_valid_from, dateFormat.format(validFrom)));
+            if (validFrom.after(now))
+                validFromView.setTextColor(context.getColor(R.color.fg_highlighted));
+        }
 
         if (plan.networkId != null) {
             final NetworkResources networkResources = NetworkResources.instance(context, plan.networkId);
