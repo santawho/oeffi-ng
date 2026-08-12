@@ -1848,7 +1848,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final long diffMaxSecs = (depMaxTime - arrMaxTime) / 1000 - 60;
             final long leftMinSecs = diffMinSecs - requiredSecs;
             final long leftMaxSecs = diffMaxSecs - requiredSecs;
-            timeText = Long.toString((diffMaxSecs + 30) / 60);
+            final long diffMaxMins = diffMaxSecs < 0 ? -((-diffMaxSecs + 30) / 60) : (diffMaxSecs + 30) / 60;
+            timeText = Long.toString(diffMaxMins);
             final String timeExplainText;
             if (arrDelaySecs != 0) {
                 if (depDelaySecs != 0) {
@@ -1863,12 +1864,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
             if (diffMaxSecs < 0) {
                 timeIsCritical = true;
-                transferText = getString(R.string.directions_trip_conneval_missed, (-diffMaxSecs) / 60, timeExplainText);
-                timeText = Long.toString(-((-diffMaxSecs + 30) / 60));
+                transferText = getString(R.string.directions_trip_conneval_missed, diffMaxMins, timeExplainText);
+                timeText = Long.toString(diffMaxMins);
                 if (isWalkIcon)
                     iconResId = R.drawable.ic_directions_walk_sprint_grey600_24dp;
             } else {
-                final long diffMaxMins = diffMaxSecs / 60;
                 if (leftMaxSecs < 0) {
                     timeIsCritical = true;
                     if (diffMinSecs < 0) {
