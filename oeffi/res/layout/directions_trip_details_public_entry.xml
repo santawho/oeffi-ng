@@ -28,7 +28,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:baselineAligned="true"
             android:paddingStart="@dimen/text_padding_horizontal"
             android:paddingEnd="0px">
 
@@ -64,7 +63,8 @@
         <de.schildbach.oeffi.util.ToggleImageButton
             android:id="@+id/directions_trip_details_public_entry_expand"
             android:layout_width="@dimen/action_bar_button_width"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
             android:scaleType="center"
             android:src="@drawable/ic_expand_black_24dp"
             android:tint="@color/fg_less_significant" />

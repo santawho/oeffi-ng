@@ -1340,14 +1340,14 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         // if (showDestination || showAccessibility)
         //     lineView.setMaxWidth(res.getDimensionPixelSize(R.dimen.line_max_width));
 
-        final LinearLayout lineGroup = row
-                .findViewById(R.id.directions_trip_details_public_entry_line_group);
-        if (showDestination)
-            lineGroup.setBaselineAlignedChildIndex(0);
-        else if (showAccessibility)
-            lineGroup.setBaselineAlignedChildIndex(1);
-        else if (showBicycleCarriage)
-            lineGroup.setBaselineAlignedChildIndex(2);
+//        final LinearLayout lineGroup = row
+//                .findViewById(R.id.directions_trip_details_public_entry_line_group);
+//        if (showDestination)
+//            lineGroup.setBaselineAlignedChildIndex(0);
+//        else if (showAccessibility)
+//            lineGroup.setBaselineAlignedChildIndex(1);
+//        else if (showBicycleCarriage)
+//            lineGroup.setBaselineAlignedChildIndex(2);
 
         final TextView destinationView = row
                 .findViewById(R.id.directions_trip_details_public_entry_destination);
@@ -1396,10 +1396,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
 
         final View accessibilityView = row.findViewById(R.id.directions_trip_details_public_entry_accessibility);
-        accessibilityView.setVisibility(showAccessibility ? View.VISIBLE : View.GONE);
+        ViewUtils.setVisibility(accessibilityView, showAccessibility);
 
         final View bicycleCarriageView = row.findViewById(R.id.directions_trip_details_public_entry_bicycle_carriage);
-        bicycleCarriageView.setVisibility(showBicycleCarriage ? View.VISIBLE : View.GONE);
+        ViewUtils.setVisibility(bicycleCarriageView, showBicycleCarriage);
 
         if (!renderConfig.isJourney && leg.journeyRef != null
                 && NetworkProviderFactory.provider(network).hasCapabilities(NetworkProvider.Capability.JOURNEY)) {
