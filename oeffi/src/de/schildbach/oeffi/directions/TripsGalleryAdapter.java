@@ -910,8 +910,8 @@ public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.
             for (final Leg leg : legs) {
                 if (leg instanceof Public) {
                     final Public publicLeg = (Public) leg;
-                    final boolean isFeeder = renderConfig.feederJourneyRef != null && renderConfig.feederJourneyRef.equals(publicLeg.journeyRef);
-                    final boolean isConnection = renderConfig.connectionJourneyRef != null && renderConfig.connectionJourneyRef.equals(publicLeg.journeyRef);
+                    final boolean isFeeder = renderConfig.feederJourneyRef != null && renderConfig.feederJourneyRef.equalsWithLog(publicLeg.journeyRef);
+                    final boolean isConnection = renderConfig.connectionJourneyRef != null && renderConfig.connectionJourneyRef.equalsWithLog(publicLeg.journeyRef);
                     final Line line = publicLeg.line;
                     final Style style = line.style;
                     final float radius;
