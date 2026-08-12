@@ -1448,10 +1448,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         boolean isHighlightedLocation = highlightedLocationIndex == 0;
         isRowSimulated |= isHighlightedLocation;
+        final boolean highlightDepartureTime = leg.getDepartureTime().equals(highlightedTime);
         addStopRow(stopsView,
                 PearlView.Type.DEPARTURE, false,
                 0, departureStop, "-", legC,
-                leg.getDepartureTime().equals(highlightedTime),
+                highlightDepartureTime, highlightDepartureTime,
                 isHighlightedLocation,
                 preferPlanTime,
                 now, collapseColumns,
@@ -1489,12 +1490,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     final Stop simulatedStop = isRowSimulated ? possiblySimulatedStop : null;
                     final boolean showLongStay = isShowLongStay(stop, isRowSimulated);
 
+                    final boolean highlightAnyTime = isArrivalTimeHighlighted || isDepartureTimeHighlighted;
                     if (isArrivalSection) {
                         addStopRow(stopsView,
                                 hasStopTime ? PearlView.Type.INTERMEDIATE_ARRIVAL : PearlView.Type.PASSING,
                                 showLongStay,
                                 stopIndex, stop, previousPlace, legC,
-                                isArrivalTimeHighlighted || (!showLongStay && isDepartureTimeHighlighted),
+                                highlightAnyTime, isArrivalTimeHighlighted || (!showLongStay && isDepartureTimeHighlighted),
                                 isHighlightedLocation,
                                 preferPlanTime,
                                 now, collapseColumns, simulatedStop);
@@ -1504,7 +1506,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                                     PearlView.Type.DEPARTURE_FOR_INTERMEDIATE_ARRIVAL,
                                     showLongStay,
                                     stopIndex, stop, previousPlace, legC,
-                                    isDepartureTimeHighlighted,
+                                    highlightAnyTime, isDepartureTimeHighlighted,
                                     isHighlightedLocation,
                                     preferPlanTime,
                                     now, collapseColumns, simulatedStop);
@@ -1515,7 +1517,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                                     PearlView.Type.ARRIVAL_FOR_INTERMEDIATE_DEPARTURE,
                                     showLongStay,
                                     stopIndex, stop, previousPlace, legC,
-                                    isArrivalTimeHighlighted,
+                                    highlightAnyTime, isArrivalTimeHighlighted,
                                     isHighlightedLocation,
                                     preferPlanTime,
                                     now, collapseColumns, simulatedStop);
@@ -1525,7 +1527,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                                 hasStopTime ? PearlView.Type.INTERMEDIATE_DEPARTURE : PearlView.Type.PASSING,
                                 showLongStay,
                                 stopIndex, stop, previousPlace, legC,
-                                isDepartureTimeHighlighted || (!showLongStay && isArrivalTimeHighlighted),
+                                highlightAnyTime, isDepartureTimeHighlighted || (!showLongStay && isArrivalTimeHighlighted),
                                 isHighlightedLocation,
                                 preferPlanTime,
                                 now, collapseColumns, simulatedStop);
@@ -1571,10 +1573,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         isHighlightedLocation = highlightedLocationIndex == numIntermediateStops + 1;
         isRowSimulated |= isHighlightedLeg;
+        final boolean highlightArrivalTime = leg.getArrivalTime().equals(highlightedTime);
         addStopRow(stopsView,
                 PearlView.Type.ARRIVAL, false,
                 numIntermediateStops + 1, leg.arrivalStop, previousPlace, legC,
-                leg.getArrivalTime().equals(highlightedTime),
+                highlightArrivalTime, highlightArrivalTime,
                 isHighlightedLocation,
                 preferPlanTime,
                 now, collapseColumns,
@@ -2381,14 +2384,14 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final int backgroundColor,
             final PearlView.Type pearlType,
             final Style style,
-            final boolean highlighted,
+            final int pearlHighlightColor,
             final Paint.FontMetrics fontMetrics) {
         // pearl
         final PearlView pearlView = tableRow.findViewById(R.id.directions_trip_details_public_entry_stop_pearl);
         pearlView.setType(pearlType);
         pearlView.setStyle(style);
         pearlView.setFontMetrics(fontMetrics);
-        pearlView.setHighlighted(highlighted);
+        pearlView.setHighlighted(pearlHighlightColor);
 
         tableLayout.addView(tableRow);
 
@@ -2404,7 +2407,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final Stop stop,
             final String previousPlace,
             final TripRenderer.LegContainer legC,
-            final boolean highlightTime,
+            final boolean highlightAnyTime,
+            final boolean highlightThisTime,
             final boolean highlightLocation,
             final boolean preferPlanTime,
             final Date now,
@@ -2622,7 +2626,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final boolean isShowSimulatedLine;
 
         if (providedTime != null) {
-            int stopTimeColor = highlightTime ? colorHighlighted
+            int stopTimeColor = highlightThisTime ? colorHighlighted
                     : isCancelled ? colorCancelled
                     : colorSignificant;
             if (simulatedTime == null) {
@@ -2650,9 +2654,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             ViewUtils.setCancelledStrikeThru(stopTimeProvidedView, isCancelled);
             stopDateProvidedView.setTextColor(stopTimeColor);
             stopTimeProvidedView.setTextColor(stopTimeColor);
-            final boolean stopTimeBold = highlightTime || isCancelled || (renderConfig.isJourney ? isEntryOrExit
+            final boolean stopTimeBold = highlightThisTime || isCancelled || (renderConfig.isJourney ? isEntryOrExit
                     : (pearlType == PearlView.Type.DEPARTURE || pearlType == PearlView.Type.ARRIVAL));
-            stopDateProvidedView.setTypeface(null, (highlightTime ? Typeface.BOLD : 0) + (isTimePredicted ? Typeface.ITALIC : 0));
+            stopDateProvidedView.setTypeface(null, (highlightThisTime ? Typeface.BOLD : 0) + (isTimePredicted ? Typeface.ITALIC : 0));
             stopTimeProvidedView.setTypeface(null, (stopTimeBold ? Typeface.BOLD : 0) + (isTimePredicted ? Typeface.ITALIC : 0));
         } else {
             stopDateProvidedView.setText(null);
@@ -2670,12 +2674,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final String timeText = Formats.formatTime(timeZoneSelector, displayTime);
             stopTimeSimulatedView.setText(isTimeDeparture ? timeText + "°" : timeText);
             // ViewUtils.setCancelledStrikeThru(stopTimeSimulatedView, isCancelled);
-            final boolean stopTimeBold = highlightTime || (renderConfig.isJourney ? isEntryOrExit
+            final boolean stopTimeBold = highlightThisTime || (renderConfig.isJourney ? isEntryOrExit
                     : (pearlType == PearlView.Type.DEPARTURE || pearlType == PearlView.Type.ARRIVAL));
-            stopDateSimulatedView.setTypeface(null, (highlightTime ? Typeface.BOLD : 0) + (isTimePredicted ? Typeface.ITALIC : 0));
+            stopDateSimulatedView.setTypeface(null, (highlightThisTime ? Typeface.BOLD : 0) + (isTimePredicted ? Typeface.ITALIC : 0));
             stopTimeSimulatedView.setTypeface(null, (stopTimeBold ? Typeface.BOLD : 0) + (isTimePredicted ? Typeface.ITALIC : 0));
 
-            final int stopTimeColor = getStopTimeColor(simulatedDelay);
+            final int stopTimeColor = getSimulatedStopTimeColor(simulatedDelay);
             stopDateSimulatedView.setTextColor(stopTimeColor);
             stopTimeSimulatedView.setTextColor(stopTimeColor);
             stopDelaySimulatedView.setTextColor(stopTimeColor);
@@ -2763,25 +2767,33 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             remainingView.setVisibility(View.GONE);
         }
 
+
+        final int pearlHighlightColor;
+        if (highlightLocation)
+            pearlHighlightColor = colorSimulated;
+        else if (highlightAnyTime)
+            pearlHighlightColor = colorHighlighted;
+        else
+            pearlHighlightColor = 0;
+
         final Paint.FontMetrics fontMetrics = stopNameView.getPaint().getFontMetrics();
-        final boolean highlight = highlightLocation || highlightTime;
 
         if (arrivalRow != null)
-            addStopRow(tableLayout, arrivalRow, backgroundColor, PearlView.Type.PASSING, style, highlight, fontMetrics);
+            addStopRow(tableLayout, arrivalRow, backgroundColor, PearlView.Type.PASSING, style, pearlHighlightColor, fontMetrics);
 
-        addStopRow(tableLayout, row, backgroundColor, pearlType, style, highlight, fontMetrics);
+        addStopRow(tableLayout, row, backgroundColor, pearlType, style, pearlHighlightColor, fontMetrics);
 
         if (departureRow != null)
-            addStopRow(tableLayout, departureRow, backgroundColor, PearlView.Type.PASSING, style, highlight, fontMetrics);
+            addStopRow(tableLayout, departureRow, backgroundColor, PearlView.Type.PASSING, style, pearlHighlightColor, fontMetrics);
 
         if (isShowSimulatedLine && pearlType != PearlView.Type.ARRIVAL) {
             // add a divider row
             final TableRow divider = (TableRow) inflater.inflate(R.layout.directions_trip_details_public_entry_stop_divider, null);
-            addStopRow(tableLayout, divider, backgroundColor, PearlView.Type.PASSING, style, highlight, fontMetrics);
+            addStopRow(tableLayout, divider, backgroundColor, PearlView.Type.PASSING, style, pearlHighlightColor, fontMetrics);
         }
     }
 
-    protected int getStopTimeColor(final Long simulatedDelay) {
+    protected int getSimulatedStopTimeColor(final Long simulatedDelay) {
         return colorSimulated;
     }
 

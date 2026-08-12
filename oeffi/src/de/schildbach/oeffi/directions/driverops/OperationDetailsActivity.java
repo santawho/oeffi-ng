@@ -167,7 +167,7 @@ public class OperationDetailsActivity extends TripDetailsActivity {
     }
 
     @Override
-    protected int getStopTimeColor(final Long simulatedDelay) {
+    protected int getSimulatedStopTimeColor(final Long simulatedDelay) {
         if (simulatedDelay == null)
             return colorSimulated;
         if (simulatedDelay < -thresholdEarlyMillis)
@@ -267,7 +267,7 @@ public class OperationDetailsActivity extends TripDetailsActivity {
 
         if (plannedTime != null && predictedTime != null) {
             arrivalDelay = predictedTime - plannedTime;
-            color = getStopTimeColor(arrivalDelay);
+            color = getSimulatedStopTimeColor(arrivalDelay);
         } else {
             arrivalDelay = null;
             color = colorSimulated;
@@ -351,7 +351,7 @@ public class OperationDetailsActivity extends TripDetailsActivity {
             if (plannedTime != null && predictedTime != null) {
                 departureDelay = nowTime - plannedTime;
                 departureDelayIsNowBased = true;
-                color = getStopTimeColor(departureDelay);
+                color = getSimulatedStopTimeColor(departureDelay);
             } else {
                 departureDelay = null;
                 departureDelayIsNowBased = false;
@@ -365,7 +365,7 @@ public class OperationDetailsActivity extends TripDetailsActivity {
             if (plannedTime != null && predictedTime != null) {
                 departureDelay = predictedTime - plannedTime;
                 departureDelayIsNowBased = false;
-                color = getStopTimeColor(departureDelay);
+                color = getSimulatedStopTimeColor(departureDelay);
             } else {
                 departureDelay = null;
                 departureDelayIsNowBased = false;
@@ -556,7 +556,7 @@ public class OperationDetailsActivity extends TripDetailsActivity {
             nearestArrivalView.setVisibility(View.INVISIBLE);
             nearestArrivalArrowView.setVisibility(View.INVISIBLE);
         } else {
-            color = getStopTimeColor(nearestArrivalDelay);
+            color = getSimulatedStopTimeColor(nearestArrivalDelay);
             isNextAction = isAtNearestStop ? nearestDepartureDelay == null : !sectionIsAfterNearestStop;
             nearestArrivalView.setVisibility(View.VISIBLE);
             nearestArrivalArrowView.setVisibility(View.VISIBLE);
@@ -598,7 +598,7 @@ public class OperationDetailsActivity extends TripDetailsActivity {
         if (nearestDepartureDelay == null) {
             nearestDepartureView.setVisibility(View.INVISIBLE);
         } else {
-            color = getStopTimeColor(nearestDepartureDelay);
+            color = getSimulatedStopTimeColor(nearestDepartureDelay);
             isNextAction = isAtNearestStop;
             nearestDepartureView.setVisibility(View.VISIBLE);
             delayTextColor = isNextAction ? colorDefaultBackground : color;
@@ -635,7 +635,7 @@ public class OperationDetailsActivity extends TripDetailsActivity {
             nextArrivalView.setVisibility(View.INVISIBLE);
             nextArrivalArrowView.setVisibility(View.INVISIBLE);
         } else {
-            color = getStopTimeColor(nextArrivalDelay);
+            color = getSimulatedStopTimeColor(nextArrivalDelay);
             isNextAction = !isAtNearestStop && sectionIsAfterNearestStop;
             nextArrivalView.setVisibility(View.VISIBLE);
             nextArrivalArrowView.setVisibility(View.VISIBLE);

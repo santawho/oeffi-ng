@@ -36,7 +36,7 @@ public class PearlView extends View {
     private static final float SAFETY_MARGIN = 2.0f;
 
     private Type type = null;
-    private boolean isHighlighted;
+    private int colorHighlighted;
     private Style style = null;
     private float cellHeight;
     private float endMarkerRadius;
@@ -48,7 +48,6 @@ public class PearlView extends View {
     private final float intermediateSizeRadius;
     private final float stopStrokeWidth;
     private final int colorBackground;
-    private final int colorHighlight;
 
     private final Paint paint = new Paint();
 
@@ -83,7 +82,6 @@ public class PearlView extends View {
         stopStrokeWidth = res.getDisplayMetrics().density;
 
         colorBackground = ViewUtils.getAttrColor(context, R.attr.bg_level0);
-        colorHighlight = res.getColor(R.color.fg_highlighted);
 
         paint.setAntiAlias(true);
     }
@@ -92,8 +90,8 @@ public class PearlView extends View {
         this.type = type;
     }
 
-    public void setHighlighted(final boolean highlighted) {
-        isHighlighted = highlighted;
+    public void setHighlighted(final int colorHighlighted) {
+        this.colorHighlighted = colorHighlighted;
     }
 
     public void setStyle(final Style style) {
@@ -123,10 +121,9 @@ public class PearlView extends View {
     }
 
     private void drawHighlight(final Canvas canvas, final float x, final float y) {
-
-        if (isHighlighted) {
+        if (colorHighlighted != 0) {
             paint.setStyle(Paint.Style.FILL);
-            paint.setColor(colorHighlight);
+            paint.setColor(colorHighlighted);
             canvas.drawCircle(x, y, highlightRadius, paint);
         }
     }
