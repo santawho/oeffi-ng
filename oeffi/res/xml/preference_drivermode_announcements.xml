@@ -41,4 +41,20 @@
         android:title="@string/extras_drivermode_announcements_lead_time_title"
         android:summary="@string/extras_drivermode_announcements_lead_time_summary" />
 
+    <CheckBoxPreference
+        android:key="extras_drivermode_announce_leaving_enabled"
+        android:dependency="extras_drivermode_announcements_enabled"
+        android:defaultValue="false"
+        android:title="@string/extras_drivermode_announce_leaving_enabled_title"
+        android:summary="@string/extras_drivermode_announce_leaving_enabled_summary" />
+
+    <EditTextPreference
+        android:key="extras_drivermode_announce_leaving_time"
+        android:dependency="extras_drivermode_announce_leaving_enabled"
+        android:singleLine="true"
+        android:inputType="number"
+        android:defaultValue="@string/default_drivermode_announce_leaving_time"
+        android:title="@string/extras_drivermode_announce_leaving_time_title"
+        android:summary="@string/extras_drivermode_announce_leaving_time_summary" />
+
 </PreferenceScreen>

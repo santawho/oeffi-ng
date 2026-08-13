@@ -46,6 +46,8 @@ import de.schildbach.oeffi.util.Formats;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Destination;
 import de.schildbach.pte.dto.JourneyRef;
+import de.schildbach.pte.dto.Line;
+import de.schildbach.pte.dto.LineDestination;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.PTDate;
 import de.schildbach.pte.dto.Point;
@@ -414,7 +416,10 @@ public class OperationDetailsActivity extends TripDetailsActivity {
     protected void processNearestStop(
             final Stop nearestStop,
             final boolean isEndOfJourney,
-            final long timeLeftToStopMillis) {
+            final long timeLeftToStopMillis,
+            final long timePassedSincePreviousStopMillis,
+            final LineDestination lineDestination,
+            final Location prevStop) {
         // nothing to do here, see sub-classes
     }
 
@@ -467,9 +472,11 @@ public class OperationDetailsActivity extends TripDetailsActivity {
 
         // final Trip.Public operationLeg = operationLegC.publicLeg;
         final Trip.Public simulatedLeg = operationLegC.simulatedPublicLeg;
+        final Line line = simulatedLeg.line;
+        final LineDestination lineDestination = new LineDestination(line, simulatedLeg.destination);
 
         final LineView lineView = findViewById(R.id.operation_next_event_line);
-        lineView.setLine(simulatedLeg.line);
+        lineView.setLine(line);
         final TextView destinationView = findViewById(R.id.operation_next_event_destination);
         final Destination destination = simulatedLeg.destination;
         destinationView.setText(destination == null ? null : Constants.DESTINATION_ARROW_PREFIX
@@ -482,6 +489,7 @@ public class OperationDetailsActivity extends TripDetailsActivity {
 
         final Stop nearestStop = TripRenderer.LegContainer.getPublicStopByIndex(simulatedLeg, nearestStopIndex);
         final Stop nextStop = TripRenderer.LegContainer.getPublicStopByIndex(simulatedLeg, nearestStopIndex + 1);
+        final Stop prevStop = TripRenderer.LegContainer.getPublicStopByIndex(simulatedLeg, nearestStopIndex - 1);
 
         if (nearestStop == null)
             return;
@@ -502,22 +510,50 @@ public class OperationDetailsActivity extends TripDetailsActivity {
             tPlan = nearestStop.plannedDepartureTime;
             nearestDepartureDelay = tPlan == null ? null : now - tPlan.getTime();
             nearestDepartureDelayIsNowBased = true;
-            processNearestStop(nearestStop, isEndOfJourney, 0);
+            processNearestStop(
+                    nearestStop,
+                    isEndOfJourney,
+                    0,
+                    -1,
+                    lineDestination,
+                    nearestStop.location);
         } else if (sectionIsAfterNearestStop) {
             // leaving nearest stop
             nearestArrivalDelay = null;
             nearestArrivalDelayIsNowBased = false;
             tPlan = nearestStop.plannedDepartureTime;
+            final long timePassedSincePreviousStopMillis;
+            if (isEndOfJourney
+                    || nextStop.predictedArrivalTime == null
+                    || nextStop.plannedArrivalTime == null
+                    || nearestStop.plannedDepartureTime == null) {
+                timePassedSincePreviousStopMillis = -1;
+            } else {
+                timePassedSincePreviousStopMillis = now - (nextStop.predictedArrivalTime.getTime()
+                        - (nextStop.plannedArrivalTime.getTime() - nearestStop.plannedDepartureTime.getTime()));
+            }
             nearestDepartureDelay = tPlan == null ? null : now - tPlan.getTime();
             nearestDepartureDelayIsNowBased = true;
-            processNearestStop(nearestStop, isEndOfJourney, -1);
+            processNearestStop(
+                    nearestStop,
+                    isEndOfJourney,
+                    -1,
+                    timePassedSincePreviousStopMillis,
+                    lineDestination,
+                    nearestStop.location);
         } else {
             // approaching nearest stop
             tPlan = nearestStop.plannedArrivalTime;
             tPred = nearestStop.predictedArrivalTime;
             nearestArrivalDelay = tPlan == null ? null : tPred == null ? 0 : tPred.getTime() - tPlan.getTime();
             nearestArrivalDelayIsNowBased = false;
-            processNearestStop(nearestStop, isEndOfJourney, tPred == null ? 1 : tPred.getTime() - now);
+            processNearestStop(
+                    nearestStop,
+                    isEndOfJourney,
+                    tPred == null ? 1 : tPred.getTime() - now,
+                    Long.MAX_VALUE,
+                    lineDestination,
+                    prevStop == null ? null : prevStop.location);
 
             tPlan = nearestStop.plannedDepartureTime;
             tPred = nearestStop.predictedDepartureTime;

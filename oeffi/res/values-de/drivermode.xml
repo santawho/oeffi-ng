@@ -43,6 +43,10 @@
     <string name="extras_drivermode_announcements_this_stop_enabled_summary">Sage \"Dies ist XXX\" beim Anhalten</string>
     <string name="extras_drivermode_announcements_lead_time_title">Vorlaufzeit</string>
     <string name="extras_drivermode_announcements_lead_time_summary">Wieviel Zeit im Voraus sollen Ankündigungen gegeben werden  [%s Sek]</string>
+    <string name="extras_drivermode_announce_leaving_enabled_title">Linie ansagen</string>
+    <string name="extras_drivermode_announce_leaving_enabled_summary">Sage Linie und Richtung an nach dem Verlassen einer Haltestelle</string>
+    <string name="extras_drivermode_announce_leaving_time_title">Verzögerungszeit</string>
+    <string name="extras_drivermode_announce_leaving_time_summary">Wieviel Zeit soll verstreichen, bevor die Linie angesagt wird  [%s Sek]</string>
 
     <!-- navigation -->
     <string name="drivermode_navigation_action_cancel">Einsatz beenden</string>
@@ -52,5 +56,8 @@
     <string name="drivermode_announcement_next_stop">nächster Halt, %1$s</string>
     <string name="drivermode_announcement_this_stop">dies ist %1$s</string>
     <string name="drivermode_announcement_journey_end">Fahrtende. Auf Wiedersehen!</string>
+    <string name="drivermode_announcement_line_without_direction">%1$s %2$s</string>
+    <string name="drivermode_announcement_line_and_direction">%1$s %2$s Richtung %3$s</string>
+    <string name="drivermode_announcement_line_prefix">Linie</string>
 
 </resources>

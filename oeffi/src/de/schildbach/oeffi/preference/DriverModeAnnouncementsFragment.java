@@ -27,5 +27,6 @@ public class DriverModeAnnouncementsFragment extends PreferenceFragment {
         addPreferencesFromResource(R.xml.preference_drivermode_announcements);
 
         setupDynamicSummary("extras_drivermode_announcements_lead_time", R.string.extras_drivermode_announcements_lead_time_summary);
+        setupDynamicSummary("extras_drivermode_announce_leaving_time", R.string.extras_drivermode_announce_leaving_time_summary);
     }
 }

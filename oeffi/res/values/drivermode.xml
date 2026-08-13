@@ -7,6 +7,7 @@
     <string name="default_drivermode_navigation_refresh_charging_interval" translatable="false">1</string>
     <string name="default_drivermode_navigation_scroll_inhibit_interval" translatable="false">10</string>
     <string name="default_drivermode_announcements_lead_time" translatable="false">60</string>
+    <string name="default_drivermode_announce_leaving_time" translatable="false">30</string>
 
     <!-- preferences driver mode -->
     <string name="extras_drivermode_title">Drivers\' Mode</string>
@@ -54,7 +55,11 @@
     <string name="extras_drivermode_announcements_this_stop_enabled_title">Announce \"this\" stop</string>
     <string name="extras_drivermode_announcements_this_stop_enabled_summary">Say \"This is XXX\" when stopping</string>
     <string name="extras_drivermode_announcements_lead_time_title">Lead time</string>
-    <string name="extras_drivermode_announcements_lead_time_summary">How much time in advance shall the annpouncement be given  [%s secs]</string>
+    <string name="extras_drivermode_announcements_lead_time_summary">How much time in advance shall the announcement be given  [%s secs]</string>
+    <string name="extras_drivermode_announce_leaving_enabled_title">Announce line</string>
+    <string name="extras_drivermode_announce_leaving_enabled_summary">Tell line and direction when leaving from a station</string>
+    <string name="extras_drivermode_announce_leaving_time_title">Delay time</string>
+    <string name="extras_drivermode_announce_leaving_time_summary">How much time shall pass before announcing the line  [%s secs]</string>
 
     <!-- navigation -->
     <string name="drivermode_navigation_action_cancel">Stop operation</string>
@@ -64,5 +69,8 @@
     <string name="drivermode_announcement_next_stop">next stop, %1$s</string>
     <string name="drivermode_announcement_this_stop">this is %1$s</string>
     <string name="drivermode_announcement_journey_end">End of line. Take care and goodbye!</string>
+    <string name="drivermode_announcement_line_without_direction">%1$s %2$s</string>
+    <string name="drivermode_announcement_line_and_direction">%1$s %2$s to %3$s</string>
+    <string name="drivermode_announcement_line_prefix">line</string>
 
 </resources>

@@ -54,11 +54,14 @@ import de.schildbach.oeffi.directions.navigation.NotificationSoundManager;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.LineView;
 import de.schildbach.oeffi.util.Formats;
+import de.schildbach.oeffi.util.LocationHelper;
+import de.schildbach.oeffi.util.LocationUtils;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Destination;
+import de.schildbach.pte.dto.LineDestination;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.Stop;
 import de.schildbach.pte.dto.Trip;
@@ -136,6 +139,8 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
     private boolean permissionRequestRunning;
     private boolean announcementsEnabled = true;
     private int announcementLeadTimeSecs = 60;
+    private boolean announceLeavingEnabled = false;
+    private int announceLeavingDelayTimeSecs = 60;
     private boolean isStartupComplete = false;
     private boolean stillCheckForOtherNavigations;
     private long autoScrollInhibitTimeMs;
@@ -250,6 +255,10 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
                     "extras_drivermode_announcements_lead_time",
                     R.string.default_drivermode_announcements_lead_time);
             announcementsEnabled = prefs.getBoolean("extras_drivermode_announcements_initially_active_enabled", true);
+            announceLeavingEnabled = prefs.getBoolean("extras_drivermode_announce_leaving_enabled", false);
+            announceLeavingDelayTimeSecs = getIntegerValueFromPrefs(
+                    "extras_drivermode_announce_leaving_time",
+                    R.string.default_drivermode_announce_leaving_time);
             final ToggleImageButton soundButton = actionBar.addToggleButton(R.drawable.ic_sound_white_24dp,
                     R.string.drivermode_navigation_action_annoucements);
             soundButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -599,6 +608,7 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
     private String lastNearestStopIdentityId;
     private boolean nextStopHasBeenAnnounced;
     private boolean thisStopHasBeenAnnounced;
+    private boolean leavingHasBeenAnnounced;
     private boolean loggedLeaving, loggedHere;
     private long loggedApproachingMillis;
 
@@ -606,11 +616,15 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
     protected void processNearestStop(
             final Stop nearestStop,
             final boolean isEndOfJourney,
-            final long timeLeftToStopMillis) {
+            final long timeLeftToStopMillis,
+            final long timePassedSincePreviousStopMillis,
+            final LineDestination lineDestination,
+            final Location prevStop) {
         final Location location = nearestStop.location;
         final String identityId = nearestStop.location.identityId;
         final boolean isNewStop = identityId != null && !identityId.equals(lastNearestStopIdentityId);
         final boolean isFirstStop = lastNearestStopIdentityId == null;
+        final boolean announceLeaving;
 
         if (isNewStop) {
             loggedLeaving = false;
@@ -619,6 +633,15 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
             nextStopHasBeenAnnounced = isFirstStop && timeLeftToStopMillis <= 0;
             thisStopHasBeenAnnounced = false;
             lastNearestStopIdentityId = identityId;
+            announceLeaving = !leavingHasBeenAnnounced;
+            leavingHasBeenAnnounced = false;
+        } else {
+            announceLeaving = !leavingHasBeenAnnounced && timePassedSincePreviousStopMillis / 1000 > announceLeavingDelayTimeSecs;
+        }
+
+        if (announceLeaving) {
+            leavingHasBeenAnnounced = true;
+            announceLineAndDirection(lineDestination, prevStop);
         }
 
         if (timeLeftToStopMillis < 0) {
@@ -685,5 +708,38 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
                 gongSoundId,
                 null,
                 Collections.singletonList(sb.toString()));
+    }
+
+    private void announceLineAndDirection(
+            final LineDestination lineDestination,
+            final Location prevStop) {
+        if (!announcementsEnabled || !announceLeavingEnabled)
+            return;
+        final String lineName = lineDestination.line.label;
+        if (lineName == null || lineName.isEmpty())
+            return;
+        final String linePrefix = Character.isLetter(lineName.charAt(0)) ? "" : getString(R.string.drivermode_announcement_line_prefix);
+        final Destination destination = lineDestination.destination;
+        final Location location = destination == null ? null : destination.location;
+        final String locationName;
+        if (location == null) {
+            locationName = null;
+        } else {
+            locationName = NotificationSoundManager.makeSpeakableLocationName(
+                    Formats.fullLocationNameIfDifferentPlace(location, prevStop),
+                    location.language);
+        }
+
+        final String message;
+        if (locationName != null) {
+            message = getString(R.string.drivermode_announcement_line_and_direction, linePrefix, lineName, locationName);
+        } else {
+            message = getString(R.string.drivermode_announcement_line_without_direction, linePrefix, lineName);
+        }
+        NotificationSoundManager.getInstance().playAlarmSoundAndVibration(
+                AudioAttributes.USAGE_MEDIA,
+                0,
+                null,
+                Collections.singletonList(message));
     }
 }
