@@ -19,13 +19,15 @@ package de.schildbach.oeffi.stations;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.PendingIntent;
+import android.appwidget.AppWidgetManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -103,46 +105,67 @@ public class StationContextMenu extends androidx.appcompat.widget.PopupMenu {
         final DialogBuilder builder = DialogBuilder.get(context, R.layout.create_launcher_shortcut_dialog);
         final EditText nameView = builder.findViewById(R.id.create_launcher_shortcut_dialog_name);
         nameView.setText(location.uniqueShortName());
-        final RadioButton departuresRadioButton = builder.findViewById(R.id.create_launcher_shortcut_dialog_departures);
-        departuresRadioButton.setEnabled(location.type == LocationType.STATION);
+        final RadioButton departuresShortcutRadioButton = builder.findViewById(R.id.create_launcher_shortcut_dialog_departures);
+        final RadioButton departuresWidgetRadioButton = builder.findViewById(R.id.create_launcher_shortcut_dialog_departures_widget);
+        final boolean isStation = location.type == LocationType.STATION;
+        departuresShortcutRadioButton.setEnabled(isStation);
+        final AppWidgetManager widgetManager = AppWidgetManager.getInstance(context);
+        final boolean widgetSupported = widgetManager.isRequestPinAppWidgetSupported();
+        departuresWidgetRadioButton.setEnabled(isStation && widgetSupported);
         builder
             .setTitle(R.string.station_context_launcher_shortcut_title)
             .setPositiveButton(R.string.create_launcher_shortcut_dialog_button_ok, (dialog, which) -> {
-                final boolean departuresChecked = departuresRadioButton.isChecked();
+                final boolean departuresShortcutChecked = departuresShortcutRadioButton.isChecked();
+                final boolean departuresWidgetChecked = departuresWidgetRadioButton.isChecked();
                 final String shortcutName = nameView.getText().toString();
                 final String shortcutId;
                 final Intent shortcutIntent;
                 final int iconId;
                 final int defaultNameId;
                 final Class<? extends Activity> activityClass;
-                if (departuresChecked) {
-                    shortcutId = "departures-at-" + networkId.name() + "-" + location.id + "-" + shortcutName;
-                    shortcutIntent = StationDetailsActivity.fillIntent(
-                            new Intent(Intent.ACTION_MAIN, null, context, StationDetailsActivity.class)
-                                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK),
-                            networkId, location, null);
-                    iconId = R.mipmap.ic_oeffi_ng_stations_color_48dp;
-                    defaultNameId = R.string.departures_shortcut_default_name;
-                    activityClass = StationDetailsActivity.class;
+                if (departuresWidgetChecked) {
+                    WidgetPinningReceiver.name = shortcutName;
+                    WidgetPinningReceiver.networkId = networkId;
+                    WidgetPinningReceiver.location = location;
+                    final ComponentName componentName = new ComponentName(context, NearestFavoriteStationWidgetProvider.class);
+                    WidgetPinningReceiver.oldWidgetIds = widgetManager.getAppWidgetIds(componentName);
+                    widgetManager.requestPinAppWidget(
+                            componentName,
+                            null,
+                            PendingIntent.getBroadcast(
+                                    context, 0,
+                                    new Intent(context, WidgetPinningReceiver.class),
+                                    PendingIntent.FLAG_MUTABLE));
                 } else {
-                    shortcutId = "directions-to-" + networkId.name() + "-" + location.id + "-" + shortcutName;
-                    shortcutIntent = DirectionsShortcutActivity.fillIntent(
-                            new Intent(Intent.ACTION_MAIN, null, context, DirectionsShortcutActivity.class)
-                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK),
-                            networkId, location);
-                    iconId = R.mipmap.ic_oeffi_ng_directions_color_48dp;
-                    defaultNameId = R.string.directions_shortcut_default_name;
-                    activityClass = DirectionsActivity.class;
+                    if (departuresShortcutChecked) {
+                        shortcutId = "departures-at-" + networkId.name() + "-" + location.id + "-" + shortcutName;
+                        shortcutIntent = StationDetailsActivity.fillIntent(
+                                new Intent(Intent.ACTION_MAIN, null, context, StationDetailsActivity.class)
+                                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK),
+                                networkId, location, null);
+                        iconId = R.mipmap.ic_oeffi_ng_stations_color_48dp;
+                        defaultNameId = R.string.departures_shortcut_default_name;
+                        activityClass = StationDetailsActivity.class;
+                    } else {
+                        shortcutId = "directions-to-" + networkId.name() + "-" + location.id + "-" + shortcutName;
+                        shortcutIntent = DirectionsShortcutActivity.fillIntent(
+                                new Intent(Intent.ACTION_MAIN, null, context, DirectionsShortcutActivity.class)
+                                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK),
+                                networkId, location);
+                        iconId = R.mipmap.ic_oeffi_ng_directions_color_48dp;
+                        defaultNameId = R.string.directions_shortcut_default_name;
+                        activityClass = DirectionsActivity.class;
+                    }
+                    log.info("creating launcher shortcut {} to {}", shortcutId, location);
+                    final String shortLabel = !shortcutName.isEmpty() ? shortcutName : context.getString(defaultNameId);
+                    ShortcutManagerCompat.requestPinShortcut(context,
+                            new ShortcutInfoCompat.Builder(context, shortcutId)
+                                    .setActivity(new ComponentName(context, activityClass))
+                                    .setShortLabel(shortLabel)
+                                    .setIcon(IconCompat.createWithResource(context, iconId))
+                                    .setIntent(shortcutIntent).build(),
+                            null);
                 }
-                log.info("creating launcher shortcut {} to {}", shortcutId, location);
-                final String shortLabel = !shortcutName.isEmpty() ? shortcutName : context.getString(defaultNameId);
-                ShortcutManagerCompat.requestPinShortcut(context,
-                        new ShortcutInfoCompat.Builder(context, shortcutId)
-                                .setActivity(new ComponentName(context, activityClass))
-                                .setShortLabel(shortLabel)
-                                .setIcon(IconCompat.createWithResource(context, iconId))
-                                .setIntent(shortcutIntent).build(),
-                        null);
             })
             .setNegativeButton(R.string.button_cancel, null)
             .show();
@@ -209,6 +232,40 @@ public class StationContextMenu extends androidx.appcompat.widget.PopupMenu {
                 });
             }
             stationsCursor.close();
+        }
+    }
+
+    public static class WidgetPinningReceiver extends BroadcastReceiver {
+        public static String name;
+        public static NetworkId networkId;
+        public static Location location;
+        public static int[] oldWidgetIds;
+
+        @Override
+        public void onReceive(final Context context, final Intent intent) {
+            int widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
+            if (widgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
+                final ComponentName componentName = new ComponentName(context, NearestFavoriteStationWidgetProvider.class);
+                final AppWidgetManager widgetManager = AppWidgetManager.getInstance(context);
+                final int[] newWidgetIds = widgetManager.getAppWidgetIds(componentName);
+                if (newWidgetIds == null || newWidgetIds.length == 0)
+                    return;
+                if (oldWidgetIds == null) {
+                    widgetId = newWidgetIds[0];
+                } else {
+                    NEW: for (final int newWidgetId : newWidgetIds) {
+                        for (final int oldWidgetId : oldWidgetIds) {
+                            if (oldWidgetId == newWidgetId)
+                                continue NEW;
+                        }
+                        widgetId = newWidgetId;
+                        break;
+                    }
+                }
+            }
+
+            if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID)
+                NearestFavoriteStationWidgetService.configureWidget(context, widgetId, name, networkId, location);
         }
     }
 }

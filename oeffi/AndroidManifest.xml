@@ -237,6 +237,7 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/nearest_favorite_station_widget" />
         </receiver>
+        <receiver android:name=".stations.StationContextMenu$WidgetPinningReceiver" />
 
         <receiver android:name=".directions.navigation.NavigationAlarmManager$RefreshReceiver" />
         <receiver android:name=".directions.navigation.NavigationNotification$ActionReceiver" />

@@ -32,7 +32,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.location.Criteria;
-import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
@@ -55,9 +54,11 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GeoUtils;
+import de.schildbach.oeffi.util.Objects;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.provider.NetworkProvider;
 import de.schildbach.pte.dto.Departure;
+import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.Point;
 import de.schildbach.pte.dto.QueryDeparturesResult;
@@ -68,6 +69,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLException;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -182,22 +185,51 @@ public class NearestFavoriteStationWidgetService extends JobService {
         }
 
         private class Job implements Runnable {
-            private RemoteViews views;
-
             @Override
             public void run() {
                 final ComponentName providerName = new ComponentName(Refresher.this, NearestFavoriteStationWidgetProvider.class);
-                final int[] appWidgetIds = appWidgetManager.getAppWidgetIds(providerName);
-                if (appWidgetIds.length == 0)
-                    return;
+                final int[] allAppWidgetIds = appWidgetManager.getAppWidgetIds(providerName);
+                int[] nearbyAppWidgetIds = new int[allAppWidgetIds.length];
+                int numNearby = 0;
+                for (final int appWidgetId : allAppWidgetIds) {
+                    nearbyAppWidgetIds[numNearby] = appWidgetId;
+                    numNearby += 1;
+//                    final Bundle options = appWidgetManager.getAppWidgetOptions(appWidgetId);
+//                    if (options != null) {
+//                        final Location location = (Location) options.getSerializable(OPTIONS_KEY_LOCATION);
+//                        if (location != null) {
+//                            numNearby -= 1;
+//                            final NetworkId networkId = NetworkId.valueOf(options.getString(OPTIONS_KEY_NETWORK_ID));
+//                            updateWidget(
+//                                    appWidgetId,
+//                                    networkId,
+//                                    location,
+//                                    -9999.9f);
+//                        }
+//                    }
+                    final WidgetConfiguration config = getWidgetConfig(appWidgetId);
+                    if (config != null) {
+                        numNearby -= 1;
+                        updateWidget(
+                                appWidgetId,
+                                config.name,
+                                config.networkId,
+                                config.location,
+                                -9999.9f);
+                    }
+                }
 
-                views = new RemoteViews(getPackageName(), R.layout.station_widget_content);
+                if (numNearby == 0)
+                    return;
+                nearbyAppWidgetIds = Arrays.copyOf(nearbyAppWidgetIds, numNearby);
 
                 if (ContextCompat.checkSelfPermission(Refresher.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
                         (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && ContextCompat.checkSelfPermission(Refresher.this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
-                    final PendingIntent intent = PendingIntent.getActivity(Refresher.this, 0, new Intent(Refresher.this,
-                            NearestFavoriteStationsWidgetPermissionActivity.class), PendingIntent.FLAG_IMMUTABLE);
-                    widgetsMessage(appWidgetIds, getString(R.string.nearest_favorite_station_widget_no_location_permission), intent);
+                    final PendingIntent intent = PendingIntent.getActivity(
+                            Refresher.this, 0,
+                            new Intent(Refresher.this, NearestFavoriteStationsWidgetPermissionActivity.class),
+                            PendingIntent.FLAG_IMMUTABLE);
+                    widgetsMessage(nearbyAppWidgetIds, getString(R.string.nearest_favorite_station_widget_no_location_permission), intent);
                     log.info("No location permission");
                     return;
                 }
@@ -214,18 +246,18 @@ public class NearestFavoriteStationWidgetService extends JobService {
                     criteria.setPowerRequirement(Criteria.POWER_LOW);
                     provider = locationManager.getBestProvider(criteria, true);
                     if (provider == null || LocationManager.PASSIVE_PROVIDER.equals(provider)) {
-                        widgetsMessage(appWidgetIds, getString(R.string.acquire_location_no_provider), null);
+                        widgetsMessage(nearbyAppWidgetIds, getString(R.string.acquire_location_no_provider), null);
                         log.info("No location provider found");
                         return;
                     }
                 }
 
-                widgetsHeader(appWidgetIds, getString(R.string.acquire_location_start, provider));
+                widgetsHeader(nearbyAppWidgetIds, getString(R.string.acquire_location_start, provider));
                 log.info("Acquiring {} location", provider);
 
-                final CompletableFuture<Location> future = new CompletableFuture<>();
+                final CompletableFuture<android.location.Location> future = new CompletableFuture<>();
                 locationManager.requestSingleUpdate(provider, new LocationListener() {
-                    public void onLocationChanged(final Location location) {
+                    public void onLocationChanged(final android.location.Location location) {
                         future.complete(location);
                     }
 
@@ -240,23 +272,27 @@ public class NearestFavoriteStationWidgetService extends JobService {
                 }, backgroundHandler.getLooper());
 
                 try {
-                    final Location here = future.get(Constants.LOCATION_BACKGROUND_UPDATE_TIMEOUT_MS, TimeUnit.MILLISECONDS);
-                    log.info("Widgets: {}, location: {}", Arrays.toString(appWidgetIds), here);
-                    handleLocation(appWidgetIds, here);
+                    final android.location.Location here = future.get(Constants.LOCATION_BACKGROUND_UPDATE_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+                    log.info("Widgets: {}, location: {}", Arrays.toString(nearbyAppWidgetIds), here);
+                    handleLocation(nearbyAppWidgetIds, here);
                 } catch (final TimeoutException x) {
-                    log.info("Widgets: {}, location timed out after {} ms", Arrays.toString(appWidgetIds),
+                    log.info("Widgets: {}, location timed out after {} ms", Arrays.toString(nearbyAppWidgetIds),
                             Constants.LOCATION_BACKGROUND_UPDATE_TIMEOUT_MS);
-                    widgetsHeader(appWidgetIds, getString(R.string.acquire_location_timeout));
+                    widgetsHeader(nearbyAppWidgetIds, getString(R.string.acquire_location_timeout));
                 } catch (final InterruptedException | ExecutionException x) {
                     throw new RuntimeException(x);
                 }
             }
 
-            private void widgetsMessage(final int[] appWidgetIds, final String message, final PendingIntent intent) {
-                setMessage(message);
-                views.setTextViewText(R.id.station_widget_distance, null);
-                views.setTextViewText(R.id.station_widget_lastupdated, null);
+            private void widgetsMessage(
+                    final int[] appWidgetIds,
+                    final String message,
+                    final PendingIntent intent) {
                 for (final int appWidgetId : appWidgetIds) {
+                    final RemoteViews views = new RemoteViews(getPackageName(), R.layout.station_widget_content);
+                    setMessage(views, message);
+                    views.setTextViewText(R.id.station_widget_distance, null);
+                    views.setTextViewText(R.id.station_widget_lastupdated, null);
                     views.setTextViewText(R.id.station_widget_header,
                             getString(R.string.nearest_favorite_station_widget_label));
                     views.setOnClickPendingIntent(R.id.station_widget_content,
@@ -267,12 +303,13 @@ public class NearestFavoriteStationWidgetService extends JobService {
 
             private void widgetsHeader(final int[] appWidgetIds, final String message) {
                 for (final int appWidgetId : appWidgetIds) {
-                    setHeader(appWidgetId, message);
+                    final RemoteViews views = new RemoteViews(getPackageName(), R.layout.station_widget_content);
+                    setHeader(views, appWidgetId, message);
                     appWidgetManager.updateAppWidget(appWidgetId, views);
                 }
             }
 
-            private void handleLocation(final int[] appWidgetIds, final Location here) {
+            private void handleLocation(final int[] appWidgetIds, final android.location.Location here) {
                 // determine nearest station
                 final List<Favorite> favorites = new ArrayList<>();
 
@@ -325,65 +362,32 @@ public class NearestFavoriteStationWidgetService extends JobService {
                     Arrays.sort(appWidgetIds);
                     log.info("Distributing {} station favorites to {} app widgets", favorites.size(), appWidgetIds.length);
 
-                    final java.text.DateFormat timeFormat = DateFormat.getTimeFormat(Refresher.this);
-
                     final int numFavorites = favorites.size();
                     for (int i = 0; i < appWidgetIds.length; i++) {
                         final int appWidgetId = appWidgetIds[appWidgetIds.length - i - 1];
-
-                        // reset
-                        views.setViewVisibility(R.id.station_widget_departures, View.GONE);
-                        views.setViewVisibility(R.id.station_widget_message, View.GONE);
 
                         if (numFavorites > 0) {
                             final Favorite favorite = favorites.get(i % numFavorites);
                             log.debug("Favorite: {}", favorite);
 
-                            views.setTextViewText(R.id.station_widget_distance, Formats.formatDistance(favorite.distance, false));
-                            views.setViewVisibility(R.id.station_widget_distance, View.VISIBLE);
+                            final String name;
+                            if (favorite.nickLocation != null)
+                                name = favorite.nickLocation.uniqueShortName();
+                            else
+                                name = favorite.location.uniqueShortName();
 
-                            setHeader(appWidgetId, getString(R.string.nearest_favorite_station_widget_loading));
-                            appWidgetManager.updateAppWidget(appWidgetId, views);
-
-                            final NetworkId networkId = favorite.networkId;
-                            final NetworkProvider networkProvider = NetworkProviderFactory.provider(networkId);
-                            final String stationId = favorite.location.id;
-                            final String stationName = favorite.location.name;
-                            final boolean canShowJourneys = networkProvider.hasCapabilities(NetworkProvider.Capability.JOURNEY);
-
-                            try {
-                                final QueryDeparturesResult result = networkProvider.queryDepartures(
-                                        stationId,
-                                        new Date(),
-                                        100,
-                                        NetworkProvider.EquivalentStationsMode.USE_META,
-                                        null);
-                                setResult(appWidgetId, networkId, result, favorite, timeFormat, canShowJourneys);
-                                appWidgetManager.updateAppWidget(appWidgetId, views);
-                            } catch (final ConnectException x) {
-                                setHeader(appWidgetId, stationName);
-                                setMessage(getString(R.string.nearest_favorite_station_widget_error_connect));
-                                appWidgetManager.updateAppWidget(appWidgetId, views);
-                                log.info("Could not query departures for station " + stationId, x);
-                            } catch (final BlockedException x) {
-                                setHeader(appWidgetId, stationName);
-                                setMessage(
-                                        getString(R.string.nearest_favorite_station_widget_error_blocked, x.getUrl().host()));
-                                appWidgetManager.updateAppWidget(appWidgetId, views);
-                                log.info("Could not query departures for station " + stationId, x);
-                            } catch (final SSLException x) {
-                                setHeader(appWidgetId, stationName);
-                                setMessage(getString(R.string.nearest_favorite_station_widget_error_ssl, x.getMessage()));
-                                appWidgetManager.updateAppWidget(appWidgetId, views);
-                                log.info("Could not query departures for station " + stationId, x);
-                            } catch (final Exception x) {
-                                setHeader(appWidgetId, stationName);
-                                setMessage(getString(R.string.nearest_favorite_station_widget_error_exception, x.getMessage()));
-                                appWidgetManager.updateAppWidget(appWidgetId, views);
-                                log.info("Could not query departures for station " + stationId, x);
-                            }
+                            updateWidget(
+                                    appWidgetId,
+                                    name,
+                                    favorite.networkId,
+                                    favorite.location,
+                                    favorite.distance);
                         } else {
-                            setMessage(getString(R.string.nearest_favorite_station_widget_no_favorites));
+                            final RemoteViews views = new RemoteViews(getPackageName(), R.layout.station_widget_content);
+                            views.setViewVisibility(R.id.station_widget_departures, View.GONE);
+                            views.setViewVisibility(R.id.station_widget_message, View.GONE);
+
+                            setMessage(views, getString(R.string.nearest_favorite_station_widget_no_favorites));
                             views.setTextViewText(R.id.station_widget_header, null);
                             appWidgetManager.updateAppWidget(appWidgetId, views);
                         }
@@ -391,43 +395,110 @@ public class NearestFavoriteStationWidgetService extends JobService {
                 }
             }
 
+            private void updateWidget(
+                    final int appWidgetId,
+                    final String aName,
+                    final NetworkId networkId,
+                    final Location location,
+                    final float distance) {
+                final String name = aName != null ? aName : location.uniqueShortName();
+
+                final RemoteViews views = new RemoteViews(getPackageName(), R.layout.station_widget_content);
+                views.setViewVisibility(R.id.station_widget_departures, View.GONE);
+                views.setViewVisibility(R.id.station_widget_message, View.GONE);
+
+                if (distance >= 0) {
+                    views.setViewVisibility(R.id.station_widget_distance, View.VISIBLE);
+                    views.setTextViewText(R.id.station_widget_distance,
+                            Formats.formatDistance(distance, false));
+                }
+
+                setHeader(views, appWidgetId, getString(R.string.nearest_favorite_station_widget_loading));
+                appWidgetManager.updateAppWidget(appWidgetId, views);
+
+                final NetworkProvider networkProvider = NetworkProviderFactory.provider(networkId);
+                final boolean canShowJourneys = networkProvider.hasCapabilities(NetworkProvider.Capability.JOURNEY);
+
+                try {
+                    final QueryDeparturesResult result = networkProvider.queryDepartures(
+                            location.id,
+                            new Date(),
+                            100,
+                            NetworkProvider.EquivalentStationsMode.USE_META,
+                            null);
+                    final java.text.DateFormat timeFormat = DateFormat.getTimeFormat(Refresher.this);
+                    setResult(views, appWidgetId, networkId, result, name, location, timeFormat, canShowJourneys);
+                    appWidgetManager.updateAppWidget(appWidgetId, views);
+                } catch (final ConnectException x) {
+                    setHeader(views, appWidgetId, name);
+                    setMessage(views, getString(R.string.nearest_favorite_station_widget_error_connect));
+                    appWidgetManager.updateAppWidget(appWidgetId, views);
+                    log.info("Could not query departures for station " + location.id, x);
+                } catch (final BlockedException x) {
+                    setHeader(views, appWidgetId, name);
+                    setMessage(views, getString(R.string.nearest_favorite_station_widget_error_blocked, x.getUrl().host()));
+                    appWidgetManager.updateAppWidget(appWidgetId, views);
+                    log.info("Could not query departures for station " + location.id, x);
+                } catch (final SSLException x) {
+                    setHeader(views, appWidgetId, name);
+                    setMessage(views, getString(R.string.nearest_favorite_station_widget_error_ssl, x.getMessage()));
+                    appWidgetManager.updateAppWidget(appWidgetId, views);
+                    log.info("Could not query departures for station " + location.id, x);
+                } catch (final Exception x) {
+                    setHeader(views, appWidgetId, name);
+                    setMessage(views, getString(R.string.nearest_favorite_station_widget_error_exception, x.getMessage()));
+                    appWidgetManager.updateAppWidget(appWidgetId, views);
+                    log.info("Could not query departures for station " + location.id, x);
+                }
+            }
+
             private void setResult(
-                    final int appWidgetId, final NetworkId networkId,
-                    final QueryDeparturesResult result, final Favorite favorite,
+                    final RemoteViews views,
+                    final int appWidgetId,
+                    final NetworkId networkId,
+                    final QueryDeparturesResult result,
+                    final String aName,
+                    final Location location,
                     final java.text.DateFormat timeFormat,
                     final boolean canShowJourneys) {
+                final String name = aName != null ? aName : location.uniqueShortName();
+                final String stationId = location.id;
+
                 views.setTextViewText(R.id.station_widget_lastupdated,
                         getString(R.string.nearest_favorite_station_widget_lastupdated, timeFormat.format(new Date())));
 
-                final String stationId = favorite.location.id;
-                views.setTextViewText(R.id.station_widget_header, favorite.location.name);
+                views.setTextViewText(R.id.station_widget_header, name);
 
                 if (result.status == QueryDeparturesResult.Status.OK) {
-                    setMessage(getString(R.string.nearest_favorite_station_widget_no_departures));
+                    setMessage(views, getString(R.string.nearest_favorite_station_widget_no_departures));
 
-                    final StationDepartures stationDepartures = result.findStationDepartures(stationId);
-                    if (stationDepartures != null && stationDepartures.location.name != null)
-                        views.setTextViewText(R.id.station_widget_header, stationDepartures.location.name);
+                    if (name == null) {
+                        // why overwrite name ??
+                        final StationDepartures stationDepartures = result.findStationDepartures(stationId);
+                        if (stationDepartures != null && stationDepartures.location.name != null)
+                            views.setTextViewText(R.id.station_widget_header, stationDepartures.location.name);
+                    }
 
                     final List<Departure> departures = new ArrayList<>();
                     for (final StationDepartures stationDeparture : result.stationDepartures)
                         departures.addAll(stationDeparture.getNonCancelledDepartures());
 
                     if (!departures.isEmpty()) {
-                        setDeparturesList(departures, appWidgetId, networkId, favorite.location, canShowJourneys);
+                        setDeparturesList(views, departures, appWidgetId, networkId, location, canShowJourneys);
                         log.info("Got {} departures for favorite {}", departures.size(), stationId);
                     } else {
                         log.info("Got no station departures for favorite {}", stationId);
                     }
                 } else {
                     log.info("Got {} for favorite {}", result.toShortString(), stationId);
-                    setMessage(getString(QueryDeparturesRunnable.statusMsgResId(result.status)));
+                    setMessage(views, getString(QueryDeparturesRunnable.statusMsgResId(result.status)));
                 }
             }
 
             private void setDeparturesList(
+                    final RemoteViews views,
                     final List<Departure> departures, final int appWidgetId,
-                    final NetworkId networkId, final de.schildbach.pte.dto.Location location,
+                    final NetworkId networkId, final Location location,
                     final boolean canShowJourneys) {
                 views.setViewVisibility(R.id.station_widget_message, View.GONE);
                 views.setViewVisibility(R.id.station_widget_departures, View.VISIBLE);
@@ -446,13 +517,17 @@ public class NearestFavoriteStationWidgetService extends JobService {
                                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE));
             }
 
-            private void setHeader(final int appWidgetId, final String message) {
+            private void setHeader(
+                    final RemoteViews views,
+                    final int appWidgetId, final String message) {
                 views.setTextViewText(R.id.station_widget_header, message);
                 views.setViewVisibility(R.id.station_widget_message, View.GONE);
                 views.setOnClickPendingIntent(R.id.station_widget_content, clickIntent(appWidgetId));
             }
 
-            private void setMessage(final String status) {
+            private void setMessage(
+                    final RemoteViews views,
+                    final String status) {
                 views.setViewVisibility(R.id.station_widget_departures, View.GONE);
                 views.setViewVisibility(R.id.station_widget_message, View.VISIBLE);
                 views.setTextViewText(R.id.station_widget_message, status);
@@ -495,5 +570,50 @@ public class NearestFavoriteStationWidgetService extends JobService {
         public String toString() {
             return "Favorite[" + networkId + "," + location.id + ",'" + location.place + "','" + location.name + "'," + distance + "m]";
         }
+    }
+
+//    private static String OPTIONS_KEY_NETWORK_ID = "networkId";
+//    private static String OPTIONS_KEY_LOCATION = "location";
+
+    public static class WidgetConfiguration implements Serializable {
+        @Serial
+        private static final long serialVersionUID = -3272993585382827465L;
+
+        String name;
+        NetworkId networkId;
+        Location location;
+    }
+
+    private final static String PREF_KEY_WIDGET_CONFIG_FOR_ID = NearestFavoriteStationWidgetService.class.getName() + ".config.%d";
+
+    private static String getWidgetConfigPrefKey(final int widgetId) {
+        return String.format(PREF_KEY_WIDGET_CONFIG_FOR_ID, widgetId);
+    }
+
+    public static void configureWidget(
+            final Context context,
+            final int widgetId,
+            final String name,
+            final NetworkId networkId,
+            final Location location) {
+// this does not work with Xiaomi Launchers ...
+//        final AppWidgetManager widgetManager = AppWidgetManager.getInstance(context);
+//        final Bundle options = new Bundle();
+//        options.putString(OPTIONS_KEY_NETWORK_ID, networkId.name());
+//        options.putSerializable(OPTIONS_KEY_LOCATION, location);
+//        widgetManager.updateAppWidgetOptions(widgetId, options);
+        final WidgetConfiguration config = new WidgetConfiguration();
+        config.name = name;
+        config.networkId = networkId;
+        config.location = location;
+        Application.getInstance().getSharedPreferences().edit()
+                .putString(getWidgetConfigPrefKey(widgetId), Objects.serializeToString(config))
+                .apply();
+    }
+
+    public static WidgetConfiguration getWidgetConfig(final int widgetId) {
+        return (WidgetConfiguration) Objects.deserializeFromString(
+                Application.getInstance().getSharedPreferences()
+                        .getString(getWidgetConfigPrefKey(widgetId), null));
     }
 }

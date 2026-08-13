@@ -18,9 +18,13 @@
 package de.schildbach.oeffi.stations;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
+
 import androidx.activity.ComponentActivity;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -35,24 +39,46 @@ import java.util.Map;
 public class NearestFavoriteStationsWidgetPermissionActivity extends ComponentActivity {
     private static final Logger log = LoggerFactory.getLogger(NearestFavoriteStationsWidgetPermissionActivity.class);
 
-    private final ActivityResultLauncher<String[]> requestPermissionsLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), results -> {
-                for (Map.Entry<String, Boolean> entry : results.entrySet())
-                    log.info("{} {}", entry.getKey(), entry.getValue() ? "granted" : "denied");
-                NearestFavoriteStationWidgetService.scheduleImmediate(this); // refresh app-widget
-                finish();
-            });
+    private ActivityResultLauncher<String[]> requestPermissionsLauncher;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestPermissionsLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestMultiplePermissions(),
+                this::onResults);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
         final List<String> permissions = new LinkedList<>();
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
             permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED)
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R || permissions.isEmpty())
+        if (permissions.isEmpty() ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
                 permissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
+        }
         log.info("Requesting permissions: {}", permissions);
         requestPermissionsLauncher.launch(permissions.toArray(new String[0]));
+    }
+
+    private void onResults(final Map<String, Boolean> results) {
+        int numGranted = 0;
+        for (final Map.Entry<String, Boolean> entry : results.entrySet()) {
+            final Boolean granted = entry.getValue();
+            log.info("{} {}", entry.getKey(), granted ? "granted" : "denied");
+            if (granted)
+                numGranted += 1;
+        }
+        if (numGranted != results.size()) {
+            // not granted, open settings as last resort
+            startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                    .setData(Uri.fromParts("package", getPackageName(), null)));
+        }
+        NearestFavoriteStationWidgetService.scheduleImmediate(this); // refresh app-widget
+        finish();
     }
 }

@@ -24,6 +24,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/create_launcher_shortcut_dialog_departures_label" />
+
+        <RadioButton
+            android:id="@+id/create_launcher_shortcut_dialog_departures_widget"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/create_launcher_shortcut_dialog_departures_widget_label" />
     </RadioGroup>
 
     <EditText

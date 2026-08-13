@@ -229,7 +229,7 @@
     <string name="station_context_directions_to_title">Connection To Here</string>
     <string name="station_context_alternative_from_title">Alternative Continuation From Here</string>
     <string name="station_context_navigate_to_title">Navigate To Here</string>
-    <string name="station_context_launcher_shortcut_title">Create Launcher Shortcut</string>
+    <string name="station_context_launcher_shortcut_title">Create Launcher Shortcut or Widget</string>
 
     <!-- stations options -->
     <string name="stations_options_favorites_title">Station Favorites</string>
@@ -517,8 +517,9 @@
     <!-- directions shortcut -->
     <string name="create_launcher_shortcut_dialog_name_hint">Shortcut Name, e.g. \'Work\'</string>
     <string name="create_launcher_shortcut_dialog_button_ok">Create</string>
-    <string name="create_launcher_shortcut_dialog_connection_label">for connection to location</string>
-    <string name="create_launcher_shortcut_dialog_departures_label">for departure board</string>
+    <string name="create_launcher_shortcut_dialog_connection_label">shortcut for connection to location</string>
+    <string name="create_launcher_shortcut_dialog_departures_label">shortcut for departure board</string>
+    <string name="create_launcher_shortcut_dialog_departures_widget_label">widget with departure board</string>
     <string name="directions_shortcut_error_title">Problem with shortcut</string>
     <string name="directions_shortcut_error_message_network">The transport network from the shortcut does not exist any more.</string>
     <string name="directions_shortcut_default_name">Directions</string>
