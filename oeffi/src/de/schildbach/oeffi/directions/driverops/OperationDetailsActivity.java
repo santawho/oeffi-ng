@@ -529,8 +529,9 @@ public class OperationDetailsActivity extends TripDetailsActivity {
                     || nearestStop.plannedDepartureTime == null) {
                 timePassedSincePreviousStopMillis = -1;
             } else {
-                timePassedSincePreviousStopMillis = now - (nextStop.predictedArrivalTime.getTime()
-                        - (nextStop.plannedArrivalTime.getTime() - nearestStop.plannedDepartureTime.getTime()));
+                final long plannedDuration = nextStop.plannedArrivalTime.getTime() - nearestStop.plannedDepartureTime.getTime();
+                final long predictedRemaining = nextStop.predictedArrivalTime.getTime() - now;
+                timePassedSincePreviousStopMillis = plannedDuration - predictedRemaining;
             }
             nearestDepartureDelay = tPlan == null ? null : now - tPlan.getTime();
             nearestDepartureDelayIsNowBased = true;

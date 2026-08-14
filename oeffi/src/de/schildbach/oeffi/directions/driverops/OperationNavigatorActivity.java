@@ -624,7 +624,7 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
         final String identityId = nearestStop.location.identityId;
         final boolean isNewStop = identityId != null && !identityId.equals(lastNearestStopIdentityId);
         final boolean isFirstStop = lastNearestStopIdentityId == null;
-        final boolean announceLeaving;
+        boolean lineHasBeenAnnounced = false;
 
         if (isNewStop) {
             loggedLeaving = false;
@@ -633,23 +633,24 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
             nextStopHasBeenAnnounced = isFirstStop && timeLeftToStopMillis <= 0;
             thisStopHasBeenAnnounced = false;
             lastNearestStopIdentityId = identityId;
-            announceLeaving = !leavingHasBeenAnnounced;
-            leavingHasBeenAnnounced = false;
-        } else {
-            announceLeaving = !leavingHasBeenAnnounced && timePassedSincePreviousStopMillis / 1000 > announceLeavingDelayTimeSecs;
-        }
 
-        if (announceLeaving) {
-            leavingHasBeenAnnounced = true;
-            announceLineAndDirection(lineDestination, prevStop);
+            lineHasBeenAnnounced = announceLineAndDirection(lineDestination, prevStop);
+            leavingHasBeenAnnounced = false;
         }
 
         if (timeLeftToStopMillis < 0) {
+            final long timePassedSincePreviousStopSecs =
+                    timePassedSincePreviousStopMillis < 0 ? -1
+                            : timePassedSincePreviousStopMillis / 1000;
             if (!loggedLeaving) {
                 loggedLeaving = true;
                 loggedHere = false;
                 loggedApproachingMillis = 999999;
-                log.debug("leaving stop {}", location.name);
+                log.debug("leaving stop {} since {} secs", location.name, timePassedSincePreviousStopSecs);
+            }
+            if (timePassedSincePreviousStopSecs >= announceLeavingDelayTimeSecs) {
+                if (!lineHasBeenAnnounced)
+                    lineHasBeenAnnounced = announceLineAndDirection(lineDestination, prevStop);
             }
         } else if (timeLeftToStopMillis == 0) {
             if (!loggedHere) {
@@ -710,15 +711,43 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
                 Collections.singletonList(sb.toString()));
     }
 
-    private void announceLineAndDirection(
+    private boolean announceLineAndDirection(
             final LineDestination lineDestination,
             final Location prevStop) {
         if (!announcementsEnabled || !announceLeavingEnabled)
-            return;
-        final String lineName = lineDestination.line.label;
+            return false;
+        if (leavingHasBeenAnnounced)
+            return false;
+        leavingHasBeenAnnounced = true;
+
+        String lineName = lineDestination.line.label;
         if (lineName == null || lineName.isEmpty())
-            return;
-        final String linePrefix = Character.isLetter(lineName.charAt(0)) ? "" : getString(R.string.drivermode_announcement_line_prefix);
+            return false;
+        lineName = lineName.toLowerCase();
+        final StringBuilder builder = new StringBuilder();
+        if (lineName.startsWith("bus ")) {
+            builder.append("Bus ");
+            lineName = lineName.substring(4);
+        }
+        char prevChar = lineName.charAt(0);
+        final boolean mustPrefix = !Character.isAlphabetic(prevChar);
+        builder.append(prevChar);
+        for (int pos = 1; pos < lineName.length(); ++pos) {
+            final char ch = lineName.charAt(pos);
+            if (Character.isAlphabetic(ch)) {
+                if (!Character.isSpaceChar(prevChar))
+                    builder.append(Character.isAlphabetic(prevChar) ? '-' : ' ');
+            } else {
+                if (!Character.isSpaceChar(ch) && Character.isAlphabetic(prevChar))
+                    builder.append(' ');
+            }
+            builder.append(ch);
+            prevChar = ch;
+        }
+        String speakableLineName = builder.toString();
+        if (mustPrefix)
+            speakableLineName = getString(R.string.drivermode_announcement_line_prefix, speakableLineName);
+
         final Destination destination = lineDestination.destination;
         final Location location = destination == null ? null : destination.location;
         final String locationName;
@@ -732,14 +761,15 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
 
         final String message;
         if (locationName != null) {
-            message = getString(R.string.drivermode_announcement_line_and_direction, linePrefix, lineName, locationName);
+            message = getString(R.string.drivermode_announcement_line_and_direction, speakableLineName, locationName);
         } else {
-            message = getString(R.string.drivermode_announcement_line_without_direction, linePrefix, lineName);
+            message = getString(R.string.drivermode_announcement_line_without_direction, speakableLineName);
         }
         NotificationSoundManager.getInstance().playAlarmSoundAndVibration(
                 AudioAttributes.USAGE_MEDIA,
                 0,
                 null,
                 Collections.singletonList(message));
+        return true;
     }
 }

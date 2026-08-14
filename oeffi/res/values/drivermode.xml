@@ -69,8 +69,8 @@
     <string name="drivermode_announcement_next_stop">next stop, %1$s</string>
     <string name="drivermode_announcement_this_stop">this is %1$s</string>
     <string name="drivermode_announcement_journey_end">End of line. Take care and goodbye!</string>
-    <string name="drivermode_announcement_line_without_direction">%1$s %2$s</string>
-    <string name="drivermode_announcement_line_and_direction">%1$s %2$s to %3$s</string>
-    <string name="drivermode_announcement_line_prefix">line</string>
+    <string name="drivermode_announcement_line_without_direction">%1$s</string>
+    <string name="drivermode_announcement_line_and_direction">%1$s to %2$s</string>
+    <string name="drivermode_announcement_line_prefix">line %1$s</string>
 
 </resources>
