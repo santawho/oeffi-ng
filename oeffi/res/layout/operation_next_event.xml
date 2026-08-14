@@ -160,6 +160,7 @@
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
                             android:layout_alignParentRight="true"
+                            android:gravity="right"
                             android:paddingRight="@dimen/text_padding_horizontal_lax">
                             <TextView
                                 android:id="@+id/operation_next_event_nearest_station_arrival_remaining"
@@ -279,6 +280,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_centerVertical="true"
                                 android:layout_alignParentRight="true"
+                                android:gravity="right"
                                 android:paddingRight="@dimen/text_padding_horizontal_lax">
                                 <TextView
                                     android:id="@+id/operation_next_event_next_station_arrival_remaining"
