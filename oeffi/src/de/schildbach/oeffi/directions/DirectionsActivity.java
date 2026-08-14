@@ -497,6 +497,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
                 viewDirectOption.setEnabled(false);
             }
             viewBike = findViewById(R.id.directions_option_bike);
+            viewBike.setChecked(application.prefsIsBicycleTravel());
 
             final boolean timeAndGoAtBottom = prefs.getBoolean("user_interface_directions_time_and_go_bottom_enabled", false);
             final ViewGroup timeAndGo = findViewById(timeAndGoAtBottom ? R.id.time_and_go_bottom : R.id.time_and_go_top);
@@ -551,7 +552,8 @@ public class DirectionsActivity extends OeffiMainActivity implements
             viewTime2 = timeAndGo.findViewById(R.id.directions_time_2);
 
             viewGo = timeAndGo.findViewById(R.id.directions_go);
-            viewGo.setOnClickListener(v -> handleGo());
+            viewGo.setOnClickListener(v -> handleGo(false));
+            viewGo.setOnLongClickListener(v -> { handleGo(true); return true; });
 
             viewQueryHistoryList = findViewById(R.id.directions_query_history_list);
             viewQueryHistoryList.setLayoutManager(new LinearLayoutManager(this));
@@ -851,6 +853,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         viewViaLocation.setImeOptions(EditorInfo.IME_ACTION_NEXT);
         viewToLocation.setImeOptions(hasDirectionsCap ? EditorInfo.IME_ACTION_GO : EditorInfo.IME_ACTION_NONE);
         viewGo.setEnabled(hasDirectionsCap);
+        ViewUtils.setVisibility(findViewById(R.id.directions_go_bike), application.prefsIsBicycleTravel());
 
         viewQueryHistoryList.setVisibility(hasDirectionsCap ? View.VISIBLE : View.GONE);
         viewQueryHistoryEmpty.setVisibility(
@@ -1327,7 +1330,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             nextFocus.requestFocus();
 
         if (doGo)
-            handleGo();
+            handleGo(false);
         else
             locationSelector.clearSelection();
     }
@@ -1442,7 +1445,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
                 buttonExpand.isChecked()
                 || haveNonDefaultProducts
                 || viewViaLocation.getText() != null
-                || viewBike.isChecked()
+                || (viewBike.isChecked() != application.prefsIsBicycleTravel())
                 || (!isForceDirectOption() && viewDirectOption.isChecked())
         );
     }
@@ -1531,7 +1534,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         if (tripOptions != null)
             initProductToggles(tripOptions.products);
         updateGUI();
-        handleGo();
+        handleGo(false);
     }
 
     @Override
@@ -1712,10 +1715,10 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
     private void handleAutoGo() {
         if (isHandleAutoGoEnabled())
-            handleGo();
+            handleGo(false);
     }
 
-    private void handleGo() {
+    private void handleGo(final boolean isLongClick) {
         resetLocationViewsBehaviour();
 
         final NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
@@ -1753,8 +1756,10 @@ public class DirectionsActivity extends OeffiMainActivity implements
         if (viewDirectOption.isChecked() && networkProvider.hasCapabilities(Capability.DIRECT_OPTION))
             flags.add(TripFlag.DIRECT);
 
-        if (viewBike.isChecked() && networkProvider.hasCapabilities(Capability.BIKE_OPTION))
-            flags.add(TripFlag.BIKE);
+        if (!(isLongClick && application.prefsIsBicycleTravel())) {
+            if (viewBike.isChecked() && networkProvider.hasCapabilities(Capability.BIKE_OPTION))
+                flags.add(TripFlag.BIKE);
+        }
 
         final TripOptions options = getTripOptionsFromPrefs(products, flags.isEmpty() ? null : flags);
 

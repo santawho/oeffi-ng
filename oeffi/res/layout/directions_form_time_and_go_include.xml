@@ -51,7 +51,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1" />
 
-    <FrameLayout
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingVertical="@dimen/text_padding_vertical_cram"
@@ -60,7 +60,7 @@
             android:id="@+id/directions_go"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
+            android:layout_centerInParent="true"
             android:background="@drawable/btn_go"
             android:textColor="#ffffff"
             android:ellipsize="none"
@@ -70,5 +70,17 @@
             android:text="@string/directions_go"
             android:textSize="@dimen/font_size_xlarge"
             android:textStyle="bold" />
-    </FrameLayout>
+        <ImageView
+            android:visibility="gone"
+            android:id="@+id/directions_go_bike"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elevation="999dp"
+            android:layout_alignRight="@id/directions_go"
+            android:layout_alignTop="@id/directions_go"
+            android:paddingRight="@dimen/text_padding_horizontal_cram"
+            android:paddingTop="@dimen/text_padding_horizontal_cram"
+            android:src="@drawable/ic_directions_bike_grey600_18dp"
+            android:tint="#ffffffff" />
+    </RelativeLayout>
 </LinearLayout>
