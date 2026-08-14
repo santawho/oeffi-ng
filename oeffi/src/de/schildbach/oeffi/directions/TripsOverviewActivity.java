@@ -92,6 +92,7 @@ import java.util.NavigableSet;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Objects.requireNonNull;
 
@@ -1062,14 +1063,14 @@ public class TripsOverviewActivity extends OeffiActivity {
         }
 
         // determine new trips
-        int countNew = 0;
+        AtomicInteger countNew = new AtomicInteger(0);
         for (final Trip resultTrip : result.trips) {
             final Trip trip = renderConfig.isOperationsPlanning
                     ? TripUtils.createTripFromJourneyTrip(resultTrip)
                     : resultTrip;
             final TripInfo tripInfo = searchMoreContext.newTripInfo(trip, earlierOrLater);
             if (tripInfo != null && trips.add(tripInfo))
-                countNew += 1;
+                countNew.incrementAndGet();
         }
         if (!earlierOrLater)
             searchMoreContext.tellNewTripsAddedAndAddMoreIfNecessary(countNew, trips);
@@ -1081,7 +1082,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         if (!later)
             queryTripsContextEarlier = result.context;
 
-        if (countNew > 0) {
+        if (countNew.get() > 0) {
             // redraw
             barView.setTrips(
                     new ArrayList<>(trips),
@@ -1095,7 +1096,7 @@ public class TripsOverviewActivity extends OeffiActivity {
                 barView.setSelection(searchMoreContext.departureBased ? 1 : trips.size() - 1);
         }
 
-        return countNew;
+        return countNew.get();
     }
 
     private void setSearchMoreButtonEnabled(final boolean enabled) {
@@ -1178,11 +1179,14 @@ public class TripsOverviewActivity extends OeffiActivity {
             return tripInfo;
         }
 
-        public void tellNewTripsAddedAndAddMoreIfNecessary(final int countNew, final NavigableSet<TripInfo> trips) {
+        public void tellNewTripsAddedAndAddMoreIfNecessary(
+                final AtomicInteger countNew,
+                final NavigableSet<TripInfo> trips) {
             if (lastRequestedFirstTransferStationId != null) {
                 // search was for short trip to one of the first transfer stations
                 // add forged trips from existing trips and this one if applicable
                 addForgedTripsWithTripsToStation(
+                        countNew,
                         lastRequestedFirstTransferStationId,
                         tripsTofirstTransferStations.get(lastRequestedFirstTransferStationId),
                         trips);
@@ -1197,7 +1201,6 @@ public class TripsOverviewActivity extends OeffiActivity {
             long minPlanned = Long.MAX_VALUE;
             long minPredicted = Long.MAX_VALUE;
             final long limitLast = (long) lastRequestedMinTransferTime * 60000;
-            int n = 0;
             for (final TripInfo tripInfo : trips) {
                 if (tripInfo.addedInRound < currentRound || tripInfo.isEarlierOrLater)
                     continue;
@@ -1257,6 +1260,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         }
 
         private void addForgedTripsWithTripsToStation(
+                final AtomicInteger countNew,
                 final String transferStationId,
                 final List<Trip> tripsToStation,
                 final NavigableSet<TripInfo> trips) {
@@ -1311,8 +1315,10 @@ public class TripsOverviewActivity extends OeffiActivity {
                 }
             }
             for (final TripInfo newTrip : newTrips) {
-                if (!trips.contains(newTrip))
+                if (!trips.contains(newTrip)) {
                     trips.add(newTrip);
+                    countNew.incrementAndGet();
+                }
             }
         }
 
@@ -1341,7 +1347,7 @@ public class TripsOverviewActivity extends OeffiActivity {
             return new Trip(
                     baseTrip.loadedAt,
                     null,
-                    provider.createTripRefFromPreviousTripWithNewLegs(feedingTrip, legs, null),
+                    provider.createTripRefFromPreviousTripWithNewLegs(baseTrip, legs, null),
                     feedingTrip.from,
                     baseTrip.to,
                     legs,
