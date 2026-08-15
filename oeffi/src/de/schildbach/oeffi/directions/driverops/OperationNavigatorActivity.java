@@ -659,8 +659,8 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
                 loggedApproachingMillis = 999999;
                 log.debug("at stop {}", location.name);
             }
-            if (!announceThisStop(location, isEndOfJourney))
-                announceNextStop(location, 0, isEndOfJourney);
+            if (!announceThisStop(location, prevStop, isEndOfJourney))
+                announceNextStop(location, 0, prevStop, isEndOfJourney);
         } else {
             final long secsLeft = timeLeftToStopMillis / 1000;
             if (Math.abs(loggedApproachingMillis - timeLeftToStopMillis) > 15000) {
@@ -669,36 +669,49 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
                 loggedLeaving = false;
                 log.debug("approaching stop {}, arrival in {} sec", location.name, secsLeft);
             }
-            announceNextStop(location, secsLeft, isEndOfJourney);
+            announceNextStop(location, secsLeft, prevStop, isEndOfJourney);
         }
     }
 
-    private boolean announceNextStop(final Location location, final long secsLeft, final boolean isEndOfJourney) {
+    private boolean announceNextStop(
+            final Location location,
+            final long secsLeft,
+            final Location prevStop,
+            final boolean isEndOfJourney) {
         if (!(announcementsEnabled && !nextStopHasBeenAnnounced && secsLeft <= announcementLeadTimeSecs))
             return false;
         nextStopHasBeenAnnounced = true;
         log.debug("now near stop {}", location.name);
-        announceStop(false, location, isEndOfJourney);
+        announceStop(false, location, prevStop, isEndOfJourney);
         return true;
     }
 
-    private boolean announceThisStop(final Location location, final boolean isEndOfJourney) {
+    private boolean announceThisStop(
+            final Location location,
+            final Location prevStop,
+            final boolean isEndOfJourney) {
         if (!(announcementsEnabled && !thisStopHasBeenAnnounced))
             return false;
         thisStopHasBeenAnnounced = true;
         log.info("now at stop {}", location.name);
         if (!prefs.getBoolean("extras_drivermode_announcements_this_stop_enabled", false))
             return false;
-        announceStop(true, location, isEndOfJourney);
+        announceStop(true, location, prevStop, isEndOfJourney);
         return true;
     }
 
-    private void announceStop(final boolean atStop, final Location location, final boolean isEndOfJourney) {
+    private void announceStop(
+            final boolean atStop,
+            final Location location,
+            final Location prevStop,
+            final boolean isEndOfJourney) {
+        final String name = prevStop == null ? location.name :
+                Formats.fullLocationNameIfDifferentPlace(location, prevStop);
         final StringBuilder sb = new StringBuilder(getString(
                 atStop ? R.string.drivermode_announcement_this_stop : R.string.drivermode_announcement_next_stop,
-                NotificationSoundManager.makeSpeakableLocationName(location.name, location.language)));
+                NotificationSoundManager.makeSpeakableLocationName(name, location.language)));
         if (isEndOfJourney) {
-            sb.append(" - ");
+            sb.append(" . ");
             sb.append(getString(R.string.drivermode_announcement_journey_end));
         }
 

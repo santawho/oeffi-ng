@@ -55,7 +55,7 @@
     <!-- announcements -->
     <string name="drivermode_announcement_next_stop">nächster Halt, %1$s</string>
     <string name="drivermode_announcement_this_stop">dies ist %1$s</string>
-    <string name="drivermode_announcement_journey_end">Fahrtende. Auf Wiedersehen!</string>
+    <string name="drivermode_announcement_journey_end">Fahrt-Ende. Auf Wiedersehen!</string>
     <string name="drivermode_announcement_line_without_direction">%1$s</string>
     <string name="drivermode_announcement_line_and_direction">%1$s Richtung %2$s</string>
     <string name="drivermode_announcement_line_prefix">Linie %1$s</string>
