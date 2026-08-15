@@ -1170,6 +1170,8 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                     colorResId = R.color.fg_insignificant;
                 }
             };
+            if (displayMessage.equals(msgViewMessageText))
+                msgViewExpanded = 2;
             final Spanned html = Html.fromHtml(HtmlUtils.makeLinksClickableInHtml(displayMessage), Html.FROM_HTML_MODE_COMPACT);
             msgView.setText(html);
             msgView.setTextColor(context.getColor(colorResId));
