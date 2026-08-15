@@ -51,6 +51,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -158,6 +159,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
     private Button viewTime1;
     private Button viewTime2;
     private Button viewGo;
+    private ImageView viewGoBike;
     private RecyclerView viewQueryHistoryList;
     private QueryHistoryAdapter queryHistoryListAdapter;
     private View viewQueryHistoryEmpty;
@@ -554,6 +556,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             viewGo = timeAndGo.findViewById(R.id.directions_go);
             viewGo.setOnClickListener(v -> handleGo(false));
             viewGo.setOnLongClickListener(v -> { handleGo(true); return true; });
+            viewGoBike = timeAndGo.findViewById(R.id.directions_go_bike);
 
             viewQueryHistoryList = findViewById(R.id.directions_query_history_list);
             viewQueryHistoryList.setLayoutManager(new LinearLayoutManager(this));
@@ -853,7 +856,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         viewViaLocation.setImeOptions(EditorInfo.IME_ACTION_NEXT);
         viewToLocation.setImeOptions(hasDirectionsCap ? EditorInfo.IME_ACTION_GO : EditorInfo.IME_ACTION_NONE);
         viewGo.setEnabled(hasDirectionsCap);
-        ViewUtils.setVisibility(findViewById(R.id.directions_go_bike), application.prefsIsBicycleTravel());
+        ViewUtils.setVisibility(viewGoBike, application.prefsIsBicycleTravel());
 
         viewQueryHistoryList.setVisibility(hasDirectionsCap ? View.VISIBLE : View.GONE);
         viewQueryHistoryEmpty.setVisibility(
@@ -863,7 +866,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         // regular refresh
         tickReceiver = new BroadcastReceiver() {
             @Override
-            public void onReceive(Context context, Intent intent) {
+            public void onReceive(final Context context, final Intent intent) {
                 updateGUI();
             }
         };
