@@ -1319,7 +1319,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final boolean showAccessibility = leg.line.hasAttr(Line.Attr.WHEEL_CHAIR_ACCESS)
                 && !NetworkProvider.Accessibility.NEUTRAL.equals(application.prefsGetAccessibility());
         final boolean showBicycleCarriage = leg.line.hasAttr(Line.Attr.BICYCLE_CARRIAGE)
-                && application.prefsIsBicycleTravel();
+                && (application.prefsIsBicycleTravel()
+                    || (renderConfig.queryTripsRequestData.options.flags != null
+                        && renderConfig.queryTripsRequestData.options.flags.contains(NetworkProvider.TripFlag.BIKE)));
         final List<Stop> intermediateStops = leg.intermediateStops;
         final List<Stop> intermediateSimulatedStops = simulatedLeg == null ? null : simulatedLeg.intermediateStops;
         String message = leg.message != null ? leg.message : leg.line.message;

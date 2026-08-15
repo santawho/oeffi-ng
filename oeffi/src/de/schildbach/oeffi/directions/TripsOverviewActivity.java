@@ -1047,7 +1047,8 @@ public class TripsOverviewActivity extends OeffiActivity {
         }
 
         final boolean showAccessibility = !NetworkProvider.Accessibility.NEUTRAL.equals(application.prefsGetAccessibility());
-        final boolean showBicycleCarriage = application.prefsIsBicycleTravel();
+        final boolean showBicycleCarriage = application.prefsIsBicycleTravel()
+                || (reloadRequestData.options.flags != null && reloadRequestData.options.flags.contains(NetworkProvider.TripFlag.BIKE));
         final int maxWalkDistance = application.prefsGetMaxWalkDistance();
 
         // remove implausible trips and adjust untravelable legs
