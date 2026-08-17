@@ -405,6 +405,8 @@
             android:showWhenLocked="true"
             android:turnScreenOn="true" />
 
+        <receiver android:name=".directions.driverops.OperationAlarmManager$RefreshReceiver" />
+
         <activity
             android:name=".directions.DirectionsShortcutActivity"
             android:exported="true"

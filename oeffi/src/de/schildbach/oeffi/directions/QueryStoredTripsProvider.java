@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.schildbach.oeffi.Application;
+import de.schildbach.oeffi.directions.driverops.OperationAlarmManager;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
@@ -91,7 +92,8 @@ public class QueryStoredTripsProvider extends ForNetworkContentProvider {
     }
 
     public static Uri put(
-            final ContentResolver contentResolver, final NetworkId network, final String usage,
+            final ContentResolver contentResolver,
+            final NetworkId network, final String usage,
             final Trip trip,
             final QueryTripRunnable.TripRequestData reloadRequestData,
             final int stateFlags) {
@@ -152,6 +154,8 @@ public class QueryStoredTripsProvider extends ForNetworkContentProvider {
             tripsUri = contentResolver.insert(baseUri, values);
         }
 
+        signalOperationAlarmManager(usage);
+
         return tripsUri;
     }
 
@@ -190,10 +194,14 @@ public class QueryStoredTripsProvider extends ForNetworkContentProvider {
         final ContentValues values = new ContentValues();
         values.put(KEY_STATE_FLAGS, stateFlags);
 
-        return contentResolver.update(
+        final int updated = contentResolver.update(
                 tripRowUri(network, usage, rowId),
                 values,
                 null, null);
+
+        signalOperationAlarmManager(usage);
+
+        return updated;
     }
 
     public static int delete(
@@ -206,9 +214,13 @@ public class QueryStoredTripsProvider extends ForNetworkContentProvider {
         selection.append(KEY_TRIP_ID).append("=?");
         selectionArgs.add(tripId);
 
-        return contentResolver.delete(
+        final int deleted = contentResolver.delete(
                 CONTENT_URI_BUILDER(network, usage).build(),
                 selection.toString(), selectionArgs.toArray(new String[0]));
+
+        signalOperationAlarmManager(usage);
+
+        return deleted;
     }
 
     private static int convert(final LocationType type) {
@@ -237,6 +249,11 @@ public class QueryStoredTripsProvider extends ForNetworkContentProvider {
         if (type == TYPE_COORD)
             return LocationType.COORD;
         throw new IllegalArgumentException("unknown type: " + type);
+    }
+
+    private static void signalOperationAlarmManager(final String usage) {
+        if (USAGE_OPERATION.equals(usage))
+            OperationAlarmManager.setupAlarm();
     }
 
     private QueryTripsHelper helper;

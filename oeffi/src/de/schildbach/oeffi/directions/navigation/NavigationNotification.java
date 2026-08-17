@@ -193,7 +193,7 @@ public class NavigationNotification {
     }
 
     private static void createNotificationChannels(final Context context) {
-        TravelAlarmManager.createNotificationChannel(context);
+        TravelAlarmManager.createNotificationChannels(context);
         if (notificationChannelsCreated)
             return;
 

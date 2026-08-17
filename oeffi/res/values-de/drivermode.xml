@@ -48,6 +48,20 @@
     <string name="extras_drivermode_announce_leaving_time_title">Verzögerungszeit</string>
     <string name="extras_drivermode_announce_leaving_time_summary">Wieviel Zeit soll verstreichen, bevor die Linie angesagt wird  [%s Sek]</string>
 
+    <!-- preferences driver mode alarm -->
+    <string name="extras_drivermode_alarm_preferences_title">Einsatzwecker</string>
+    <string name="extras_drivermode_alarm_preferences_short_summary">Lasse einen Wecker ertönen wenn ein Einsatz bevorsteht.</string>
+    <string name="extras_drivermode_alarm_preferences_summary">Lasse einen Wecker ertönen wenn ein Einsatz bevorsteht. Du kannst 4 verschiedene Pausenzeiten festlegen. Format: \"hh:mm\"</string>
+    <string name="extras_drivermode_alarm_enabled_title">Verwenden</string>
+    <string name="extras_drivermode_alarm_duration_title">Dauer</string>
+    <string name="extras_drivermode_alarm_duration_summary">Minimale Dauer der Pause.  [%s]</string>
+    <string name="extras_drivermode_alarm_lead_time_title">Vorlaufzeit</string>
+    <string name="extras_drivermode_alarm_lead_time_summary">Wieviel Zeit vor Beginn des Einsatzes soll der Wecker ertönen.  [%s]</string>
+    <string name="extras_drivermode_alarm_short_break_title">Kurze Pause</string>
+    <string name="extras_drivermode_alarm_long_break_title">Lange Pause</string>
+    <string name="extras_drivermode_alarm_second_shift_title">Zweite Schicht an einem Tag</string>
+    <string name="extras_drivermode_alarm_next_day_title">Nächster Tag</string>
+
     <!-- navigation -->
     <string name="drivermode_navigation_action_cancel">Einsatz beenden</string>
     <string name="drivermode_navigation_action_annoucements">Ankündigungen an/aus</string>
@@ -59,5 +73,11 @@
     <string name="drivermode_announcement_line_without_direction">%1$s</string>
     <string name="drivermode_announcement_line_and_direction">%1$s Richtung %2$s</string>
     <string name="drivermode_announcement_line_prefix">Linie %1$s</string>
+
+    <!-- operation alarm -->
+    <string name="drivermode_operationalarm_notification_default_channel_name">Einsatzwecker</string>
+    <string name="drivermode_operationalarm_notification_default_channel_description">Wecker für bevorstehende Einsätze</string>
+    <string name="drivermode_operationalarm_notification_start_title">Einsatz Linie %1$s Richtung %2$s beginnt bald</string>
+    <string name="drivermode_operationalarm_notification_start_message">Abfahrt %1$s um %2$s</string>
 
 </resources>

@@ -306,7 +306,6 @@
     <string name="directions_time_arr_dep_description">depart at/arrive by</string>
     <string name="directions_time_dep">Dep ↦</string>
     <string name="directions_time_arr">⇥ Arr</string>
-    <string name="directions_time_relative">in %s</string>
     <string name="directions_go">Go ➝</string>
     <string name="directions_message_choose_from">Please choose an origin</string>
     <string name="directions_message_choose_to">Please choose a destination</string>
@@ -621,6 +620,7 @@
     <string name="time_tomorrow_abbrev">tom.</string>
     <string name="time_now">now</string>
     <string name="time_min">%d&#x200a;min</string>
+    <string name="time_long">in&#x2009;%s</string>
     <string name="time_min_short">%d&#x200a;m</string>
     <string name="time_ago">%d&#x200a;min&#x2009;ago</string>
     <string name="time_hours_mins">%1$dh&#x2009;%2$02d&#x200a;min</string>

@@ -1094,8 +1094,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         } else if (timeSpec instanceof TimeSpec.Relative) {
             final long diff = ((TimeSpec.Relative) timeSpec).diffMs;
             viewTime1.setVisibility(View.VISIBLE);
-            viewTime1.setText(diff == 0 ? getString(R.string.time_now)
-                    : getString(R.string.directions_time_relative, Formats.formatTimeDiff(this, diff)));
+            viewTime1.setText(Formats.formatTimeDiff(this, diff));
             viewTime1.setOnClickListener(v -> {
                 if (timeSpec instanceof TimeSpec.Relative) {
                     // set to depart at ...
@@ -1229,11 +1228,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         final String[] relativeTimeStrings = new String[relativeTimeValues.length + 1];
         relativeTimeStrings[relativeTimeValues.length] = getString(R.string.directions_set_time_relative_fixed);
         for (int i = 0; i < relativeTimeValues.length; i++) {
-            if (relativeTimeValues[i] == 0)
-                relativeTimeStrings[i] = getString(R.string.time_now);
-            else
-                relativeTimeStrings[i] = getString(R.string.directions_time_relative,
-                        Formats.formatTimeDiff(this, relativeTimeValues[i] * DateUtils.MINUTE_IN_MILLIS));
+            relativeTimeStrings[i] = Formats.formatTimeDiff(this, relativeTimeValues[i] * DateUtils.MINUTE_IN_MILLIS);
         }
         DialogBuilder.get(this)
             .setTitle(R.string.directions_set_time_relative_prompt)

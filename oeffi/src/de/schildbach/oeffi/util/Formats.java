@@ -155,22 +155,33 @@ public final class Formats {
     public static String formatTimeDiff(final Context context, final Date from, final Date to, final boolean refIsNow) {
         if (to == null || from == null)
             return "?";
-        return formatTimeDiff(context, to.getTime(), from.getTime(), refIsNow);
+        return formatTimeDiff(context, from.getTime(), to.getTime(), refIsNow, false, true);
     }
 
     public static String formatTimeDiff(final Context context, final long from, final long to, final boolean refIsNow) {
         return formatTimeDiff(context, to - from, refIsNow);
     }
 
+    public static String formatTimeDiff(
+            final Context context,
+            final long from, final long to,
+            final boolean refIsNow,
+            final boolean shortFormat, final boolean longFormat) {
+        return formatTimeDiff(context, to - from, refIsNow, shortFormat, longFormat);
+    }
+
     public static String formatTimeDiff(final Context context, final long diff) {
-        return formatTimeDiff(context, diff, true);
+        return formatTimeDiff(context, diff, true, false, true);
     }
 
     public static String formatTimeDiff(final Context context, final long diff, final boolean refIsNow) {
-        return formatTimeDiff(context, diff, refIsNow, false);
+        return formatTimeDiff(context, diff, refIsNow, false, false);
     }
 
-    public static String formatTimeDiff(final Context context, final long diff, final boolean refIsNow, final boolean shortFormat) {
+    public static String formatTimeDiff(
+            final Context context,
+            final long diff, final boolean refIsNow,
+            final boolean shortFormat, final boolean longFormat) {
         final long rel = Math.round(((float) diff) / DateUtils.MINUTE_IN_MILLIS);
         if (refIsNow) {
             if (rel >= 60) {
@@ -180,13 +191,27 @@ public final class Formats {
                     else
                         return context.getString(R.string.time_hours, (rel + 30) / 60);
                 } else {
-                    return context.getString(R.string.time_hours_mins, rel / 60, rel % 60);
+                    final long mins = rel % 60;
+                    final String s;
+                    if (mins == 0)
+                        s = context.getString(R.string.time_hours, rel / 60);
+                    else
+                        s = context.getString(R.string.time_hours_mins, rel / 60, mins);
+                    if (longFormat)
+                        return context.getString(R.string.time_long, s);
+                    else
+                        return s;
                 }
             } else if (rel > 0) {
-                if (shortFormat)
+                if (shortFormat) {
                     return context.getString(R.string.time_min_short, rel);
-                else
-                    return context.getString(R.string.time_min, rel);
+                } else {
+                    final String s = context.getString(R.string.time_min, rel);
+                    if (longFormat)
+                        return context.getString(R.string.time_long, s);
+                    else
+                        return s;
+                }
             } else if (rel == 0) {
                 return context.getString(R.string.time_now);
             } else {

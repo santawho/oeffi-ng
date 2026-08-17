@@ -19,6 +19,9 @@ package de.schildbach.oeffi.directions.driverops;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -42,10 +45,30 @@ import de.schildbach.pte.dto.Product;
 import de.schildbach.pte.dto.Trip;
 
 public class OperationsActivity extends DirectionsActivity {
+    public static final String INTENT_EXTRA_PLAYALARM = OperationsActivity.class.getName() + ".playalarm";
 
     public static void start(final Context context) {
+        context.startActivity(buildStartIntent(context, null));
+    }
+
+    public static Intent buildStartIntent(final Context context, final String playAlarmNotificationTag) {
         final Intent intent = new Intent(context, OperationsActivity.class);
-        context.startActivity(intent);
+        if (playAlarmNotificationTag != null)
+            intent.putExtra(INTENT_EXTRA_PLAYALARM, playAlarmNotificationTag);
+        return intent;
+    }
+
+    @Override
+    protected void onCreate(final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        final Intent intent = getIntent();
+        handlePlayAlarm(intent);
+    }
+
+    @Override
+    public void onNewIntent(@NonNull final Intent intent) {
+        super.onNewIntent(intent);
+        handlePlayAlarm(intent);
     }
 
     @Override
@@ -155,5 +178,13 @@ public class OperationsActivity extends DirectionsActivity {
         renderConfig.queryTripsRequestData = queryTripsRequestData;
         final Trip journeyTrip = TripUtils.createTripFromJourneyTrip(trip);
         OperationNavigatorActivity.startNavigation(this, network, journeyTrip, renderConfig, false);
+    }
+
+    private void handlePlayAlarm(final Intent intent) {
+        final String playAlarmNotificationTag = intent.getStringExtra(INTENT_EXTRA_PLAYALARM);
+        if (playAlarmNotificationTag == null)
+            return;
+
+        new OperationAlarmManager(this).showAlarmPopupDialog(playAlarmNotificationTag);
     }
 }

@@ -50,6 +50,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
@@ -95,6 +96,7 @@ public class OperationNotification {
     }
 
     private static void createNotificationChannels(final Context context) {
+        OperationAlarmManager.createNotificationChannels(context);
         if (notificationChannelsCreated)
             return;
 
@@ -184,6 +186,15 @@ public class OperationNotification {
             return true;
         });
         return minRefreshAt.get();
+    }
+
+    public static int getNumberOfActiveNotifications(final Context context) {
+        final AtomicInteger count = new AtomicInteger(0);
+        forAllActiveNotifications(context, "activeNotifications", operationNotification -> {
+            count.incrementAndGet();
+            return true;
+        });
+        return count.get();
     }
 
     public static boolean isTripUnderOperation(final Context context, final String aTripId) {

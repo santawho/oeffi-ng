@@ -326,7 +326,8 @@ public class QueryJourneyRunnable implements Runnable {
             .setMessage(R.string.alert_network_problem_message)
             .setPositiveButton(R.string.alert_network_problem_retry, (dialog, which) -> {
                 dialog.dismiss();
-                clickedView.performClick();
+                if (clickedView != null)
+                    clickedView.performClick();
             })
             .setOnCancelListener(dialog -> dialog.dismiss())
             .show();

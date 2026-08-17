@@ -200,7 +200,7 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder
             iconResId = R.drawable.ic_navigation_white_24dp;
         }
         if (sTimeLeft == null && msTimeLeft >= 0) {
-            sTimeLeft = Formats.formatTimeDiff(context, msTimeLeft, true, true);
+            sTimeLeft = Formats.formatTimeDiff(context, msTimeLeft, true, true, false);
         }
         final int timeLeftColor = context.getColor(timeLeftColorId);
         frameView.setBackground(AppCompatResources.getDrawable(context, backgroundId));

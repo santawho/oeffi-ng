@@ -57,7 +57,7 @@ import de.schildbach.pte.dto.PTDate;
 import de.schildbach.pte.dto.Trip;
 
 public class TravelAlarmManager {
-    private static Logger log = LoggerFactory.getLogger(TravelAlarmManager.class);
+    private static final Logger log = LoggerFactory.getLogger(TravelAlarmManager.class);
 
     public interface TravelAlarmDialogFinishedListener {
         void onTravelAlarmDialogFinished();
@@ -80,12 +80,12 @@ public class TravelAlarmManager {
 
     private static boolean notificationChannelCreated;
 
-    public static void createNotificationChannel(final Context context) {
+    public static void createNotificationChannels(final Context context) {
         if (notificationChannelCreated)
             return;
 
         final NotificationManager notificationManager = getNotificationManager(context);
-        for (String channelId : LEGACY_CHANNEL_IDS) {
+        for (final String channelId : LEGACY_CHANNEL_IDS) {
             notificationManager.deleteNotificationChannel(channelId);
         }
 
@@ -133,7 +133,7 @@ public class TravelAlarmManager {
 
     private Notification findNotificationByTag(final String tag) {
         final StatusBarNotification[] activeNotifications = getNotificationManager(context).getActiveNotifications();
-        for (StatusBarNotification statusBarNotification : activeNotifications) {
+        for (final StatusBarNotification statusBarNotification : activeNotifications) {
             if (tag.equals(statusBarNotification.getTag()))
                 return statusBarNotification.getNotification();
         }
@@ -245,7 +245,7 @@ public class TravelAlarmManager {
         else if (explicitSettingMs > 0)
             return getWeightedTime(earliestEventTime, estimatedEventTime) - explicitSettingMs;
 
-        long alarmTimeBeforeEventMs = getArrivalAlarmTimeDefault();
+        final long alarmTimeBeforeEventMs = getArrivalAlarmTimeDefault();
         if (alarmTimeBeforeEventMs <= 0)
             return 0;
         final long alarmTimeMs = getWeightedTime(earliestEventTime, estimatedEventTime) - alarmTimeBeforeEventMs;
@@ -264,7 +264,7 @@ public class TravelAlarmManager {
         else if (explicitSettingMs > 0)
             return getWeightedTime(earliestEventTime, estimatedEventTime) - explicitSettingMs;
 
-        long alarmTimeBeforeEventMs = getDepartureAlarmTimeDefault();
+        final long alarmTimeBeforeEventMs = getDepartureAlarmTimeDefault();
         if (alarmTimeBeforeEventMs <= 0)
             return 0;
         final long alarmTimeMs = getWeightedTime(earliestEventTime, estimatedEventTime) - alarmTimeBeforeEventMs;
@@ -397,7 +397,7 @@ public class TravelAlarmManager {
                 Formats.formatTime(timeZoneSelector, tripRenderer.nextEventEstimatedTime, PTDate.SYSTEM_OFFSET),
                 tripRenderer.nextEventTimeLeftValue, tripRenderer.nextEventTimeLeftUnit);
 
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, channelId)
+        final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, channelId)
                 .setContentIntent(contentIntent)
                 .setFullScreenIntent(fullScreenIntent, true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -439,7 +439,7 @@ public class TravelAlarmManager {
         dialog.setContentView(R.layout.navigation_alarm_popup);
         ((TextView) dialog.findViewById(R.id.navigation_alarm_popup_title)).setText(title);
         ((TextView) dialog.findViewById(R.id.navigation_alarm_popup_message)).setText(message);
-        dialog.findViewById(R.id.navigation_travelalarm_popup_button_ok).setOnClickListener(v -> {
+        dialog.findViewById(R.id.navigation_alarm_popup_button_ok).setOnClickListener(v -> {
             // dismissAlarm(notificationTag); -- done in dismiss listener
             dialog.dismiss();
         });
@@ -563,11 +563,11 @@ public class TravelAlarmManager {
                 ViewUtils.setVisibility(saveDefaultCheckBox, false);
                 ViewUtils.setVisibility(deleteDefaultButton, false);
                 if (alarmIsForDeparture) {
-                    String departureName = Formats.makeBreakableStationName(travelAlarmState.publicLeg.departure.uniqueShortName());
+                    final String departureName = Formats.makeBreakableStationName(travelAlarmState.publicLeg.departure.uniqueShortName());
                     ((TextView) findViewById(R.id.navigation_alarm_dialog_message)).setText(
                             context.getString(R.string.navigation_alarm_dialog_message_departure, departureName));
                 } else {
-                    String arrivalName = Formats.makeBreakableStationName(travelAlarmState.publicLeg.arrival.uniqueShortName());
+                    final String arrivalName = Formats.makeBreakableStationName(travelAlarmState.publicLeg.arrival.uniqueShortName());
                     ((TextView) findViewById(R.id.navigation_alarm_dialog_message)).setText(
                             context.getString(R.string.navigation_alarm_dialog_message_arrival, arrivalName));
                 }

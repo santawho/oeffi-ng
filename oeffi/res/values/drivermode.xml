@@ -61,6 +61,28 @@
     <string name="extras_drivermode_announce_leaving_time_title">Delay time</string>
     <string name="extras_drivermode_announce_leaving_time_summary">How much time shall pass before announcing the line  [%s secs]</string>
 
+    <!-- preferences driver mode alarm -->
+    <string name="extras_drivermode_alarm_preferences_title">Operation Alarms</string>
+    <string name="extras_drivermode_alarm_preferences_short_summary">Sound alarms prior to an upcoming operation.</string>
+    <string name="extras_drivermode_alarm_preferences_summary">Sound alarms prior to an upcoming operation. You can set 4 different break times. Format: \"hh:mm\"</string>
+    <string name="extras_drivermode_alarm_enabled_title">Use</string>
+    <string name="extras_drivermode_alarm_duration_title">Duration</string>
+    <string name="extras_drivermode_alarm_duration_summary">Minimum duration of the break.  [%s]</string>
+    <string name="extras_drivermode_alarm_lead_time_title">Alarm lead time</string>
+    <string name="extras_drivermode_alarm_lead_time_summary">How much time in advance to the beginning of the operation shall the alarm sound.  [%s]</string>
+    <string name="extras_drivermode_alarm_short_break_title">Short Break</string>
+    <string name="extras_drivermode_alarm_short_break_duration_value" translatable="false">0:15</string>
+    <string name="extras_drivermode_alarm_short_break_lead_time_value" translatable="false">0:05</string>
+    <string name="extras_drivermode_alarm_long_break_title">Long Break</string>
+    <string name="extras_drivermode_alarm_long_break_duration_value" translatable="false">0:45</string>
+    <string name="extras_drivermode_alarm_long_break_lead_time_value" translatable="false">0:10</string>
+    <string name="extras_drivermode_alarm_second_shift_title">Second Shift in a Day</string>
+    <string name="extras_drivermode_alarm_second_shift_duration_value" translatable="false">2:00</string>
+    <string name="extras_drivermode_alarm_second_shift_lead_time_value" translatable="false">0:20</string>
+    <string name="extras_drivermode_alarm_next_day_title">Next Day</string>
+    <string name="extras_drivermode_alarm_next_day_duration_value" translatable="false">6:00</string>
+    <string name="extras_drivermode_alarm_next_day_lead_time_value" translatable="false">2:00</string>
+
     <!-- navigation -->
     <string name="drivermode_navigation_action_cancel">Stop operation</string>
     <string name="drivermode_navigation_action_annoucements">Toggle announcements</string>
@@ -72,5 +94,11 @@
     <string name="drivermode_announcement_line_without_direction">%1$s</string>
     <string name="drivermode_announcement_line_and_direction">%1$s to %2$s</string>
     <string name="drivermode_announcement_line_prefix">line %1$s</string>
+
+    <!-- operation alarm -->
+    <string name="drivermode_operationalarm_notification_default_channel_name">Operation Alarm</string>
+    <string name="drivermode_operationalarm_notification_default_channel_description">Alarm for upcoming operation</string>
+    <string name="drivermode_operationalarm_notification_start_title">Operation on line %1$s to %2$s starts soon</string>
+    <string name="drivermode_operationalarm_notification_start_message">Departure %1$s at %2$s</string>
 
 </resources>

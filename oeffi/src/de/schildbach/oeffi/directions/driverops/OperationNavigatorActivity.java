@@ -274,6 +274,7 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
         OperationNotification.remove(this, getIntent());
         markTripAsDone(markAsDone);
         finishAndRemoveTask();
+        OperationAlarmManager.setupAlarm();
     }
 
     private void markTripAsDone(final boolean isDone) {
@@ -285,6 +286,7 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        new OperationAlarmManager(this).clearAlarm();
         setupConfig();
     }
 

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/extras_drivermode_alarm_preferences_title" >
+
+    <Preference
+        android:summary="@string/extras_drivermode_alarm_preferences_summary" />
+
+    <PreferenceCategory android:title="@string/extras_drivermode_alarm_short_break_title">
+        <CheckBoxPreference
+            android:key="extras_drivermode_alarm_short_break_enabled"
+            android:defaultValue="false"
+            android:title="@string/extras_drivermode_alarm_enabled_title" />
+
+        <EditTextPreference
+            android:key="extras_drivermode_alarm_short_break_duration"
+            android:dependency="extras_drivermode_alarm_short_break_enabled"
+            android:singleLine="true"
+            android:inputType="time"
+            android:defaultValue="@string/extras_drivermode_alarm_short_break_duration_value"
+            android:title="@string/extras_drivermode_alarm_duration_title"
+            android:summary="@string/extras_drivermode_alarm_duration_summary" />
+
+        <EditTextPreference
+            android:key="extras_drivermode_alarm_short_break_lead_time"
+            android:dependency="extras_drivermode_alarm_short_break_enabled"
+            android:singleLine="true"
+            android:inputType="time"
+            android:defaultValue="@string/extras_drivermode_alarm_short_break_lead_time_value"
+            android:title="@string/extras_drivermode_alarm_lead_time_title"
+            android:summary="@string/extras_drivermode_alarm_lead_time_summary" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/extras_drivermode_alarm_long_break_title">
+        <CheckBoxPreference
+            android:key="extras_drivermode_alarm_long_break_enabled"
+            android:defaultValue="false"
+            android:title="@string/extras_drivermode_alarm_enabled_title" />
+
+        <EditTextPreference
+            android:key="extras_drivermode_alarm_long_break_duration"
+            android:dependency="extras_drivermode_alarm_long_break_enabled"
+            android:singleLine="true"
+            android:inputType="time"
+            android:defaultValue="@string/extras_drivermode_alarm_long_break_duration_value"
+            android:title="@string/extras_drivermode_alarm_duration_title"
+            android:summary="@string/extras_drivermode_alarm_duration_summary" />
+
+        <EditTextPreference
+            android:key="extras_drivermode_alarm_long_break_lead_time"
+            android:dependency="extras_drivermode_alarm_long_break_enabled"
+            android:singleLine="true"
+            android:inputType="time"
+            android:defaultValue="@string/extras_drivermode_alarm_long_break_lead_time_value"
+            android:title="@string/extras_drivermode_alarm_lead_time_title"
+            android:summary="@string/extras_drivermode_alarm_lead_time_summary" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/extras_drivermode_alarm_second_shift_title">
+        <CheckBoxPreference
+            android:key="extras_drivermode_alarm_second_shift_enabled"
+            android:defaultValue="false"
+            android:title="@string/extras_drivermode_alarm_enabled_title" />
+
+        <EditTextPreference
+            android:key="extras_drivermode_alarm_second_shift_duration"
+            android:dependency="extras_drivermode_alarm_second_shift_enabled"
+            android:singleLine="true"
+            android:inputType="time"
+            android:defaultValue="@string/extras_drivermode_alarm_second_shift_duration_value"
+            android:title="@string/extras_drivermode_alarm_duration_title"
+            android:summary="@string/extras_drivermode_alarm_duration_summary" />
+
+        <EditTextPreference
+            android:key="extras_drivermode_alarm_second_shift_lead_time"
+            android:dependency="extras_drivermode_alarm_second_shift_enabled"
+            android:singleLine="true"
+            android:inputType="time"
+            android:defaultValue="@string/extras_drivermode_alarm_second_shift_lead_time_value"
+            android:title="@string/extras_drivermode_alarm_lead_time_title"
+            android:summary="@string/extras_drivermode_alarm_lead_time_summary" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/extras_drivermode_alarm_next_day_title">
+        <CheckBoxPreference
+            android:key="extras_drivermode_alarm_next_day_enabled"
+            android:defaultValue="false"
+            android:title="@string/extras_drivermode_alarm_enabled_title" />
+
+        <EditTextPreference
+            android:key="extras_drivermode_alarm_next_day_duration"
+            android:dependency="extras_drivermode_alarm_next_day_enabled"
+            android:singleLine="true"
+            android:inputType="time"
+            android:defaultValue="@string/extras_drivermode_alarm_next_day_duration_value"
+            android:title="@string/extras_drivermode_alarm_duration_title"
+            android:summary="@string/extras_drivermode_alarm_duration_summary" />
+
+        <EditTextPreference
+            android:key="extras_drivermode_alarm_next_day_lead_time"
+            android:dependency="extras_drivermode_alarm_next_day_enabled"
+            android:singleLine="true"
+            android:inputType="time"
+            android:defaultValue="@string/extras_drivermode_alarm_next_day_lead_time_value"
+            android:title="@string/extras_drivermode_alarm_lead_time_title"
+            android:summary="@string/extras_drivermode_alarm_lead_time_summary" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

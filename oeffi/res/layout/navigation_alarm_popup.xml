@@ -27,7 +27,7 @@
         />
 
     <Button
-        android:id="@+id/navigation_travelalarm_popup_button_ok"
+        android:id="@+id/navigation_alarm_popup_button_ok"
         style="@style/My.Widget.Button.Border"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -12,6 +12,11 @@
         android:title="@string/extras_drivermode_enabled_title" />
 
     <PreferenceScreen
+        android:fragment="de.schildbach.oeffi.preference.DriverModeAlarmFragment"
+        android:title="@string/extras_drivermode_alarm_preferences_title"
+        android:summary="@string/extras_drivermode_alarm_preferences_short_summary" />
+
+    <PreferenceScreen
         android:fragment="de.schildbach.oeffi.preference.DriverModeAnnouncementsFragment"
         android:title="@string/extras_drivermode_announcements_preferences_title"
         android:summary="@string/extras_drivermode_announcements_preferences_summary" />
