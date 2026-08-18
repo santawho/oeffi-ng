@@ -294,6 +294,9 @@ public class OperationAlarmManager {
         notification.flags |= NotificationCompat.FLAG_INSISTENT;
         log.info("set alarm notification with tag={}", notificationTag);
         getNotificationManager(context).notify(notificationTag, 0, notification);
+
+        // prepare another alarm (for this same trip) if required
+        setupAlarm(networkId);
     }
 
     public void dismissAlarm(final String notificationTag) {
