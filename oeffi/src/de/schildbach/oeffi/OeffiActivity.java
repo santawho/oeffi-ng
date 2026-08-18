@@ -240,6 +240,10 @@ public abstract class OeffiActivity extends AppCompatActivity
         return false;
     }
 
+    public boolean isBicycleTravel() {
+        return application.prefsIsBicycleTravel();
+    }
+
     protected void updateFromPreferences() {
         timeZoneSelector = application.getPreferredNetworkTimeZoneSelector(network);
         isDriverMode = getIntent().getBooleanExtra(Constants.PREFS_KEY_EXTRAS_DRIVERMODE_ENABLED, false)

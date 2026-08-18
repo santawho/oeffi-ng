@@ -42,7 +42,13 @@
     <CheckBoxPreference
         android:defaultValue="false"
         android:key="bicycle_travel"
-        android:summary="@string/directions_preferences_bicycle_carriage_summary"
-        android:title="@string/directions_preferences_bicycle_carriage_title" />
+        android:summary="@string/directions_preferences_bicycle_travel_summary"
+        android:title="@string/directions_preferences_bicycle_travel_title" />
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="bicycle_travel_without_bike_carriage"
+        android:dependency="bicycle_travel"
+        android:summary="@string/directions_preferences_bicycle_travel_without_bike_carriage_summary"
+        android:title="@string/directions_preferences_bicycle_travel_without_bike_carriage_title" />
 
 </PreferenceScreen>

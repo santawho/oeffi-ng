@@ -92,6 +92,11 @@ public class OperationsActivity extends DirectionsActivity {
     }
 
     @Override
+    public boolean isBicycleTravel() {
+        return false;
+    }
+
+    @Override
     protected void setupTripsOverviewRenderConfig(final TripsOverviewActivity.RenderConfig renderConfig) {
         super.setupTripsOverviewRenderConfig(renderConfig);
         renderConfig.isOperationsPlanning = true;

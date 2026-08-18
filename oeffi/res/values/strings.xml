@@ -538,8 +538,10 @@
     <string name="directions_preferences_min_transfer_time_summary">How long do you need for a transfer?  [%s]</string>
     <string name="directions_preferences_accessibility_title">Accessibility</string>
     <string name="directions_preferences_accessibility_summary">How accessible do you need the route to be?  [%s]</string>
-    <string name="directions_preferences_bicycle_carriage_title">Travel with Bicycle</string>
-    <string name="directions_preferences_bicycle_carriage_summary">Show useful information for those travelling with a bicycle.</string>
+    <string name="directions_preferences_bicycle_travel_title">Travel with Bicycle</string>
+    <string name="directions_preferences_bicycle_travel_summary">Show useful information for those traveling with a bicycle.</string>
+    <string name="directions_preferences_bicycle_travel_without_bike_carriage_title">… without bicycle carriage</string>
+    <string name="directions_preferences_bicycle_travel_without_bike_carriage_summary">Do not activate bike carriage option, even when aboce option is set.</string>
 
     <!-- navigation -->
     <string name="directions_trip_navigation_action_cancel">Stop navigation</string>

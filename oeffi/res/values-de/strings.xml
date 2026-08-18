@@ -536,8 +536,10 @@
     <string name="directions_preferences_min_transfer_time_summary">Wie lange benötigst du zum umsteigen?  [%s]</string>
     <string name="directions_preferences_accessibility_title">Barrierefreiheit</string>
     <string name="directions_preferences_accessibility_summary">Wie barrierefrei muss die Route sein?  [%s]</string>
-    <string name="directions_preferences_bicycle_carriage_title">Reise mit Fahrrad</string>
-    <string name="directions_preferences_bicycle_carriage_summary">Zeigt nützliche Information für Reisende mit Fahrrad.</string>
+    <string name="directions_preferences_bicycle_travel_title">Reise mit Fahrrad</string>
+    <string name="directions_preferences_bicycle_travel_summary">Zeigt nützliche Information für Reisende mit Fahrrad.</string>
+    <string name="directions_preferences_bicycle_travel_without_bike_carriage_title">… ohne Fahrradmitnahme</string>
+    <string name="directions_preferences_bicycle_travel_without_bike_carriage_summary">Aktiviere die Option zur Fahrradmitnahme nicht, auch wenn die obige Einstellung gewählt ist.</string>
 
     <!-- navigation -->
     <string name="directions_trip_navigation_action_cancel">Navigation beenden</string>

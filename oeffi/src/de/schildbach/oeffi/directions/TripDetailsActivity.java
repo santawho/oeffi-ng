@@ -1319,7 +1319,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final boolean showAccessibility = leg.line.hasAttr(Line.Attr.WHEEL_CHAIR_ACCESS)
                 && !NetworkProvider.Accessibility.NEUTRAL.equals(application.prefsGetAccessibility());
         final boolean showBicycleCarriage = leg.line.hasAttr(Line.Attr.BICYCLE_CARRIAGE)
-                && (application.prefsIsBicycleTravel()
+                && (isBicycleTravel()
                     || (renderConfig.queryTripsRequestData != null
                         && renderConfig.queryTripsRequestData.options != null
                         && renderConfig.queryTripsRequestData.options.flags != null

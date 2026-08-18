@@ -63,6 +63,7 @@ public class Constants {
     public static final String PREFS_KEY_MIN_TRANSFER_TIME = "min_transfer_time";
     public static final String PREFS_KEY_ACCESSIBILITY = "accessibility";
     public static final String PREFS_KEY_BICYCLE_TRAVEL = "bicycle_travel";
+    public static final String PREFS_KEY_BICYCLE_TRAVEL_WITHOUT_BIKE_CARRIAGE = "bicycle_travel_without_bike_carriage";
     public static final String PREFS_KEY_MAX_WALK_DISTANCE = "walk_distance";
     public static final String PREFS_KEY_LAST_VERSION = "last_version";
     public static final String PREFS_KEY_SHOW_INFO = "show_hints";

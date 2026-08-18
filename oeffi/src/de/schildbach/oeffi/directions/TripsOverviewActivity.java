@@ -1047,7 +1047,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         }
 
         final boolean showAccessibility = !NetworkProvider.Accessibility.NEUTRAL.equals(application.prefsGetAccessibility());
-        final boolean showBicycleCarriage = application.prefsIsBicycleTravel()
+        final boolean showBicycleCarriage = isBicycleTravel()
                 || (reloadRequestData != null
                     && reloadRequestData.options != null
                     && reloadRequestData.options.flags != null
