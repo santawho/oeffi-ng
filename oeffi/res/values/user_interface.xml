@@ -95,6 +95,18 @@
         <item>show start button in main menu</item>
         <item>hide voice input, voice control is off</item>
     </string-array>
+    <string name="user_interface_voice_use_on_device_recognizer_title">On-Device Engine</string>
+    <string name="user_interface_voice_use_on_device_recognizer_summary">
+        Use on-device speech recognition engine, if available.
+        Turn this OFF, if you want to be sure to use a custom aftermarket recognizer.
+    </string>
+    <string name="user_interface_voice_prefer_offline_recognizer_title">Prefer off-line</string>
+    <string name="user_interface_voice_prefer_offline_recognizer_summary">
+        Prefer off-line recognition, if available,
+        i.e. the recognition engine is offline capable
+        and the language modules have been installed.
+    </string>
+
     <string name="user_interface_voice_control_toggle_on_title">Listening for voice commands</string>
     <string name="user_interface_voice_control_toggle_off_title">Not listening for voice commands</string>
     <string name="user_interface_voice_control_trigger_title">Start voice input</string>

@@ -83,6 +83,18 @@
         <item>zeige Start-Button im Hauptmenü</item>
         <item>verstecke die Spracheingabe, Sprachsteuerung ist ausgeschaltet</item>
     </string-array>
+    <string name="user_interface_voice_use_on_device_recognizer_title">On-Device Erkennung</string>
+    <string name="user_interface_voice_use_on_device_recognizer_summary">
+        Nutze die im Gerät fest installierte Spracherkennung, sofern verfügbar.
+        Schalte dies AUS, wenn du sicher sein willst, eine nachinstallierte Spracherkennung zu verwenden.
+    </string>
+    <string name="user_interface_voice_prefer_offline_recognizer_title">Bevorzuge off-line</string>
+    <string name="user_interface_voice_prefer_offline_recognizer_summary">
+        Bevorzuge off-line Spracherkennung, sofern verfügbar,
+        d.h. das Erkennungsmodul muss in der Lage sein, offline zu arbeiten
+        und das Sprachpaket muss installiert sein.
+    </string>
+
     <string name="user_interface_voice_control_toggle_on_title">Höre auf Sprachbefehle</string>
     <string name="user_interface_voice_control_toggle_off_title">Höre nicht auf Sprachbefehle</string>
     <string name="user_interface_voice_control_trigger_title">Starte Spracheingabe</string>

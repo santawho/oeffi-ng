@@ -22,6 +22,7 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -247,8 +248,14 @@ public class SpeechInput {
         if (isSpeechRecognitionRunning)
             return;
 
+        final SharedPreferences prefs = Application.getInstance().getSharedPreferences();
+        final boolean isUseOnDeviceRecognition = prefs.getBoolean("user_interface_voice_use_on_device_recognizer", true);
+        final boolean isPreferOfflineRecognition = prefs.getBoolean("user_interface_voice_prefer_offline_recognizer", true);
+
         if (speechRecognizer == null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && SpeechRecognizer.isOnDeviceRecognitionAvailable(activityContext)) {
+            if (isUseOnDeviceRecognition
+                    && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                    && SpeechRecognizer.isOnDeviceRecognitionAvailable(activityContext)) {
                 speechRecognizer = SpeechRecognizer.createOnDeviceSpeechRecognizer(activityContext);
             } else if (SpeechRecognizer.isRecognitionAvailable(activityContext)) {
                 speechRecognizer = SpeechRecognizer.createSpeechRecognizer(activityContext);
@@ -326,8 +333,10 @@ public class SpeechInput {
         if (speechRecognizer != null) {
             isSpeechRecognitionRunning = true;
             this.activityContext = activityContext;
-            speechRecognizer.startListening(new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
-                    .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM));
+            final Intent recognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+                    .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                    .putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, isPreferOfflineRecognition);
+            speechRecognizer.startListening(recognizerIntent);
         }
     }
 

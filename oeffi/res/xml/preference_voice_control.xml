@@ -15,4 +15,16 @@
         android:entries="@array/user_interface_voice_control_entries"
         android:entryValues="@array/user_interface_voice_control_values" />
 
+    <CheckBoxPreference
+        android:key="user_interface_voice_use_on_device_recognizer"
+        android:defaultValue="true"
+        android:title="@string/user_interface_voice_use_on_device_recognizer_title"
+        android:summary="@string/user_interface_voice_use_on_device_recognizer_summary" />
+
+    <CheckBoxPreference
+        android:key="user_interface_voice_prefer_offline_recognizer"
+        android:defaultValue="true"
+        android:title="@string/user_interface_voice_prefer_offline_recognizer_title"
+        android:summary="@string/user_interface_voice_prefer_offline_recognizer_summary" />
+
 </PreferenceScreen>
