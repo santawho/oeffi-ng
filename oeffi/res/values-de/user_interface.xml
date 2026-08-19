@@ -71,6 +71,22 @@
     <string name="user_interface_category_map_title">Landkarten</string>
     <string name="user_interface_map_tile_resolution_title">Auflösung von Landkarten</string>
     <string name="user_interface_map_tile_resolution_summary">Setze dies höher für mehr Details, aber weniger Lesbarkeit, und umgekehrt. [%s]</string>
+    <string name="user_interface_map_point_title">Wie sollen Punkte auf einer Landkarte angezeigt werden</string>
+    <string name="user_interface_map_trip_title">Wie sollen Reiseverläufe auf einer Landkarte angezeigt werden</string>
+    <string name="user_interface_map_action_title">Aktion</string>
+    <string name="user_interface_map_action_summary">%s</string>
+    <string name="user_interface_map_app_title">Externe App</string>
+    <string name="user_interface_map_app_summary">Wähle die externe App, die standardmäßig geöffnet werden soll  [%s]</string>
+    <string-array name="user_interface_map_action_entries">
+        <item>Verwende interne Kartenansicht</item>
+        <item>Öffne Karte in festgelegter externer App</item>
+        <item>Wähle externe App zum Öffnen der Karte</item>
+        <item>Zeige ein Menü zum Wählen der Aktion</item>
+    </string-array>
+    <string name="user_interface_map_app_type_title">Wähle den Datentyp</string>
+    <string name="user_interface_map_app_type_summary">Welche Datentyp soll benutzt werden, um die App zu öffnen? Versuche beide, um die passendste Methode zu finden.</string>
+    <string name="user_interface_map_app_content_type_points">Orten</string>
+    <string name="user_interface_map_app_content_type_trips">Reiseverläufen</string>
 
     <string name="user_interface_mainmenu_shareapp_enabled_title">Zeige \"Teile App\" Eintrag im Hauptmenü</string>
 

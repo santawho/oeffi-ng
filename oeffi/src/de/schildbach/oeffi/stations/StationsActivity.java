@@ -93,7 +93,7 @@ import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.oeffi.util.locationview.AutoCompleteLocationsHandler;
 import de.schildbach.oeffi.util.ConnectivityBroadcastReceiver;
 import de.schildbach.oeffi.util.DialogBuilder;
-import de.schildbach.oeffi.util.GoogleMapsUtils;
+import de.schildbach.oeffi.util.ExternalMapsUtils;
 import de.schildbach.oeffi.util.LocationUriParser;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.locationview.LocationView;
@@ -315,7 +315,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         actionBar.addProgressButton().setOnClickListener(v -> requestRefresh());
         // actionBar.addButton(R.drawable.ic_star_white_24dp, R.string.stations_options_favorites_title)
         //         .setOnClickListener(view -> FavoriteStationsActivity.start(StationsActivity.this));
-        addShowMapButtonToActionBar();
+        addShowMapButtonToActionBar(true, false);
         actionBar.addButton(R.drawable.ic_search_white_24dp, R.string.stations_action_search_title)
                 .setOnClickListener(v -> {
                     if (DO_FILTER_BY_SEARCH_ON_NETWORK) {
@@ -793,12 +793,12 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
             setFixedLocation(presetLocation, presetTime);
 
         if (Intent.ACTION_SEND.equals(intentAction) && intentExtraText != null
-                && intentExtraText.startsWith(GoogleMapsUtils.GMAPS_SHORT_LOCATION_URL_PREFIX)) {
+                && intentExtraText.startsWith(ExternalMapsUtils.GMAPS_SHORT_LOCATION_URL_PREFIX)) {
             // location shared from Google Maps app
             startBackgroundHandler();
             fixedLocationResolving = true;
             backgroundHandler.post(() -> {
-                final Location location = GoogleMapsUtils.resolveLocationUrl(intentExtraText);
+                final Location location = ExternalMapsUtils.resolveLocationUrl(intentExtraText);
                 runOnUiThread(() -> {
                     setFixedLocation(location, presetTime);
                     updateGUI();

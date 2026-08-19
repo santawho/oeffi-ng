@@ -33,6 +33,14 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 public final class Formats {
+    public static int parseInt(final String s, final int fallback) {
+        try {
+            return Integer.parseInt(s);
+        } catch (final NumberFormatException nfe) {
+            return fallback;
+        }
+    }
+
     public static String formatDate(final TimeZoneSelector timeZoneSelector, final PTDate timestamp) {
         return formatDate(timeZoneSelector, timestamp.getTime(), timestamp.getOffset());
     }

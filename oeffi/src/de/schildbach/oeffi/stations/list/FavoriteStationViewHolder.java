@@ -17,7 +17,7 @@
 
 package de.schildbach.oeffi.stations.list;
 
-import android.content.Context;
+import android.app.Activity;
 import android.content.res.Resources;
 import android.view.View;
 import android.widget.ImageButton;
@@ -32,7 +32,7 @@ import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
 
 public class FavoriteStationViewHolder extends RecyclerView.ViewHolder {
-    private final Context context;
+    private final Activity context;
     private final StationClickListener clickListener;
     private final StationContextMenuItemListener contextMenuItemListener;
     private final TextView nicknameView;
@@ -43,7 +43,7 @@ public class FavoriteStationViewHolder extends RecyclerView.ViewHolder {
     private StationContextMenu contextMenu;
 
     public FavoriteStationViewHolder(
-            final View itemView, final Context context,
+            final View itemView, final Activity context,
             final StationClickListener clickListener,
             final StationContextMenuItemListener contextMenuItemListener) {
         super(itemView);

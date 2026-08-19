@@ -142,6 +142,14 @@ public abstract class PreferenceFragment extends androidx.preference.PreferenceF
         PreferenceActivity.setActionIntent(preference, preferenceActivity, fragmentClass, actionHandlerClass);
     }
 
+    protected void setupCustomPreference(
+            final String prefkey,
+            final CustomPreference.ClickHandler clickHandler) {
+        final Preference preference = findPreference(prefkey);
+        if (preference instanceof CustomPreference)
+            ((CustomPreference) preference).setClickHandler(clickHandler);
+    }
+
     public static abstract class ShowHelpHandler extends ActionHandler {
         protected int getHelpTextResourceId() {
             return 0;

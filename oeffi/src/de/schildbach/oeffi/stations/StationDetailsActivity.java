@@ -245,7 +245,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 StationsActivity.start(this, selectedNetwork, selectedCoord, presetTime);
         });
         nearbyButton.setVisibility(View.GONE);
-        addShowMapButtonToActionBar();
+        addShowMapButtonToActionBar(false, false);
         favoriteButton = actionBar.addToggleButton(R.drawable.ic_star_24dp,
                 R.string.stations_station_details_action_favorite_title);
         favoriteButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -700,6 +700,9 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
         final Location location = aStation.location;
         final String locationId = location.id;
+
+        if (location.hasCoord())
+            setLocationForMap(location);
 
         Station station = aStation;
         Collection<Station> stations = null;

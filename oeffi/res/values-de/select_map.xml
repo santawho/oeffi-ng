@@ -3,5 +3,6 @@
 
     <string name="map_dialog_maps_internal">Interne Karte</string>
     <string name="map_dialog_maps_external">Externe Karte</string>
+    <string name="map_dialog_maps_choose_external">Wähle externe Karte</string>
 
 </resources>

@@ -181,7 +181,7 @@ public class NetworkPickerActivity extends OeffiActivity implements
         actionBar = findViewById(R.id.action_bar);
         setPrimaryColor(R.color.bg_action_bar);
         actionBar.setPrimaryTitle(getTitle());
-        addShowMapButtonToActionBar();
+        addShowMapButtonToActionBar(true, false);
 
         listView = findViewById(android.R.id.list);
         listView.setLayoutManager(new LinearLayoutManager(this));

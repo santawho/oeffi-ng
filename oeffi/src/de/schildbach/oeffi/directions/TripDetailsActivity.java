@@ -80,7 +80,6 @@ import androidx.core.widget.NestedScrollView;
 import androidx.lifecycle.Lifecycle;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.DeviceAdmin;
 import de.schildbach.oeffi.DeviceLocationAware;
@@ -88,10 +87,11 @@ import de.schildbach.oeffi.MyActionBar;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.TripAware;
+import de.schildbach.oeffi.preference.MapsFragment;
 import de.schildbach.oeffi.trampoline.AppLinkActivity;
 import de.schildbach.oeffi.tripeval.TripGeoUtils;
 import de.schildbach.oeffi.util.DialogBuilder;
-import de.schildbach.oeffi.util.GoogleMapsUtils;
+import de.schildbach.oeffi.util.ExternalMapsUtils;
 import de.schildbach.oeffi.util.HorizontalPager;
 import de.schildbach.oeffi.util.geofiles.GeoFileProducer;
 import de.schildbach.oeffi.util.geofiles.GpxProducer;
@@ -136,7 +136,6 @@ import org.msgpack.core.MessagePack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -357,14 +356,16 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         actionBar = getMyActionBar();
         actionBar.setBack(isTaskRoot() ? null : v -> goBack());
 
-        final long duration = tripRenderer.trip.getDuration();
-        final Long publicDuration = tripRenderer.trip.getPublicDuration();
+        final Trip trip = tripRenderer.trip;
+        setTripForMap(trip);
+        final long duration = trip.getDuration();
+        final Long publicDuration = trip.getPublicDuration();
         final String durationFormatted = (publicDuration == null || publicDuration == duration)
                 ? Formats.formatTimeSpanHM(duration, false)
                 : Formats.formatTimeSpanHM(duration, false)
                     + " / " + Formats.formatTimeSpanHM(publicDuration, false);
         final String durationText = getString(R.string.directions_trip_details_duration, durationFormatted);
-        final Integer numChanges = tripRenderer.trip.getNumChanges();
+        final Integer numChanges = trip.getNumChanges();
         final String numChangesText = numChanges == null || numChanges <= 0 ? null :
                 getString(R.string.directions_trip_details_num_changes, numChanges);
 
@@ -416,7 +417,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             updateGUI();
         });
 
-        addShowMapButtonToActionBar();
+        addShowMapButtonToActionBar(false, true);
 
         final boolean isShareCalendarVisible = true;
         final boolean isShareCalendarWithLink = true; // !renderConfig.isNavigation && !renderConfig.isAlternativeConnectionSearch;
@@ -444,7 +445,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                             if (provider.hasCapabilities(NetworkProvider.Capability.TRIP_LINKING)) {
                                 backgroundHandler.post(() -> {
                                     try {
-                                        final String link = provider.getOpenLink(tripRenderer.trip);
+                                        final String link = provider.getOpenLink(trip);
                                         runOnUiThread(() -> {
                                             @SuppressLint("UnsafeImplicitIntentLaunch")
                                             final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
@@ -462,7 +463,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                             if (provider.hasCapabilities(NetworkProvider.Capability.TRIP_SHARING)) {
                                 backgroundHandler.post(() -> {
                                     try {
-                                        final String link = provider.getShareLink(tripRenderer.trip);
+                                        final String link = provider.getShareLink(trip);
                                         runOnUiThread(() -> {
                                             @SuppressLint("UnsafeImplicitIntentLaunch")
                                             final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
@@ -476,9 +477,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                             }
                             return true;
                         } else if (itemId == R.id.directions_trip_details_action_open_external_kml_maps_app) {
-                            intentSupplier = () -> showInExternalMapsApp(new KmlProducer(), R.string.directions_trip_details_action_open_external_kml_maps_app_title);
+                            intentSupplier = () -> createChooserForTripInExternalMapsApp(new KmlProducer(), R.string.directions_trip_details_action_open_external_kml_maps_app_title);
                         } else if (itemId == R.id.directions_trip_details_action_open_external_gpx_maps_app) {
-                            intentSupplier = () -> showInExternalMapsApp(new GpxProducer(), R.string.directions_trip_details_action_open_external_gpx_maps_app_title);
+                            intentSupplier = () -> createChooserForTripInExternalMapsApp(new GpxProducer(), R.string.directions_trip_details_action_open_external_gpx_maps_app_title);
                         } else if (itemId == R.id.directions_trip_details_action_add_to_calendar) {
                             shareCalendarEntry(isShareCalendarWithLink);
                             return true;
@@ -507,7 +508,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         updateDeveloperInfo();
         updateLocations();
-        updateFares(tripRenderer.trip.fares);
+        updateFares(trip.fares);
 
         LEGSGROUP_INSERT_INDEX = legsGroup.indexOfChild(findViewById(R.id.directions_trip_details_legs_start_here)) + 1;
         int i = LEGSGROUP_INSERT_INDEX;
@@ -538,7 +539,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         getMapView().setTripAware(new TripAware() {
             public Trip getTrip() {
-                return tripRenderer.trip;
+                return trip;
             }
 
             @Override
@@ -644,7 +645,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         if (isTripDetailsLoadingEnabled()) {
             backgroundHandler.post(() -> {
-                final Trip rawTrip = tripRenderer.trip;
+                final Trip rawTrip = trip;
                 final Trip tripWithDetails = TripUtils.loadTripDetails(network, baseTrip);
                 final Trip finalTrip;
                 if (tripWithDetails == null) {
@@ -1710,10 +1711,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 mapBoundingLocations.add(transferFromLocation);
             if (transferToLocation != null && transferToLocation.hasCoord())
                 mapBoundingLocations.add(transferToLocation);
-            mapView.setOnClickListener(v -> {
-                setMapVisible(true);
-                getMapView().zoomToStations(mapBoundingLocations, 0);
-            });
             final View.OnLongClickListener onLongClickListener = v -> {
                 final PopupMenu popupMenu = new PopupMenu(TripDetailsActivity.this, v);
                 StationContextMenu.prepareMapMenu(TripDetailsActivity.this, popupMenu.getMenu(),
@@ -1727,6 +1724,26 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 popupMenu.show();
                 return true;
             };
+            mapView.setOnClickListener(v -> {
+                final MapsFragment.ActionMode actionMode = MapsFragment.getActionMode(false);
+                switch (actionMode) {
+                    case INTERNAL:
+                        setMapVisible(true);
+                        getMapView().zoomToStations(mapBoundingLocations, 0);
+                        break;
+                    case EXTERNAL:
+                        if (!mapBoundingLocations.isEmpty())
+                            ExternalMapsUtils.openPointInPreselectedExternalMapsApp(this, mapBoundingLocations.get(0));
+                        break;
+                    case CHOOSE:
+                        if (!mapBoundingLocations.isEmpty())
+                            ExternalMapsUtils.openPointByChoosingExternalMapsApp(this, mapBoundingLocations.get(0));
+                        break;
+                    case MENU:
+                        onLongClickListener.onLongClick(v);
+                        break;
+                }
+            });
             mapView.setOnLongClickListener(onLongClickListener);
             row.setOnLongClickListener(onLongClickListener);
         } else {
@@ -3118,20 +3135,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         return intent;
     }
 
-    private Intent showInExternalMapsApp(final GeoFileProducer producer, final int titleId) {
-        String extension = "?";
-        try {
-            producer.setApplication(application);
-            extension = producer.getFilenameExtension();
-            final File geoFile = new File(Application.getInstance().getShareDir(),
-                    "shareroute." + extension);
-            producer.writeTrip(tripRenderer.trip, geoFile);
-            final Intent kmlIntent = GoogleMapsUtils.getOpenGeoFileIntent(geoFile);
-            return Intent.createChooser(kmlIntent, getString(titleId));
-        } catch (final Exception e) {
-            log.error("cannot create shared {} file", extension, e);
-            return null;
-        }
+    private Intent createChooserForTripInExternalMapsApp(final GeoFileProducer producer, final int titleId) {
+        producer.setApplication(application);
+        return ExternalMapsUtils.createChooserToOpenTripInExternalMapsApp(tripRenderer.trip, producer, getString(titleId));
     }
 
     private String tripToShortText(final Trip trip) {

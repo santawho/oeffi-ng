@@ -76,6 +76,28 @@
     <string name="user_interface_category_map_title">Maps</string>
     <string name="user_interface_map_tile_resolution_title">Map resolution</string>
     <string name="user_interface_map_tile_resolution_summary">Set higher for more details, but less readability, and vice versa. [%s]</string>
+    <string name="user_interface_map_point_title">How to show points on a map</string>
+    <string name="user_interface_map_trip_title">How to show trips on a map</string>
+    <string name="user_interface_map_action_title">Action</string>
+    <string name="user_interface_map_action_summary">%s</string>
+    <string name="user_interface_map_app_title">External App</string>
+    <string name="user_interface_map_app_summary">Choose the external app to be opened by default  [%s]</string>
+    <string-array name="user_interface_map_action_entries">
+        <item>Use internal map viewer</item>
+        <item>Open map in fixed external app</item>
+        <item>Choose external app to open the map</item>
+        <item>Show a menu to choose the action</item>
+    </string-array>
+    <string-array name="user_interface_map_action_values" translatable="false">
+        <item translatable="false">INTERNAL</item>
+        <item translatable="false">EXTERNAL</item>
+        <item translatable="false">CHOOSE</item>
+        <item translatable="false">MENU</item>
+    </string-array>
+    <string name="user_interface_map_app_type_title">Choose Content Type</string>
+    <string name="user_interface_map_app_type_summary">Which content type shall be used to open the app? Try both to find the best suitable method.</string>
+    <string name="user_interface_map_app_content_type_points">points</string>
+    <string name="user_interface_map_app_content_type_trips">trips</string>
 
     <string name="user_interface_mainmenu_shareapp_enabled_title">Show \"Share App\" item in main menu</string>
 

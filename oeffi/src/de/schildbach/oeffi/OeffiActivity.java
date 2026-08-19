@@ -74,12 +74,15 @@ import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.network.NetworkResources;
 import de.schildbach.oeffi.plans.PlansPickerActivity;
 import de.schildbach.oeffi.preference.AboutFragment;
+import de.schildbach.oeffi.preference.MapsFragment;
 import de.schildbach.oeffi.preference.PreferenceActivity;
 import de.schildbach.oeffi.stations.FavoriteStationsActivity;
+import de.schildbach.oeffi.stations.StationContextMenu;
 import de.schildbach.oeffi.stations.StationsActivity;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.DividerItemDecoration;
 import de.schildbach.oeffi.util.ErrorReporter;
+import de.schildbach.oeffi.util.ExternalMapsUtils;
 import de.schildbach.oeffi.util.NavigationMenuAdapter;
 import de.schildbach.oeffi.util.ResourcesInterceptor;
 import de.schildbach.oeffi.util.SpeechInput;
@@ -88,6 +91,8 @@ import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.oeffi.util.ZoomControls;
 import de.schildbach.pte.NetworkId;
+import de.schildbach.pte.dto.Location;
+import de.schildbach.pte.dto.Trip;
 import de.schildbach.pte.provider.NetworkProvider;
 import de.schildbach.pte.dto.Product;
 import de.schildbach.pte.dto.ResultHeader;
@@ -98,6 +103,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -829,11 +835,91 @@ public abstract class OeffiActivity extends AppCompatActivity
             mapClose.setVisibility(View.GONE);
     }
 
-    protected void addShowMapButtonToActionBar() {
+    protected void addShowMapButtonToActionBar(final boolean internalOnly, final boolean forTrip) {
         if (mapIsAtBottom && getResources().getBoolean(R.bool.layout_map_show_toggleable)) {
-            getMyActionBar()
-                    .addButton(R.drawable.ic_map_white_24dp, R.string.directions_trip_details_action_showmap_title)
-                    .setOnClickListener(v -> setMapVisible(!mapEnabled));
+            final ImageButton button = getMyActionBar()
+                    .addButton(R.drawable.ic_map_white_24dp, R.string.directions_trip_details_action_showmap_title);
+            if (internalOnly) {
+                button.setOnClickListener(v -> setMapVisible(!mapEnabled));
+            } else {
+                button.setOnClickListener(v -> {
+                    final MapsFragment.ActionMode actionMode = MapsFragment.getActionMode(forTrip);
+                    switch (actionMode) {
+                        case INTERNAL:
+                            setMapVisible(!mapEnabled);
+                            break;
+                        case EXTERNAL:
+                            if (forTrip)
+                                ExternalMapsUtils.openTripInPreselectedExternalMapsApp(this, tripForMap);
+                            else
+                                ExternalMapsUtils.openPointInPreselectedExternalMapsApp(this, locationForMap);
+                            break;
+                        case CHOOSE:
+                            if (forTrip)
+                                ExternalMapsUtils.openTripByChoosingExternalMapsApp(this, tripForMap);
+                            else
+                                ExternalMapsUtils.openPointByChoosingExternalMapsApp(this, locationForMap);
+                            break;
+                        case MENU:
+                            showMapButtonMenu(forTrip, button);
+                            break;
+                    }
+                });
+                button.setOnLongClickListener(v -> {
+                    showMapButtonMenu(forTrip, button);
+                    return true;
+                });
+            }
+        }
+    }
+
+    private Location locationForMap;
+    private Trip tripForMap;
+
+    public void setLocationForMap(final Location locationForMap) {
+        this.locationForMap = locationForMap;
+    }
+
+    public void setTripForMap(final Trip tripForMap) {
+        this.tripForMap = tripForMap;
+    }
+
+    private void showMapButtonMenu(final boolean forTrip, final View refView) {
+        final PopupMenu contextMenu = new PopupMenu(this, refView);
+        final Menu menu = contextMenu.getMenu();
+
+        boolean show = false;
+        if (forTrip) {
+            if (tripForMap != null) {
+                contextMenu.getMenuInflater().inflate(R.menu.trip_map_menu, menu);
+                show = true;
+            }
+        } else {
+            show = StationContextMenu.prepareMapMenu(this, menu, network, locationForMap);
+        }
+
+        if (show) {
+            contextMenu.setOnMenuItemClickListener(menuItem -> {
+                final int itemId = menuItem.getItemId();
+                if (locationForMap != null) {
+                    if (itemId == R.id.station_map_context_maps_internal) {
+                        setMapVisible(true);
+                        getMapView().zoomToStations(List.of(locationForMap), 0);
+                    }
+                }
+                if (tripForMap != null) {
+                    if (itemId == R.id.trip_map_menu_maps_internal) {
+                        setMapVisible(true);
+                        getMapView().zoomToAll();
+                    } else if (itemId == R.id.trip_map_menu_maps_external) {
+                        ExternalMapsUtils.openTripInPreselectedExternalMapsApp(this, tripForMap);
+                    } else if (itemId == R.id.trip_map_menu_maps_choose_external) {
+                        ExternalMapsUtils.openTripByChoosingExternalMapsApp(this, tripForMap);
+                    }
+                }
+                return true;
+            });
+            contextMenu.show();
         }
     }
 

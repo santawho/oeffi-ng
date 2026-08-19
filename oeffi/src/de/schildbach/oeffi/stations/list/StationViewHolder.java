@@ -17,6 +17,7 @@
 
 package de.schildbach.oeffi.stations.list;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -84,7 +85,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
     public final TextView departuresStatusView;
     public final ViewGroup messagesViewGroup;
 
-    private final Context context;
+    private final Activity context;
     private final Resources res;
     private final int maxDepartures;
     private final StationContextMenuItemListener contextMenuItemListener;
@@ -101,7 +102,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
     private static final int MESSAGE_INDEX_COLOR = Color.parseColor("#c08080");
 
     public StationViewHolder(
-            final Context context, final View itemView, final int maxDepartures,
+            final Activity context, final View itemView, final int maxDepartures,
             final StationContextMenuItemListener contextMenuItemListener,
             final JourneyClickListener journeyClickListener) {
         super(itemView);

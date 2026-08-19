@@ -93,7 +93,7 @@ import de.schildbach.oeffi.util.ConnectivityBroadcastReceiver;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.DividerItemDecoration;
 import de.schildbach.oeffi.util.Formats;
-import de.schildbach.oeffi.util.GoogleMapsUtils;
+import de.schildbach.oeffi.util.ExternalMapsUtils;
 import de.schildbach.oeffi.util.LocationUriParser;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.Toast;
@@ -666,13 +666,13 @@ public class DirectionsActivity extends OeffiMainActivity implements
             final Uri intentUri = intent.getData();
             final String intentExtraText = intent.getStringExtra(Intent.EXTRA_TEXT);
             if (Intent.ACTION_SEND.equals(intentAction) && intentExtraText != null
-                    && intentExtraText.startsWith(GoogleMapsUtils.GMAPS_SHORT_LOCATION_URL_PREFIX)) {
+                    && intentExtraText.startsWith(ExternalMapsUtils.GMAPS_SHORT_LOCATION_URL_PREFIX)) {
                 // location shared from Google Maps app
                 if (isSharingTo && viewFromLocation.getLocation() == null) {
                     viewFromLocation.setToCurrentLocation();
                 }
                 backgroundHandler.post(() -> {
-                    final Location location = GoogleMapsUtils.resolveLocationUrl(intentExtraText);
+                    final Location location = ExternalMapsUtils.resolveLocationUrl(intentExtraText);
                     if (location != null) {
                         runOnUiThread(() -> {
                             if (isSharingTo) {

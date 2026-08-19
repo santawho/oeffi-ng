@@ -10,4 +10,40 @@
         android:title="@string/user_interface_map_tile_resolution_title"
         android:summary="@string/user_interface_map_tile_resolution_summary"/>
 
+    <PreferenceCategory
+        android:summary="@string/user_interface_map_point_title">
+
+        <ListPreference
+            android:key="user_interface_map_point_action"
+            android:defaultValue="INTERNAL"
+            android:entries="@array/user_interface_map_action_entries"
+            android:entryValues="@array/user_interface_map_action_values"
+            android:summary="@string/user_interface_map_action_summary"
+            android:title="@string/user_interface_map_action_title" />
+
+        <de.schildbach.oeffi.preference.CustomPreference
+            android:key="user_interface_map_point_app"
+            android:summary="@string/user_interface_map_app_summary"
+            android:title="@string/user_interface_map_app_title" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:summary="@string/user_interface_map_trip_title">
+
+        <ListPreference
+            android:key="user_interface_map_trip_action"
+            android:defaultValue="INTERNAL"
+            android:entries="@array/user_interface_map_action_entries"
+            android:entryValues="@array/user_interface_map_action_values"
+            android:summary="@string/user_interface_map_action_summary"
+            android:title="@string/user_interface_map_action_title" />
+
+        <de.schildbach.oeffi.preference.CustomPreference
+            android:key="user_interface_map_trip_app"
+            android:summary="@string/user_interface_map_app_summary"
+            android:title="@string/user_interface_map_app_title" />
+
+    </PreferenceCategory>
+
 </PreferenceScreen>

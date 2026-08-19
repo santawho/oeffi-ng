@@ -71,6 +71,21 @@
             <action
                 android:name="android.intent.action.ASSIST" />
         </intent>
+        <intent>
+            <action
+                android:name="android.intent.action.VIEW" />
+            <data android:scheme="geo" />
+        </intent>
+        <intent>
+            <action
+                android:name="android.intent.action.VIEW" />
+            <data android:mimeType="application/gpx+xml" />
+        </intent>
+        <intent>
+            <action
+                android:name="android.intent.action.VIEW" />
+            <data android:mimeType="application/vnd.google-earth.kml+xml" />
+        </intent>
     </queries>
 
     <supports-screens

@@ -651,4 +651,8 @@
     <string name="log_viewer_button_forwards_button">Gehe zu späteren Logs</string>
     <string name="log_viewer_button_backwards_button">Gehe zu früheren Logs</string>
 
+    <string name="app_chooser_title">Wähle App zum Öffnen von %1$s</string>
+    <string name="app_chooser_no_apps">Keine Apps gefunden</string>
+    <string name="app_chooser_app_none">(keine)</string>
+
 </resources>

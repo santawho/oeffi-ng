@@ -45,6 +45,7 @@ import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.plans.PlanActivity;
 import de.schildbach.oeffi.plans.PlanContentProvider;
 import de.schildbach.oeffi.util.DialogBuilder;
+import de.schildbach.oeffi.util.ExternalMapsUtils;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
@@ -52,14 +53,11 @@ import de.schildbach.pte.dto.LocationType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URLEncoder;
-import java.util.Locale;
-
 public class StationContextMenu extends androidx.appcompat.widget.PopupMenu {
     private static final Logger log = LoggerFactory.getLogger(StationContextMenu.class);
 
     public StationContextMenu(
-            final Context context, final View anchor,
+            final Activity context, final View anchor,
             final NetworkId network, final Location station,
             final Integer favState,
             final boolean showFavorite, final boolean showIgnore, final boolean showRename,
@@ -171,16 +169,19 @@ public class StationContextMenu extends androidx.appcompat.widget.PopupMenu {
             .show();
     }
 
-    public static void prepareMapMenu(
-            final Context context, final Menu menu,
+    public static boolean prepareMapMenu(
+            final Activity context, final Menu menu,
             final NetworkId network, final Location location) {
         new MenuInflater(context).inflate(R.menu.station_map_context, menu);
         final MenuItem mapsItemInternal = menu.findItem(R.id.station_map_context_maps_internal);
         final MenuItem mapsItemExternal = menu.findItem(R.id.station_map_context_maps_external);
+        final MenuItem mapsItemChooseExternal = menu.findItem(R.id.station_map_context_maps_choose_external);
         final MenuItem mapsItemInfoUrl = menu.findItem(R.id.station_map_context_info_url);
+        boolean haveVisibleItems = false;
 
         final String infoUrl = NetworkProviderFactory.provider(network).getLocationInfoUrl(location);
         if (infoUrl != null) {
+            haveVisibleItems = true;
             mapsItemInfoUrl.setVisible(true);
             mapsItemInfoUrl.setOnMenuItemClickListener(item -> {
                 @SuppressLint("UnsafeImplicitIntentLaunch")
@@ -193,24 +194,23 @@ public class StationContextMenu extends androidx.appcompat.widget.PopupMenu {
         }
 
         if (location.hasCoord()) {
-            final double lat = location.getLatAsDouble();
-            final double lon = location.getLonAsDouble();
-            final String name = location.name;
-
-            @SuppressLint("UnsafeImplicitIntentLaunch")
-            final Intent mapsIntent = new Intent(Intent.ACTION_VIEW,
-                    Uri.parse(String.format(Locale.ENGLISH, "geo:%.6f,%.6f?q=%.6f,%.6f%s", lat, lon, lat, lon,
-                            name != null ? '(' + URLEncoder.encode(name.replaceAll("[()]", "")) + ')' : "")));
+            haveVisibleItems = true;
             mapsItemExternal.setOnMenuItemClickListener(item -> {
-                context.startActivity(mapsIntent);
+                ExternalMapsUtils.openPointInPreselectedExternalMapsApp(context, location);
+                return true;
+            });
+            mapsItemChooseExternal.setOnMenuItemClickListener(item -> {
+                ExternalMapsUtils.openPointByChoosingExternalMapsApp(context, location);
                 return true;
             });
 
             mapsItemInternal.setVisible(true);
             mapsItemExternal.setVisible(true);
+            mapsItemChooseExternal.setVisible(true);
         } else {
             mapsItemInternal.setVisible(false);
             mapsItemExternal.setVisible(false);
+            mapsItemChooseExternal.setVisible(false);
         }
 
         final ContentResolver contentResolver = context.getContentResolver();
@@ -226,6 +226,7 @@ public class StationContextMenu extends androidx.appcompat.widget.PopupMenu {
                 final String planName = plansCursor
                         .getString(plansCursor.getColumnIndexOrThrow(PlanContentProvider.KEY_PLAN_NAME));
                 plansCursor.close();
+                haveVisibleItems = true;
                 menu.add(planName).setOnMenuItemClickListener(item -> {
                     PlanActivity.start(context, planId, location.id);
                     return true;
@@ -233,6 +234,8 @@ public class StationContextMenu extends androidx.appcompat.widget.PopupMenu {
             }
             stationsCursor.close();
         }
+
+        return haveVisibleItems;
     }
 
     public static class WidgetPinningReceiver extends BroadcastReceiver {

@@ -36,7 +36,8 @@ public abstract class GeoFileProducer {
 
     public void writeTrip(final Trip trip, final File file) throws IOException {
         final FileOutputStream fos = new FileOutputStream(file);
-        writeTrip(trip, fos);
+        if (trip != null)
+            writeTrip(trip, fos);
         fos.close();
     }
 
