@@ -153,6 +153,7 @@ public class ExternalMapsUtils {
             final AppChooser.ComponentInfo componentInfo = MapsFragment.getPreselectedApp(false);
             if (componentInfo != null)
                 intent.setComponent(componentInfo.getComponentName());
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         }
     }
@@ -166,6 +167,7 @@ public class ExternalMapsUtils {
             final Intent intent = createIntentToOpenPointInExternalMapsApp(location);
             if (intent != null) {
                 intent.setComponent(componentInfo.getComponentName());
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
             }
         });
@@ -202,6 +204,7 @@ public class ExternalMapsUtils {
             final Intent intent = createIntentToOpenTripInExternalMapsApp(trip, producer);
             if (intent != null) {
                 intent.setComponent(componentInfo.getComponentName());
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
             }
         }
@@ -220,6 +223,7 @@ public class ExternalMapsUtils {
             final Intent intent = createIntentToOpenTripInExternalMapsApp(trip, producer);
             if (intent != null) {
                 intent.setComponent(componentInfo.getComponentName());
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
             }
         });
