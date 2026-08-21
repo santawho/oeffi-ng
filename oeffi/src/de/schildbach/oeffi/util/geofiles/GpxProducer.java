@@ -27,6 +27,7 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.ResourceUtil;
 import de.schildbach.pte.dto.Location;
+import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.Point;
 import de.schildbach.pte.dto.Stop;
 import de.schildbach.pte.dto.Trip;
@@ -50,14 +51,17 @@ public class GpxProducer extends GeoXmlProducer {
         xmlTextNode("name", tripName);
         xs.endTag(null, "metadata");
 
-        gpxWaypoint(trip.legs.get(0).departure);
-        for (final Trip.Leg leg : trip.legs) {
+        gpxWaypoint(trip.legs.get(0).departure, "Flag, Green");
+        final List<Trip.Leg> legs = trip.legs;
+        final int numLegs = legs.size();
+        for (int index = 0; index < numLegs; index++) {
+            final Trip.Leg leg = legs.get(index);
             if (leg instanceof Trip.Public) {
                 gpxRteForPublicLeg((Trip.Public) leg);
             } else if (leg instanceof Trip.Individual) {
                 gpxRteForIndividualLeg((Trip.Individual) leg);
             }
-            gpxWaypoint(leg.arrival);
+            gpxWaypoint(leg.arrival, index == numLegs - 1 ? "Flag, Red" : "Flag, Blue");
         }
 
         xs.endTag(null, "gpx");
@@ -67,20 +71,30 @@ public class GpxProducer extends GeoXmlProducer {
         outputStream.close();
     }
 
-    private void gpxWaypoint(final Location location) throws IOException {
+    private void gpxWaypoint(final Location location, final String symbol) throws IOException {
+        gpxPoint("wpt", location, symbol);
+    }
+
+    private void gpxPoint(final String tagName, final Location location, final String symbol) throws IOException {
         final Point coord = location.coord;
         if (coord == null)
             return;
 
-        gpxPoint("wpt", coord, Formats.fullLocationName(location));
+        gpxPoint(tagName, location.coord, Formats.fullLocationName(location), symbol);
     }
 
-    private void gpxPoint(final String tagName, final Point point, final String name) throws IOException {
+    private void gpxPoint(final String tagName, final Point point) throws IOException {
+        gpxPoint(tagName, point, null, null);
+    }
+
+    private void gpxPoint(final String tagName, final Point point, final String name, final String symbol) throws IOException {
         xs.startTag(null, tagName);
         xs.attribute(null, "lat", Double.toString(point.getLatAsDouble()));
         xs.attribute(null, "lon", Double.toString(point.getLonAsDouble()));
         if (name != null)
             xmlTextNode("name", name);
+        if (symbol != null)
+            xmlTextNode("sym", symbol);
         xs.endTag(null, tagName);
     }
 
@@ -90,15 +104,15 @@ public class GpxProducer extends GeoXmlProducer {
                 leg.line.label,
                 Formats.fullLocationName(leg.departure),
                 Formats.fullLocationName(leg.arrival));
-        final List<Point> points = new ArrayList<>();
-        points.add(leg.departureStop.location.coord);
+        final List<Location> locations = new ArrayList<>();
+        locations.add(new Location(LocationType.STATION, null, leg.departureStop.location.coord));
         final List<Stop> intermediateStops = leg.intermediateStops;
         if (intermediateStops != null) {
             for (final Stop stop : intermediateStops)
-                points.add(stop.location.coord);
+                locations.add(stop.location);
         }
-        points.add(leg.arrivalStop.location.coord);
-        gpxRte(legName, typeName, points);
+        locations.add(new Location(LocationType.STATION, null, leg.arrivalStop.location.coord));
+        gpxRteForLocations(legName, typeName, locations);
     }
 
     private void gpxRteForIndividualLeg(final Trip.Individual leg) throws IOException {
@@ -117,18 +131,39 @@ public class GpxProducer extends GeoXmlProducer {
         final List<Point> points = new ArrayList<>();
         points.add(leg.departure.coord);
         points.add(leg.arrival.coord);
-        gpxRte(legName, typeName, points);
+        gpxRteForPoints(legName, typeName, points);
     }
 
-    private void gpxRte(final String name, final String typeName, final List<Point> points) throws IOException {
+    private void gpxRteForLocations(final String name, final String typeName, final List<Location> locations) throws IOException {
+        gpxRteStart(name, typeName);
+        for (final Location location : locations)
+            gpxRtePoint(location);
+        gpxRteEnd();
+    }
+
+    private void gpxRteForPoints(final String name, final String typeName, final List<Point> points) throws IOException {
+        gpxRteStart(name, typeName);
+        for (final Point point : points)
+            gpxRtePoint(point);
+        gpxRteEnd();
+    }
+
+    private void gpxRteStart(final String name, final String typeName) throws IOException {
         xs.startTag(null, "rte");
         xmlTextNode("name", name);
         if (typeName != null)
             xmlTextNode("type", typeName);
+    }
 
-        for (final Point point : points)
-            gpxPoint("rtept", point, null);
-
+    private void gpxRteEnd() throws IOException {
         xs.endTag(null, "rte");
+    }
+
+    private void gpxRtePoint(final Location location) throws IOException {
+        gpxPoint("rtept", location, null);
+    }
+
+    private void gpxRtePoint(final Point point) throws IOException {
+        gpxPoint("rtept", point);
     }
 }
