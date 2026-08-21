@@ -173,6 +173,7 @@
 
     <!-- toasts -->
     <string name="toast_add_favorite">%s\nadded to favorites</string>
+    <string name="toast_cannot_handle_sharing_information">Cannot handle the shared information</string>
 
     <!-- stations -->
     <string name="stations_intentfilter_nearby_title">Nearby Stops or Stations</string>
@@ -287,6 +288,8 @@
     <string name="directions_to_geo_link_title">Travel &lt;b>to there&lt;/b></string>
     <string name="directions_intentfilter_from_title">Travel from here by Public Transport</string>
     <string name="directions_from_geo_link_title">Travel &lt;b>from there&lt;/b></string>
+    <string name="directions_intentfilter_trip_title">Import Trip</string>
+    <string name="directions_trip_link_title">&lt;b>Import&lt;/b> trip</string>
 
     <!-- directions options -->
     <string name="directions_options_clear_history_title">Clear saved queries</string>

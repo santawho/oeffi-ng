@@ -124,6 +124,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import javax.net.ssl.SSLException;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -171,6 +172,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
     private TripsOverviewActivity.RenderConfig renderConfig;
 
     private QueryTripRunnable queryTripRunnable;
+    private String loadSharedTripMessageText;
     private HandlerThread backgroundThread;
     private Handler backgroundHandler;
     private final Handler handler = new Handler();
@@ -659,9 +661,16 @@ public class DirectionsActivity extends OeffiMainActivity implements
         final String intentClassName = intentComponentName.getClassName();
         final boolean isSharingTo = intentClassName.endsWith(".TO");
         final boolean isSharingFrom = intentClassName.endsWith(".FROM");
-        final boolean isSharing = isSharingTo || isSharingFrom;
+        final boolean isSharingLocation = isSharingTo || isSharingFrom;
+        final boolean isSharingTrip = intentClassName.endsWith(".TRIP");
         Command command = null;
-        if (isSharing) {
+        if (isSharingTrip) {
+            final String messageText = intent.getStringExtra(Intent.EXTRA_TEXT);
+            if (isNewIntent)
+                loadSharedMessageTrip(messageText);
+            else
+                loadSharedTripMessageText = messageText;
+        } else if (isSharingLocation) {
             final String intentAction = intent.getAction();
             final Uri intentUri = intent.getData();
             final String intentExtraText = intent.getStringExtra(Intent.EXTRA_TEXT);
@@ -673,31 +682,33 @@ public class DirectionsActivity extends OeffiMainActivity implements
                 }
                 backgroundHandler.post(() -> {
                     final Location location = ExternalMapsUtils.resolveLocationUrl(intentExtraText);
-                    if (location != null) {
-                        runOnUiThread(() -> {
-                            if (isSharingTo) {
-                                viewToLocation.setLocation(location);
-                            } else {
-                                viewFromLocation.setLocation(location);
-                            }
-                        });
-                    }
+                    runOnUiThread(() -> {
+                        if (location == null) {
+                            new Toast(this).longToast(R.string.toast_cannot_handle_sharing_information);
+                        } else if (isSharingTo) {
+                            viewToLocation.setLocation(location);
+                        } else {
+                            viewFromLocation.setLocation(location);
+                        }
+                    });
                 });
             } else if (intentUri != null) {
                 log.info("Got intent: {}, data/uri={}", intent, intentUri);
 
                 final Location[] locations = LocationUriParser.parseLocations(intentUri.toString());
-
-                if (locations.length == 1) {
+                boolean isBad = false;
+                if (locations == null) {
+                    isBad = true;
+                } else if (locations.length == 1) {
                     final Location location = locations[0];
-                    if (location != null) {
-                        if (isSharingTo) {
-                            viewToLocation.setLocation(location);
-                            if (viewFromLocation.getLocation() == null)
-                                viewFromLocation.setToCurrentLocation();
-                        } else {
-                            viewFromLocation.setLocation(location);
-                        }
+                    if (location == null) {
+                        isBad = true;
+                    } else if (isSharingTo) {
+                        viewToLocation.setLocation(location);
+                        if (viewFromLocation.getLocation() == null)
+                            viewFromLocation.setToCurrentLocation();
+                    } else {
+                        viewFromLocation.setLocation(location);
                     }
                 } else {
                     if (locations[0] != null)
@@ -707,6 +718,8 @@ public class DirectionsActivity extends OeffiMainActivity implements
                     if (locations.length >= 3 && locations[2] != null)
                         viewViaLocation.setLocation(locations[2]);
                 }
+                if (isBad)
+                    new Toast(this).longToast(R.string.toast_cannot_handle_sharing_information);
             }
         } else {
             if (intent.hasExtra(INTENT_EXTRA_FROM_LOCATION)) {
@@ -793,6 +806,33 @@ public class DirectionsActivity extends OeffiMainActivity implements
         return prefs.getBoolean(Constants.PREFS_KEY_BICYCLE_TRAVEL_WITHOUT_BIKE_CARRIAGE, false);
     }
 
+    private void startTripDetailsActivityForTripAndFinishThis(final Trip trip) {
+        if (trip != null) {
+            TripDetailsActivity.start(DirectionsActivity.this,
+                    network, trip,
+                    Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            finish();
+        }
+    }
+
+    private void loadSharedMessageTrip(final String messageText) {
+        backgroundHandler.post(() -> {
+            final NetworkProvider provider = NetworkProviderFactory.provider(network);
+            final TripShare tripShare;
+            try {
+                tripShare = provider.getTripShareFromSharedTextMessage(messageText);
+                if (tripShare == null) {
+                    runOnUiThread(() -> new Toast(this).longToast(R.string.toast_cannot_handle_sharing_information));
+                    return;
+                }
+            } catch (final IOException ioe) {
+                log.error("error when processing shared trip: {}", messageText, ioe);
+                runOnUiThread(() -> new Toast(this).longToast(R.string.toast_cannot_handle_sharing_information));
+                return;
+            }
+            loadTripByTripShare(tripShare, this::startTripDetailsActivityForTripAndFinishThis);
+        });
+    }
 
     @Override
     protected void onStart() {
@@ -802,21 +842,13 @@ public class DirectionsActivity extends OeffiMainActivity implements
             try {
                 final String action = linkArgs[0];
                 final NetworkProvider provider = NetworkProviderFactory.provider(network);
-                final Consumer<Trip> startTripDetailsActivity = (trip) -> {
-                    if (trip != null) {
-                        TripDetailsActivity.start(DirectionsActivity.this,
-                                network, trip,
-                                Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        finish();
-                    }
-                };
                 if (LINK_IDENTIFIER_TRIP.equals(action) && linkArgs.length == 2) {
                     if (provider.hasCapabilities(Capability.TRIP_RELOAD)) {
                         final byte[] bytes = Objects.uncompressFromString(linkArgs[1]);
                         final MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(bytes);
                         final TripRef tripRef = provider.unpackTripRefFromMessage(unpacker);
                         unpacker.close();
-                        loadTripByTripRef(tripRef, startTripDetailsActivity);
+                        loadTripByTripRef(tripRef, this::startTripDetailsActivityForTripAndFinishThis);
                     }
                 } else if (LINK_IDENTIFIER_SHARE_TRIP.equals(action) && linkArgs.length == 2) {
                     if (provider.hasCapabilities(Capability.TRIP_SHARING)) {
@@ -824,7 +856,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
                         final MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(bytes);
                         final TripShare tripShare = provider.unpackTripShareFromMessage(unpacker);
                         unpacker.close();
-                        loadTripByTripShare(tripShare, startTripDetailsActivity);
+                        loadTripByTripShare(tripShare, this::startTripDetailsActivityForTripAndFinishThis);
                     }
                 }
             } catch (final Exception e) {
@@ -834,6 +866,10 @@ public class DirectionsActivity extends OeffiMainActivity implements
                         .setNegativeButton(android.R.string.cancel, null)
                         .show();
             }
+        } else if (loadSharedTripMessageText != null && network != null) {
+            final String messageText = loadSharedTripMessageText;
+            loadSharedTripMessageText = null;
+            loadSharedMessageTrip(messageText);
         }
     }
 

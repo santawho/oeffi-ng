@@ -54,4 +54,17 @@
         android:drawableStart="@drawable/ic_oeffi_ng_directions_color_48dp"
         android:text="@string/directions_to_geo_link_title" />
 
+    <Button
+        android:id="@+id/geo_link_directions_trip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/text_padding_vertical_verylax"
+        android:paddingVertical="@dimen/text_padding_vertical_verylax"
+        android:layout_marginHorizontal="@dimen/text_padding_horizontal_verylax"
+        android:paddingStart="@dimen/text_padding_horizontal_cram"
+        android:paddingEnd="@dimen/text_padding_horizontal_verylax"
+        style="@style/My.Widget.Button.Border"
+        android:drawableStart="@drawable/ic_oeffi_ng_directions_color_48dp"
+        android:text="@string/directions_trip_link_title" />
+
 </LinearLayout>

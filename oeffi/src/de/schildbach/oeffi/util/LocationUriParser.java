@@ -17,6 +17,9 @@
 
 package de.schildbach.oeffi.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.Point;
@@ -28,16 +31,20 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LocationUriParser {
-    public static final Location[] parseLocations(final String encodedUriString) {
+    private static final Logger log = LoggerFactory.getLogger(LocationUriParser.class);
+
+    public static Location[] parseLocations(final String encodedUriString) {
         URI uri;
         try {
             uri = new URI(encodedUriString);
         } catch (final URISyntaxException x) {
+            final String uriString = encodedUriString.replace(' ', '+').replaceAll("\n", "%0a");
             try {
                 // work around uri encoding bug in Google Calendar
-                uri = new URI(encodedUriString.replace(' ', '+').replaceAll("\n", "%0a"));
-            } catch (final URISyntaxException x2) {
-                throw new RuntimeException(x2);
+                uri = new URI(uriString);
+            } catch (final URISyntaxException use) {
+                log.error("cannot parse location URI: '" + uriString + "'");
+                return null;
             }
         }
 
@@ -49,7 +56,8 @@ public class LocationUriParser {
             return new Location[] { location };
         }
 
-        throw new IllegalArgumentException("cannot parse: '" + encodedUriString + "'");
+        log.error("cannot parse location URI: '" + encodedUriString + "'");
+        return null;
     }
 
     private static final Pattern P_URI_GEO = Pattern.compile("(-?\\d*\\.?\\d+),(-?\\d*\\.?\\d+)", Pattern.DOTALL);

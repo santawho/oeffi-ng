@@ -171,6 +171,7 @@
 
     <!-- toasts -->
     <string name="toast_add_favorite">%s\nzu Favoriten hinzugefügt</string>
+    <string name="toast_cannot_handle_sharing_information">Die geteilten Daten können nicht verarbeitet werden</string>
 
     <!-- stations -->
     <string name="stations_intentfilter_nearby_title">Nahegelegene Haltestellen der öffentlichen Verkehrsmittel</string>
@@ -285,6 +286,8 @@
     <string name="directions_to_geo_link_title">Reise &lt;b>dorthin&lt;/b></string>
     <string name="directions_intentfilter_from_title">Reise von hier mit öffentlichen Verkehrsmitteln</string>
     <string name="directions_from_geo_link_title">Reise &lt;b>von dort&lt;/b></string>
+    <string name="directions_intentfilter_trip_title">Reise importieren</string>
+    <string name="directions_trip_link_title">Reise &lt;b>importieren&lt;/b></string>
 
     <!-- directions options -->
     <string name="directions_options_clear_history_title">Gespeicherte Anfragen löschen</string>

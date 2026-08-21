@@ -361,6 +361,18 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity-alias>
+        <activity-alias
+            android:name=".directions.DirectionsActivity.TRIP"
+            android:targetActivity=".directions.DirectionsActivity"
+            android:exported="false"
+            android:label="@string/directions_intentfilter_trip_title"
+            tools:ignore="AppLinkUrlError">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity-alias>
 
         <activity
             android:name=".directions.driverops.OperationsActivity"

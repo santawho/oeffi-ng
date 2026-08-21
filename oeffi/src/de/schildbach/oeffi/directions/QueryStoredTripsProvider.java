@@ -119,7 +119,7 @@ public class QueryStoredTripsProvider extends ForNetworkContentProvider {
 
             final Location from, to, via;
             final TripRef tripRef = trip.tripRef;
-            if (tripRef != null) {
+            if (tripRef != null && tripRef.from != null && tripRef.to != null) {
                 from = tripRef.from;
                 to = tripRef.to;
                 via = tripRef.via;
