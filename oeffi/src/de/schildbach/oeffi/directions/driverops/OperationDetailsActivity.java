@@ -488,7 +488,8 @@ public class OperationDetailsActivity extends TripDetailsActivity {
         final double distanceToNearestStop = operationLegC.distanceToNearestStop;
 
         final Stop nearestStop = TripRenderer.LegContainer.getPublicStopByIndex(simulatedLeg, nearestStopIndex);
-        final Stop nextStop = TripRenderer.LegContainer.getPublicStopByIndex(simulatedLeg, nearestStopIndex + 1);
+        final int nextStopIndex = nearestStopIndex + 1;
+        final Stop nextStop = TripRenderer.LegContainer.getPublicStopByIndex(simulatedLeg, nextStopIndex);
         final Stop prevStop = TripRenderer.LegContainer.getPublicStopByIndex(simulatedLeg, nearestStopIndex - 1);
 
         if (nearestStop == null)
@@ -609,7 +610,7 @@ public class OperationDetailsActivity extends TripDetailsActivity {
                     containerView.findViewById(R.id.operation_next_event_nearest_station_arrival_remaining),
                     nearestStop.getArrivalTime().getTime() - now,
                     containerView.findViewById(R.id.operation_next_event_nearest_station_arrival_distance),
-                    nearestStop.location.coord,
+                    nearestStop.location.coord, operationLegC, nearestStopIndex,
                     otherTextColor);
 
             if (isNextAction) {
@@ -649,7 +650,7 @@ public class OperationDetailsActivity extends TripDetailsActivity {
             setRemaining(
                     containerView.findViewById(R.id.operation_next_event_nearest_station_departure_remaining),
                     nearestStop.getDepartureTime().getTime() - now,
-                    null, null,
+                    null, null, null, 0,
                     otherTextColor);
 
             if (isNextAction) {
@@ -688,7 +689,7 @@ public class OperationDetailsActivity extends TripDetailsActivity {
                     containerView.findViewById(R.id.operation_next_event_next_station_arrival_remaining),
                     nextStop.getArrivalTime().getTime() - now,
                     containerView.findViewById(R.id.operation_next_event_next_station_arrival_distance),
-                    nextStop.location.coord,
+                    nextStop.location.coord, operationLegC, nextStopIndex,
                     otherTextColor);
 
             final TextView nextStopNameView = containerView.findViewById(R.id.operation_next_event_next_station_name);
@@ -734,14 +735,22 @@ public class OperationDetailsActivity extends TripDetailsActivity {
             final long timeSpan,
             final TextView distanceView,
             final Point locationCoord,
+            final TripRenderer.LegContainer legC, final int stopIndex,
             final int textColor) {
         remainingView.setText(isShowRemaining() ? Formats.formatTimeSpanMS(timeSpan, false) : null);
         remainingView.setTextColor(textColor);
 
         if (distanceView != null) {
             final Point deviceCoord = getDeviceLocation();
-            distanceView.setText(!(isShowRemaining() && locationCoord != null && deviceCoord != null) ? null
-                    : Formats.formatDistance(TripGeoUtils.geoDistanceInMeters(locationCoord, deviceCoord), false));
+            final String distanceText;
+            if (isShowRemaining() && locationCoord != null && deviceCoord != null) {
+                distanceText = (legC == null ? ""
+                        : Formats.formatDistance(legC.geoDistanceOnPathInMeters(deviceCoord, stopIndex), false) + " / ")
+                        + Formats.formatDistance(TripGeoUtils.geoDistanceInMeters(deviceCoord, locationCoord), false);
+            } else {
+                distanceText = null;
+            }
+            distanceView.setText(distanceText);
             distanceView.setTextColor(textColor);
         }
     }

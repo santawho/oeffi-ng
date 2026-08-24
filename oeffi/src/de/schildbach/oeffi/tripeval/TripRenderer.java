@@ -69,6 +69,8 @@ public class TripRenderer {
         public boolean sectionIsAfterNearestStop; // otherwise is before
         public PTDate plannedTimeAtRefPoint;
         public Trip.Public simulatedPublicLeg;
+        private TripGeoUtils.GeoPath geoPath;
+        private TripGeoUtils.PointAndDistance[] pointAndDistanceForStops;
 
         public LegContainer(
                 final int legContainerIndex,
@@ -124,7 +126,7 @@ public class TripRenderer {
             if (stopIndex <= numIntermediates)
                 return leg.intermediateStops.get(stopIndex - 1);
 
-            if (stopIndex == numIntermediates + 1)
+            if (stopIndex >= numIntermediates + 1)
                 return leg.arrivalStop;
 
             return null;
@@ -299,7 +301,7 @@ public class TripRenderer {
 
             if (bestForwardAtStationIndex >= 0) {
                 // we are just next to one of the stations
-                // while going in same direction as the device is travelling
+                // while going in same direction as the device is traveling
                 // assume we are waiting there for departure
                 isAtNearestStop = true;
                 nearestStopIndex = bestForwardAtStationIndex;
@@ -308,7 +310,7 @@ public class TripRenderer {
                 sectionRelation = sectionIsAfterNearestStop ? 0.0 : 1.0;
             } else if (bestReverseAtStationIndex >= 0) {
                 // but we are just next to one of the stations
-                // while going in the opposite direction as the device is travelling
+                // while going in the opposite direction as the device is traveling
                 // assume we are waiting there for departure
                 isAtNearestStop = true;
                 nearestStopIndex = bestReverseAtStationIndex;
@@ -316,7 +318,7 @@ public class TripRenderer {
                 sectionIsAfterNearestStop = bestReverseAtStationIndex < bestReverseEndIndex || bestReverseAtStationIndex == 0;
                 sectionRelation = sectionIsAfterNearestStop ? 0.0 : 1.0;
             } else {
-                // we have a section going in either same or opposite direction as the device is travelling
+                // we have a section going in either same or opposite direction as the device is traveling
                 isAtNearestStop = false;
 
                 final boolean useBestForward;
@@ -481,6 +483,39 @@ public class TripRenderer {
                     publicLeg.journeyRef,
                     refTime);
             simulatedPublicLeg.setPath(publicLeg.getPath());
+        }
+
+        public TripGeoUtils.GeoPath getGeoPath() {
+            if (geoPath == null && publicLeg != null) {
+                this.geoPath = new TripGeoUtils.GeoPath(publicLeg, false);
+            }
+            return geoPath;
+        }
+
+        public TripGeoUtils.PointAndDistance getPointAndDistanceForStopIndex(final int aStopIndex) {
+            if (publicLeg == null)
+                return null;
+            if (pointAndDistanceForStops == null) {
+                final int numIntermediates = publicLeg.intermediateStops == null ? 0 : publicLeg.intermediateStops.size();
+                pointAndDistanceForStops = new TripGeoUtils.PointAndDistance[2 + numIntermediates];
+            }
+            if (aStopIndex < 0)
+                return null;
+            final int stopIndex = Math.min(aStopIndex, pointAndDistanceForStops.length - 1);
+            TripGeoUtils.PointAndDistance pointAndDistance = pointAndDistanceForStops[stopIndex];
+            if (pointAndDistance == null) {
+                final Stop stop = getPublicStopByIndex(publicLeg, stopIndex);
+                pointAndDistance = getGeoPath().findClosestPoint(stop.location.coord);
+                pointAndDistanceForStops[stopIndex] = pointAndDistance;
+            }
+            return pointAndDistance;
+        }
+
+        public double geoDistanceOnPathInMeters(final Point pointA, final int stopIndex) {
+            final TripGeoUtils.GeoPath geoPath = getGeoPath();
+            if (geoPath == null)
+                return 0.0d;
+            return geoPath.geoDistanceOnPathInMeters(pointA, getPointAndDistanceForStopIndex(stopIndex));
         }
     }
 
@@ -761,7 +796,7 @@ public class TripRenderer {
         setNextEventPositions(
                 arrivalStop, arrPos, arrPos != null && !arrPos.equals(arrivalStop.plannedArrivalPosition),
                 nextDepartureStop, depPos, depPos != null && !depPos.equals(plannedDepPos),
-                simulatedArrivalLocation, simulatedArrivalTime);
+                simulatedArrivalLocation, simulatedArrivalTime, legC);
         setNextEventTransport(nextPublicLeg);
         setNextEventTransferTimes(walkLegC, false, now);
         setNextEventActions(
@@ -843,7 +878,7 @@ public class TripRenderer {
         setNextEventPositions(
                 transferFrom, arrPos, arrPos != null && !arrPos.equals(plannedArrPos),
                 transferTo, depPos, depPos != null && !depPos.equals(plannedDepPos),
-                simulatedArrivalLocation, null);
+                simulatedArrivalLocation, null, null);
         setNextEventTransport(nextPublicLeg);
         setNextEventTransferTimes(legC, true, now);
         setNextEventActions(transferTo == null ? (eventIsNow
@@ -991,6 +1026,7 @@ public class TripRenderer {
     public Stop nextEventArrivalStop;
     public Location nextEventSimulatedArrivalLocation;
     public Date nextEventSimulatedArrivalTime;
+    public LegContainer nextEventSimulatedPublicLegContainer;
     public Stop nextEventDepartureStop;
     public boolean nextEventStopChange;
     public String nextEventArrivalPosName;
@@ -1001,7 +1037,8 @@ public class TripRenderer {
     private void setNextEventPositions(
             final Stop arrStop, final Position arrPos, final boolean arrChanged,
             final Stop depStop, final Position depPos, final boolean depChanged,
-            final Location simulatedArrivalLocation, final Date simulatedArrivalTime) {
+            final Location simulatedArrivalLocation, final Date simulatedArrivalTime,
+            final LegContainer simulatedPubliclegC) {
         nextEventArrivalStop = arrStop;
         nextEventDepartureStop = depStop;
         nextEventStopChange = (arrStop != null && depStop != null) && !arrStop.location.id.equals(depStop.location.id);
@@ -1012,6 +1049,7 @@ public class TripRenderer {
         nextEventDeparturePosChanged = depChanged;
         nextEventSimulatedArrivalLocation = simulatedArrivalLocation;
         nextEventSimulatedArrivalTime = simulatedArrivalTime;
+        nextEventSimulatedPublicLegContainer = simulatedPubliclegC;
     }
 
     public Line nextEventTransportLine;

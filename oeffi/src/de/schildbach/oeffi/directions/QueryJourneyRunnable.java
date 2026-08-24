@@ -21,11 +21,8 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Handler;
-import android.text.SpannableStringBuilder;
-import android.text.style.StyleSpan;
 import android.view.View;
 
 import org.slf4j.Logger;
@@ -49,7 +46,6 @@ import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.pte.NetworkId;
-import de.schildbach.pte.dto.Stop;
 import de.schildbach.pte.provider.NetworkProvider;
 import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.Location;
@@ -153,7 +149,8 @@ public class QueryJourneyRunnable implements Runnable {
             tries++;
 
             try {
-                final QueryJourneyResult result = networkProvider.queryJourney(journeyRef, splitSubJourneys, false);
+                final boolean loadPath = isOperation;
+                final QueryJourneyResult result = networkProvider.queryJourney(journeyRef, splitSubJourneys, loadPath);
 
                 if (!cancelled.get())
                     postOnResult(result);

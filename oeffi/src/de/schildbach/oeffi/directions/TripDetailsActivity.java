@@ -570,12 +570,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                         final TripRenderer.LegContainer legC = tripRenderer.legs.get(legIndex);
                         final Trip.Individual individualLeg = legC.individualLeg;
                         if (individualLeg != null)
-                            return TripGeoUtils.getPathForLeg(individualLeg);
+                            return new TripGeoUtils.GeoPath(individualLeg, false).getPoints();
 
                         final Trip.Public publicLeg = legC.publicLeg;
                         if (publicLeg == null)
                             return null;
-                        return TripGeoUtils.getPathForLegStops(publicLeg);
+                        return new TripGeoUtils.GeoPath(publicLeg, true).getPoints();
                     }
                 };
             }
@@ -2143,11 +2143,19 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final TextView distanceView = findViewById(R.id.navigation_next_event_time_distance);
         final Location nextEventSimulatedArrivalLocation = tripRenderer.nextEventSimulatedArrivalLocation;
         final Point locationCoord = nextEventSimulatedArrivalLocation == null ? null : nextEventSimulatedArrivalLocation.coord;
+        final TripRenderer.LegContainer nextEventSimulatedPublicLegC = tripRenderer.nextEventSimulatedPublicLegContainer;
         final Point deviceCoord = getDeviceLocation();
-        final String distance = locationCoord == null || deviceCoord == null ? null :
-                Formats.formatDistance(
-                        TripGeoUtils.geoDistanceInMeters(locationCoord, deviceCoord),
-                        true);
+        final String distance;
+        if (locationCoord == null || deviceCoord == null) {
+            distance = null;
+        } else {
+            final String onPathDistance = nextEventSimulatedPublicLegC == null ? "" : Formats.formatDistance(
+                    nextEventSimulatedPublicLegC.geoDistanceOnPathInMeters(deviceCoord, Integer.MAX_VALUE),
+                    true) + " / ";
+            distance = onPathDistance + Formats.formatDistance(
+                    TripGeoUtils.geoDistanceInMeters(locationCoord, deviceCoord),
+                    true);
+        }
         final Date nextEventSimulatedArrivalTime = tripRenderer.nextEventSimulatedArrivalTime;
         final String remainingTime = nextEventSimulatedArrivalTime == null ? null :
                 Formats.formatTimeSpanMorS(
@@ -2780,8 +2788,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             builder.append(Formats.formatTimeSpanMorS(remainingTime, false));
             if (locationCoord != null && deviceCoord != null) {
                 builder.append("  ");
-                builder.append(Formats.formatDistance(
-                        TripGeoUtils.geoDistanceInMeters(locationCoord, deviceCoord), true));
+                final String onPathDistance = Formats.formatDistance(
+                        legC.geoDistanceOnPathInMeters(deviceCoord, stopIndex), true);
+                builder.append(onPathDistance);
+                builder.append(" / ");
+                final String directDistance = Formats.formatDistance(
+                        TripGeoUtils.geoDistanceInMeters(locationCoord, deviceCoord), true);
+                builder.append(directDistance);
             }
             remainingView.setText(builder.toString());
         } else {
