@@ -258,13 +258,15 @@ public final class Formats {
     private static final String KILOMETER_SUFFIX = Constants.CHAR_HAIR_SPACE + "km";
 
     public static String formatDistance(final double meters, final boolean forceKilometers) {
-        final int metersInt = (int) meters;
+        final boolean isNegative = meters < 0.0d;
+        final int metersInt = (int) (isNegative ? -meters : meters);
+        final String prefix = isNegative ? "-" : "";
         if (!forceKilometers && metersInt < 1000)
-            return String.valueOf(metersInt) + METER_SUFFIX;
+            return prefix + String.valueOf(metersInt) + METER_SUFFIX;
         else if (metersInt < 1000 * 100)
-            return String.valueOf(metersInt / 1000) + '.' + String.valueOf((metersInt % 1000) / 100) + KILOMETER_SUFFIX;
+            return prefix + String.valueOf(metersInt / 1000) + '.' + String.valueOf((metersInt % 1000) / 100) + KILOMETER_SUFFIX;
         else
-            return String.valueOf(metersInt / 1000) + KILOMETER_SUFFIX;
+            return prefix + String.valueOf(metersInt / 1000) + KILOMETER_SUFFIX;
     }
 
     public static String makeBreakablePositionName(final String originalName) {
