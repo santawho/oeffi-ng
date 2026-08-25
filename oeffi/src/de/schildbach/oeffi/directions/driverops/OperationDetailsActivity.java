@@ -742,10 +742,11 @@ public class OperationDetailsActivity extends TripDetailsActivity {
 
         if (distanceView != null) {
             final Point deviceCoord = getDeviceLocation();
+            final Double deviceBearing = getDeviceBearing();
             final String distanceText;
             if (isShowRemaining() && locationCoord != null && deviceCoord != null) {
                 distanceText = (legC == null ? ""
-                        : Formats.formatDistance(legC.geoDistanceOnPathInMeters(deviceCoord, stopIndex), false) + " / ")
+                        : Formats.formatDistance(legC.geoDistanceOnPathInMeters(deviceCoord, deviceBearing, stopIndex), false) + " / ")
                         + Formats.formatDistance(TripGeoUtils.geoDistanceInMeters(deviceCoord, locationCoord), false);
             } else {
                 distanceText = null;

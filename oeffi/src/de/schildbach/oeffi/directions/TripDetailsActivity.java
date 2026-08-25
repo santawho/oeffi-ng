@@ -2145,12 +2145,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final Point locationCoord = nextEventSimulatedArrivalLocation == null ? null : nextEventSimulatedArrivalLocation.coord;
         final TripRenderer.LegContainer nextEventSimulatedPublicLegC = tripRenderer.nextEventSimulatedPublicLegContainer;
         final Point deviceCoord = getDeviceLocation();
+        final Double deviceBearing = getDeviceBearing();
         final String distance;
         if (locationCoord == null || deviceCoord == null) {
             distance = null;
         } else {
             final String onPathDistance = nextEventSimulatedPublicLegC == null ? "" : Formats.formatDistance(
-                    nextEventSimulatedPublicLegC.geoDistanceOnPathInMeters(deviceCoord, Integer.MAX_VALUE),
+                    nextEventSimulatedPublicLegC.geoDistanceOnPathInMeters(deviceCoord, deviceBearing, Integer.MAX_VALUE),
                     true) + " / ";
             distance = onPathDistance + Formats.formatDistance(
                     TripGeoUtils.geoDistanceInMeters(locationCoord, deviceCoord),
@@ -2784,12 +2785,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final long remainingTime = simulatedTime.getTime() - now.getTime();
             final Point locationCoord = stop.location.coord;
             final Point deviceCoord = getDeviceLocation();
+            final Double deviceBearing = getDeviceBearing();
             final StringBuilder builder = new StringBuilder();
             builder.append(Formats.formatTimeSpanMorS(remainingTime, false));
             if (locationCoord != null && deviceCoord != null) {
                 builder.append("  ");
                 final String onPathDistance = Formats.formatDistance(
-                        legC.geoDistanceOnPathInMeters(deviceCoord, stopIndex), true);
+                        legC.geoDistanceOnPathInMeters(deviceCoord, deviceBearing, stopIndex), true);
                 builder.append(onPathDistance);
                 builder.append(" / ");
                 final String directDistance = Formats.formatDistance(

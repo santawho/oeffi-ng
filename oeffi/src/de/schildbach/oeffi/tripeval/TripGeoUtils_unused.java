@@ -260,7 +260,7 @@ public class TripGeoUtils_unused {
             }
 
             final GeoPath path = new GeoPath(journeyLeg, false);
-            final PointAndDistance closestPointOnTrack = path.findClosestPoint(position);
+            final PointAndDistance closestPointOnTrack = path.findClosestPoint(position, null);
             if (closestPointOnTrack.distanceInMeters < closestDistance) {
                 closestPoint = closestPointOnTrack;
                 closestDistance = closestPoint.distanceInMeters;

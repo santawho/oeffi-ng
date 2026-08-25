@@ -223,7 +223,7 @@ public class TripRenderer {
             }
         }
 
-        private void computeCurrentSectionV2(final Stop[] allStops) {
+        private void computeCurrentSectionV2WithoutPath(final Stop[] allStops) {
             final double stationRadiusInMeters =
                     getStationRadiusProviderForProduct(publicLeg.line.product)
                             .getStationRadiusInMeters();
@@ -255,12 +255,7 @@ public class TripRenderer {
                     continue;
                 }
                 final double sectionBearing = TripGeoUtils.getBearing(startPoint, endPoint);
-                double bearingDiff = sectionBearing - refBearing;
-                if (bearingDiff < -180.0)
-                    bearingDiff += 360.0;
-                else if (bearingDiff > 180.0)
-                    bearingDiff -= 360.0;
-                final boolean isGoingOpposite = bearingDiff < -90.0 || bearingDiff > 90.0;
+                final boolean isGoingOpposite = TripGeoUtils.isReverseBearing(refBearing, sectionBearing);
                 final double refEndDistance = TripGeoUtils.geoDistanceInMeters(refPoint, endPoint);
                 final TripGeoUtils.PointAndDistance closestPoint =
                         TripGeoUtils.findClosestPointOnLine(refPoint, startPoint, endPoint);
@@ -351,6 +346,69 @@ public class TripRenderer {
             }
         }
 
+        private void computeCurrentSectionV2WithPath(final Stop[] allStops) {
+            if (publicLeg == null || publicLeg.getPath() == null) {
+                computeCurrentSectionV2WithoutPath(allStops);
+                return;
+            }
+            final TripGeoUtils.GeoPath geoPath = getGeoPath();
+            final TripGeoUtils.PointAndDistance closestPointToRef = geoPath.findClosestPoint(refPoint, refBearing);
+
+            int bestIndex = -1;
+            double bestDistance = Double.MAX_VALUE;
+            TripGeoUtils.PointAndDistance bestPoint = null;
+            for (int stopIndex = 0; stopIndex < allStops.length; ++stopIndex) {
+                final TripGeoUtils.PointAndDistance stopPoint = getPointAndDistanceForStopIndex(stopIndex);
+                final double distanceToStop = Math.abs(geoPath.geoDistanceOnPathInMeters(closestPointToRef, stopPoint));
+                if (distanceToStop < bestDistance) {
+                    bestDistance = distanceToStop;
+                    bestIndex = stopIndex;
+                    bestPoint = stopPoint;
+                }
+            }
+
+            if (bestPoint == null)
+                return;
+
+            nearestStopIndex = bestIndex;
+            distanceToNearestStop = bestDistance;
+            isAtNearestStop = distanceToNearestStop <
+                    getStationRadiusProviderForProduct(publicLeg.line.product).getStationRadiusInMeters();
+
+            if (closestPointToRef.pointAfterIndex <= bestPoint.pointBeforeIndex)
+                sectionIsAfterNearestStop = false;
+            else if (closestPointToRef.pointBeforeIndex >= bestPoint.pointAfterIndex)
+                sectionIsAfterNearestStop = true;
+            else
+                sectionIsAfterNearestStop = closestPointToRef.relativePosition > bestPoint.relativePosition;
+
+            if (sectionIsAfterNearestStop) {
+                final int nextIndex = bestIndex + 1;
+                if (nextIndex >= allStops.length) {
+                    // after the end of leg
+                    sectionIsAfterNearestStop = false;
+                    sectionRelation = 1.0d;
+                } else {
+                    final TripGeoUtils.PointAndDistance nextPoint = getPointAndDistanceForStopIndex(nextIndex);
+                    final double sectionLength = geoPath.geoDistanceOnPathOnlyInMeters(bestPoint, nextPoint);
+                    final double sectionConsumed = geoPath.geoDistanceOnPathOnlyInMeters(bestPoint, closestPointToRef);
+                    sectionRelation = sectionConsumed / sectionLength;
+                }
+            } else {
+                final int prevIndex = bestIndex - 1;
+                if (prevIndex < 0) {
+                    // before the start of leg
+                    sectionIsAfterNearestStop = true;
+                    sectionRelation = 0.0d;
+                } else {
+                    final TripGeoUtils.PointAndDistance prevStop = getPointAndDistanceForStopIndex(prevIndex);
+                    final double sectionLength = geoPath.geoDistanceOnPathOnlyInMeters(prevStop, bestPoint);
+                    final double sectionConsumed = geoPath.geoDistanceOnPathOnlyInMeters(prevStop, closestPointToRef);
+                    sectionRelation = sectionConsumed / sectionLength;
+                }
+            }
+        }
+
         private void setRefPoint(
                 final Point refPoint,
                 final Double refBearing,
@@ -372,7 +430,7 @@ public class TripRenderer {
 
             final Stop[] allStops = getAllStops();
             // computeCurrentSectionV1(allStops);
-            computeCurrentSectionV2(allStops);
+            computeCurrentSectionV2WithPath(allStops);
             buildSimulatedLeg(allStops);
         }
 
@@ -505,17 +563,17 @@ public class TripRenderer {
             TripGeoUtils.PointAndDistance pointAndDistance = pointAndDistanceForStops[stopIndex];
             if (pointAndDistance == null) {
                 final Stop stop = getPublicStopByIndex(publicLeg, stopIndex);
-                pointAndDistance = getGeoPath().findClosestPoint(stop.location.coord);
+                pointAndDistance = getGeoPath().findClosestPoint(stop.location.coord, null);
                 pointAndDistanceForStops[stopIndex] = pointAndDistance;
             }
             return pointAndDistance;
         }
 
-        public double geoDistanceOnPathInMeters(final Point pointA, final int stopIndex) {
+        public double geoDistanceOnPathInMeters(final Point point, final Double bearing, final int stopIndex) {
             final TripGeoUtils.GeoPath geoPath = getGeoPath();
             if (geoPath == null)
                 return 0.0d;
-            return geoPath.geoDistanceOnPathInMeters(pointA, getPointAndDistanceForStopIndex(stopIndex));
+            return geoPath.geoDistanceOnPathInMeters(point, getPointAndDistanceForStopIndex(stopIndex), bearing);
         }
     }
 

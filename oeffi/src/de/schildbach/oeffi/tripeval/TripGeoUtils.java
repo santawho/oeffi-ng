@@ -34,10 +34,24 @@ public class TripGeoUtils {
         return Math.toDegrees(Math.atan2(y, x));
     }
 
+    public static double clipBearing(final double bearing) {
+        if (bearing <= -180.0d)
+            return bearing + 360.0d;
+        if (bearing > 180.0d)
+            return bearing - 360.0d;
+        return bearing;
+    }
+
+    public static boolean isReverseBearing(final double moveBearing, final double pathBearing) {
+        final double bearingDiff = clipBearing(pathBearing - moveBearing);
+        return bearingDiff < -90.0 || bearingDiff > 90.0;
+    }
+
     public static class GeoPath {
         private final List<Point> pointsAsList;
         private Point[] points;
         private double[] distancesFromStart;
+        private double[] bearings;
 
         public GeoPath(final Trip.Leg leg, final boolean forStopsOnly) {
             if (!forStopsOnly) {
@@ -102,6 +116,38 @@ public class TripGeoUtils {
             return distancesFromStart;
         }
 
+        public double[] getBearings() {
+            if (bearings == null) {
+                final Point[] points = getPointsAsArray();
+                final int length = points.length;
+                bearings = new double[length];
+                if (length > 1) {
+                    Point prevPoint = points[0];
+                    for (int index = 1; index < length; index += 1) {
+                        final Point currPoint = points[index];
+                        bearings[index] = getBearing(prevPoint, currPoint);
+                        prevPoint = currPoint;
+                    }
+                }
+                bearings[0] = bearings[1];
+            }
+            return bearings;
+        }
+
+        public double getBearingBeforeIndex(final int pointOnPathIndex) {
+            final double[] bearings = getBearings();
+            if (bearings == null)
+                return 0.0d;
+            final int length = bearings.length;
+            if (length == 0)
+                return 0.0d;
+            if (pointOnPathIndex < 0)
+                return bearings[0];
+            if (pointOnPathIndex >= length)
+                return bearings[length - 1];
+            return bearings[pointOnPathIndex];
+        }
+
         public List<Point> getPoints() {
             return pointsAsList;
         }
@@ -110,13 +156,14 @@ public class TripGeoUtils {
             return pointsAsList == null || pointsAsList.isEmpty();
         }
 
-        public PointAndDistance findClosestPoint(final Point position) {
-            return findClosestPoint(position, 0, -1);
+        public PointAndDistance findClosestPoint(final Point position, final Double bearing) {
+            return findClosestPoint(position, 0, -1, bearing);
         }
 
         public PointAndDistance findClosestPoint(
                 final Point position,
-                int startIndex, int endIndex) {
+                int startIndex, int endIndex,
+                final Double bearing) {
             if (isEmpty())
                 return null;
             final int lastIndex = pointsAsList.size() - 1;
@@ -131,14 +178,40 @@ public class TripGeoUtils {
                         GeoUtils.geoDistanceInMeters(position, lastPoint),
                         0.0);
             }
-            PointAndDistance closestPoint = null;
-            int pointBeforeIndex = -1;
-            int pointAfterIndex = -1;
+            final boolean obeyBearing;
+            final double forwardBearing;
+            if (bearing == null) {
+                obeyBearing = false;
+                forwardBearing = 0.0d;
+            } else {
+                obeyBearing = true;
+                forwardBearing = bearing;
+            }
+            PointAndDistance closestPointForward = null;
+            int pointBeforeIndexForward = -1;
+            int pointAfterIndexForward = -1;
+            PointAndDistance closestPointReverse = null;
+            int pointBeforeIndexReverse = -1;
+            int pointAfterIndexReverse = -1;
+            PointAndDistance closestPoint;
+            int pointBeforeIndex;
+            int pointAfterIndex;
             double distance = Double.MAX_VALUE;
             Point pointA = pointsAsList.get(startIndex);
             for (int indexAfter = startIndex + 1; indexAfter < endIndex; ++indexAfter) {
                 final Point pointB = pointsAsList.get(indexAfter);
                 final PointAndDistance toLine = findClosestPointOnLine(position, pointA, pointB);
+                final double lineBearing = getBearingBeforeIndex(toLine.pointAfterIndex);
+                final boolean isGoingOpposite = obeyBearing && isReverseBearing(forwardBearing, lineBearing);
+                if (isGoingOpposite) {
+                    closestPoint = closestPointReverse;
+                    pointBeforeIndex = pointBeforeIndexReverse;
+                    pointAfterIndex = pointAfterIndexReverse;
+                } else {
+                    closestPoint = closestPointForward;
+                    pointBeforeIndex = pointBeforeIndexForward;
+                    pointAfterIndex = pointAfterIndexForward;
+                };
                 if (closestPoint == null) {
                     closestPoint = toLine;
                     distance = toLine.distanceInMeters;
@@ -160,8 +233,37 @@ public class TripGeoUtils {
                         pointAfterIndex = ax;
                     }
                 }
+                if (isGoingOpposite) {
+                    closestPointReverse = closestPoint;
+                    pointBeforeIndexReverse = pointBeforeIndex;
+                    pointAfterIndexReverse = pointAfterIndex;
+                } else {
+                    closestPointForward = closestPoint;
+                    pointBeforeIndexForward = pointBeforeIndex;
+                    pointAfterIndexForward = pointAfterIndex;
+                }
                 pointA = pointB;
             }
+
+            final boolean useReverse;
+            if (closestPointForward == null) {
+                useReverse = true;
+            } else if (closestPointReverse == null) {
+                useReverse = false;
+            } else {
+                useReverse = closestPointForward.distanceInMeters / closestPointReverse.distanceInMeters > 2.0;
+            }
+            if (useReverse) {
+                closestPoint = closestPointReverse;
+                pointBeforeIndex = pointBeforeIndexReverse;
+                pointAfterIndex = pointAfterIndexReverse;
+            } else {
+                closestPoint = closestPointForward;
+                pointBeforeIndex = pointBeforeIndexForward;
+                pointAfterIndex = pointAfterIndexForward;
+            }
+            if (closestPoint == null)
+                return null;
             return new PointAndDistance(
                     closestPoint.originalPoint,
                     closestPoint.closestPoint,
@@ -170,18 +272,32 @@ public class TripGeoUtils {
                     closestPoint.relativePosition);
         }
 
-        public double geoDistanceOnPathInMeters(final Point pointA, final Point pointB) {
-            return geoDistanceOnPathInMeters(pointA, findClosestPoint(pointB));
+        public double geoDistanceOnPathInMeters(final Point pointA, final Point pointB, final Double bearingAtPointA) {
+            return geoDistanceOnPathInMeters(pointA, findClosestPoint(pointB, null), bearingAtPointA);
         }
 
-        public double geoDistanceOnPathInMeters(final Point pointA, final PointAndDistance closestB) {
-            final PointAndDistance closestA = findClosestPoint(pointA);
+        public double geoDistanceOnPathInMeters(final Point pointA, final PointAndDistance closestB, final Double bearingAtPointA) {
+            final PointAndDistance closestA = findClosestPoint(pointA, bearingAtPointA);
+            return geoDistanceOnPathInMeters(closestA, closestB);
+        }
 
-            final double directDistance = geoDistanceInMeters(pointA, closestB.originalPoint);
+        public double geoDistanceOnPathInMeters(final PointAndDistance closestA, final PointAndDistance closestB) {
+            final double directDistance = geoDistanceInMeters(closestA.originalPoint, closestB.originalPoint);
             final double distanceOffPath = closestA.distanceInMeters + closestB.distanceInMeters;
             if (directDistance < distanceOffPath)
                 return directDistance;
 
+            return geoDistanceOnPathOnlyInMeters(closestA, closestB, distanceOffPath);
+        }
+
+        public double geoDistanceOnPathOnlyInMeters(final PointAndDistance closestA, final PointAndDistance closestB) {
+            return geoDistanceOnPathOnlyInMeters(closestA, closestB, 0.0d);
+        }
+
+        public double geoDistanceOnPathOnlyInMeters(
+                final PointAndDistance closestA,
+                final PointAndDistance closestB,
+                final double distanceOffPath) {
             final boolean reverse;
             final double distance;
             final int pointBeforeIndex = closestA.pointBeforeIndex;
@@ -235,7 +351,7 @@ public class TripGeoUtils {
                     d2 = 0.0d;
                 } else {
                     afterIndex = p2.pointBeforeIndex;
-                    d2 = p1.relativePosition * (distances[p2.pointAfterIndex] - distances[p2.pointBeforeIndex]);
+                    d2 = p2.relativePosition * (distances[p2.pointAfterIndex] - distances[p2.pointBeforeIndex]);
                 }
                 distance = d1 + (distances[afterIndex] - distances[beforeIndex]) + d2 + distanceOffPath;
             }
