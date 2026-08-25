@@ -223,7 +223,7 @@ public class TripRenderer {
             }
         }
 
-        private void computeCurrentSectionV2WithoutPath(final Stop[] allStops) {
+        private void computeCurrentSectionV2(final Stop[] allStops) {
             final double stationRadiusInMeters =
                     getStationRadiusProviderForProduct(publicLeg.line.product)
                             .getStationRadiusInMeters();
@@ -346,11 +346,12 @@ public class TripRenderer {
             }
         }
 
-        private void computeCurrentSectionV2WithPath(final Stop[] allStops) {
-            if (publicLeg == null || publicLeg.getPath() == null) {
-                computeCurrentSectionV2WithoutPath(allStops);
-                return;
-            }
+        private void computeCurrentSectionV3(final Stop[] allStops) {
+//            if (publicLeg == null || publicLeg.getPath() == null) {
+//                computeCurrentSectionV2(allStops);
+//                return;
+//            }
+
             final TripGeoUtils.GeoPath geoPath = getGeoPath();
             final TripGeoUtils.PointAndDistance closestPointToRef = geoPath.findClosestPoint(refPoint, refBearing);
 
@@ -430,7 +431,8 @@ public class TripRenderer {
 
             final Stop[] allStops = getAllStops();
             // computeCurrentSectionV1(allStops);
-            computeCurrentSectionV2WithPath(allStops);
+            // computeCurrentSectionV2(allStops);
+            computeCurrentSectionV3(allStops);
             buildSimulatedLeg(allStops);
         }
 
