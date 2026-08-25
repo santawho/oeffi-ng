@@ -1284,19 +1284,20 @@ public class TripsOverviewActivity extends OeffiActivity {
                         if (transferStationId.equals(leg.departureStop.location.id)) {
                             final PTDate departureTime = leg.departureStop.getDepartureTime();
                             for (final Trip feedingTrip: tripsToStation) {
-                                final Trip.Leg lastLeg = feedingTrip.legs.get(feedingTrip.legs.size() - 1);
-                                final Trip.Public lastPublicLeg;
-                                final Trip.Individual connectingWalkLeg;
+                                final int numFeedingLegs = feedingTrip.legs.size();
+                                final Trip.Leg lastLeg = feedingTrip.legs.get(numFeedingLegs - 1);
                                 final PTDate arrivalTime;
                                 if (lastLeg instanceof Trip.Public) {
-                                    lastPublicLeg = (Trip.Public) lastLeg;
+                                    final Trip.Public lastPublicLeg = (Trip.Public) lastLeg;
                                     arrivalTime = lastPublicLeg.arrivalStop.plannedArrivalTime;
                                 } else if (lastLeg instanceof Trip.Individual){
-                                    connectingWalkLeg = (Trip.Individual) lastLeg;
-                                    final PTDate walkArrivalTime = connectingWalkLeg.arrivalTime;
-                                    final Trip.Leg secondLastLeg = feedingTrip.legs.get(feedingTrip.legs.size() - 2);
+                                    if (numFeedingLegs < 2)
+                                        continue;
+                                    final Trip.Leg secondLastLeg = feedingTrip.legs.get(numFeedingLegs - 2);
                                     if (!(secondLastLeg instanceof Trip.Public))
                                         continue;
+                                    final Trip.Individual connectingWalkLeg = (Trip.Individual) lastLeg;
+                                    final PTDate walkArrivalTime = connectingWalkLeg.arrivalTime;
                                     arrivalTime = walkArrivalTime != null ? walkArrivalTime
                                             : ((Trip.Public) secondLastLeg).arrivalStop.plannedArrivalTime;
                                 } else {
