@@ -1024,6 +1024,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
         }
         final Double speedMetersPerSecond = location.hasSpeed() ? (double) location.getSpeed() : null;
+        log.debug("device location changed: {}/{}", newDeviceLocation, bearingDegrees);
         updateDeviceLocationDependencies(newDeviceLocation, bearingDegrees, speedMetersPerSecond, new Date());
         updateGuiIfApplicable(true);
     }
