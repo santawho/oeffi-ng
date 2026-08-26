@@ -2789,14 +2789,16 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final StringBuilder builder = new StringBuilder();
             builder.append(Formats.formatTimeSpanMorS(remainingTime, false));
             if (locationCoord != null && deviceCoord != null) {
+                final double distanceOnPath = legC.geoDistanceOnPathInMeters(deviceCoord, deviceBearing, stopIndex);
+                final double directDistance = TripGeoUtils.geoDistanceInMeters(locationCoord, deviceCoord);
+                if (Math.abs(distanceOnPath) < Math.abs(directDistance)) {
+                    log.warn("unexpected distance order {} < {} at {}/{}",
+                            distanceOnPath, directDistance, deviceCoord, deviceBearing);
+                }
                 builder.append("  ");
-                final String onPathDistance = Formats.formatDistance(
-                        legC.geoDistanceOnPathInMeters(deviceCoord, deviceBearing, stopIndex), true);
-                builder.append(onPathDistance);
+                builder.append(Formats.formatDistance(distanceOnPath, true));
                 builder.append(" / ");
-                final String directDistance = Formats.formatDistance(
-                        TripGeoUtils.geoDistanceInMeters(locationCoord, deviceCoord), true);
-                builder.append(directDistance);
+                builder.append(Formats.formatDistance(directDistance, true));
             }
             remainingView.setText(builder.toString());
         } else {

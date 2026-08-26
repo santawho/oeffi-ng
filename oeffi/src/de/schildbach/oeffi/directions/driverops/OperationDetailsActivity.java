@@ -745,9 +745,15 @@ public class OperationDetailsActivity extends TripDetailsActivity {
             final Double deviceBearing = getDeviceBearing();
             final String distanceText;
             if (isShowRemaining() && locationCoord != null && deviceCoord != null) {
-                distanceText = (legC == null ? ""
-                        : Formats.formatDistance(legC.geoDistanceOnPathInMeters(deviceCoord, deviceBearing, stopIndex), false) + " / ")
-                        + Formats.formatDistance(TripGeoUtils.geoDistanceInMeters(deviceCoord, locationCoord), false);
+                final double distanceOnPath = legC == null ? 999_000d : legC.geoDistanceOnPathInMeters(deviceCoord, deviceBearing, stopIndex);
+                final double directDistance = TripGeoUtils.geoDistanceInMeters(deviceCoord, locationCoord);
+                if (Math.abs(distanceOnPath) < Math.abs(directDistance)) {
+                    log.warn("unexpected distance order {} < {} at {}/{}",
+                            distanceOnPath, directDistance, deviceCoord, deviceBearing);
+                }
+                distanceText =
+                        legC == null ? "" : (Formats.formatDistance(distanceOnPath, false) + " / ")
+                        + Formats.formatDistance(directDistance, false);
             } else {
                 distanceText = null;
             }

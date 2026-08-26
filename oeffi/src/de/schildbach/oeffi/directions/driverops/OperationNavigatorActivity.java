@@ -683,7 +683,7 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
         if (!(announcementsEnabled && !nextStopHasBeenAnnounced && secsLeft <= announcementLeadTimeSecs))
             return false;
         nextStopHasBeenAnnounced = true;
-        log.debug("now near stop {}", location.name);
+        log.debug("now near stop {}, at {}/{}", location.name, tripRenderer.refPoint, tripRenderer.refBearing);
         announceStop(false, location, prevStop, isEndOfJourney);
         return true;
     }
