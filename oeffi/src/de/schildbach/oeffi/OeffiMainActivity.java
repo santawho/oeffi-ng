@@ -70,8 +70,6 @@ public abstract class OeffiMainActivity extends OeffiActivity {
 
     private static final int DIALOG_MESSAGE = 102;
 
-    private static final Logger log = LoggerFactory.getLogger(OeffiMainActivity.class);
-
     protected boolean acceptNetworkChanges() {
         return true;
     }

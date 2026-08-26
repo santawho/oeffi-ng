@@ -215,8 +215,6 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
     private ImageView multiStationsView;
     private LinearLayout.LayoutParams LINES_LAYOUT_PARAMS;
 
-    private static final Logger log = LoggerFactory.getLogger(StationDetailsActivity.class);
-
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

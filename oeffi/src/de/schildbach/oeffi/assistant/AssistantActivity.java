@@ -22,6 +22,7 @@ import de.schildbach.oeffi.stations.StationsActivity;
 public class AssistantActivity extends Activity {
     private static final long DOUBLE_ACTION_TIME_MS = 5000;
     private static final long DELAY_SPEAK_ON_HEADSET_MS = 1500;
+
     private static final Logger log = LoggerFactory.getLogger(AssistantActivity.class);
 
     static long timeOfLastAction;

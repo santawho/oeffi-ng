@@ -41,6 +41,7 @@ import androidx.annotation.NonNull;
 
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
+import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.StationsAware;
 import de.schildbach.oeffi.URLs;
@@ -80,7 +81,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static java.util.Objects.requireNonNull;
 
-public class PlanActivity extends ComponentActivity {
+public class PlanActivity extends OeffiActivity {
     public static final String INTENT_EXTRA_PLAN_ID = "plan_id"; // Used in launcher shortcuts
     private static final String INTENT_EXTRA_SELECTED_STATION_ID = PlanActivity.class.getName()
             + ".selected_station_id";
@@ -113,8 +114,6 @@ public class PlanActivity extends ComponentActivity {
     private final Handler handler = new Handler();
     private HandlerThread backgroundThread;
     private Handler backgroundHandler;
-
-    private static final Logger log = LoggerFactory.getLogger(PlanActivity.class);
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {

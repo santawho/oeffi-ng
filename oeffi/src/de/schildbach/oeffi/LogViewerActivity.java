@@ -51,8 +51,6 @@ import de.schildbach.oeffi.util.ColorHash;
 import de.schildbach.oeffi.util.ViewUtils;
 
 public class LogViewerActivity extends OeffiActivity {
-    private static final Logger log = LoggerFactory.getLogger(LogViewerActivity.class);
-
     private static final int BLOCK_SIZE = 200000;
 
     public static void start(final Context context) {

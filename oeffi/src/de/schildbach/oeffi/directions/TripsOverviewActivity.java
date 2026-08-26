@@ -235,8 +235,6 @@ public class TripsOverviewActivity extends OeffiActivity {
         }
     };
 
-    private static final Logger log = LoggerFactory.getLogger(TripsOverviewActivity.class);
-
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

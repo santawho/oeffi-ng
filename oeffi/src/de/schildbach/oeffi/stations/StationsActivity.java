@@ -244,8 +244,6 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
     private static final int DIALOG_NEARBY_STATIONS_ERROR = 1;
 
-    private static final Logger log = LoggerFactory.getLogger(StationsActivity.class);
-
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
                 startLocationProvider();

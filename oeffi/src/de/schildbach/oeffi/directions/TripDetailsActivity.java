@@ -294,8 +294,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     protected boolean isShowCompactTimes;
 
-    protected static final Logger log = LoggerFactory.getLogger(TripDetailsActivity.class);
-
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -3255,7 +3253,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         return description.toString();
     }
 
-    public static String getTripLinkUrl(final Context context, final NetworkId network, final Trip trip) {
+    public String getTripLinkUrl(final Context context, final NetworkId network, final Trip trip) {
         try {
             final NetworkProvider provider = NetworkProviderFactory.provider(network);
             if (provider.hasCapabilities(NetworkProvider.Capability.TRIP_SHARING)) {

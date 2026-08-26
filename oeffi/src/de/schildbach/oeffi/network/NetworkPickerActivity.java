@@ -152,8 +152,6 @@ public class NetworkPickerActivity extends OeffiActivity implements
     private static final String INDEX_FILENAME = "networks.txt";
     private static final int MAX_LAST_NETWORKS = 3;
 
-    private static final Logger log = LoggerFactory.getLogger(NetworkPickerActivity.class);
-
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
                 maybeStartLocation();

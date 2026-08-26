@@ -179,8 +179,6 @@ public class DirectionsActivity extends OeffiMainActivity implements
     private BroadcastReceiver connectivityReceiver;
     private BroadcastReceiver tickReceiver;
 
-    private static final Logger log = LoggerFactory.getLogger(DirectionsActivity.class);
-
     private static final String INTENT_EXTRA_FROM_LOCATION = DirectionsActivity.class.getName() + ".from_location";
     private static final String INTENT_EXTRA_TO_LOCATION = DirectionsActivity.class.getName() + ".to_location";
     private static final String INTENT_EXTRA_VIA_LOCATION = DirectionsActivity.class.getName() + ".via_location";

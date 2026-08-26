@@ -88,8 +88,6 @@ public class PlansPickerActivity extends OeffiMainActivity implements LocationHe
 
     private static final int THUMB_CACHE_SIZE = 2 * 1024 * 1024;
 
-    private static final Logger log = LoggerFactory.getLogger(PlansPickerActivity.class);
-
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
                 maybeStartLocation();

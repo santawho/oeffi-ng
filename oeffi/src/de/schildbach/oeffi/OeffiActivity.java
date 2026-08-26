@@ -144,7 +144,7 @@ public abstract class OeffiActivity extends AppCompatActivity
 
     protected LocationManager locationManager;
 
-    protected Logger log;
+    protected final Logger log;
 
     protected OeffiActivity() {
          log = LoggerFactory.getLogger(this.getClass());
