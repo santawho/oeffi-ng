@@ -133,9 +133,8 @@ import de.schildbach.pte.dto.TripShare;
 
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -151,6 +150,7 @@ import static java.util.Objects.requireNonNull;
 
 public class TripDetailsActivity extends OeffiActivity implements LocationListener, DeviceLocationAware {
     public static class RenderConfig implements Serializable {
+        @Serial
         private static final long serialVersionUID = 6006525041994219717L;
 
         public boolean isJourney;
@@ -165,6 +165,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     public static final String INTENT_EXTRA_RENDERCONFIG = TripDetailsActivity.class.getName() + ".config";
 
     public static class IntentData implements Serializable {
+        @Serial
         private static final long serialVersionUID = 8180214631776887395L;
 
         public final NetworkId network;
@@ -277,6 +278,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private boolean locationTrackingEnabled;
     private String locationProvider;
     private Point deviceLocation;
+    private Point previousStraightLocation;
     private Double deviceBearingDegrees;
     private Double deviceSpeedMetersPerSecond;
     private Date deviceLocationTime;
@@ -1004,25 +1006,48 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private void removeLocationUpdates() {
         lastLocationUpdateIntervalMs = 0;
         locationManager.removeUpdates(this);
+        previousStraightLocation = null;
         updateDeviceLocationDependencies(null, null, null, null);
     }
 
+    private static final float REQUIRED_ACCURACY_METERS = 20.0f;
+    private static final double MINIMUM_MOTION_FOR_UPDATE = 10.0d;
+    private static final double MAX_BEARING_CHANGE_FOR_STRAIGHT = 20.0d;
+    private static final boolean TRUST_GPS_BEARING = false;
+
     @Override
     public void onLocationChanged(@NonNull final android.location.Location location) {
+        if (!location.hasAccuracy())
+            return;
+        final float accuracy = location.getAccuracy();
+        if (accuracy > REQUIRED_ACCURACY_METERS)
+            return;
+
         final Point newDeviceLocation = Point.fromDouble(location.getLatitude(), location.getLongitude());
-        final Double bearingDegrees;
-        if (location.hasBearing()) {
-            bearingDegrees = Double.valueOf(location.getBearing());
-        } else if (deviceLocation == null) {
-            bearingDegrees = null;
-        } else {
+        if (deviceLocation != null) {
             final double dist = TripGeoUtils.geoDistanceInMeters(deviceLocation, newDeviceLocation);
-            if (dist > 0) {
-                bearingDegrees = TripGeoUtils.getBearing(deviceLocation, newDeviceLocation);
-            } else {
+            if (dist < MINIMUM_MOTION_FOR_UPDATE)
                 return;
-            }
         }
+
+        Double bearingDegrees = null;
+        if (TRUST_GPS_BEARING && location.hasBearing()) {
+            bearingDegrees = (double) location.getBearing();
+        } else if (deviceLocation != null) {
+            final double newBearingDegrees = TripGeoUtils.getBearing(deviceLocation, newDeviceLocation);
+            if (previousStraightLocation != null) {
+                final double prevBearingDegrees = TripGeoUtils.getBearing(previousStraightLocation, newDeviceLocation);
+                final double bearingDiff = Math.abs(TripGeoUtils.clipBearing(newBearingDegrees - prevBearingDegrees));
+                if (bearingDiff < MAX_BEARING_CHANGE_FOR_STRAIGHT) {
+                    bearingDegrees = TripGeoUtils.clipBearing(prevBearingDegrees + bearingDiff / 2);
+                } else {
+                    // sharp turn, keep previous bearing until settled by going straight again
+                    bearingDegrees = deviceBearingDegrees;
+                }
+            }
+            previousStraightLocation = deviceLocation;
+        }
+
         final Double speedMetersPerSecond = location.hasSpeed() ? (double) location.getSpeed() : null;
         log.debug("device location changed: {}/{}", newDeviceLocation, bearingDegrees);
         updateDeviceLocationDependencies(newDeviceLocation, bearingDegrees, speedMetersPerSecond, new Date());
@@ -1246,7 +1271,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     private void setupTripRenderer() {
         tripRenderer.setRefPoint(
                 deviceLocation,
-                deviceBearingDegrees == null ? 0 : deviceBearingDegrees,
+                deviceBearingDegrees,
                 deviceSpeedMetersPerSecond == null ? 0 : deviceSpeedMetersPerSecond,
                 deviceLocationTime);
     }

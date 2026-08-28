@@ -44,7 +44,7 @@ public class TripGeoUtils {
 
     public static boolean isReverseBearing(final double moveBearing, final double pathBearing) {
         final double bearingDiff = clipBearing(pathBearing - moveBearing);
-        return bearingDiff < -90.0 || bearingDiff > 90.0;
+        return bearingDiff < -90.0d || bearingDiff > 90.0d;
     }
 
     public static class GeoPath {

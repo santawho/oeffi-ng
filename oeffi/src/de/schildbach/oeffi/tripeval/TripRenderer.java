@@ -658,7 +658,7 @@ public class TripRenderer {
 
     public void setRefPoint(
             final Point refPoint,
-            final double refBearing,
+            final Double refBearing,
             final double refSpeed,
             final Date refTime) {
         this.refPoint = refPoint;
