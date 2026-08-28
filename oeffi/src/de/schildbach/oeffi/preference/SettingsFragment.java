@@ -23,13 +23,12 @@ import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceScreen;
 
 import de.schildbach.oeffi.Application;
+import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.network.NetworkResources;
 import de.schildbach.pte.NetworkId;
 
 public class SettingsFragment extends PreferenceFragment {
-    public static final String KEY_COMMON_NETWORK_PROVIDER = "network_provider";
-
     @Override
     public void onCreatePreferences(@androidx.annotation.Nullable final Bundle savedInstanceState, @androidx.annotation.Nullable final String rootKey) {
         addPreferencesFromResource(R.xml.preference_settings);
@@ -39,9 +38,9 @@ public class SettingsFragment extends PreferenceFragment {
         aboutPreferenceScreen.setTitle(Application.getInstance().getString(R.string.about_title, Application.getInstance().getAppName()));
         addPreference(aboutPreferenceScreen);
 
-        setupActionPreference(KEY_COMMON_NETWORK_PROVIDER, CommonFragment.NetworkProviderActionHandler.class);
+        setupActionPreference(Constants.PREFS_KEY_NETWORK_PROVIDER, CommonFragment.NetworkProviderActionHandler.class);
         setupDynamicSummary(
-                KEY_COMMON_NETWORK_PROVIDER, R.string.global_preferences_network_provider_summary,
+                Constants.PREFS_KEY_NETWORK_PROVIDER, R.string.global_preferences_network_provider_summary,
                 networkIdName -> {
                     if (networkIdName == null)
                         return "-";
@@ -54,6 +53,6 @@ public class SettingsFragment extends PreferenceFragment {
     @Override
     public void onResume() {
         super.onResume();
-        preferenceChanged(KEY_COMMON_NETWORK_PROVIDER, Application.getInstance().prefsGetNetworkId().name());
+        preferenceChanged(Constants.PREFS_KEY_NETWORK_PROVIDER, Application.getInstance().prefsGetNetworkId(false).name());
     }
 }

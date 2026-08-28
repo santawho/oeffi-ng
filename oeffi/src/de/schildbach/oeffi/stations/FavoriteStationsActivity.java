@@ -41,7 +41,6 @@ import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.mapview.OeffiMapView;
-import de.schildbach.oeffi.network.NetworkPickerActivity;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.locationview.LocationView;
 import de.schildbach.oeffi.stations.list.FavoriteStationsAdapter;
@@ -164,8 +163,7 @@ public class FavoriteStationsActivity extends OeffiActivity
         setPrimaryColor(R.color.bg_action_bar_station_favorites);
         actionBar.setPrimaryTitle(R.string.stations_favorite_stations_title);
         if (this instanceof Main) {
-            actionBar.setTitlesOnClickListener(
-                    v -> NetworkPickerActivity.start(FavoriteStationsActivity.this));
+            actionBar.setTitlesOnClickListener(v -> startNetworkPicker());
         }
         actionBar.setBack(isRootActivity ? null : v -> finish());
         actionBar.addButton(R.drawable.ic_add_white_24dp, R.string.stations_favorite_stations_add_title)

@@ -84,7 +84,6 @@ import de.schildbach.oeffi.util.GeoUtils;
 import de.schildbach.oeffi.util.KeyWordMatcher;
 import de.schildbach.oeffi.util.LocationUtils;
 import de.schildbach.oeffi.util.TimeSpec;
-import de.schildbach.oeffi.network.NetworkPickerActivity;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.stations.list.JourneyClickListener;
 import de.schildbach.oeffi.stations.list.StationContextMenuItemListener;
@@ -113,8 +112,6 @@ import de.schildbach.pte.dto.QueryDeparturesResult;
 import de.schildbach.pte.dto.StationDepartures;
 import de.schildbach.pte.dto.SuggestLocationsResult;
 import okhttp3.HttpUrl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -309,7 +306,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         actionBar = getMyActionBar();
         setPrimaryColor(R.color.bg_action_bar_stations);
         actionBar.setPrimaryTitle(R.string.stations_activity_title);
-        actionBar.setTitlesOnClickListener(v -> NetworkPickerActivity.start(StationsActivity.this));
+        actionBar.setTitlesOnClickListener(v -> startNetworkPicker());
         actionBar.addProgressButton().setOnClickListener(v -> requestRefresh());
         // actionBar.addButton(R.drawable.ic_star_white_24dp, R.string.stations_options_favorites_title)
         //         .setOnClickListener(view -> FavoriteStationsActivity.start(StationsActivity.this));
@@ -411,7 +408,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         final Button locationSettingsButton = findViewById(R.id.stations_list_location_settings);
         locationSettingsButton.setOnClickListener(v -> startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)));
 
-        final OnClickListener selectNetworkListener = v -> NetworkPickerActivity.start(StationsActivity.this);
+        final OnClickListener selectNetworkListener = v -> startNetworkPicker();
         final Button networkSettingsButton = findViewById(R.id.stations_list_empty_network_settings);
         networkSettingsButton.setOnClickListener(selectNetworkListener);
         final Button missingCapabilityButton = findViewById(R.id.stations_network_missing_capability_button);

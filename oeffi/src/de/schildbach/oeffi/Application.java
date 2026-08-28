@@ -276,10 +276,6 @@ public class Application extends android.app.Application {
         return systemTimeZoneSelector;
     }
 
-    public TimeZoneSelector getPreferredNetworkTimeZoneSelector() {
-        return getPreferredNetworkTimeZoneSelector(prefsGetNetworkId());
-    }
-
     public TimeZoneSelector getPreferredNetworkTimeZoneSelector(final NetworkId network) {
         return new TimeZoneSelector(this, prefs.getString(Constants.PREFS_KEY_PREFERRED_TIMEZONE, "location"), network);
     }
@@ -288,8 +284,13 @@ public class Application extends android.app.Application {
         return NetworkId.DEUTSCHLANDTICKET;
     }
 
-    public NetworkId prefsGetNetworkId() {
-        final String networkName = prefs.getString(Constants.PREFS_KEY_NETWORK_PROVIDER, null);
+    public String getPrefsKeyNetwork(final boolean forOperations) {
+        return forOperations ? Constants.PREFS_KEY_OPERATIONS_NETWORK_PROVIDER : Constants.PREFS_KEY_NETWORK_PROVIDER;
+    }
+
+    public NetworkId prefsGetNetworkId(final boolean forOperations) {
+        final String prefsKey = getPrefsKeyNetwork(forOperations);
+        final String networkName = prefs.getString(prefsKey, null);
         if (networkName != null) {
             try {
                 return NetworkId.valueOf(networkName);
@@ -301,7 +302,7 @@ public class Application extends android.app.Application {
         if (defaultNetwork == null)
             return null;
 
-        prefs.edit().putString(Constants.PREFS_KEY_NETWORK_PROVIDER, defaultNetwork.name()).apply();
+        prefs.edit().putString(prefsKey, defaultNetwork.name()).apply();
         return defaultNetwork;
     }
 
@@ -508,8 +509,13 @@ public class Application extends android.app.Application {
     }
 
     private void migrateSelectedNetwork(final String fromName, final NetworkId to) {
-        if (fromName.equals(prefs.getString(Constants.PREFS_KEY_NETWORK_PROVIDER, null)))
-            prefs.edit().putString(Constants.PREFS_KEY_NETWORK_PROVIDER, to.name()).commit();
+        migrateSelectedNetwork(Constants.PREFS_KEY_NETWORK_PROVIDER, fromName, to);
+        migrateSelectedNetwork(Constants.PREFS_KEY_OPERATIONS_NETWORK_PROVIDER, fromName, to);
+    }
+
+    private void migrateSelectedNetwork(final String prefsKey, final String fromName, final NetworkId to) {
+        if (fromName.equals(prefs.getString(prefsKey, null)))
+            prefs.edit().putString(prefsKey, to.name()).commit();
     }
 
     public PackageInfo packageInfo() {

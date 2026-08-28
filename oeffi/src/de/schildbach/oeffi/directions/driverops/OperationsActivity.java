@@ -58,6 +58,10 @@ public class OperationsActivity extends DirectionsActivity {
         return intent;
     }
 
+    protected boolean isForOperations() {
+        return true;
+    }
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -28,8 +28,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.format.DateUtils;
 
-import de.schildbach.oeffi.network.NetworkPickerActivity;
-import de.schildbach.oeffi.network.NetworkResources;
 import de.schildbach.oeffi.preference.PreferenceFragment;
 import de.schildbach.oeffi.util.AppInstaller;
 import de.schildbach.oeffi.util.DialogBuilder;
@@ -41,8 +39,6 @@ import okhttp3.Callback;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -85,7 +81,7 @@ public abstract class OeffiMainActivity extends OeffiActivity {
         final int lastVersionCode = prefs.getInt(Constants.PREFS_KEY_LAST_VERSION, 0);
 
         if (prefsGetNetworkId() == null) {
-            NetworkPickerActivity.start(this);
+            startNetworkPicker();
 
             prefs.edit().putLong(Constants.PREFS_KEY_LAST_INFO_AT, now).apply();
 
@@ -467,7 +463,7 @@ public abstract class OeffiMainActivity extends OeffiActivity {
 
         public void onClick(final DialogInterface dialog, final int which) {
             if ("select-network".equals(link))
-                NetworkPickerActivity.start(OeffiMainActivity.this);
+                startNetworkPicker();
             else
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(link)));
         }

@@ -80,7 +80,6 @@ import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.util.TimeSpec.DepArr;
 import de.schildbach.oeffi.directions.list.QueryHistoryAdapter;
 import de.schildbach.oeffi.directions.list.QueryHistoryClickListener;
-import de.schildbach.oeffi.network.NetworkPickerActivity;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
 import de.schildbach.oeffi.stations.FavoriteUtils;
@@ -118,8 +117,6 @@ import okhttp3.HttpUrl;
 
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessageUnpacker;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.net.ssl.SSLException;
@@ -340,7 +337,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
                         });
             }
             // addShowMapButtonToActionBar();
-            actionBar.setTitlesOnClickListener(v -> NetworkPickerActivity.start(DirectionsActivity.this));
+            actionBar.setTitlesOnClickListener(v -> startNetworkPicker());
             buttonExpand = actionBar.addToggleButton(R.drawable.ic_expand_white_24dp,
                     R.string.directions_action_expand_title);
             buttonExpand.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -397,7 +394,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             });
 
             findViewById(R.id.directions_network_missing_capability_button)
-                    .setOnClickListener(v -> NetworkPickerActivity.start(DirectionsActivity.this));
+                    .setOnClickListener(v -> startNetworkPicker());
             connectivityWarningView = findViewById(R.id.directions_connectivity_warning_box);
 
             initLayoutTransitions();

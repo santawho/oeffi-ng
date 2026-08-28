@@ -75,9 +75,11 @@ public class NetworkPickerActivity extends OeffiActivity implements
         LocationHelper.Callback,
         NetworkClickListener,
         NetworkContextMenuItemListener {
+    private static String EXTRAS_FOR_OPERATIONS = NetworkPickerActivity.class.getName() + ".forOperations";
 
-    public static void start(final Context context) {
+    public static void start(final Context context, final boolean forOperations) {
         final Intent intent = new Intent(context, NetworkPickerActivity.class);
+        intent.putExtra(EXTRAS_FOR_OPERATIONS, forOperations);
         context.startActivity(intent);
     }
 
@@ -144,6 +146,7 @@ public class NetworkPickerActivity extends OeffiActivity implements
     private LocationHelper locationHelper;
     private Point deviceLocation;
     private Address deviceAddress;
+    private boolean isForOperations;
 
     private HandlerThread backgroundThread;
     private Handler backgroundHandler;
@@ -161,6 +164,9 @@ public class NetworkPickerActivity extends OeffiActivity implements
     protected void onCreate(final Bundle savedInstanceState) {
         EdgeToEdge.enable(this, Constants.STATUS_BAR_STYLE);
         super.onCreate(savedInstanceState);
+
+        final Intent intent = getIntent();
+        isForOperations = intent.getBooleanExtra(EXTRAS_FOR_OPERATIONS, false);
 
         locationHelper = new LocationHelper(this, this);
 
@@ -348,7 +354,7 @@ public class NetworkPickerActivity extends OeffiActivity implements
     @Override
     public void onNetworkClick(final NetworkListEntry.Network entry) {
         // persist in preferences
-        prefs.edit().putString(Constants.PREFS_KEY_NETWORK_PROVIDER, entry.id.name()).commit();
+        prefs.edit().putString(application.getPrefsKeyNetwork(isForOperations), entry.id.name()).commit();
         lastNetworks.addNetwork(entry.id);
         finish();
     }

@@ -1883,7 +1883,7 @@ public class NavigationNotification {
     private TimeZoneSelector getNetworkTimeZoneSelector() {
         NetworkId network = getNetwork();
         if (network == null)
-            network = context.prefsGetNetworkId();
+            network = context.prefsGetNetworkId(false);
         return context.getPreferredNetworkTimeZoneSelector(network);
     }
 

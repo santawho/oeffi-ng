@@ -75,6 +75,10 @@ public class OperationDetailsActivity extends TripDetailsActivity {
     private int colorTimeGood, colorTimeEarly, colorTimeDelay;
     private long thresholdEarlyMillis, thresholdDelayMillis;
 
+    protected boolean isForOperations() {
+        return true;
+    }
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

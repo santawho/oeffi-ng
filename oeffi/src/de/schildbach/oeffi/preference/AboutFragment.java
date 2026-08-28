@@ -119,7 +119,7 @@ public class AboutFragment extends PreferenceFragment {
 
         final Preference prefDataProvider = findPreference(KEY_ABOUT_DATA_PROVIDER);
         final StringBuilder providerText = new StringBuilder();
-        final NetworkProvider networkProvider = NetworkProviderFactory.provider(Application.getInstance().prefsGetNetworkId());
+        final NetworkProvider networkProvider = NetworkProviderFactory.provider(Application.getInstance().prefsGetNetworkId(false));
         final Provider.Description networkProviderDescription = networkProvider.getDescription();
         providerText.append(getString(R.string.about_data_provider_summary_pattern1, networkProviderDescription.getName()));
         final String networkProviderDescriptionUrl = networkProviderDescription.getUrl();

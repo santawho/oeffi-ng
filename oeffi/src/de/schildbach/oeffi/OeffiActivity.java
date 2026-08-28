@@ -70,6 +70,7 @@ import de.schildbach.oeffi.directions.driverops.OperationNotification;
 import de.schildbach.oeffi.directions.driverops.OperationsActivity;
 import de.schildbach.oeffi.directions.navigation.NavigationNotification;
 import de.schildbach.oeffi.mapview.OeffiMapView;
+import de.schildbach.oeffi.network.NetworkPickerActivity;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.network.NetworkResources;
 import de.schildbach.oeffi.plans.PlansPickerActivity;
@@ -951,8 +952,16 @@ public abstract class OeffiActivity extends AppCompatActivity
         return mapEnabled || !mapIsAtBottom;
     }
 
+    protected boolean isForOperations() {
+        return false;
+    }
+
+    protected void startNetworkPicker() {
+        NetworkPickerActivity.start(this, isForOperations());
+    }
+
     protected NetworkId prefsGetNetworkId() {
-        return Application.getInstance().prefsGetNetworkId();
+        return Application.getInstance().prefsGetNetworkId(isForOperations());
     }
 
     protected Set<Product> getNetworkDefaultProducts() {

@@ -767,7 +767,7 @@ public class OperationNotification {
     private TimeZoneSelector getNetworkTimeZoneSelector() {
         NetworkId network = getNetwork();
         if (network == null)
-            network = context.prefsGetNetworkId();
+            network = context.prefsGetNetworkId(true);
         return context.getPreferredNetworkTimeZoneSelector(network);
     }
 }

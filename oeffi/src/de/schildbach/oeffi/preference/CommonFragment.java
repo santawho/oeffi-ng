@@ -31,7 +31,7 @@ public class CommonFragment extends PreferenceFragment {
     public static class NetworkProviderActionHandler extends ActionHandler {
         @Override
         public boolean handleAction(final PreferenceActivity context, final String prefkey) {
-            NetworkPickerActivity.start(context);
+            NetworkPickerActivity.start(context, false);
             return true;
         }
     }
