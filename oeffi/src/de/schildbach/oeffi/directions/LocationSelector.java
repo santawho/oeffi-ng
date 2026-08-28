@@ -218,6 +218,7 @@ public class LocationSelector extends LinearLayout implements
     }
 
     private void setupContent() {
+        persist();
         ItemData[] items = null;
         final PrefState prefState = (PrefState) Objects.deserializeFromString(
                 preferences.getString(getPrefsStateKey(), null));
@@ -230,7 +231,9 @@ public class LocationSelector extends LinearLayout implements
             final boolean bIsPinned = b.isPinned;
             if (aIsPinned && !bIsPinned) return -1;
             if (!aIsPinned && bIsPinned) return 1;
-            return (int) (b.addedAtTime - a.addedAtTime);
+            final int timeDiff = (int) (b.addedAtTime - a.addedAtTime);
+            // pinned: first pinned comes first; not pinned: latest use comes first
+            return aIsPinned ? -timeDiff : timeDiff;
         });
         for (int n = 0; n < availableItems.length; n += 1) {
             final Item item = availableItems[n];
@@ -297,12 +300,43 @@ public class LocationSelector extends LinearLayout implements
         final ItemData itemData = item.itemData;
         if (itemData == null)
             return;
-        if (itemData.isPinned == isPinned)
+        if (itemData.isPinned == isPinned) {
+            // pinning not changed
+            if (isPinned) {
+                // pinned again, then move up one position in sort order
+                final int itemIndex = item.itemIndex;
+                final long itemAddedAtTime = itemData.addedAtTime;
+                long maxAddedAtTime = 0;
+                Item maxItem = null;
+                if (itemIndex > 0) {
+                    for (final Item other : availableItems) {
+                        final ItemData otherData = other.itemData;
+                        if (otherData == null || !otherData.isPinned)
+                            continue;
+                        final long addedAtTime = otherData.addedAtTime;
+                        if (addedAtTime < itemAddedAtTime
+                            && addedAtTime > maxAddedAtTime) {
+                            maxAddedAtTime = addedAtTime;
+                            maxItem = other;
+                        }
+                    }
+                    if (maxItem != null) {
+                        // swap times and finally sort again
+                        item.itemData.addedAtTime = maxItem.itemData.addedAtTime;
+                        maxItem.itemData.addedAtTime = itemAddedAtTime;
+
+                        stateIsChanged = true;
+                        setupContent();
+                    }
+                }
+            }
             return;
+        }
 
         itemData.isPinned = isPinned;
         setItemPinning(item, isPinned);
         stateIsChanged = true;
+        setupContent();
     }
 
     public void addLocation(final Location location, final long addedAtTime) {
@@ -314,8 +348,10 @@ public class LocationSelector extends LinearLayout implements
             if (itemData != null) {
                 final Location itemLocation = itemData.location;
                 if (itemLocation.equals(location)) {
-                    itemData.addedAtTime = addedAtTime;
-                    stateIsChanged = true;
+                    if (!itemData.isPinned) {
+                        itemData.addedAtTime = addedAtTime;
+                        stateIsChanged = true;
+                    }
                     return; // was already added
                 }
                 if (!itemData.isPinned

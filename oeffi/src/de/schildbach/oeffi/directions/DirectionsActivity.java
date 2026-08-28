@@ -1384,10 +1384,12 @@ public class DirectionsActivity extends OeffiMainActivity implements
         final MenuInflater inflater = contextMenu.getMenuInflater();
         final Menu menu = contextMenu.getMenu();
         inflater.inflate(R.menu.directions_location_selector_context, menu);
-        if (locationSelector.isPinned(location))
+        if (locationSelector.isPinned(location)) {
             menu.findItem(R.id.directions_location_selector_context_pin).setVisible(false);
-        else
+        } else {
             menu.findItem(R.id.directions_location_selector_context_unpin).setVisible(false);
+            menu.findItem(R.id.directions_location_selector_context_pin_up).setVisible(false);
+        }
         final MenuItem mapMenuItem = menu.findItem(R.id.directions_location_selector_context_map);
         if (location.hasCoord())
             StationContextMenu.prepareMapMenu(this, mapMenuItem.getSubMenu(), network, location);
@@ -1411,12 +1413,15 @@ public class DirectionsActivity extends OeffiMainActivity implements
             }
             if (itemId == R.id.directions_location_selector_context_pin) {
                 locationSelector.setPinned(location, true);
-                locationSelector.persist();
+                return true;
+            }
+            if (itemId == R.id.directions_location_selector_context_pin_up) {
+                // pin again
+                locationSelector.setPinned(location, true);
                 return true;
             }
             if (itemId == R.id.directions_location_selector_context_unpin) {
                 locationSelector.setPinned(location, false);
-                locationSelector.persist();
                 return true;
             }
 

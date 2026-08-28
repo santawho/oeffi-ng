@@ -375,6 +375,7 @@
 
     <!-- location selector -->
     <string name="directions_location_selector_context_pin_title">Anheften</string>
+    <string name="directions_location_selector_context_pin_up_title">Angeheftetes nach oben</string>
     <string name="directions_location_selector_context_unpin_title">Anheftung entfernen</string>
     <string name="directions_location_selector_context_set_from_title">Als Start</string>
     <string name="directions_location_selector_context_set_to_title">Als Ziel</string>
