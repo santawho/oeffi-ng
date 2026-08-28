@@ -332,7 +332,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
                 actionBar.addButton(R.drawable.ic_clear_white_24dp, R.string.directions_action_restart_planning_title)
                         .setOnClickListener(v -> {
                             // finish();
-                            final Intent newIntent = new Intent(this, DirectionsActivity.class);
+                            final Intent newIntent = new Intent(this, DirectionsActivity.this.getClass());
                             // newIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             newIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             newIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
