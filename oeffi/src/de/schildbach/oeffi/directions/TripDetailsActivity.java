@@ -2816,6 +2816,14 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 final double distanceOnPath = legC.geoDistanceOnPathInMeters(deviceCoord, deviceBearing, stopIndex);
                 final double directDistance = TripGeoUtils.geoDistanceInMeters(locationCoord, deviceCoord);
                 if (Math.abs(distanceOnPath) < Math.abs(directDistance)) {
+//                    final File downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+//                    try (final OutputStream outputStream = new FileOutputStream(new File(downloadDir, "geopath.gpx"))) {
+//                        legC.writeGpx(outputStream, deviceCoord, deviceBearing);
+//                    } catch (final IOException ioe) {
+//                        // ignore
+//                    }
+//                    final double d1 = legC.geoDistanceOnPathInMeters(deviceCoord, deviceBearing, stopIndex);
+//                    final double d2 = TripGeoUtils.geoDistanceInMeters(locationCoord, deviceCoord);
                     log.warn("unexpected distance order {} < {} at {}/{}",
                             distanceOnPath, directDistance, deviceCoord, deviceBearing);
                 }

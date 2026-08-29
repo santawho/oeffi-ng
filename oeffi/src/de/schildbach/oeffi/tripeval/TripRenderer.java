@@ -19,6 +19,8 @@ package de.schildbach.oeffi.tripeval;
 
 import android.annotation.SuppressLint;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -258,7 +260,7 @@ public class TripRenderer {
                 final boolean isGoingOpposite = TripGeoUtils.isReverseBearing(refBearing, sectionBearing);
                 final double refEndDistance = TripGeoUtils.geoDistanceInMeters(refPoint, endPoint);
                 final TripGeoUtils.PointAndDistance closestPoint =
-                        TripGeoUtils.findClosestPointOnLine(refPoint, startPoint, endPoint);
+                        TripGeoUtils.findClosestPointOnLine(refPoint, startPoint, endPoint, true);
                 final double distanceToLine = closestPoint.distanceInMeters;
                 if (isGoingOpposite) {
                     if (refStartDistance < stationRadiusInMeters && refStartDistance < bestReverseAtStationDistance) {
@@ -574,6 +576,16 @@ public class TripRenderer {
             if (geoPath == null)
                 return 0.0d;
             return geoPath.geoDistanceOnPathInMeters(point, getPointAndDistanceForStopIndex(stopIndex), bearing);
+        }
+
+        public void writeGpx(
+                final OutputStream outputStream,
+                final Point deviceCoord, final Double deviceBearing) throws IOException {
+            geoPath.writeGpx(
+                    outputStream,
+                    publicLeg,
+                    pointAndDistanceForStops,
+                    deviceCoord, deviceBearing);
         }
     }
 

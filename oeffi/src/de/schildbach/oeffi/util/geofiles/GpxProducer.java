@@ -39,10 +39,7 @@ public class GpxProducer extends GeoXmlProducer {
     }
 
     protected void writeTrip(final Trip trip, final OutputStream outputStream) throws IOException {
-        xs.setOutput(outputStream, StandardCharsets.UTF_8.name());
-        xs.startDocument(null, null);
-
-        xs.startTag(null, "gpx");
+        startGpxDocument(outputStream);
 
         xs.startTag(null, "metadata");
         final String tripName = application.getString(R.string.kml_trip_name,
@@ -66,16 +63,27 @@ public class GpxProducer extends GeoXmlProducer {
 
         xs.endTag(null, "gpx");
 
+        endGpxDocument(outputStream);
+    }
+
+    protected void startGpxDocument(final OutputStream outputStream) throws IOException {
+        xs.setOutput(outputStream, StandardCharsets.UTF_8.name());
+        xs.startDocument(null, null);
+
+        xs.startTag(null, "gpx");
+    }
+
+    protected void endGpxDocument(final OutputStream outputStream) throws IOException {
         xs.endDocument();
         xs.flush();
         outputStream.close();
     }
 
-    private void gpxWaypoint(final Location location, final String symbol) throws IOException {
+    protected void gpxWaypoint(final Location location, final String symbol) throws IOException {
         gpxPoint("wpt", location, symbol);
     }
 
-    private void gpxPoint(final String tagName, final Location location, final String symbol) throws IOException {
+    protected void gpxPoint(final String tagName, final Location location, final String symbol) throws IOException {
         final Point coord = location.coord;
         if (coord == null)
             return;
@@ -83,11 +91,11 @@ public class GpxProducer extends GeoXmlProducer {
         gpxPoint(tagName, location.coord, Formats.fullLocationName(location), symbol);
     }
 
-    private void gpxPoint(final String tagName, final Point point) throws IOException {
+    protected void gpxPoint(final String tagName, final Point point) throws IOException {
         gpxPoint(tagName, point, null, null);
     }
 
-    private void gpxPoint(final String tagName, final Point point, final String name, final String symbol) throws IOException {
+    protected void gpxPoint(final String tagName, final Point point, final String name, final String symbol) throws IOException {
         xs.startTag(null, tagName);
         xs.attribute(null, "lat", Double.toString(point.getLatAsDouble()));
         xs.attribute(null, "lon", Double.toString(point.getLonAsDouble()));
@@ -98,7 +106,7 @@ public class GpxProducer extends GeoXmlProducer {
         xs.endTag(null, tagName);
     }
 
-    private void gpxRteForPublicLeg(final Trip.Public leg) throws IOException {
+    protected void gpxRteForPublicLeg(final Trip.Public leg) throws IOException {
         final String typeName = ResourceUtil.getProductName(leg.line.product);
         final String legName = application.getString(R.string.kml_public_leg_name,
                 leg.line.label,
@@ -115,7 +123,7 @@ public class GpxProducer extends GeoXmlProducer {
         gpxRteForLocations(legName, typeName, locations);
     }
 
-    private void gpxRteForIndividualLeg(final Trip.Individual leg) throws IOException {
+    protected void gpxRteForIndividualLeg(final Trip.Individual leg) throws IOException {
         final int typeResId;
         switch (leg.type) {
             case WALK: typeResId =  R.string.kml_individual_type_walk; break;
@@ -134,7 +142,7 @@ public class GpxProducer extends GeoXmlProducer {
         gpxRteForPoints(legName, typeName, points);
     }
 
-    private void gpxRteForLocations(final String name, final String typeName, final List<Location> locations) throws IOException {
+    protected void gpxRteForLocations(final String name, final String typeName, final List<Location> locations) throws IOException {
         gpxRteStart(name, typeName);
         for (final Location location : locations)
             gpxRtePoint(location);
@@ -148,22 +156,22 @@ public class GpxProducer extends GeoXmlProducer {
         gpxRteEnd();
     }
 
-    private void gpxRteStart(final String name, final String typeName) throws IOException {
+    protected void gpxRteStart(final String name, final String typeName) throws IOException {
         xs.startTag(null, "rte");
         xmlTextNode("name", name);
         if (typeName != null)
             xmlTextNode("type", typeName);
     }
 
-    private void gpxRteEnd() throws IOException {
+    protected void gpxRteEnd() throws IOException {
         xs.endTag(null, "rte");
     }
 
-    private void gpxRtePoint(final Location location) throws IOException {
+    protected void gpxRtePoint(final Location location) throws IOException {
         gpxPoint("rtept", location, null);
     }
 
-    private void gpxRtePoint(final Point point) throws IOException {
+    protected void gpxRtePoint(final Point point) throws IOException {
         gpxPoint("rtept", point);
     }
 }
