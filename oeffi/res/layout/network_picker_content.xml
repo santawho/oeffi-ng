@@ -34,6 +34,18 @@
                 android:textSize="@dimen/font_size_large"
                 android:textStyle="normal" />
 
+            <EditText
+                android:id="@+id/network_picker_filter_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?attr/bg_shaded"
+                android:paddingHorizontal="@dimen/text_padding_horizontal_lax"
+                android:paddingVertical="@dimen/text_padding_vertical"
+                android:hint="@string/network_picker_filter_hint"
+                android:drawableStart="@drawable/ic_search_grey600_24dp"
+                android:drawablePadding="@dimen/text_padding_horizontal"
+                android:textSize="@dimen/font_size_large" />
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@android:id/list"
                 android:layout_width="match_parent"

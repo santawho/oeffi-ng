@@ -28,8 +28,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.EditText;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
@@ -135,6 +138,7 @@ public class NetworkPickerActivity extends OeffiActivity implements
     }
 
     private MyActionBar actionBar;
+    private EditText filterView;
     private RecyclerView listView;
     private NetworksAdapter listAdapter;
 
@@ -147,6 +151,7 @@ public class NetworkPickerActivity extends OeffiActivity implements
     private Point deviceLocation;
     private Address deviceAddress;
     private boolean isForOperations;
+    private String filterText;
 
     private HandlerThread backgroundThread;
     private Handler backgroundHandler;
@@ -186,6 +191,20 @@ public class NetworkPickerActivity extends OeffiActivity implements
         setPrimaryColor(R.color.bg_action_bar);
         actionBar.setPrimaryTitle(getTitle());
         addShowMapButtonToActionBar(true, false);
+
+        filterView = findViewById(R.id.network_picker_filter_text);
+        filterView.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(final Editable s) {
+                onFilterChanged(s.toString());
+            }
+
+            @Override
+            public void beforeTextChanged(final CharSequence s, final int start, final int count, final int after) { }
+
+            @Override
+            public void onTextChanged(final CharSequence s, final int start, final int before, final int count) { }
+        });
 
         listView = findViewById(android.R.id.list);
         listView.setLayoutManager(new LinearLayoutManager(this));
@@ -379,6 +398,26 @@ public class NetworkPickerActivity extends OeffiActivity implements
         return false;
     }
 
+    private void onFilterChanged(final String filterText) {
+        this.filterText = filterText == null ? null : filterText.toLowerCase();
+        generateIndex();
+    }
+
+    private boolean matchesFilter(final NetworkListEntry.Network entry) {
+        if (filterText == null || filterText.isEmpty())
+            return true;
+
+        final NetworkResources networkRes = NetworkResources.instance(this, entry.id);
+        return matchesFilter(networkRes.label) || matchesFilter(networkRes.comment);
+    }
+
+    private boolean matchesFilter(final String text) {
+        if (filterText == null || filterText.isEmpty())
+            return true;
+
+        return text != null && text.toLowerCase().contains(filterText);
+    }
+
     protected void updateFragments() {
         updateFragments(R.id.network_picker_list_frame);
     }
@@ -445,7 +484,7 @@ public class NetworkPickerActivity extends OeffiActivity implements
         boolean firstLastUsed = true;
         for (final NetworkId lastNetwork : lastNetworks) {
             final NetworkListEntry.Network networkEntry = (NetworkListEntry.Network) entriesMap.get(lastNetwork.name());
-            if (networkEntry != null && networkEntry.state.lessThan(NetworkId.State.unselectable)) {
+            if (networkEntry != null && networkEntry.state.lessThan(NetworkId.State.unselectable) && matchesFilter(networkEntry)) {
                 if (firstLastUsed) {
                     entries.add(new NetworkListEntry.Separator(getString(R.string.network_picker_separator_last)));
                     firstLastUsed = false;
@@ -460,7 +499,7 @@ public class NetworkPickerActivity extends OeffiActivity implements
         // favorite networks
         for (final NetworkId networkId : favoriteNetworks) {
             final NetworkListEntry.Network networkEntry = (NetworkListEntry.Network) entriesMap.get(networkId.name());
-            if (networkEntry != null && networkEntry.state.lessThan(NetworkId.State.unselectable)) {
+            if (networkEntry != null && networkEntry.state.lessThan(NetworkId.State.unselectable) && matchesFilter(networkEntry)) {
                 if (firstLastUsed) {
                     entries.add(new NetworkListEntry.Separator(getString(R.string.network_picker_separator_last)));
                     firstLastUsed = false;
@@ -476,7 +515,7 @@ public class NetworkPickerActivity extends OeffiActivity implements
         boolean firstSuggested = true;
         for (final Iterator<NetworkListEntry> i = entriesMap.values().iterator(); i.hasNext();) {
             final NetworkListEntry.Network networkEntry = (NetworkListEntry.Network) i.next();
-            if (isSuggested(networkEntry)) {
+            if (isSuggested(networkEntry) && matchesFilter(networkEntry)) {
                 if (firstSuggested) {
                     entries.add(new NetworkListEntry.Separator(getString(R.string.network_picker_separator_suggested)));
                     firstSuggested = false;
@@ -491,7 +530,7 @@ public class NetworkPickerActivity extends OeffiActivity implements
         boolean firstNearby = true;
         for (Iterator<NetworkListEntry> i = entriesMap.values().iterator(); i.hasNext();) {
             final NetworkListEntry.Network networkEntry = (NetworkListEntry.Network) i.next();
-            if (isNearby(networkEntry)) {
+            if (isNearby(networkEntry) && matchesFilter(networkEntry)) {
                 if (firstNearby) {
                     entries.add(new NetworkListEntry.Separator(getString(R.string.network_picker_separator_nearby)));
                     firstNearby = false;
@@ -504,23 +543,33 @@ public class NetworkPickerActivity extends OeffiActivity implements
 
         // rest
         String lastGroup = null;
+        boolean takeFullGroup = false;
+        String groupTitle = null;
         for (final NetworkListEntry entry : entriesMap.values()) {
             final NetworkListEntry.Network networkEntry = (NetworkListEntry.Network) entry;
             final String group = networkEntry.group;
             if (!group.equals(lastGroup)) {
                 if (NetworkId.Descriptor.GROUP_WORLD.equals(group)) {
-                    entries.add(new NetworkListEntry.Separator(getString(R.string.network_picker_separator_world)));
+                    groupTitle = getString(R.string.network_picker_separator_world);
                 } else if (NetworkId.Descriptor.GROUP_EUROPE.equals(group)) {
-                    entries.add(new NetworkListEntry.Separator(getString(R.string.network_picker_separator_europe)));
+                    groupTitle = getString(R.string.network_picker_separator_europe);
                 } else {
                     final String[] groupFields = group.split("-", 2);
-                    entries.add(new NetworkListEntry.Separator(
-                            new Locale(groupFields[0], groupFields[1]).getDisplayCountry()));
+                    groupTitle = new Locale(groupFields[0], groupFields[1]).getDisplayCountry();
                 }
+
+                takeFullGroup = matchesFilter(groupTitle);
                 lastGroup = group;
             }
 
-            entries.add(entry);
+            if (takeFullGroup || matchesFilter(networkEntry)) {
+                if (groupTitle != null) {
+                    entries.add(new NetworkListEntry.Separator(groupTitle));
+                    groupTitle = null;
+                }
+
+                entries.add(networkEntry);
+            }
         }
 
         listAdapter.setEntries(entries);

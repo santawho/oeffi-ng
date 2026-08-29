@@ -154,8 +154,10 @@
     </string>
 
     <!-- network picker -->
-    <string name="network_picker_firsttime_message">Because you are using Öffi for the first time, you need to pick a region that suits you well. You
-		can change this later.</string>
+    <string name="network_picker_firsttime_message">
+        Because you are using Öffi for the first time, you need to pick a region that suits you well.
+        You can change this later.</string>
+    <string name="network_picker_filter_hint">Find …</string>
     <string name="network_picker_entry_usage">%.1f MB\ninstalled</string>
     <string name="network_picker_entry_license">License:\n%s</string>
     <string name="network_picker_entry_state_alpha">alpha</string>
