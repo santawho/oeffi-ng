@@ -362,7 +362,8 @@ public class TripsOverviewActivity extends OeffiActivity {
                         publicLeg.departureStop.location, publicLeg.departureStop.plannedDepartureTime,
                         publicLeg.arrivalStop.location, publicLeg.arrivalStop.plannedArrivalTime,
                         false,
-                        false);
+                        false,
+                        getReturnHereIntent());
             }
         } else {
             if (isLongClick) {
@@ -385,7 +386,7 @@ public class TripsOverviewActivity extends OeffiActivity {
                     config.isAlternativeConnectionSearch = true;
                     TripDetailsActivity.startForResult(TripsOverviewActivity.this, DETAILS_NEW_NAVIGATION, network, trip, config);
                 } else {
-                    TripDetailsActivity.start(TripsOverviewActivity.this, network, trip, config);
+                    TripDetailsActivity.start(TripsOverviewActivity.this, network, trip, config, getReturnHereIntent());
                 }
 
                 final PTDate firstPublicLegDepartureTime = trip.getFirstPublicLegDepartureTime();

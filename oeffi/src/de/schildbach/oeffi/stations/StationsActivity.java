@@ -258,14 +258,18 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         context.startActivity(intent);
     }
 
-    public static void start(final Context context, final NetworkId networkId, final Location location, final Date time) {
-        final Intent intent = new Intent(context, StationsActivity.class);
+    public static void start(
+            final Context context,
+            final NetworkId networkId, final Location location, final Date time,
+            final Intent returnToIntent) {
+        Intent intent = new Intent(context, StationsActivity.class);
         if (networkId != null)
             intent.putExtra(StationsActivity.INTENT_EXTRA_NETWORK, networkId.name());
         if (location != null)
             intent.putExtra(StationsActivity.INTENT_EXTRA_LOCATION, location);
         if (time != null)
             intent.putExtra(StationsActivity.INTENT_EXTRA_TIME, time);
+        intent = addFinishingPendingIntent(context, intent, returnToIntent);
         context.startActivity(intent);
     }
 
@@ -1620,11 +1624,13 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         } else if (menuItemId == R.id.station_context_directions_from) {
             DirectionsActivity.start(StationsActivity.this,
                     network, station, null, null, null, null, false,
+                    getReturnHereIntent(),
                     Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             return true;
         } else if (menuItemId == R.id.station_context_directions_to) {
             DirectionsActivity.start(StationsActivity.this,
                     network, null, station, null, null, null, false,
+                    getReturnHereIntent(),
                     Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             return true;
         } else if (menuItemId == R.id.station_context_launcher_shortcut) {
@@ -1659,7 +1665,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                 entryLocation, entryTime,
                 null, null,
                 true,
-                false);
+                false,
+                getReturnHereIntent());
     }
 
     private final LocationListener locationListener = new LocationListener() {

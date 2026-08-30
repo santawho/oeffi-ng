@@ -22,6 +22,7 @@ import android.animation.AnimatorInflater;
 import android.animation.AnimatorSet;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager.TaskDescription;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -36,6 +37,7 @@ import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.text.format.DateUtils;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -112,8 +114,9 @@ import javax.annotation.Nullable;
 
 public abstract class OeffiActivity extends AppCompatActivity
         implements OeffiMapView.MapPointSelectionProvider {
-    protected static final String INTENT_EXTRA_LINK_ARGS = OeffiActivity.class.getName() + ".link_args";
+    public static final String INTENT_EXTRA_LINK_ARGS = OeffiActivity.class.getName() + ".link_args";
     public static final String INTENT_EXTRA_NETWORK_NAME = OeffiActivity.class.getName() + ".network";
+    public static final String INTENT_EXTRA_FINISHING_PENDINGINTENT = OeffiActivity.class.getName() + ".finishing_pendingintent";
 
     protected static final String PREFS_KEY_VOICE_CONTROL_MODE = "user_interface_voice_control_mode";
     protected static final String PREFS_KEY_VOICE_TOGGLE_STATE = "user_interface_voice_control_toggle";
@@ -734,6 +737,50 @@ public abstract class OeffiActivity extends AppCompatActivity
 
     public boolean isMainActivity() {
         return false;
+    }
+
+    @Override
+    public void finish() {
+        onFinishing(false);
+        super.finish();
+    }
+
+    @Override
+    public void finishAndRemoveTask() {
+        onFinishing(true);
+        super.finishAndRemoveTask();
+    }
+
+    public void onFinishing(final boolean finishTask) {
+        if (isFinishing())
+            return;
+
+        final Parcelable pendingIntentExtra = getIntent().getParcelableExtra(INTENT_EXTRA_FINISHING_PENDINGINTENT);
+        if (pendingIntentExtra instanceof PendingIntent) {
+            final PendingIntent pendingIntent = (PendingIntent) pendingIntentExtra;
+            try {
+                pendingIntent.send();
+            } catch (final PendingIntent.CanceledException pice) {
+                // ignore
+            }
+        }
+    }
+
+    public static Intent addFinishingPendingIntent(final Intent targetIntent, final PendingIntent pendingIntent) {
+        if (pendingIntent != null)
+            targetIntent.putExtra(INTENT_EXTRA_FINISHING_PENDINGINTENT, pendingIntent);
+        return targetIntent;
+    }
+
+    public static Intent addFinishingPendingIntent(final Context context, final Intent targetIntent, final Intent intent) {
+        if (intent == null)
+            return targetIntent;
+        final PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+        return addFinishingPendingIntent(targetIntent, pendingIntent);
+    }
+
+    protected Intent getReturnHereIntent() {
+        return null;
     }
 
     @Override

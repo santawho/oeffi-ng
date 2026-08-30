@@ -172,7 +172,7 @@ public class OperationsActivity extends DirectionsActivity {
             config.queryTripsRequestData = (QueryTripRunnable.TripRequestData) Objects.deserialize(serializedReloadRequest, true);
             setupTripDetailsRenderConfig(config);
             final List<Trip.Public> journeyLegs = Collections.singletonList(useTrip.getFirstPublicLeg());
-            OperationDetailsActivity.startOperation(OperationsActivity.this, network, journeyLegs, new Date(), 0);
+            OperationDetailsActivity.startOperation(OperationsActivity.this, network, journeyLegs, new Date(), getReturnHereIntent(), 0);
         });
     }
 

@@ -74,6 +74,7 @@ public class QueryJourneyRunnable implements Runnable {
     private final Location exitLocation;
     private final Date exitTime;
     private final boolean splitSubJourneys;
+    private final Intent returnToIntent;
 
     private final AtomicBoolean cancelled = new AtomicBoolean(false);
 
@@ -87,7 +88,8 @@ public class QueryJourneyRunnable implements Runnable {
             final Location entryLocation, final Date entryTime,
             final Location exitLocation, final Date exitTime,
             final boolean splitSubJourneys,
-            final boolean openInNewWindow) {
+            final boolean openInNewWindow,
+            final Intent returnToIntent) {
         final ProgressDialog progressDialog = ProgressDialog.show(parentActivity,
                 null, parentActivity.getString(R.string.directions_query_journey_progress),
                 true, true, dialog -> {
@@ -104,7 +106,8 @@ public class QueryJourneyRunnable implements Runnable {
                 entryLocation, entryTime,
                 exitLocation, exitTime,
                 splitSubJourneys,
-                openInNewWindow);
+                openInNewWindow,
+                returnToIntent);
 
         log.info("Executing: {}", queryJourneyRunnable);
 
@@ -121,10 +124,12 @@ public class QueryJourneyRunnable implements Runnable {
             final Location entryLocation, final Date entryTime,
             final Location exitLocation, final Date exitTime,
             final boolean splitSubJourneys,
-            final boolean openInNewWindow) {
+            final boolean openInNewWindow,
+            final Intent returnToIntent) {
         this.parentActivity = parentActivity;
         this.clickedView = clickedView;
         this.openInNewWindow = openInNewWindow;
+        this.returnToIntent = returnToIntent;
         this.splitSubJourneys = splitSubJourneys;
         this.res = parentActivity.getResources();
         this.progressDialog = progressDialog;
@@ -249,11 +254,13 @@ public class QueryJourneyRunnable implements Runnable {
                 OperationDetailsActivity.startOperation(
                         parentActivity,
                         networkProvider.id(), journeyLegs, new Date(),
+                        returnToIntent,
                         openInNewWindow ? Intent.FLAG_ACTIVITY_NEW_TASK : 0);
             } else {
                 TripDetailsActivity.startJourney(
                         parentActivity,
                         networkProvider.id(), journeyLegs, new Date(),
+                        returnToIntent,
                         openInNewWindow ? Intent.FLAG_ACTIVITY_NEW_TASK : 0);
             }
         } else if (result.status == QueryJourneyResult.Status.SERVICE_DOWN) {

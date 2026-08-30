@@ -199,8 +199,9 @@ public class DirectionsActivity extends OeffiMainActivity implements
             @Nullable final TimeSpec timeSpec,
             @Nullable final TripsOverviewActivity.RenderConfig renderConfig,
             final boolean autoGo,
+            final Intent returnToIntent,
             final int intentFlags) {
-        final Intent intent = new Intent(context, DirectionsActivity.class).addFlags(intentFlags);
+        Intent intent = new Intent(context, DirectionsActivity.class).addFlags(intentFlags);
         if (networkId != null)
             intent.putExtra(DirectionsActivity.INTENT_EXTRA_NETWORK_NAME, networkId.name());
         if (fromLocation != null)
@@ -215,6 +216,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             intent.putExtra(INTENT_EXTRA_RENDERCONFIG, renderConfig);
         if (autoGo)
             intent.putExtra(INTENT_EXTRA_AUTOGO, true);
+        intent = addFinishingPendingIntent(context, intent, returnToIntent);
         context.startActivity(intent);
     }
 
@@ -805,6 +807,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         if (trip != null) {
             TripDetailsActivity.start(DirectionsActivity.this,
                     network, trip,
+                    getReturnHereIntent(),
                     Intent.FLAG_ACTIVITY_CLEAR_TASK);
             finish();
         }
@@ -1444,7 +1447,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             if (itemId == R.id.directions_location_selector_context_show_departures) {
                 StationDetailsActivity.start(this, network, location, departureDate, null);
             } else if (itemId == R.id.directions_location_selector_context_nearby_departures) {
-                StationsActivity.start(this, network, location, departureDate);
+                StationsActivity.start(this, network, location, departureDate, getReturnHereIntent());
             }
             return true;
         });
@@ -1657,7 +1660,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             final TripDetailsActivity.RenderConfig config = new TripDetailsActivity.RenderConfig();
             config.queryTripsRequestData = (QueryTripRunnable.TripRequestData) Objects.deserialize(serializedReloadRequest, true);
             setupTripDetailsRenderConfig(config);
-            TripDetailsActivity.start(DirectionsActivity.this, network, useTrip, config);
+            TripDetailsActivity.start(DirectionsActivity.this, network, useTrip, config, getReturnHereIntent());
         });
     }
 

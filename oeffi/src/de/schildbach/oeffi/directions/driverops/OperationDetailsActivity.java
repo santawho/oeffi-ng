@@ -62,12 +62,13 @@ public class OperationDetailsActivity extends TripDetailsActivity {
             final NetworkId network,
             final List<Trip.Public> journeyLegs,
             final Date loadedAt,
+            final Intent returnToIntent,
             final int intentFlags) {
         final Trip trip = TripUtils.createTripFromJourneys(loadedAt, journeyLegs);
         final RenderConfig renderConfig = new RenderConfig();
         renderConfig.isJourney = true;
         renderConfig.isOperation = true;
-        final Intent intent = buildStartIntent(OperationDetailsActivity.class, context, network, trip, renderConfig);
+        final Intent intent = buildStartIntent(OperationDetailsActivity.class, context, network, trip, renderConfig, returnToIntent);
         intent.addFlags(intentFlags);
         context.startActivity(intent);
     }
@@ -805,7 +806,8 @@ public class OperationDetailsActivity extends TripDetailsActivity {
                     time = stop.getDepartureTime(true);
                 StationDetailsActivity.start(OperationDetailsActivity.this,
                         network, stop.location, time, null,
-                        shallShowChildActivitiesInNewTask());
+                        shallShowChildActivitiesInNewTask(),
+                        getReturnHereIntent());
                 return true;
             }
 

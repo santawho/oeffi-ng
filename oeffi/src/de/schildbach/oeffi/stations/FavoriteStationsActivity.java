@@ -290,7 +290,7 @@ public class FavoriteStationsActivity extends OeffiActivity
             StationDetailsActivity.start(FavoriteStationsActivity.this, stationNetwork, station, null, departures);
             return true;
         } else if (menuItemId == R.id.station_context_nearby_departures) {
-            StationsActivity.start(FavoriteStationsActivity.this, stationNetwork, station, null);
+            StationsActivity.start(FavoriteStationsActivity.this, stationNetwork, station, null, getReturnHereIntent());
             return true;
         } else if (menuItemId == R.id.station_context_rename_favorite) {
             adapter.renameEntry(adapterPosition);
@@ -305,11 +305,13 @@ public class FavoriteStationsActivity extends OeffiActivity
         } else if (menuItemId == R.id.station_context_directions_from) {
             DirectionsActivity.start(FavoriteStationsActivity.this,
                     network, station, null, null, null, null, false,
+                    getReturnHereIntent(),
                     Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             return true;
         } else if (menuItemId == R.id.station_context_directions_to) {
             DirectionsActivity.start(FavoriteStationsActivity.this,
                     network, null, station, null, null, null, false,
+                    getReturnHereIntent(),
                     Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             return true;
         } else if (menuItemId == R.id.station_context_launcher_shortcut) {

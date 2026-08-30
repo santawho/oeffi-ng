@@ -120,19 +120,21 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             final Context context, final NetworkId networkId,
             final Location station, final Date presetTime,
             final List<Departure> departures,
-            final boolean newTask) {
+            final boolean newTask,
+            final Intent returnToIntent) {
         if (station.type != LocationType.STATION) {
-            StationsActivity.start(context, networkId, station, presetTime);
+            StationsActivity.start(context, networkId, station, presetTime, returnToIntent);
             return;
         }
 
-        final Intent intent = StationDetailsActivity.fillIntent(
+        Intent intent = StationDetailsActivity.fillIntent(
                 new Intent(context, StationDetailsActivity.class),
                 networkId, station, presetTime);
         if (departures != null)
             intent.putExtra(StationDetailsActivity.INTENT_EXTRA_DEPARTURES, (Serializable) departures);
         if (newTask)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent = addFinishingPendingIntent(context, intent, returnToIntent);
         context.startActivity(intent);
     }
 
@@ -140,7 +142,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             final Context context, final NetworkId networkId,
             final Location station, final Date presetTime,
             final List<Departure> departures) {
-        start(context, networkId, station, presetTime, departures, false);
+        start(context, networkId, station, presetTime, departures, false, null);
     }
 
     public static Intent fillIntent(
@@ -240,7 +242,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         nearbyButton = actionBar.addButton(R.drawable.ic_radar_white_24dp, R.string.stations_station_details_action_explore_nearby_title);
         nearbyButton.setOnClickListener(v -> {
             if (selectedCoord != null)
-                StationsActivity.start(this, selectedNetwork, selectedCoord, presetTime);
+                StationsActivity.start(this, selectedNetwork, selectedCoord, presetTime, getReturnHereIntent());
         });
         nearbyButton.setVisibility(View.GONE);
         addShowMapButtonToActionBar(false, false);
@@ -391,7 +393,8 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                     selectedLocation, departureTime,
                     null, null,
                     true,
-                    false);
+                    false,
+                    getReturnHereIntent());
         }
     }
 
@@ -1087,7 +1090,8 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                             station, departure.plannedTime,
                             null, null,
                             true,
-                            false);
+                            false,
+                            getReturnHereIntent());
                 };
                 itemView.setOnClickListener(onClickListener);
 //                lineView.setClickable(true);

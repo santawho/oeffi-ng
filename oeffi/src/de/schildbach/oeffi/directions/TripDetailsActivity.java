@@ -194,12 +194,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final NetworkId network,
             final List<Trip.Public> journeyLegs,
             final Date loadedAt,
+            final Intent returnToIntent,
             final int intentFlags) {
         final Trip trip = TripUtils.createTripFromJourneys(loadedAt, journeyLegs);
         final RenderConfig renderConfig = new RenderConfig();
         renderConfig.isJourney = true;
         renderConfig.isOperation = false;
-        final Intent intent = buildStartIntent(TripDetailsActivity.class, context, network, trip, renderConfig);
+        final Intent intent = buildStartIntent(TripDetailsActivity.class, context, network, trip, renderConfig, returnToIntent);
         intent.addFlags(intentFlags);
         context.startActivity(intent);
     }
@@ -208,23 +209,26 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final Context context,
             final NetworkId network,
             final Trip trip,
+            final Intent returnToIntent,
             final int intentFlags) {
-        start(context, network, trip, new RenderConfig(), intentFlags);
+        start(context, network, trip, new RenderConfig(), returnToIntent, intentFlags);
     }
 
     public static void start(
             final Context context,
             final NetworkId network, final Trip trip,
-            final RenderConfig renderConfig) {
-        start(context, network, trip, renderConfig, 0);
+            final RenderConfig renderConfig,
+            final Intent returnToIntent) {
+        start(context, network, trip, renderConfig, returnToIntent, 0);
     }
 
     protected static void start(
             final Context context,
             final NetworkId network, final Trip trip,
             final RenderConfig renderConfig,
+            final Intent returnToIntent,
             final int intentFlags) {
-        final Intent intent = buildStartIntent(TripDetailsActivity.class, context, network, trip, renderConfig);
+        final Intent intent = buildStartIntent(TripDetailsActivity.class, context, network, trip, renderConfig, returnToIntent);
         intent.addFlags(intentFlags);
         context.startActivity(intent);
     }
@@ -233,16 +237,18 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final Activity context, final int requestCode,
             final NetworkId network, final Trip trip,
             final RenderConfig renderConfig) {
-        context.startActivityForResult(buildStartIntent(TripDetailsActivity.class, context, network, trip, renderConfig), requestCode);
+        context.startActivityForResult(buildStartIntent(TripDetailsActivity.class, context, network, trip, renderConfig, null), requestCode);
     }
 
     protected static Intent buildStartIntent(
             final Class<? extends TripDetailsActivity> activityClass, final Context context,
-            final NetworkId network, final Trip trip, final RenderConfig renderConfig) {
-        final Intent intent = new Intent(context, activityClass);
+            final NetworkId network, final Trip trip, final RenderConfig renderConfig,
+            final Intent returnToIntent) {
+        Intent intent = new Intent(context, activityClass);
         intent.putExtra(INTENT_EXTRA_NETWORK_NAME, requireNonNull(network).name());
         intent.putExtra(INTENT_EXTRA_TRIP, requireNonNull(trip));
         intent.putExtra(INTENT_EXTRA_RENDERCONFIG, requireNonNull(renderConfig));
+        intent = addFinishingPendingIntent(context, intent, returnToIntent);
         return intent;
     }
 
@@ -771,7 +777,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                             journeyLeg.departureStop.location, journeyLeg.departureStop.plannedDepartureTime,
                             journeyLeg.arrivalStop.location, journeyLeg.arrivalStop.plannedArrivalTime,
                             false,
-                            false);
+                            false,
+                            getReturnHereIntent());
                 }
             });
         }
@@ -1402,11 +1409,17 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     contextMenu.setOnMenuItemClickListener(item -> {
                         final int itemId = item.getItemId();
                         if (itemId == R.id.station_context_show_departures) {
-                            StationDetailsActivity.start(TripDetailsActivity.this, network, destinationLocation, leg.getArrivalTime(), null,
-                                    shallShowChildActivitiesInNewTask());
+                            StationDetailsActivity.start(
+                                    TripDetailsActivity.this,
+                                    network, destinationLocation, leg.getArrivalTime(), null,
+                                    shallShowChildActivitiesInNewTask(),
+                                    getReturnHereIntent());
                             return true;
                         } else if (itemId == R.id.station_context_nearby_departures) {
-                            StationsActivity.start(TripDetailsActivity.this, network, destinationLocation, leg.getArrivalTime());
+                            StationsActivity.start(
+                                    TripDetailsActivity.this,
+                                    network, destinationLocation, leg.getArrivalTime(),
+                                    getReturnHereIntent());
                             return true;
                         } else if (itemId == R.id.station_map_context_maps_internal) {
                             setMapVisible(true);
@@ -1440,7 +1453,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                         leg.departureStop.location, leg.departureStop.plannedDepartureTime,
                         leg.arrivalStop.location, leg.arrivalStop.plannedArrivalTime,
                         true,
-                        mustOpenActivityInNewTask());
+                        mustOpenActivityInNewTask(),
+                        getReturnHereIntent());
             };
             lineView.setOnClickListener(onClickListener);
             destinationView.setOnClickListener(onClickListener);
@@ -3062,13 +3076,19 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 if (time == null)
                     time = stop.getDepartureTime(true);
                 if (menuItemId == R.id.station_context_show_departures) {
-                    StationDetailsActivity.start(TripDetailsActivity.this, network, stop.location,
+                    StationDetailsActivity.start(
+                            TripDetailsActivity.this,
+                            network, stop.location,
                             time,
                             null,
-                            shallShowChildActivitiesInNewTask());
+                            shallShowChildActivitiesInNewTask(),
+                            getReturnHereIntent());
                     return true;
                 } else if (menuItemId == R.id.station_context_nearby_departures) {
-                    StationsActivity.start(TripDetailsActivity.this, network, stop.location, time);
+                    StationsActivity.start(
+                            TripDetailsActivity.this,
+                            network, stop.location, time,
+                            getReturnHereIntent());
                     return true;
                 } else if (menuItemId == R.id.station_context_navigate_to) {
                     startNavigationForJourneyToExit(stop);
@@ -3430,7 +3450,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final PTDate arrivalTime = stop.getArrivalTime();
         final TimeSpec time = new TimeSpec.Absolute(DepArr.DEPART,
                 arrivalTime != null ? arrivalTime.getTime() : stop.getDepartureTime().getTime());
-        DirectionsActivity.start(TripDetailsActivity.this,
+        DirectionsActivity.start(
+                TripDetailsActivity.this,
                 getRequestedNetwork(),
                 stop.location,
                 renderConfig.isJourney
@@ -3440,6 +3461,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 time,
                 getOverviewConfig(stop, isLegDeparture, currentJourneyRef, feederJourneyRef, connectionJourneyRef, time),
                 false,
+                getReturnHereIntent(),
                 Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         return true;
     }
@@ -3467,7 +3489,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             time = new TimeSpec.Absolute(DepArr.ARRIVE,
                     arrivalTime != null ? arrivalTime.getTime() : stop.getDepartureTime().getTime());
         }
-        DirectionsActivity.start(this,
+        DirectionsActivity.start(
+                this,
                 getRequestedNetwork(),
                 entry,
                 stop.location,
@@ -3475,6 +3498,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 time,
                 null,
                 false,
+                getReturnHereIntent(),
                 Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         return true;
     }
@@ -3502,7 +3526,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             time = new TimeSpec.Absolute(DepArr.DEPART,
                     departureTime != null ? departureTime.getTime() : stop.getArrivalTime().getTime());
         }
-        DirectionsActivity.start(this,
+        DirectionsActivity.start(
+                this,
                 getRequestedNetwork(),
                 null,
                 exit,
@@ -3510,6 +3535,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 time,
                 null,
                 false,
+                getReturnHereIntent(),
                 Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         return true;
     }

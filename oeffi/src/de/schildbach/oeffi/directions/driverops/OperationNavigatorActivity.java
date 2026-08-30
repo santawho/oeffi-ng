@@ -112,7 +112,7 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
             final String playAlarmNotificationTag,
             final boolean sameWindow) {
         renderConfig.isNavigation = true;
-        final Intent intent = TripDetailsActivity.buildStartIntent(OperationNavigatorActivity.class, context, network, trip, renderConfig);
+        final Intent intent = TripDetailsActivity.buildStartIntent(OperationNavigatorActivity.class, context, network, trip, renderConfig, null);
         intent.putExtra(INTENT_EXTRA_DELETEREQUEST, deleteRequest);
         if (setShowPage != null)
             intent.putExtra(INTENT_EXTRA_SHOWPAGE, setShowPage.pageNum);
@@ -131,6 +131,15 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
                 .build();
         intent.setData(uri);
         return intent;
+    }
+
+    @Override
+    protected Intent getReturnHereIntent() {
+        return buildStartIntent(
+                this,
+                network, tripRenderer.trip, renderConfig,
+                DELETEREQUEST_NOT_REQUESTED,
+                null, null, false);
     }
 
     private Runnable navigationRefreshRunnable;
