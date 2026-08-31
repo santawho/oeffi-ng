@@ -739,10 +739,18 @@ public abstract class OeffiActivity extends AppCompatActivity
         return false;
     }
 
+    public final void superFinish() {
+        super.finish();
+    }
+
     @Override
     public void finish() {
         onFinishing(false);
         super.finish();
+    }
+
+    public void superFinishAndRemoveTask() {
+        super.finishAndRemoveTask();
     }
 
     @Override
@@ -755,9 +763,8 @@ public abstract class OeffiActivity extends AppCompatActivity
         if (isFinishing())
             return;
 
-        final Parcelable pendingIntentExtra = getIntent().getParcelableExtra(INTENT_EXTRA_FINISHING_PENDINGINTENT);
-        if (pendingIntentExtra instanceof PendingIntent) {
-            final PendingIntent pendingIntent = (PendingIntent) pendingIntentExtra;
+        final PendingIntent pendingIntent = getFinishingPendingIntentFromIntent(getIntent());
+        if (pendingIntent != null) {
             try {
                 pendingIntent.send();
             } catch (final PendingIntent.CanceledException pice) {
@@ -770,6 +777,13 @@ public abstract class OeffiActivity extends AppCompatActivity
         if (pendingIntent != null)
             targetIntent.putExtra(INTENT_EXTRA_FINISHING_PENDINGINTENT, pendingIntent);
         return targetIntent;
+    }
+
+    public static PendingIntent getFinishingPendingIntentFromIntent(final Intent intent) {
+        final Parcelable pendingIntentExtra = intent.getParcelableExtra(INTENT_EXTRA_FINISHING_PENDINGINTENT);
+        if (pendingIntentExtra instanceof PendingIntent)
+            return (PendingIntent) pendingIntentExtra;
+        return null;
     }
 
     public static Intent addFinishingPendingIntent(final Context context, final Intent targetIntent, final Intent intent) {

@@ -19,6 +19,7 @@ package de.schildbach.oeffi.directions;
 
 import android.animation.LayoutTransition;
 import android.app.DatePickerDialog;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -175,6 +176,8 @@ public class DirectionsActivity extends OeffiMainActivity implements
     private final Handler handler = new Handler();
     private BroadcastReceiver connectivityReceiver;
     private BroadcastReceiver tickReceiver;
+
+    private boolean autoFinishOnRestart;
 
     private static final String INTENT_EXTRA_FROM_LOCATION = DirectionsActivity.class.getName() + ".from_location";
     private static final String INTENT_EXTRA_TO_LOCATION = DirectionsActivity.class.getName() + ".to_location";
@@ -795,7 +798,12 @@ public class DirectionsActivity extends OeffiMainActivity implements
         }
 
         if (autoGo && autoProvidedFrom && autoProvidedTo) {
-            handleAutoGo();
+            if (renderConfig.isAlternativeConnectionSearch) {
+                final PendingIntent returnToIntent = getFinishingPendingIntentFromIntent(getIntent());
+                if (returnToIntent != null)
+                    autoFinishOnRestart = true;
+            }
+            handleGo(false);
         }
     }
 
@@ -869,6 +877,14 @@ public class DirectionsActivity extends OeffiMainActivity implements
             loadSharedTripMessageText = null;
             loadSharedMessageTrip(messageText);
         }
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+
+        if (autoFinishOnRestart)
+            finish();
     }
 
     private long refTime;
