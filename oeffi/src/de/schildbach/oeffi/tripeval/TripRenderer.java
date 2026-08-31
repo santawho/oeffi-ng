@@ -257,7 +257,7 @@ public class TripRenderer {
                     continue;
                 }
                 final double sectionBearing = TripGeoUtils.getBearing(startPoint, endPoint);
-                final boolean isGoingOpposite = TripGeoUtils.isReverseBearing(refBearing, sectionBearing);
+                final boolean isGoingOpposite = refBearing != null && TripGeoUtils.isReverseBearing(refBearing, sectionBearing);
                 final double refEndDistance = TripGeoUtils.geoDistanceInMeters(refPoint, endPoint);
                 final TripGeoUtils.PointAndDistance closestPoint =
                         TripGeoUtils.findClosestPointOnLine(refPoint, startPoint, endPoint, true);
