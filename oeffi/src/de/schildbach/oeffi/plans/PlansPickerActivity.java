@@ -279,7 +279,7 @@ public class PlansPickerActivity extends OeffiMainActivity implements LocationHe
             openPlan(plan);
             return true;
         } else if (menuItemId == R.id.plans_picker_context_remove) {
-            Downloader.deleteDownload(plan.localFile);
+            Downloader.deleteDownload(plan.getPlanFile());
             final int position = listView.findViewHolderForItemId(plan.rowId).getAdapterPosition();
             if (position != RecyclerView.NO_POSITION)
                 listAdapter.setLoaded(position, false);
@@ -304,14 +304,14 @@ public class PlansPickerActivity extends OeffiMainActivity implements LocationHe
     }
 
     private void openPlan(final PlansAdapter.Plan plan) {
-        final File planFile = PlanContentProvider.getPlanFile(plan.planId);
+        final File planFile = plan.getPlanFile();
 
         if (planFile.exists()) {
             PlanActivity.start(this, plan.planId, null);
         } else {
             final Downloader downloader = new Downloader(application.getCacheDir());
             final HttpUrl remoteUrl = plan.url != null ? plan.url
-                    : URLs.getPlansBaseUrl().newBuilder().addEncodedPathSegment(PlanContentProvider.getPlanFilename(plan.planId)).build();
+                    : URLs.getPlansBaseUrl().newBuilder().addEncodedPathSegment(plan.getPlanFilename()).build();
             final CompletableFuture<Integer> download = downloader.download(
                     application.okHttpClient(), remoteUrl, planFile, false,
                     (contentRead, contentLength) -> runOnUiThread(() -> {

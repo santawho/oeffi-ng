@@ -21,6 +21,7 @@ import android.app.SearchManager;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.AbstractCursor;
 import android.database.Cursor;
 import android.database.CursorWrapper;
 import android.database.MatrixCursor;
@@ -88,14 +89,34 @@ public class PlanContentProvider extends ContentProvider {
     public static final String KEY_STATION_X = "station_x";
     public static final String KEY_STATION_Y = "station_y";
 
-    public static String getPlanFilename(final String planId) {
-        return planId + ".png";
+    public static final String URL_MARK_AS_PDF = "PDF";
+    public static final String FILENAME_EXTENSION_PDF = ".pdf";
+    public static final String FILENAME_EXTENSION_PNG = ".png";
+
+    public static boolean isPdfUrl(final String url) {
+        if (url == null)
+            return false;
+        if (url.equals(URL_MARK_AS_PDF))
+            return true;
+        return url.toLowerCase().endsWith(FILENAME_EXTENSION_PDF);
     }
 
-    public static File getPlanFile(final String planId) {
-        return new File(
-                Application.getInstance().getDir(Constants.PLANS_DIR, Context.MODE_PRIVATE),
-                getPlanFilename(planId));
+    public static HttpUrl getValidUrl(final String url) {
+        return url == null ? null : HttpUrl.parse(url);
+    }
+
+    public static String getPlanFilename(final String planId, final boolean isPDF) {
+        return planId + (isPDF ? FILENAME_EXTENSION_PDF : FILENAME_EXTENSION_PNG);
+    }
+
+    public static File getPlanFile(final String planId, final boolean isPDF) {
+        final Application application = Application.getInstance();
+        final File plansDir =
+//                application.getDir(Constants.PLANS_DIR, Context.MODE_PRIVATE);
+                new File(application.getCacheDir(), Constants.PLANS_DIR);
+        if (!plansDir.exists())
+            plansDir.mkdirs();
+        return new File(plansDir, getPlanFilename(planId, isPDF));
     }
 
     public static class PlanList extends LinkedList<String> {
@@ -235,7 +256,7 @@ public class PlanContentProvider extends ContentProvider {
             else
                 throw new IllegalArgumentException("Bad path: " + uri);
 
-            final Cursor cursor = readIndexIntoCursor(indexFile, id, q);
+            final MatrixCursor cursor = readIndexIntoCursor(indexFile, id, q);
             if (sortOrder != null) {
                 final String[] latLon = sortOrder.split(",");
                 final double lat = Double.parseDouble(latLon[0]);
@@ -257,7 +278,9 @@ public class PlanContentProvider extends ContentProvider {
         throw new IllegalArgumentException("Bad path: " + uri);
     }
 
-    private Cursor readIndexIntoCursor(final File indexFile, @Nullable final String idFilter,
+    private MatrixCursor readIndexIntoCursor(
+            final File indexFile,
+            @Nullable final String idFilter,
             @Nullable final String query) {
         if (indexFile.exists()) {
             try {
@@ -275,7 +298,9 @@ public class PlanContentProvider extends ContentProvider {
         }
     }
 
-    private Cursor readIndexIntoCursor(final InputStream is, @Nullable final String idFilter,
+    private MatrixCursor readIndexIntoCursor(
+            final InputStream is,
+            @Nullable final String idFilter,
             @Nullable final String query) throws IOException, NumberFormatException {
 
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
@@ -296,7 +321,7 @@ public class PlanContentProvider extends ContentProvider {
                 final Iterator<String> fieldIterator = Stream.of(line.split("\\|")).map(s -> !s.trim().isEmpty() ? s.trim() : null).iterator();
 
                 final String planId = fieldIterator.next();
-                final int rowId = planId.hashCode(); // FIXME colliding hashcodes
+                // final int rowId = planId.hashCode(); // FIXME colliding hashcodes
                 final String[] coords = fieldIterator.next().split(",");
                 final Point centerLocation = Point.fromDouble(Double.parseDouble(coords[0]), Double.parseDouble(coords[1]));
                 final Date planValidFrom = parse(fieldIterator.next(), dateFormat);
@@ -315,7 +340,7 @@ public class PlanContentProvider extends ContentProvider {
 
                 if (filterMatch) {
                     cursor.newRow()
-                            .add(rowId)
+                            .add(cursor.getCount()) // rowId
                             .add(planId)
                             .add(planName)
                             .add(centerLocation.getLatAs1E6())
@@ -433,15 +458,23 @@ public class PlanContentProvider extends ContentProvider {
     private static class DistanceSortingCursorWrapper extends CursorWrapper {
         private List<Integer> mapping;
         private int pos = -1;
-        private final Map<String, Boolean> planFileExistsMap = new HashMap<>();
+        private static final int FILE_NOT_EXISTS = 0;
+        private static final int PNG_EXISTS = 1;
+        private static final int PDF_EXISTS = 2;
+        private final Map<String, Integer> planFileExistsMap = new HashMap<>();
 
         private boolean planFileExists(final String planId) {
-            Boolean b = planFileExistsMap.get(planId);
-            if (b != null)
-                return b;
-            b = getPlanFile(planId).exists();
-            planFileExistsMap.put(planId, b);
-            return b;
+            Integer n = planFileExistsMap.get(planId);
+            if (n != null)
+                return n != 0;
+            if (getPlanFile(planId, false).exists())
+                n = PNG_EXISTS;
+            else if (getPlanFile(planId, true).exists())
+                n = PDF_EXISTS;
+            else
+                n = FILE_NOT_EXISTS;
+            planFileExistsMap.put(planId, n);
+            return n != 0;
         }
 
         public DistanceSortingCursorWrapper(

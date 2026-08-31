@@ -37,7 +37,22 @@ public class TiledImageDrawable extends Drawable {
 
     private static final Paint PAINT = new Paint(Paint.FILTER_BITMAP_FLAG);
 
-    public TiledImageDrawable(final Bitmap nwBitmap, final Bitmap neBitmap, final Bitmap swBitmap,
+    public TiledImageDrawable(final Bitmap bitmap) {
+        width = bitmap.getWidth();
+        height = bitmap.getHeight();
+        wWidth = width / 2;
+        nHeight = height / 2;
+
+        nwBitmap = Bitmap.createBitmap(bitmap, 0, 0, wWidth, nHeight);
+        neBitmap = Bitmap.createBitmap(bitmap, wWidth, 0, width - wWidth, nHeight);
+        swBitmap = Bitmap.createBitmap(bitmap, 0, nHeight, wWidth, height - nHeight);
+        seBitmap = Bitmap.createBitmap(bitmap, wWidth, nHeight, width - wWidth, height - nHeight);
+    }
+
+    public TiledImageDrawable(
+            final Bitmap nwBitmap,
+            final Bitmap neBitmap,
+            final Bitmap swBitmap,
             final Bitmap seBitmap) {
         this.nwBitmap = nwBitmap;
         this.neBitmap = neBitmap;

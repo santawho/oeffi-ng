@@ -93,7 +93,8 @@ public class PlanViewHolder extends RecyclerView.ViewHolder {
 
         disclaimerView.setText(plan.disclaimer);
 
-        loadedView.setVisibility(plan.localFile.exists() ? View.VISIBLE : View.GONE);
+        final boolean planFileExists = plan.getPlanFile().exists();
+        loadedView.setVisibility(planFileExists ? View.VISIBLE : View.GONE);
 
         progressView.setVisibility(View.INVISIBLE);
 
@@ -118,7 +119,7 @@ public class PlanViewHolder extends RecyclerView.ViewHolder {
         contextButton.setOnClickListener(v -> {
             final PopupMenu contextMenu = new PopupMenu(context, v);
             contextMenu.inflate(R.menu.plans_picker_context);
-            contextMenu.getMenu().findItem(R.id.plans_picker_context_remove).setVisible(plan.localFile.exists());
+            contextMenu.getMenu().findItem(R.id.plans_picker_context_remove).setVisible(planFileExists);
             contextMenu.setOnMenuItemClickListener(item -> contextMenuItemListener.onPlanContextMenuItemClick(plan,
                     item.getItemId()));
             contextMenu.show();

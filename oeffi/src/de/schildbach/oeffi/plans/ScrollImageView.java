@@ -35,7 +35,7 @@ import de.schildbach.oeffi.util.UpGestureDetector;
 
 import java.util.List;
 
-public class ScrollImageView extends ImageView implements Runnable {
+public class ScrollImageView extends androidx.appcompat.widget.AppCompatImageView implements Runnable {
     private OnMoveListener onMoveListener;
     private StationsAware stationsAware;
 

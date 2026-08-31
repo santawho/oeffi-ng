@@ -24,17 +24,22 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.pdf.PdfRenderer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 import android.widget.ViewAnimator;
-import androidx.activity.ComponentActivity;
+
 import androidx.activity.EdgeToEdge;
 import androidx.activity.SystemBarStyle;
 import androidx.annotation.NonNull;
@@ -65,8 +70,6 @@ import de.schildbach.pte.dto.Point;
 import de.schildbach.pte.dto.QueryDeparturesResult;
 import de.schildbach.pte.dto.StationDepartures;
 import okhttp3.HttpUrl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -181,13 +184,17 @@ public class PlanActivity extends OeffiActivity {
         final String planId = requireNonNull(getIntent().getExtras().getString(INTENT_EXTRA_PLAN_ID), () ->
                 "Required intent extra: " + INTENT_EXTRA_PLAN_ID);
         final Uri planContentUri = PlanContentProvider.planUri(planId);
-        final File planFile = PlanContentProvider.getPlanFile(planId);
 
         final Cursor cursor = getContentResolver().query(planContentUri, null, null, null, null);
         cursor.moveToFirst();
-        final String planUrlStr = cursor
-                .getString(cursor.getColumnIndexOrThrow(PlanContentProvider.KEY_PLAN_REMOTE_URL));
+        final String planUrlStr = cursor.getString(cursor.getColumnIndexOrThrow(PlanContentProvider.KEY_PLAN_REMOTE_URL));
         cursor.close();
+
+        final boolean isPDF = PlanContentProvider.isPdfUrl(planUrlStr);
+        final HttpUrl planUrl = PlanContentProvider.getValidUrl(planUrlStr);
+        final File planFile = PlanContentProvider.getPlanFile(planId, isPDF);
+        final HttpUrl remoteUrl = planUrl != null ? planUrl
+                : URLs.getPlansBaseUrl().newBuilder().addEncodedPathSegment(PlanContentProvider.getPlanFilename(planId, isPDF)).build();
 
         stations.clear();
         final Cursor stationsCursor = getContentResolver().query(PlanContentProvider.stationsUri(planId), null, null,
@@ -213,18 +220,16 @@ public class PlanActivity extends OeffiActivity {
         }
 
         final Downloader downloader = new Downloader(application.getCacheDir());
-        final HttpUrl remoteUrl = planUrlStr != null ? HttpUrl.parse(planUrlStr)
-                : URLs.getPlansBaseUrl().newBuilder().addEncodedPathSegment(PlanContentProvider.getPlanFilename(planId)).build();
         final CompletableFuture<Integer> download = downloader.download(application.okHttpClient(), remoteUrl, planFile);
 
         download.whenComplete((status, t) -> {
             if (t == null && status == HttpURLConnection.HTTP_OK) {
-                runOnUiThread(() -> loadPlan(planFile));
+                runOnUiThread(() -> loadPlan(isPDF, planFile));
             }
         });
 
         if (planFile.exists())
-            loadPlan(planFile);
+            loadPlan(isPDF, planFile);
 
         setDefaultKeyMode(DEFAULT_KEYS_SEARCH_LOCAL);
     }
@@ -345,24 +350,47 @@ public class PlanActivity extends OeffiActivity {
         LOWMEM_OPTIONS.inDither = true;
     }
 
-    private void loadPlan(final File planFile) {
+    private void loadPlan(final boolean isPDF, final File planFile) {
         try {
-            final Bitmap bitmap = BitmapFactory.decodeFile(planFile.getPath(), LOWMEM_OPTIONS);
-            if (bitmap == null)
-                throw new IOException("Cannot decode bitmap from file descriptor");
+            final Bitmap bitmap;
+            if (isPDF) {
+                try (final ParcelFileDescriptor parcelFileDescriptor =
+                             ParcelFileDescriptor.open(planFile, ParcelFileDescriptor.MODE_READ_ONLY)) {
+                    final PdfRenderer pdfRenderer = new PdfRenderer(parcelFileDescriptor);
+                    final int pageCount = pdfRenderer.getPageCount();
+                    int maxWidth = 0;
+                    int heightSum = 0;
+                    for (int pageIndex = 0; pageIndex < pageCount; pageIndex += 1) {
+                        final PdfRenderer.Page page = pdfRenderer.openPage(pageIndex);
+                        final int width = page.getWidth();
+                        final int height = page.getHeight();
+                        if (width > maxWidth)
+                            maxWidth = width;
+                        heightSum += height;
+                    }
+                    double scale = 3600d / maxWidth;
+                    if ((int) (scale * heightSum) > 6000)
+                        scale = 6000d / heightSum;
+                    bitmap = Bitmap.createBitmap((int) (scale * maxWidth), (int) (scale * heightSum), Bitmap.Config.ARGB_8888);
+                    int yPos = 0;
+                    for (int pageIndex = 0; pageIndex < pageCount; pageIndex += 1) {
+                        final PdfRenderer.Page page = pdfRenderer.openPage(pageIndex);
+                        final int height = (int) (scale * page.getHeight());
+                        final int width = (int) (scale * page.getWidth());
+                        final int bottom = yPos + height;
+                        final Rect destClip = new Rect(0, yPos, width, bottom);
+                        page.render(bitmap, destClip, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+                        yPos = bottom;
+                    }
+                }
+            } else {
+                bitmap = BitmapFactory.decodeFile(planFile.getPath(), LOWMEM_OPTIONS);
+                if (bitmap == null)
+                    throw new IOException("Cannot decode bitmap from file descriptor");
+            }
 
-            final int height = bitmap.getHeight();
-            final int halfHeight = height / 2;
-            final int width = bitmap.getWidth();
-            final int halfWidth = width / 2;
-
-            final Bitmap nwBitmap = Bitmap.createBitmap(bitmap, 0, 0, halfWidth, halfHeight);
-            final Bitmap neBitmap = Bitmap.createBitmap(bitmap, halfWidth, 0, width - halfWidth, halfHeight);
-            final Bitmap swBitmap = Bitmap.createBitmap(bitmap, 0, halfHeight, halfWidth, height - halfHeight);
-            final Bitmap seBitmap = Bitmap.createBitmap(bitmap, halfWidth, halfHeight, width - halfWidth,
-                    height - halfHeight);
-            final TiledImageDrawable drawable = new TiledImageDrawable(nwBitmap, neBitmap, swBitmap, seBitmap);
-
+//            final Drawable drawable = new TiledImageDrawable(bitmap);
+            final Drawable drawable = new BitmapDrawable(getResources(), bitmap);
             plan.setImageDrawable(drawable);
 
             updateScale();

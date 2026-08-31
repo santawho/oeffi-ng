@@ -29,7 +29,6 @@ import android.view.ViewGroup;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.URLs;
 import de.schildbach.oeffi.plans.PlanContentProvider;
@@ -228,7 +227,6 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
         final String networkLogo = cursor.getString(networkLogoColumn);
         final String urlStr = cursor.getString(urlColumn);
         final Point centerLocation = Point.from1E6(cursor.getInt(latColumn), cursor.getInt(lonColumn));
-        final HttpUrl url = urlStr != null ? HttpUrl.parse(urlStr) : null;
         NetworkId networkId = null;
         if (networkLogo != null) {
             try {
@@ -239,8 +237,7 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
         }
         final Plan newPlan = new Plan(
                 rowId, planId, name, disclaimer,
-                validFrom, networkId, url,
-                PlanContentProvider.getPlanFile(planId),
+                validFrom, networkId, urlStr,
                 centerLocation,
                 PlanContentProvider.isPlanFavorite(planId));
         plansByPosition.put(position, newPlan);
@@ -257,16 +254,16 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
         public final Date validFrom;
         @Nullable
         public final NetworkId networkId;
+        public Boolean isPDF;
         @Nullable
         public final HttpUrl url;
-        public final File localFile;
         public final Point centerPosition;
         public boolean isFavorite;
         public Drawable thumb;
 
         private Plan(
                 final long rowId, final String planId, final String name, final String disclaimer,
-                final Date validFrom, final NetworkId networkId, final HttpUrl url, final File localFile,
+                final Date validFrom, final NetworkId networkId, final String url,
                 final Point centerPosition, final boolean isFavorite) {
             this.rowId = rowId;
             this.planId = requireNonNull(planId);
@@ -274,14 +271,22 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
             this.disclaimer = disclaimer;
             this.validFrom = validFrom;
             this.networkId = networkId;
-            this.url = url;
-            this.localFile = requireNonNull(localFile);
+            this.isPDF = PlanContentProvider.isPdfUrl(url);
+            this.url = PlanContentProvider.getValidUrl(url);
             this.centerPosition = centerPosition;
             this.isFavorite = isFavorite;
         }
 
         public String getId() {
             return planId;
+        }
+
+        public File getPlanFile() {
+            return PlanContentProvider.getPlanFile(planId, isPDF);
+        }
+
+        public String getPlanFilename() {
+            return PlanContentProvider.getPlanFilename(planId, isPDF);
         }
     }
 }
