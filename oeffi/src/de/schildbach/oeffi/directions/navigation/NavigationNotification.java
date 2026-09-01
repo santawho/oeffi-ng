@@ -2698,6 +2698,8 @@ public class NavigationNotification {
             builder.append(prevChar);
             for (int pos = 1; pos < lineName.length(); ++pos) {
                 final char ch = lineName.charAt(pos);
+                if (ch == '-')
+                    continue;
                 if (Character.isAlphabetic(ch)) {
                     if (!Character.isSpaceChar(prevChar))
                         builder.append(Character.isAlphabetic(prevChar) ? '-' : ' ');
