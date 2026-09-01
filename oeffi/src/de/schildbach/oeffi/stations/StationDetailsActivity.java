@@ -211,6 +211,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
     private View headerView;
     private TextView nameView;
+    private TextView timeView;
     private TextView idView;
     private NestedScrollView linesGroupScroll;
     private LinearLayout linesGroup;
@@ -321,7 +322,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         }
 
         if (presetTime != null) {
-            final TextView timeView = findViewById(R.id.stations_station_details_time_text);
+            timeView = findViewById(R.id.stations_station_details_time_text);
             timeView.setVisibility(View.VISIBLE);
             final long presetTimeMs = presetTime.getTime();
             final String text = String.format("%s %s",
@@ -1008,8 +1009,19 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             this.station = station;
             this.departure = departure;
 
-            final boolean refIsNow = context.presetTime == null;
-            final long referenceTime = (refIsNow ? new Date() : context.presetTime).getTime();
+            final long now = new Date().getTime();
+            final boolean refIsNow;
+            final long referenceTime;
+            if (context.presetTime == null) {
+                refIsNow = true;
+                referenceTime = now;
+            } else {
+                final long pt = context.presetTime.getTime();
+                refIsNow = pt <= now;
+                referenceTime = refIsNow ? now : pt;
+            }
+
+            timeView.setTextColor(getColor(refIsNow ? R.color.fg_highlighted : R.color.fg_significant));
 
             final PTDate predictedTime = departure.predictedTime;
             final PTDate plannedTime = departure.plannedTime;
