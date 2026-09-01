@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
@@ -380,6 +381,9 @@ public class PlanActivity extends OeffiActivity {
                             final int width = (int) (scale * page.getWidth());
                             final int bottom = yPos + height;
                             final Rect destClip = new Rect(0, yPos, width, bottom);
+                            final Canvas canvas = new Canvas(bitmap);
+                            canvas.clipRect(destClip);
+                            canvas.drawColor(Color.WHITE);
                             page.render(bitmap, destClip, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
                             yPos = bottom;
                         }
