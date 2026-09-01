@@ -361,12 +361,13 @@ public class PlanActivity extends OeffiActivity {
                     int maxWidth = 0;
                     int heightSum = 0;
                     for (int pageIndex = 0; pageIndex < pageCount; pageIndex += 1) {
-                        final PdfRenderer.Page page = pdfRenderer.openPage(pageIndex);
-                        final int width = page.getWidth();
-                        final int height = page.getHeight();
-                        if (width > maxWidth)
-                            maxWidth = width;
-                        heightSum += height;
+                        try (final PdfRenderer.Page page = pdfRenderer.openPage(pageIndex)) {
+                            final int width = page.getWidth();
+                            final int height = page.getHeight();
+                            if (width > maxWidth)
+                                maxWidth = width;
+                            heightSum += height;
+                        }
                     }
                     double scale = 3600d / maxWidth;
                     if ((int) (scale * heightSum) > 6000)
@@ -374,13 +375,14 @@ public class PlanActivity extends OeffiActivity {
                     bitmap = Bitmap.createBitmap((int) (scale * maxWidth), (int) (scale * heightSum), Bitmap.Config.ARGB_8888);
                     int yPos = 0;
                     for (int pageIndex = 0; pageIndex < pageCount; pageIndex += 1) {
-                        final PdfRenderer.Page page = pdfRenderer.openPage(pageIndex);
-                        final int height = (int) (scale * page.getHeight());
-                        final int width = (int) (scale * page.getWidth());
-                        final int bottom = yPos + height;
-                        final Rect destClip = new Rect(0, yPos, width, bottom);
-                        page.render(bitmap, destClip, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-                        yPos = bottom;
+                        try (final PdfRenderer.Page page = pdfRenderer.openPage(pageIndex)) {
+                            final int height = (int) (scale * page.getHeight());
+                            final int width = (int) (scale * page.getWidth());
+                            final int bottom = yPos + height;
+                            final Rect destClip = new Rect(0, yPos, width, bottom);
+                            page.render(bitmap, destClip, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+                            yPos = bottom;
+                        }
                     }
                 }
             } else {
