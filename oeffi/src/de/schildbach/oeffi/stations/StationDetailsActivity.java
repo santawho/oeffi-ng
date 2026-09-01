@@ -321,8 +321,8 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                     loadProductFilter()));
         }
 
+        timeView = findViewById(R.id.stations_station_details_time_text);
         if (presetTime != null) {
-            timeView = findViewById(R.id.stations_station_details_time_text);
             timeView.setVisibility(View.VISIBLE);
             final long presetTimeMs = presetTime.getTime();
             final String text = String.format("%s %s",
