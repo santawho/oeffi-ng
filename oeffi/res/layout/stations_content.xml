@@ -49,6 +49,11 @@
                             android:text="@string/stations_connectivity_warning"
                             android:visibility="gone" />
 
+                        <include layout="@layout/find_edittext"
+                            android:id="@+id/stations_filter_text"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+
                         <LinearLayout
                             android:visibility="gone"
                             android:orientation="horizontal"

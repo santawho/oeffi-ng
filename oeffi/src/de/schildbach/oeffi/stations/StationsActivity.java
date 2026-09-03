@@ -79,6 +79,7 @@ import de.schildbach.oeffi.StationsAware;
 import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.directions.QueryJourneyRunnable;
 import de.schildbach.oeffi.mapview.OeffiMapView;
+import de.schildbach.oeffi.util.FilterSearchView;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GeoUtils;
 import de.schildbach.oeffi.util.KeyWordMatcher;
@@ -181,7 +182,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private TextView disclaimerSourceView;
     private View filterActionButton;
     private ViewGroup locationProvidersView;
-    private ViewGroup searchBoxView;
+    private ViewGroup legacySearchBoxView;
+    private FilterSearchView newFilterSearchView;
     private EditText searchEditView;
     private LocationView locationView;
     private SwipeRefreshLayout swipeRefresh;
@@ -320,26 +322,47 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                     if (DO_FILTER_BY_SEARCH_ON_NETWORK) {
                         onSearchRequested();
                     } else {
-                        if (searchBoxView.getVisibility() == View.VISIBLE) {
+                        if (legacySearchBoxView.getVisibility() == View.VISIBLE) {
                             final Editable text = searchEditView.getText();
                             if (text == null || text.length() == 0) {
                                 ViewUtils.setVisibility(locationView, true);
-                                ViewUtils.setVisibility(searchBoxView, false);
+                                ViewUtils.setVisibility(legacySearchBoxView, false);
+                                ViewUtils.setVisibility(newFilterSearchView, false);
+                            }
+                        } else if (newFilterSearchView.getVisibility() == View.VISIBLE) {
+                            final Editable text = newFilterSearchView.getText();
+                            if (text == null || text.length() == 0) {
+                                ViewUtils.setVisibility(locationView, true);
+                                ViewUtils.setVisibility(legacySearchBoxView, false);
+                                ViewUtils.setVisibility(newFilterSearchView, false);
                             }
                         } else {
                             ViewUtils.setVisibility(locationView, false);
-                            ViewUtils.setVisibility(searchBoxView, true);
+
+                            // ViewUtils.setVisibility(legacySearchBoxView, true);
+                            ViewUtils.setVisibility(newFilterSearchView, true);
                         }
                     }
                 });
-        searchBoxView = findViewById(R.id.stations_search_box);
-        ViewUtils.setVisibility(searchBoxView, false);
+        newFilterSearchView = findViewById(R.id.stations_filter_text);
+        newFilterSearchView.setHint(R.string.stations_filter_hint);
+        ViewUtils.setVisibility(newFilterSearchView, false);
+        if (!DO_FILTER_BY_SEARCH_ON_NETWORK) {
+            newFilterSearchView.setTextChangeListener(this::setListFilter);
+            newFilterSearchView.setOnClearListener(v -> {
+                ViewUtils.setVisibility(locationView, true);
+                ViewUtils.setVisibility(legacySearchBoxView, false);
+                ViewUtils.setVisibility(newFilterSearchView, false);
+            });
+        }
+        legacySearchBoxView = findViewById(R.id.stations_search_box);
+        ViewUtils.setVisibility(legacySearchBoxView, false);
         ViewUtils.setVisibility(findViewById(R.id.stations_search_text), DO_FILTER_BY_SEARCH_ON_NETWORK);
         searchEditView = findViewById(R.id.stations_search_edit);
         findViewById(R.id.stations_search_clear).setOnClickListener(v -> {
             if (!DO_FILTER_BY_SEARCH_ON_NETWORK) {
                 ViewUtils.setVisibility(locationView, true);
-                ViewUtils.setVisibility(searchBoxView, false);
+                ViewUtils.setVisibility(legacySearchBoxView, false);
                 searchEditView.setText(null);
             }
             setListFilter(null);

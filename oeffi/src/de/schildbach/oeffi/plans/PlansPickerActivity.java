@@ -55,13 +55,12 @@ import de.schildbach.oeffi.plans.list.PlansAdapter;
 import de.schildbach.oeffi.util.ConnectivityBroadcastReceiver;
 import de.schildbach.oeffi.util.DividerItemDecoration;
 import de.schildbach.oeffi.util.Downloader;
+import de.schildbach.oeffi.util.FilterSearchView;
 import de.schildbach.oeffi.util.LocationHelper;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.pte.dto.Point;
 import okhttp3.Cache;
 import okhttp3.HttpUrl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.HttpURLConnection;
@@ -77,7 +76,7 @@ public class PlansPickerActivity extends OeffiMainActivity implements LocationHe
     private RecyclerView listView;
     private PlansAdapter listAdapter;
     private TextView connectivityWarningView;
-    private View filterBox;
+    private FilterSearchView filterBox;
 
     private Cache thumbCache;
     private BroadcastReceiver connectivityReceiver;
@@ -121,8 +120,8 @@ public class PlansPickerActivity extends OeffiMainActivity implements LocationHe
         actionBar.setPrimaryTitle(R.string.plans_activity_title);
         actionBar.addButton(R.drawable.ic_refresh_white_24dp, R.string.action_bar_progress_description)
                 .setOnClickListener(v -> requery());
-        actionBar.addButton(R.drawable.ic_search_white_24dp, R.string.plans_picker_action_search_title)
-                .setOnClickListener(v -> onSearchRequested());
+        // actionBar.addButton(R.drawable.ic_search_white_24dp, R.string.plans_picker_action_search_title)
+        //         .setOnClickListener(v -> setListFilter(""));
 
         cursor = getContentResolver().query(PlanContentProvider.CONTENT_URI(), null, null, null, null);
 
@@ -138,9 +137,10 @@ public class PlansPickerActivity extends OeffiMainActivity implements LocationHe
         });
 
         connectivityWarningView = findViewById(R.id.plans_picker_connectivity_warning_box);
-        filterBox = findViewById(R.id.plans_picker_filter_box);
-
-        findViewById(R.id.plans_picker_filter_clear).setOnClickListener(v -> clearListFilter());
+        filterBox = findViewById(R.id.plans_picker_filter_text);
+        // ViewUtils.setVisibility(filterBox, false);
+        filterBox.setTextChangeListener(this::setListFilter);
+        filterBox.setOnClearListener(v -> clearListFilter());
 
         connectivityReceiver = new ConnectivityBroadcastReceiver(connectivityManager) {
             @Override
@@ -245,14 +245,13 @@ public class PlansPickerActivity extends OeffiMainActivity implements LocationHe
 
     private void setListFilter(final String filter) {
         this.filter = filter;
-        filterBox.setVisibility(View.VISIBLE);
-        ((TextView) findViewById(R.id.plans_picker_filter_text)).setText(filter);
+        // filterBox.setVisibility(View.VISIBLE);
         requery();
     }
 
     private void clearListFilter() {
         filter = null;
-        filterBox.setVisibility(View.GONE);
+        // filterBox.setVisibility(View.GONE);
         requery();
     }
 
@@ -260,7 +259,7 @@ public class PlansPickerActivity extends OeffiMainActivity implements LocationHe
         final String sortOrder = location != null
                 ? Double.toString(location.getLatAsDouble()) + "," + Double.toString(location.getLonAsDouble()) : null;
         final Uri.Builder uri = PlanContentProvider.CONTENT_URI().buildUpon();
-        if (filter != null)
+        if (filter != null && !filter.isEmpty())
             uri.appendPath(SearchManager.SUGGEST_URI_PATH_QUERY).appendPath(filter);
         cursor = getContentResolver().query(uri.build(), null, null, null, sortOrder);
         listAdapter = new PlansAdapter(this, cursor, thumbCache, this, this, application.okHttpClient());

@@ -239,9 +239,12 @@ public class PlanActivity extends OeffiActivity {
     public void onNewIntent(@NonNull final Intent intent) {
         super.onNewIntent(intent);
         final String query = intent.getStringExtra(SearchManager.QUERY);
+        findStation(query);
+    }
 
-        if (query != null && !stations.isEmpty()) {
-            final String lcQuery = query.trim().toLowerCase(Constants.DEFAULT_LOCALE);
+    private void findStation(final String filterText) {
+        if (filterText != null && !stations.isEmpty()) {
+            final String lcQuery = filterText.trim().toLowerCase(Constants.DEFAULT_LOCALE);
 
             for (final Station station : stations) {
                 final String stationName = station.location.name;

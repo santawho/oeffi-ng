@@ -23,6 +23,7 @@ import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
 
@@ -35,6 +36,8 @@ public class FilterSearchView extends FrameLayout {
 
     private EditText editText;
     private TextChangeListener textChangeListener;
+    private ImageView clearButton;
+    private OnClickListener clearButtonOnClickListener;
 
     public FilterSearchView(final Context context, @Nullable final AttributeSet attrs) {
         super(context, attrs);
@@ -45,7 +48,6 @@ public class FilterSearchView extends FrameLayout {
         super.onFinishInflate();
 
         editText = findViewById(R.id.filter_text);
-
         editText.addTextChangedListener(new TextWatcher() {
             @Override
             public void afterTextChanged(final Editable s) {
@@ -60,10 +62,31 @@ public class FilterSearchView extends FrameLayout {
             public void onTextChanged(final CharSequence s, final int start, final int before, final int count) { }
         });
 
-        findViewById(R.id.filter_clear).setOnClickListener(v -> editText.setText(null));
+        clearButton = findViewById(R.id.filter_clear);
+        clearButton.setOnClickListener(v -> {
+            editText.setText(null);
+            if (clearButtonOnClickListener != null)
+                clearButtonOnClickListener.onClick(v);
+        });
     }
 
     public void setTextChangeListener(final TextChangeListener textChangeListener) {
         this.textChangeListener = textChangeListener;
+    }
+
+    public void setOnClearListener(final OnClickListener onClickListener) {
+        this.clearButtonOnClickListener = onClickListener;
+    }
+
+    public void setHint(final int resId) {
+        editText.setHint(resId);
+    }
+
+    public void setHint(final CharSequence hintText) {
+        editText.setHint(hintText);
+    }
+
+    public Editable getText() {
+        return editText.getText();
     }
 }
