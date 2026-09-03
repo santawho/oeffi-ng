@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/text_padding_vertical_cram"
+        android:background="@color/bg_divider" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:id="@+id/journey_entry_item_frame"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/list_entry_background"
+        android:paddingBottom="@dimen/text_padding_vertical_verylax"
+        android:paddingLeft="@dimen/text_padding_horizontal"
+        android:paddingRight="@dimen/text_padding_horizontal"
+        android:paddingTop="@dimen/text_padding_vertical_verylax">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="true" >
+
+            <de.schildbach.oeffi.util.LineView
+                android:id="@+id/journey_entry_line"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxWidth="96dp" />
+
+            <de.schildbach.oeffi.util.OverflowTextView
+                android:id="@+id/journey_entry_destination"
+                app:overflow_id="@id/journey_entry_destination_overflow"
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="@dimen/text_padding_horizontal_lax"
+                android:layout_weight="1"
+                android:ellipsize="none"
+                android:breakStrategy="high_quality" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/journey_entry_destination_overflow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/text_padding_horizontal"
+            android:ellipsize="none"
+            android:breakStrategy="high_quality" />
+
+        <!-- departures -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:id="@+id/journey_entry_departures"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/text_padding_vertical_cram"/>
+
+    </LinearLayout>
+
+</LinearLayout>

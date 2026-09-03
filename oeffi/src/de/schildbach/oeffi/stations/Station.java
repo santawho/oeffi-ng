@@ -44,6 +44,7 @@ public class Station {
     private @Nullable Product relevantProduct = null;
     public boolean hasDistanceAndBearing = false;
     public float distance;
+    public long walkTimeMillis;
     public float bearing;
     public @Nullable Date requestedAt = null;
     public @Nullable Date updatedAt = null;
@@ -114,13 +115,14 @@ public class Station {
         return matchedByQuery;
     }
 
-    public void setDistanceAndBearing(final GeoUtils.DistanceResult distanceResult) {
-        setDistanceAndBearing(distanceResult.distanceInMeters, distanceResult.initialBearing);
+    public void setDistanceAndBearing(final GeoUtils.DistanceResult distanceResult, final float walkPaceMillisPerMeter) {
+        setDistanceAndBearing(distanceResult.distanceInMeters, distanceResult.initialBearing, walkPaceMillisPerMeter);
     }
 
-    public void setDistanceAndBearing(final float distance, final float bearing) {
+    public void setDistanceAndBearing(final float distance, final float bearing, final float walkPaceMillisPerMeter) {
         this.distance = distance;
         this.bearing = bearing;
+        this.walkTimeMillis = (long) (distance * walkPaceMillisPerMeter);
         this.hasDistanceAndBearing = true;
     }
 

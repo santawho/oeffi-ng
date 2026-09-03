@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:baselineAligned="true" >
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/text_padding_horizontal_cram">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="true" >
+
+            <de.schildbach.oeffi.stations.CompassNeedleView
+                android:id="@+id/jny_departure_entry_bearing"
+                android:layout_width="@dimen/font_size_xlarge"
+                android:layout_height="@dimen/font_size_xlarge"
+                android:padding="2dp"
+                android:visibility="gone" />
+
+            <de.schildbach.oeffi.util.OverflowTextView
+                android:id="@+id/jny_departure_entry_name"
+                app:overflow_id="@id/jny_departure_entry_name_overflow"
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="none"
+                android:breakStrategy="high_quality" />
+
+            <TextView
+                android:id="@+id/jny_departure_entry_position"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="none"
+                android:gravity="center_horizontal"
+                android:paddingHorizontal="@dimen/text_padding_horizontal_cram"
+                android:background="@color/bg_position"
+                android:textColor="@color/fg_position"
+                android:textStyle="bold"
+                android:singleLine="true" />
+
+            <TextView
+                android:id="@+id/jny_departure_entry_delay"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/text_padding_horizontal" />
+
+            <TextView
+                android:id="@+id/jny_departure_entry_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/text_padding_horizontal"
+                android:textSize="@dimen/font_size_small" />
+
+            <TextView
+                android:id="@+id/jny_departure_entry_distance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/text_padding_horizontal"
+                android:textSize="@dimen/font_size_small" />
+
+            <TextView
+                android:id="@+id/jny_departure_entry_remaining"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/text_padding_horizontal_lax"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/jny_departure_entry_name_overflow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/text_padding_horizontal_verylax"
+            android:ellipsize="none"
+            android:breakStrategy="high_quality"
+            android:singleLine="true"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/jny_departure_entry_name2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/text_padding_horizontal_verylax"
+            android:ellipsize="middle"
+            android:singleLine="true"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+</LinearLayout>

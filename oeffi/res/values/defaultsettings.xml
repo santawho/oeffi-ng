@@ -2,6 +2,7 @@
 <resources>
 
     <integer name="max_departures_per_station">5</integer>
+    <integer name="max_departures_per_journey">4</integer>
     <integer name="default_max_history_entries">50</integer>
     <string name="default_stored_trips_retention_hours" translatable="false">24.0</string>
 

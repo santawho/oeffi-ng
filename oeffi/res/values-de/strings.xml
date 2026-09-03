@@ -236,6 +236,7 @@
 
     <!-- stations options menu -->
     <string name="stations_options_favorites_title">Haltestellen-Favoriten</string>
+    <string name="stations_sort_by_walk_time_title">Nach Laufweg sortieren</string>
 
     <!-- stations filter -->
     <string name="stations_filter_title">Produkt-Filter</string>

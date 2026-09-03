@@ -70,6 +70,7 @@ import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.DeviceLocationAware;
 import de.schildbach.oeffi.MyActionBar;
@@ -79,6 +80,7 @@ import de.schildbach.oeffi.StationsAware;
 import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.directions.QueryJourneyRunnable;
 import de.schildbach.oeffi.mapview.OeffiMapView;
+import de.schildbach.oeffi.stations.list.JourneysAdapter;
 import de.schildbach.oeffi.util.FilterSearchView;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GeoUtils;
@@ -89,6 +91,7 @@ import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.stations.list.JourneyClickListener;
 import de.schildbach.oeffi.stations.list.StationContextMenuItemListener;
 import de.schildbach.oeffi.stations.list.StationsAdapter;
+import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.oeffi.util.locationview.AutoCompleteLocationsHandler;
 import de.schildbach.oeffi.util.ConnectivityBroadcastReceiver;
@@ -145,6 +148,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     // and line labels, i.e. you can also search for something like "U1"
     public static final boolean DO_FILTER_BY_SEARCH_ON_NETWORK = false;
 
+    public static final String PREF_KEY_SORT_BY_WALK = "stations_sort_by_walk";
+
     public static final String INTENT_EXTRA_OPEN_FAVORITES = StationsActivity.class.getName() + ".open_favorites";
     public static final String INTENT_EXTRA_NETWORK = StationsActivity.class.getName() + ".network";
     public static final String INTENT_EXTRA_LOCATION = StationsActivity.class.getName() + ".location";
@@ -168,6 +173,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private String filterByText;
     private String searchQuery;
     private KeyWordMatcher.Query filterQuery;
+    private boolean sortByWalkAccess;
     private boolean anyProviderEnabled = false;
     private boolean loading = true;
 
@@ -178,6 +184,9 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private RecyclerView stationList;
     private LinearLayoutManager stationListLayoutManager;
     private StationsAdapter stationListAdapter;
+    private RecyclerView journeyList;
+    private LinearLayoutManager journeyListLayoutManager;
+    private JourneysAdapter journeyListAdapter;
     private TextView connectivityWarningView;
     private TextView disclaimerSourceView;
     private View filterActionButton;
@@ -196,6 +205,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private BroadcastReceiver tickReceiver;
 
     private int maxDeparturesPerStation;
+    private int maxDeparturesPerJourney;
+    private float walkPaceMillisPerMeter;
 
     final LocationView.Listener locationViewListener = new LocationView.Listener() {
         @Override
@@ -293,6 +304,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        updateWalkSpeed();
 
         connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -316,6 +328,14 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         actionBar.addProgressButton().setOnClickListener(v -> requestRefresh());
         // actionBar.addButton(R.drawable.ic_star_white_24dp, R.string.stations_options_favorites_title)
         //         .setOnClickListener(view -> FavoriteStationsActivity.start(StationsActivity.this));
+        sortByWalkAccess = prefs.getBoolean(PREF_KEY_SORT_BY_WALK, false);
+        final ToggleImageButton sortModeButton = actionBar.addToggleButton(R.drawable.ic_walk_on_off_white_24dp, R.string.stations_sort_by_walk_time_title);
+        sortModeButton.setChecked(sortByWalkAccess);
+        sortModeButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            sortByWalkAccess = isChecked;
+            prefs.edit().putBoolean(PREF_KEY_SORT_BY_WALK, sortByWalkAccess).apply();
+            updateGUI();
+        });
         addShowMapButtonToActionBar(true, false);
         actionBar.addButton(R.drawable.ic_search_white_24dp, R.string.stations_action_search_title)
                 .setOnClickListener(v -> {
@@ -407,6 +427,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                             }
 
                             stationListAdapter.notifyDataSetChanged();
+                            journeyListAdapter.notifyDataSetChanged();
                             getMapView().invalidate();
                         }
 
@@ -459,6 +480,31 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         disclaimerSourceView = findViewById(R.id.stations_disclaimer_source);
 
         // initialize stations list
+        setupStationsList();
+        setupJourneysList();
+
+        connectivityReceiver = new ConnectivityBroadcastReceiver(connectivityManager) {
+            @Override
+            protected void onConnected() {
+                connectivityWarningView.setVisibility(View.GONE);
+                postLoadNextVisible(0);
+            }
+
+            @Override
+            protected void onDisconnected() {
+                connectivityWarningView.setVisibility(View.VISIBLE);
+            }
+        };
+        registerReceiver(connectivityReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+
+        products.clear();
+        products.addAll(loadProductFilter());
+
+        final Intent intent = getIntent();
+        handleIntent(intent);
+    }
+
+    private void setupStationsList() {
         maxDeparturesPerStation = res.getInteger(R.integer.max_departures_per_station);
 
         final ItemTouchHelper itemTouchHelper = new ItemTouchHelper(
@@ -484,10 +530,10 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                         drawableClear.setTint(fgColor);
                         drawableBlock.setTint(fgColor);
                         starMargin = resources.getDimensionPixelOffset(R.dimen.text_padding_horizontal_lax);
-                        actionTriggerThreshold = starMargin * 2 + Math.max(
-                                drawableStar.getIntrinsicWidth(), Math.max(
-                                drawableClear.getIntrinsicWidth(),
-                                drawableBlock.getIntrinsicWidth()));
+                        actionTriggerThreshold = starMargin * 2 +
+                                Math.max(drawableStar.getIntrinsicWidth(),
+                                Math.max(drawableClear.getIntrinsicWidth(),
+                                        drawableBlock.getIntrinsicWidth()));
                     }
 
                     @Override
@@ -506,8 +552,10 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                     }
 
                     @Override
-                    public void onChildDraw(final Canvas c, final RecyclerView recyclerView,
-                            final RecyclerView.ViewHolder viewHolder, float dX, final float dY, final int actionState,
+                    public void onChildDraw(
+                            final Canvas c, final RecyclerView recyclerView,
+                            final RecyclerView.ViewHolder viewHolder,
+                            float dX, final float dY, final int actionState,
                             final boolean isCurrentlyActive) {
                         final int adapterPosition = viewHolder.getAdapterPosition();
                         if (adapterPosition == RecyclerView.NO_POSITION)
@@ -591,7 +639,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                     }
 
                     @Override
-                    public boolean onMove(final RecyclerView recyclerView, final RecyclerView.ViewHolder viewHolder,
+                    public boolean onMove(
+                            final RecyclerView recyclerView, final RecyclerView.ViewHolder viewHolder,
                             final RecyclerView.ViewHolder target) {
                         throw new IllegalStateException();
                     }
@@ -635,26 +684,98 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
             }
         });
         itemTouchHelper.attachToRecyclerView(stationList);
+    }
 
-        connectivityReceiver = new ConnectivityBroadcastReceiver(connectivityManager) {
-            @Override
-            protected void onConnected() {
-                connectivityWarningView.setVisibility(View.GONE);
-                postLoadNextVisible(0);
-            }
+    private void setupJourneysList() {
+        maxDeparturesPerJourney = res.getInteger(R.integer.max_departures_per_journey);
 
+        final ItemTouchHelper itemTouchHelper = new ItemTouchHelper(
+                new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+                    @Override
+                    public boolean isItemViewSwipeEnabled() {
+                        return true;
+                    }
+
+                    @Override
+                    public float getSwipeEscapeVelocity(final float defaultValue) {
+                        return Float.MAX_VALUE; // disable swipe by flinging
+                    }
+
+                    @Override
+                    public float getSwipeThreshold(final RecyclerView.ViewHolder viewHolder) {
+                        return Float.MAX_VALUE; // disable swipe by dragging
+                    }
+
+                    @Override
+                    public void onChildDraw(final Canvas c, final RecyclerView recyclerView,
+                                            final RecyclerView.ViewHolder viewHolder, float dX, final float dY, final int actionState,
+                                            final boolean isCurrentlyActive) {
+                        final int adapterPosition = viewHolder.getAdapterPosition();
+                        if (adapterPosition == RecyclerView.NO_POSITION)
+                            return;
+
+                        super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+                    }
+
+                    @Override
+                    public void onSelectedChanged(final RecyclerView.ViewHolder viewHolder, final int actionState) {
+                        super.onSelectedChanged(viewHolder, actionState);
+                    }
+
+                    private void onAction(final int adapterPosition, final int direction) {
+                        journeyListAdapter.notifyItemChanged(adapterPosition);
+                    }
+
+                    @Override
+                    public void onSwiped(final RecyclerView.ViewHolder viewHolder, final int direction) {
+                        throw new IllegalStateException();
+                    }
+
+                    @Override
+                    public boolean onMove(final RecyclerView recyclerView, final RecyclerView.ViewHolder viewHolder,
+                                          final RecyclerView.ViewHolder target) {
+                        throw new IllegalStateException();
+                    }
+                });
+        journeyList = findViewById(R.id.journeys_list);
+        journeyListLayoutManager = new LinearLayoutManager(this) {
+            // override the layout manger, so that scrolling to the top of an item is always preferred
             @Override
-            protected void onDisconnected() {
-                connectivityWarningView.setVisibility(View.VISIBLE);
+            public void smoothScrollToPosition(final RecyclerView recyclerView, final RecyclerView.State state, final int position) {
+                // this is like the method from super.smoothScrollToPosition() ...
+                final LinearSmoothScroller linearSmoothScroller =
+                        new LinearSmoothScroller(recyclerView.getContext()) {
+                            @Override
+                            protected int getVerticalSnapPreference() {
+                                // ... but with this override
+                                return SNAP_TO_START;
+                            }
+                        };
+                linearSmoothScroller.setTargetPosition(position);
+                startSmoothScroll(linearSmoothScroller);
             }
         };
-        registerReceiver(connectivityReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-
-        products.clear();
-        products.addAll(loadProductFilter());
-
-        final Intent intent = getIntent();
-        handleIntent(intent);
+        journeyList.setLayoutManager(journeyListLayoutManager);
+        // stationList.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
+        journeyListAdapter = new JourneysAdapter(this, maxDeparturesPerJourney, products,
+                this,
+                NetworkProviderFactory.provider(network).hasCapabilities(NetworkProvider.Capability.JOURNEY) ? this : null,
+                this);
+        journeyList.setAdapter(journeyListAdapter);
+        ViewCompat.setOnApplyWindowInsetsListener(journeyList, (v, windowInsets) -> {
+            final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(),
+                    insets.bottom + (int) (48 * res.getDisplayMetrics().density));
+            return windowInsets;
+        });
+        journeyList.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(final RecyclerView recyclerView, final int newState) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE)
+                    postLoadNextVisible(0);
+            }
+        });
+        itemTouchHelper.attachToRecyclerView(journeyList);
     }
 
     @Override
@@ -699,6 +820,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     @Override
     protected void onResume() {
         super.onResume();
+        updateWalkSpeed();
 
         updateGUI();
         postLoadNextVisible(0);
@@ -720,6 +842,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
         stationListAdapter.setBaseTime(null);
         stationListAdapter.notifyDataSetChanged();
+        journeyListAdapter.setBaseTime(null);
+        journeyListAdapter.notifyDataSetChanged();
         getMapView().invalidate();
         loading = true;
     }
@@ -773,6 +897,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         stationsMap.clear();
 
         stationList.clearOnScrollListeners();
+        journeyList.clearOnScrollListeners();
 
         handler.removeCallbacksAndMessages(null);
 
@@ -859,6 +984,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         locationView.setLocation(location);
         this.presetTime = presetTime;
         stationListAdapter.setBaseTime(presetTime);
+        journeyListAdapter.setBaseTime(presetTime);
     }
 
     private void setLocationByUser(final Location location) {
@@ -869,6 +995,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         final boolean hadPresetTime = presetTime != null;
         presetTime = null;
         stationListAdapter.setBaseTime(null);
+        journeyListAdapter.setBaseTime(null);
 
         // remove non-favorites and re-calculate distances
         for (final Iterator<Station> i = stations.iterator(); i.hasNext(); ) {
@@ -880,7 +1007,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                     station.setDepartures(null);
 
                 if (station.location.hasCoord())
-                    station.setDistanceAndBearing(GeoUtils.distanceBetween(deviceLocation, station.location.coord));
+                    station.setDistanceAndBearing(GeoUtils.distanceBetween(deviceLocation, station.location.coord), walkPaceMillisPerMeter);
             } else {
                 i.remove();
                 stationsMap.remove(station.location.id);
@@ -934,6 +1061,10 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         stationListAdapter.setFilterQuery(filterQuery);
         stationListAdapter.notifyDataSetChanged();
 
+        journeyListAdapter.setShowPlaces(searchQuery != null);
+        journeyListAdapter.setFilterQuery(filterQuery);
+        journeyListAdapter.notifyDataSetChanged();
+
         if (searchQueryModified) {
             handler.post(initStationsRunnable);
         }
@@ -944,6 +1075,9 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private void updateGUI() {
         // fragments
         updateFragments();
+
+        ViewUtils.setVisibility(stationList, !sortByWalkAccess);
+        ViewUtils.setVisibility(journeyList, sortByWalkAccess);
 
         // filter indicator
         filterActionButton.setSelected(!productsAreNetworkDefault(products));
@@ -1107,7 +1241,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                                     final Point coord = location.coord;
                                     if (coord != null) {
                                         final Station station = new Station(network, location);
-                                        station.setDistanceAndBearing(GeoUtils.distanceBetween(referenceLocation.coord, coord));
+                                        station.setDistanceAndBearing(GeoUtils.distanceBetween(referenceLocation.coord, coord), walkPaceMillisPerMeter);
                                         freshStations.add(station);
                                     }
                                 }
@@ -1147,7 +1281,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                 if (favType == FavoriteStationsProvider.TYPE_FAVORITE) {
                     final Station station = new Station(network, location);
                     if (deviceLocation != null && location.hasCoord())
-                        station.setDistanceAndBearing(GeoUtils.distanceBetween(deviceLocation, location.coord));
+                        station.setDistanceAndBearing(GeoUtils.distanceBetween(deviceLocation, location.coord), walkPaceMillisPerMeter);
                     freshStations.add(station);
                 }
             }
@@ -1164,7 +1298,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                     if (referenceLocation != null) {
                         for (final Station freshStation : freshStations) {
                             if (freshStation.location.hasCoord())
-                                freshStation.setDistanceAndBearing(GeoUtils.distanceBetween(referenceLocation.coord, freshStation.location.coord));
+                                freshStation.setDistanceAndBearing(GeoUtils.distanceBetween(referenceLocation.coord, freshStation.location.coord), walkPaceMillisPerMeter);
                         }
                     }
 
@@ -1188,7 +1322,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                         changed = true;
                     }
                     if (freshStation.hasDistanceAndBearing) {
-                        station.setDistanceAndBearing(freshStation.distance, freshStation.bearing);
+                        station.setDistanceAndBearing(freshStation.distance, freshStation.bearing, walkPaceMillisPerMeter);
                         changed = true;
                     }
                     if (freshStation.getDepartures() != null) {
@@ -1231,6 +1365,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
         if (added || changed) {
             stationListAdapter.notifyDataSetChanged();
+            journeyListAdapter.notifyDataSetChanged();
             getMapView().invalidate();
         }
 
@@ -1268,6 +1403,30 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
             return true;
 
         return false;
+    }
+
+    public void updateWalkSpeed() {
+        walkPaceMillisPerMeter = 60000f / getWalkSpeedMetersPerMinute();
+    }
+
+    public static float getWalkSpeedMetersPerMinute() {
+        final String walkSpeedS = Application.getInstance().getSharedPreferences()
+                .getString(Constants.PREFS_KEY_WALK_SPEED, NetworkProvider.WalkSpeed.NORMAL.name());
+        final NetworkProvider.WalkSpeed walkSpeed = NetworkProvider.WalkSpeed.valueOf(walkSpeedS);
+        final float speed;
+        switch (walkSpeed) {
+            case FAST:
+                speed = 75.0f;
+                break;
+            case SLOW:
+                speed = 35.0f;
+                break;
+            case NORMAL:
+            default:
+                speed = 55.0f;
+                break;
+        }
+        return speed;
     }
 
     private static void sortStations(final List<Station> stations) {
@@ -1359,6 +1518,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                                         }
 
                                         stationListAdapter.notifyDataSetChanged();
+                                        journeyListAdapter.notifyDataSetChanged();
                                     } else if (result.status == QueryDeparturesResult.Status.INVALID_STATION) {
                                         final Station resultStation = stationsMap.get(requestedStationId);
                                         if (resultStation != null) {
@@ -1366,6 +1526,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                                             resultStation.updatedAt = new Date();
 
                                             stationListAdapter.notifyDataSetChanged();
+                                            journeyListAdapter.notifyDataSetChanged();
                                         }
                                     } else {
                                         log.info("Got {}", result.toShortString());
@@ -1424,8 +1585,16 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
             if (stations.isEmpty())
                 return null;
 
-            int firstVisible = stationListLayoutManager.findFirstVisibleItemPosition();
-            int lastVisible = stationListLayoutManager.findLastVisibleItemPosition();
+            int firstVisible;
+            int lastVisible;
+            if (sortByWalkAccess) {
+                firstVisible = 0;
+                lastVisible = Integer.MAX_VALUE;
+            } else {
+                firstVisible = stationListLayoutManager.findFirstVisibleItemPosition();
+                lastVisible = stationListLayoutManager.findLastVisibleItemPosition();
+            }
+
             if (firstVisible == RecyclerView.NO_POSITION || lastVisible == RecyclerView.NO_POSITION)
                 return null;
             if (firstVisible >= stations.size())
@@ -1489,6 +1658,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     public final void selectStation(final Station station) {
         selectedStation = station;
         stationListAdapter.notifyDataSetChanged();
+        journeyListAdapter.notifyDataSetChanged();
 
         if (selectedStation != null) {
             // scroll list into view
@@ -1698,15 +1868,17 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
             deviceLocation = Point.fromDouble(here.getLatitude(), here.getLongitude());
             stationListAdapter.setDeviceLocation(here);
+            journeyListAdapter.setDeviceLocation(here);
 
             // re-calculate distances for sorting
             if (fixedLocation == null) {
                 for (final Station station : stations) {
                     if (station.location.hasCoord())
-                        station.setDistanceAndBearing(GeoUtils.distanceBetween(here, station.location.coord));
+                        station.setDistanceAndBearing(GeoUtils.distanceBetween(here, station.location.coord), walkPaceMillisPerMeter);
                 }
 
                 stationListAdapter.notifyDataSetChanged();
+                journeyListAdapter.notifyDataSetChanged();
 
                 handler.post(initStationsRunnable);
             }
@@ -1766,6 +1938,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
             runOnUiThread(() -> {
                 deviceBearing = azimuth;
                 stationListAdapter.setDeviceBearing(azimuth, faceDown);
+                journeyListAdapter.setDeviceBearing(azimuth, faceDown);
 
                 // refresh compass needles
                 final int childCount = stationList.getChildCount();

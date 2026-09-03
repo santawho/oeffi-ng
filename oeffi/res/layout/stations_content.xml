@@ -119,12 +119,24 @@
                             android:layout_height="match_parent"
                             android:layout_weight="1">
 
-                            <androidx.recyclerview.widget.RecyclerView
-                                android:id="@+id/stations_list"
+                            <FrameLayout
                                 android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:clipToPadding="false"
-                                android:scrollbars="vertical" />
+                                android:layout_height="match_parent" >
+
+                                <androidx.recyclerview.widget.RecyclerView
+                                    android:id="@+id/stations_list"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:clipToPadding="false"
+                                    android:scrollbars="vertical" />
+
+                                <androidx.recyclerview.widget.RecyclerView
+                                    android:id="@+id/journeys_list"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:clipToPadding="false"
+                                    android:scrollbars="vertical" />
+                            </FrameLayout>
 
                             <!-- Missing capability -->
 

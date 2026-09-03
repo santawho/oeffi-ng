@@ -236,6 +236,7 @@
 
     <!-- stations options -->
     <string name="stations_options_favorites_title">Station Favorites</string>
+    <string name="stations_sort_by_walk_time_title">Sort by walk access</string>
 
     <!-- stations filter -->
     <string name="stations_filter_title">Product filter</string>
