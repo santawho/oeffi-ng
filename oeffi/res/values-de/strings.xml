@@ -5,6 +5,7 @@
 
     <string name="yes">Ja</string>
     <string name="no">Nein</string>
+    <string name="find_hint">Suchen …</string>
 
     <string name="stations_icon_label">Öffi Haltestellen</string>
     <string name="favorite_stations_icon_label">Öffi Favoriten</string>
@@ -157,7 +158,6 @@
         Da du Öffi das erste Mal nutzt, musst Du die Region wählen die am besten passt.
         Du kannst das später ändern.
     </string>
-    <string name="network_picker_filter_hint">Suchen …</string>
     <string name="network_picker_entry_usage">%.1f MB\ninstalliert</string>
     <string name="network_picker_entry_license">Lizenz:\n%s</string>
     <string name="network_picker_entry_state_alpha">alpha</string>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<de.schildbach.oeffi.util.FilterSearchView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" >
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/text_padding_horizontal_lax"
+        android:paddingVertical="@dimen/text_padding_vertical"
+        android:background="?attr/bg_shaded" >
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_search_grey600_24dp" />
+
+        <EditText
+            android:id="@+id/filter_text"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:inputType="textNoSuggestions"
+            android:background="?attr/bg_shaded"
+            android:hint="@string/find_hint"
+            android:paddingHorizontal="@dimen/text_padding_horizontal"
+            android:textSize="@dimen/font_size_large" />
+
+        <ImageView
+            android:id="@+id/filter_clear"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_clear_grey600_24dp" />
+
+    </LinearLayout>
+</de.schildbach.oeffi.util.FilterSearchView>

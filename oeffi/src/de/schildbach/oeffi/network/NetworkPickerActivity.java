@@ -55,6 +55,7 @@ import de.schildbach.oeffi.network.list.NetworkContextMenuItemListener;
 import de.schildbach.oeffi.network.list.NetworkListEntry;
 import de.schildbach.oeffi.network.list.NetworksAdapter;
 import de.schildbach.oeffi.util.DividerItemDecoration;
+import de.schildbach.oeffi.util.FilterSearchView;
 import de.schildbach.oeffi.util.GeocoderThread;
 import de.schildbach.oeffi.util.LocationHelper;
 import de.schildbach.oeffi.util.LocationUtils;
@@ -77,7 +78,8 @@ import java.util.Map;
 public class NetworkPickerActivity extends OeffiActivity implements
         LocationHelper.Callback,
         NetworkClickListener,
-        NetworkContextMenuItemListener {
+        NetworkContextMenuItemListener,
+        FilterSearchView.TextChangeListener {
     private static String EXTRAS_FOR_OPERATIONS = NetworkPickerActivity.class.getName() + ".forOperations";
 
     public static void start(final Context context, final boolean forOperations) {
@@ -138,7 +140,7 @@ public class NetworkPickerActivity extends OeffiActivity implements
     }
 
     private MyActionBar actionBar;
-    private EditText filterView;
+    private FilterSearchView filterSearchView;
     private RecyclerView listView;
     private NetworksAdapter listAdapter;
 
@@ -192,19 +194,8 @@ public class NetworkPickerActivity extends OeffiActivity implements
         actionBar.setPrimaryTitle(getTitle());
         addShowMapButtonToActionBar(true, false);
 
-        filterView = findViewById(R.id.network_picker_filter_text);
-        filterView.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void afterTextChanged(final Editable s) {
-                onFilterChanged(s.toString());
-            }
-
-            @Override
-            public void beforeTextChanged(final CharSequence s, final int start, final int count, final int after) { }
-
-            @Override
-            public void onTextChanged(final CharSequence s, final int start, final int before, final int count) { }
-        });
+        filterSearchView = findViewById(R.id.network_picker_filter_text);
+        filterSearchView.setTextChangeListener(this);
 
         listView = findViewById(android.R.id.list);
         listView.setLayoutManager(new LinearLayoutManager(this));
@@ -398,7 +389,8 @@ public class NetworkPickerActivity extends OeffiActivity implements
         return false;
     }
 
-    private void onFilterChanged(final String filterText) {
+    @Override
+    public void onFilterChanged(final String filterText) {
         this.filterText = filterText == null ? null : filterText.toLowerCase();
         generateIndex();
     }
