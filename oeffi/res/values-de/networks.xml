@@ -153,13 +153,13 @@
     <string name="network_mersey_label">Liverpool</string>
     <string name="network_mersey_comment">Lokal- und Regionalverkehr</string>
     <string name="network_irl_label">Irland</string>
-    <string name="network_irl_comment">Schienenverkehr: InterCity, Commuter, DART, LUAS</string>
+    <string name="network_irl_comment">Schienenverkehr: InterCity, Commuter, DART, LUAS (TG:IÉ)</string>
     <string name="network_pl_label">Polen</string>
-    <string name="network_pl_comment">Fern-, Regional- und Lokalverkehr (z.B. Warschau)</string>
+    <string name="network_pl_comment">Fern-, Regional- und Lokalverkehr (z.B. Warschau) (TG:PKP)</string>
     <string name="network_dub_label">Dubai</string>
     <string name="network_dub_comment">Lokalverkehr</string>
     <string name="network_bart_label">San Francisco</string>
-    <string name="network_bart_comment">Lokal- und Regionalverkehr</string>
+    <string name="network_bart_comment">Lokal- und Regionalverkehr (TG:BART)</string>
     <string name="network_sydney_label">Sydney</string>
     <string name="network_sydney_comment">Lokal- und Regionalverkehr</string>
     <string name="network_met_label">Melbourne</string>
