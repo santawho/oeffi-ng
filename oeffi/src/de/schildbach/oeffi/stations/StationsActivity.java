@@ -1600,10 +1600,11 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
             if (firstVisible == RecyclerView.NO_POSITION || lastVisible == RecyclerView.NO_POSITION)
                 return null;
-            if (firstVisible >= stations.size())
-                firstVisible = stations.size() - 1;
-            if (lastVisible >= stations.size())
-                lastVisible = stations.size() - 1;
+            final int size = stations.size();
+            if (firstVisible >= size)
+                firstVisible = size - 1;
+            if (lastVisible >= size)
+                lastVisible = size - 1;
 
             final long now = System.currentTimeMillis();
 
@@ -1634,7 +1635,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
             }
 
             if (sortByWalkAccess) {
-                lastVisible = 25;
+                if (lastVisible > 25)
+                    lastVisible = 25;
             }
 
             for (int i = firstVisible; i <= lastVisible; i++) { // then load others
