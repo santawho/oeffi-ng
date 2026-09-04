@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.StationsAware;
 import de.schildbach.oeffi.stations.CompassNeedleView;
@@ -58,6 +59,7 @@ public class JourneysAdapter extends RecyclerView.Adapter<JourneyViewHolder> imp
     private final StationContextMenuItemListener contextMenuItemListener;
     private final JourneyClickListener journeyClickListener;
     private final StationsAware stationsAware;
+    private final int maxWalkDistance;
     private Date baseTime;
 
     private android.location.Location deviceLocation = null;
@@ -84,6 +86,8 @@ public class JourneysAdapter extends RecyclerView.Adapter<JourneyViewHolder> imp
         this.stationsAware = stationsAware;
 
         setHasStableIds(true);
+
+        this.maxWalkDistance = Application.getInstance().prefsGetMaxWalkDistance();
 
         registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
@@ -128,9 +132,13 @@ public class JourneysAdapter extends RecyclerView.Adapter<JourneyViewHolder> imp
         final Map<JourneyRef, JourneyC> journeyMap = new HashMap<>();
         final List<Station> stations = stationsAware.getStations();
         for (final Station station : stations) {
+            if (station.distance > maxWalkDistance)
+                continue;
+
             final List<Departure> departures = station.getDepartures();
             if (departures == null || departures.isEmpty())
                 continue;
+
             for (final Departure departure : departures) {
                 final long timeRemaining = getWalkDepartureTime(departure, station) - refTime;
                 if (timeRemaining < -MAX_TIME_TO_CATCH_UP_MILLIS)
