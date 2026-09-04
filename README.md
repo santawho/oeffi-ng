@@ -1,4 +1,4 @@
-#![Öffi NG Logo](androidstudio/oeffi-studio/graphics/ic_oeffi_ng_directions_color_48dp-mdpi.svg) Öffi NG - Öffi Next Generation
+# ![Öffi NG Logo](androidstudio/oeffi-studio/graphics/ic_oeffi_ng_directions_color_48dp-mdpi.svg) Öffi NG - Öffi Next Generation
 
 This is a fork of **Öffi – The King of Public Transit!** from https://gitlab.com/oeffi/oeffi.
 
