@@ -30,6 +30,8 @@
     <color name="fg_trip_next_event_normal">#000000</color>
     <color name="fg_trip_next_event_important">#aa0000</color>
     <color name="fg_trip_next_event_less_important">#666666</color>
+    <color name="fg_walk_departure_good">#228822</color>
+    <color name="fg_walk_departure_bad">#aa2222</color>
 
     <!-- background -->
     <attr name="bg_level0" format="reference|color" />

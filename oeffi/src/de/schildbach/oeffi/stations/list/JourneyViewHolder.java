@@ -17,7 +17,6 @@
 
 package de.schildbach.oeffi.stations.list;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -32,6 +31,9 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -42,6 +44,8 @@ import de.schildbach.oeffi.StationsAware;
 import de.schildbach.oeffi.stations.CompassNeedleView;
 import de.schildbach.oeffi.stations.Station;
 import de.schildbach.oeffi.stations.StationContextMenu;
+import de.schildbach.oeffi.stations.StationDetailsActivity;
+import de.schildbach.oeffi.stations.StationsActivity;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.LineView;
 import de.schildbach.oeffi.util.OverflowTextView;
@@ -53,12 +57,13 @@ import de.schildbach.pte.dto.Position;
 import de.schildbach.pte.dto.Product;
 
 public class JourneyViewHolder extends RecyclerView.ViewHolder {
+    private static final Logger log = LoggerFactory.getLogger(JourneyViewHolder.class);
     public final View itemFrameView;
     public final LineView lineView;
     public final OverflowTextView destinationView;
     public final ViewGroup departuresViewGroup;
 
-    private final Activity context;
+    private final StationsActivity context;
     private final Resources res;
     private final int maxDepartures;
     private final StationContextMenuItemListener contextMenuItemListener;
@@ -68,6 +73,7 @@ public class JourneyViewHolder extends RecyclerView.ViewHolder {
     private final Display display;
     private final int colorArrow;
     private final int colorSignificant, colorLessSignificant, colorInsignificant, colorHighlighted;
+    private final int colorWalkTimeGood, colorWalkTimeBad;
     private final int listEntryVerticalPadding;
     private StationContextMenu contextMenu;
 
@@ -75,7 +81,7 @@ public class JourneyViewHolder extends RecyclerView.ViewHolder {
     private static final int MESSAGE_INDEX_COLOR = Color.parseColor("#c08080");
 
     public JourneyViewHolder(
-            final Activity context, final View itemView, final int maxDepartures,
+            final StationsActivity context, final View itemView, final int maxDepartures,
             final StationContextMenuItemListener contextMenuItemListener,
             final JourneyClickListener journeyClickListener) {
         super(itemView);
@@ -98,6 +104,8 @@ public class JourneyViewHolder extends RecyclerView.ViewHolder {
         this.colorLessSignificant = res.getColor(R.color.fg_less_significant);
         this.colorInsignificant = res.getColor(R.color.fg_insignificant);
         this.colorHighlighted = res.getColor(R.color.fg_highlighted);
+        this.colorWalkTimeBad = res.getColor(R.color.fg_walk_departure_bad);
+        this.colorWalkTimeGood = res.getColor(R.color.fg_walk_departure_good);
         this.listEntryVerticalPadding = res.getDimensionPixelOffset(R.dimen.text_padding_vertical);
     }
 
@@ -113,6 +121,9 @@ public class JourneyViewHolder extends RecyclerView.ViewHolder {
 
         final boolean baseIsNow = aBaseTime == null;
         final Date baseTime = baseIsNow ? new Date() : aBaseTime;
+
+//        log.debug("---- bind ----");
+//        journey.log(baseTime.getTime());
 
         final boolean isGhosted = false;
         final int colorSignificant = !isGhosted ? this.colorSignificant : colorInsignificant;
@@ -155,10 +166,6 @@ public class JourneyViewHolder extends RecyclerView.ViewHolder {
             lineView.setOnClickListener(onClickListener);
             destinationView.setClickable(true);
             destinationView.setOnClickListener(onClickListener);
-            destinationView.setOnLongClickListener(v -> {
-                onContextClick(v, firstStation);
-                return true;
-            });
         }
 
         // departures
@@ -229,20 +236,20 @@ public class JourneyViewHolder extends RecyclerView.ViewHolder {
                     bearingView.setVisibility(View.GONE);
                 }
 
-                final long time;
+                final PTDate departureTime;
                 final PTDate predictedTime = departure.predictedTime;
                 final PTDate plannedTime = departure.plannedTime;
                 final boolean isPredicted = predictedTime != null;
                 if (predictedTime != null)
-                    time = predictedTime.getTime();
+                    departureTime = predictedTime;
                 else if (plannedTime != null)
-                    time = plannedTime.getTime();
+                    departureTime = plannedTime;
                 else
                     throw new IllegalStateException();
 
                 // time
                 final TextView timeView = departureViewHolder.time;
-                timeView.setText(Formats.formatTimeDiff(context, baseTime.getTime(), time, baseIsNow));
+                timeView.setText(Formats.formatTimeDiff(context, baseTime, departureTime, baseIsNow));
                 timeView.setTypeface(Typeface.DEFAULT, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
                 final Date updatedAt = station.updatedAt;
                 final boolean isStale = updatedAt != null
@@ -256,8 +263,7 @@ public class JourneyViewHolder extends RecyclerView.ViewHolder {
                 final long delayMins = delay / DateUtils.MINUTE_IN_MILLIS;
                 delayView.setText(delayMins != 0 ? String.format("(%+d)", delayMins) + ' ' : "");
                 delayView.setTypeface(Typeface.DEFAULT, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
-                delayView.setTextColor(isStale ? colorLessSignificant : (isGhosted ? colorSignificant :
-                        colorHighlighted));
+                delayView.setTextColor(isStale ? colorLessSignificant : (isGhosted ? colorSignificant : colorHighlighted));
 
                 // position
                 final TextView positionView = departureViewHolder.position;
@@ -274,14 +280,34 @@ public class JourneyViewHolder extends RecyclerView.ViewHolder {
                 }
 
                 // remaining
-                final long walkStartTime = time - station.walkTimeMillis;
+                final long walkStartTime = departureTime.getTime() - station.walkTimeMillis;
+                final long timeRemaining = walkStartTime - baseTime.getTime();
                 final TextView remaining = departureViewHolder.remaining;
                 remaining.setText(Formats.formatTimeDiff(context, baseTime.getTime(), walkStartTime, baseIsNow));
                 remaining.setTypeface(Typeface.DEFAULT, isPredicted ? Typeface.BOLD_ITALIC : Typeface.BOLD);
-                remaining.setTextColor(isStale ? colorLessSignificant : colorSignificant);
+                remaining.setTextColor(timeRemaining < 60000L ? colorWalkTimeBad : colorWalkTimeGood);
+
+                departureView.setOnClickListener(v -> {
+                    StationDetailsActivity.start(
+                            context,
+                            context.getNetwork(), station.location,
+                            departureTime,
+                            null,
+                            false,
+                            null);
+                });
+                departureView.setOnLongClickListener(v -> {
+                    onContextClick(v, station);
+                    return true;
+                });
 
                 if (++iDeparture == maxDepartures)
                     break;
+            }
+
+            while (iDepartureView < departuresChildCount) {
+                final ViewGroup departureView = (ViewGroup) departuresViewGroup.getChildAt(iDepartureView++);
+                departureView.setVisibility(View.GONE);
             }
         } else {
             departuresViewGroup.setVisibility(View.GONE);

@@ -49,6 +49,7 @@ import android.os.Looper;
 import android.os.Process;
 import android.provider.Settings;
 import android.text.Editable;
+import android.text.Html;
 import android.text.TextWatcher;
 import android.text.format.DateUtils;
 import android.view.View;
@@ -70,7 +71,6 @@ import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.DeviceLocationAware;
 import de.schildbach.oeffi.MyActionBar;
@@ -181,9 +181,11 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private String accurateLocationProvider, lowPowerLocationProvider;
 
     private MyActionBar actionBar;
+    private ViewGroup stationsContainer;
     private RecyclerView stationList;
     private LinearLayoutManager stationListLayoutManager;
     private StationsAdapter stationListAdapter;
+    private ViewGroup journeysContainer;
     private RecyclerView journeyList;
     private LinearLayoutManager journeyListLayoutManager;
     private JourneysAdapter journeyListAdapter;
@@ -645,6 +647,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                         throw new IllegalStateException();
                     }
                 });
+        stationsContainer = findViewById(R.id.stations_container);
         stationList = findViewById(R.id.stations_list);
         stationListLayoutManager = new LinearLayoutManager(this) {
             // override the layout manger, so that scrolling to the top of an item is always preferred
@@ -737,6 +740,9 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                         throw new IllegalStateException();
                     }
                 });
+        journeysContainer = findViewById(R.id.journeys_container);
+        final TextView descriptionView = findViewById(R.id.journeys_description);
+        descriptionView.setText(Html.fromHtml(getString(R.string.stations_journeys_description), Html.FROM_HTML_MODE_COMPACT));
         journeyList = findViewById(R.id.journeys_list);
         journeyListLayoutManager = new LinearLayoutManager(this) {
             // override the layout manger, so that scrolling to the top of an item is always preferred
@@ -1076,8 +1082,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         // fragments
         updateFragments();
 
-        ViewUtils.setVisibility(stationList, !sortByWalkAccess);
-        ViewUtils.setVisibility(journeyList, sortByWalkAccess);
+        ViewUtils.setVisibility(stationsContainer, !sortByWalkAccess);
+        ViewUtils.setVisibility(journeysContainer, sortByWalkAccess);
 
         // filter indicator
         filterActionButton.setSelected(!productsAreNetworkDefault(products));
@@ -1406,27 +1412,21 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     }
 
     public void updateWalkSpeed() {
-        walkPaceMillisPerMeter = 60000f / getWalkSpeedMetersPerMinute();
-    }
-
-    public static float getWalkSpeedMetersPerMinute() {
-        final String walkSpeedS = Application.getInstance().getSharedPreferences()
-                .getString(Constants.PREFS_KEY_WALK_SPEED, NetworkProvider.WalkSpeed.NORMAL.name());
-        final NetworkProvider.WalkSpeed walkSpeed = NetworkProvider.WalkSpeed.valueOf(walkSpeedS);
-        final float speed;
+        final NetworkProvider.WalkSpeed walkSpeed = application.prefsGetWalkSpeed();
+        final float speedMetersPerMinute;
         switch (walkSpeed) {
             case FAST:
-                speed = 75.0f;
+                speedMetersPerMinute = JourneysAdapter.WALK_SPEED_FAST_METERS_PER_MINUTE;
                 break;
             case SLOW:
-                speed = 35.0f;
+                speedMetersPerMinute = JourneysAdapter.WALK_SPEED_SLOW_METERS_PER_MINUTE;
                 break;
             case NORMAL:
             default:
-                speed = 55.0f;
+                speedMetersPerMinute = JourneysAdapter.WALK_SPEED_NORMAL_METERS_PER_MINUTE;
                 break;
         }
-        return speed;
+        walkPaceMillisPerMeter = 60000f / speedMetersPerMinute;
     }
 
     private static void sortStations(final List<Station> stations) {
@@ -1587,12 +1587,15 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
             int firstVisible;
             int lastVisible;
+            int maxDistance;
             if (sortByWalkAccess) {
                 firstVisible = 0;
                 lastVisible = Integer.MAX_VALUE;
+                maxDistance = application.prefsGetMaxWalkDistance();
             } else {
                 firstVisible = stationListLayoutManager.findFirstVisibleItemPosition();
                 lastVisible = stationListLayoutManager.findLastVisibleItemPosition();
+                maxDistance = Integer.MAX_VALUE;
             }
 
             if (firstVisible == RecyclerView.NO_POSITION || lastVisible == RecyclerView.NO_POSITION)
@@ -1604,32 +1607,41 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
             final long now = System.currentTimeMillis();
 
-            for (int i = firstVisible; i <= lastVisible; i++) // first load selected
-            {
+            for (int i = firstVisible; i <= lastVisible; i++) { // first load selected
                 final Station station = stations.get(i);
 
                 final Date requestedAt = station.requestedAt;
-                if ((requestedAt == null || now - requestedAt.getTime() > DateUtils.MINUTE_IN_MILLIS)) {
-                    if (selectedStation != null && selectedStation.location.id.equals(station.location.id))
-                        return station;
+                if (requestedAt != null && now - requestedAt.getTime() < DateUtils.MINUTE_IN_MILLIS)
+                    continue;
+
+                if (selectedStation != null
+                        && selectedStation.location.id != null
+                        && selectedStation.location.id.equals(station.location.id)) {
+                    return station;
                 }
             }
 
-            for (int i = firstVisible; i <= lastVisible; i++) // then load favorites
-            {
+            for (int i = firstVisible; i <= lastVisible; i++) { // then load favorites
                 final Station station = stations.get(i);
 
                 final Date requestedAt = station.requestedAt;
-                if ((requestedAt == null || now - requestedAt.getTime() > DateUtils.MINUTE_IN_MILLIS)) {
-                    final Integer favState = favorites.get(station.location.id);
-                    if (favState != null && favState == FavoriteStationsProvider.TYPE_FAVORITE)
-                        return station;
-                }
+                if (requestedAt != null && now - requestedAt.getTime() < DateUtils.MINUTE_IN_MILLIS)
+                    continue;
+
+                final Integer favState = favorites.get(station.location.id);
+                if (favState != null && favState == FavoriteStationsProvider.TYPE_FAVORITE)
+                    return station;
             }
 
-            for (int i = firstVisible; i <= lastVisible; i++) // then load others
-            {
+            if (sortByWalkAccess) {
+                lastVisible = 25;
+            }
+
+            for (int i = firstVisible; i <= lastVisible; i++) { // then load others
                 final Station station = stations.get(i);
+
+                if (station.distance > maxDistance)
+                    continue;
 
                 if (station.requestedAt == null) {
                     final Integer favState = favorites.get(station.location.id);

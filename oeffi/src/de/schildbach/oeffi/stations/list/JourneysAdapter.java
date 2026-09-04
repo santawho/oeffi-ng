@@ -19,11 +19,13 @@ package de.schildbach.oeffi.stations.list;
 
 import static de.schildbach.pte.util.Preconditions.checkArgument;
 
-import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.recyclerview.widget.RecyclerView;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,13 +39,20 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.StationsAware;
 import de.schildbach.oeffi.stations.CompassNeedleView;
 import de.schildbach.oeffi.stations.Station;
+import de.schildbach.oeffi.stations.StationsActivity;
 import de.schildbach.oeffi.util.KeyWordMatcher;
 import de.schildbach.pte.dto.Departure;
 import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.Product;
 
 public class JourneysAdapter extends RecyclerView.Adapter<JourneyViewHolder> implements CompassNeedleView.Callback {
-    private final Activity context;
+    public static final float WALK_SPEED_NORMAL_METERS_PER_MINUTE = 55.0f;
+    public static final float WALK_SPEED_SLOW_METERS_PER_MINUTE = 35.0f;
+    public static final float WALK_SPEED_FAST_METERS_PER_MINUTE = 75.0f;
+    public static final long MAX_TIME_TO_CATCH_UP_MILLIS = 180_000L; // 3 minutes
+    private static final Logger log = LoggerFactory.getLogger(JourneysAdapter.class);
+
+    private final StationsActivity context;
     private final int maxDepartures;
     private final Set<Product> productsFilter;
     private final StationContextMenuItemListener contextMenuItemListener;
@@ -62,7 +71,7 @@ public class JourneysAdapter extends RecyclerView.Adapter<JourneyViewHolder> imp
     private final LayoutInflater inflater;
 
     public JourneysAdapter(
-            final Activity context, final int maxDepartures, final Set<Product> productsFilter,
+            final StationsActivity context, final int maxDepartures, final Set<Product> productsFilter,
             final StationContextMenuItemListener contextMenuItemListener,
             final JourneyClickListener journeyClickListener,
             final StationsAware stationsAware) {
@@ -79,7 +88,7 @@ public class JourneysAdapter extends RecyclerView.Adapter<JourneyViewHolder> imp
         registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
             public void onChanged() {
-                JourneysAdapter.this.onChanged();
+                journeys = null;
             }
         });
     }
@@ -107,10 +116,15 @@ public class JourneysAdapter extends RecyclerView.Adapter<JourneyViewHolder> imp
 
     @Override
     public int getItemCount() {
-        return journeys.size();
+        return getJourneys().size();
     }
 
-    public void onChanged() {
+    public List<JourneyC> getJourneys() {
+        if (journeys != null)
+            return journeys;
+
+        final long refTime = (this.baseTime == null ? new Date() : this.baseTime).getTime();
+
         final Map<JourneyRef, JourneyC> journeyMap = new HashMap<>();
         final List<Station> stations = stationsAware.getStations();
         for (final Station station : stations) {
@@ -118,6 +132,10 @@ public class JourneysAdapter extends RecyclerView.Adapter<JourneyViewHolder> imp
             if (departures == null || departures.isEmpty())
                 continue;
             for (final Departure departure : departures) {
+                final long timeRemaining = getWalkDepartureTime(departure, station) - refTime;
+                if (timeRemaining < -MAX_TIME_TO_CATCH_UP_MILLIS)
+                    continue;
+
                 final JourneyRef journeyRef = departure.journeyRef;
                 JourneyC journeyContainer = journeyMap.get(journeyRef);
                 if (journeyContainer == null) {
@@ -130,22 +148,21 @@ public class JourneysAdapter extends RecyclerView.Adapter<JourneyViewHolder> imp
         final ArrayList<JourneyC> journeys = new ArrayList<>(journeyMap.values());
         for (final JourneyC journey : journeys) {
             // latest possible start of walk first
-            Collections.sort(journey.departures, (d1, d2) -> -diffDepartureTimes(d1, d2));
+//            final List<DepartureC> departures = journey.departures;
+//            final Departure departure = departures.get(0).departure;
+//            if (departures.size() > 1 && departure.destination.location.name.contains("tzelbu"))
+//                log.debug("x");
+            Collections.sort(journey.departures, (d1, d2) -> -compareDepartureTimes(d1, d2));
         }
         // earliest of latest first
-        Collections.sort(journeys, (j1, j2) -> diffDepartureTimes(j1.departures.get(0), j2.departures.get(0)));
-        this.journeys = journeys;
-    }
+        Collections.sort(journeys, (j1, j2) -> compareDepartureTimes(j1.departures.get(0), j2.departures.get(0)));
 
-    private int diffDepartureTimes(final DepartureC d1, final DepartureC d2) {
-        final long walkMinutes1 = d1.getDepartureTimeMillis();
-        final long walkMinutes2 = d2.getDepartureTimeMillis();
-        final long diff = walkMinutes1 - walkMinutes2;
-        if (diff < 0)
-            return -1;
-        if (diff > 0)
-            return 1;
-        return 0;
+//        log.debug("-----------------");
+//        for (final JourneyC journey : journeys)
+//            journey.log(refTime);
+
+        this.journeys = journeys;
+        return journeys;
     }
 
     @Override
@@ -157,7 +174,7 @@ public class JourneysAdapter extends RecyclerView.Adapter<JourneyViewHolder> imp
 
     public JourneyC getItem(final int position) {
         checkArgument(position != RecyclerView.NO_POSITION);
-        return journeys.get(position);
+        return getJourneys().get(position);
     }
 
     @Override
@@ -181,6 +198,21 @@ public class JourneysAdapter extends RecyclerView.Adapter<JourneyViewHolder> imp
         return faceDown;
     }
 
+    public static long getWalkDepartureTime(final Departure departure, final Station station) {
+        return departure.getTime().getTime() - station.walkTimeMillis;
+    }
+
+    private static int compareDepartureTimes(final DepartureC d1, final DepartureC d2) {
+        final long t1 = d1.getDepartureTimeMillis();
+        final long t2 = d2.getDepartureTimeMillis();
+        final long diff = t1 - t2;
+        if (diff < 0)
+            return -1;
+        if (diff > 0)
+            return 1;
+        return 0;
+    }
+
     public static class DepartureC {
         public final Departure departure;
         public final Station station;
@@ -193,11 +225,20 @@ public class JourneysAdapter extends RecyclerView.Adapter<JourneyViewHolder> imp
         }
 
         public long getDepartureTimeMillis() {
-            return departure.getTime().getTime() + station.walkTimeMillis;
+            return getWalkDepartureTime(departure, station);
         }
     }
 
     public static class JourneyC {
         public final List<DepartureC> departures = new ArrayList<>();
+
+        public void log(final long refTime) {
+            final Departure dep1 = departures.get(0).departure;
+            log.debug("line {} to {}", dep1.line.label, dep1.destination.uniqueShortName());
+            for (final DepartureC departure : departures) {
+                final long departureTimeMillis = departure.getDepartureTimeMillis();
+                log.debug("  {} {}", departure.station, departureTimeMillis - refTime);
+            }
+        }
     }
 }

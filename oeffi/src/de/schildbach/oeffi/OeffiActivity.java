@@ -250,6 +250,10 @@ public abstract class OeffiActivity extends AppCompatActivity
         return false;
     }
 
+    public NetworkId getNetwork() {
+        return network;
+    }
+
     public boolean isBicycleTravel() {
         return application.prefsIsBicycleTravel();
     }

@@ -21,6 +21,8 @@
     <color name="fg_trip_next_event_normal">#ffffff</color>
     <color name="fg_trip_next_event_important">#ff6666</color>
     <color name="fg_trip_next_event_less_important">#cccccc</color>
+    <color name="fg_walk_departure_good">#44dd44</color>
+    <color name="fg_walk_departure_bad">#ee4444</color>
 
     <!-- background -->
     <color name="bg_level0_default">#222222</color>

@@ -123,19 +123,42 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent" >
 
-                                <androidx.recyclerview.widget.RecyclerView
-                                    android:id="@+id/stations_list"
+                                <LinearLayout
+                                    android:id="@+id/stations_container"
+                                    android:orientation="vertical"
                                     android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:clipToPadding="false"
-                                    android:scrollbars="vertical" />
+                                    android:layout_height="match_parent">
+                                    <androidx.recyclerview.widget.RecyclerView
+                                        android:id="@+id/stations_list"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="0dp"
+                                        android:layout_weight="1"
+                                        android:clipToPadding="false"
+                                        android:scrollbars="vertical" />
+                                </LinearLayout>
 
-                                <androidx.recyclerview.widget.RecyclerView
-                                    android:id="@+id/journeys_list"
+                                <LinearLayout
+                                    android:id="@+id/journeys_container"
+                                    android:orientation="vertical"
                                     android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:clipToPadding="false"
-                                    android:scrollbars="vertical" />
+                                    android:layout_height="match_parent">
+                                    <TextView
+                                        android:id="@+id/journeys_description"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:background="?attr/bg_shaded"
+                                        android:paddingVertical="@dimen/text_padding_vertical"
+                                        android:paddingHorizontal="@dimen/text_padding_horizontal_lax"
+                                        android:textSize="@dimen/font_size_small"
+                                        android:text="@string/stations_journeys_description" />
+                                    <androidx.recyclerview.widget.RecyclerView
+                                        android:id="@+id/journeys_list"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="0dp"
+                                        android:layout_weight="1"
+                                        android:clipToPadding="false"
+                                        android:scrollbars="vertical" />
+                                </LinearLayout>
                             </FrameLayout>
 
                             <!-- Missing capability -->
