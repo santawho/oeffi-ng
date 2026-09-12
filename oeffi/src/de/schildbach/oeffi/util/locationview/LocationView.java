@@ -21,6 +21,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -30,6 +31,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -110,6 +112,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
     private TextWatcher textChangedListener;
     private int hintRes = 0;
     private String hint;
+    private boolean actionButtonsEnabled = true;
 
     private Location location;
     private LocationType locationType = LocationType.ANY;
@@ -147,11 +150,11 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
     public void setStationsOnly(final boolean stationsOnly) {
         this.stationsOnly = stationsOnly;
         if (mapButton != null)
-            ViewUtils.setVisibility(mapButton, !stationsOnly);
+            ViewUtils.setVisibility(mapButton, actionButtonsEnabled && !stationsOnly);
         if (currentLocationButton != null)
-            ViewUtils.setVisibility(currentLocationButton, !stationsOnly);
+            ViewUtils.setVisibility(currentLocationButton, actionButtonsEnabled && !stationsOnly);
         if (contactButton != null)
-            ViewUtils.setVisibility(contactButton, !stationsOnly);
+            ViewUtils.setVisibility(contactButton, actionButtonsEnabled && !stationsOnly);
     }
 
     public boolean isStationsOnly() {
@@ -251,6 +254,12 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
     }
 
     private void setup(final Context context) {
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        actionButtonsEnabled = prefs
+                .getBoolean(Constants.PREFS_KEY_USER_INTERFACE_DIRECTIONS_LOCATION_ACTION_BUTTONS_ENABLED, true);
+        if (prefs.getBoolean(Constants.PREFS_KEY_USER_INTERFACE_DIRECTIONS_LOCATION_FULL_HEIGHT_ENABLED, false))
+            setMinimumHeight(res.getDimensionPixelOffset(R.dimen.directions_form_location_min_height));
+
         inflate(context, R.layout.location_view, this);
         textView = findViewById(R.id.location_view_text);
         textView.setOnItemClickListener((parent, view, position, id) -> {
@@ -296,6 +305,13 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         favoriteStationButton = findViewById(R.id.location_view_favorite_station_button);
         mapButton = findViewById(R.id.location_view_map_button);
         currentLocationButton = findViewById(R.id.location_view_current_location_button);
+        if (!actionButtonsEnabled) {
+            ViewUtils.setVisibility(currentLocationButton, false);
+            ViewUtils.setVisibility(mapButton, false);
+            ViewUtils.setVisibility(contactButton, false);
+            ViewUtils.setVisibility(favoriteStationButton, false);
+            ViewUtils.setVisibility(alternateSearchButton, false);
+        }
         menuButton.setOnClickListener((view) -> {
             final PopupMenu popupMenu = new PopupMenu(getContext(), view);
             popupMenu.inflate(R.menu.directions_location_context);
@@ -517,7 +533,8 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
 
     public void setListener(final Listener listener) {
         this.listener = listener;
-        ViewUtils.setVisibility(mapButton, listener != null && !stationsOnly && listener.getMapPointSelectionProvider() != null);
+        ViewUtils.setVisibility(mapButton, actionButtonsEnabled && listener != null && !stationsOnly
+                && listener.getMapPointSelectionProvider() != null);
         setAdapter(new AutoCompleteLocationAdapter(this, listener.getNetwork(), listener.getUsage(), stationsOnly));
     }
 

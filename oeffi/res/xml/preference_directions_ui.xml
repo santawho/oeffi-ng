@@ -50,6 +50,18 @@
         android:summary="@string/user_interface_directions_show_clear_button_enabled_summary" />
 
     <CheckBoxPreference
+        android:key="user_interface_directions_location_action_buttons_enabled"
+        android:defaultValue="true"
+        android:title="@string/user_interface_directions_location_action_buttons_enabled_title"
+        android:summary="@string/user_interface_directions_location_action_buttons_enabled_summary" />
+
+    <CheckBoxPreference
+        android:key="user_interface_directions_location_full_height_enabled"
+        android:defaultValue="false"
+        android:title="@string/user_interface_directions_location_full_height_enabled_title"
+        android:summary="@string/user_interface_directions_location_full_height_enabled_summary" />
+
+    <CheckBoxPreference
         android:key="user_interface_directions_tripextrainfo_enabled"
         android:defaultValue="false"
         android:title="@string/user_interface_directions_tripextrainfo_enabled_title"

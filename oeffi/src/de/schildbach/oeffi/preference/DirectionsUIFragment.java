@@ -42,6 +42,8 @@ public class DirectionsUIFragment extends PreferenceFragment {
                 || "stored_trips_retention_hours".equals(key)
                 || "user_interface_directions_history_show_saved_trip_enabled".equals(key)
                 || "user_interface_directions_show_clear_button_enabled".equals(key)
+                || "user_interface_directions_location_action_buttons_enabled".equals(key)
+                || "user_interface_directions_location_full_height_enabled".equals(key)
                 || super.isPreferenceRequiringRestart(key);
     }
 

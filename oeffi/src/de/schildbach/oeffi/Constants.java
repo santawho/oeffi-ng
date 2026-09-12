@@ -78,6 +78,8 @@ public class Constants {
     public static final String PREFS_KEY_USER_INTERFACE_DEVELOPER_OPTIONS_SHOW_EXTRA_INFOS_ENABLED = "user_interface_developer_options_show_extra_infos_enabled";
     public static final String PREFS_KEY_LAST_INFO_AT = "last_hint_at";
     public static final String PREFS_KEY_USER_INTERFACE_DIRECTIONS_TRIPEXTRAINFO_ENABLED = "user_interface_directions_tripextrainfo_enabled";
+    public static final String PREFS_KEY_USER_INTERFACE_DIRECTIONS_LOCATION_ACTION_BUTTONS_ENABLED = "user_interface_directions_location_action_buttons_enabled";
+    public static final String PREFS_KEY_USER_INTERFACE_DIRECTIONS_LOCATION_FULL_HEIGHT_ENABLED = "user_interface_directions_location_full_height_enabled";
     public static final String PREFS_KEY_EXTRAS_DRIVERMODE_ENABLED = "extras_drivermode_enabled";
     public static final String PREFS_KEY_SPECIAL_PROVIDERS_ENABLED = "special_providers_enabled";
 
