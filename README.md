@@ -5,6 +5,8 @@ This is a fork of **Öffi – The King of Public Transit!** from https://gitlab.
 Öffi is an Android app that tells you where and when trains and busses go,
 including delays and replacement bus service for more and more transport authorities in Europe and beyond.
 
+[![Java CI with Gradle](../../actions/workflows/gradle.yml/badge.svg?branch=nextgen)](../../actions/workflows/gradle.yml)
+
 **A lot of new features** have been added in this fork and continue to be added. Stay tuned!
 See details in the [Wiki](../../wiki).
 
