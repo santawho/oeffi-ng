@@ -159,6 +159,10 @@ android {
             resValue "string", "app_url_path_prefix", "/@apps/oeffi-ng${CREDENTIALS.editionName ? "-${CREDENTIALS.editionName}" : ''}-debug/"
             resValue "bool", "flags_no_update_check", "true"
         }
+        unsignedRelease {
+           initWith release
+           signingConfig = null
+        }
         preRelease {
 //            minifyEnabled true
 //            shrinkResources false
