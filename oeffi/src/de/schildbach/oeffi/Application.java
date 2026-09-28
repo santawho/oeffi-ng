@@ -281,7 +281,7 @@ public class Application extends android.app.Application {
     }
 
     public NetworkId getDefaultNetwork() {
-        return NetworkId.DEUTSCHLANDTICKET;
+        return NetworkId.TRANSITOUS;
     }
 
     public String getPrefsKeyNetwork(final boolean forOperations) {
