@@ -3392,7 +3392,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
         }
         final Trip.Public leg = new Trip.Public(
-                journeyLeg.line, new Destination(exitLocation), entryStop, exitStop,
+                journeyLeg.line, new Destination(null, exitLocation), entryStop, exitStop,
                 intermediateStops,
                 journeyLeg.message,
                 journeyLeg.journeyRef, journeyLeg.loadedAt);
