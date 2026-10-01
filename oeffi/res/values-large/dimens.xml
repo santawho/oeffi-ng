@@ -35,4 +35,7 @@
 
     <integer name="max_departures_per_station">6</integer>
 
+    <dimen name="vehicle_information_meters_translation">-7dp</dimen>
+    <dimen name="vehicle_information_meters_translation_padding">7dp</dimen>
+
 </resources>

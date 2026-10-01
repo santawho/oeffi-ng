@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:insetTop="-1dp"
+    android:insetLeft="0dp"
+    android:insetBottom="-1dp"
+    android:insetRight="0dp">
+    <shape>
+        <stroke
+            android:width="2dp"
+            android:color="@color/fg_less_significant" />
+        <solid android:color="@color/vehicle_information_vehicle_restaurant_background" />
+        <corners android:radius="4dp" />
+    </shape>
+</inset>

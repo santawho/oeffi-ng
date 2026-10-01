@@ -477,6 +477,7 @@
     <string name="directions_trip_details_public_entry_vehicle_information_available">Vehicle information may be available.</string>
     <string name="directions_trip_details_vehicle_information_title">Vehicle Information</string>
     <string name="directions_trip_details_vehicle_information_direction">Departure direction</string>
+    <string name="directions_trip_details_vehicle_information_showall_label">Show all information</string>
     <string name="directions_trip_details_time_left_minutes">&lt;b>%1$d minutes&lt;/b> left</string>
     <string name="directions_trip_details_time_left_hours">&lt;b>%1$d hours&lt;/b> left</string>
     <string name="directions_trip_details_time_left_days">&lt;b>%1$d days&lt;/b> left</string>

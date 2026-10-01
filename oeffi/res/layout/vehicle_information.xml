@@ -61,9 +61,23 @@
             android:text="@string/directions_trip_details_vehicle_information_direction" />
     </LinearLayout>
 
-    <WebView
-        android:id="@+id/vehicle_information_webview"
+    <CheckBox
+        android:id="@+id/vehicle_information_showall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/directions_trip_details_vehicle_information_showall_label"/>
+
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content">
+        <GridLayout
+            android:id="@+id/vehicle_information_grid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingVertical="@dimen/vehicle_information_meters_translation_padding"
+            android:clipChildren="false"
+            android:clipToPadding="false">
+        </GridLayout>
+    </ScrollView>
 
 </LinearLayout>

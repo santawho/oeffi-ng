@@ -476,6 +476,7 @@
     <string name="directions_trip_details_public_entry_vehicle_information_available">Wagenreihung ggf. verfügbar</string>
     <string name="directions_trip_details_vehicle_information_title">Wagenreihung</string>
     <string name="directions_trip_details_vehicle_information_direction">Fahrtrichtung</string>
+    <string name="directions_trip_details_vehicle_information_showall_label">Zeige alle Informationen</string>
     <string name="directions_trip_details_time_left_minutes">Noch &lt;b>%1$d Minuten&lt;/b></string>
     <string name="directions_trip_details_time_left_hours">Noch &lt;b>%1$d Stunden&lt;/b></string>
     <string name="directions_trip_details_time_left_days">Noch &lt;b>%1$d Tage&lt;/b></string>

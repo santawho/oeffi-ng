@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/vehicle_information_vehicle_minheight"
+        android:paddingVertical="@dimen/text_padding_vertical_lax"
+        android:paddingHorizontal="@dimen/text_padding_horizontal_lax">
+
+        <TextView
+            android:id="@+id/vehicle_information_wagon_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:textSize="@dimen/font_size_large"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/vehicle_information_vehicle_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/font_size_small"
+            android:textStyle="italic" />
+
+        <LinearLayout
+            android:id="@+id/vehicle_information_vehicle_bicycle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/ic_directions_bike_grey600_18dp"
+                android:tint="@color/fg_significant" />
+            <TextView
+                android:id="@+id/vehicle_information_vehicle_bicycle_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="@dimen/text_padding_horizontal_lax"
+                android:layout_gravity="center_vertical" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/vehicle_information_vehicle_wheelchair"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/ic_accessible_grey600_18dp"
+                android:tint="@color/fg_significant" />
+            <TextView
+                android:id="@+id/vehicle_information_vehicle_wheelchair_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="@dimen/text_padding_horizontal_lax"
+                android:layout_gravity="center_vertical" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/vehicle_information_vehicle_amenities"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:id="@+id/vehicle_information_vehicle_amenity_restaurant"
+                android:visibility="gone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/ic_restaurant_grey600_18dp"
+                android:tint="@color/fg_significant" />
+        </LinearLayout>
+
+    </LinearLayout>
+</FrameLayout>

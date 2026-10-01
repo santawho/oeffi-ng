@@ -287,6 +287,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     protected boolean mustEnableTrackButton;
 
     protected NetworkProvider networkProvider;
+    private boolean hasVehicleInformationCapability;
+
     protected TripRenderer tripRenderer;
     protected RenderConfig renderConfig;
     private PTDate highlightedTime;
@@ -348,6 +350,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         renderConfig = intentData.renderConfig;
         network = intentData.network;
         networkProvider = NetworkProviderFactory.provider(network);
+        hasVehicleInformationCapability =
+                networkProvider.hasCapabilities(NetworkProvider.Capability.VEHICLE_INFORMATION);
+
         final Trip baseTrip = intentData.trip;
 
         log.info(
@@ -1342,18 +1347,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 .setText(fares.get(0).currency.getSymbol());
     }
 
-    private boolean hasVehicleInformationCapability;
-
     protected boolean updatePublicLeg(
             final View row,
             final TripRenderer.LegContainer legC,
             final TripRenderer.LegContainer walkLegC,
             final TripRenderer.LegContainer nextLegC,
             final Date now) {
-        hasVehicleInformationCapability =
-                application.isDeveloperElementsEnabled() &&
-                networkProvider.hasCapabilities(NetworkProvider.Capability.VEHICLE_INFORMATION);
-
         final TripRenderer.LegContainer nearestPublicLeg = tripRenderer.nearestPublicLeg;
         final boolean isHighlightedLeg = nearestPublicLeg == legC;
         final int highlightedLocationIndex = isHighlightedLeg ? nearestPublicLeg.nearestStopIndex : -1;
@@ -1362,7 +1361,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final Destination destination = leg.destination;
         final Location destinationLocation = destination == null ? null : destination.location;
         final String destinationName = Formats.fullLocationName(destinationLocation);
-        final boolean showDestination = destinationName != null;
         final JourneyRef journeyRef = leg.journeyRef;
         final Line line = leg.line;
         final boolean mayHaveVehicleInformation = hasVehicleInformationCapability &&
@@ -3586,7 +3584,23 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                         networkProvider.queryVehicleInformation(journeyRef, stop);
                 if (result.status == QueryVehicleInformationResult.Status.OK) {
                     runOnUiThread(() -> {
-                        new VehicleInformationRenderer(result.vehicleInformation)
+                        boolean showBicycle = true;
+                        boolean showWheelchair = true;
+                        if (renderConfig != null
+                                && renderConfig.queryTripsRequestData != null
+                                && renderConfig.queryTripsRequestData.options != null) {
+                            if (isBicycleTravel())
+                                showBicycle = true;
+                            else if (renderConfig.queryTripsRequestData.options.flags == null)
+                                showBicycle = false;
+                            else
+                                showBicycle = renderConfig.queryTripsRequestData.options.flags.contains(NetworkProvider.TripFlag.BIKE);
+
+                            showWheelchair = renderConfig.queryTripsRequestData.options.accessibility == NetworkProvider.Accessibility.BARRIER_FREE;
+                        }
+                        new VehicleInformationRenderer(
+                                result.vehicleInformation,
+                                showBicycle, showWheelchair)
                                 .showVehicleInformationDialog(this, () -> {
                                         isVehicleInformationShowing = false;
                                 });

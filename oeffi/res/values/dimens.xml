@@ -126,4 +126,8 @@
     <integer name="pearl_endmarker_size_percent">70</integer>
     <integer name="pearl_highlight_size_percent">90</integer>
 
+    <dimen name="vehicle_information_meters_translation">-7dp</dimen>
+    <dimen name="vehicle_information_meters_translation_padding">7dp</dimen>
+    <dimen name="vehicle_information_vehicle_minheight">80dp</dimen>
+
 </resources>

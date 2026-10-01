@@ -114,4 +114,11 @@
 
     <item name="alpha_bright_white" format="float" type="dimen">1</item>
 
+    <color name="vehicle_information_section_label_background">#0000c0</color>
+    <color name="vehicle_information_section_label_foreground">#ffffff</color>
+    <color name="vehicle_information_vehicle_nopax_background">#a0a0a0</color>
+    <color name="vehicle_information_vehicle_firstclass_frame">#ff8080</color>
+    <color name="vehicle_information_vehicle_firstclass_background">#ffd0d0</color>
+    <color name="vehicle_information_vehicle_restaurant_background">#d0ffff</color>
+
 </resources>
