@@ -42,6 +42,8 @@
     <string name="user_interface_results_remark_without_links_enabled_summary">Entferne klickbare Links aus Kommentartexten</string>
     <string name="user_interface_results_remark_links_clickable_enabled_title">Links klickbar machen</string>
     <string name="user_interface_results_remark_links_clickable_enabled_summary">Zeige klickbare Links (wie http:// und Telefonnummern), um den Web-Browser oder die Telefon-App zu öffnen</string>
+    <string name="user_interface_results_show_original_directions_enabled_title">Original Richtungstexte</string>
+    <string name="user_interface_results_show_original_directions_enabled_summary">Zeige die Richtungstexte so wie sie vom Netzwerk geliefert werden. Beachte, dass dadurch Funktionalität verloren geht.</string>
 
     <string name="user_interface_category_station_departures_title">Stations-Abfahrten</string>
     <string name="user_interface_station_departures_show_journey_messages_title">Zeige Fahrt-Meldungen</string>

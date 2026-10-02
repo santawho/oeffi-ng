@@ -55,6 +55,7 @@ public class JourneysAdapter extends RecyclerView.Adapter<JourneyViewHolder> imp
 
     private final StationsActivity context;
     private final int maxDepartures;
+    private final boolean showOriginalDirectionText;
     private final Set<Product> productsFilter;
     private final StationContextMenuItemListener contextMenuItemListener;
     private final JourneyClickListener journeyClickListener;
@@ -73,13 +74,17 @@ public class JourneysAdapter extends RecyclerView.Adapter<JourneyViewHolder> imp
     private final LayoutInflater inflater;
 
     public JourneysAdapter(
-            final StationsActivity context, final int maxDepartures, final Set<Product> productsFilter,
+            final StationsActivity context,
+            final int maxDepartures,
+            final boolean showOriginalDirectionText,
+            final Set<Product> productsFilter,
             final StationContextMenuItemListener contextMenuItemListener,
             final JourneyClickListener journeyClickListener,
             final StationsAware stationsAware) {
         this.context = context;
         this.inflater = LayoutInflater.from(context);
         this.maxDepartures = maxDepartures;
+        this.showOriginalDirectionText = showOriginalDirectionText;
         this.productsFilter = productsFilter;
         this.contextMenuItemListener = contextMenuItemListener;
         this.journeyClickListener = journeyClickListener;
@@ -188,7 +193,7 @@ public class JourneysAdapter extends RecyclerView.Adapter<JourneyViewHolder> imp
     @Override
     public JourneyViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
         return new JourneyViewHolder(context, inflater.inflate(R.layout.stations_journey_entry, parent, false),
-                maxDepartures, contextMenuItemListener, journeyClickListener);
+                maxDepartures, showOriginalDirectionText, contextMenuItemListener, journeyClickListener);
     }
 
     @Override

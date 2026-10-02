@@ -37,6 +37,7 @@ import static de.schildbach.pte.util.Preconditions.checkArgument;
 public class StationsAdapter extends RecyclerView.Adapter<StationViewHolder> implements CompassNeedleView.Callback {
     private final Activity context;
     private final int maxDepartures;
+    private final boolean showOriginalDirectionText;
     private final Set<Product> productsFilter;
     private final StationContextMenuItemListener contextMenuItemListener;
     private final JourneyClickListener journeyClickListener;
@@ -52,13 +53,17 @@ public class StationsAdapter extends RecyclerView.Adapter<StationViewHolder> imp
     private final LayoutInflater inflater;
 
     public StationsAdapter(
-            final Activity context, final int maxDepartures, final Set<Product> productsFilter,
+            final Activity context,
+            final int maxDepartures,
+            final boolean showOriginalDirectionText,
+            final Set<Product> productsFilter,
             final StationContextMenuItemListener contextMenuItemListener,
             final JourneyClickListener journeyClickListener,
             final StationsAware stationsAware) {
         this.context = context;
         this.inflater = LayoutInflater.from(context);
         this.maxDepartures = maxDepartures;
+        this.showOriginalDirectionText = showOriginalDirectionText;
         this.productsFilter = productsFilter;
         this.contextMenuItemListener = contextMenuItemListener;
         this.journeyClickListener = journeyClickListener;
@@ -108,7 +113,7 @@ public class StationsAdapter extends RecyclerView.Adapter<StationViewHolder> imp
     @Override
     public StationViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
         return new StationViewHolder(context, inflater.inflate(R.layout.stations_station_entry, parent, false),
-                maxDepartures, contextMenuItemListener, journeyClickListener);
+                maxDepartures, showOriginalDirectionText, contextMenuItemListener, journeyClickListener);
     }
 
     @Override

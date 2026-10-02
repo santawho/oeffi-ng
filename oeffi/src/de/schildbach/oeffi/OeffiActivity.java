@@ -261,6 +261,10 @@ public abstract class OeffiActivity extends AppCompatActivity
         return application.prefsIsBicycleTravel();
     }
 
+    public boolean isShowOriginalDirectionText() {
+        return prefs.getBoolean("user_interface_results_show_original_directions_enabled", false);
+    }
+
     protected void updateFromPreferences() {
         timeZoneSelector = application.getPreferredNetworkTimeZoneSelector(network);
         isDriverMode = getIntent().getBooleanExtra(Constants.PREFS_KEY_EXTRAS_DRIVERMODE_ENABLED, false)

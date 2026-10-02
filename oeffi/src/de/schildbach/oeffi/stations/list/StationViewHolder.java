@@ -88,6 +88,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
     private final Activity context;
     private final Resources res;
     private final int maxDepartures;
+    private final boolean showOriginalDirectionText;
     private final StationContextMenuItemListener contextMenuItemListener;
     private final JourneyClickListener journeyClickListener;
 
@@ -102,7 +103,8 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
     private static final int MESSAGE_INDEX_COLOR = Color.parseColor("#c08080");
 
     public StationViewHolder(
-            final Activity context, final View itemView, final int maxDepartures,
+            final Activity context, final View itemView,
+            final int maxDepartures, final boolean showOriginalDirectionText,
             final StationContextMenuItemListener contextMenuItemListener,
             final JourneyClickListener journeyClickListener) {
         super(itemView);
@@ -124,6 +126,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
         this.context = context;
         this.res = context.getResources();
         this.maxDepartures = maxDepartures;
+        this.showOriginalDirectionText = showOriginalDirectionText;
         this.contextMenuItemListener = contextMenuItemListener;
         this.journeyClickListener = journeyClickListener;
 
@@ -304,11 +307,16 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
                                 if (destination == null) {
                                     text = null;
                                 } else {
-                                    final String destinationName = Formats.makeBreakableStationName(
-                                            Formats.fullLocationNameIfDifferentPlace(destination.location, station.location));
+                                    final String destinationName;
+                                    if (showOriginalDirectionText && destination.directionText != null) {
+                                        destinationName = destination.directionText;
+                                    } else {
+                                        destinationName = Formats.makeBreakableStationName(
+                                                Formats.fullLocationNameIfDifferentPlace(destination.location, station.location));
+                                    }
                                     if (destinationName == null) {
                                         text = null;
-                                    } else if (!destination.isNotCommonType) {
+                                    } else if (showOriginalDirectionText || !destination.isNotCommonType) {
                                         text = Constants.DESTINATION_ARROW_PREFIX + destinationName;
                                     } else if (destination.location.type == LocationType.STATION) {
                                         text = Constants.DESTINATION_STATION_ARROW_PREFIX + destinationName;

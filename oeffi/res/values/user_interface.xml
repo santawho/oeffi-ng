@@ -47,6 +47,8 @@
     <string name="user_interface_results_remark_without_links_enabled_summary">Remove clickable links from remark texts</string>
     <string name="user_interface_results_remark_links_clickable_enabled_title">Make links clickable</string>
     <string name="user_interface_results_remark_links_clickable_enabled_summary">Show clickable links (like http:// and phone numbers) to open the web browser or telephone app</string>
+    <string name="user_interface_results_show_original_directions_enabled_title">Original direction text</string>
+    <string name="user_interface_results_show_original_directions_enabled_summary">Show direction texts as delivered by the network. Beware that you may lose functionality.</string>
 
     <string name="user_interface_category_station_departures_title">Station Departures</string>
     <string name="user_interface_station_departures_show_journey_messages_title">Show journey messages</string>

@@ -668,7 +668,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         };
         stationList.setLayoutManager(stationListLayoutManager);
         // stationList.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
-        stationListAdapter = new StationsAdapter(this, maxDeparturesPerStation, products,
+        stationListAdapter = new StationsAdapter(this,
+                maxDeparturesPerStation, isShowOriginalDirectionText(), products,
                 this,
                 NetworkProviderFactory.provider(network).hasCapabilities(NetworkProvider.Capability.JOURNEY) ? this : null,
                 this);
@@ -763,7 +764,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         };
         journeyList.setLayoutManager(journeyListLayoutManager);
         // stationList.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
-        journeyListAdapter = new JourneysAdapter(this, maxDeparturesPerJourney, products,
+        journeyListAdapter = new JourneysAdapter(this,
+                maxDeparturesPerJourney, isShowOriginalDirectionText(), products,
                 this,
                 NetworkProviderFactory.provider(network).hasCapabilities(NetworkProvider.Capability.JOURNEY) ? this : null,
                 this);

@@ -1167,16 +1167,22 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             // destination
             final Destination destination = departure.destination;
             final boolean isArrival = departure.isArrival;
-            final String prefix;
+            final String destinationText;
             if (destination != null) {
-                if (!destination.isNotCommonType) {
-                    prefix = isArrival ? Constants.ORIGIN_ARROW_PREFIX : Constants.DESTINATION_ARROW_PREFIX;
-                } else if (destination.location.type == LocationType.STATION) {
-                    prefix = isArrival ? Constants.ORIGIN_STATION_ARROW_PREFIX : Constants.DESTINATION_STATION_ARROW_PREFIX;
+                if (isShowOriginalDirectionText() && destination.directionText != null) {
+                    destinationText = (isArrival ? Constants.ORIGIN_ARROW_PREFIX : Constants.DESTINATION_ARROW_PREFIX) + destination.directionText;
                 } else {
-                    prefix = isArrival ? Constants.ORIGIN_DIRECTION_ARROW_PREFIX : Constants.DESTINATION_DIRECTION_ARROW_PREFIX;
+                    final String prefix;
+                    if (!destination.isNotCommonType) {
+                        prefix = isArrival ? Constants.ORIGIN_ARROW_PREFIX : Constants.DESTINATION_ARROW_PREFIX;
+                    } else if (destination.location.type == LocationType.STATION) {
+                        prefix = isArrival ? Constants.ORIGIN_STATION_ARROW_PREFIX : Constants.DESTINATION_STATION_ARROW_PREFIX;
+                    } else {
+                        prefix = isArrival ? Constants.ORIGIN_DIRECTION_ARROW_PREFIX : Constants.DESTINATION_DIRECTION_ARROW_PREFIX;
+                    }
+                    destinationText = prefix + Formats.fullLocationNameIfDifferentPlace(destination.location, station);
                 }
-                destinationView.setText(prefix + Formats.fullLocationNameIfDifferentPlace(destination.location, station));
+                destinationView.setText(destinationText);
 //                itemView.setOnClickListener(destination.id == null ? null : v ->
 //                        start(context, network, destination, null, null));
                 ViewUtils.setCancelledStrikeThru(destinationView, isCancelled);

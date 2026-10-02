@@ -1359,8 +1359,18 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final Trip.Public leg = legC.publicLeg;
         final Trip.Public simulatedLeg = legC.simulatedPublicLeg;
         final Destination destination = leg.destination;
-        final Location destinationLocation = destination == null ? null : destination.location;
-        final String destinationName = Formats.fullLocationName(destinationLocation);
+        final String destinationName;
+        final Location destinationLocation;
+        if (destination == null) {
+            destinationName = null;
+            destinationLocation = null;
+        } else if (isShowOriginalDirectionText() && destination.directionText != null) {
+            destinationName = destination.directionText;
+            destinationLocation = null;
+        } else {
+            destinationLocation = destination.location;
+            destinationName = Formats.fullLocationName(destinationLocation);
+        }
         final JourneyRef journeyRef = leg.journeyRef;
         final Line line = leg.line;
         final boolean mayHaveVehicleInformation = hasVehicleInformationCapability &&
@@ -1404,17 +1414,17 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         final TextView destinationView = row
                 .findViewById(R.id.directions_trip_details_public_entry_destination);
-        if (destinationLocation != null) {
+        if (destinationName != null) {
             destinationView.setVisibility(View.VISIBLE);
             final String prefix;
             if (!destination.isNotCommonType)
                 prefix = Constants.DESTINATION_ARROW_PREFIX;
-            else if (destinationLocation.type == LocationType.STATION)
+            else if (destinationLocation == null || destinationLocation.type == LocationType.STATION)
                 prefix = Constants.DESTINATION_STATION_ARROW_PREFIX;
             else
                 prefix = Constants.DESTINATION_DIRECTION_ARROW_PREFIX;
             destinationView.setText(prefix + Formats.makeBreakableStationName(destinationName));
-            if (destinationLocation.hasId()) {
+            if (destinationLocation != null && destinationLocation.hasId()) {
                 destinationView.setOnLongClickListener(v -> {
                     final StationContextMenu contextMenu = new StationContextMenu(TripDetailsActivity.this, v, network, destinationLocation, null,
                             false, false, false, true,

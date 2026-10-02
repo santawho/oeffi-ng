@@ -35,4 +35,10 @@
         android:title="@string/user_interface_results_remark_links_clickable_enabled_title"
         android:summary="@string/user_interface_results_remark_links_clickable_enabled_summary" />
 
+    <CheckBoxPreference
+        android:key="user_interface_results_show_original_directions_enabled"
+        android:defaultValue="false"
+        android:title="@string/user_interface_results_show_original_directions_enabled_title"
+        android:summary="@string/user_interface_results_show_original_directions_enabled_summary" />
+
 </PreferenceScreen>
