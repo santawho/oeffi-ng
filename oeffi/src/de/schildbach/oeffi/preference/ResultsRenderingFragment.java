@@ -26,4 +26,10 @@ public class ResultsRenderingFragment extends PreferenceFragment {
     public void onCreatePreferences(@androidx.annotation.Nullable final Bundle savedInstanceState, @androidx.annotation.Nullable final String rootKey) {
         addPreferencesFromResource(R.xml.preference_results_rendering);
     }
+
+    @Override
+    protected boolean isPreferenceRequiringRestart(final String key) {
+        return "user_interface_results_show_original_directions_enabled".equals(key)
+                || super.isPreferenceRequiringRestart(key);
+    }
 }
