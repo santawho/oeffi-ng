@@ -1,0 +1,50 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
+
+name: Java CI with Gradle
+
+on:
+  push:
+    branches: [ "nextgen" ]
+  pull_request:
+    branches: [ "nextgen" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+    - name: Checkout sources with submodules
+      uses: actions/checkout@v7
+      with:
+        submodules: recursive
+        
+    - name: Set up JDK 17
+      uses: actions/setup-java@v6
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
+    # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v6
+      
+    - name: Build unsigned release APK
+      working-directory: androidstudio
+      env:
+        OEFFI_NG_JKS_PASSWORD: ${{secrets.OEFFI_NG_JKS_PASSWORD}}
+      run: ./gradlew assembleNgUnsignedRelease
+
+    - name: Upload unsigned APK
+      uses: actions/upload-artifact@v7
+      with:
+        name: oeffi-ng-unsigned-release
+        path: androidstudio/oeffi-studio/build/outputs/apk/ng/unsignedRelease/*.apk
