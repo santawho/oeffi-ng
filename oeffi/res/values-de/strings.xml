@@ -76,6 +76,8 @@
     <string name="network_preferences_credentials_title">Zugangsdaten</string>
     <string name="network_preferences_credentials_summary">Gib Zugangsdaten an, falls vom Provider benötigt, z.B. ein API-Token</string>
     <string name="network_preferences_credentials_edit_title">Zugangsdaten …</string>
+    <string name="network_preferences_credentials_not_working_title">Test fehlgeschlagen</string>
+    <string name="network_preferences_credentials_not_working_message">Das Netzwerk verweigert den Zugriff mit diesen Zugangsdaten!</string>
     <string name="network_preferences_credentials_edit_hint">… für %1$s</string>
 
     <!-- preferences shortcuts -->

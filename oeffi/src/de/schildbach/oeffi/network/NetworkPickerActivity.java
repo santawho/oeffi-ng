@@ -359,9 +359,18 @@ public class NetworkPickerActivity extends OeffiActivity implements
 
     @Override
     public void onNetworkClick(final NetworkListEntry.Network entry) {
+        final NetworkId networkId = entry.id;
+        if (entry.credentialsRequired) {
+            final NetworkProviderFactory networkProviderFactory = NetworkProviderFactory.getInstance();
+            final String credentials = networkProviderFactory.getNetworkCredentials(networkId);
+            if (credentials == null) {
+                NetworkCredentialsDialog.show(this, networkId);
+                return;
+            }
+        }
         // persist in preferences
-        prefs.edit().putString(application.getPrefsKeyNetwork(isForOperations), entry.id.name()).commit();
-        lastNetworks.addNetwork(entry.id);
+        prefs.edit().putString(application.getPrefsKeyNetwork(isForOperations), networkId.name()).apply();
+        lastNetworks.addNetwork(networkId);
         finish();
     }
 

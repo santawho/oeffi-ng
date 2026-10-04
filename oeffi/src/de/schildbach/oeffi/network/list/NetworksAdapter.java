@@ -17,7 +17,7 @@
 
 package de.schildbach.oeffi.network.list;
 
-import android.content.Context;
+import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import androidx.recyclerview.widget.RecyclerView;
@@ -30,7 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class NetworksAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    private final Context context;
+    private final Activity context;
     private final LayoutInflater inflater;
     private final NetworkId previouslySelectedNetwork;
     private final NetworkClickListener clickListener;
@@ -39,8 +39,11 @@ public class NetworksAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private final List<NetworkListEntry> entries = new LinkedList<>();
     private final NetworkId.State limitSelectableState;
 
-    public NetworksAdapter(final Context context, final NetworkId previouslySelectedNetwork,
-            final NetworkClickListener clickListener, final NetworkContextMenuItemListener contextMenuItemListener) {
+    public NetworksAdapter(
+            final Activity context,
+            final NetworkId previouslySelectedNetwork,
+            final NetworkClickListener clickListener,
+            final NetworkContextMenuItemListener contextMenuItemListener) {
         this.context = context;
         this.inflater = LayoutInflater.from(context);
         this.previouslySelectedNetwork = previouslySelectedNetwork;

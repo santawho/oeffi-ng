@@ -49,7 +49,7 @@ public class NetworkFragment extends PreferenceFragment {
             NetworkPickerActivity.start(context, false);
         });
         setupCustomPreference(PREF_KEY_NETWORK_CREDENTIALS, preference ->
-                NetworkCredentialsDialog.show(getContext(), application.prefsGetNetworkId(false)));
+                NetworkCredentialsDialog.show(preferenceActivity, application.prefsGetNetworkId(false)));
         setupDynamicSummary(
                 Constants.PREFS_KEY_NETWORK_PROVIDER, R.string.network_preferences_provider_summary,
                 networkIdName -> (networkIdName == null) ? "-"

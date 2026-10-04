@@ -17,7 +17,7 @@
 
 package de.schildbach.oeffi.network.list;
 
-import android.content.Context;
+import android.app.Activity;
 import android.content.res.Resources;
 import android.text.Html;
 import android.view.View;
@@ -27,6 +27,7 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.network.NetworkCredentialsDialog;
 import de.schildbach.oeffi.network.NetworkResources;
 import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.pte.NetworkId;
@@ -34,7 +35,7 @@ import de.schildbach.pte.NetworkId;
 import javax.annotation.Nullable;
 
 public class NetworkViewHolder extends RecyclerView.ViewHolder {
-    private final Context context;
+    private final Activity context;
     private final Resources res;
     private final int colorSignificant;
     private final int colorLessSignificant;
@@ -51,7 +52,7 @@ public class NetworkViewHolder extends RecyclerView.ViewHolder {
 
     private static final int MEGABYTE = 1024 * 1024;
 
-    public NetworkViewHolder(final Context context, final View itemView) {
+    public NetworkViewHolder(final Activity context, final View itemView) {
         super(itemView);
         this.context = context;
         this.res = context.getResources();
@@ -105,7 +106,12 @@ public class NetworkViewHolder extends RecyclerView.ViewHolder {
         commentView.setText(Html.fromHtml(networkRes.comment, Html.FROM_HTML_MODE_COMPACT));
         commentView.setTextColor(isEnabled ? colorSignificant : colorLessSignificant);
 
-        ViewUtils.setVisibility(credentialsRequiredView, entry.credentialsRequired);
+        if (entry.credentialsRequired) {
+            credentialsRequiredView.setOnClickListener(view ->
+                    NetworkCredentialsDialog.show(context, entry.id));
+        } else {
+            credentialsRequiredView.setVisibility(View.GONE);
+        }
 
         if (dbFileLength > 0) {
             usageView.setVisibility(View.VISIBLE);
