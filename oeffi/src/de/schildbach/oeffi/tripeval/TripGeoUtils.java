@@ -89,7 +89,7 @@ public class TripGeoUtils {
         }
 
         private void addPointFromLocation(final Location location) {
-            if (location != null)
+            if (location != null && location.hasCoord())
                 pointsAsList.add(location.coord);
         }
 
