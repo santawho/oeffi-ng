@@ -26,14 +26,26 @@ ext {
 
 def oeffi_ng_password = System.getenv('OEFFI_NG_JKS_PASSWORD')
 if (!oeffi_ng_password) {
-    file('../../passwords.properties').withInputStream {
-        def props = new Properties()
-        props.load(it)
-        oeffi_ng_password = props.get('oeffi_ng.jks.password')
-        CREDENTIALS.github_user = props.get('github.user')
-        CREDENTIALS.github_repo = props.get('github.repo')
-        CREDENTIALS.github_token = props.get('github.token')
+    def propsFile = file('../../passwords.properties')
+    if (propsFile.exists()) {
+        propsFile.withInputStream {
+            def props = new Properties()
+            props.load(it)
+            oeffi_ng_password = props.get('oeffi_ng.jks.password')
+            CREDENTIALS.github_user = props.get('github.user')
+            CREDENTIALS.github_repo = props.get('github.repo')
+            CREDENTIALS.github_token = props.get('github.token')
+        }
+    } else {
+        oeffi_ng_password = "NOPASSWORD"
+        CREDENTIALS.github_user = "NOUSER"
+        CREDENTIALS.github_repo = "NOREPO"
+        CREDENTIALS.github_token = "NOTOKEN"
     }
+} else {
+    CREDENTIALS.github_user = "NOUSER"
+    CREDENTIALS.github_repo = "NOREPO"
+    CREDENTIALS.github_token = "NOTOKEN"
 }
 
 def androidManifest = new XmlSlurper().parse("../oeffi/AndroidManifest.xml")
@@ -148,7 +160,6 @@ android {
     buildTypes {
         configureEach {
             minifyEnabled false
-            signingConfig = signingConfigs.oeffi_ng
         }
         debug {
             debuggable true
@@ -163,11 +174,13 @@ android {
 //            minifyEnabled true
 //            shrinkResources false
 //            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig = signingConfigs.oeffi_ng
         }
         mainRelease {
 //            minifyEnabled true
 //            shrinkResources false
 //            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig = signingConfigs.oeffi_ng
         }
         release {
 //            minifyEnabled true
