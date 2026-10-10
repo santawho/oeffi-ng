@@ -2823,13 +2823,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
 
         if (providedTime != null || simulatedTime != null) {
-            final View.OnClickListener onClickListener = v -> {
-                final Spanned tooltip = getTooltipForStop(stop, simulatedStop, now.getTime());
-                DialogBuilder.get(this)
-                        .setCanceledOnTouchOutside(true)
-                        .setMessage(tooltip)
-                        .show();
-            };
+            final View.OnClickListener onClickListener = v -> DialogBuilder.tooltip(this,
+                    getTooltipForStop(stop, simulatedStop, now.getTime())).show();
             stopDateFrameView.setOnClickListener(onClickListener);
             stopTimeFrameView.setOnClickListener(onClickListener);
             stopDelayFrameView.setOnClickListener(onClickListener);
@@ -2935,6 +2930,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 realStop.getArrivalDelay(),
                 simulatedStop == null ? null : simulatedStop.predictedArrivalTime,
                 simulatedStop == null ? null : simulatedStop.getArrivalDelay(),
+                realStop.arrivalCancelled,
                 now);
         final String departureEvent = getTooltipForStopEvent(realStop,
                 getString(R.string.directions_trip_details_public_entry_tooltip_label_departure),
@@ -2943,6 +2939,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 realStop.getDepartureDelay(),
                 simulatedStop == null ? null : simulatedStop.predictedDepartureTime,
                 simulatedStop == null ? null : simulatedStop.getDepartureDelay(),
+                realStop.departureCancelled,
                 now);
 
         final String eventText;
@@ -2967,6 +2964,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final PTDate plannedTime,
             final PTDate predictedTime, final Long delay,
             final PTDate simulatedTime, final Long simulatedDelay,
+            final boolean isCancelled,
             final long now) {
         if (plannedTime == null && predictedTime == null)
             return null;
@@ -2997,10 +2995,17 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             simulatedDelayText = getString(R.string.directions_trip_details_public_entry_tooltip_delay_format, delayMins);
         }
 
+        final String titleAppendix;
+        if (isCancelled)
+            titleAppendix = String.format(" (%s)", getString(R.string.directions_trip_details_public_entry_tooltip_event_cancelled));
+        else
+            titleAppendix = "";
+
         return getString(R.string.directions_trip_details_public_entry_tooltip_event_format,
                 eventLabel, plannedText,
                 predictedText, delayText,
-                simulatedText, simulatedDelayText);
+                simulatedText, simulatedDelayText,
+                titleAppendix);
     }
 
     private String getTooltipForPTDate(final PTDate timestamp, final String todayString, final long now) {

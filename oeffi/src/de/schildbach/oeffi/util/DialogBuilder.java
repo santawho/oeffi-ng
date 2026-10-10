@@ -50,6 +50,13 @@ public class DialogBuilder extends AlertDialog.Builder {
         return builder;
     }
 
+    public static DialogBuilder tooltip(final Context context, final CharSequence tooltip) {
+        final DialogBuilder builder = get(context);
+        builder.setCanceledOnTouchOutside(true);
+        builder.setMessage(tooltip);
+        return builder;
+    }
+
     private DialogBuilder(final Context context, final int theme) {
         super(context, theme);
     }
