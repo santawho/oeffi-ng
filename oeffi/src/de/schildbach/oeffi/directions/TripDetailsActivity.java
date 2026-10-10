@@ -1565,10 +1565,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
                     final Stop possiblySimulatedStop = intermediateSimulatedStops == null ? null : intermediateSimulatedStops.get(intermediateIndex);
                     final Stop simulatedStop = isRowSimulated ? possiblySimulatedStop : null;
-                    final boolean showLongStay = isShowLongStay(stop, isRowSimulated);
+                    final boolean showLongStay = isShowLongStay(stop, isRowSimulated) || stop.arrivalCancelled != stop.departureCancelled;
 
                     final boolean highlightAnyTime = isArrivalTimeHighlighted || isDepartureTimeHighlighted;
-                    if (isArrivalSection) {
+                    final boolean showArrival = isArrivalSection
+                            ? !(stop.arrivalCancelled && !stop.departureCancelled)
+                            : !stop.arrivalCancelled && stop.departureCancelled;
+                    if (showArrival) {
                         addStopRow(stopsView,
                                 hasStopTime ? PearlView.Type.INTERMEDIATE_ARRIVAL : PearlView.Type.PASSING,
                                 showLongStay,
