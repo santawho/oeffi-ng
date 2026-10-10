@@ -112,6 +112,7 @@ public class LineView extends AppCompatTextView {
     }
 
     private void update() {
+        CharSequence tooltip = null;
         if (lines != null && !lines.isEmpty()) {
             if (hideIfEmpty)
                 setVisibility(VISIBLE);
@@ -185,18 +186,19 @@ public class LineView extends AppCompatTextView {
                         .filter(Objects::nonNull)
                         .collect(Collectors.joining("\n"));
                 if (!sheet.isEmpty())
-                    setTooltipText(sheet);
-                else
-                    setTooltipText(null);
-            } else {
-                setTooltipText(null);
+                    tooltip = sheet;
             }
         } else {
             if (hideIfEmpty)
                 setVisibility(GONE);
             setText(null);
-            setTooltipText(null);
         }
+        // setTooltipText(tooltip);
+        final CharSequence finalTooltip = tooltip;
+        setOnLongClickListener(tooltip == null ? null : view -> {
+            DialogBuilder.tooltip(getContext(), finalTooltip).show();
+            return true;
+        });
     }
 
     private static class Span extends ReplacementSpan {
