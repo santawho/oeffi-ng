@@ -622,6 +622,7 @@ public class TripRenderer {
             publicDepartureLegIndex = -1;
         }
 
+        public long refreshedAt;
         public long refreshNotificationRequiredAt;
         public long refreshTripRequiredAt;
         public int currentLegCIndex;

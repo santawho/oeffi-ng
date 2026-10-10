@@ -159,6 +159,7 @@ public class NavigationNotification {
     private static final long KEEP_NOTIFICATION_FOR_MINUTES = 30;
     private static final long REMINDER_FIRST_MS = 6 * 60 * 1000;
     private static final long REMINDER_SECOND_MS = 2 * 60 * 1000;
+    private static final long INHIBIT_FAST_REFRESH_MS = 10 * 1000;
     private static final int ACTION_REFRESH = 1;
     private static final int ACTION_DELETE = 2;
     private static final String INTENT_EXTRA_ACTION = NavigationNotification.class.getName() + ".action";
@@ -413,7 +414,7 @@ public class NavigationNotification {
     public static long refreshAllGuides(final Context context) {
         final AtomicLong minRefreshAt = new AtomicLong(Long.MAX_VALUE);
         forAllActiveNotifications(context, "refresh", navigationNotification -> {
-            final long refreshAt = navigationNotification.refresh();
+            final long refreshAt = navigationNotification.refresh(false);
             if (refreshAt > 0 && refreshAt < minRefreshAt.get())
                 minRefreshAt.set(refreshAt);
             return true;
@@ -430,6 +431,7 @@ public class NavigationNotification {
         final AtomicBoolean anythingDone = new AtomicBoolean();
         forAllActiveNotifications(context, "speak", navigationNotification -> {
             NavigationAlarmManager.runOnHandlerThread(() -> {
+                navigationNotification.refresh(true);
                 navigationNotification.update(null, speakInstruction, delayUntil);
             });
             if (showInformation) {
@@ -993,9 +995,9 @@ public class NavigationNotification {
 
 //    static Long pppp;
 
-    List<EventLogEntry> newEventLogEntries;
-    List<String> newSpeakTexts;
-    List<EventNotificationData> newEventNotifications;
+    private List<EventLogEntry> newEventLogEntries;
+    private List<String> newSpeakTexts;
+    private List<EventNotificationData> newEventNotifications;
 
     private boolean update(
             final Trip aTrip,
@@ -1371,6 +1373,7 @@ public class NavigationNotification {
 
         newNotified.refreshNotificationRequiredAt = nextRefreshTimeMs;
         newNotified.refreshTripRequiredAt = nextTripReloadTimeMs;
+        newNotified.refreshedAt = nowTime;
 
         if (nextRefreshTimeMs > 0) {
             log.info("refreshing in {} secs at {} (reason: {}), reminder at {}, trip reload at {}",
@@ -1590,6 +1593,7 @@ public class NavigationNotification {
                 final NavigationNotification navigationNotification = new NavigationNotification(intent);
                 switch (intent.getIntExtra(INTENT_EXTRA_ACTION, 0)) {
                     case ACTION_REFRESH:
+                        navigationNotification.refresh(true);
                         navigationNotification.update(null, true);
                         break;
                     case ACTION_DELETE:
@@ -1616,20 +1620,24 @@ public class NavigationNotification {
         return PendingIntent.getBroadcast(context, action, intent, PendingIntent.FLAG_IMMUTABLE);
     }
 
-    private long refresh() {
+    private long refresh(final boolean force) {
         log.info("refreshing notification");
         final Date now = new Date();
         final long nowTime = now.getTime();
         final long refreshRequiredAt = lastNotified.refreshNotificationRequiredAt;
-        if (nowTime < refreshRequiredAt)
+        if (nowTime < refreshRequiredAt && nowTime - lastNotified.refreshedAt < INHIBIT_FAST_REFRESH_MS)
             return refreshRequiredAt; // ignore multiple alarms in short time
         Trip newTrip = null;
         final long refreshTripRequiredAt = lastNotified.refreshTripRequiredAt;
         final long refreshTripRequiredFromNow = refreshTripRequiredAt - nowTime;
-        if (refreshTripRequiredAt > 0 && refreshTripRequiredFromNow <= 0) {
+        if (force || (refreshTripRequiredAt > 0 && refreshTripRequiredFromNow <= 0)) {
             log.info("refreshing trip");
             try {
-                newTrip = TripUtils.refreshTrip(intentData.network, getTrip(), extraData.refreshAllLegs, false, now, 30000);
+                newTrip = TripUtils.refreshTrip(
+                        intentData.network, getTrip(),
+                        force || extraData.refreshAllLegs,
+                        false,
+                        now, 30000);
             } catch (final IOException e) {
                 log.error("error while refreshing trip", e);
             }

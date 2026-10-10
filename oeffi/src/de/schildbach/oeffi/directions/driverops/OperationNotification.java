@@ -527,6 +527,7 @@ public class OperationNotification {
 
         newNotified.refreshNotificationRequiredAt = nextRefreshTimeMs;
         newNotified.refreshTripRequiredAt = nextTripReloadTimeMs;
+        newNotified.refreshedAt = nowTime;
 
         if (nextRefreshTimeMs > 0) {
             log.info("refreshing in {} secs at {} (reason: {}), trip reload at {}",
