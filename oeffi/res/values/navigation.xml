@@ -45,6 +45,9 @@
         <item translatable="false">always</item>
     </string-array>
 
+    <string name="navigation_speech_language_as_provider_summary">Check this to speak announcements in the language of the data provider</string>
+    <string name="navigation_speech_language_as_provider_title">Speech Language</string>
+
     <string name="navigation_preferences_media_channel_summary">Amplify sound volume when played on media channel, e.g. default for headphones</string>
     <string name="navigation_preferences_media_channel_title">Volume Amplification</string>
 

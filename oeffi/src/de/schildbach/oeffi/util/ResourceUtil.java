@@ -17,11 +17,14 @@
 
 package de.schildbach.oeffi.util;
 
+import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 
 import java.util.Locale;
 
 import de.schildbach.oeffi.Application;
+import de.schildbach.oeffi.R;
 import de.schildbach.pte.dto.Product;
 
 public class ResourceUtil {
@@ -35,7 +38,7 @@ public class ResourceUtil {
         return application.getString(productResId);
     }
 
-    public static String[] getStringArray(final int resId, Object... formatArgs) {
+    public static String[] getStringArray(final int resId, final Object... formatArgs) {
         final Resources resources = Application.getInstance().getResources();
         final Locale locale = resources.getConfiguration().getLocales().get(0);
         final String[] strings = resources.getStringArray(resId);
@@ -44,5 +47,15 @@ public class ResourceUtil {
             strings[pos] = String.format(locale, string, formatArgs);
         }
         return strings;
+    }
+
+    public static Context getLanguageContext(final Context context, final String languageCode) {
+        if (languageCode == null)
+            return context;
+        final Configuration configuration = new Configuration(context.getResources().getConfiguration());
+        configuration.setLocale(Locale.forLanguageTag(languageCode));
+        final Context newContext = context.createConfigurationContext(configuration);
+        final String newLanguageCode = newContext.getString(R.string.locale);
+        return languageCode.equals(newLanguageCode) ? newContext : context;
     }
 }

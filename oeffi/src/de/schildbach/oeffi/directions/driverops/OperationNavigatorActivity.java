@@ -732,7 +732,8 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
                 AudioAttributes.USAGE_MEDIA,
                 gongSoundId,
                 null,
-                Collections.singletonList(sb.toString()));
+                Collections.singletonList(sb.toString()),
+                null);
     }
 
     private boolean announceLineAndDirection(
@@ -795,7 +796,8 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
                 AudioAttributes.USAGE_MEDIA,
                 0,
                 null,
-                Collections.singletonList(message));
+                Collections.singletonList(message),
+                null);
         return true;
     }
 }

@@ -34,6 +34,9 @@
         <item>Immer</item>
     </string-array>
 
+    <string name="navigation_speech_language_as_provider_summary">Aktiviere dies, um die Anweisungen in der Sprache des Daten-Providers zu sprechen</string>
+    <string name="navigation_speech_language_as_provider_title">Sprache der Sprachausgabe</string>
+
     <string name="navigation_preferences_media_channel_summary">Erhöhe die Lautstärke bei Ausgabe auf dem Medienkanal, z.B. Standard für Kopfhörer</string>
     <string name="navigation_preferences_media_channel_title">Lautstärke erhöhen</string>
 

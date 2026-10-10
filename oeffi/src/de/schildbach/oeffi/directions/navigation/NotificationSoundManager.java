@@ -73,10 +73,15 @@ public class NotificationSoundManager {
     private final ArrayList<Speakable> speakableQueue = new ArrayList<>();
 
     public static class Speakable {
+        public final String languageCode;
         public final String text;
         public final int stream;
 
-        public Speakable(final String text, final int stream) {
+        public Speakable(
+                final String languageCode,
+                final String text,
+                final int stream) {
+            this.languageCode = languageCode;
             this.text = text;
             this.stream = stream;
         }
@@ -150,9 +155,10 @@ public class NotificationSoundManager {
             final int soundUsage,
             final int soundId,
             final long[] vibrationPattern,
-            final List<String> speakTexts) {
+            final List<String> speakTexts,
+            final String languageCode) {
         backgroundHandler.post(() -> {
-            internPlayAlarmSoundAndVibration(soundUsage, soundId, vibrationPattern, speakTexts);
+            internPlayAlarmSoundAndVibration(soundUsage, soundId, vibrationPattern, speakTexts, languageCode);
         });
     }
 
@@ -160,7 +166,8 @@ public class NotificationSoundManager {
             final int soundUsage,
             final int soundId,
             final long[] vibrationPattern,
-            final List<String> speakTexts) {
+            final List<String> speakTexts,
+            final String languageCode) {
         final Context context = getContext();
         if (vibrationPattern != null) {
             ((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE)).vibrate(vibrationPattern, -1);
@@ -201,7 +208,7 @@ public class NotificationSoundManager {
             final int audioStream = getAudioStreamFromUsage(soundUsage);
             for (final String text : speakTexts) {
                 log.info("speaking: \"{}\" stream {}", text, audioStream);
-                isSpeaking |= speak(text, audioStream);
+                isSpeaking |= speak(languageCode, text, audioStream);
             }
             if (!isSpeaking)
                 log.warn("no speech queued");
@@ -348,8 +355,11 @@ public class NotificationSoundManager {
         return false;
     }
 
-    public boolean speak(final String text, final int audioStream) {
-        return speak(new Speakable(text, audioStream));
+    public boolean speak(
+            final String languageCode,
+            final String text,
+            final int audioStream) {
+        return speak(new Speakable(languageCode, text, audioStream));
     }
 
     public boolean speak(final Speakable speakable) {
@@ -388,6 +398,9 @@ public class NotificationSoundManager {
         final Bundle params = new Bundle();
         params.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, speakable.stream);
 
+        final String speakableLanguage = speakable.languageCode;
+        final Locale speakableLocale = Locale.forLanguageTag(speakableLanguage);
+
         boolean res = true;
 
         // split sections of [~lang:XX[part]~] and speak part using language XX
@@ -404,33 +417,31 @@ public class NotificationSoundManager {
             pos = langEndIndex + 1;
             final int textEndIndex = text.indexOf("]~]", pos);
             final String langText = text.substring(pos, textEndIndex);
-            if (lang.equals(DEFAULT_LOCALE.getLanguage())) {
+            if (lang.equals(speakableLanguage)) {
                 sb.append(langText);
             } else {
                 if (sb.length() > 0) {
-                    res &= queueSpeak(sb.toString(), params);
+                    res &= queueSpeak(speakableLocale, sb.toString(), params);
                     sb = new StringBuilder();
                 }
-                final Locale locale = Locale.forLanguageTag(lang);
-                textToSpeech.setLanguage(locale);
-                res &= queueSpeak(langText, params);
-                textToSpeech.setLanguage(DEFAULT_LOCALE);
+                res &= queueSpeak(Locale.forLanguageTag(lang), langText, params);
             }
             pos = textEndIndex + 3;
         }
         if (pos < text.length())
             sb.append(text.substring(pos));
         if (sb.length() > 0)
-            res &= queueSpeak(sb.toString(), params);
+            res &= queueSpeak(speakableLocale, sb.toString(), params);
 
         return res;
     }
 
-    private boolean queueSpeak(final String text, final Bundle params) {
+    private boolean queueSpeak(final Locale locale, final String text, final Bundle params) {
         if (text == null || text.isEmpty())
             return true;
         final String utteranceId = NotificationSoundManager.class.getName() + ":" + utteranceIdCounter;
         utteranceIdCounter += 1;
+        textToSpeech.setLanguage(locale);
         return TextToSpeech.SUCCESS == textToSpeech.speak(text, TextToSpeech.QUEUE_ADD, params, utteranceId);
     }
 
@@ -445,7 +456,7 @@ public class NotificationSoundManager {
     public static String makeSpeakableLocationName(final String locationName, final String languageCode) {
         if (locationName == null)
             return null;
-        return NotificationSoundManager.speakableTextForLanguage(
+        return speakableTextForLanguage(
                 removeDisturbingInterpunctuationFromSpeakableName(locationName),
                 languageCode);
     }

@@ -77,6 +77,7 @@ import de.schildbach.oeffi.util.ClockUtils;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.ResourceUri;
+import de.schildbach.oeffi.util.ResourceUtil;
 import de.schildbach.oeffi.util.TimeZoneSelector;
 import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.pte.dto.Destination;
@@ -103,6 +104,7 @@ public class NavigationNotification {
     public static final String PREFS_KEY_NAVIGATION_FULL_SOUNDS_WHEN_SPEAKING = "navigation_full_sounds_when_speaking";
     public static final String PREFS_KEY_NAVIGATION_REFRESH_BEEP = "navigation_refresh_beep";
     public static final String PREFS_KEY_NOTIFICATIONS_ENABLED = "navigation_notifications_enabled";
+    public static final String PREFS_KEY_NOTIFICATIONS_SPEECH_LANGUAGE_AS_PROVIDER = "navigation_speech_language_as_provider";
     public static final String PREFS_KEY_NOTIFICATIONS_CHANGES_SHOW_WHEN = "navigation_notification_changes_show_when";
     public static final String PREFS_KEY_NOTIFICATIONS_CHANGES_REMOVE_WHEN = "navigation_notification_changes_remove_when";
     public static final String PREFS_KEY_NOTIFICATIONS_DIRECTIONS_SHOW_WHEN = "navigation_notification_directions_show_when";
@@ -997,6 +999,8 @@ public class NavigationNotification {
 
     private List<EventLogEntry> newEventLogEntries;
     private List<String> newSpeakTexts;
+    private String speechLanguageCode;
+    private Context speechResourcesContext;
     private List<EventNotificationData> newEventNotifications;
 
     @SuppressLint("ScheduleExactAlarm")
@@ -1011,6 +1015,10 @@ public class NavigationNotification {
         this.newEventLogEntries = new ArrayList<>();
         this.newSpeakTexts = new ArrayList<>();
         this.newEventNotifications = new ArrayList<>();
+        this.speechResourcesContext = ResourceUtil.getLanguageContext(context,
+                prefs.getBoolean(PREFS_KEY_NOTIFICATIONS_SPEECH_LANGUAGE_AS_PROVIDER, false)
+                        ? trip.from.language : null);
+        this.speechLanguageCode = speechResourcesContext.getString(R.string.locale);
         // addEventOutputMessage(newEventLogEntries, "updating");
         final long tripUpdatedAt = tripUpdatedAtDate.getTime();
         final Date now = new Date();
@@ -1476,6 +1484,7 @@ public class NavigationNotification {
                     SOUND_ALARM,
                     VIBRATION_PATTERN_ALARM,
                     newSpeakTexts,
+                    speechLanguageCode,
                     onRide,
                     delaySoundUntil);
         } else if (reminderSoundId != SOUND_REMIND_VIA_NOTIFICATION) {
@@ -1484,6 +1493,7 @@ public class NavigationNotification {
                         reminderSoundId,
                         reminderSoundId == 0 ? null : VIBRATION_PATTERN_REMIND,
                         newSpeakTexts,
+                        speechLanguageCode,
                         onRide,
                         delaySoundUntil);
             } else if (speakPreview) {
@@ -1493,6 +1503,7 @@ public class NavigationNotification {
                         SOUND_PREVIEW,
                         null,
                         newSpeakTexts,
+                        speechLanguageCode,
                         onRide,
                         delaySoundUntil);
             }
@@ -1507,6 +1518,7 @@ public class NavigationNotification {
             final int aSoundId,
             final long[] vibrationPattern,
             final List<String> speakTexts,
+            final String languageCode,
             final boolean onRide,
             final long delayUntil) {
         final NotificationSoundManager soundManager = NotificationSoundManager.getInstance();
@@ -1535,7 +1547,8 @@ public class NavigationNotification {
         soundManager.playAlarmSoundAndVibration(
                 actualUsage, actualSoundId,
                 actualVibrationPattern,
-                doSpeech ? speakTexts : null);
+                doSpeech ? speakTexts : null,
+                languageCode);
     }
 
     public void remove() {
@@ -1647,12 +1660,12 @@ public class NavigationNotification {
                 if (!alarmPlayed && prefs.getBoolean(PREFS_KEY_NAVIGATION_REFRESH_BEEP, false)) {
                     playAlarmSoundAndVibration(
                             AudioAttributes.USAGE_NOTIFICATION, R.raw.nav_refresh_beep,
-                            null, null, false, 0);
+                            null, null, null, false, 0);
                 }
             } else {
                 playAlarmSoundAndVibration(
                         AudioAttributes.USAGE_NOTIFICATION, R.raw.nav_refresh_error,
-                        null, null, false, 0);
+                        null, null, null, false, 0);
                 update(null, speakPreview, delaySoundUntil);
             }
         } else {
@@ -1910,20 +1923,20 @@ public class NavigationNotification {
         if (prevPosition == null) {
             if (newPosition == null)
                 return "";
-            return context.getString(
+            return speechResourcesContext.getString(
                     sayOn
                             ? R.string.navigation_event_speak_position_on_unchanged_format
                             : R.string.navigation_event_speak_position_to_unchanged_format,
                     newText);
         }
         if (newPosition == null || prevText.equals(newText)) {
-            return context.getString(
+            return speechResourcesContext.getString(
                     sayOn
                             ? R.string.navigation_event_speak_position_on_unchanged_format
                             : R.string.navigation_event_speak_position_to_unchanged_format,
                     prevText);
         }
-        return context.getString(
+        return speechResourcesContext.getString(
                 sayOn
                         ? R.string.navigation_event_speak_position_on_changed_format
                         : R.string.navigation_event_speak_position_to_changed_format,
@@ -1948,30 +1961,30 @@ public class NavigationNotification {
         if (plannedTime == null) {
             if (estimatedTime == null)
                 return "";
-            return context.getString(R.string.navigation_event_speak_times_nodelay_format, estimatedTime);
+            return speechResourcesContext.getString(R.string.navigation_event_speak_times_nodelay_format, estimatedTime);
         }
         if (estimatedTime == null)
-            return context.getString(R.string.navigation_event_speak_times_nodelay_format, plannedTime);
+            return speechResourcesContext.getString(R.string.navigation_event_speak_times_nodelay_format, plannedTime);
         if (estimatedTime.equals(plannedTime))
-            return context.getString(R.string.navigation_event_speak_times_nodelay_ontime_format, estimatedTime);
-        return context.getString(R.string.navigation_event_speak_times_delayed_format,
+            return speechResourcesContext.getString(R.string.navigation_event_speak_times_nodelay_ontime_format, estimatedTime);
+        return speechResourcesContext.getString(R.string.navigation_event_speak_times_delayed_format,
                 plannedTime, estimatedTime, Long.toString(delayMillis / 60000));
     }
 
     private String remainingTimeForSpeakTextAtEnd(final long remainingMillis) {
         if (remainingMillis < -50000)
-            return context.getString(R.string.navigation_event_speak_time_left_end_negative_format,
+            return speechResourcesContext.getString(R.string.navigation_event_speak_time_left_end_negative_format,
                     Long.toString((-remainingMillis + 10000) / 60000));
         if (remainingMillis < 50000)
-            return context.getString(R.string.navigation_event_speak_notime_left_end_format);
-        return context.getString(R.string.navigation_event_speak_time_left_end_format,
+            return speechResourcesContext.getString(R.string.navigation_event_speak_notime_left_end_format);
+        return speechResourcesContext.getString(R.string.navigation_event_speak_time_left_end_format,
                 Long.toString((remainingMillis + 10000) / 60000));
     }
 
     private String remainingTimeForSpeakText(final long remainingMillis) {
         if (remainingMillis < 50000)
-            return context.getString(R.string.navigation_event_speak_notime_left_front_format);
-        return context.getString(R.string.navigation_event_speak_time_left_front_format,
+            return speechResourcesContext.getString(R.string.navigation_event_speak_notime_left_front_format);
+        return speechResourcesContext.getString(R.string.navigation_event_speak_time_left_front_format,
                 Long.toString((remainingMillis + 10000) / 60000));
     }
 
@@ -1989,7 +2002,7 @@ public class NavigationNotification {
             formatStringId = R.string.navigation_event_speak_transfer_time_standard_format;
         }
 
-        return context.getString(formatStringId, minutesText);
+        return speechResourcesContext.getString(formatStringId, minutesText);
     }
 
     private String remainingTimeForNotificationText(final long remainingMillis) {
@@ -2033,7 +2046,7 @@ public class NavigationNotification {
     private void addEventOutputNavigationStarted() {
         newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.START_STOP, context.getString(
                 R.string.navigation_event_log_entry_nav_start)));
-        newSpeakTexts.add(context.getString(
+        newSpeakTexts.add(speechResourcesContext.getString(
                 R.string.navigation_event_speak_nav_start));
         if (isEventNotificationsEnabled) {
             newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
@@ -2044,7 +2057,7 @@ public class NavigationNotification {
     private void addEventOutputNavigationRestarted() {
         newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.START_STOP, context.getString(
                 R.string.navigation_event_log_entry_nav_restart)));
-        newSpeakTexts.add(context.getString(
+        newSpeakTexts.add(speechResourcesContext.getString(
                 R.string.navigation_event_speak_nav_restart));
         if (isEventNotificationsEnabled) {
             newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
@@ -2055,7 +2068,7 @@ public class NavigationNotification {
     private void addEventOutputNavigationEnded() {
         newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.START_STOP, context.getString(
                 R.string.navigation_event_log_entry_nav_end)));
-        newSpeakTexts.add(context.getString(
+        newSpeakTexts.add(speechResourcesContext.getString(
                 R.string.navigation_event_speak_nav_end));
         if (isEventNotificationsEnabled) {
             newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
@@ -2068,7 +2081,7 @@ public class NavigationNotification {
             newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.SERVICES_CANCELLED, context.getString(
                     R.string.navigation_event_log_entry_services_cancelled)));
         }
-        newSpeakTexts.add(context.getString(
+        newSpeakTexts.add(speechResourcesContext.getString(
                 R.string.navigation_event_speak_services_cancelled));
         if (isEventNotificationsEnabled) {
             newEventNotifications.add(EventNotificationData.directionsEvent(context.getString(
@@ -2110,7 +2123,7 @@ public class NavigationNotification {
                 plannedTimeString,
                 predictedTimeString,
                 formatTimeSpan(plannedTime, predictedTime))));
-        newSpeakTexts.add(context.getString(
+        newSpeakTexts.add(speechResourcesContext.getString(
                 locationName == null
                         ? R.string.navigation_event_speak_transfer_start_same_station
                         : R.string.navigation_event_speak_transfer_start,
@@ -2143,7 +2156,7 @@ public class NavigationNotification {
         newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.TRANSFER_LEG_RESTART, context.getString(
                 R.string.navigation_event_log_entry_transfer_still_running,
                 locationName)));
-        newSpeakTexts.add(context.getString(
+        newSpeakTexts.add(speechResourcesContext.getString(
                 R.string.navigation_event_speak_transfer_still_running,
                 NotificationSoundManager.makeSpeakableLocationName(locationName, departureLocation.language)));
         if (isEventNotificationsEnabled) {
@@ -2171,7 +2184,7 @@ public class NavigationNotification {
         final String notificationDestination = makeNotificationDestination(departureLine, departureLocationName);
         if (sameLocation) {
             if (departurePosition != null) {
-                newSpeakTexts.add(context.getString(
+                newSpeakTexts.add(speechResourcesContext.getString(
                         R.string.navigation_event_speak_transfer_preview_same_location,
                         speakableArrivalLocationName,
                         speakableDestination,
@@ -2188,7 +2201,7 @@ public class NavigationNotification {
             }
         } else {
             if (departurePosition != null) {
-                newSpeakTexts.add(context.getString(
+                newSpeakTexts.add(speechResourcesContext.getString(
                         R.string.navigation_event_speak_transfer_preview_different_location,
                         speakableArrivalLocationName,
                         speakableDestination,
@@ -2203,7 +2216,7 @@ public class NavigationNotification {
                             transferTimeForNotificationText(tripRenderer))));
                 }
             } else {
-                newSpeakTexts.add(context.getString(
+                newSpeakTexts.add(speechResourcesContext.getString(
                         R.string.navigation_event_speak_transfer_preview_different_location_no_position,
                         speakableArrivalLocationName,
                         speakableDestination,
@@ -2230,7 +2243,7 @@ public class NavigationNotification {
         final String speakableArrivalLocationName = NotificationSoundManager.makeSpeakableLocationName(arrivalLocationName, arrivalLocation.language);
         final String speakableDestination = makeSpeakableDestination(null, arrivalLocationName, arrivalLocation.language);
         final String notificationDestination = makeNotificationDestination(null, arrivalLocationName);
-        newSpeakTexts.add(context.getString(
+        newSpeakTexts.add(speechResourcesContext.getString(
                 R.string.navigation_event_speak_transfer_preview_different_location_no_position,
                 speakableArrivalLocationName,
                 speakableDestination,
@@ -2250,7 +2263,7 @@ public class NavigationNotification {
         newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.FINAL_TRANSFER, context.getString(
                 R.string.navigation_event_log_entry_final_transfer_start,
                 locationName)));
-        newSpeakTexts.add(context.getString(
+        newSpeakTexts.add(speechResourcesContext.getString(
                 R.string.navigation_event_speak_final_transfer_start,
                 NotificationSoundManager.makeSpeakableLocationName(locationName, destination.language)));
         if (isEventNotificationsEnabled) {
@@ -2293,7 +2306,7 @@ public class NavigationNotification {
                 plannedTimeString,
                 predictedTimeString,
                 formatTimeSpan(plannedTime, predictedTime))));
-        newSpeakTexts.add(context.getString(
+        newSpeakTexts.add(speechResourcesContext.getString(
                 R.string.navigation_event_speak_public_leg_start,
                 makeSpeakableLineName(line, publicLeg.destination, publicLeg.departureStop.location),
                 NotificationSoundManager.makeSpeakableLocationName(locationName, location.language),
@@ -2322,7 +2335,7 @@ public class NavigationNotification {
                 R.string.navigation_event_log_entry_public_leg_still_running,
                 line.label,
                 locationName)));
-        newSpeakTexts.add(context.getString(
+        newSpeakTexts.add(speechResourcesContext.getString(
                 R.string.navigation_event_speak_public_leg_still_running,
                 makeSpeakableLineName(line, publicLeg.destination, publicLeg.departureStop.location),
                 NotificationSoundManager.makeSpeakableLocationName(locationName, location.language)));
@@ -2340,7 +2353,7 @@ public class NavigationNotification {
         newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.PUBLIC_LEG_END, context.getString(
                 R.string.navigation_event_log_entry_public_leg_end,
                 locationName)));
-        newSpeakTexts.add(context.getString(
+        newSpeakTexts.add(speechResourcesContext.getString(
                 R.string.navigation_event_speak_public_leg_end,
                 NotificationSoundManager.makeSpeakableLocationName(locationName, location.language)));
         if (isEventNotificationsEnabled) {
@@ -2417,7 +2430,7 @@ public class NavigationNotification {
                     predictedTimeString,
                     formatTimeSpan(plannedTime, predictedTime))));
         }
-        newSpeakTexts.add(context.getString(
+        newSpeakTexts.add(speechResourcesContext.getString(
                 R.string.navigation_event_speak_public_leg_end_reminder,
                 remainingTimeForSpeakText(timeLeftMs),
                 NotificationSoundManager.makeSpeakableLocationName(locationName, location.language),
@@ -2472,7 +2485,7 @@ public class NavigationNotification {
                     predictedTimeString,
                     formatTimeSpan(plannedTime, predictedTime))));
         }
-        newSpeakTexts.add(context.getString(
+        newSpeakTexts.add(speechResourcesContext.getString(
                 R.string.navigation_event_speak_transfer_end_reminder,
                 remainingTimeForSpeakText(timeLeftMs),
                 makeSpeakableLineName(line, toPublicLeg.destination, stop.location),
@@ -2505,7 +2518,7 @@ public class NavigationNotification {
                 Formats.fullLocationName(stop.location),
                 formatTimeSpan(plannedTime, predictedTime),
                 predictedTimeString)));
-        newSpeakTexts.add(context.getString(
+        newSpeakTexts.add(speechResourcesContext.getString(
                 R.string.navigation_event_speak_departure_delay_change,
                 timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime()),
                 remainingTimeForSpeakTextAtEnd(timeLeftMs)));
@@ -2536,7 +2549,7 @@ public class NavigationNotification {
                 Formats.fullLocationName(stop.location),
                 formatTimeSpan(plannedTime, predictedTime),
                 predictedTimeString)));
-        newSpeakTexts.add(context.getString(
+        newSpeakTexts.add(speechResourcesContext.getString(
                 R.string.navigation_event_speak_arrival_delay_change,
                 timesForSpeakText(plannedTimeString, predictedTimeString, predictedTime.getTime() - plannedTime.getTime()),
                 remainingTimeForSpeakTextAtEnd(timeLeftMs)));
@@ -2565,7 +2578,7 @@ public class NavigationNotification {
                 line.label,
                 Formats.fullLocationName(stop.location),
                 Formats.formatTime(timeZoneSelector, stop.getDepartureTime(true)))));
-        newSpeakTexts.add(context.getString(
+        newSpeakTexts.add(speechResourcesContext.getString(
                 R.string.navigation_event_speak_departure_position_change,
                 platformForSpeakText(true, oldPosition, newPosition)));
         if (isEventNotificationsEnabled) {
@@ -2591,7 +2604,7 @@ public class NavigationNotification {
                 publicLeg.line.label,
                 Formats.fullLocationName(stop.location),
                 Formats.formatTime(timeZoneSelector, stop.getArrivalTime(true)))));
-        newSpeakTexts.add(context.getString(
+        newSpeakTexts.add(speechResourcesContext.getString(
                 R.string.navigation_event_speak_arrival_position_change,
                 platformForSpeakText(true, oldPosition, newPosition)));
         if (isEventNotificationsEnabled) {
@@ -2607,7 +2620,7 @@ public class NavigationNotification {
     private void addEventOutputNextTransferCritical(final TripRenderer tripRenderer) {
         newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.TRANSFER_CRITICAL, context.getString(
                 R.string.navigation_event_log_entry_next_transfer_critical, tripRenderer.nextEventTransferLeftTimeValue)));
-        newSpeakTexts.add(context.getString(
+        newSpeakTexts.add(speechResourcesContext.getString(
                 R.string.navigation_event_speak_next_transfer_critical,
                 transferTimeForSpeakText(tripRenderer)));
         if (isEventNotificationsEnabled) {
@@ -2620,7 +2633,7 @@ public class NavigationNotification {
     private void addEventOutputAnyTransferCritical() {
         newEventLogEntries.add(new EventLogEntry(EventLogEntry.Type.TRANSFER_CRITICAL, context.getString(
                 R.string.navigation_event_log_entry_any_transfer_critical)));
-        newSpeakTexts.add(context.getString(
+        newSpeakTexts.add(speechResourcesContext.getString(
                 R.string.navigation_event_speak_any_transfer_critical));
         if (isEventNotificationsEnabled) {
             newEventNotifications.add(EventNotificationData.changeEvent(context.getString(
@@ -2688,7 +2701,7 @@ public class NavigationNotification {
 
     private String makeSpeakableLineName(final Line line, final Destination destination, final Location refLocation) {
         final Integer speakableProductResId = speakableProducts.get(line.product);
-        final String speakableProduct = context.getString(speakableProductResId == null
+        final String speakableProduct = speechResourcesContext.getString(speakableProductResId == null
                 ? R.string.navigation_event_speak_product_unknown
                 : speakableProductResId);
         final String speakableLineName;
@@ -2728,7 +2741,7 @@ public class NavigationNotification {
             final String locationName = Formats.fullLocationNameIfDifferentPlace(location, refLocation);
             destinationName = NotificationSoundManager.makeSpeakableLocationName(locationName, location.language);
         }
-        return context.getString(R.string.navigation_event_speak_linename,
+        return speechResourcesContext.getString(R.string.navigation_event_speak_linename,
                 speakableProduct.isEmpty() ? "" : (speakableProduct + " "),
                 speakableLineName,
                 destinationName);
@@ -2775,7 +2788,7 @@ public class NavigationNotification {
 
     private String makeSpeakableDestination(final Line line, final String destinationName, final String language) {
         final Integer speakableDestinationFormatResId = line == null ? null : speakableDestinations.get(line.product);
-        return context.getString(
+        return speechResourcesContext.getString(
                 speakableDestinationFormatResId == null
                         ? R.string.navigation_event_speak_to_destination
                         : speakableDestinationFormatResId,
