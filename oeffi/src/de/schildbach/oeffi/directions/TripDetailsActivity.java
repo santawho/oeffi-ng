@@ -3090,17 +3090,14 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
 
         public boolean onClick(final View v, final boolean isLongClick) {
-            final boolean showNavigateTo;
+            boolean showNavigateTo = false;
             if (renderConfig.isJourney) {
                 final Trip.Public journeyLeg = (Trip.Public) tripRenderer.trip.legs.get(0);
                 if (journeyLeg.exitLocation == null) {
                     final Location entry = journeyLeg.entryLocation;
-                    showNavigateTo = journeyLeg.isStopAfterOther(stop, entry);
-                } else {
-                    showNavigateTo = false;
+                    if (entry != null)
+                        showNavigateTo = journeyLeg.isStopAfterOther(stop, entry);
                 }
-            } else {
-                showNavigateTo = false;
             }
             final boolean isLastPublicStop = stop.location.equals(getLastPublicLocation());
             final boolean showTravelAlarm = isShowTravelAlarm();
