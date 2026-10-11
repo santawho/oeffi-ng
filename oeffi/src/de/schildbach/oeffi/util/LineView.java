@@ -76,7 +76,7 @@ public class LineView extends AppCompatTextView {
 
     public LineView(final Context context, final AttributeSet attrs, final int defStyle) {
         super(context, attrs, defStyle);
-        this.hideIfEmpty = attrs.getAttributeBooleanValue(null, "hideIfEmpty", false);
+        this.hideIfEmpty = attrs != null && attrs.getAttributeBooleanValue(null, "hideIfEmpty", false);
 
         setSingleLine();
         setTypeface(Typeface.DEFAULT_BOLD);

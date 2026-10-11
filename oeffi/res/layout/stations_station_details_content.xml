@@ -56,7 +56,7 @@
                         android:orientation="vertical"
                         android:paddingBottom="@dimen/text_padding_vertical_lax"
                         android:paddingLeft="@dimen/text_padding_horizontal_verylax"
-                        android:paddingRight="@dimen/text_padding_horizontal_verylax"
+                        android:paddingRight="@dimen/text_padding_horizontal_lax"
                         android:paddingTop="@dimen/text_padding_vertical_lax">
 
                         <LinearLayout
@@ -90,18 +90,53 @@
                                 android:textColor="@color/fg_less_significant" />
                         </LinearLayout>
 
-                        <androidx.core.widget.NestedScrollView
-                            android:id="@+id/stations_station_details_header_lines_scroll"
-                            android:layout_marginTop="@dimen/text_padding_vertical_lax"
-                            android:layout_marginBottom="@dimen/text_padding_vertical_lax"
+                        <LinearLayout
+                            android:id="@+id/stations_station_details_header_lines"
+                            android:orientation="horizontal"
                             android:layout_width="match_parent"
-                            android:layout_height="@dimen/stations_station_details_header_lines_scroll_max_height">
-                            <LinearLayout
-                                android:id="@+id/stations_station_details_header_lines"
-                                android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+                            <ViewAnimator
+                                android:id="@+id/stations_station_details_header_lines_container"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:orientation="vertical" />
-                        </androidx.core.widget.NestedScrollView>
+                                android:layout_weight="1"
+                                android:layout_marginTop="@dimen/text_padding_vertical_lax"
+                                android:layout_marginBottom="@dimen/text_padding_vertical_lax"
+                                android:measureAllChildren="false" >
+
+                                <HorizontalScrollView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content" >
+                                    <LinearLayout
+                                        android:orientation="horizontal"
+                                        android:id="@+id/stations_station_details_header_lines_compact"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:paddingBottom="@dimen/text_padding_vertical_cram" />
+                                </HorizontalScrollView>
+
+                                <androidx.core.widget.NestedScrollView
+                                    android:id="@+id/stations_station_details_header_lines_full_scroll"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="@dimen/stations_station_details_header_lines_scroll_max_height" >
+                                    <LinearLayout
+                                        android:orientation="vertical"
+                                        android:id="@+id/stations_station_details_header_lines_full"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content" />
+                                </androidx.core.widget.NestedScrollView>
+                            </ViewAnimator>
+
+                            <de.schildbach.oeffi.util.ToggleImageButton
+                                android:id="@+id/stations_station_details_header_lines_expand"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:paddingLeft="@dimen/text_padding_horizontal_cram"
+                                android:layout_gravity="top"
+                                android:scaleType="center"
+                                android:src="@drawable/ic_expand_black_24dp"
+                                android:tint="@color/fg_less_significant" />
+                        </LinearLayout>
 
                     </LinearLayout>
 

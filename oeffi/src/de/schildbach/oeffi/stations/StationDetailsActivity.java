@@ -36,6 +36,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -215,8 +216,11 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
     private TextView nameView;
     private TextView timeView;
     private TextView idView;
-    private NestedScrollView linesGroupScroll;
-    private LinearLayout linesGroup;
+    private ViewGroup linesGroup;
+    private ViewAnimator linesGroupContainer;
+    private NestedScrollView linesGroupFullScroll;
+    private LinearLayout linesGroupFull;
+    private LinearLayout linesGroupCompact;
     private ImageView multiStationsView;
     private LinearLayout.LayoutParams LINES_LAYOUT_PARAMS;
 
@@ -384,8 +388,12 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         headerView = findViewById(R.id.stations_station_details_header);
         nameView = findViewById(R.id.stations_station_details_header_name);
         idView = findViewById(R.id.stations_station_details_header_id);
-        linesGroupScroll = findViewById(R.id.stations_station_details_header_lines_scroll);
         linesGroup = findViewById(R.id.stations_station_details_header_lines);
+        linesGroupContainer = findViewById(R.id.stations_station_details_header_lines_container);
+        linesGroupContainer.setDisplayedChild(0);
+        linesGroupFullScroll = findViewById(R.id.stations_station_details_header_lines_full_scroll);
+        linesGroupFull = findViewById(R.id.stations_station_details_header_lines_full);
+        linesGroupCompact = findViewById(R.id.stations_station_details_header_lines_compact);
         multiStationsView = findViewById(R.id.stations_station_details_header_multistations);
         multiStationsView.setVisibility(View.GONE);
         LINES_LAYOUT_PARAMS = new LinearLayout.LayoutParams(
@@ -400,6 +408,11 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         selectStation(station);
         statusMessage(getString(R.string.stations_station_details_progress));
         updateDisclaimerSource(disclaimerSourceView, selectedNetwork, null);
+
+        ((ToggleImageButton) findViewById(R.id.stations_station_details_header_lines_expand))
+                .setOnCheckedChangeListener((buttonView, isChecked) -> {
+                    linesGroupContainer.setDisplayedChild(isChecked ? 1 : 0);
+                });
     }
 
     @Override
@@ -978,19 +991,28 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         }
 
         // lines
-        linesGroup.removeAllViews();
-        if (selectedLines != null) {
-            linesGroupScroll.setVisibility(View.VISIBLE);
-            linesGroupScroll.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-                    selectedLines.size() < 6
-                            ? LinearLayout.LayoutParams.WRAP_CONTENT
-                            : (int) getResources().getDimension(R.dimen.stations_station_details_header_lines_scroll_max_height)));
+        if (selectedLines == null || selectedLines.isEmpty()) {
+            linesGroup.setVisibility(View.GONE);
+        } else {
+            linesGroup.setVisibility(View.VISIBLE);
+            linesGroupFullScroll.setLayoutParams(
+                    new FrameLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            selectedLines.size() < 6
+                                    ? ViewGroup.LayoutParams.WRAP_CONTENT
+                                    : (int) getResources().getDimension(R.dimen.stations_station_details_header_lines_scroll_max_height)));
+            linesGroupFull.removeAllViews();
+            linesGroupCompact.removeAllViews();
             for (final Map.Entry<Line, List<Destination>> linesEntry : selectedLines.entrySet()) {
                 final Line line = linesEntry.getKey();
                 final List<Destination> destinations = linesEntry.getValue();
 
-                final View lineRow = getLayoutInflater().inflate(R.layout.stations_station_details_header_line, null);
-                linesGroup.addView(lineRow, LINES_LAYOUT_PARAMS);
+                final LineView compactLineView = (LineView) getLayoutInflater().inflate(R.layout.stations_station_details_header_line_compact, null);
+                compactLineView.setLine(line);
+                linesGroupCompact.addView(compactLineView);
+
+                final View lineRow = getLayoutInflater().inflate(R.layout.stations_station_details_header_line_full, null);
+                linesGroupFull.addView(lineRow, LINES_LAYOUT_PARAMS);
 
                 final LineView lineView = lineRow
                         .findViewById(R.id.stations_station_details_header_line_line);
@@ -1011,8 +1033,6 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 }
                 destinationView.setText(text);
             }
-        } else {
-            linesGroupScroll.setVisibility(View.GONE);
         }
     }
 
