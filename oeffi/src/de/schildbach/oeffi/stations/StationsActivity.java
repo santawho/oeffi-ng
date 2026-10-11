@@ -1091,26 +1091,28 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         filterActionButton.setSelected(!productsAreNetworkDefault(products));
 
         final ViewAnimator viewAnimator = findViewById(R.id.stations_list_layout);
+        final int childViewIndex;
         if (network == null || !NetworkProviderFactory.provider(network).hasCapabilities(Capability.DEPARTURES)) {
-            viewAnimator.setDisplayedChild(1); // Missing capability
-        } else if (searchQuery == null && ContextCompat.checkSelfPermission(this,
+            childViewIndex = 1; // Missing capability
+        } else if (searchQuery == null && fixedLocation == null && ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            viewAnimator.setDisplayedChild(2); // Location permission denied
-        } else if (searchQuery == null && loading && deviceLocation == null && !anyProviderEnabled) {
-            viewAnimator.setDisplayedChild(3); // Location providers disabled
-        } else if (searchQuery == null && loading && deviceLocation == null && anyProviderEnabled) {
-            viewAnimator.setDisplayedChild(4); // Acquiring location
+            childViewIndex = 2; // Location permission denied
+        } else if (searchQuery == null && fixedLocation == null && loading && deviceLocation == null && !anyProviderEnabled) {
+            childViewIndex = 3; // Location providers disabled
+        } else if (searchQuery == null && fixedLocation == null && loading && deviceLocation == null && anyProviderEnabled) {
+            childViewIndex = 4; // Acquiring location
         } else if (stations.isEmpty() && searchQuery == null && loading && deviceLocation != null) {
-            viewAnimator.setDisplayedChild(5); // Querying nearby stations
+            childViewIndex = 5; // Querying nearby stations
         } else if (stations.isEmpty() && searchQuery != null && loading) {
-            viewAnimator.setDisplayedChild(6); // Matching stations
+            childViewIndex = 6; // Matching stations
         } else if (stations.isEmpty() && searchQuery == null) {
-            viewAnimator.setDisplayedChild(7); // List empty, no nearby stations
+            childViewIndex = 7; // List empty, no nearby stations
         } else if (stations.isEmpty() && searchQuery != null) {
-            viewAnimator.setDisplayedChild(8); // List empty, no query match
+            childViewIndex = 8; // List empty, no query match
         } else {
-            viewAnimator.setDisplayedChild(0); // Stations list
+            childViewIndex = 0; // Stations list
         }
+        viewAnimator.setDisplayedChild(childViewIndex); // Stations list
 
         // location box
         if (presetTime != null && fixedLocation != null) {
