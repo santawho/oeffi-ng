@@ -881,13 +881,18 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
         final LinkedHashMap<Line, List<Destination>> groups = new LinkedHashMap<>();
         for (final LineDestination lineDestination : lineDestinations) {
-            if (lineDestination.destination != null) {
-                List<Destination> list = groups.get(lineDestination.line);
-                if (list == null) {
+            final Line line = lineDestination.line;
+            final Destination destination = lineDestination.destination;
+
+            List<Destination> list = groups.get(line);
+            if (list == null) {
+                if (destination != null)
                     list = new ArrayList<>(2); // A typical line will have two destinations.
-                    groups.put(lineDestination.line, list);
-                }
-                list.add(lineDestination.destination);
+                groups.put(line, list);
+            }
+
+            if (destination != null) {
+                list.add(destination);
             }
         }
         return groups;
@@ -994,13 +999,15 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 final TextView destinationView = lineRow
                         .findViewById(R.id.stations_station_details_header_line_destination);
                 final StringBuilder text = new StringBuilder();
-                for (final Destination destination : destinations) {
-                    if (text.length() > 0) {
-                        text.append(Constants.CHAR_THIN_SPACE)
-                                .append(Constants.CHAR_LEFT_RIGHT_ARROW)
-                                .append(Constants.CHAR_THIN_SPACE);
+                if (destinations != null) {
+                    for (final Destination destination : destinations) {
+                        if (text.length() > 0) {
+                            text.append(Constants.CHAR_THIN_SPACE)
+                                    .append(Constants.CHAR_LEFT_RIGHT_ARROW)
+                                    .append(Constants.CHAR_THIN_SPACE);
+                        }
+                        text.append(destination.uniqueShortName());
                     }
-                    text.append(destination.uniqueShortName());
                 }
                 destinationView.setText(text);
             }
