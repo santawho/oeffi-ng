@@ -3557,16 +3557,19 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final JourneyRef connectionJourneyRef,
             final QueryTripRunnable.TripRequestData queryTripsRequestData,
             final TripsOverviewActivity.RenderConfig overviewConfig) {
-        final Location exit;
-        final TimeSpec time;
+        Location exit = null;
+        TimeSpec time = null;
         if (renderConfig.isJourney) {
             final Trip.Public journeyLeg = (Trip.Public) tripRenderer.trip.legs.get(0);
             exit = journeyLeg.exitLocation;
-            final Stop exitStop = journeyLeg.findStopByLocationAndTime(exit, journeyLeg.exitTime, true);
-            final PTDate departureTime = exitStop.getDepartureTime();
-            time = new TimeSpec.Absolute(DepArr.DEPART,
-                    departureTime != null ? departureTime.getTime() : exitStop.getArrivalTime().getTime());
-        } else {
+            if (exit != null) {
+                final Stop exitStop = journeyLeg.findStopByLocationAndTime(exit, journeyLeg.exitTime, true);
+                final PTDate departureTime = exitStop.getDepartureTime();
+                time = new TimeSpec.Absolute(DepArr.DEPART,
+                        departureTime != null ? departureTime.getTime() : exitStop.getArrivalTime().getTime());
+            }
+        }
+        if (exit == null) {
             exit = tripRenderer.trip.to;
             final PTDate departureTime = stop.getDepartureTime();
             time = new TimeSpec.Absolute(DepArr.DEPART,
