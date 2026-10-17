@@ -9,10 +9,28 @@
         android:paddingTop="@dimen/trip_details_stop_offset" />
 
     <View
-        android:layout_span="5"
         android:layout_width="match_parent"
         android:layout_height="@dimen/text_padding_vertical_cram"
-        android:background="@color/bg_divider"
-        android:visibility="gone" />
+        android:background="@color/bg_divider" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/text_padding_vertical_cram"
+        android:background="@color/bg_divider" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/text_padding_vertical_cram"
+        android:background="@color/bg_divider" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/text_padding_vertical_cram"
+        android:background="@color/bg_divider" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/text_padding_vertical_cram"
+        android:background="@color/bg_divider" />
 
 </TableRow>
