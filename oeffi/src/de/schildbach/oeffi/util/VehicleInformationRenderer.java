@@ -333,11 +333,16 @@ public class VehicleInformationRenderer {
         }
 
         final TextView vehicleId = vehicleLayout.findViewById(R.id.vehicle_information_vehicle_id);
-        if (vehicleData.vehicleIdentification != null) {
+        if (vehicleData.vehicleIdentification != null)
             vehicleId.setText(vehicleData.vehicleIdentification);
-        } else {
+        else
             vehicleId.setVisibility(View.GONE);
-        }
+
+        final TextView vehicleType = vehicleLayout.findViewById(R.id.vehicle_information_vehicle_type);
+        if (vehicleData.vehicleTypeName != null)
+            vehicleType.setText(vehicleData.vehicleTypeName);
+        else
+            vehicleType.setVisibility(View.GONE);
 
         if (vehicleData.bicycleSpaces != null && (showBicycle || showAllInformation)) {
             final TextView bicycleCount = vehicleLayout.findViewById(R.id.vehicle_information_vehicle_bicycle_count);
