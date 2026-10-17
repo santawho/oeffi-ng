@@ -502,7 +502,9 @@ public class DirectionsActivity extends OeffiMainActivity implements
                 viewDirectOption.setEnabled(false);
             }
             viewBike = findViewById(R.id.directions_option_bike);
-            viewBike.setChecked(isBicycleTravel() && !preferBicycleCarriageOff());
+            final boolean bicycleIsDefault = isBicycleTravel() && !preferBicycleCarriageOff();
+            // viewBike.setChecked(bicycleIsDefault);
+            viewBike.setText(bicycleIsDefault ? R.string.directions_option_without_bike : R.string.directions_option_with_bike);
 
             final boolean timeAndGoAtBottom = prefs.getBoolean("user_interface_directions_time_and_go_bottom_enabled", false);
             final ViewGroup timeAndGo = findViewById(timeAndGoAtBottom ? R.id.time_and_go_bottom : R.id.time_and_go_top);
@@ -913,6 +915,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         viewToLocation.setImeOptions(hasDirectionsCap ? EditorInfo.IME_ACTION_GO : EditorInfo.IME_ACTION_NONE);
         viewGo.setEnabled(hasDirectionsCap);
         ViewUtils.setVisibility(viewGoBike, isBicycleTravel());
+        viewBike.setText(isBicycleTravel() && !preferBicycleCarriageOff() ? R.string.directions_option_without_bike : R.string.directions_option_with_bike);
 
         viewQueryHistoryList.setVisibility(hasDirectionsCap ? View.VISIBLE : View.GONE);
         viewQueryHistoryEmpty.setVisibility(
@@ -1504,7 +1507,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
                 buttonExpand.isChecked()
                 || haveNonDefaultProducts
                 || viewViaLocation.getText() != null
-                || (viewBike.isChecked() != (isBicycleTravel() && !preferBicycleCarriageOff()))
+                || viewBike.isChecked()
                 || (!isForceDirectOption() && viewDirectOption.isChecked())
         );
     }
@@ -1816,9 +1819,11 @@ public class DirectionsActivity extends OeffiMainActivity implements
             flags.add(TripFlag.DIRECT);
 
         if (networkProvider.hasCapabilities(Capability.BIKE_OPTION)) {
-            if (isBicycleTravel() && isLongClick
-                    ? preferBicycleCarriageOff()
-                    : viewBike.isChecked()) {
+            final boolean bicycleTravel = isBicycleTravel();
+            final boolean prefBikeOff = !bicycleTravel || preferBicycleCarriageOff();
+            if (isLongClick && bicycleTravel
+                    ? prefBikeOff
+                    : viewBike.isChecked() == prefBikeOff) {
                 flags.add(TripFlag.BIKE);
             }
         }

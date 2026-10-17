@@ -165,7 +165,7 @@
                 android:layout_marginLeft="@dimen/text_padding_horizontal_lax"
                 android:layout_marginRight="@dimen/text_padding_horizontal_lax"
                 android:layout_marginTop="@dimen/text_padding_vertical_lax"
-                android:text="@string/directions_option_bike" />
+                android:text="@string/directions_option_with_bike" />
 
             <CheckBox
                 android:id="@+id/directions_option_direct"
