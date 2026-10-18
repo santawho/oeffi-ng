@@ -415,6 +415,8 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 });
     }
 
+    private boolean firstStart = true;
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -429,7 +431,9 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         };
         registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
 
-        if (!autoRefreshDisabled)
+        if (firstStart)
+            firstStart = false;
+        else if (!autoRefreshDisabled)
             load(null, false);
 
         updateFragments();
