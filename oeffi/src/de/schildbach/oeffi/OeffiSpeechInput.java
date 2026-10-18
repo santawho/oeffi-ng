@@ -20,7 +20,6 @@ package de.schildbach.oeffi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.text.format.DateUtils;
 
 import java.util.Calendar;
 import java.util.Map;
@@ -54,17 +53,17 @@ public class OeffiSpeechInput extends SpeechInput {
             String value;
             TimeSpec timeSpec = null;
             if (fields.get("RELONEMINUTE") != null) {
-                timeSpec = new TimeSpec.Relative(DateUtils.MINUTE_IN_MILLIS);
+                timeSpec = new TimeSpec.Relative(Constants.MINUTE_IN_MILLIS);
             } else if (fields.get("RELONEHOUR") != null) {
-                timeSpec = new TimeSpec.Relative(DateUtils.HOUR_IN_MILLIS);
+                timeSpec = new TimeSpec.Relative(Constants.HOUR_IN_MILLIS);
             } else if ((value = fields.get("RELMINUTES")) != null) {
                 final Integer minutes = getNumberFromWord(value, language);
                 if (minutes != null)
-                    timeSpec = new TimeSpec.Relative(minutes * DateUtils.MINUTE_IN_MILLIS);
+                    timeSpec = new TimeSpec.Relative(minutes * Constants.MINUTE_IN_MILLIS);
             } else if ((value = fields.get("RELHOURS")) != null) {
                 final Integer hours = getNumberFromWord(value, language);
                 if (hours != null)
-                    timeSpec = new TimeSpec.Relative(hours * DateUtils.HOUR_IN_MILLIS);
+                    timeSpec = new TimeSpec.Relative(hours * Constants.HOUR_IN_MILLIS);
             } else if ((value = fields.get("ABSHOUR")) != null) {
                 final Integer hour = getNumberFromWord(value, language);
                 final Integer minute = getNumberFromWord(fields.get("ABSMINUTE"), language);

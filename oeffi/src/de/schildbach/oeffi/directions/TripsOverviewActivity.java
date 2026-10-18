@@ -30,7 +30,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
 import android.text.SpannableStringBuilder;
-import android.text.format.DateUtils;
 import android.text.style.StyleSpan;
 import android.view.View;
 import android.widget.AdapterView;
@@ -1056,7 +1055,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         for (final Iterator<Trip> i = result.trips.iterator(); i.hasNext();) {
             final Trip trip = i.next();
             final long duration = trip.getDuration();
-            if (duration < 0 || duration > DateUtils.DAY_IN_MILLIS * 5) {
+            if (duration < 0 || duration > Constants.DAY_IN_MILLIS * 5) {
                 log.info("Not showing implausible trip: {}", trip);
                 i.remove();
             } else {

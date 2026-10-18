@@ -20,7 +20,6 @@ package de.schildbach.oeffi.directions;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -48,7 +47,6 @@ import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
-import android.text.format.DateUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.RelativeSizeSpan;
 import android.util.DisplayMetrics;
@@ -57,10 +55,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.WindowManager;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.Chronometer;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -123,7 +118,6 @@ import de.schildbach.pte.dto.Destination;
 import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.QueryVehicleInformationResult;
 import de.schildbach.pte.dto.TripRef;
-import de.schildbach.pte.dto.VehicleInformation;
 import de.schildbach.pte.provider.NetworkProvider;
 import de.schildbach.pte.dto.Fare;
 import de.schildbach.pte.dto.JourneyRef;
@@ -1231,7 +1225,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         final PTDate firstPublicLegDepartureTime = tripRenderer.trip.getFirstPublicLegDepartureTime();
         if (firstPublicLegDepartureTime == null
-                || firstPublicLegDepartureTime.getTime() - now.getTime() > 10 * DateUtils.MINUTE_IN_MILLIS)
+                || firstPublicLegDepartureTime.getTime() - now.getTime() > 10 * Constants.MINUTE_IN_MILLIS)
             return;
 
         for (final TripRenderer.LegContainer legC : tripRenderer.legs) {
@@ -2803,7 +2797,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         // delay
         if (providedDelay != null) {
-            final long delayMins = providedDelay / DateUtils.MINUTE_IN_MILLIS;
+            final long delayMins = providedDelay / Constants.MINUTE_IN_MILLIS;
             if (delayMins != 0) {
                 collapseColumns.collapseDelayColumn = false;
                 stopDelayProvidedView.setText(String.format("(%+d)", delayMins));
@@ -2812,7 +2806,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
 
         if (isShowSimulatedLine && simulatedDelay != null) {
-            final long delayMins = simulatedDelay / DateUtils.MINUTE_IN_MILLIS;
+            final long delayMins = simulatedDelay / Constants.MINUTE_IN_MILLIS;
             if (delayMins != 0) {
                 collapseColumns.collapseDelayColumn = false;
                 stopDelaySimulatedView.setText(String.format("(%+d)", delayMins));
@@ -2981,7 +2975,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             predictedText = noDataString;
             delayText = noDataString;
         } else {
-            final long delayMins = delay == null ? 0 : (delay / DateUtils.MINUTE_IN_MILLIS);
+            final long delayMins = delay == null ? 0 : (delay / Constants.MINUTE_IN_MILLIS);
             delayText = getString(R.string.directions_trip_details_public_entry_tooltip_delay_format, delayMins);
         }
 
@@ -2991,7 +2985,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             simulatedText = noDataString;
             simulatedDelayText = noDataString;
         } else {
-            final long delayMins = simulatedDelay == null ? 0 : (simulatedDelay / DateUtils.MINUTE_IN_MILLIS);
+            final long delayMins = simulatedDelay == null ? 0 : (simulatedDelay / Constants.MINUTE_IN_MILLIS);
             simulatedDelayText = getString(R.string.directions_trip_details_public_entry_tooltip_delay_format, delayMins);
         }
 

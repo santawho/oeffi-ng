@@ -25,7 +25,6 @@ import android.net.Uri;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.format.DateFormat;
-import android.text.format.DateUtils;
 import android.text.style.StyleSpan;
 import android.view.View;
 import android.widget.RemoteViews;
@@ -169,7 +168,7 @@ public class NearestFavoriteStationWidgetListService extends RemoteViewsService 
             final boolean isPredicted = predictedTime != null;
             final long delay = predictedTime != null && plannedTime != null
                     ? predictedTime.getTime() - plannedTime.getTime() : 0;
-            final long delayMins = delay / DateUtils.MINUTE_IN_MILLIS;
+            final long delayMins = delay / Constants.MINUTE_IN_MILLIS;
             views.setViewVisibility(R.id.station_widget_entry_delay, delayMins != 0 ? View.VISIBLE : View.GONE);
             final SpannableString delayStr = new SpannableString(String.format(Locale.US, "(%+d)", delayMins));
             delayStr.setSpan(new StyleSpan(isPredicted ? Typeface.BOLD_ITALIC : Typeface.BOLD), 0, delayStr.length(),

@@ -35,7 +35,6 @@ import android.os.HandlerThread;
 import android.os.Process;
 import android.text.Html;
 import android.text.format.DateFormat;
-import android.text.format.DateUtils;
 import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.Gravity;
@@ -526,7 +525,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
                         } else if (parts[1].equals("IN")) {
                             if (parts.length > 2) {
                                 timeSpec = new TimeSpec.Relative(depArr,
-                                        Long.parseLong(parts[2]) * DateUtils.MINUTE_IN_MILLIS);
+                                        Long.parseLong(parts[2]) * Constants.MINUTE_IN_MILLIS);
                             } else {
                                 timeSpec = new TimeSpec.Relative(depArr, 0);
                                 handleDiffClick();
@@ -1287,14 +1286,14 @@ public class DirectionsActivity extends OeffiMainActivity implements
         final String[] relativeTimeStrings = new String[relativeTimeValues.length + 1];
         relativeTimeStrings[relativeTimeValues.length] = getString(R.string.directions_set_time_relative_fixed);
         for (int i = 0; i < relativeTimeValues.length; i++) {
-            relativeTimeStrings[i] = Formats.formatTimeDiff(this, relativeTimeValues[i] * DateUtils.MINUTE_IN_MILLIS);
+            relativeTimeStrings[i] = Formats.formatTimeDiff(this, relativeTimeValues[i] * Constants.MINUTE_IN_MILLIS);
         }
         DialogBuilder.get(this)
             .setTitle(R.string.directions_set_time_relative_prompt)
             .setItems(relativeTimeStrings, (dialog, which) -> {
                 if (which < relativeTimeValues.length) {
                     final int mins = relativeTimeValues[which];
-                    timeSpec = new TimeSpec.Relative(mins * DateUtils.MINUTE_IN_MILLIS);
+                    timeSpec = new TimeSpec.Relative(mins * Constants.MINUTE_IN_MILLIS);
                 } else {
                     // set to depart at ...
                     timeSpec = new TimeSpec.Absolute(DepArr.DEPART, timeSpec.timeInMillis());

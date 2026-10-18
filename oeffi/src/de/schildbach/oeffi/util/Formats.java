@@ -21,6 +21,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
+
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.pte.dto.Line;
@@ -78,30 +79,30 @@ public final class Formats {
     public static String formatDate(
             final TimeZoneSelector timeZoneSelector, final long now, final long time, final int offset,
             final boolean abbreviate, final String todayString) {
-        // today
-        if (DateUtils.isToday(time))
+        final Calendar timeCalendar = new GregorianCalendar(timeZoneSelector.getTimeZoneForOffset(time, offset));
+        timeCalendar.setTimeInMillis(time);
+        final int dayOfTime = timeCalendar.get(Calendar.DAY_OF_YEAR) + timeCalendar.get(Calendar.YEAR) * 1000;
+
+        final Calendar nowCalendar = new GregorianCalendar();
+        nowCalendar.setTimeInMillis(now);
+        final int dayOfNow = nowCalendar.get(Calendar.DAY_OF_YEAR) + nowCalendar.get(Calendar.YEAR) * 1000;
+
+        final int dayDiff = dayOfTime - dayOfNow;
+        if (dayDiff == 0)
             return todayString;
 
-        final Calendar calendar = new GregorianCalendar(timeZoneSelector.getTimeZoneForOffset(time, offset));
-        calendar.setTimeInMillis(time);
-        if (time > now) {
-            // tomorrow
-            calendar.add(Calendar.DAY_OF_MONTH, -1);
-            if (DateUtils.isToday(calendar.getTimeInMillis()))
-                return timeZoneSelector.context.getString(abbreviate ? R.string.time_tomorrow_abbrev : R.string.time_tomorrow);
+        if (dayDiff == 1) // tomorrow
+            return timeZoneSelector.context.getString(abbreviate ? R.string.time_tomorrow_abbrev : R.string.time_tomorrow);
 
-            // next several days
-            if (time - now < DateUtils.DAY_IN_MILLIS * 6) {
-                int flags = DateUtils.FORMAT_SHOW_WEEKDAY;
-                if (abbreviate)
-                    flags |= DateUtils.FORMAT_ABBREV_WEEKDAY;
-                return DateUtils.formatDateTime(timeZoneSelector.context, time, flags);
-            }
-        } else {
-            // yesterday
-            calendar.add(Calendar.DAY_OF_MONTH, 1);
-            if (DateUtils.isToday(calendar.getTimeInMillis()))
-                return timeZoneSelector.context.getString(abbreviate ? R.string.time_yesterday_abbrev : R.string.time_yesterday);
+        if (dayDiff == -1) // yesterday
+            return timeZoneSelector.context.getString(abbreviate ? R.string.time_yesterday_abbrev : R.string.time_yesterday);
+
+        if (-3 <= dayDiff && dayDiff <= 3) {
+            // next or previous several days
+            int flags = DateUtils.FORMAT_SHOW_WEEKDAY;
+            if (abbreviate)
+                flags |= DateUtils.FORMAT_ABBREV_WEEKDAY;
+            return DateUtils.formatDateTime(timeZoneSelector.context, now + dayDiff * Constants.DAY_IN_MILLIS, flags);
         }
 
         // default
@@ -190,7 +191,7 @@ public final class Formats {
             final Context context,
             final long diff, final boolean refIsNow,
             final boolean shortFormat, final boolean longFormat) {
-        final long rel = Math.round(((float) diff) / DateUtils.MINUTE_IN_MILLIS);
+        final long rel = Math.round(((float) diff) / Constants.MINUTE_IN_MILLIS);
         if (refIsNow) {
             if (rel >= 60) {
                 if (shortFormat) {
@@ -235,19 +236,19 @@ public final class Formats {
 
     @SuppressLint("DefaultLocale")
     public static String formatTimeSpanHM(final long millis, final boolean forcePlus) {
-        final long mins = Math.abs(millis) / DateUtils.MINUTE_IN_MILLIS;
+        final long mins = Math.abs(millis) / Constants.MINUTE_IN_MILLIS;
         return String.format("%s%d:%02d", millis < 0 ? "-" : forcePlus ? "+" : "", mins / 60, mins % 60);
     }
 
     @SuppressLint("DefaultLocale")
     public static String formatTimeSpanMS(final long millis, final boolean forcePlus) {
-        final long secs = Math.abs(millis) / DateUtils.SECOND_IN_MILLIS;
+        final long secs = Math.abs(millis) / Constants.SECOND_IN_MILLIS;
         return String.format("%s%d:%02d", millis < 0 ? "-" : forcePlus ? "+" : "", secs / 60, secs % 60);
     }
 
     @SuppressLint("DefaultLocale")
     public static String formatTimeSpanMorS(final long millis, final boolean forcePlus) {
-        final long secs = Math.abs(millis) / DateUtils.SECOND_IN_MILLIS;
+        final long secs = Math.abs(millis) / Constants.SECOND_IN_MILLIS;
         final String sign = millis < 0 ? "-" : forcePlus ? "+" : "";
         if (secs > 90)
             return String.format("%s%d min", sign, secs / 60);

@@ -38,7 +38,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
-import android.text.format.DateUtils;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -1219,7 +1218,7 @@ public abstract class OeffiActivity extends AppCompatActivity
 
         // time delta
         if (header.serverTime != 0) {
-            final long delta = (System.currentTimeMillis() - header.serverTime) / DateUtils.MINUTE_IN_MILLIS;
+            final long delta = (System.currentTimeMillis() - header.serverTime) / Constants.MINUTE_IN_MILLIS;
             if (Math.abs(delta) > 0)
                 str.append("\u0394 ").append(delta).append(" min\n");
         }

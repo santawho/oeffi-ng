@@ -17,11 +17,11 @@
 
 package de.schildbach.oeffi.util;
 
-import android.text.format.DateUtils;
-
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Locale;
+
+import de.schildbach.oeffi.Constants;
 
 public abstract class TimeSpec implements Serializable {
     public enum DepArr {
@@ -87,7 +87,7 @@ public abstract class TimeSpec implements Serializable {
 
         @Override
         public String toString() {
-            return String.format(Locale.ENGLISH, "%s in %d min", super.toString(), diffMs / DateUtils.MINUTE_IN_MILLIS);
+            return String.format(Locale.ENGLISH, "%s in %d min", super.toString(), diffMs / Constants.MINUTE_IN_MILLIS);
         }
     }
 }

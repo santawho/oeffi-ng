@@ -28,7 +28,9 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.Handler;
-import android.text.format.DateUtils;
+
+import de.schildbach.oeffi.Constants;
+
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Gallery;
@@ -316,7 +318,7 @@ public class TripsGallery extends Gallery { //@@@ RecyclerView {
         }
 
         // snap to current time
-        final long SNAP_CURRENT_TIME_SPAN = DateUtils.MINUTE_IN_MILLIS * 30;
+        final long SNAP_CURRENT_TIME_SPAN = Constants.MINUTE_IN_MILLIS * 30;
         if (minTime == Long.MAX_VALUE || (currentTime > minTime - SNAP_CURRENT_TIME_SPAN && currentTime < minTime))
             minTime = currentTime;
         else if (maxTime == 0 || (currentTime < maxTime + SNAP_CURRENT_TIME_SPAN && currentTime > maxTime))
@@ -324,13 +326,13 @@ public class TripsGallery extends Gallery { //@@@ RecyclerView {
 
         // padding
         final long PADDING_DEFAULT_FRACTION = 6;  // was 12
-        final long PADDING_MIN_TIME = DateUtils.MINUTE_IN_MILLIS * 14;  // was 30 minutes
+        final long PADDING_MIN_TIME = Constants.MINUTE_IN_MILLIS * 14;  // was 30 minutes
         final long timeDiff = maxTime - minTime;
         long timePadding = timeDiff / PADDING_DEFAULT_FRACTION;
         if (timeDiff < PADDING_MIN_TIME) // zoom limit
             timePadding = (PADDING_MIN_TIME - timeDiff) / 2;
-        if (timePadding < DateUtils.MINUTE_IN_MILLIS) // minimum padding
-            timePadding = DateUtils.MINUTE_IN_MILLIS;
+        if (timePadding < Constants.MINUTE_IN_MILLIS) // minimum padding
+            timePadding = Constants.MINUTE_IN_MILLIS;
         minTime = minTime - timePadding;
         maxTime = maxTime + timePadding;
 
@@ -342,7 +344,7 @@ public class TripsGallery extends Gallery { //@@@ RecyclerView {
             final long diffMin = currentMinTime - minTime;
             final long diffMax = maxTime - currentMaxTime;
 
-            final long ANIMATE_TO_TIME = DateUtils.SECOND_IN_MILLIS * 59;
+            final long ANIMATE_TO_TIME = Constants.SECOND_IN_MILLIS * 59;
             if (Math.abs(diffMin) > ANIMATE_TO_TIME || Math.abs(diffMax) > ANIMATE_TO_TIME) {
                 minTime = currentMinTime - diffMin / 5;
                 maxTime = currentMaxTime + diffMax / 5;
@@ -393,30 +395,30 @@ public class TripsGallery extends Gallery { //@@@ RecyclerView {
         gridPtr.set(Calendar.MINUTE, 0);
 
         final int gridValue, gridField;
-        if (timeDiff < DateUtils.MINUTE_IN_MILLIS * 30) {
+        if (timeDiff < Constants.MINUTE_IN_MILLIS * 30) {
             // 5 minute grid
             gridValue = 5;
             gridField = Calendar.MINUTE;
-        } else if (timeDiff < DateUtils.HOUR_IN_MILLIS) {
+        } else if (timeDiff < Constants.HOUR_IN_MILLIS) {
             // 10 minute grid
             gridValue = 10;
             gridField = Calendar.MINUTE;
-        } else if (timeDiff < DateUtils.HOUR_IN_MILLIS * 3) {
+        } else if (timeDiff < Constants.HOUR_IN_MILLIS * 3) {
             // half hour grid
             gridValue = 30;
             gridField = Calendar.MINUTE;
             gridPtr.set(Calendar.HOUR_OF_DAY, 0);
-        } else if (timeDiff < DateUtils.HOUR_IN_MILLIS * 6) {
+        } else if (timeDiff < Constants.HOUR_IN_MILLIS * 6) {
             // hour grid
             gridValue = 1;
             gridField = Calendar.HOUR_OF_DAY;
             gridPtr.set(Calendar.HOUR_OF_DAY, 0);
-        } else if (timeDiff < DateUtils.HOUR_IN_MILLIS * 12) {
+        } else if (timeDiff < Constants.HOUR_IN_MILLIS * 12) {
             // 2 hour grid
             gridValue = 2;
             gridField = Calendar.HOUR_OF_DAY;
             gridPtr.set(Calendar.HOUR_OF_DAY, 0);
-        } else if (timeDiff < DateUtils.DAY_IN_MILLIS) {
+        } else if (timeDiff < Constants.DAY_IN_MILLIS) {
             // 4 hour grid
             gridValue = 4;
             gridField = Calendar.HOUR_OF_DAY;

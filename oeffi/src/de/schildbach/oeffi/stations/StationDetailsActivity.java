@@ -30,7 +30,6 @@ import android.os.HandlerThread;
 import android.os.Process;
 import android.text.Html;
 import android.text.Spanned;
-import android.text.format.DateUtils;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -1186,7 +1185,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             // delay
             final long delay = predictedTime != null && plannedTime != null
                     ? predictedTime.getTime() - plannedTime.getTime() : 0;
-            final long delayMins = delay / DateUtils.MINUTE_IN_MILLIS;
+            final long delayMins = delay / Constants.MINUTE_IN_MILLIS;
             delayView.setText(delayMins != 0 ? String.format(Locale.US, "(%+d)", delayMins) + ' ' : "");
             delayView.setTypeface(Typeface.DEFAULT, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
             ViewUtils.setCancelledStrikeThru(delayView, isCancelled);

@@ -24,7 +24,6 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.text.Html;
 import android.text.Spanned;
-import android.text.format.DateUtils;
 import android.text.method.LinkMovementMethod;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -405,7 +404,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
                             final TextView delayView = departureViewHolder.delay;
                             final long delay = predictedTime != null && plannedTime != null
                                     ? predictedTime.getTime() - plannedTime.getTime() : 0;
-                            final long delayMins = delay / DateUtils.MINUTE_IN_MILLIS;
+                            final long delayMins = delay / Constants.MINUTE_IN_MILLIS;
                             delayView.setText(delayMins != 0 ? String.format("(%+d)", delayMins) + ' ' : "");
                             delayView.setTypeface(Typeface.DEFAULT, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
                             delayView.setTextColor(isStale ? colorLessSignificant : (isGhosted ? colorSignificant :
@@ -515,7 +514,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
                 return 0;
             if (lastPlannedTime != null) {
                 final int diff = (int) ((plannedTime.getTime() - lastPlannedTime.getTime())
-                        / DateUtils.MINUTE_IN_MILLIS);
+                        / Constants.MINUTE_IN_MILLIS);
                 if (interval == 0)
                     interval = diff;
                 else if (Math.abs(diff - interval) > 1)

@@ -42,7 +42,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
 import android.text.format.DateFormat;
-import android.text.format.DateUtils;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -98,7 +97,7 @@ public class NearestFavoriteStationWidgetService extends JobService {
         if (haveWidgets) {
             final JobInfo.Builder jobInfo = new JobInfo.Builder(JOB_ID_PERIODIC, new ComponentName(context,
                     NearestFavoriteStationWidgetService.class));
-            jobInfo.setPeriodic(DateUtils.MINUTE_IN_MILLIS * 15);
+            jobInfo.setPeriodic(Constants.MINUTE_IN_MILLIS * 15);
             jobInfo.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
             final JobInfo job = jobInfo.build();
             jobScheduler.schedule(job);

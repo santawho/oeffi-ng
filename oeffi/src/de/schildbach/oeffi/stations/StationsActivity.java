@@ -51,7 +51,6 @@ import android.provider.Settings;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
-import android.text.format.DateUtils;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -1594,7 +1593,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
                 final Station station = stations.get(i);
                 final Date requestedAt = station.requestedAt;
-                if (requestedAt != null && now - requestedAt.getTime() < DateUtils.MINUTE_IN_MILLIS)
+                if (requestedAt != null && now - requestedAt.getTime() < Constants.MINUTE_IN_MILLIS)
                     continue;
 
                 if (selectedStation != null
@@ -1608,7 +1607,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                 final Station station = stations.get(i);
 
                 final Date requestedAt = station.requestedAt;
-                if (requestedAt != null && now - requestedAt.getTime() < DateUtils.MINUTE_IN_MILLIS)
+                if (requestedAt != null && now - requestedAt.getTime() < Constants.MINUTE_IN_MILLIS)
                     continue;
 
                 final Integer favState = favorites.get(station.location.id);

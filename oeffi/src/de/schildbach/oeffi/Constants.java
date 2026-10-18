@@ -18,13 +18,19 @@
 package de.schildbach.oeffi;
 
 import android.graphics.Color;
-import android.text.format.DateUtils;
+
 import androidx.activity.SystemBarStyle;
 import okhttp3.HttpUrl;
 
 import java.util.Locale;
 
 public class Constants {
+    public static final long SECOND_IN_MILLIS = 1000L;
+    public static final long MINUTE_IN_MILLIS = 60 * SECOND_IN_MILLIS;
+    public static final long HOUR_IN_MILLIS = 60 * MINUTE_IN_MILLIS;
+    public static final long DAY_IN_MILLIS = 24 * HOUR_IN_MILLIS;
+    public static final long WEEK_IN_MILLIS = 7 * DAY_IN_MILLIS;
+
     public static final HttpUrl OEFFI_BASE_DEFAULT_URL = HttpUrl.parse("https://oeffi.schildbach.de/");
     public static final String PLANS_PATH = "plans";
     public static final HttpUrl PLANS_BASE_URL = OEFFI_BASE_DEFAULT_URL.newBuilder().addPathSegment(PLANS_PATH).build();
@@ -34,11 +40,11 @@ public class Constants {
     public static final String PLAN_INDEX_FILENAME = "plans-index.txt";
     public static final String PLAN_STATIONS_FILENAME = "plans-stations.txt";
 
-    public static final long LOCATION_UPDATE_FREQ_MS = 10 * DateUtils.SECOND_IN_MILLIS;
+    public static final long LOCATION_UPDATE_FREQ_MS = 10 * SECOND_IN_MILLIS;
     public static final int LOCATION_UPDATE_DISTANCE = 3;
-    public static final long LOCATION_FOREGROUND_UPDATE_TIMEOUT_MS = 1 * DateUtils.MINUTE_IN_MILLIS;
-    public static final long LOCATION_BACKGROUND_UPDATE_TIMEOUT_MS = 5 * DateUtils.MINUTE_IN_MILLIS;
-    public static final long STALE_UPDATE_MS = 2 * DateUtils.MINUTE_IN_MILLIS;
+    public static final long LOCATION_FOREGROUND_UPDATE_TIMEOUT_MS = 1 * MINUTE_IN_MILLIS;
+    public static final long LOCATION_BACKGROUND_UPDATE_TIMEOUT_MS = 5 * MINUTE_IN_MILLIS;
+    public static final long STALE_UPDATE_MS = 2 * MINUTE_IN_MILLIS;
     public static final int MAX_NUMBER_OF_STOPS = 150;
     public static final float BEARING_ACCURACY_THRESHOLD = 0.5f;
     public static final double MAP_MIN_ZOOM_LEVEL = 3.0;

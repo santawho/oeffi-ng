@@ -26,9 +26,7 @@ import android.content.pm.PackageInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.text.format.DateUtils;
 
-import de.schildbach.oeffi.preference.PreferenceFragment;
 import de.schildbach.oeffi.util.AppInstaller;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.Downloader;
@@ -453,11 +451,11 @@ public abstract class OeffiMainActivity extends OeffiActivity {
 
     private long parseTimeExp(final String exp) {
         if (exp.endsWith("h"))
-            return DateUtils.HOUR_IN_MILLIS * Integer.parseInt(exp.substring(0, exp.length() - 1));
+            return Constants.HOUR_IN_MILLIS * Integer.parseInt(exp.substring(0, exp.length() - 1));
         else if (exp.endsWith("d"))
-            return DateUtils.DAY_IN_MILLIS * Integer.parseInt(exp.substring(0, exp.length() - 1));
+            return Constants.DAY_IN_MILLIS * Integer.parseInt(exp.substring(0, exp.length() - 1));
         else if (exp.endsWith("w"))
-            return DateUtils.WEEK_IN_MILLIS * Integer.parseInt(exp.substring(0, exp.length() - 1));
+            return Constants.WEEK_IN_MILLIS * Integer.parseInt(exp.substring(0, exp.length() - 1));
         else
             throw new IllegalArgumentException("cannot parse time expression: '" + exp + "'");
     }

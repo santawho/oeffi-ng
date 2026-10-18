@@ -36,7 +36,9 @@ import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
-import android.text.format.DateUtils;
+
+import de.schildbach.oeffi.Constants;
+
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -743,8 +745,8 @@ public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.
                     final Long departureDelay = publicLeg.departureStop.getDepartureDelay();
                     final Long arrivalDelay = publicLeg.arrivalStop.getArrivalDelay();
                     final boolean isDelayed = (departureDelay != null
-                            && departureDelay / DateUtils.MINUTE_IN_MILLIS != 0)
-                            || (arrivalDelay != null && arrivalDelay / DateUtils.MINUTE_IN_MILLIS != 0);
+                            && departureDelay / Constants.MINUTE_IN_MILLIS != 0)
+                            || (arrivalDelay != null && arrivalDelay / Constants.MINUTE_IN_MILLIS != 0);
 
                     final PTDate plannedDepartureTime = publicLeg.departureStop.plannedDepartureTime;
                     final PTDate plannedArrivalTime = publicLeg.arrivalStop.plannedArrivalTime;
