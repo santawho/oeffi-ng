@@ -48,6 +48,8 @@ public abstract class QueryDeparturesRunnable implements Runnable {
     protected final Date fromTime;
     protected final boolean arrivals;
     protected final int maxEvents;
+    protected final boolean includeLinesAtStation;
+
 
     protected static final Logger log = LoggerFactory.getLogger(QueryDeparturesRunnable.class);
 
@@ -58,7 +60,8 @@ public abstract class QueryDeparturesRunnable implements Runnable {
             final NetworkProvider.EquivalentStationsMode equivsMode,
             final Date time,
             final boolean arrivals,
-            final int maxEvents) {
+            final int maxEvents,
+            final boolean includeLinesAtStation) {
         this.handler = handler;
         this.networkProvider = networkProvider;
         this.stationId = stationId;
@@ -66,6 +69,7 @@ public abstract class QueryDeparturesRunnable implements Runnable {
         this.fromTime = time != null ? time : new Date();
         this.arrivals = arrivals;
         this.maxEvents = maxEvents;
+        this.includeLinesAtStation = includeLinesAtStation;
     }
 
     public void run() {
@@ -78,7 +82,7 @@ public abstract class QueryDeparturesRunnable implements Runnable {
         }
     }
 
-    private final void doRequest() {
+    private void doRequest() {
         int tries = 0;
 
         while (true) {
@@ -86,7 +90,8 @@ public abstract class QueryDeparturesRunnable implements Runnable {
 
             try {
                 final QueryDeparturesResult result = networkProvider.queryStationBoard(
-                        stationId, fromTime, arrivals, maxEvents, equivsMode, null);
+                        stationId, fromTime, arrivals, maxEvents,
+                        equivsMode, null, includeLinesAtStation);
 
                 postOnResult(result);
                 break;

@@ -1447,7 +1447,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                                     handler, networkProvider,
                                     requestedStationId,
                                     NetworkProvider.EquivalentStationsMode.META_IF_SAME_NAME,
-                                    presetTime, false, maxDepartures) {
+                                    presetTime, false, maxDepartures, false) {
                                 @Override
                                 protected void onPreExecute() {
                                     actionBar.startProgress();
