@@ -205,6 +205,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private BroadcastReceiver connectivityReceiver;
     private BroadcastReceiver tickReceiver;
 
+    private int maxStationsToLoad;
     private int maxDeparturesPerStation;
     private int maxDeparturesPerJourney;
     private float walkPaceMillisPerMeter;
@@ -507,6 +508,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     }
 
     private void setupStationsList() {
+        maxStationsToLoad = res.getInteger(R.integer.max_stations_to_load_per_stationboard);
         maxDeparturesPerStation = res.getInteger(R.integer.max_departures_per_station);
 
         final ItemTouchHelper itemTouchHelper = new ItemTouchHelper(
@@ -1587,8 +1589,10 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
             final long now = System.currentTimeMillis();
 
             for (int i = firstVisible; i <= lastVisible; i++) { // first load selected
-                final Station station = stations.get(i);
+                if (i >= maxStationsToLoad)
+                    break;
 
+                final Station station = stations.get(i);
                 final Date requestedAt = station.requestedAt;
                 if (requestedAt != null && now - requestedAt.getTime() < DateUtils.MINUTE_IN_MILLIS)
                     continue;
@@ -1618,8 +1622,10 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
             }
 
             for (int i = firstVisible; i <= lastVisible; i++) { // then load others
-                final Station station = stations.get(i);
+                if (i >= maxStationsToLoad)
+                    break;
 
+                final Station station = stations.get(i);
                 if (station.distance > maxDistance)
                     continue;
 
