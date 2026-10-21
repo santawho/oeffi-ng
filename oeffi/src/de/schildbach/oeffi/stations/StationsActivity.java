@@ -174,6 +174,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private boolean sortByWalkAccess;
     private boolean anyProviderEnabled = false;
     private boolean loading = true;
+    private boolean queryFailed = false;
 
     private final Set<Product> products = new HashSet<>(Product.ALL_SELECTABLE);
     private String accurateLocationProvider, lowPowerLocationProvider;
@@ -1108,6 +1109,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
             childViewIndex = 5; // Querying nearby stations
         } else if (stations.isEmpty() && searchQuery != null && loading) {
             childViewIndex = 6; // Matching stations
+        } else if (stations.isEmpty() && queryFailed) {
+            childViewIndex = 9; // network error
         } else if (stations.isEmpty() && searchQuery == null) {
             childViewIndex = 7; // List empty, no nearby stations
         } else if (stations.isEmpty() && searchQuery != null) {
@@ -1236,6 +1239,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
                     final NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
                     try {
+                        queryFailed = true;
                         final NearbyLocationsResult result =
                                 networkProvider.queryNearbyLocations(
                                         EnumSet.of(LocationType.STATION),
@@ -1260,6 +1264,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                                 }
                             }
 
+                            queryFailed = false;
                             runOnUiThread(() -> mergeIntoStations(freshStations, true));
                         }
                     } catch (final IOException x) {

@@ -121,6 +121,8 @@
                             android:layout_height="match_parent"
                             android:layout_weight="1">
 
+                            <!-- #0: main content -->
+
                             <FrameLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent" >
@@ -163,7 +165,7 @@
                                 </LinearLayout>
                             </FrameLayout>
 
-                            <!-- Missing capability -->
+                            <!-- #1: Missing capability -->
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
@@ -192,7 +194,7 @@
                                     android:text="@string/stations_list_network_settings" />
                             </LinearLayout>
 
-                            <!-- Location permission denied -->
+                            <!-- #2: Location permission denied -->
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
@@ -220,7 +222,7 @@
                                     android:text="@string/stations_location_permission_request" />
                             </LinearLayout>
 
-                            <!-- Location providers disabled -->
+                            <!-- #3: Location providers disabled -->
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
@@ -256,7 +258,7 @@
                                     android:text="@string/stations_list_location_settings" />
                             </LinearLayout>
 
-                            <!-- Acquiring location -->
+                            <!-- #4: Acquiring location -->
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
@@ -288,7 +290,7 @@
                                     android:layout_marginTop="@dimen/text_padding_vertical_verylax" />
                             </LinearLayout>
 
-                            <!-- Querying nearby stations -->
+                            <!-- #5: Querying nearby stations -->
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
@@ -314,7 +316,7 @@
                                     android:textStyle="bold" />
                             </LinearLayout>
 
-                            <!-- Matching stations -->
+                            <!-- #6: Matching stations -->
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
@@ -340,7 +342,7 @@
                                     android:textStyle="bold" />
                             </LinearLayout>
 
-                            <!-- List empty, no nearby stations -->
+                            <!-- #7: List empty, no nearby stations -->
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
@@ -376,7 +378,7 @@
                                     android:text="@string/stations_list_network_settings" />
                             </LinearLayout>
 
-                            <!-- List empty, no query match -->
+                            <!-- #8: List empty, no query match -->
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
@@ -402,6 +404,26 @@
                                     android:gravity="center"
                                     android:maxWidth="256dp"
                                     android:text="@string/stations_list_empty_query_hint" />
+                            </LinearLayout>
+
+                            <!-- #9: network error -->
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginLeft="@dimen/text_padding_horizontal_verylax"
+                                android:layout_marginRight="@dimen/text_padding_horizontal_verylax"
+                                android:gravity="center_horizontal"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="center"
+                                    android:maxWidth="256dp"
+                                    android:text="@string/stations_list_network_error"
+                                    android:textStyle="bold" />
                             </LinearLayout>
                         </ViewAnimator>
                     </LinearLayout>

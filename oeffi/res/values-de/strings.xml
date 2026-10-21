@@ -212,6 +212,7 @@
     <string name="stations_list_empty_query">Keine passenden Haltestellen.</string>
     <string name="stations_list_empty_query_hint">Hast du\'s richtig geschrieben? Versuch\'s mit einem allgemeineren Suchwort.</string>
     <string name="stations_list_network_settings">Netzwerk wechseln</string>
+    <string name="stations_list_network_error">Netzwerk-Fehler</string>
     <string name="stations_location_permission_missing">Die Berechtigung zum Auslesen des Gerätestandorts ist nicht erteilt.</string>
     <string name="stations_location_permission_request">Berechtigung erteilen</string>
     <string name="stations_location_provider_disabled">ausgeschaltet</string>

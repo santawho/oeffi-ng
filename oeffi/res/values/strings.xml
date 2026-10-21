@@ -213,6 +213,7 @@
     <string name="stations_list_empty_query">No stations matched.</string>
     <string name="stations_list_empty_query_hint">Have you spelled it correctly? Try a more general query.</string>
     <string name="stations_list_network_settings">Switch network</string>
+    <string name="stations_list_network_error">Network error.</string>
     <string name="stations_location_permission_missing">There is no permission to read the device\'s location.</string>
     <string name="stations_location_permission_request">Grant permission</string>
     <string name="stations_location_provider_disabled">disabled</string>
