@@ -21,6 +21,7 @@ import android.os.Handler;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.pte.dto.Location;
+import de.schildbach.pte.dto.Product;
 import de.schildbach.pte.provider.NetworkProvider;
 import de.schildbach.pte.dto.QueryDeparturesResult;
 import de.schildbach.pte.exception.BlockedException;
@@ -38,6 +39,7 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.Date;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public abstract class QueryDeparturesRunnable implements Runnable {
@@ -48,6 +50,7 @@ public abstract class QueryDeparturesRunnable implements Runnable {
     protected final NetworkProvider.EquivalentStationsMode equivsMode;
     protected final Date fromTime;
     protected final boolean arrivals;
+    private final Set<Product> products;
     protected final int maxEvents;
     protected final boolean includeLinesAtStation;
 
@@ -61,6 +64,7 @@ public abstract class QueryDeparturesRunnable implements Runnable {
             final NetworkProvider.EquivalentStationsMode equivsMode,
             final Date time,
             final boolean arrivals,
+            final Set<Product> products,
             final int maxEvents,
             final boolean includeLinesAtStation) {
         this.handler = handler;
@@ -71,6 +75,7 @@ public abstract class QueryDeparturesRunnable implements Runnable {
         this.arrivals = arrivals;
         this.maxEvents = maxEvents;
         this.includeLinesAtStation = includeLinesAtStation;
+        this.products = products;
     }
 
     public void run() {
@@ -91,8 +96,8 @@ public abstract class QueryDeparturesRunnable implements Runnable {
 
             try {
                 final QueryDeparturesResult result = networkProvider.queryStationBoard(
-                        station.id, fromTime, arrivals, maxEvents,
-                        equivsMode, null, includeLinesAtStation);
+                        station, fromTime, arrivals, maxEvents,
+                        equivsMode, products, includeLinesAtStation);
 
                 postOnResult(result);
                 break;

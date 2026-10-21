@@ -290,7 +290,7 @@ public class PlanActivity extends OeffiActivity {
                     handler, networkProvider,
                     selection.location,
                     NetworkProvider.EquivalentStationsMode.USE_META,
-                    null, false, 0, true) {
+                    null, false, null, 0, true) {
                 @Override
                 protected void onResult(final QueryDeparturesResult result) {
                     log.info("Got {}", result.toShortString());

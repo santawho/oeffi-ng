@@ -599,7 +599,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                         handler, networkProvider,
                         selectedLocation,
                         NetworkProvider.EquivalentStationsMode.META_IF_SAME_NAME,
-                        fromTime, showArrivals, MAX_DEPARTURES, true) {
+                        fromTime, showArrivals, null, MAX_DEPARTURES, true) {
                     @Override
                     protected void onPreExecute() {
                         swipeRefresh.setRefreshing(true);

@@ -1440,17 +1440,27 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
             if (nextStation != null) {
                 final Location requestedStation = nextStation.location;
                 if (requestedStation.hasId()) {
-                    nextStation.requestedAt = new Date();
+                    final Date now = new Date();
+                    nextStation.requestedAt = now;
 
                     final NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
-                    final int maxDepartures = maxDeparturesPerStation * 2;
 
+                    final Set<Product> reqProducts = new HashSet<>();
+                    if (requestedStation.products == null) {
+                        reqProducts.addAll(products);
+                    } else {
+                        reqProducts.addAll(requestedStation.products);
+                        reqProducts.retainAll(products);
+                    }
+                    final int maxDepartures = maxDeparturesPerStation * (reqProducts.isEmpty() ? 2 : products.size());
                     backgroundHandler.post(
                             new QueryDeparturesRunnable(
                                     handler, networkProvider,
                                     requestedStation,
                                     NetworkProvider.EquivalentStationsMode.META_IF_SAME_NAME,
-                                    presetTime, false, maxDepartures, false) {
+                                    presetTime, false,
+                                    reqProducts.isEmpty() ? null : reqProducts,
+                                    maxDepartures, false) {
                                 @Override
                                 protected void onPreExecute() {
                                     actionBar.startProgress();
@@ -1471,7 +1481,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                                     }
 
                                     if (result.status == QueryDeparturesResult.Status.OK) {
-                                        final ArrayList<Departure> newDepartures = new ArrayList<>();
+                                        List<Departure> newDepartures = null;
                                         for (final StationDepartures subStationDepartures : result.stationDepartures) {
                                             final String subStationId = subStationDepartures.location.id;
                                             final List<Departure> departures = subStationDepartures.getNonCancelledDepartures();
@@ -1483,18 +1493,25 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                                                 if (subStation.requestedAt == null && !departures.isEmpty()) {
                                                     subStation.setDepartures(departures);
                                                     subStation.departureQueryStatus = QueryDeparturesResult.Status.OK;
-                                                    subStation.updatedAt = new Date();
+                                                    subStation.updatedAt = now;
                                                 }
                                             } else {
-                                                newDepartures.addAll(departures);
+                                                newDepartures = departures;
                                             }
                                         }
 
                                         final Station requestedStation = stationsMap.get(station.id);
                                         if (requestedStation != null) {
-                                            requestedStation.setDepartures(newDepartures);
-                                            requestedStation.departureQueryStatus = QueryDeparturesResult.Status.OK;
-                                            requestedStation.updatedAt = new Date();
+                                            if (newDepartures == null) {
+                                                // requested station is not contained in response, may be meta-station
+                                                requestedStation.setDepartures(null);
+                                                requestedStation.departureQueryStatus = QueryDeparturesResult.Status.INVALID_STATION;
+                                                requestedStation.updatedAt = now;
+                                            } else {
+                                                requestedStation.setDepartures(newDepartures);
+                                                requestedStation.departureQueryStatus = QueryDeparturesResult.Status.OK;
+                                                requestedStation.updatedAt = now;
+                                            }
                                         }
 
                                         stationListAdapter.notifyDataSetChanged();
@@ -1503,7 +1520,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                                         final Station resultStation = stationsMap.get(requestedStation.id);
                                         if (resultStation != null) {
                                             resultStation.departureQueryStatus = QueryDeparturesResult.Status.INVALID_STATION;
-                                            resultStation.updatedAt = new Date();
+                                            resultStation.updatedAt = now;
 
                                             stationListAdapter.notifyDataSetChanged();
                                             journeyListAdapter.notifyDataSetChanged();
