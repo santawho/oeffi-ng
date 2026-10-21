@@ -26,89 +26,116 @@
             android:foreground="?android:attr/selectableItemBackground">
 
             <LinearLayout
+                android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
                 android:paddingBottom="@dimen/text_padding_vertical_verylax"
                 android:paddingLeft="@dimen/text_padding_horizontal_verylax"
                 android:paddingRight="@dimen/text_padding_horizontal_verylax"
                 android:paddingTop="@dimen/text_padding_vertical_verylax">
 
-                <!-- first row -->
-
                 <LinearLayout
+                    android:orientation="horizontal"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_height="wrap_content">
 
-                    <TextView
-                        android:id="@+id/station_entry_favorite"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingRight="2dp"
-                        android:shadowColor="#000"
-                        android:shadowRadius="1"
-                        android:text="★"
-                        android:textColor="#ff8c00"
-                        tools:ignore="HardcodedText" />
-
-                    <de.schildbach.oeffi.util.OverflowTextView
-                        android:id="@+id/station_entry_name"
-                        app:overflow_id="@id/station_entry_name_overflow"
-                        android:layout_width="0px"
-                        android:layout_height="wrap_content"
+                    <LinearLayout
+                        android:orientation="vertical"
+                        android:layout_width="0dp"
                         android:layout_weight="1"
-                        android:ellipsize="none"
-                        android:breakStrategy="high_quality" />
+                        android:layout_height="wrap_content">
 
-                    <de.schildbach.oeffi.util.LineView
-                        android:id="@+id/station_entry_lines"
+                        <!-- first row -->
+
+                        <LinearLayout
+                            android:orientation="horizontal"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <TextView
+                                android:id="@+id/station_entry_favorite"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:paddingRight="2dp"
+                                android:shadowColor="#000"
+                                android:shadowRadius="1"
+                                android:text="★"
+                                android:textColor="#ff8c00"
+                                tools:ignore="HardcodedText" />
+
+                            <de.schildbach.oeffi.util.OverflowTextView
+                                android:id="@+id/station_entry_name"
+                                app:overflow_id="@id/station_entry_name_overflow"
+                                android:layout_width="0px"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:ellipsize="none"
+                                android:breakStrategy="high_quality" />
+
+                            <de.schildbach.oeffi.util.LineView
+                                android:id="@+id/station_entry_lines"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:paddingLeft="@dimen/text_padding_horizontal"
+                                android:textSize="@dimen/font_size_tiny" />
+
+                            <TextView
+                                android:id="@+id/station_entry_distance"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:paddingLeft="@dimen/text_padding_horizontal"
+                                android:paddingRight="@dimen/text_padding_horizontal_cram"
+                                android:textSize="@dimen/font_size_small" />
+
+                            <de.schildbach.oeffi.stations.CompassNeedleView
+                                android:id="@+id/station_entry_bearing"
+                                android:layout_width="@dimen/font_size_xlarge"
+                                android:layout_height="@dimen/font_size_xlarge"
+                                android:padding="2dp"
+                                android:visibility="gone" />
+                        </LinearLayout>
+
+                        <!-- overflow row -->
+
+                        <TextView
+                            android:id="@+id/station_entry_name_overflow"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="none"
+                            android:breakStrategy="high_quality"
+                            android:singleLine="true"
+                            android:textStyle="bold" />
+
+                        <!-- second row -->
+
+                        <TextView
+                            android:id="@+id/station_entry_name2"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="middle"
+                            android:singleLine="true"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:orientation="horizontal"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingLeft="@dimen/text_padding_horizontal"
-                        android:textSize="@dimen/font_size_tiny" />
-
-                    <TextView
-                        android:id="@+id/station_entry_distance"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingLeft="@dimen/text_padding_horizontal"
-                        android:paddingRight="@dimen/text_padding_horizontal_cram"
-                        android:textSize="@dimen/font_size_small" />
-
-                    <de.schildbach.oeffi.stations.CompassNeedleView
-                        android:id="@+id/station_entry_bearing"
-                        android:layout_width="@dimen/font_size_xlarge"
-                        android:layout_height="@dimen/font_size_xlarge"
-                        android:padding="2dp"
-                        android:visibility="gone" />
-
-                    <Space
-                        android:id="@+id/station_entry_context_button_space"
-                        android:layout_width="28dp"
-                        android:layout_height="0px" />
+                        android:layout_height="wrap_content">
+                        <ImageButton
+                            android:id="@+id/station_entry_context_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/ic_more_vert_grey600_24dp"
+                            android:tint="@color/fg_less_significant" />
+                        <ImageButton
+                            android:id="@+id/station_entry_open_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/ic_open_ext_black_24dp"
+                            android:tint="@color/fg_less_significant" />
+                    </LinearLayout>
                 </LinearLayout>
-
-                <!-- overflow row -->
-
-                <TextView
-                    android:id="@+id/station_entry_name_overflow"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="none"
-                    android:breakStrategy="high_quality"
-                    android:singleLine="true"
-                    android:textStyle="bold" />
-
-                <!-- second row -->
-
-                <TextView
-                    android:id="@+id/station_entry_name2"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="middle"
-                    android:singleLine="true"
-                    android:textStyle="bold" />
 
                 <!-- departures or status -->
 
@@ -132,12 +159,12 @@
                         android:textColor="@color/fg_insignificant"
                         android:textStyle="bold" />
 
-                    <de.schildbach.oeffi.util.LineView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingBottom="@dimen/text_padding_vertical_cram"
-                        android:paddingTop="@dimen/text_padding_vertical_cram"
-                        android:visibility="invisible" />
+<!--                    <de.schildbach.oeffi.util.LineView-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:paddingBottom="@dimen/text_padding_vertical_cram"-->
+<!--                        android:paddingTop="@dimen/text_padding_vertical_cram"-->
+<!--                        android:visibility="invisible" />-->
                 </FrameLayout>
 
                 <!-- messages -->
@@ -149,11 +176,6 @@
                     android:layout_marginTop="@dimen/text_padding_vertical_cram"
                     android:orientation="vertical" />
             </LinearLayout>
-
-            <ImageButton
-                android:id="@+id/station_entry_context_button"
-                style="@style/My.Widget.ImageButton.Context"
-                android:layout_gravity="top|right" />
 
         </FrameLayout>
     </LinearLayout>

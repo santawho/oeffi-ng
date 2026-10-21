@@ -591,14 +591,13 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             nextLaterTime = null;
             nextEarlierTime = new Date(fromTime.getTime() - 30 * 60 * 1000);
         }
-        final String requestedStationId = selectedLocation.id;
         final NetworkProvider networkProvider = NetworkProviderFactory.provider(selectedNetwork);
 
         backgroundHandler.removeCallbacksAndMessages(null);
         backgroundHandler
                 .post(new QueryDeparturesRunnable(
                         handler, networkProvider,
-                        requestedStationId,
+                        selectedLocation,
                         NetworkProvider.EquivalentStationsMode.META_IF_SAME_NAME,
                         fromTime, showArrivals, MAX_DEPARTURES, true) {
                     @Override

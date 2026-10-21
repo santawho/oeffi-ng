@@ -46,6 +46,7 @@ public class StationsAdapter extends RecyclerView.Adapter<StationViewHolder> imp
 
     private android.location.Location deviceLocation = null;
     private Double deviceBearing = null;
+    private boolean expandAllEntries = false;
     private boolean showPlaces = false;
     private boolean faceDown = false;
     private KeyWordMatcher.Query filterQuery;
@@ -55,6 +56,7 @@ public class StationsAdapter extends RecyclerView.Adapter<StationViewHolder> imp
     public StationsAdapter(
             final Activity context,
             final int maxDepartures,
+            final boolean expandAllEntries,
             final boolean showOriginalDirectionText,
             final Set<Product> productsFilter,
             final StationContextMenuItemListener contextMenuItemListener,
@@ -63,6 +65,7 @@ public class StationsAdapter extends RecyclerView.Adapter<StationViewHolder> imp
         this.context = context;
         this.inflater = LayoutInflater.from(context);
         this.maxDepartures = maxDepartures;
+        this.expandAllEntries = expandAllEntries;
         this.showOriginalDirectionText = showOriginalDirectionText;
         this.productsFilter = productsFilter;
         this.contextMenuItemListener = contextMenuItemListener;
@@ -122,7 +125,7 @@ public class StationsAdapter extends RecyclerView.Adapter<StationViewHolder> imp
         final Station station = getItem(position);
         final boolean isVisible = station.keyWordMatch(filterQuery);
         final Integer favState = stationsAware.getFavoriteState(station.location.id);
-        holder.bind(stationsAware, isVisible, station, baseTime, productsFilter, showPlaces, favState, deviceLocation, this);
+        holder.bind(stationsAware, isVisible, station, baseTime, productsFilter, expandAllEntries, showPlaces, favState, deviceLocation, this);
     }
 
     public Double getDeviceBearing() {

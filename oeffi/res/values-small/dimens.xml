@@ -9,6 +9,7 @@
     <dimen name="action_bar_padding_horizontal">4dp</dimen>
     <dimen name="dialog_padding">3dp</dimen>
 
+    <bool name="expand_all_stationboard_entries">false</bool>
     <integer name="max_departures_per_station">4</integer>
 
 </resources>

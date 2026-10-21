@@ -46,6 +46,7 @@ import de.schildbach.oeffi.stations.StationContextMenu;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.HtmlUtils;
 import de.schildbach.oeffi.util.OverflowTextView;
+import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.pte.Standard;
 import de.schildbach.pte.dto.Departure;
 import de.schildbach.pte.dto.Destination;
@@ -79,7 +80,6 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
     public final TextView distanceView;
     public final CompassNeedleView bearingView;
     public final ImageButton contextButton;
-    public final View contextButtonSpace;
     public final ViewGroup departuresViewGroup;
     public final TextView departuresStatusView;
     public final ViewGroup messagesViewGroup;
@@ -117,7 +117,6 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
         distanceView = itemView.findViewById(R.id.station_entry_distance);
         bearingView = itemView.findViewById(R.id.station_entry_bearing);
         contextButton = itemView.findViewById(R.id.station_entry_context_button);
-        contextButtonSpace = itemView.findViewById(R.id.station_entry_context_button_space);
         departuresViewGroup = itemView.findViewById(R.id.station_entry_departures);
         departuresStatusView = itemView.findViewById(R.id.station_entry_status);
         messagesViewGroup = itemView.findViewById(R.id.station_entry_messages);
@@ -141,7 +140,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
 
     public void bind(
             final StationsAware stationsAware, final boolean isVisible, final Station station, final Date aBaseTime,
-            final Set<Product> productsFilter, final boolean forceShowPlace,
+            final Set<Product> productsFilter, final boolean expandAllEntries, final boolean forceShowPlace,
             final Integer favState, final android.location.Location deviceLocation,
             final CompassNeedleView.Callback compassCallback) {
         if (contextMenu != null) {
@@ -164,6 +163,16 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
             stationsAware.selectStation(isSelected ? null : station);
         });
 
+        if (expandAllEntries && contextMenuItemListener != null) {
+            itemView.findViewById(R.id.station_entry_open_button).setOnClickListener(v -> {
+                // trigger context menu item "open all departures"
+                contextMenuItemListener.onStationContextMenuItemClick(getBindingAdapterPosition(),
+                        station.network, station.location, station.getDepartures(),
+                        R.id.station_context_show_departures);
+            });
+        }
+
+        final boolean isExpanded = isActivated || expandAllEntries;
         final boolean baseIsNow = aBaseTime == null;
         final Date baseTime = baseIsNow ? new Date() : aBaseTime;
 
@@ -181,7 +190,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
         favoriteView.setVisibility(isFavorite ? View.VISIBLE : View.GONE);
 
         // name/place
-        final boolean showPlace = forceShowPlace || isActivated;
+        final boolean showPlace = forceShowPlace || isExpanded;
         final String name = Formats.makeBreakableStationName(showPlace ? station.location.place : station.location.uniqueShortName());
         nameView.setText(name);
         nameView.setTypeface(showPlace ? Typeface.DEFAULT : Typeface.DEFAULT_BOLD);
@@ -229,9 +238,8 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
         }
 
         // context button
-        contextButton.setVisibility(isActivated ? View.VISIBLE : View.GONE);
-        contextButtonSpace.setVisibility(isActivated ? View.VISIBLE : View.GONE);
-        contextButton.setOnClickListener(isActivated ? v -> {
+        ViewUtils.setVisibility(contextButton, isExpanded);
+        contextButton.setOnClickListener(isExpanded ? v -> {
             onContextClick(v, station, favState);
         } : null);
 
@@ -244,20 +252,20 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
             departuresStatusView.setVisibility(View.VISIBLE);
             departuresStatusView.setText("("
                     + context.getString(QueryDeparturesRunnable.statusMsgResId(station.departureQueryStatus)) + ")");
-        } else if (stationDepartures != null && (!isGhosted || isActivated)) {
+        } else if (stationDepartures != null && (!isGhosted || isExpanded)) {
             int iDepartureView = 0;
 
             if (!stationDepartures.isEmpty()) {
-                final int maxGroups = isActivated ? maxDepartures : 1;
+                final int maxGroups = isExpanded ? maxDepartures : 1;
                 final Map<LineDestination, List<Departure>> departureGroups = groupDeparturesByLineDestination(
                         stationDepartures, maxGroups, productsFilter);
                 if (!departureGroups.isEmpty()) {
-                    final int maxDeparturesPerGroup = !isActivated ? 1
-                            : 1 + (maxDepartures / departureGroups.size());
-                    final int departuresChildCount = departuresViewGroup.getChildCount();
-
                     departuresViewGroup.setVisibility(View.VISIBLE);
                     departuresStatusView.setVisibility(View.GONE);
+
+                    final int maxDeparturesPerGroup = !isExpanded ? 1
+                            : 1 + (maxDepartures / departureGroups.size());
+                    final int departuresChildCount = departuresViewGroup.getChildCount();
 
                     for (final Map.Entry<LineDestination, List<Departure>> departureGroup : departureGroups
                             .entrySet()) {
@@ -337,7 +345,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
                                 lineView.setLine(lineDestination.line); // Padding only
                                 destinationView.setVisibility(View.INVISIBLE);
                             }
-                            if (isActivated && departure.journeyRef != null && journeyClickListener != null) {
+                            if (isExpanded && departure.journeyRef != null && journeyClickListener != null) {
                                 View.OnClickListener onClickListener = clickedView ->
                                         journeyClickListener.onJourneyClick(
                                                 clickedView, departure.journeyRef,
@@ -359,7 +367,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
 
                                 final String indexText;
 
-                                if (isActivated) {
+                                if (isExpanded) {
                                     final String message = Stream.of(departure.message, departure.line.message)
                                             .filter(Objects::nonNull)
                                             .collect(Collectors.joining("\n"));
@@ -443,7 +451,8 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
             }
         } else {
             departuresViewGroup.setVisibility(View.GONE);
-            departuresStatusView.setVisibility(View.INVISIBLE);
+            departuresStatusView.setVisibility(View.VISIBLE);
+            departuresStatusView.setText(R.string.stations_list_entry_not_loaded);
         }
 
         // messages
@@ -535,7 +544,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
                 true, false,
                 false, false, true);
         contextMenu.setOnMenuItemClickListener(item -> {
-            final int position = getAdapterPosition();
+            final int position = getBindingAdapterPosition();
             if (position != RecyclerView.NO_POSITION) {
                 return contextMenuItemListener.onStationContextMenuItemClick(position, station.network,
                         station.location, station.getDepartures(), item.getItemId());

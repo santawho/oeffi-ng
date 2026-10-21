@@ -20,6 +20,7 @@ package de.schildbach.oeffi.stations;
 import android.os.Handler;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
+import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.provider.NetworkProvider;
 import de.schildbach.pte.dto.QueryDeparturesResult;
 import de.schildbach.pte.exception.BlockedException;
@@ -43,7 +44,7 @@ public abstract class QueryDeparturesRunnable implements Runnable {
     protected final Handler handler;
 
     protected final NetworkProvider networkProvider;
-    protected final String stationId;
+    protected final Location station;
     protected final NetworkProvider.EquivalentStationsMode equivsMode;
     protected final Date fromTime;
     protected final boolean arrivals;
@@ -56,7 +57,7 @@ public abstract class QueryDeparturesRunnable implements Runnable {
     public QueryDeparturesRunnable(
             final Handler handler,
             final NetworkProvider networkProvider,
-            final String stationId,
+            final Location station,
             final NetworkProvider.EquivalentStationsMode equivsMode,
             final Date time,
             final boolean arrivals,
@@ -64,7 +65,7 @@ public abstract class QueryDeparturesRunnable implements Runnable {
             final boolean includeLinesAtStation) {
         this.handler = handler;
         this.networkProvider = networkProvider;
-        this.stationId = stationId;
+        this.station = station;
         this.equivsMode = equivsMode;
         this.fromTime = time != null ? time : new Date();
         this.arrivals = arrivals;
@@ -90,7 +91,7 @@ public abstract class QueryDeparturesRunnable implements Runnable {
 
             try {
                 final QueryDeparturesResult result = networkProvider.queryStationBoard(
-                        stationId, fromTime, arrivals, maxEvents,
+                        station.id, fromTime, arrivals, maxEvents,
                         equivsMode, null, includeLinesAtStation);
 
                 postOnResult(result);
@@ -108,7 +109,7 @@ public abstract class QueryDeparturesRunnable implements Runnable {
                 postOnParserException(x.getMessage());
                 break;
             } catch (final IOException x) {
-                log.info("IO problem while querying departures on " + stationId + " " + networkProvider + " (try "
+                log.info("IO problem while querying departures on " + station.id + " " + networkProvider + " (try "
                         + tries + ")", x);
 
                 if (tries >= Constants.MAX_TRIES_ON_IO_PROBLEM) {
@@ -125,7 +126,7 @@ public abstract class QueryDeparturesRunnable implements Runnable {
                 // try again
                 continue;
             } catch (final RuntimeException x) {
-                final String message = "uncategorized problem while querying departures on " + stationId + " "
+                final String message = "uncategorized problem while querying departures on " + station.id + " "
                         + networkProvider;
                 throw new RuntimeException(message, x);
             }

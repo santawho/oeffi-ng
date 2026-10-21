@@ -33,7 +33,7 @@
     <dimen name="layout_list_width">400dp</dimen>
     <dimen name="layout_list_height">500dp</dimen>
 
-    <integer name="max_departures_per_station">6</integer>
+    <integer name="max_departures_per_station">5</integer>
 
     <dimen name="vehicle_information_meters_translation">-7dp</dimen>
     <dimen name="vehicle_information_meters_translation_padding">7dp</dimen>

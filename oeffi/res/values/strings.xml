@@ -198,6 +198,7 @@
     <string name="stations_nearby_geo_link_title">Show Nearby &lt;b>Stops&lt;/b></string>
 
     <!-- station list -->
+    <string name="stations_list_entry_not_loaded">(not loaded yet)</string>
     <string name="stations_list_entry_no_departures">(No departures/arrivals)</string>
     <string name="stations_list_entry_product_filtered">(None of the departures/arrivals match the product filter)</string>
     <string name="stations_list_entry_interval">(approx. %d min interval)</string>
