@@ -461,7 +461,6 @@ public class NearestFavoriteStationWidgetService extends JobService {
                     final java.text.DateFormat timeFormat,
                     final boolean canShowJourneys) {
                 final String name = aName != null ? aName : location.uniqueShortName();
-                final String stationId = location.id;
 
                 views.setTextViewText(R.id.station_widget_lastupdated,
                         getString(R.string.nearest_favorite_station_widget_lastupdated, timeFormat.format(new Date())));
@@ -473,7 +472,7 @@ public class NearestFavoriteStationWidgetService extends JobService {
 
                     if (name == null) {
                         // why overwrite name ??
-                        final StationDepartures stationDepartures = result.findStationDepartures(stationId);
+                        final StationDepartures stationDepartures = result.findStationDepartures(location);
                         if (stationDepartures != null && stationDepartures.location.name != null)
                             views.setTextViewText(R.id.station_widget_header, stationDepartures.location.name);
                     }
@@ -484,12 +483,12 @@ public class NearestFavoriteStationWidgetService extends JobService {
 
                     if (!departures.isEmpty()) {
                         setDeparturesList(views, departures, appWidgetId, networkId, location, canShowJourneys);
-                        log.info("Got {} departures for favorite {}", departures.size(), stationId);
+                        log.info("Got {} departures for favorite {}", departures.size(), location.toString());
                     } else {
-                        log.info("Got no station departures for favorite {}", stationId);
+                        log.info("Got no station departures for favorite {}", location.toString());
                     }
                 } else {
-                    log.info("Got {} for favorite {}", result.toShortString(), stationId);
+                    log.info("Got {} for favorite {}", result.toShortString(), location.toString());
                     setMessage(views, getString(QueryDeparturesRunnable.statusMsgResId(result.status)));
                 }
             }

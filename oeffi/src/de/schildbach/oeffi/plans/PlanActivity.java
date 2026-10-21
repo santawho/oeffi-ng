@@ -288,7 +288,7 @@ public class PlanActivity extends OeffiActivity {
             final NetworkProvider networkProvider = NetworkProviderFactory.provider(selection.network);
             backgroundHandler.post(new QueryDeparturesRunnable(
                     handler, networkProvider,
-                    selection.location.id,
+                    selection.location,
                     NetworkProvider.EquivalentStationsMode.USE_META,
                     null, false, 0, true) {
                 @Override
@@ -296,7 +296,7 @@ public class PlanActivity extends OeffiActivity {
                     log.info("Got {}", result.toShortString());
                     if (result.status != QueryDeparturesResult.Status.OK)
                         return;
-                    final StationDepartures stationDepartures = result.findStationDepartures(selection.location.id);
+                    final StationDepartures stationDepartures = result.findStationDepartures(selection.location);
                     if (stationDepartures == null)
                         return;
                     bubbleLinesView.setVisibility(View.GONE);
