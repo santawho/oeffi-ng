@@ -50,6 +50,7 @@ public class OverflowTextView extends TextView {
     }
 
     private int overflowViewId = -1;
+    private boolean overflowVisible;
 
     public OverflowTextView(final Context context, @Nullable final AttributeSet attrs, final int defStyleAttr, final int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
@@ -78,7 +79,7 @@ public class OverflowTextView extends TextView {
     @Override
     public void setVisibility(final int visibility) {
         super.setVisibility(visibility);
-        doOnOverflowView(ovView -> ovView.setVisibility(visibility));
+        doOnOverflowView(ovView -> ovView.setVisibility(overflowVisible ? visibility: View.GONE));
     }
 
     @Override
@@ -125,9 +126,13 @@ public class OverflowTextView extends TextView {
 
     @Override
     protected void onMeasure(final int widthMeasureSpec, final int heightMeasureSpec) {
+        final TextView overflowView = getOverflowView();
+        overflowView.setVisibility(View.GONE);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
         final int lineCount = getLineCount();
-        if (lineCount > 1) {
+        overflowVisible = lineCount > 1;
+        if (overflowVisible) {
             final int endFirstLine = getLayout().getLineVisibleEnd(0);
             final int startSecondLine = getLayout().getLineStart(1);
             int posNonAlpha = -1;
@@ -156,13 +161,9 @@ public class OverflowTextView extends TextView {
                 remainingText = text.subSequence(startSecondLine, text.length());
             }
             super.setText(firstLine, BufferType.NORMAL);
-            final TextView overflowView = getOverflowView();
             overflowView.setText(remainingText);
             overflowView.setVisibility(View.VISIBLE);
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        } else {
-            final TextView overflowView = getOverflowView();
-            overflowView.setVisibility(View.GONE);
         }
     }
 
