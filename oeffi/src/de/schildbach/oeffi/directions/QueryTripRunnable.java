@@ -27,6 +27,7 @@ import androidx.annotation.NonNull;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.Objects;
+import de.schildbach.pte.exception.RateLimitException;
 import de.schildbach.pte.provider.NetworkProvider;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.QueryTripsResult;
@@ -153,6 +154,11 @@ public abstract class QueryTripRunnable implements Runnable {
                     postOnBlocked(x.getUrl());
 
                 break;
+            } catch (final RateLimitException x) {
+                if (!cancelled.get())
+                    postOnRateLimit(x.getUrl());
+
+                break;
             } catch (final InternalErrorException x) {
                 if (!cancelled.get())
                     postOnInternalError(x.getUrl());
@@ -230,6 +236,13 @@ public abstract class QueryTripRunnable implements Runnable {
     }
 
     protected void onBlocked(final HttpUrl url) {
+    }
+
+    private void postOnRateLimit(final HttpUrl url) {
+        handler.post(() -> onRateLimit());
+    }
+
+    protected void onRateLimit() {
     }
 
     private void postOnInternalError(final HttpUrl url) {

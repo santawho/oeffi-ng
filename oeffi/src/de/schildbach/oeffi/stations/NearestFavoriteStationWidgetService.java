@@ -55,6 +55,7 @@ import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GeoUtils;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.pte.NetworkId;
+import de.schildbach.pte.exception.RateLimitException;
 import de.schildbach.pte.provider.NetworkProvider;
 import de.schildbach.pte.dto.Departure;
 import de.schildbach.pte.dto.Location;
@@ -433,7 +434,7 @@ public class NearestFavoriteStationWidgetService extends JobService {
                     setMessage(views, getString(R.string.nearest_favorite_station_widget_error_connect));
                     appWidgetManager.updateAppWidget(appWidgetId, views);
                     log.info("Could not query departures for station " + location.id, x);
-                } catch (final BlockedException x) {
+                } catch (final BlockedException | RateLimitException x) {
                     setHeader(views, appWidgetId, name);
                     setMessage(views, getString(R.string.nearest_favorite_station_widget_error_blocked, x.getUrl().host()));
                     appWidgetManager.updateAppWidget(appWidgetId, views);

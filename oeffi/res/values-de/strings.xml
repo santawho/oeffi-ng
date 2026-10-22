@@ -619,6 +619,7 @@
     <string name="toast_network_problem">Problem mit Netzwerk, werde nochmal versuchen</string>
     <string name="toast_session_expired">Server-Sitzung abgelaufen!\nGehe zurück und wiederhole die Anfrage, um mehr zu laden.</string>
     <string name="toast_network_blocked">Von \"%s\" blockiert.\nMögliche Serverüberlastung?</string>
+    <string name="toast_network_rate_limit">Zu viele Anfragen. Mach langsamer!</string>
     <string name="toast_internal_error">Interner Serverfehler auf \"%s\".</string>
     <string name="toast_invalid_data">Auskunftssystem liefert ungültige Daten:\n%s</string>
     <string name="alert_network_connection_unavailable">Probleme beim Verbinden zum Server</string>

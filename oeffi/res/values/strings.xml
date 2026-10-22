@@ -620,6 +620,7 @@
     <string name="toast_network_problem">Network problem, will try again</string>
     <string name="toast_session_expired">Session to server expired!\nGo back and query again to load more.</string>
     <string name="toast_network_blocked">Blocked by \"%s\".\nPossible server overload?</string>
+    <string name="toast_network_rate_limit">Too many requests. Slow down!</string>
     <string name="toast_internal_error">Internal server error on \"%s\".</string>
     <string name="toast_invalid_data">Server returned invalid data:\n%s</string>
     <string name="alert_network_connection_unavailable">Cannot connect to server</string>

@@ -22,6 +22,7 @@ import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.Product;
+import de.schildbach.pte.exception.RateLimitException;
 import de.schildbach.pte.provider.NetworkProvider;
 import de.schildbach.pte.dto.QueryDeparturesResult;
 import de.schildbach.pte.exception.BlockedException;
@@ -107,6 +108,9 @@ public abstract class QueryDeparturesRunnable implements Runnable {
             } catch (final BlockedException x) {
                 postOnBlocked(x.getUrl());
                 break;
+            } catch (final RateLimitException x) {
+                postOnRateLimit(x.getUrl());
+                break;
             } catch (final InternalErrorException x) {
                 postOnInternalError(x.getUrl());
                 break;
@@ -172,6 +176,13 @@ public abstract class QueryDeparturesRunnable implements Runnable {
 
     protected void onBlocked(final HttpUrl url) {
         onAllErrors();
+    }
+
+    private void postOnRateLimit(final HttpUrl url) {
+        handler.post(() -> onRateLimit());
+    }
+
+    protected void onRateLimit() {
     }
 
     private void postOnInternalError(final HttpUrl url) {

@@ -1554,6 +1554,13 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                                             url.host()));
                                 }
 
+                                protected void onRateLimit(final HttpUrl url) {
+                                    log.info("Rate limited querying departures on {}", requestedStation.id);
+
+                                    handler.post(() -> new Toast(StationsActivity.this).toast(R.string.toast_network_rate_limit,
+                                            url.host()));
+                                }
+
                                 @Override
                                 protected void onInternalError(final HttpUrl url) {
                                     log.info("Internal error querying departures on {}", requestedStation.id);

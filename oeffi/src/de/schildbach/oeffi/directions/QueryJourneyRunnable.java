@@ -46,6 +46,7 @@ import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.pte.NetworkId;
+import de.schildbach.pte.exception.RateLimitException;
 import de.schildbach.pte.provider.NetworkProvider;
 import de.schildbach.pte.dto.JourneyRef;
 import de.schildbach.pte.dto.Location;
@@ -171,6 +172,11 @@ public class QueryJourneyRunnable implements Runnable {
                     postOnBlocked(x.getUrl());
 
                 break;
+            } catch (final RateLimitException x) {
+                if (!cancelled.get())
+                    postOnRateLimit(x.getUrl());
+
+                break;
             } catch (final InternalErrorException x) {
                 if (!cancelled.get())
                     postOnInternalError(x.getUrl());
@@ -294,6 +300,14 @@ public class QueryJourneyRunnable implements Runnable {
             })
             .setNegativeButton(R.string.directions_alert_blocked_button_dismiss, null)
             .show();
+    }
+
+    private void postOnRateLimit(final HttpUrl url) {
+        handler.post(() -> onRateLimit());
+    }
+
+    protected void onRateLimit() {
+        new Toast(parentActivity).toast(R.string.toast_network_rate_limit);
     }
 
     private void postOnInternalError(final HttpUrl url) {

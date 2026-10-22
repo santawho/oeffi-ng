@@ -1951,6 +1951,11 @@ public class DirectionsActivity extends OeffiMainActivity implements
         }
 
         @Override
+        protected void onRateLimit() {
+            new Toast(DirectionsActivity.this).toast(R.string.toast_network_rate_limit);
+        }
+
+        @Override
         protected void onInternalError(final HttpUrl url) {
             DialogBuilder.warn(DirectionsActivity.this, R.string.directions_alert_internal_error_title)
                 .setMessage(getString(R.string.directions_alert_internal_error_message, url.host()))

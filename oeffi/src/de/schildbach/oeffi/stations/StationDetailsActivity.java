@@ -782,6 +782,11 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                     }
 
                     @Override
+                    protected void onRateLimit() {
+                        new Toast(StationDetailsActivity.this).toast(R.string.toast_network_rate_limit);
+                    }
+
+                    @Override
                     protected void onAllErrors() {
                         statusMessage(getString(R.string.toast_network_problem));
                     }

@@ -320,6 +320,11 @@ public class PlanActivity extends OeffiActivity {
                 }
 
                 @Override
+                protected void onRateLimit() {
+                    onAllErrors();
+                }
+
+                @Override
                 protected void onAllErrors() {
                     bubbleLinesView.setVisibility(View.GONE);
                     updateBubble();
