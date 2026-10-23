@@ -165,7 +165,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
             stationsAware.selectStation(isSelected ? null : station);
         });
 
-        if (expandAllEntries && contextMenuItemListener != null) {
+        if (contextMenuItemListener != null) {
             itemView.findViewById(R.id.station_entry_open_button).setOnClickListener(v -> {
                 // trigger context menu item "open all departures"
                 contextMenuItemListener.onStationContextMenuItemClick(getBindingAdapterPosition(),
