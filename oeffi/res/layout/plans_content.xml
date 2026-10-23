@@ -4,7 +4,6 @@
     android:id="@+id/plans_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_plan"
     android:inAnimation="@android:anim/fade_in"
     android:outAnimation="@android:anim/fade_out">
 
@@ -37,6 +36,7 @@
             android:id="@+id/plans_plan"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@color/bg_plan"
             android:focusable="true" />
 
         <de.schildbach.oeffi.plans.BubbleLayout

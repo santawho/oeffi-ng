@@ -37,10 +37,8 @@
         <item name="imageButtonStyle">@style/My.Widget.ImageButton</item>
     </style>
 
-    <style name="My.Theme.Fullscreen" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:windowBackground">@android:color/black</item>
+    <style name="My.Theme.Fullscreen" parent="My.Theme">
         <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="27">shortEdges</item>
-        <item name="android:textViewStyle">@style/My.Widget.TextView</item>
     </style>
 
     <style name="My.Theme.Preference" parent="@style/My.Theme">
