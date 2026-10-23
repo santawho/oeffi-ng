@@ -1462,7 +1462,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                             new QueryDeparturesRunnable(
                                     handler, networkProvider,
                                     requestedStation,
-                                    NetworkProvider.EquivalentStationsMode.META_IF_SAME_NAME,
+                                    NetworkProvider.EquivalentStationsMode.KEEP_DISTINCT, // META_IF_SAME_NAME,
                                     presetTime, false,
                                     reqProducts.isEmpty() ? null : reqProducts,
                                     maxDepartures, false) {
