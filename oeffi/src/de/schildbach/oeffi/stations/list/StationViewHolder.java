@@ -86,7 +86,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
 
     private final Activity context;
     private final Resources res;
-    private final int maxDepartures;
+    private final int maxDeparturesCollapsed, maxDeparturesExpanded;
     private final boolean showOriginalDirectionText;
     private final StationContextMenuItemListener contextMenuItemListener;
     private final JourneyClickListener journeyClickListener;
@@ -103,7 +103,8 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
 
     public StationViewHolder(
             final Activity context, final View itemView,
-            final int maxDepartures, final boolean showOriginalDirectionText,
+            final int maxDeparturesCollapsed, final int maxDeparturesExpanded,
+            final boolean showOriginalDirectionText,
             final StationContextMenuItemListener contextMenuItemListener,
             final JourneyClickListener journeyClickListener) {
         super(itemView);
@@ -123,7 +124,8 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
 
         this.context = context;
         this.res = context.getResources();
-        this.maxDepartures = maxDepartures;
+        this.maxDeparturesCollapsed = maxDeparturesCollapsed;
+        this.maxDeparturesExpanded = maxDeparturesExpanded;
         this.showOriginalDirectionText = showOriginalDirectionText;
         this.contextMenuItemListener = contextMenuItemListener;
         this.journeyClickListener = journeyClickListener;
@@ -256,15 +258,15 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
             int iDepartureView = 0;
 
             if (!stationDepartures.isEmpty()) {
-                final int maxGroups = isExpanded ? maxDepartures : 1;
+                final int maxGroups = isExpanded ? maxDeparturesExpanded : maxDeparturesCollapsed;
                 final Map<LineDestination, List<Departure>> departureGroups = groupDeparturesByLineDestination(
                         stationDepartures, maxGroups, productsFilter);
                 if (!departureGroups.isEmpty()) {
                     departuresViewGroup.setVisibility(View.VISIBLE);
                     departuresStatusView.setVisibility(View.GONE);
 
-                    final int maxDeparturesPerGroup = !isExpanded ? 1
-                            : 1 + (maxDepartures / departureGroups.size());
+                    // final int maxDeparturesPerGroup = !isExpanded ? 1 : 1 + (maxGroups / departureGroups.size());
+                    final int maxDeparturesPerGroup = (isExpanded ? 1 : 0) + (maxGroups / departureGroups.size());
                     final int departuresChildCount = departuresViewGroup.getChildCount();
 
                     for (final Map.Entry<LineDestination, List<Departure>> departureGroup : departureGroups

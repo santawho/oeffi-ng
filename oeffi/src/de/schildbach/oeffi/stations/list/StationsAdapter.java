@@ -36,7 +36,7 @@ import static de.schildbach.pte.util.Preconditions.checkArgument;
 
 public class StationsAdapter extends RecyclerView.Adapter<StationViewHolder> implements CompassNeedleView.Callback {
     private final Activity context;
-    private final int maxDepartures;
+    private final int maxDeparturesCollapsed, maxDeparturesExpanded;
     private final boolean showOriginalDirectionText;
     private final Set<Product> productsFilter;
     private final StationContextMenuItemListener contextMenuItemListener;
@@ -55,7 +55,7 @@ public class StationsAdapter extends RecyclerView.Adapter<StationViewHolder> imp
 
     public StationsAdapter(
             final Activity context,
-            final int maxDepartures,
+            final int maxDeparturesCollapsed, final int maxDeparturesExpanded,
             final boolean expandAllEntries,
             final boolean showOriginalDirectionText,
             final Set<Product> productsFilter,
@@ -64,7 +64,8 @@ public class StationsAdapter extends RecyclerView.Adapter<StationViewHolder> imp
             final StationsAware stationsAware) {
         this.context = context;
         this.inflater = LayoutInflater.from(context);
-        this.maxDepartures = maxDepartures;
+        this.maxDeparturesCollapsed = maxDeparturesCollapsed;
+        this.maxDeparturesExpanded = maxDeparturesExpanded;
         this.expandAllEntries = expandAllEntries;
         this.showOriginalDirectionText = showOriginalDirectionText;
         this.productsFilter = productsFilter;
@@ -115,8 +116,10 @@ public class StationsAdapter extends RecyclerView.Adapter<StationViewHolder> imp
 
     @Override
     public StationViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
-        return new StationViewHolder(context, inflater.inflate(R.layout.stations_station_entry, parent, false),
-                maxDepartures, showOriginalDirectionText, contextMenuItemListener, journeyClickListener);
+        return new StationViewHolder(context,
+                inflater.inflate(R.layout.stations_station_entry, parent, false),
+                maxDeparturesCollapsed, maxDeparturesExpanded,
+                showOriginalDirectionText, contextMenuItemListener, journeyClickListener);
     }
 
     @Override

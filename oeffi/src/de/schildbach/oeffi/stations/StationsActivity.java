@@ -207,7 +207,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
     private boolean expandAllEntries;
     private int maxStationsToLoad;
-    private int maxDeparturesPerStation;
+    private int maxDeparturesPerStationCollapsed, maxDeparturesPerStationExpanded;
     private int maxDeparturesPerJourney;
     private float walkPaceMillisPerMeter;
 
@@ -511,7 +511,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private void setupStationsList() {
         expandAllEntries = res.getBoolean(R.bool.expand_all_stationboard_entries);
         maxStationsToLoad = res.getInteger(R.integer.max_stations_to_load_per_stationboard);
-        maxDeparturesPerStation = res.getInteger(R.integer.max_departures_per_station);
+        maxDeparturesPerStationCollapsed = res.getInteger(R.integer.max_departures_per_station_collapsed);
+        maxDeparturesPerStationExpanded = res.getInteger(R.integer.max_departures_per_station_expanded);
 
         final ItemTouchHelper itemTouchHelper = new ItemTouchHelper(
                 new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
@@ -673,7 +674,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         stationList.setLayoutManager(stationListLayoutManager);
         // stationList.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
         stationListAdapter = new StationsAdapter(this,
-                maxDeparturesPerStation, expandAllEntries, isShowOriginalDirectionText(), products,
+                maxDeparturesPerStationCollapsed, maxDeparturesPerStationExpanded,
+                expandAllEntries, isShowOriginalDirectionText(), products,
                 this,
                 NetworkProviderFactory.provider(network).hasCapabilities(NetworkProvider.Capability.JOURNEY) ? this : null,
                 this);
@@ -1457,7 +1459,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                         reqProducts.addAll(requestedStation.products);
                         reqProducts.retainAll(products);
                     }
-                    final int maxDepartures = maxDeparturesPerStation * (reqProducts.isEmpty() ? 2 : products.size());
+                    final int maxDepartures = maxDeparturesPerStationExpanded * (reqProducts.isEmpty() ? 2 : products.size());
                     backgroundHandler.post(
                             new QueryDeparturesRunnable(
                                     handler, networkProvider,
