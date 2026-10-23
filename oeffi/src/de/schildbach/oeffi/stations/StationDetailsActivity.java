@@ -590,6 +590,10 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             fromTime = presetTime != null ? presetTime : new Date();
             nextLaterTime = null;
             nextEarlierTime = new Date(fromTime.getTime() - 30 * 60 * 1000);
+            for (final Station station : stations) {
+                station.setDepartures(null);
+                station.departureQueryStatus = null;
+            }
         }
         final NetworkProvider networkProvider = NetworkProviderFactory.provider(selectedNetwork);
 
@@ -761,12 +765,9 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                             }
 
                             if (newSelectedStation != null) {
-//                                selectedStation = newSelectedStation;
-//                                if (selectedStation.hasCoord()) {
-//                                    selectedCoord = selectedStation;
-//                                    nearbyButton.setVisibility(View.VISIBLE);
-//                                }
                                 selectStation(newSelectedStation);
+                            } else if (!modeAppend) {
+                                selectStation(selectedStation);
                             }
 
                             updateGUI();
