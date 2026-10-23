@@ -196,9 +196,13 @@ public abstract class OeffiActivity extends AppCompatActivity
         setContentView(layoutResID, true);
     }
 
+    public View setContentView(final int layoutResID, final boolean showNavigation) {
+        return setContentView(layoutResID, showNavigation, ViewUtils.getAttrColor(this, R.attr.bg_level0));
+    }
+
     protected View contentView;
 
-    public View setContentView(final int layoutResID, final boolean showNavigation) {
+    public View setContentView(final int layoutResID, final boolean showNavigation, final int backgroundColor) {
         if (prefs.getBoolean("user_interface_darkmode_amoled_enabled", false))
             setTheme(R.style.My_Theme_Amoled);
 
@@ -209,7 +213,7 @@ public abstract class OeffiActivity extends AppCompatActivity
         super.setContentView(layoutResID);
 
         contentView = findViewById(android.R.id.content);
-        contentView.setBackgroundColor(ViewUtils.getAttrColor(this, R.attr.bg_level0));
+        contentView.setBackgroundColor(backgroundColor);
         setupMapView(contentView);
 
         // chance to perform general setup

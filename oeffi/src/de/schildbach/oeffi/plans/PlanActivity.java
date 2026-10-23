@@ -130,7 +130,7 @@ public class PlanActivity extends OeffiActivity {
         backgroundThread.start();
         backgroundHandler = new Handler(backgroundThread.getLooper());
 
-        setContentView(R.layout.plans_content);
+        setContentView(R.layout.plans_content, false);
 
         final Animation zoomControlsAnimation = AnimationUtils.loadAnimation(this, R.anim.zoom_controls);
         zoomControlsAnimation.setFillAfter(true); // workaround: set through code because XML does not work
