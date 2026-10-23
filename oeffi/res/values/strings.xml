@@ -616,7 +616,7 @@
 
     <!-- generic messages -->
     <string name="result_status_service_down">Service not available</string>
-    <string name="result_status_invalid_station">Station not existing</string>
+    <string name="result_status_invalid_station">No departures at this time, or station not existing</string>
     <string name="toast_network_problem">Network problem, will try again</string>
     <string name="toast_session_expired">Session to server expired!\nGo back and query again to load more.</string>
     <string name="toast_network_blocked">Blocked by \"%s\".\nPossible server overload?</string>
