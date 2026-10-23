@@ -151,12 +151,15 @@ public class PlanContentProvider extends ContentProvider {
 
         private void load() {
             clear();
-            for (final String planId : Application.getInstance().getSharedPreferences()
-                    .getString(prefKey, "").split(",")) {
-                try {
-                    add(planId);
-                } catch (final IllegalArgumentException x) {
-                    // don't care
+            final String savedValue = Application.getInstance().getSharedPreferences()
+                    .getString(prefKey, "");
+            if (savedValue.length() > 0) {
+                for (final String planId : savedValue.split(",")) {
+                    try {
+                        add(planId);
+                    } catch (final IllegalArgumentException x) {
+                        // don't care
+                    }
                 }
             }
         }
