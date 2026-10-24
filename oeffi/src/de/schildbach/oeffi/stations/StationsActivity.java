@@ -862,6 +862,9 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         journeyListAdapter.notifyDataSetChanged();
         getMapView().invalidate();
         loading = true;
+
+        stationList.scrollToPosition(0);
+        journeyList.scrollToPosition(0);
     }
 
     @Override
@@ -1006,6 +1009,9 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private void setLocationByUser(final Location location) {
         fixedLocation = location;
         fixedLocationResolving = false;
+
+        stationList.scrollToPosition(0);
+        journeyList.scrollToPosition(0);
 
         // clear the time preset
         final boolean hadPresetTime = presetTime != null;
