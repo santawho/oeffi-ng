@@ -85,6 +85,7 @@ public class OverflowTextView extends TextView {
     @Override
     public void setText(final CharSequence text, final BufferType type) {
         this.text = text;
+        doOnOverflowView(ovView -> ovView.setVisibility(View.GONE));
         super.setText(text, type);
     }
 
@@ -126,8 +127,8 @@ public class OverflowTextView extends TextView {
 
     @Override
     protected void onMeasure(final int widthMeasureSpec, final int heightMeasureSpec) {
-        final TextView overflowView = getOverflowView();
-        overflowView.setVisibility(View.GONE);
+//        final TextView overflowView = getOverflowView();
+//        overflowView.setVisibility(View.GONE);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
         final int lineCount = getLineCount();
