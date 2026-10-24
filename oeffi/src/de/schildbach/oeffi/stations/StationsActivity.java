@@ -60,6 +60,8 @@ import android.widget.TextView;
 import android.widget.ViewAnimator;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.RequiresPermission;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -1738,23 +1740,33 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
     private void startLocationProvider() {
         // determine location providers
-        final Criteria accurateCriteria = new Criteria();
-        accurateCriteria.setAccuracy(Criteria.ACCURACY_FINE);
-        accurateLocationProvider = locationManager.getBestProvider(accurateCriteria, true);
-        final Criteria lowPowerCriteria = new Criteria();
-        lowPowerCriteria.setPowerRequirement(Criteria.POWER_LOW);
-        lowPowerLocationProvider = locationManager.getBestProvider(lowPowerCriteria, true);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (locationManager.getProviders(true).contains(LocationManager.GPS_PROVIDER)) {
+                accurateLocationProvider = LocationManager.GPS_PROVIDER;
+            } else {
+                final Criteria accurateCriteria = new Criteria();
+                accurateCriteria.setAccuracy(Criteria.ACCURACY_FINE);
+                accurateLocationProvider = locationManager.getBestProvider(accurateCriteria, true);
+            }
+        }
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            final Criteria lowPowerCriteria = new Criteria();
+            lowPowerCriteria.setPowerRequirement(Criteria.POWER_LOW);
+            lowPowerLocationProvider = locationManager.getBestProvider(lowPowerCriteria, true);
+        }
 
         if (accurateLocationProvider != null && accurateLocationProvider.equals(lowPowerLocationProvider))
-            accurateLocationProvider = null;
+            lowPowerLocationProvider = null;
 
         // request update on location change
-        if (accurateLocationProvider != null)
+        if (accurateLocationProvider != null) {
             locationManager.requestLocationUpdates(accurateLocationProvider, Constants.LOCATION_UPDATE_FREQ_MS,
                     Constants.LOCATION_UPDATE_DISTANCE, locationListener);
-        if (lowPowerLocationProvider != null)
+        }
+        if (lowPowerLocationProvider != null) {
             locationManager.requestLocationUpdates(lowPowerLocationProvider, Constants.LOCATION_UPDATE_FREQ_MS,
                     Constants.LOCATION_UPDATE_DISTANCE, locationListener);
+        }
 
         // last known location
         final android.location.Location here = determineLastKnownLocation();
@@ -1790,6 +1802,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         locationManager.removeUpdates(locationListener);
     }
 
+    @RequiresPermission(allOf = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
     private android.location.Location determineLastKnownLocation() {
         android.location.Location accurateLocation = null;
         if (accurateLocationProvider != null) {
