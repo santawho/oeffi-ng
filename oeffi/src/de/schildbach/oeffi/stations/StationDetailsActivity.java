@@ -425,7 +425,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             @Override
             public void onReceive(final Context context, final Intent intent) {
                 if (!autoRefreshDisabled)
-                    load(null, false);
+                    requestRefresh();
             }
         };
         registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
@@ -433,7 +433,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         if (firstStart)
             firstStart = false;
         else if (!autoRefreshDisabled)
-            load(null, false);
+            requestRefresh();
 
         updateFragments();
     }
@@ -576,6 +576,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
     private void requestRefresh() {
         autoRefreshDisabled = false;
+        listView.scrollToPosition(0);
         load(null, false);
     }
 
@@ -886,10 +887,8 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         // actionBar.setPrimaryTitle(selectedStation.name);
         // actionBar.setSecondaryTitle(selectedStation.place);
 
-        if (changed) {
-            autoRefreshDisabled = false;
-            load(null, false);
-        }
+        if (changed)
+            requestRefresh();
     }
 
     public boolean isSelectedStation(final String stationId) {
