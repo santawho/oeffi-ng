@@ -776,7 +776,10 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
 
                 final double allowedDistance = mapDiagonal / 20.0;
                 for (final Station station : stationsAware.getStations()) {
-                    final float distance = GeoUtils.distanceBetween(tappedLat, tappedLon, station.location.coord).distanceInMeters;
+                    final Point coord = station.location.coord;
+                    if (coord == null)
+                        continue;
+                    final float distance = GeoUtils.distanceBetween(tappedLat, tappedLon, coord).distanceInMeters;
                     if (distance < allowedDistance) {
                         if (tappedStation == null || distance < tappedStationDistance) {
                             tappedStation = station;
