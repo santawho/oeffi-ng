@@ -1240,12 +1240,11 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                             getReturnHereIntent());
                 };
                 itemView.setOnClickListener(onClickListener);
-//                lineView.setClickable(true);
-//                lineView.setOnClickListener(onClickListener);
-//                destinationView.setClickable(true);
+                lineView.setOnClickListener(onClickListener);
 //                destinationView.setOnClickListener(onClickListener);
             } else {
                 itemView.setOnClickListener(null);
+                lineView.setOnClickListener(null);
             }
 
             final Position position = departure.getPosition();
