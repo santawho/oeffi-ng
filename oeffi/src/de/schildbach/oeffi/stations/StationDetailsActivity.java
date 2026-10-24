@@ -458,6 +458,27 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                     false,
                     getReturnHereIntent());
         }
+
+        startPeriodicUpdateGuiRunnable();
+    }
+
+    @Override
+    protected long getPeriodicUpdateIntervalMs() {
+        return 5000;
+    }
+
+    private static class TimerTick {
+        final long nowMs;
+
+        private TimerTick(final long nowMs) {
+            this.nowMs = nowMs;
+        }
+    }
+
+    @Override
+    protected void doPeriodicUpdateGui(final long nowMs, final long intervalMs) {
+        super.doPeriodicUpdateGui(nowMs, intervalMs);
+        departuresAdapter.notifyItemRangeChanged(0, departuresAdapter.getItemCount(), new TimerTick(nowMs));
     }
 
     @Override
@@ -1086,6 +1107,19 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             final Departure departure = getItem(position);
             ((DepartureViewHolder) holder).bind(selectedNetwork, selectedLocation, departure);
         }
+
+        @Override
+        public void onBindViewHolder(
+                @NonNull final RecyclerView.ViewHolder holder, final int position,
+                @NonNull final List<Object> payloads) {
+            for (final Object payload : payloads) {
+                if (payload instanceof TimerTick) {
+                    ((DepartureViewHolder) holder).onTimerTick(((TimerTick) payload).nowMs);
+                    return;
+                }
+            }
+            super.onBindViewHolder(holder, position, payloads);
+        }
     }
 
     private class DepartureViewHolder extends RecyclerView.ViewHolder {
@@ -1135,8 +1169,14 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         public void bind(final NetworkId network, final Location station, final Departure departure) {
             this.station = station;
             this.departure = departure;
+            render();
+        }
 
-            final long now = new Date().getTime();
+        public void onTimerTick(final long nowMs) {
+            renderTimeDependentElements(nowMs);
+        }
+
+        private boolean renderTimeDependentElements(final long now) {
             final boolean refIsNow;
             final long referenceTime;
             if (context.presetTime == null) {
@@ -1152,8 +1192,6 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
             final PTDate predictedTime = departure.predictedTime;
             final PTDate plannedTime = departure.plannedTime;
-            final boolean isCancelled = departure.cancelled;
-
             final PTDate time;
             final boolean isPredicted = predictedTime != null;
             if (predictedTime != null)
@@ -1170,18 +1208,32 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                     ? context.getColor(R.color.bg_station_before)
                     : ViewUtils.getAttrColor(context, R.attr.bg_level0));
 
-            // time rel
-            timeRelView.setText(Formats.formatTimeDiff(context, referenceTime, timeMillis, refIsNow));
-            timeRelView.setTypeface(Typeface.DEFAULT, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
-            ViewUtils.setCancelledStrikeThru(timeRelView, isCancelled);
+            final String relTime = Formats.formatTimeDiff(context, referenceTime, timeMillis, refIsNow);
+            timeRelView.setText(relTime);
 
-            // time abs
             final PTDate displayTime = timeZoneSelector.getDisplay(time);
             final StringBuilder timeAbs = new StringBuilder(Formats.formatDate(timeZoneSelector, referenceTime, displayTime, false, ""));
             if (timeAbs.length() > 0)
                 timeAbs.append(',').append(Constants.CHAR_HAIR_SPACE);
             timeAbs.append(Formats.formatTime(timeZoneSelector, displayTime));
             timeAbsView.setText(timeAbs);
+
+            return isPredicted;
+        }
+
+        private void render() {
+            final long now = System.currentTimeMillis();
+            final boolean isPredicted = renderTimeDependentElements(now);
+
+            final PTDate predictedTime = departure.predictedTime;
+            final PTDate plannedTime = departure.plannedTime;
+            final boolean isCancelled = departure.cancelled;
+
+            // time rel
+            timeRelView.setTypeface(Typeface.DEFAULT, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
+            ViewUtils.setCancelledStrikeThru(timeRelView, isCancelled);
+
+            // time abs
             timeAbsView.setTypeface(Typeface.DEFAULT, (isPredicted ? Typeface.ITALIC : 0) + (isCancelled ? Typeface.BOLD : 0));
             ViewUtils.setCancelledStrikeThru(timeAbsView, isCancelled);
             timeAbsView.setTextColor(getColor(isCancelled ? R.color.fg_cancelled : R.color.fg_significant));
@@ -1336,21 +1388,5 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             else if (capacity == 3)
                 capacityView.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.capacity_3, 0);
         }
-    }
-
-    private static String bvgStationIdNfcToQr(final String stationIdStr) {
-        final int stationId = Integer.parseInt(stationIdStr);
-
-        if (stationId < 100000000 || stationId >= 1000000000)
-            return stationIdStr;
-        final int low = stationId % 100000;
-        final int middle = (stationId % 100000000) - low;
-
-        if (middle != 1000000)
-            return stationIdStr;
-
-        final int high = stationId - (stationId % 100000000);
-
-        return Integer.toString(high / 1000 + low);
     }
 }
