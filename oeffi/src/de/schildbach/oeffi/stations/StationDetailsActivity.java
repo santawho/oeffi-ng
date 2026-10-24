@@ -467,18 +467,16 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         return 5000;
     }
 
-    private static class TimerTick {
-        final long nowMs;
-
-        private TimerTick(final long nowMs) {
-            this.nowMs = nowMs;
-        }
-    }
-
     @Override
     protected void doPeriodicUpdateGui(final long nowMs, final long intervalMs) {
         super.doPeriodicUpdateGui(nowMs, intervalMs);
-        departuresAdapter.notifyItemRangeChanged(0, departuresAdapter.getItemCount(), new TimerTick(nowMs));
+
+        int itemPos = departuresAdapter.getItemCount();
+        while (--itemPos >= 0) {
+            final DepartureViewHolder holder = (DepartureViewHolder) listView.findViewHolderForAdapterPosition(itemPos);
+            if (holder != null)
+                holder.renderTimeDependentElements(nowMs);
+        }
     }
 
     @Override
@@ -1106,19 +1104,6 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, final int position) {
             final Departure departure = getItem(position);
             ((DepartureViewHolder) holder).bind(selectedNetwork, selectedLocation, departure);
-        }
-
-        @Override
-        public void onBindViewHolder(
-                @NonNull final RecyclerView.ViewHolder holder, final int position,
-                @NonNull final List<Object> payloads) {
-            for (final Object payload : payloads) {
-                if (payload instanceof TimerTick) {
-                    ((DepartureViewHolder) holder).onTimerTick(((TimerTick) payload).nowMs);
-                    return;
-                }
-            }
-            super.onBindViewHolder(holder, position, payloads);
         }
     }
 
