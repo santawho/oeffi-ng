@@ -825,37 +825,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         return null;
     }
 
-    private long fastRefreshIntervalMs;
-
-    public boolean startPeriodicUpdateGuiRunnable() {
-        fastRefreshIntervalMs = getPeriodicUpdateIntervalMs();
-        if (fastRefreshIntervalMs > 0) {
-            periodicUpdateGuiRunnable.run();
-            return true;
-        } else {
-            stopPeriodicUpdateGuiRunnable();
-            return false;
-        }
-    }
-
-    private void stopPeriodicUpdateGuiRunnable() {
-        handler.removeCallbacks(periodicUpdateGuiRunnable);
-    }
-
-    private final Runnable periodicUpdateGuiRunnable = new Runnable() {
-        @Override
-        public void run() {
-            fastRefreshIntervalMs = getPeriodicUpdateIntervalMs();
-            updateGuiIfApplicable(false);
-            if (fastRefreshIntervalMs > 0) {
-                requestLocationUpdates(fastRefreshIntervalMs);
-                handler.postDelayed(this, fastRefreshIntervalMs);
-            } else {
-                stopPeriodicUpdateGuiRunnable();
-            }
-        }
-    };
-
     @Override
     protected void onStart() {
         super.onStart();
@@ -884,8 +853,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         return updateGUI();
     }
 
-    protected long getPeriodicUpdateIntervalMs() {
-        return -1;
+    @Override
+    protected void doPeriodicUpdateGui(final long nowMs, final long intervalMs) {
+        super.doPeriodicUpdateGui(nowMs, intervalMs);
+        updateGuiIfApplicable(false);
+        if (intervalMs > 0)
+            requestLocationUpdates(intervalMs);
     }
 
     @Override
@@ -912,7 +885,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     protected void onPause() {
         isPaused = true;
         removeLocationUpdates();
-        stopPeriodicUpdateGuiRunnable();
         super.onPause();
     }
 

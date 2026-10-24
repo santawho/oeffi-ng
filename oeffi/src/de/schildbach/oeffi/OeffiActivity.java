@@ -252,6 +252,47 @@ public abstract class OeffiActivity extends AppCompatActivity
         super.attachBaseContext(interceptorContext);
     }
 
+    private long fastRefreshIntervalMs;
+    private Runnable periodicUpdateGuiRunnable;
+
+    protected boolean startPeriodicUpdateGuiRunnable() {
+        fastRefreshIntervalMs = getPeriodicUpdateIntervalMs();
+        if (fastRefreshIntervalMs > 0) {
+            if (periodicUpdateGuiRunnable == null) {
+                periodicUpdateGuiRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        fastRefreshIntervalMs = getPeriodicUpdateIntervalMs();
+                        doPeriodicUpdateGui(System.currentTimeMillis(), fastRefreshIntervalMs);
+                        if (fastRefreshIntervalMs > 0) {
+                            handler.postDelayed(this, fastRefreshIntervalMs);
+                        } else {
+                            stopPeriodicUpdateGuiRunnable();
+                        }
+                    }
+                };
+            }
+            periodicUpdateGuiRunnable.run();
+            return true;
+        } else {
+            stopPeriodicUpdateGuiRunnable();
+            return false;
+        }
+    }
+
+    private void stopPeriodicUpdateGuiRunnable() {
+        if (periodicUpdateGuiRunnable != null)
+            handler.removeCallbacks(periodicUpdateGuiRunnable);
+    }
+
+    protected long getPeriodicUpdateIntervalMs() {
+        return -1;
+    }
+
+    protected void doPeriodicUpdateGui(final long nowMs, final long intervalMs) {
+        // override me
+    }
+
     protected boolean isTakeDriverModeFromApplication() {
         return false;
     }
@@ -337,6 +378,7 @@ public abstract class OeffiActivity extends AppCompatActivity
 
     @Override
     protected void onPause() {
+        stopPeriodicUpdateGuiRunnable();
         savedProducts = loadProductFilter();
         if (mapView != null)
             mapView.onPause();
