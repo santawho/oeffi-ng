@@ -103,6 +103,11 @@ public class OeffiActionBar extends FrameLayout implements View.OnLayoutChangeLi
         addOnLayoutChangeListener(this);
     }
 
+    public void addView(final View view) {
+        final LinearLayout frameView = findViewById(R.id.action_bar);
+        frameView.addView(view);
+    }
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();

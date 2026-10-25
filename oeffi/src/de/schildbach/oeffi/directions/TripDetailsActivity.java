@@ -369,6 +369,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         marginView = findViewById(R.id.directions_trip_details_footer_margin);
 
         actionBar = getMyActionBar();
+        addNetworkStatisticsDisplay();
         actionBar.setBack(isTaskRoot() ? null : v -> goBack());
 
         final Trip trip = tripRenderer.trip;
@@ -972,7 +973,16 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             onLocationChanged(lastKnownLocation);
         }
 
-        requestLocationUpdates(getPeriodicUpdateIntervalMs());
+        requestLocationUpdates(getTripDetailsPeriodicUpdateIntervalMs());
+    }
+
+    protected long getTripDetailsPeriodicUpdateIntervalMs() {
+        return -1;
+    }
+
+    @Override
+    protected long getPeriodicUpdateIntervalMs(final long otherRequiredIntervalMs) {
+        return super.getPeriodicUpdateIntervalMs(getTripDetailsPeriodicUpdateIntervalMs());
     }
 
     private long lastLocationUpdateIntervalMs;

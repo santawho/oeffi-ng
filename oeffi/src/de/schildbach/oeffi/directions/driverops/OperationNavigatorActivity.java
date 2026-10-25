@@ -237,7 +237,7 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
     }
 
     @Override
-    protected long getPeriodicUpdateIntervalMs() {
+    protected long getTripDetailsPeriodicUpdateIntervalMs() {
         return isExternalPower()
                 ? periodicUpdateIntervalMsWhenCharging
                 : periodicUpdateIntervalMsOnBattery;

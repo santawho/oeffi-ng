@@ -262,6 +262,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         });
 
         final OeffiActionBar actionBar = getMyActionBar();
+        addNetworkStatisticsDisplay();
         setPrimaryColor(renderConfig.actionBarColor > 0 ? renderConfig.actionBarColor
                 : renderConfig.isOperationsPlanning ? R.color.bg_action_bar_operations_darkdefault
                 : R.color.bg_action_bar_directions_overview);

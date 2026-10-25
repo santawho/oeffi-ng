@@ -701,8 +701,14 @@
     <string name="log_viewer_button_forwards_button">Move to later logs</string>
     <string name="log_viewer_button_backwards_button">Move to earlier logs</string>
 
+    <!-- app chooser -->
     <string name="app_chooser_title">Choose app to open %1$s</string>
     <string name="app_chooser_no_apps">No apps found</string>
     <string name="app_chooser_app_none">(none)</string>
+
+    <!-- network statistics -->
+    <string name="network_statistics_requests">%1$d requests over last %2$d mins</string>
+    <string name="network_statistics_rate_limit">%1$d / %2$d req per %3$d %4$s: %5$d rej\'d over %6$d mins</string>
+    <string name="show_network_statistics_enabled_title">Show network statistics</string>
 
 </resources>

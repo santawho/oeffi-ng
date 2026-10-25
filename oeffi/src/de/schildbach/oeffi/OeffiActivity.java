@@ -74,6 +74,7 @@ import de.schildbach.oeffi.mapview.OeffiMapView;
 import de.schildbach.oeffi.network.NetworkPickerActivity;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.network.NetworkResources;
+import de.schildbach.oeffi.network.NetworkStatisticsHandler;
 import de.schildbach.oeffi.plans.PlansPickerActivity;
 import de.schildbach.oeffi.preference.AboutFragment;
 import de.schildbach.oeffi.preference.MapsFragment;
@@ -147,6 +148,7 @@ public abstract class OeffiActivity extends AppCompatActivity
     private View navigationDrawerFooterView;
 
     protected LocationManager locationManager;
+    protected NetworkStatisticsHandler networkStatisticsHandler;
 
     protected final Logger log;
 
@@ -254,15 +256,16 @@ public abstract class OeffiActivity extends AppCompatActivity
 
     private long fastRefreshIntervalMs;
     private Runnable periodicUpdateGuiRunnable;
+    private boolean periodicUpdateGuiIsStarted;
 
     protected boolean startPeriodicUpdateGuiRunnable() {
-        fastRefreshIntervalMs = getPeriodicUpdateIntervalMs();
+        fastRefreshIntervalMs = getPeriodicUpdateIntervalMs(-1);
         if (fastRefreshIntervalMs > 0) {
             if (periodicUpdateGuiRunnable == null) {
                 periodicUpdateGuiRunnable = new Runnable() {
                     @Override
                     public void run() {
-                        fastRefreshIntervalMs = getPeriodicUpdateIntervalMs();
+                        fastRefreshIntervalMs = getPeriodicUpdateIntervalMs(-1);
                         doPeriodicUpdateGui(System.currentTimeMillis(), fastRefreshIntervalMs);
                         if (fastRefreshIntervalMs > 0) {
                             handler.postDelayed(this, fastRefreshIntervalMs);
@@ -272,7 +275,10 @@ public abstract class OeffiActivity extends AppCompatActivity
                     }
                 };
             }
-            periodicUpdateGuiRunnable.run();
+            if (!periodicUpdateGuiIsStarted) {
+                periodicUpdateGuiIsStarted = true;
+                periodicUpdateGuiRunnable.run();
+            }
             return true;
         } else {
             stopPeriodicUpdateGuiRunnable();
@@ -283,14 +289,22 @@ public abstract class OeffiActivity extends AppCompatActivity
     private void stopPeriodicUpdateGuiRunnable() {
         if (periodicUpdateGuiRunnable != null)
             handler.removeCallbacks(periodicUpdateGuiRunnable);
+        periodicUpdateGuiIsStarted = false;
     }
 
-    protected long getPeriodicUpdateIntervalMs() {
-        return -1;
+    protected long getPeriodicUpdateIntervalMs(final long otherRequiredIntervalMs) {
+        final long myRequiredIntervalMs = networkStatisticsHandler != null ? 5000 : -1;
+        if (myRequiredIntervalMs <= 0)
+            return otherRequiredIntervalMs;
+        if (otherRequiredIntervalMs <= 0)
+            return myRequiredIntervalMs;
+        return Math.min(myRequiredIntervalMs, otherRequiredIntervalMs);
     }
 
     protected void doPeriodicUpdateGui(final long nowMs, final long intervalMs) {
-        // override me
+        if (networkStatisticsHandler != null) {
+            networkStatisticsHandler.refresh(nowMs, getNetwork());
+        }
     }
 
     protected boolean isTakeDriverModeFromApplication() {
@@ -358,6 +372,9 @@ public abstract class OeffiActivity extends AppCompatActivity
             mapView.onResume();
 
         ErrorReporter.getInstance().check(this, applicationVersionCode(), application.okHttpClient());
+
+        if (networkStatisticsHandler != null)
+            startPeriodicUpdateGuiRunnable();
     }
 
     @Override
@@ -1224,6 +1241,17 @@ public abstract class OeffiActivity extends AppCompatActivity
 
     protected final OeffiActionBar getMyActionBar() {
         return OeffiActionBar.findActionBar(contentView);
+    }
+
+    public void addNetworkStatisticsDisplay() {
+        if (networkStatisticsHandler != null)
+            return;
+
+        if (!prefs.getBoolean("show_network_statistics_enabled", false))
+            return;
+
+        networkStatisticsHandler = new NetworkStatisticsHandler(this);
+        getMyActionBar().addView(networkStatisticsHandler.getRootView());
     }
 
     protected final void setPrimaryColor(final int colorResId) {

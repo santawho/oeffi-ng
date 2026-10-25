@@ -1,65 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
     android:id="@+id/action_bar"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:gravity="center_vertical"
-    android:minHeight="@dimen/action_bar_height"
-    android:animateLayoutChanges="true"
-    android:paddingTop="0dp"
-    android:paddingBottom="@dimen/action_bar_padding_vertical"
-    android:paddingLeft="@dimen/action_bar_padding_horizontal"
-    android:paddingRight="@dimen/action_bar_padding_horizontal"
-    android:elevation="@dimen/elevation_action_bar">
-
-    <ImageButton
-        android:id="@+id/action_bar_menu_button"
-        android:layout_width="@dimen/action_bar_button_width"
+    android:layout_height="wrap_content">
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingRight="@dimen/action_bar_padding_horizontal"
-        android:contentDescription="@string/action_bar_navigator_description"
-        android:scaleType="center"
-        android:src="@drawable/ic_menu_white_24dp"
-        android:visibility="gone" />
-
-    <ImageButton
-        android:id="@+id/action_bar_back_button"
-        android:layout_width="@dimen/action_bar_button_width"
-        android:layout_height="wrap_content"
-        android:paddingRight="@dimen/action_bar_padding_horizontal"
-        android:contentDescription="@string/action_bar_back_description"
-        android:scaleType="center"
-        android:src="@drawable/ic_arrow_back_white_24dp"
-        android:visibility="gone" />
-
-    <FrameLayout
-        android:id="@+id/action_bar_content"
-        android:layout_width="0px"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:background="?android:attr/selectableItemBackground"
         android:gravity="center_vertical"
-        android:paddingLeft="@dimen/text_padding_horizontal_cram"
-        android:paddingRight="@dimen/text_padding_horizontal_cram" />
+        android:minHeight="@dimen/action_bar_height"
+        android:animateLayoutChanges="true"
+        android:paddingTop="0dp"
+        android:paddingBottom="@dimen/action_bar_padding_vertical"
+        android:paddingLeft="@dimen/action_bar_padding_horizontal"
+        android:paddingRight="@dimen/action_bar_padding_horizontal"
+        android:elevation="@dimen/elevation_action_bar">
 
-    <ImageButton
-        android:id="@+id/action_bar_progress_button"
-        android:visibility="gone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/action_bar_padding_horizontal"
-        android:scaleType="center"
-        android:contentDescription="@string/action_bar_progress_description"
-        android:src="@drawable/ic_refresh_white_24dp" />
+        <ImageButton
+            android:id="@+id/action_bar_menu_button"
+            android:layout_width="@dimen/action_bar_button_width"
+            android:layout_height="wrap_content"
+            android:paddingRight="@dimen/action_bar_padding_horizontal"
+            android:contentDescription="@string/action_bar_navigator_description"
+            android:scaleType="center"
+            android:src="@drawable/ic_menu_white_24dp"
+            android:visibility="gone" />
 
-    <ImageButton
-        android:id="@+id/action_bar_overflow_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/action_bar_padding_horizontal"
-        android:contentDescription="@string/action_bar_overflow_description"
-        android:src="@drawable/ic_more_vert_white_24dp"
-        android:visibility="gone" />
+        <ImageButton
+            android:id="@+id/action_bar_back_button"
+            android:layout_width="@dimen/action_bar_button_width"
+            android:layout_height="wrap_content"
+            android:paddingRight="@dimen/action_bar_padding_horizontal"
+            android:contentDescription="@string/action_bar_back_description"
+            android:scaleType="center"
+            android:src="@drawable/ic_arrow_back_white_24dp"
+            android:visibility="gone" />
 
+        <FrameLayout
+            android:id="@+id/action_bar_content"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="?android:attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:paddingLeft="@dimen/text_padding_horizontal_cram"
+            android:paddingRight="@dimen/text_padding_horizontal_cram" />
+
+        <ImageButton
+            android:id="@+id/action_bar_progress_button"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/action_bar_padding_horizontal"
+            android:scaleType="center"
+            android:contentDescription="@string/action_bar_progress_description"
+            android:src="@drawable/ic_refresh_white_24dp" />
+
+        <ImageButton
+            android:id="@+id/action_bar_overflow_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/action_bar_padding_horizontal"
+            android:contentDescription="@string/action_bar_overflow_description"
+            android:src="@drawable/ic_more_vert_white_24dp"
+            android:visibility="gone" />
+
+    </LinearLayout>
 </LinearLayout>

@@ -240,6 +240,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         });
 
         actionBar = getMyActionBar();
+        addNetworkStatisticsDisplay();
         setPrimaryColor(R.color.bg_action_bar_stations);
         actionBar.setBack(isTaskRoot() ? null : v -> finish());
         actionBar.setPrimaryTitle(R.string.station_details_activity_departures_short_title);
@@ -463,8 +464,8 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
     }
 
     @Override
-    protected long getPeriodicUpdateIntervalMs() {
-        return 5000;
+    protected long getPeriodicUpdateIntervalMs(final long otherRequiredIntervalMs) {
+        return super.getPeriodicUpdateIntervalMs(5000);
     }
 
     @Override

@@ -326,6 +326,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             });
 
             final OeffiActionBar actionBar = getMyActionBar();
+            addNetworkStatisticsDisplay();
             setPrimaryColor(renderConfig.actionBarColor > 0 ? renderConfig.actionBarColor : getActionBarColorId());
             actionBar.setPrimaryTitle(getActionBarTitleStringId());
             if (renderConfig.isAlternativeConnectionSearch

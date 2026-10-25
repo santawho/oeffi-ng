@@ -327,6 +327,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         });
 
         actionBar = getMyActionBar();
+        addNetworkStatisticsDisplay();
         setPrimaryColor(R.color.bg_action_bar_stations);
         actionBar.setPrimaryTitle(R.string.stations_activity_title);
         actionBar.setTitlesOnClickListener(v -> startNetworkPicker());

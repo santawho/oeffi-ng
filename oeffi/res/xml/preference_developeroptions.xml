@@ -9,4 +9,9 @@
         android:title="@string/developer_options_show_extra_infos_enabled_title"
         android:summary="@string/developer_options_show_extra_infos_enabled_summary" />
 
+    <CheckBoxPreference
+        android:key="show_network_statistics_enabled"
+        android:defaultValue="false"
+        android:title="@string/show_network_statistics_enabled_title" />
+
 </PreferenceScreen>

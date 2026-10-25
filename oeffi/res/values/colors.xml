@@ -112,6 +112,9 @@
 
     <color name="bg_plan_entry_nearby">#e2f4e3</color>
 
+    <color name="bg_network_statistics_entry">#F2EDED</color>
+    <color name="bg_network_statistics_entry_meter">#FB9C9C</color>
+
     <item name="alpha_bright_white" format="float" type="dimen">1</item>
 
     <color name="vehicle_information_section_label_background">#0000c0</color>

@@ -26,4 +26,10 @@ public class DeveloperOptionsFragment extends PreferenceFragment {
     public void onCreatePreferences(@androidx.annotation.Nullable final Bundle savedInstanceState, @androidx.annotation.Nullable final String rootKey) {
         addPreferencesFromResource(R.xml.preference_developeroptions);
     }
+
+    @Override
+    protected boolean isPreferenceRequiringRestart(final String key) {
+        return "show_network_statistics_enabled".equals(key)
+                || super.isPreferenceRequiringRestart(key);
+    }
 }
