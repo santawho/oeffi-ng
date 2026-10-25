@@ -454,7 +454,9 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
         } else {
             departuresViewGroup.setVisibility(View.GONE);
             departuresStatusView.setVisibility(View.VISIBLE);
-            departuresStatusView.setText(R.string.stations_list_entry_not_loaded);
+            departuresStatusView.setText(isIgnored
+                    ? R.string.stations_list_entry_ignored
+                    : R.string.stations_list_entry_not_loaded);
         }
 
         // messages

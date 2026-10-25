@@ -200,6 +200,7 @@
     <!-- station list -->
     <string name="stations_list_entry_not_loaded">(not loaded yet)</string>
     <string name="stations_list_entry_no_departures">(No departures/arrivals)</string>
+    <string name="stations_list_entry_ignored">(ignored)</string>
     <string name="stations_list_entry_product_filtered">(None of the departures/arrivals match the product filter)</string>
     <string name="stations_list_entry_interval">(approx. %d min interval)</string>
     <string name="stations_list_acquiring_location">Acquiring location…</string>

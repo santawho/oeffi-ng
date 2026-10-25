@@ -199,6 +199,7 @@
     <!-- station list -->
     <string name="stations_list_entry_not_loaded">(noch nicht geladen)</string>
     <string name="stations_list_entry_no_departures">(Keine Abfahrten/Ankünfte)</string>
+    <string name="stations_list_entry_ignored">(ignoriert)</string>
     <string name="stations_list_entry_product_filtered">(Keine der Abfahrten/Ankünfte passen auf den Produktfilter)</string>
     <string name="stations_list_entry_interval">(ca. alle %d min)</string>
     <string name="stations_list_acquiring_location">Ermittle Standort…</string>
