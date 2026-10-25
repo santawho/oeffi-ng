@@ -244,7 +244,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         actionBar.setBack(isTaskRoot() ? null : v -> finish());
         actionBar.setPrimaryTitle(R.string.station_details_activity_departures_short_title);
         // actionBar.swapTitles();
-        actionBar.addProgressButton().setOnClickListener(v -> requestRefresh());
+        actionBar.addProgressButton().setOnClickListener(v -> requestRefresh(false));
         nearbyButton = actionBar.addButton(R.drawable.ic_radar_white_24dp, R.string.stations_station_details_action_explore_nearby_title);
         nearbyButton.setOnClickListener(v -> {
             if (selectedCoord != null)
@@ -295,9 +295,9 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                         products.addAll(filter);
 
                         if (!added.isEmpty()) {
-                            handler.post(this::requestRefresh);
+                            handler.post(() -> requestRefresh(true));
                         } else if (!removed.isEmpty()) {
-                            handler.post(this::requestRefresh);
+                            handler.post(() -> requestRefresh(true));
 //                            for (final Iterator<Station> i = stations.iterator(); i.hasNext(); ) {
 //                                final Station station = i.next();
 //                                if (!station.filter(products)) {
@@ -330,7 +330,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         actionBar.concludeSetup();
 
         swipeRefresh = findViewById(R.id.stations_station_details_refresh);
-        swipeRefresh.setOnRefreshListener(this::requestRefresh);
+        swipeRefresh.setOnRefreshListener(() -> requestRefresh(true));
 
         viewAnimator = findViewById(R.id.stations_station_details_list_layout);
 
@@ -425,7 +425,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             @Override
             public void onReceive(final Context context, final Intent intent) {
                 if (!autoRefreshDisabled)
-                    requestRefresh();
+                    requestRefresh(false);
             }
         };
         registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
@@ -433,7 +433,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         if (firstStart)
             firstStart = false;
         else if (!autoRefreshDisabled)
-            requestRefresh();
+            requestRefresh(true);
 
         updateFragments();
     }
@@ -525,7 +525,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             actionBar.setPrimaryTitle(showArrivals
                     ? R.string.station_details_activity_arrivals_short_title
                     : R.string.station_details_activity_departures_short_title);
-            requestRefresh();
+            requestRefresh(true);
         }
 
         showArrivalsButton.setChecked(showArrivals);
@@ -593,9 +593,10 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         return selectedFilteredDepartures;
     }
 
-    private void requestRefresh() {
+    private void requestRefresh(final boolean resetScroll) {
         autoRefreshDisabled = false;
-        listView.scrollToPosition(0);
+        if (resetScroll)
+            listView.scrollToPosition(0);
         load(null, false);
     }
 
@@ -907,7 +908,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         // actionBar.setSecondaryTitle(selectedStation.place);
 
         if (changed)
-            requestRefresh();
+            requestRefresh(true);
     }
 
     public boolean isSelectedStation(final String stationId) {
