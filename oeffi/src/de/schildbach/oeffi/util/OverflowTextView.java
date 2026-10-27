@@ -90,6 +90,12 @@ public class OverflowTextView extends TextView {
     }
 
     @Override
+    public void setTypeface(@Nullable final Typeface tf, final int style) {
+        super.setTypeface(tf, style);
+        doOnOverflowView(ovView -> ovView.setTypeface(tf, style));
+    }
+
+    @Override
     public void setTypeface(@Nullable final Typeface tf) {
         super.setTypeface(tf);
         doOnOverflowView(ovView -> ovView.setTypeface(tf));

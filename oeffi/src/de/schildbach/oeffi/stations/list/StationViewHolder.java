@@ -75,7 +75,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
     public final View hideableFrameView;
     public final View favoriteView;
     public final OverflowTextView nameView;
-    public final TextView name2View;
+    public final TextView placeView;
     public final LineView linesView;
     public final TextView distanceView;
     public final CompassNeedleView bearingView;
@@ -113,7 +113,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
         itemFrameView = itemView.findViewById(R.id.station_entry_item_frame);
         favoriteView = itemView.findViewById(R.id.station_entry_favorite);
         nameView = itemView.findViewById(R.id.station_entry_name);
-        name2View = itemView.findViewById(R.id.station_entry_name2);
+        placeView = itemView.findViewById(R.id.station_entry_place);
         linesView = itemView.findViewById(R.id.station_entry_lines);
         distanceView = itemView.findViewById(R.id.station_entry_distance);
         bearingView = itemView.findViewById(R.id.station_entry_bearing);
@@ -141,7 +141,9 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
     }
 
     public void bind(
-            final StationsAware stationsAware, final boolean isVisible, final Station station, final Date aBaseTime,
+            final StationsAware stationsAware, final boolean isVisible,
+            final Station station, final Station previousStation,
+            final Date aBaseTime,
             final Set<Product> productsFilter, final boolean expandAllEntries, final boolean forceShowPlace,
             final Integer favState, final android.location.Location deviceLocation,
             final CompassNeedleView.Callback compassCallback) {
@@ -192,14 +194,16 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
         favoriteView.setVisibility(isFavorite ? View.VISIBLE : View.GONE);
 
         // name/place
-        final boolean showPlace = forceShowPlace || isExpanded;
-        final String name = Formats.makeBreakableStationName(showPlace ? station.location.place : station.location.uniqueShortName());
+        final String name = station.location.name;
+        final String place = station.location.place;
+        final boolean showPlace = place != null && (
+                forceShowPlace || isExpanded || previousStation == null ||
+                        !place.equals(previousStation.location.place));
         nameView.setText(name);
-        nameView.setTypeface(showPlace ? Typeface.DEFAULT : Typeface.DEFAULT_BOLD);
         nameView.setTextColor(colorSignificant);
-        name2View.setVisibility(showPlace ? View.VISIBLE : View.GONE);
-        name2View.setText(station.location.name);
-        name2View.setTextColor(colorSignificant);
+        ViewUtils.setVisibility(placeView, showPlace);
+        placeView.setText(place);
+        placeView.setTextColor(colorSignificant);
 
         // lines
         final Set<Line> lines = new TreeSet<>();

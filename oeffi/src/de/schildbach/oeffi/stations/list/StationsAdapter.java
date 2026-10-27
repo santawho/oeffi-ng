@@ -126,9 +126,14 @@ public class StationsAdapter extends RecyclerView.Adapter<StationViewHolder> imp
     public void onBindViewHolder(final StationViewHolder holder, final int position) {
         checkArgument(position != RecyclerView.NO_POSITION);
         final Station station = getItem(position);
+        final Station previousStation = position <= 0 ? null : getItem(position - 1);
         final boolean isVisible = station.keyWordMatch(filterQuery);
         final Integer favState = stationsAware.getFavoriteState(station.location.id);
-        holder.bind(stationsAware, isVisible, station, baseTime, productsFilter, expandAllEntries, showPlaces, favState, deviceLocation, this);
+        holder.bind(
+                stationsAware, isVisible,
+                station, previousStation,
+                baseTime, productsFilter, expandAllEntries, showPlaces,
+                favState, deviceLocation, this);
     }
 
     public Double getDeviceBearing() {
