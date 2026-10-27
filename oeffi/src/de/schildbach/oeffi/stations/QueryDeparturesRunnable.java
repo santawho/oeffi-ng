@@ -17,7 +17,10 @@
 
 package de.schildbach.oeffi.stations;
 
+import android.content.SharedPreferences;
 import android.os.Handler;
+
+import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.pte.dto.Location;
@@ -79,6 +82,21 @@ public abstract class QueryDeparturesRunnable implements Runnable {
         this.products = products;
     }
 
+    private static long getTimeOffset() {
+        final Application application = Application.getInstance();
+        final SharedPreferences prefs = application.getSharedPreferences();
+        final String offsetText = prefs.getString(
+                "station_events_time_offset_minutes",
+                application.getString(R.string.default_station_events_time_offset_minutes));
+        long offset;
+        try {
+            offset = (long) (Float.parseFloat(offsetText) * 60000f);
+        } catch (final NumberFormatException nfe) {
+            offset = 0;
+        }
+        return -offset;
+    }
+
     public void run() {
         postOnPreExecute();
 
@@ -97,7 +115,7 @@ public abstract class QueryDeparturesRunnable implements Runnable {
 
             try {
                 final QueryDeparturesResult result = networkProvider.queryStationBoard(
-                        station, fromTime, arrivals, maxEvents,
+                        station, new Date(fromTime.getTime() + getTimeOffset()), arrivals, maxEvents,
                         equivsMode, products, includeLinesAtStation);
 
                 postOnResult(result);

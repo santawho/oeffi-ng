@@ -25,5 +25,7 @@ public class DeparturesFragment extends PreferenceFragment {
     @Override
     public void onCreatePreferences(@androidx.annotation.Nullable final Bundle savedInstanceState, @androidx.annotation.Nullable final String rootKey) {
         addPreferencesFromResource(R.xml.preference_departures);
+
+        setupDynamicSummary("station_events_time_offset_minutes", R.string.station_events_time_offset_minutes_summary);
     }
 }

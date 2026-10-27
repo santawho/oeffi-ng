@@ -55,4 +55,7 @@
         <item>Barrierefrei</item>
     </string-array>
 
+    <string name="station_events_time_offset_minutes_title">Haltestellentafel Rückblick</string>
+    <string name="station_events_time_offset_minutes_summary">Wie weit zurück in der Vergangenheit sollen Haltestellentafeln beginnen?  [%s Minuten]</string>
+
 </resources>

@@ -97,4 +97,7 @@
         <item translatable="false">BARRIER_FREE</item>
     </string-array>
 
+    <string name="station_events_time_offset_minutes_title">Station board look-behind</string>
+    <string name="station_events_time_offset_minutes_summary">How far back in the past should the station boards begin?  [%s minutes]</string>
+
 </resources>

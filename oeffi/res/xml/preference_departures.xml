@@ -9,4 +9,12 @@
         android:title="@string/user_interface_station_departures_show_journey_messages_title"
         android:summary="@string/user_interface_station_departures_show_journey_messages_summary" />
 
+    <EditTextPreference
+        android:key="station_events_time_offset_minutes"
+        android:singleLine="true"
+        android:inputType="numberDecimal"
+        android:defaultValue="@string/default_station_events_time_offset_minutes"
+        android:title="@string/station_events_time_offset_minutes_title"
+        android:summary="@string/station_events_time_offset_minutes_summary" />
+
 </PreferenceScreen>
