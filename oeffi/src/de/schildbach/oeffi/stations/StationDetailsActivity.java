@@ -463,20 +463,26 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         startPeriodicUpdateGuiRunnable();
     }
 
+    private long nextTimesRefreshMs;
+
     @Override
-    protected long getPeriodicUpdateIntervalMs(final long otherRequiredIntervalMs) {
-        return super.getPeriodicUpdateIntervalMs(5000);
+    protected long getPeriodicUpdateIntervalMs(final long nowMs, final long otherRequiredIntervalMs) {
+        return super.getPeriodicUpdateIntervalMs(nowMs, minIntervalMs(otherRequiredIntervalMs,
+                Math.max(nextTimesRefreshMs, nowMs) - nowMs));
     }
 
     @Override
-    protected void doPeriodicUpdateGui(final long nowMs, final long intervalMs) {
-        super.doPeriodicUpdateGui(nowMs, intervalMs);
+    protected void doPeriodicUpdateGui(final long nowMs) {
+        super.doPeriodicUpdateGui(nowMs);
 
-        int itemPos = departuresAdapter.getItemCount();
-        while (--itemPos >= 0) {
-            final DepartureViewHolder holder = (DepartureViewHolder) listView.findViewHolderForAdapterPosition(itemPos);
-            if (holder != null)
-                holder.renderTimeDependentElements(nowMs);
+        if (nowMs >= nextTimesRefreshMs) {
+            int itemPos = departuresAdapter.getItemCount();
+            while (--itemPos >= 0) {
+                final DepartureViewHolder holder = (DepartureViewHolder) listView.findViewHolderForAdapterPosition(itemPos);
+                if (holder != null)
+                    holder.renderTimeDependentElements(nowMs);
+            }
+            nextTimesRefreshMs = nowMs - nowMs % 30000 + 30200;
         }
     }
 

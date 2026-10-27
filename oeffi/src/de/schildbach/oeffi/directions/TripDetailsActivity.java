@@ -855,9 +855,11 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     @Override
-    protected void doPeriodicUpdateGui(final long nowMs, final long intervalMs) {
-        super.doPeriodicUpdateGui(nowMs, intervalMs);
-        updateGuiIfApplicable(false);
+    protected void doPeriodicUpdateGui(final long nowMs) {
+        super.doPeriodicUpdateGui(nowMs);
+        final long intervalMs = getTripDetailsPeriodicUpdateIntervalMs();
+        if (intervalMs >= 0)
+            updateGuiIfApplicable(false);
         if (intervalMs > 0)
             requestLocationUpdates(intervalMs);
     }
@@ -981,8 +983,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     @Override
-    protected long getPeriodicUpdateIntervalMs(final long otherRequiredIntervalMs) {
-        return super.getPeriodicUpdateIntervalMs(getTripDetailsPeriodicUpdateIntervalMs());
+    protected long getPeriodicUpdateIntervalMs(final long nowMs, final long otherRequiredIntervalMs) {
+        return super.getPeriodicUpdateIntervalMs(nowMs, minIntervalMs(otherRequiredIntervalMs,
+                getTripDetailsPeriodicUpdateIntervalMs()));
     }
 
     private long lastLocationUpdateIntervalMs;

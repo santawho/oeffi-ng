@@ -259,18 +259,24 @@ public abstract class OeffiActivity extends AppCompatActivity
     private boolean periodicUpdateGuiIsStarted;
 
     protected boolean startPeriodicUpdateGuiRunnable() {
-        fastRefreshIntervalMs = getPeriodicUpdateIntervalMs(-1);
-        if (fastRefreshIntervalMs > 0) {
+        fastRefreshIntervalMs = getPeriodicUpdateIntervalMs(System.currentTimeMillis(), -1);
+        if (fastRefreshIntervalMs >= 0) {
             if (periodicUpdateGuiRunnable == null) {
                 periodicUpdateGuiRunnable = new Runnable() {
                     @Override
                     public void run() {
-                        fastRefreshIntervalMs = getPeriodicUpdateIntervalMs(-1);
-                        doPeriodicUpdateGui(System.currentTimeMillis(), fastRefreshIntervalMs);
-                        if (fastRefreshIntervalMs > 0) {
-                            handler.postDelayed(this, fastRefreshIntervalMs);
-                        } else {
-                            stopPeriodicUpdateGuiRunnable();
+                        for (;;) {
+                            final long nowMs = System.currentTimeMillis();
+                            fastRefreshIntervalMs = getPeriodicUpdateIntervalMs(nowMs, -1);
+                            doPeriodicUpdateGui(nowMs);
+                            if (fastRefreshIntervalMs != 0) {
+                                if (fastRefreshIntervalMs > 0) {
+                                    handler.postDelayed(this, fastRefreshIntervalMs);
+                                } else {
+                                    stopPeriodicUpdateGuiRunnable();
+                                }
+                                break;
+                            }
                         }
                     }
                 };
@@ -292,16 +298,22 @@ public abstract class OeffiActivity extends AppCompatActivity
         periodicUpdateGuiIsStarted = false;
     }
 
-    protected long getPeriodicUpdateIntervalMs(final long otherRequiredIntervalMs) {
-        final long myRequiredIntervalMs = networkStatisticsHandler != null ? 5000 : -1;
-        if (myRequiredIntervalMs <= 0)
-            return otherRequiredIntervalMs;
-        if (otherRequiredIntervalMs <= 0)
-            return myRequiredIntervalMs;
-        return Math.min(myRequiredIntervalMs, otherRequiredIntervalMs);
+    protected long getPeriodicUpdateIntervalMs(final long nowMs, final long otherRequiredIntervalMs) {
+        return minIntervalMs(otherRequiredIntervalMs,
+                networkStatisticsHandler != null ? 5000 : -1);
     }
 
-    protected void doPeriodicUpdateGui(final long nowMs, final long intervalMs) {
+    protected static long minIntervalMs(
+            final long otherRequiredIntervalMs,
+            final long minimumRequiredIntervalMs) {
+        if (minimumRequiredIntervalMs < 0)
+            return otherRequiredIntervalMs;
+        if (otherRequiredIntervalMs < 0)
+            return minimumRequiredIntervalMs;
+        return Math.min(minimumRequiredIntervalMs, otherRequiredIntervalMs);
+    }
+
+    protected void doPeriodicUpdateGui(final long nowMs) {
         if (networkStatisticsHandler != null) {
             networkStatisticsHandler.refresh(nowMs, getNetwork());
         }
