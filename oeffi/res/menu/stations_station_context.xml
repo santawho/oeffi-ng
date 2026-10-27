@@ -4,7 +4,8 @@
 
     <item
         android:id="@+id/station_context_navigate_to"
-        android:title="@string/station_context_navigate_to_title"/>
+        android:title="@string/station_context_navigate_to_title"
+        android:icon="@drawable/ic_navigation_white_24dp" />
     <item
         android:id="@+id/station_context_directions_alternative_from"
         android:title="@string/station_context_alternative_from_title"
@@ -25,10 +26,12 @@
         android:icon="@drawable/ic_bell_grey600_24dp" />
     <item
         android:id="@+id/station_context_infopage"
-        android:title="@string/station_context_infopage_title" />
+        android:title="@string/station_context_infopage_title"
+        android:icon="@drawable/ic_open_ext_black_24dp" />
     <item
         android:id="@+id/station_context_map"
-        android:title="@string/station_context_map_title">
+        android:title="@string/station_context_map_title"
+        android:icon="@drawable/ic_map_white_24dp" >
         <menu />
     </item>
     <item
@@ -42,13 +45,15 @@
         android:title="@string/station_context_directions_to_title" />
     <item
         android:id="@+id/station_context_add_favorite"
-        android:title="@string/station_context_add_favorite_title" />
+        android:title="@string/station_context_add_favorite_title"
+        android:icon="@drawable/ic_star_white_24dp"/>
     <item
         android:id="@+id/station_context_rename_favorite"
         android:title="@string/station_context_rename_favorite_title" />
     <item
         android:id="@+id/station_context_remove_favorite"
-        android:title="@string/station_context_remove_favorite_title" />
+        android:title="@string/station_context_remove_favorite_title"
+        android:icon="@drawable/ic_star_border_black_24dp" />
     <item
         android:id="@+id/station_context_add_ignore"
         android:title="@string/station_context_add_ignore_title" />

@@ -17,15 +17,15 @@
 
 package de.schildbach.oeffi.directions.list;
 
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
+
+import de.schildbach.oeffi.util.MapPopupMenu;
+import de.schildbach.oeffi.util.PopupMenu;
 import androidx.recyclerview.widget.RecyclerView;
 
 import de.schildbach.oeffi.util.SwipeLayout;
@@ -37,7 +37,6 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.oeffi.util.locationview.LocationTextView;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
-import de.schildbach.oeffi.stations.StationContextMenu;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
@@ -181,18 +180,14 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder
     }
 
     private void showContextMenu(final View view) {
-        final PopupMenu contextMenu = new PopupMenu(context, view);
-        final MenuInflater inflater = contextMenu.getMenuInflater();
-        final Menu menu = contextMenu.getMenu();
-        inflater.inflate(R.menu.directions_query_history_context, menu);
-        menu.findItem(R.id.directions_query_history_context_show_trip).setVisible(hasSavedTrip);
-        menu.findItem(R.id.directions_query_history_context_remove_trip).setVisible(hasSavedTrip);
-        menu.findItem(R.id.directions_query_history_context_add_favorite).setVisible(!isFavorite);
-        menu.findItem(R.id.directions_query_history_context_remove_favorite).setVisible(isFavorite);
+        final PopupMenu contextMenu = new PopupMenu(context, R.menu.directions_query_history_context, view);
+        contextMenu.findItem(R.id.directions_query_history_context_show_trip).setVisible(hasSavedTrip);
+        contextMenu.findItem(R.id.directions_query_history_context_remove_trip).setVisible(hasSavedTrip);
+        contextMenu.findItem(R.id.directions_query_history_context_add_favorite).setVisible(!isFavorite);
+        contextMenu.findItem(R.id.directions_query_history_context_remove_favorite).setVisible(isFavorite);
         final SubMenu fromMenu;
         if (from.isIdentified()) {
-            fromMenu = menu.addSubMenu(from.uniqueShortName());
-            inflater.inflate(R.menu.directions_query_history_location_context, fromMenu);
+            fromMenu = contextMenu.addSubMenu(R.menu.directions_query_history_location_context, from.uniqueShortName());
             fromMenu.findItem(R.id.directions_query_history_location_context_details)
                     .setVisible(from.type == LocationType.STATION);
             fromMenu.findItem(R.id.directions_query_history_location_context_add_favorite)
@@ -200,7 +195,7 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder
                             || fromFavState != FavoriteStationsProvider.TYPE_FAVORITE));
             final MenuItem mapMenuItem = fromMenu.findItem(R.id.directions_query_history_location_context_map);
             if (from.hasCoord())
-                StationContextMenu.prepareMapMenu(context, mapMenuItem.getSubMenu(), network, from);
+                MapPopupMenu.setupSubMenu(context, mapMenuItem, network, from);
             else
                 mapMenuItem.setVisible(false);
         } else {
@@ -208,8 +203,7 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder
         }
         final SubMenu toMenu;
         if (to.isIdentified()) {
-            toMenu = menu.addSubMenu(to.uniqueShortName());
-            inflater.inflate(R.menu.directions_query_history_location_context, toMenu);
+            toMenu = contextMenu.addSubMenu(R.menu.directions_query_history_location_context, to.uniqueShortName());
             toMenu.findItem(R.id.directions_query_history_location_context_details)
                     .setVisible(to.type == LocationType.STATION);
             toMenu.findItem(R.id.directions_query_history_location_context_add_favorite)
@@ -217,7 +211,7 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder
                             && (toFavState == null || toFavState != FavoriteStationsProvider.TYPE_FAVORITE));
             final MenuItem mapMenuItem = toMenu.findItem(R.id.directions_query_history_location_context_map);
             if (to.hasCoord())
-                StationContextMenu.prepareMapMenu(context, mapMenuItem.getSubMenu(), network, to);
+                MapPopupMenu.setupSubMenu(context, mapMenuItem, network, to);
             else
                 mapMenuItem.setVisible(false);
         } else {

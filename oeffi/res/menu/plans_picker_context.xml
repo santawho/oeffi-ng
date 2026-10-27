@@ -7,10 +7,12 @@
         android:title="@string/plans_picker_context_open_title" />
     <item
         android:id="@+id/plans_picker_context_remove"
-        android:title="@string/plans_picker_context_remove_title" />
+        android:title="@string/plans_picker_context_remove_title"
+        android:icon="@drawable/ic_delete_black_24dp" />
     <item
         android:id="@+id/plans_picker_context_toggle_favorite"
-        android:title="@string/plans_picker_context_toggle_favorite_title" />
+        android:title="@string/plans_picker_context_toggle_favorite_title"
+        android:icon="@drawable/ic_star_white_24dp" />
     <item
         android:id="@+id/plans_picker_context_launcher_shortcut"
         android:title="@string/plans_picker_context_launcher_shortcut_title" />

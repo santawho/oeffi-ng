@@ -4,6 +4,7 @@
 
     <item
         android:id="@+id/stations_options_favorites"
-        android:title="@string/stations_options_favorites_title" />
+        android:title="@string/stations_options_favorites_title"
+        android:icon="@drawable/ic_star_white_24dp" />
 
 </menu>

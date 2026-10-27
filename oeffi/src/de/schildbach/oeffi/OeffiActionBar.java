@@ -34,7 +34,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
-import android.widget.PopupMenu;
+import de.schildbach.oeffi.util.PopupMenu;
 import android.widget.TextView;
 
 import androidx.appcompat.widget.AppCompatImageButton;
@@ -350,8 +350,7 @@ public class OeffiActionBar extends FrameLayout implements View.OnLayoutChangeLi
         final View overflowButton = findViewById(R.id.action_bar_overflow_button);
         overflowButton.setVisibility(View.VISIBLE);
         overflowButton.setOnClickListener(v -> {
-            final PopupMenu overflowMenu = new PopupMenu(context, v);
-            overflowMenu.inflate(menuResId);
+            final PopupMenu overflowMenu = new PopupMenu(context, menuResId, v);
             overflowMenu.setOnMenuItemClickListener(menuItemClickListener);
             overflowMenu.show();
         });

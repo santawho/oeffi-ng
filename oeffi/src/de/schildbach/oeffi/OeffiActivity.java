@@ -47,7 +47,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.PopupMenu;
+
+import de.schildbach.oeffi.util.MapPopupMenu;
+import de.schildbach.oeffi.util.PopupMenu;
 import android.widget.TextView;
 import android.window.OnBackInvokedDispatcher;
 
@@ -81,7 +83,6 @@ import de.schildbach.oeffi.preference.MapsFragment;
 import de.schildbach.oeffi.preference.PreferenceActivity;
 import de.schildbach.oeffi.preference.PreferenceFragment;
 import de.schildbach.oeffi.stations.FavoriteStationsActivity;
-import de.schildbach.oeffi.stations.StationContextMenu;
 import de.schildbach.oeffi.stations.StationsActivity;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.DividerItemDecoration;
@@ -565,11 +566,8 @@ public abstract class OeffiActivity extends AppCompatActivity
 
                 if (itemId == R.id.global_options_extras) {
                     final View actionView = item.getActionView();
-                    final PopupMenu popupMenu = new PopupMenu(OeffiActivity.this, actionView);
+                    final PopupMenu popupMenu = new PopupMenu(OeffiActivity.this, R.menu.global_extras, actionView);
                     popupMenu.setGravity(Gravity.RIGHT);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-                        popupMenu.setForceShowIcon(true);
-                    popupMenu.inflate(R.menu.global_extras);
                     popupMenu.setOnMenuItemClickListener(subItem -> {
                         navigationDrawerLayout.closeDrawers();
                         final int subItemId = subItem.getItemId();
@@ -1045,20 +1043,19 @@ public abstract class OeffiActivity extends AppCompatActivity
     }
 
     private void showMapButtonMenu(final boolean forTrip, final View refView) {
-        final PopupMenu contextMenu = new PopupMenu(this, refView);
-        final Menu menu = contextMenu.getMenu();
+        final PopupMenu contextMenu;
 
-        boolean show = false;
         if (forTrip) {
             if (tripForMap != null) {
-                contextMenu.getMenuInflater().inflate(R.menu.trip_map_menu, menu);
-                show = true;
+                contextMenu = new PopupMenu(this, R.menu.trip_map_menu, refView);
+            } else {
+                contextMenu = null;
             }
         } else {
-            show = StationContextMenu.prepareMapMenu(this, menu, network, locationForMap);
+            contextMenu = MapPopupMenu.createPopupMenuIfNotEmpty(this, refView, network, locationForMap);
         }
 
-        if (show) {
+        if (contextMenu != null) {
             contextMenu.setOnMenuItemClickListener(menuItem -> {
                 final int itemId = menuItem.getItemId();
                 if (locationForMap != null) {

@@ -18,11 +18,9 @@
 package de.schildbach.oeffi.directions.list;
 
 import android.content.Context;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
+import de.schildbach.oeffi.util.PopupMenu;
 import android.widget.TextView;
 
 import androidx.appcompat.content.res.AppCompatResources;
@@ -259,12 +257,9 @@ public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder
     private void showContextMenu(
             final View view,
             final QueryHistoryClickListener clickListener) {
-        final PopupMenu contextMenu = new PopupMenu(context, view);
-        final MenuInflater inflater = contextMenu.getMenuInflater();
-        final Menu menu = contextMenu.getMenu();
-        inflater.inflate(R.menu.directions_query_stored_trip_context, menu);
-        menu.findItem(R.id.directions_query_stored_trip_context_set_done).setVisible(canBeMarkedAsDone && (stateFlags & QueryStoredTripsProvider.STATE_FLAG_DONE) == 0);
-        menu.findItem(R.id.directions_query_stored_trip_context_unset_done).setVisible(canBeMarkedAsDone && (stateFlags & QueryStoredTripsProvider.STATE_FLAG_DONE) != 0);
+        final PopupMenu contextMenu = new PopupMenu(context, R.menu.directions_query_stored_trip_context, view);
+        contextMenu.findItem(R.id.directions_query_stored_trip_context_set_done).setVisible(canBeMarkedAsDone && (stateFlags & QueryStoredTripsProvider.STATE_FLAG_DONE) == 0);
+        contextMenu.findItem(R.id.directions_query_stored_trip_context_unset_done).setVisible(canBeMarkedAsDone && (stateFlags & QueryStoredTripsProvider.STATE_FLAG_DONE) != 0);
         contextMenu.setOnMenuItemClickListener(item -> {
             final int position = getAdapterPosition();
             if (position != RecyclerView.NO_POSITION) {

@@ -10,15 +10,18 @@
         android:title="@string/directions_query_history_context_show_trip_original" />
     <item
         android:id="@+id/directions_query_history_context_remove_trip"
-        android:title="@string/directions_query_history_context_remove_trip" />
+        android:title="@string/directions_query_history_context_remove_trip"
+        android:icon="@drawable/ic_clear_black_24dp" />
     <item
         android:id="@+id/directions_query_history_context_remove_entry"
         android:title="@string/directions_query_history_context_remove_entry" />
     <item
         android:id="@+id/directions_query_history_context_add_favorite"
-        android:title="@string/directions_query_history_context_add_favorite" />
+        android:title="@string/directions_query_history_context_add_favorite"
+        android:icon="@drawable/ic_star_white_24dp" />
     <item
         android:id="@+id/directions_query_history_context_remove_favorite"
-        android:title="@string/directions_query_history_context_remove_favorite" />
+        android:title="@string/directions_query_history_context_remove_favorite"
+        android:icon="@drawable/ic_star_border_black_24dp" />
 
 </menu>

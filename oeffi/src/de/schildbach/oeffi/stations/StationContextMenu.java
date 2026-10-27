@@ -17,19 +17,13 @@
 
 package de.schildbach.oeffi.stations;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -42,10 +36,9 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.directions.DirectionsShortcutActivity;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
-import de.schildbach.oeffi.plans.PlanActivity;
-import de.schildbach.oeffi.plans.PlanContentProvider;
 import de.schildbach.oeffi.util.DialogBuilder;
-import de.schildbach.oeffi.util.ExternalMapsUtils;
+import de.schildbach.oeffi.util.MapPopupMenu;
+import de.schildbach.oeffi.util.PopupMenu;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
@@ -53,7 +46,7 @@ import de.schildbach.pte.dto.LocationType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class StationContextMenu extends androidx.appcompat.widget.PopupMenu {
+public class StationContextMenu extends PopupMenu {
     private static final Logger log = LoggerFactory.getLogger(StationContextMenu.class);
 
     public StationContextMenu(
@@ -66,33 +59,31 @@ public class StationContextMenu extends androidx.appcompat.widget.PopupMenu {
             final boolean showTravelAlarmDeparture, final boolean showTravelAlarmArrival,
             final boolean showDirections, final boolean showDirectionsVia, final boolean showAlternativeDirections,
             final boolean showNavigateTo, final boolean showShortcut) {
-        super(context, anchor);
-        inflate(R.menu.stations_station_context);
-        final Menu menu = getMenu();
+        super(context, R.menu.stations_station_context, anchor);
         final boolean isFavorite = favState != null && favState == FavoriteStationsProvider.TYPE_FAVORITE;
         final boolean isIgnored = favState != null && favState == FavoriteStationsProvider.TYPE_IGNORE;
-        menu.findItem(R.id.station_context_add_favorite).setVisible(showFavorite && !isFavorite);
-        menu.findItem(R.id.station_context_rename_favorite).setVisible(showRename && isFavorite);
-        menu.findItem(R.id.station_context_remove_favorite).setVisible(showFavorite && isFavorite);
-        menu.findItem(R.id.station_context_add_ignore).setVisible(showIgnore && !isIgnored);
-        menu.findItem(R.id.station_context_remove_ignore).setVisible(showIgnore && isIgnored);
+        findItem(R.id.station_context_add_favorite).setVisible(showFavorite && !isFavorite);
+        findItem(R.id.station_context_rename_favorite).setVisible(showRename && isFavorite);
+        findItem(R.id.station_context_remove_favorite).setVisible(showFavorite && isFavorite);
+        findItem(R.id.station_context_add_ignore).setVisible(showIgnore && !isIgnored);
+        findItem(R.id.station_context_remove_ignore).setVisible(showIgnore && isIgnored);
         final String infoUrl = NetworkProviderFactory.provider(network).getLocationInfoUrl(station);
-        menu.findItem(R.id.station_context_infopage).setVisible(infoUrl != null);
-        final MenuItem mapItem = menu.findItem(R.id.station_context_map);
+        findItem(R.id.station_context_infopage).setVisible(infoUrl != null);
+        final MenuItem mapItem = findItem(R.id.station_context_map);
         if (showMap && station.hasCoord())
-            prepareMapMenu(context, mapItem.getSubMenu(), network, station);
+            MapPopupMenu.setupSubMenu(context, mapItem, network, station);
         else
             mapItem.setVisible(false);
-        menu.findItem(R.id.station_context_show_departures).setVisible(showDepartures);
-        menu.findItem(R.id.station_context_nearby_departures).setVisible(showNearbyDepartures);
-        menu.findItem(R.id.station_context_set_departure_travel_alarm).setVisible(showTravelAlarmDeparture);
-        menu.findItem(R.id.station_context_set_arrival_travel_alarm).setVisible(showTravelAlarmArrival);
-        menu.findItem(R.id.station_context_directions_from).setVisible(showDirections);
-        menu.findItem(R.id.station_context_directions_via).setVisible(showDirectionsVia);
-        menu.findItem(R.id.station_context_directions_to).setVisible(showDirections);
-        menu.findItem(R.id.station_context_launcher_shortcut).setVisible(showShortcut);
-        menu.findItem(R.id.station_context_directions_alternative_from).setVisible(showAlternativeDirections);
-        menu.findItem(R.id.station_context_navigate_to).setVisible(showNavigateTo);
+        findItem(R.id.station_context_show_departures).setVisible(showDepartures);
+        findItem(R.id.station_context_nearby_departures).setVisible(showNearbyDepartures);
+        findItem(R.id.station_context_set_departure_travel_alarm).setVisible(showTravelAlarmDeparture);
+        findItem(R.id.station_context_set_arrival_travel_alarm).setVisible(showTravelAlarmArrival);
+        findItem(R.id.station_context_directions_from).setVisible(showDirections);
+        findItem(R.id.station_context_directions_via).setVisible(showDirectionsVia);
+        findItem(R.id.station_context_directions_to).setVisible(showDirections);
+        findItem(R.id.station_context_launcher_shortcut).setVisible(showShortcut);
+        findItem(R.id.station_context_directions_alternative_from).setVisible(showAlternativeDirections);
+        findItem(R.id.station_context_navigate_to).setVisible(showNavigateTo);
         setForceShowIcon(true);
     }
 
@@ -167,75 +158,6 @@ public class StationContextMenu extends androidx.appcompat.widget.PopupMenu {
             })
             .setNegativeButton(R.string.button_cancel, null)
             .show();
-    }
-
-    public static boolean prepareMapMenu(
-            final Activity context, final Menu menu,
-            final NetworkId network, final Location location) {
-        new MenuInflater(context).inflate(R.menu.station_map_context, menu);
-        final MenuItem mapsItemInternal = menu.findItem(R.id.station_map_context_maps_internal);
-        final MenuItem mapsItemExternal = menu.findItem(R.id.station_map_context_maps_external);
-        final MenuItem mapsItemChooseExternal = menu.findItem(R.id.station_map_context_maps_choose_external);
-        final MenuItem mapsItemInfoUrl = menu.findItem(R.id.station_map_context_info_url);
-        boolean haveVisibleItems = false;
-
-        final String infoUrl = NetworkProviderFactory.provider(network).getLocationInfoUrl(location);
-        if (infoUrl != null) {
-            haveVisibleItems = true;
-            mapsItemInfoUrl.setVisible(true);
-            mapsItemInfoUrl.setOnMenuItemClickListener(item -> {
-                @SuppressLint("UnsafeImplicitIntentLaunch")
-                final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(infoUrl));
-                context.startActivity(intent);
-                return true;
-            });
-        } else {
-            mapsItemInfoUrl.setVisible(false);
-        }
-
-        if (location.hasCoord()) {
-            haveVisibleItems = true;
-            mapsItemExternal.setOnMenuItemClickListener(item -> {
-                ExternalMapsUtils.openPointInPreselectedExternalMapsApp(context, location);
-                return true;
-            });
-            mapsItemChooseExternal.setOnMenuItemClickListener(item -> {
-                ExternalMapsUtils.openPointByChoosingExternalMapsApp(context, location);
-                return true;
-            });
-
-            mapsItemInternal.setVisible(true);
-            mapsItemExternal.setVisible(true);
-            mapsItemChooseExternal.setVisible(true);
-        } else {
-            mapsItemInternal.setVisible(false);
-            mapsItemExternal.setVisible(false);
-            mapsItemChooseExternal.setVisible(false);
-        }
-
-        final ContentResolver contentResolver = context.getContentResolver();
-        final Cursor stationsCursor = contentResolver.query(PlanContentProvider.stationsUri(network, location.id), null,
-                null, null, null);
-        if (stationsCursor != null) {
-            final int planIdColumn = stationsCursor.getColumnIndexOrThrow(PlanContentProvider.KEY_STATION_PLAN_ID);
-            while (stationsCursor.moveToNext()) {
-                final String planId = stationsCursor.getString(planIdColumn);
-                final Cursor plansCursor = contentResolver.query(PlanContentProvider.planUri(planId), null, null, null,
-                        null);
-                plansCursor.moveToFirst();
-                final String planName = plansCursor
-                        .getString(plansCursor.getColumnIndexOrThrow(PlanContentProvider.KEY_PLAN_NAME));
-                plansCursor.close();
-                haveVisibleItems = true;
-                menu.add(planName).setOnMenuItemClickListener(item -> {
-                    PlanActivity.start(context, planId, location.id);
-                    return true;
-                });
-            }
-            stationsCursor.close();
-        }
-
-        return haveVisibleItems;
     }
 
     public static class WidgetPinningReceiver extends BroadcastReceiver {

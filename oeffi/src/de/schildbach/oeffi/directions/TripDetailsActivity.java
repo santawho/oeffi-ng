@@ -51,8 +51,6 @@ import android.text.method.LinkMovementMethod;
 import android.text.style.RelativeSizeSpan;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -69,7 +67,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 import androidx.core.graphics.Insets;
@@ -92,6 +89,8 @@ import de.schildbach.oeffi.tripeval.TripGeoUtils;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.ExternalMapsUtils;
 import de.schildbach.oeffi.util.HorizontalPager;
+import de.schildbach.oeffi.util.MapPopupMenu;
+import de.schildbach.oeffi.util.PopupMenu;
 import de.schildbach.oeffi.util.VehicleInformationRenderer;
 import de.schildbach.oeffi.util.geofiles.GeoFileProducer;
 import de.schildbach.oeffi.util.geofiles.GpxProducer;
@@ -440,13 +439,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         actionBar.addButton(R.drawable.ic_share_white_24dp, R.string.directions_trip_details_action_share_title)
                 .setOnClickListener(v -> {
-                    final PopupMenu popupMenu = new PopupMenu(TripDetailsActivity.this, v);
-                    final Menu menu = popupMenu.getMenu();
-                    new MenuInflater(this).inflate(R.menu.directions_trip_details_action_share, menu);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-                        popupMenu.setForceShowIcon(true);
+                    final PopupMenu popupMenu = new PopupMenu(TripDetailsActivity.this, R.menu.directions_trip_details_action_share, v);
                     if (isShareCalendarVisible)
-                        menu.findItem(R.id.directions_trip_details_action_add_to_calendar).setVisible(true);
+                        popupMenu.findItem(R.id.directions_trip_details_action_add_to_calendar).setVisible(true);
                     popupMenu.setOnMenuItemClickListener(item -> {
                         final int itemId = item.getItemId();
                         final Supplier<Intent> intentSupplier;
@@ -1766,15 +1761,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             if (transferToLocation != null && transferToLocation.hasCoord())
                 mapBoundingLocations.add(transferToLocation);
             final View.OnLongClickListener onLongClickListener = v -> {
-                final PopupMenu popupMenu = new PopupMenu(TripDetailsActivity.this, v);
-                StationContextMenu.prepareMapMenu(TripDetailsActivity.this, popupMenu.getMenu(),
+                final PopupMenu popupMenu = new MapPopupMenu(TripDetailsActivity.this, v,
                         network, transferToLocation != null ? transferToLocation : transferFromLocation);
                 popupMenu.setOnMenuItemClickListener(item -> {
                     setMapVisible(true);
                     getMapView().zoomToStations(mapBoundingLocations, 0);
                     return true;
                 });
-                popupMenu.setForceShowIcon(true);
                 popupMenu.show();
                 return true;
             };

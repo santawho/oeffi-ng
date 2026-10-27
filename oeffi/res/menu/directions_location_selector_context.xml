@@ -24,7 +24,8 @@
         android:icon="@drawable/ic_station_grey600_24dp" />
     <item
         android:id="@+id/directions_location_selector_context_map"
-        android:title="@string/station_context_map_title">
+        android:title="@string/station_context_map_title"
+        android:icon="@drawable/ic_map_black_24dp" >
         <menu />
     </item>
     <item

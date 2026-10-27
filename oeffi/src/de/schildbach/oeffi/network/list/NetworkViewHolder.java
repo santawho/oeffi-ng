@@ -23,7 +23,7 @@ import android.text.Html;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
+import de.schildbach.oeffi.util.PopupMenu;
 import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 import de.schildbach.oeffi.R;
@@ -130,9 +130,8 @@ public class NetworkViewHolder extends RecyclerView.ViewHolder {
             contextButton.setVisibility(View.VISIBLE);
             contextButtonSpace.setVisibility(View.VISIBLE);
             contextButton.setOnClickListener(v -> {
-                final PopupMenu contextMenu = new PopupMenu(context, v);
-                contextMenu.inflate(R.menu.network_picker_context);
-                contextMenu.getMenu().findItem(R.id.network_picker_context_credentials)
+                final PopupMenu contextMenu = new PopupMenu(context, R.menu.network_picker_context, v);
+                contextMenu.findItem(R.id.network_picker_context_credentials)
                         .setVisible(entry.credentialsRequired);
                 contextMenu.setOnMenuItemClickListener(item ->
                         contextMenuItemListener.onNetworkContextMenuItemClick(entry, item.getItemId()));

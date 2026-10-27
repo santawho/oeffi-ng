@@ -28,7 +28,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -38,8 +37,6 @@ import android.text.format.DateFormat;
 import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.Gravity;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -52,7 +49,9 @@ import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
+
+import de.schildbach.oeffi.util.MapPopupMenu;
+import de.schildbach.oeffi.util.PopupMenu;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
@@ -1397,22 +1396,17 @@ public class DirectionsActivity extends OeffiMainActivity implements
             final Location location,
             final boolean isLongHold,
             final View selectedView) {
-        final PopupMenu contextMenu = new PopupMenu(this, selectedView);
+        final PopupMenu contextMenu = new PopupMenu(this, R.menu.directions_location_selector_context, selectedView);
         contextMenu.setGravity(Gravity.RIGHT);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-            contextMenu.setForceShowIcon(true);
-        final MenuInflater inflater = contextMenu.getMenuInflater();
-        final Menu menu = contextMenu.getMenu();
-        inflater.inflate(R.menu.directions_location_selector_context, menu);
         if (locationSelector.isPinned(location)) {
-            menu.findItem(R.id.directions_location_selector_context_pin).setVisible(false);
+            contextMenu.findItem(R.id.directions_location_selector_context_pin).setVisible(false);
         } else {
-            menu.findItem(R.id.directions_location_selector_context_unpin).setVisible(false);
-            menu.findItem(R.id.directions_location_selector_context_pin_up).setVisible(false);
+            contextMenu.findItem(R.id.directions_location_selector_context_unpin).setVisible(false);
+            contextMenu.findItem(R.id.directions_location_selector_context_pin_up).setVisible(false);
         }
-        final MenuItem mapMenuItem = menu.findItem(R.id.directions_location_selector_context_map);
+        final MenuItem mapMenuItem = contextMenu.findItem(R.id.directions_location_selector_context_map);
         if (location.hasCoord())
-            StationContextMenu.prepareMapMenu(this, mapMenuItem.getSubMenu(), network, location);
+            MapPopupMenu.setupSubMenu(this, mapMenuItem, network, location);
         else
             mapMenuItem.setVisible(false);
         contextMenu.setOnDismissListener((popupMenu) -> {

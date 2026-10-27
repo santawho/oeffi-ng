@@ -35,7 +35,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.SparseArray;
-import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -49,7 +48,7 @@ import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresPermission;
-import androidx.appcompat.widget.PopupMenu;
+import de.schildbach.oeffi.util.PopupMenu;
 import androidx.core.content.ContextCompat;
 
 import org.slf4j.Logger;
@@ -305,16 +304,13 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         mapButton = findViewById(R.id.location_view_map_button);
         currentLocationButton = findViewById(R.id.location_view_current_location_button);
         menuButton.setOnClickListener((view) -> {
-            final PopupMenu popupMenu = new PopupMenu(getContext(), view);
-            popupMenu.inflate(R.menu.directions_location_context);
-            final Menu menu = popupMenu.getMenu();
-            menu.findItem(R.id.directions_location_map)
+            final PopupMenu popupMenu = new PopupMenu(getContext(), R.menu.directions_location_context, view);
+            popupMenu.findItem(R.id.directions_location_map)
                     .setVisible(!stationsOnly && listener.getMapPointSelectionProvider() != null);
-            menu.findItem(R.id.directions_location_contact)
+            popupMenu.findItem(R.id.directions_location_contact)
                     .setVisible(!stationsOnly);
-            menu.findItem(R.id.directions_location_current_location)
+            popupMenu.findItem(R.id.directions_location_current_location)
                     .setVisible(!stationsOnly);
-            popupMenu.setForceShowIcon(true);
             popupMenu.setOnMenuItemClickListener(item -> {
                 final int itemId = item.getItemId();
                 if (itemId == R.id.directions_location_current_location)

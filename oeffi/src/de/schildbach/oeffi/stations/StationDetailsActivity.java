@@ -39,7 +39,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.PopupMenu;
+import de.schildbach.oeffi.util.PopupMenu;
 import android.widget.TextView;
 import android.widget.ViewAnimator;
 

@@ -7,12 +7,14 @@
         android:title="@string/station_context_details_title" />
     <item
         android:id="@+id/directions_query_history_location_context_map"
-        android:title="@string/station_context_map_title">
+        android:title="@string/station_context_map_title"
+        android:icon="@drawable/ic_map_black_24dp" >
         <menu />
     </item>
     <item
         android:id="@+id/directions_query_history_location_context_add_favorite"
-        android:title="@string/station_context_add_favorite_title" />
+        android:title="@string/station_context_add_favorite_title"
+        android:icon="@drawable/ic_star_white_24dp" />
     <item
         android:id="@+id/directions_query_history_location_context_launcher_shortcut"
         android:title="@string/station_context_launcher_shortcut_title" />

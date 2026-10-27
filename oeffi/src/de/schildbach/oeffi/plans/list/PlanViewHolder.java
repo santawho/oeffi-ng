@@ -26,7 +26,7 @@ import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
+import de.schildbach.oeffi.util.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
@@ -117,9 +117,8 @@ public class PlanViewHolder extends RecyclerView.ViewHolder {
         }
 
         contextButton.setOnClickListener(v -> {
-            final PopupMenu contextMenu = new PopupMenu(context, v);
-            contextMenu.inflate(R.menu.plans_picker_context);
-            contextMenu.getMenu().findItem(R.id.plans_picker_context_remove).setVisible(planFileExists);
+            final PopupMenu contextMenu = new PopupMenu(context, R.menu.plans_picker_context, v);
+            contextMenu.findItem(R.id.plans_picker_context_remove).setVisible(planFileExists);
             contextMenu.setOnMenuItemClickListener(item -> contextMenuItemListener.onPlanContextMenuItemClick(plan,
                     item.getItemId()));
             contextMenu.show();
