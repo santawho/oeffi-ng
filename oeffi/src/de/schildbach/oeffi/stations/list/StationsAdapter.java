@@ -17,7 +17,6 @@
 
 package de.schildbach.oeffi.stations.list;
 
-import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import androidx.recyclerview.widget.RecyclerView;
@@ -25,6 +24,7 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.StationsAware;
 import de.schildbach.oeffi.stations.CompassNeedleView;
 import de.schildbach.oeffi.stations.Station;
+import de.schildbach.oeffi.stations.StationsActivity;
 import de.schildbach.oeffi.util.KeyWordMatcher;
 import de.schildbach.pte.dto.Product;
 
@@ -35,7 +35,7 @@ import java.util.Set;
 import static de.schildbach.pte.util.Preconditions.checkArgument;
 
 public class StationsAdapter extends RecyclerView.Adapter<StationViewHolder> implements CompassNeedleView.Callback {
-    private final Activity context;
+    private final StationsActivity context;
     private final int maxDeparturesCollapsed, maxDeparturesExpanded;
     private final boolean showOriginalDirectionText;
     private final Set<Product> productsFilter;
@@ -54,7 +54,7 @@ public class StationsAdapter extends RecyclerView.Adapter<StationViewHolder> imp
     private final LayoutInflater inflater;
 
     public StationsAdapter(
-            final Activity context,
+            final StationsActivity context,
             final int maxDeparturesCollapsed, final int maxDeparturesExpanded,
             final boolean expandAllEntries,
             final boolean showOriginalDirectionText,

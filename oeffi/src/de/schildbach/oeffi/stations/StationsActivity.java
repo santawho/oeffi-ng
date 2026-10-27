@@ -28,7 +28,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.graphics.Canvas;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
@@ -66,7 +65,6 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
@@ -85,8 +83,10 @@ import de.schildbach.oeffi.stations.list.JourneysAdapter;
 import de.schildbach.oeffi.util.FilterSearchView;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GeoUtils;
+import de.schildbach.oeffi.util.HorizontalSwipeHelper;
 import de.schildbach.oeffi.util.KeyWordMatcher;
 import de.schildbach.oeffi.util.LocationUtils;
+import de.schildbach.oeffi.util.ResourceUtil;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.stations.list.JourneyClickListener;
@@ -213,6 +213,10 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private int maxDeparturesPerJourney;
     private float walkPaceMillisPerMeter;
 
+    public Drawable drawableSwipeStar;
+    public Drawable drawableSwipeClear;
+    public Drawable drawableSwipeBlock;
+
     final LocationView.Listener locationViewListener = new LocationView.Listener() {
         @Override
         public NetworkId getNetwork() {
@@ -317,6 +321,9 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         sensorMagnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 
         res = getResources();
+        drawableSwipeStar = ResourceUtil.getDrawableIconInTextColor(this, R.drawable.ic_star_border_black_24dp);
+        drawableSwipeClear = ResourceUtil.getDrawableIconInTextColor(this, R.drawable.ic_clear_black_24dp);
+        drawableSwipeBlock = ResourceUtil.getDrawableIconInTextColor(this, R.drawable.ic_block_black_24dp);
 
         setContentView(R.layout.stations_content);
         final View contentView = findViewById(android.R.id.content);
@@ -517,144 +524,6 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         maxDeparturesPerStationCollapsed = res.getInteger(R.integer.max_departures_per_station_collapsed);
         maxDeparturesPerStationExpanded = res.getInteger(R.integer.max_departures_per_station_expanded);
 
-        final ItemTouchHelper itemTouchHelper = new ItemTouchHelper(
-                new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
-
-                    private float lastDX = 0;
-                    private int lastDirection = 0;
-
-                    private final Drawable drawableStar;
-                    private final Drawable drawableClear;
-                    private final Drawable drawableBlock;
-                    private final int starMargin;
-                    private final int actionTriggerThreshold;
-
-                    {
-                        final Resources resources = getResources();
-                        drawableStar = resources.getDrawable(R.drawable.ic_star_border_black_24dp);
-                        drawableClear = resources.getDrawable(R.drawable.ic_clear_black_24dp);
-                        drawableBlock = resources.getDrawable(R.drawable.ic_block_black_24dp);
-
-                        final int fgColor = resources.getColor(R.color.fg_significant);
-                        drawableStar.setTint(fgColor);
-                        drawableClear.setTint(fgColor);
-                        drawableBlock.setTint(fgColor);
-                        starMargin = resources.getDimensionPixelOffset(R.dimen.text_padding_horizontal_lax);
-                        actionTriggerThreshold = starMargin * 2 +
-                                Math.max(drawableStar.getIntrinsicWidth(),
-                                Math.max(drawableClear.getIntrinsicWidth(),
-                                        drawableBlock.getIntrinsicWidth()));
-                    }
-
-                    @Override
-                    public boolean isItemViewSwipeEnabled() {
-                        return true;
-                    }
-
-                    @Override
-                    public float getSwipeEscapeVelocity(final float defaultValue) {
-                        return Float.MAX_VALUE; // disable swipe by flinging
-                    }
-
-                    @Override
-                    public float getSwipeThreshold(final RecyclerView.ViewHolder viewHolder) {
-                        return Float.MAX_VALUE; // disable swipe by dragging
-                    }
-
-                    @Override
-                    public void onChildDraw(
-                            final Canvas c, final RecyclerView recyclerView,
-                            final RecyclerView.ViewHolder viewHolder,
-                            float dX, final float dY, final int actionState,
-                            final boolean isCurrentlyActive) {
-                        final int adapterPosition = viewHolder.getAdapterPosition();
-                        if (adapterPosition == RecyclerView.NO_POSITION)
-                            return;
-                        final Station station = stationListAdapter.getItem(adapterPosition);
-                        final Integer favState = favorites.get(station.location.id);
-                        final Drawable drawable;
-                        if (favState != null)
-                            drawable = drawableClear;
-                        else if (dX > 0)
-                            drawable = drawableStar;
-                        else
-                            drawable = drawableBlock;
-
-                        final int drawableHeight = drawable.getIntrinsicHeight();
-                        final int drawableWidth = drawable.getIntrinsicWidth();
-                        final int drawableTop = viewHolder.itemView.getTop() + viewHolder.itemView.getHeight() / 2
-                                - drawableHeight / 2;
-                        if (dX > 0 && (favState == null || favState == FavoriteStationsProvider.TYPE_IGNORE)) {
-                            // drag right
-                            if (dX > actionTriggerThreshold) {
-                                dX = actionTriggerThreshold;
-                                if (isCurrentlyActive) {
-                                    drawable.setBounds(starMargin, drawableTop, starMargin + drawableWidth,
-                                            drawableTop + drawableHeight);
-                                    drawable.draw(c);
-                                }
-                            }
-                        } else if (dX < 0 && (favState == null || favState == FavoriteStationsProvider.TYPE_FAVORITE)) {
-                            // drag left
-                            if (dX < -actionTriggerThreshold) {
-                                dX = -actionTriggerThreshold;
-                                if (isCurrentlyActive) {
-                                    final int right = viewHolder.itemView.getWidth() - starMargin;
-                                    drawable.setBounds(right - drawableWidth, drawableTop, right,
-                                            drawableTop + drawableHeight);
-                                    drawable.draw(c);
-                                }
-                            }
-                        } else {
-                            dX = 0;
-                        }
-
-                        lastDX = dX;
-                        super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
-
-                        if (dX == 0 && lastDirection != 0) {
-                            onAction(adapterPosition, lastDirection);
-                            lastDirection = 0;
-                        }
-                    }
-
-                    @Override
-                    public void onSelectedChanged(final RecyclerView.ViewHolder viewHolder, final int actionState) {
-                        super.onSelectedChanged(viewHolder, actionState);
-
-                        if (actionState == ItemTouchHelper.ACTION_STATE_IDLE
-                                && Math.abs(lastDX) >= actionTriggerThreshold)
-                            lastDirection = lastDX > 0 ? ItemTouchHelper.RIGHT : ItemTouchHelper.LEFT;
-                    }
-
-                    private void onAction(final int adapterPosition, final int direction) {
-                        final Station station = stationListAdapter.getItem(adapterPosition);
-                        final Location location = station.location;
-                        final Integer favState = favorites.get(location.id);
-                        if (direction == ItemTouchHelper.RIGHT && favState == null)
-                            addFavorite(location);
-                        else if (direction == ItemTouchHelper.RIGHT && favState == FavoriteStationsProvider.TYPE_IGNORE)
-                            removeIgnore(location);
-                        else if (direction == ItemTouchHelper.LEFT && favState == null)
-                            addIgnore(location);
-                        else if (direction == ItemTouchHelper.LEFT
-                                && favState == FavoriteStationsProvider.TYPE_FAVORITE)
-                            removeFavorite(location);
-                        stationListAdapter.notifyItemChanged(adapterPosition);
-                    }
-
-                    @Override
-                    public void onSwiped(final RecyclerView.ViewHolder viewHolder, final int direction) {
-                        throw new IllegalStateException();
-                    }
-
-                    @Override
-                    public boolean onMove(
-                            final RecyclerView recyclerView, final RecyclerView.ViewHolder viewHolder,
-                            final RecyclerView.ViewHolder target) {
-                        throw new IllegalStateException();
-                    }
-                });
         stationsContainer = findViewById(R.id.stations_container);
         stationList = findViewById(R.id.stations_list);
         stationListLayoutManager = new LinearLayoutManager(this) {
@@ -696,60 +565,12 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                     postLoadNextVisible(0);
             }
         });
-        itemTouchHelper.attachToRecyclerView(stationList);
+
+        HorizontalSwipeHelper.addToRecylerView(stationList);
     }
 
     private void setupJourneysList() {
         maxDeparturesPerJourney = res.getInteger(R.integer.max_departures_per_journey);
-
-        final ItemTouchHelper itemTouchHelper = new ItemTouchHelper(
-                new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
-                    @Override
-                    public boolean isItemViewSwipeEnabled() {
-                        return true;
-                    }
-
-                    @Override
-                    public float getSwipeEscapeVelocity(final float defaultValue) {
-                        return Float.MAX_VALUE; // disable swipe by flinging
-                    }
-
-                    @Override
-                    public float getSwipeThreshold(final RecyclerView.ViewHolder viewHolder) {
-                        return Float.MAX_VALUE; // disable swipe by dragging
-                    }
-
-                    @Override
-                    public void onChildDraw(final Canvas c, final RecyclerView recyclerView,
-                                            final RecyclerView.ViewHolder viewHolder, float dX, final float dY, final int actionState,
-                                            final boolean isCurrentlyActive) {
-                        final int adapterPosition = viewHolder.getAdapterPosition();
-                        if (adapterPosition == RecyclerView.NO_POSITION)
-                            return;
-
-                        super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
-                    }
-
-                    @Override
-                    public void onSelectedChanged(final RecyclerView.ViewHolder viewHolder, final int actionState) {
-                        super.onSelectedChanged(viewHolder, actionState);
-                    }
-
-                    private void onAction(final int adapterPosition, final int direction) {
-                        journeyListAdapter.notifyItemChanged(adapterPosition);
-                    }
-
-                    @Override
-                    public void onSwiped(final RecyclerView.ViewHolder viewHolder, final int direction) {
-                        throw new IllegalStateException();
-                    }
-
-                    @Override
-                    public boolean onMove(final RecyclerView recyclerView, final RecyclerView.ViewHolder viewHolder,
-                                          final RecyclerView.ViewHolder target) {
-                        throw new IllegalStateException();
-                    }
-                });
         journeysContainer = findViewById(R.id.journeys_container);
         final TextView descriptionView = findViewById(R.id.journeys_description);
         descriptionView.setText(Html.fromHtml(getString(R.string.stations_journeys_description), Html.FROM_HTML_MODE_COMPACT));
@@ -792,7 +613,6 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                     postLoadNextVisible(0);
             }
         });
-        itemTouchHelper.attachToRecyclerView(journeyList);
     }
 
     @Override
@@ -1607,7 +1427,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
             int firstVisible;
             int lastVisible;
-            int maxDistance;
+            final int maxDistance;
             if (sortByWalkAccess) {
                 firstVisible = 0;
                 lastVisible = Integer.MAX_VALUE;

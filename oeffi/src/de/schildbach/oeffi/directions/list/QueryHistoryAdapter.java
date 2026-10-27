@@ -33,8 +33,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Date;
 
-import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.directions.QueryHistoryProvider;
 import de.schildbach.oeffi.directions.QueryStoredTripsProvider;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
@@ -329,7 +329,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         }
     }
 
-    private final OeffiActivity context;
+    private final DirectionsActivity context;
     private final ContentResolver contentResolver;
     private final LayoutInflater inflater;
     private final NetworkId network;
@@ -349,7 +349,7 @@ public class QueryHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private long selectedRowId = RecyclerView.NO_ID;
 
     public QueryHistoryAdapter(
-            final OeffiActivity context,
+            final DirectionsActivity context,
             final NetworkId network, final String usage,
             final boolean canBeMarkedAsDone,
             final QueryHistoryClickListener clickListener,

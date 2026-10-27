@@ -17,11 +17,11 @@
 
 package de.schildbach.oeffi.stations.list;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
@@ -39,6 +39,8 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.StationsAware;
 import de.schildbach.oeffi.stations.CompassNeedleView;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
+import de.schildbach.oeffi.stations.StationsActivity;
+import de.schildbach.oeffi.util.HorizontalSwipeHelper;
 import de.schildbach.oeffi.util.LineView;
 import de.schildbach.oeffi.stations.QueryDeparturesRunnable;
 import de.schildbach.oeffi.stations.Station;
@@ -70,7 +72,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class StationViewHolder extends RecyclerView.ViewHolder {
+public class StationViewHolder extends RecyclerView.ViewHolder implements HorizontalSwipeHelper.HorizontalSwipeHolder {
     public final View itemFrameView;
     public final View hideableFrameView;
     public final View favoriteView;
@@ -84,7 +86,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
     public final TextView departuresStatusView;
     public final ViewGroup messagesViewGroup;
 
-    private final Activity context;
+    private final StationsActivity context;
     private final Resources res;
     private final int maxDeparturesCollapsed, maxDeparturesExpanded;
     private final boolean showOriginalDirectionText;
@@ -97,12 +99,14 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
     private final int colorSignificant, colorLessSignificant, colorInsignificant, colorHighlighted;
     private final int listEntryVerticalPadding;
     private StationContextMenu contextMenu;
+    private Station station;
+    private Integer favState;
 
     private static final int CONDENSE_LINES_THRESHOLD = 5;
     private static final int MESSAGE_INDEX_COLOR = Color.parseColor("#c08080");
 
     public StationViewHolder(
-            final Activity context, final View itemView,
+            final StationsActivity context, final View itemView,
             final int maxDeparturesCollapsed, final int maxDeparturesExpanded,
             final boolean showOriginalDirectionText,
             final StationContextMenuItemListener contextMenuItemListener,
@@ -147,6 +151,9 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
             final Set<Product> productsFilter, final boolean expandAllEntries, final boolean forceShowPlace,
             final Integer favState, final android.location.Location deviceLocation,
             final CompassNeedleView.Callback compassCallback) {
+        this.station = station;
+        this.favState = favState;
+
         if (contextMenu != null) {
             contextMenu.dismiss();
             contextMenu = null;
@@ -170,8 +177,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
         if (contextMenuItemListener != null) {
             itemView.findViewById(R.id.station_entry_open_button).setOnClickListener(v -> {
                 // trigger context menu item "open all departures"
-                contextMenuItemListener.onStationContextMenuItemClick(getBindingAdapterPosition(),
-                        station.network, station.location, station.getDepartures(),
+                onStationContextMenuItemClick(getBindingAdapterPosition(),
                         R.id.station_context_show_departures);
             });
         }
@@ -554,8 +560,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
         contextMenu.setOnMenuItemClickListener(item -> {
             final int position = getBindingAdapterPosition();
             if (position != RecyclerView.NO_POSITION) {
-                return contextMenuItemListener.onStationContextMenuItemClick(position, station.network,
-                        station.location, station.getDepartures(), item.getItemId());
+                return onStationContextMenuItemClick(position, item.getItemId());
             }
             return false;
         });
@@ -565,6 +570,13 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
         contextMenu.show();
     }
 
+    private boolean onStationContextMenuItemClick(final int position, final int menuItemId) {
+        return contextMenuItemListener.onStationContextMenuItemClick(
+                position, station.network,
+                station.location, station.getDepartures(),
+                menuItemId);
+    }
+
     private static class DepartureViewHolder {
         public LineView line;
         public OverflowTextView destination;
@@ -572,5 +584,41 @@ public class StationViewHolder extends RecyclerView.ViewHolder {
         public TextView time;
         public TextView delay;
         public TextView position;
+    }
+
+    @Override
+    public void onRevealLeft(final int adapterPosition) {
+        if (favState == null)
+            onStationContextMenuItemClick(adapterPosition, R.id.station_context_add_favorite);
+        else if (favState == FavoriteStationsProvider.TYPE_IGNORE)
+            onStationContextMenuItemClick(adapterPosition, R.id.station_context_remove_ignore);
+    }
+
+    @Override
+    public void onRevealRight(final int adapterPosition) {
+        if (favState == null)
+            onStationContextMenuItemClick(adapterPosition, R.id.station_context_add_ignore);
+        else if (favState == FavoriteStationsProvider.TYPE_FAVORITE)
+            onStationContextMenuItemClick(adapterPosition, R.id.station_context_remove_favorite);
+    }
+
+    @Override
+    public Drawable getLeftIcon(final int adapterPosition) {
+        return favState != null ? context.drawableSwipeClear : context.drawableSwipeStar;
+    }
+
+    @Override
+    public Drawable getRightIcon(final int adapterPosition) {
+        return favState != null ? context.drawableSwipeClear : context.drawableSwipeBlock;
+    }
+
+    @Override
+    public boolean canRevealLeft(final int adapterPosition) {
+        return favState == null || favState == FavoriteStationsProvider.TYPE_IGNORE;
+    }
+
+    @Override
+    public boolean canRevealRight(final int adapterPosition) {
+        return favState == null || favState == FavoriteStationsProvider.TYPE_FAVORITE;
     }
 }

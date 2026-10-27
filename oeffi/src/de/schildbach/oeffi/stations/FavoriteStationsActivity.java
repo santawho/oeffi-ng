@@ -21,6 +21,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -42,6 +43,8 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.mapview.OeffiMapView;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
+import de.schildbach.oeffi.util.HorizontalSwipeHelper;
+import de.schildbach.oeffi.util.ResourceUtil;
 import de.schildbach.oeffi.util.locationview.LocationView;
 import de.schildbach.oeffi.stations.list.FavoriteStationsAdapter;
 import de.schildbach.oeffi.stations.list.StationClickListener;
@@ -99,6 +102,10 @@ public class FavoriteStationsActivity extends OeffiActivity
     private HandlerThread backgroundThread;
     private Handler backgroundHandler;
 
+    public Drawable drawableSwipeStarBorder;
+    public Drawable drawableSwipeStarSolid;
+    public Drawable drawableSwipeDelete;
+
     final LocationView.Listener locationListener = new LocationView.Listener() {
         @Override
         public NetworkId getNetwork() {
@@ -149,6 +156,10 @@ public class FavoriteStationsActivity extends OeffiActivity
         backgroundThread.start();
         backgroundHandler = new Handler(backgroundThread.getLooper());
 
+        drawableSwipeStarBorder = ResourceUtil.getDrawableIconInTextColor(this, R.drawable.ic_star_border_black_24dp);
+        drawableSwipeStarSolid = ResourceUtil.getDrawableIconInTextColor(this, R.drawable.ic_star_white_24dp);
+        drawableSwipeDelete = ResourceUtil.getDrawableIconInTextColor(this, R.drawable.ic_delete_black_24dp);
+
         final boolean isRootActivity = isTaskRoot() && !shouldReturnResult;
 
         setContentView(R.layout.favorites_content, isRootActivity);
@@ -182,6 +193,7 @@ public class FavoriteStationsActivity extends OeffiActivity
             v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), insets.bottom);
             return windowInsets;
         });
+        HorizontalSwipeHelper.addToRecylerView(listView);
 
         viewNewLocation = findViewById(R.id.favorites_new);
         viewNewLocation.setVisibility(View.GONE);

@@ -20,6 +20,7 @@ package de.schildbach.oeffi.util;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 
 import java.util.Locale;
 
@@ -57,5 +58,11 @@ public class ResourceUtil {
         final Context newContext = context.createConfigurationContext(configuration);
         final String newLanguageCode = newContext.getString(R.string.locale);
         return languageCode.equals(newLanguageCode) ? newContext : context;
+    }
+
+    public static Drawable getDrawableIconInTextColor(final Context context, final int resId) {
+        final Drawable drawable = context.getDrawable(resId);
+        drawable.setTint(context.getColor(R.color.fg_significant));
+        return drawable;
     }
 }

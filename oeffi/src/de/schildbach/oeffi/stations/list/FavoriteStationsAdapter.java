@@ -17,7 +17,6 @@
 
 package de.schildbach.oeffi.stations.list;
 
-import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -31,6 +30,7 @@ import android.widget.EditText;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.stations.FavoriteStationsActivity;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.pte.NetworkId;
@@ -39,7 +39,7 @@ import de.schildbach.pte.dto.Location;
 import javax.annotation.Nullable;
 
 public class FavoriteStationsAdapter extends RecyclerView.Adapter<FavoriteStationViewHolder> {
-    private final Activity context;
+    private final FavoriteStationsActivity context;
     private final ContentResolver contentResolver;
     private final LayoutInflater inflater;
     private final boolean showNetwork;
@@ -55,7 +55,7 @@ public class FavoriteStationsAdapter extends RecyclerView.Adapter<FavoriteStatio
     private long selectedRowId = RecyclerView.NO_ID;
 
     public FavoriteStationsAdapter(
-            final Activity context, final NetworkId network,
+            final FavoriteStationsActivity context, final NetworkId network,
             final StationClickListener clickListener,
             @Nullable final StationContextMenuItemListener contextMenuItemListener) {
         this.context = context;

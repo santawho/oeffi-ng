@@ -17,22 +17,24 @@
 
 package de.schildbach.oeffi.stations.list;
 
-import android.app.Activity;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.network.NetworkResources;
+import de.schildbach.oeffi.stations.FavoriteStationsActivity;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
 import de.schildbach.oeffi.stations.StationContextMenu;
+import de.schildbach.oeffi.util.HorizontalSwipeHelper;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
 
-public class FavoriteStationViewHolder extends RecyclerView.ViewHolder {
-    private final Activity context;
+public class FavoriteStationViewHolder extends RecyclerView.ViewHolder implements HorizontalSwipeHelper.HorizontalSwipeHolder {
+    private final FavoriteStationsActivity context;
     private final StationClickListener clickListener;
     private final StationContextMenuItemListener contextMenuItemListener;
     private final TextView nicknameView;
@@ -41,9 +43,11 @@ public class FavoriteStationViewHolder extends RecyclerView.ViewHolder {
     private final TextView nameView;
     private final ImageButton contextButton;
     private StationContextMenu contextMenu;
+    private NetworkId network;
+    private Location station;
 
     public FavoriteStationViewHolder(
-            final View itemView, final Activity context,
+            final View itemView, final FavoriteStationsActivity context,
             final StationClickListener clickListener,
             final StationContextMenuItemListener contextMenuItemListener) {
         super(itemView);
@@ -63,6 +67,9 @@ public class FavoriteStationViewHolder extends RecyclerView.ViewHolder {
             final NetworkId network,
             final Location station, final String nickname,
             final boolean showNetwork, final long selectedRowId) {
+        this.network = network;
+        this.station = station;
+
         if (contextMenu != null) {
             contextMenu.dismiss();
             contextMenu = null;
@@ -132,5 +139,36 @@ public class FavoriteStationViewHolder extends RecyclerView.ViewHolder {
             contextMenu = null;
         });
         contextMenu.show();
+    }
+
+    @Override
+    public void onRevealLeft(final int adapterPosition) {
+    }
+
+    @Override
+    public void onRevealRight(final int adapterPosition) {
+        contextMenuItemListener.onStationContextMenuItemClick(
+                adapterPosition, network, station, null,
+                R.id.station_context_remove_favorite);
+    }
+
+    @Override
+    public Drawable getLeftIcon(final int adapterPosition) {
+        return null;
+    }
+
+    @Override
+    public Drawable getRightIcon(final int adapterPosition) {
+        return context.drawableSwipeDelete;
+    }
+
+    @Override
+    public boolean canRevealLeft(final int adapterPosition) {
+        return false;
+    }
+
+    @Override
+    public boolean canRevealRight(final int adapterPosition) {
+        return true;
     }
 }

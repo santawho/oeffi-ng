@@ -17,22 +17,21 @@
 
 package de.schildbach.oeffi.directions.list;
 
+import android.graphics.drawable.Drawable;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 
+import de.schildbach.oeffi.directions.DirectionsActivity;
+import de.schildbach.oeffi.util.HorizontalSwipeHelper;
 import de.schildbach.oeffi.util.MapPopupMenu;
 import de.schildbach.oeffi.util.PopupMenu;
 import androidx.recyclerview.widget.RecyclerView;
 
-import de.schildbach.oeffi.util.SwipeLayout;
-
 import javax.annotation.Nullable;
 
-import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.oeffi.util.locationview.LocationTextView;
@@ -43,8 +42,7 @@ import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.PTDate;
 
-public class QueryHistoryViewHolder extends RecyclerView.ViewHolder
-        implements SwipeLayout.SwipeListener {
+public class QueryHistoryViewHolder extends RecyclerView.ViewHolder implements HorizontalSwipeHelper.HorizontalSwipeHolder {
     public interface ContextMenuItemListener {
         boolean onQueryHistoryContextMenuItemClick(
                 int adapterPosition,
@@ -52,9 +50,8 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder
                 @Nullable byte[] serializedSavedTrip, int menuItemId, @Nullable Location menuItemLocation);
     }
 
-    private final OeffiActivity context;
+    private final DirectionsActivity context;
     private final NetworkId network;
-    private final SwipeLayout swipeLayout;
     private final LocationTextView fromView;
     private final LocationTextView toView;
     private final LocationTextView viaView;
@@ -73,12 +70,9 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder
     private Integer toFavState;
     private boolean hasSavedTrip;
     private PopupMenu contextMenu;
-    private final ImageView starView;
-    private boolean starOpened;
-    private boolean removeOpened;
 
     public QueryHistoryViewHolder(
-            final OeffiActivity context,
+            final DirectionsActivity context,
             final NetworkId network,
             final View itemView) {
         super(itemView);
@@ -92,21 +86,6 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder
         favoriteView = itemView.findViewById(R.id.directions_query_history_entry_favorite);
         tripView = itemView.findViewById(R.id.directions_query_history_entry_trip);
         contextButton = itemView.findViewById(R.id.directions_query_history_entry_context_button);
-
-        swipeLayout = (SwipeLayout) itemView;
-        starView = swipeLayout.findViewById(R.id.directions_query_history_entry_swipe_star);
-        setStarDrawable();
-
-        swipeLayout.addRevealListener(R.id.directions_query_history_entry_swipe_star,
-                (child, edge, fraction, distance) -> {
-                    starOpened = fraction > 0.999;
-                });
-        swipeLayout.addRevealListener(R.id.directions_query_history_entry_swipe_remove,
-                (child, edge, fraction, distance) -> {
-                    removeOpened = fraction > 0.999;
-                });
-
-        swipeLayout.addSwipeListener(this);
     }
 
     public void bind(
@@ -116,7 +95,6 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder
             final long savedTripDepartureTime, final byte[] serializedSavedTrip, final Integer fromFavState,
             final Integer toFavState, final long selectedRowId, final QueryHistoryClickListener clickListener,
             final ContextMenuItemListener contextMenuItemListener) {
-        swipeLayout.resetCaches();
         this.clickListener = clickListener;
         this.contextMenuItemListener = contextMenuItemListener;
         this.from = from;
@@ -161,16 +139,12 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder
         final boolean selected = rowId == selectedRowId;
         itemView.setActivated(selected);
         itemView.setOnClickListener(v -> {
-            if (starWasOpened || removeWasOpened)
-                return;
             final int position = getAdapterPosition();
             if (position != RecyclerView.NO_POSITION) {
                 clickListener.onEntryClick(position, from, to, via);
             }
         });
         itemView.setOnLongClickListener(v -> {
-            if (starOpened || removeOpened)
-                return false;
             showContextMenu(v);
             return true;
         });
@@ -241,73 +215,43 @@ public class QueryHistoryViewHolder extends RecyclerView.ViewHolder
     }
 
     @Override
-    public void onStartOpen(final SwipeLayout layout) {
-        if (contextMenu != null) {
-            contextMenu.dismiss();
-            contextMenu = null;
-        }
-
-        handWasReleased = false;
-        starWasOpened = false;
-        removeWasOpened = false;
-    }
-
-    private boolean handWasReleased;
-    private boolean starWasOpened;
-    private boolean removeWasOpened;
-
-    @Override
-    public void onHandRelease(final SwipeLayout layout, final float xvel, final float yvel) {
-        handWasReleased = true;
-
-        starWasOpened = starOpened;
-        starOpened = false;
-
-        removeWasOpened = removeOpened;
-        removeOpened = false;
-
-        swipeLayout.close();
+    public void onRevealLeft(final int adapterPosition) {
+        isFavorite = !isFavorite;
+        contextMenuItemListener.onQueryHistoryContextMenuItemClick(
+                adapterPosition, from, to, via,
+                serializedSavedTrip,
+                isFavorite
+                    ? R.id.directions_query_history_context_add_favorite
+                    : R.id.directions_query_history_context_remove_favorite,
+                null);
     }
 
     @Override
-    public boolean onLongClick(final SwipeLayout layout) {
-        return !(starOpened || removeOpened);
+    public void onRevealRight(final int adapterPosition) {
+        contextMenuItemListener.onQueryHistoryContextMenuItemClick(
+                adapterPosition, from, to, via,
+                serializedSavedTrip,
+                R.id.directions_query_history_context_remove_entry,
+                null);
     }
 
     @Override
-    public void onEndClose(final SwipeLayout layout) {
-        if (!handWasReleased)
-            return;
-        handWasReleased = false;
-
-        final int position = getAdapterPosition();
-
-        if (starWasOpened) {
-            starWasOpened = false;
-            isFavorite = !isFavorite;
-            setStarDrawable();
-            contextMenuItemListener.onQueryHistoryContextMenuItemClick(
-                    position, from, to, via,
-                    serializedSavedTrip,
-                    isFavorite
-                        ? R.id.directions_query_history_context_add_favorite
-                        : R.id.directions_query_history_context_remove_favorite,
-                    null);
-        } else if (removeWasOpened) {
-            removeWasOpened = false;
-            contextMenuItemListener.onQueryHistoryContextMenuItemClick(
-                    position, from, to, via,
-                    serializedSavedTrip,
-                    R.id.directions_query_history_context_remove_entry,
-                    null);
-//        } else {
-//            clickListener.onEntryClick(position, from, to, via);
-        }
+    public Drawable getLeftIcon(final int adapterPosition) {
+        return isFavorite ? context.drawableSwipeStarBorder : context.drawableSwipeStarSolid;
     }
 
-    private void setStarDrawable() {
-        starView.setImageDrawable(isFavorite
-                ? context.getDrawable(R.drawable.ic_star_border_white_24dp)
-                : context.getDrawable(R.drawable.ic_star_white_24dp));
+    @Override
+    public Drawable getRightIcon(final int adapterPosition) {
+        return context.drawableSwipeDelete;
+    }
+
+    @Override
+    public boolean canRevealLeft(final int adapterPosition) {
+        return true;
+    }
+
+    @Override
+    public boolean canRevealRight(final int adapterPosition) {
+        return true;
     }
 }

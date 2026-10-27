@@ -26,6 +26,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -50,6 +51,7 @@ import android.widget.DatePicker;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import de.schildbach.oeffi.util.HorizontalSwipeHelper;
 import de.schildbach.oeffi.util.MapPopupMenu;
 import de.schildbach.oeffi.util.PopupMenu;
 import android.widget.TextView;
@@ -177,6 +179,11 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
     private boolean autoFinishOnRestart;
 
+    public Drawable drawableSwipeStarBorder;
+    public Drawable drawableSwipeStarSolid;
+    public Drawable drawableSwipeNavigate;
+    public Drawable drawableSwipeDelete;
+
     private static final String INTENT_EXTRA_FROM_LOCATION = DirectionsActivity.class.getName() + ".from_location";
     private static final String INTENT_EXTRA_TO_LOCATION = DirectionsActivity.class.getName() + ".to_location";
     private static final String INTENT_EXTRA_VIA_LOCATION = DirectionsActivity.class.getName() + ".via_location";
@@ -266,6 +273,11 @@ public class DirectionsActivity extends OeffiMainActivity implements
         backgroundThread = new HandlerThread("Directions.queryTripsThread", Process.THREAD_PRIORITY_BACKGROUND);
         backgroundThread.start();
         backgroundHandler = new Handler(backgroundThread.getLooper());
+
+        drawableSwipeStarBorder = ResourceUtil.getDrawableIconInTextColor(this, R.drawable.ic_star_border_black_24dp);
+        drawableSwipeStarSolid = ResourceUtil.getDrawableIconInTextColor(this, R.drawable.ic_star_white_24dp);
+        drawableSwipeNavigate = ResourceUtil.getDrawableIconInTextColor(this, R.drawable.ic_navigation_white_24dp);
+        drawableSwipeDelete = ResourceUtil.getDrawableIconInTextColor(this, R.drawable.ic_delete_black_24dp);
 
         handleIntent(getIntent(), false);
     }
@@ -566,6 +578,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             viewQueryHistoryList.setLayoutManager(new LinearLayoutManager(this));
             viewQueryHistoryList.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
             newQueryHistoryListAdapter();
+            HorizontalSwipeHelper.addToRecylerView(viewQueryHistoryList);
 
             final CoordinatorLayout.LayoutParams coordinatorLayoutParams = new CoordinatorLayout.LayoutParams(
                     viewQueryHistoryList.getLayoutParams().width, viewQueryHistoryList.getLayoutParams().height);
