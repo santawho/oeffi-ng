@@ -83,7 +83,6 @@ import de.schildbach.oeffi.stations.list.JourneysAdapter;
 import de.schildbach.oeffi.util.FilterSearchView;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GeoUtils;
-import de.schildbach.oeffi.util.HorizontalSwipeHelper;
 import de.schildbach.oeffi.util.KeyWordMatcher;
 import de.schildbach.oeffi.util.LocationUtils;
 import de.schildbach.oeffi.util.ResourceUtil;
@@ -565,8 +564,6 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                     postLoadNextVisible(0);
             }
         });
-
-        HorizontalSwipeHelper.addToRecylerView(stationList);
     }
 
     private void setupJourneysList() {

@@ -28,12 +28,12 @@ import de.schildbach.oeffi.network.NetworkResources;
 import de.schildbach.oeffi.stations.FavoriteStationsActivity;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
 import de.schildbach.oeffi.stations.StationContextMenu;
-import de.schildbach.oeffi.util.HorizontalSwipeHelper;
+import de.schildbach.oeffi.util.RecyclerViewNG;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
 
-public class FavoriteStationViewHolder extends RecyclerView.ViewHolder implements HorizontalSwipeHelper.HorizontalSwipeHolder {
+public class FavoriteStationViewHolder extends RecyclerViewNG.HorizontalSwipeHolder {
     private final FavoriteStationsActivity context;
     private final StationClickListener clickListener;
     private final StationContextMenuItemListener contextMenuItemListener;

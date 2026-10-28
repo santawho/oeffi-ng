@@ -25,7 +25,6 @@ import android.widget.Button;
 import android.widget.ImageButton;
 
 import de.schildbach.oeffi.directions.DirectionsActivity;
-import de.schildbach.oeffi.util.HorizontalSwipeHelper;
 import de.schildbach.oeffi.util.MapPopupMenu;
 import de.schildbach.oeffi.util.PopupMenu;
 import androidx.recyclerview.widget.RecyclerView;
@@ -33,6 +32,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import javax.annotation.Nullable;
 
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.util.RecyclerViewNG;
 import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.oeffi.util.locationview.LocationTextView;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
@@ -42,7 +42,7 @@ import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.PTDate;
 
-public class QueryHistoryViewHolder extends RecyclerView.ViewHolder implements HorizontalSwipeHelper.HorizontalSwipeHolder {
+public class QueryHistoryViewHolder extends RecyclerViewNG.HorizontalSwipeHolder {
     public interface ContextMenuItemListener {
         boolean onQueryHistoryContextMenuItemClick(
                 int adapterPosition,

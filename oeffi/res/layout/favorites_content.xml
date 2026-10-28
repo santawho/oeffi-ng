@@ -25,7 +25,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <androidx.recyclerview.widget.RecyclerView
+            <de.schildbach.oeffi.util.RecyclerViewNG
                 android:id="@+id/favorites_list"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

@@ -43,7 +43,6 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.mapview.OeffiMapView;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
-import de.schildbach.oeffi.util.HorizontalSwipeHelper;
 import de.schildbach.oeffi.util.ResourceUtil;
 import de.schildbach.oeffi.util.locationview.LocationView;
 import de.schildbach.oeffi.stations.list.FavoriteStationsAdapter;
@@ -193,7 +192,6 @@ public class FavoriteStationsActivity extends OeffiActivity
             v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), insets.bottom);
             return windowInsets;
         });
-        HorizontalSwipeHelper.addToRecylerView(listView);
 
         viewNewLocation = findViewById(R.id.favorites_new);
         viewNewLocation.setVisibility(View.GONE);

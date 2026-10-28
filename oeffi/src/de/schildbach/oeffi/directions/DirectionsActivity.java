@@ -51,7 +51,6 @@ import android.widget.DatePicker;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
-import de.schildbach.oeffi.util.HorizontalSwipeHelper;
 import de.schildbach.oeffi.util.MapPopupMenu;
 import de.schildbach.oeffi.util.PopupMenu;
 import android.widget.TextView;
@@ -578,7 +577,6 @@ public class DirectionsActivity extends OeffiMainActivity implements
             viewQueryHistoryList.setLayoutManager(new LinearLayoutManager(this));
             viewQueryHistoryList.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
             newQueryHistoryListAdapter();
-            HorizontalSwipeHelper.addToRecylerView(viewQueryHistoryList);
 
             final CoordinatorLayout.LayoutParams coordinatorLayoutParams = new CoordinatorLayout.LayoutParams(
                     viewQueryHistoryList.getLayoutParams().width, viewQueryHistoryList.getLayoutParams().height);

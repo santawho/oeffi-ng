@@ -23,7 +23,6 @@ import android.view.View;
 import android.widget.ImageView;
 
 import de.schildbach.oeffi.directions.DirectionsActivity;
-import de.schildbach.oeffi.util.HorizontalSwipeHelper;
 import de.schildbach.oeffi.util.PopupMenu;
 import android.widget.TextView;
 
@@ -35,6 +34,7 @@ import de.schildbach.oeffi.directions.QueryStoredTripsProvider;
 import de.schildbach.oeffi.directions.QueryTripRunnable;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
+import de.schildbach.oeffi.util.RecyclerViewNG;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.locationview.LocationTextView;
 import de.schildbach.pte.NetworkId;
@@ -42,7 +42,7 @@ import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.PTDate;
 import de.schildbach.pte.dto.Trip;
 
-public class QueryStoredTripViewHolder extends RecyclerView.ViewHolder implements HorizontalSwipeHelper.HorizontalSwipeHolder {
+public class QueryStoredTripViewHolder extends RecyclerViewNG.HorizontalSwipeHolder {
     public interface ContextListener {
         boolean isTripUnderNavigation(final Context context, final String tripId);
     }

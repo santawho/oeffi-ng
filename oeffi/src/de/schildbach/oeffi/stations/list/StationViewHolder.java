@@ -40,7 +40,6 @@ import de.schildbach.oeffi.StationsAware;
 import de.schildbach.oeffi.stations.CompassNeedleView;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
 import de.schildbach.oeffi.stations.StationsActivity;
-import de.schildbach.oeffi.util.HorizontalSwipeHelper;
 import de.schildbach.oeffi.util.LineView;
 import de.schildbach.oeffi.stations.QueryDeparturesRunnable;
 import de.schildbach.oeffi.stations.Station;
@@ -48,6 +47,7 @@ import de.schildbach.oeffi.stations.StationContextMenu;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.HtmlUtils;
 import de.schildbach.oeffi.util.OverflowTextView;
+import de.schildbach.oeffi.util.RecyclerViewNG;
 import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.pte.Standard;
 import de.schildbach.pte.dto.Departure;
@@ -72,7 +72,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class StationViewHolder extends RecyclerView.ViewHolder implements HorizontalSwipeHelper.HorizontalSwipeHolder {
+public class StationViewHolder extends RecyclerViewNG.HorizontalSwipeHolder {
     public final View itemFrameView;
     public final View hideableFrameView;
     public final View favoriteView;
