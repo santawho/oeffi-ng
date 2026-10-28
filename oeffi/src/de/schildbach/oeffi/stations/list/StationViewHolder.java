@@ -209,7 +209,7 @@ public class StationViewHolder extends RecyclerView.ViewHolder implements Horizo
         nameView.setTextColor(colorSignificant);
         ViewUtils.setVisibility(placeView, showPlace);
         placeView.setText(place);
-        placeView.setTextColor(colorSignificant);
+        placeView.setTextColor(this.colorSignificant);
 
         // lines
         final Set<Line> lines = new TreeSet<>();
