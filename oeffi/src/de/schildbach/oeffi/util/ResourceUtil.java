@@ -22,6 +22,8 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 
+import androidx.appcompat.content.res.AppCompatResources;
+
 import java.util.Locale;
 
 import de.schildbach.oeffi.Application;
@@ -60,9 +62,13 @@ public class ResourceUtil {
         return languageCode.equals(newLanguageCode) ? newContext : context;
     }
 
-    public static Drawable getDrawableIconInTextColor(final Context context, final int resId) {
-        final Drawable drawable = context.getDrawable(resId);
-        drawable.setTint(context.getColor(R.color.fg_significant));
+    public static Drawable getDrawableInTextColor(final Context context, final int iconResId) {
+        return getColoredDrawable(context, iconResId, context.getColor(R.color.fg_significant));
+    }
+
+    public static Drawable getColoredDrawable(final Context context, final int iconResId, final int color) {
+        final Drawable drawable = AppCompatResources.getDrawable(context, iconResId).mutate();
+        drawable.setTint(color);
         return drawable;
     }
 }

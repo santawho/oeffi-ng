@@ -28,6 +28,8 @@ import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
 
+import androidx.core.content.res.ResourcesCompat;
+
 public class MultiDrawable extends AnimationDrawable {
     private final Resources res;
     private final Map<Integer, Integer> drawableIndexes = new HashMap<>();
@@ -46,7 +48,7 @@ public class MultiDrawable extends AnimationDrawable {
     public int add(final int drawableResId) {
         final int nextIndex = drawableIndexes.size();
         drawableIndexes.put(drawableResId, nextIndex);
-        final Drawable drawable = res.getDrawable(drawableResId).mutate();
+        final Drawable drawable = ResourcesCompat.getDrawable(res, drawableResId, null).mutate();
         addFrame(drawable, 0);
         return nextIndex;
     }

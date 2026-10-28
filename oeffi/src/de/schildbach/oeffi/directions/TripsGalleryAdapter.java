@@ -52,6 +52,7 @@ import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.Formats;
+import de.schildbach.oeffi.util.ResourceUtil;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Fare;
@@ -303,26 +304,20 @@ public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.
         colorAdditionalFeederBackground = makeBackgroundColorFromId(R.color.bg_trip_overview_additional_feeder);
 
         warningIcon = AppCompatResources.getDrawable(context, R.drawable.ic_warning_amber_24dp);
-        walkIcon = getColoredIcon(R.drawable.ic_directions_walk_grey600_24dp, colorLessSignificant);
-        stayIcon = getColoredIcon(R.drawable.ic_directions_stay_grey600_24dp, colorLessSignificant);
-        bikeIcon = getColoredIcon(R.drawable.ic_directions_bike_grey600_24dp, colorLessSignificant);
-        carIcon = getColoredIcon(R.drawable.ic_local_taxi_grey600_24dp, colorLessSignificant);
-        wheelChairIcon = getColoredIcon(R.drawable.ic_accessible_grey600_18dp, colorLessSignificant);
-        bicycleIcon = getColoredIcon(R.drawable.ic_directions_bike_grey600_18dp, colorLessSignificant);
-        bookmarkedIcon = getColoredIcon(R.drawable.ic_bookmarked_white_24dp, colorLessSignificant);
-        bookmarkableIcon = getColoredIcon(R.drawable.ic_bookmarkable_white_24dp, colorLessSignificant);
+        walkIcon = ResourceUtil.getColoredDrawable(context, R.drawable.ic_directions_walk_grey600_24dp, colorLessSignificant);
+        stayIcon = ResourceUtil.getColoredDrawable(context, R.drawable.ic_directions_stay_grey600_24dp, colorLessSignificant);
+        bikeIcon = ResourceUtil.getColoredDrawable(context, R.drawable.ic_directions_bike_grey600_24dp, colorLessSignificant);
+        carIcon = ResourceUtil.getColoredDrawable(context, R.drawable.ic_local_taxi_grey600_24dp, colorLessSignificant);
+        wheelChairIcon = ResourceUtil.getColoredDrawable(context, R.drawable.ic_accessible_grey600_18dp, colorLessSignificant);
+        bicycleIcon = ResourceUtil.getColoredDrawable(context, R.drawable.ic_directions_bike_grey600_18dp, colorLessSignificant);
+        bookmarkedIcon = ResourceUtil.getColoredDrawable(context, R.drawable.ic_bookmarked_white_24dp, colorLessSignificant);
+        bookmarkableIcon = ResourceUtil.getColoredDrawable(context, R.drawable.ic_bookmarkable_white_24dp, colorLessSignificant);
     }
 
 //@@@
 //    public void setOnItemClickListener(final TripsGallery.ItemClickListener listener) {
 //        itemClickListener = listener;
 //    }
-
-    private Drawable getColoredIcon(final int iconResId, final int color) {
-        final Drawable drawable = AppCompatResources.getDrawable(context, iconResId).mutate();
-        drawable.setTint(color);
-        return drawable;
-    }
 
     private int makeBackgroundColorFromId(final int colorId) {
         return makeBackgroundColor(context.getColor(colorId));

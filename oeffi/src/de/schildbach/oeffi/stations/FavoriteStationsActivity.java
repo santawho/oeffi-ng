@@ -155,9 +155,9 @@ public class FavoriteStationsActivity extends OeffiActivity
         backgroundThread.start();
         backgroundHandler = new Handler(backgroundThread.getLooper());
 
-        drawableSwipeStarBorder = ResourceUtil.getDrawableIconInTextColor(this, R.drawable.ic_star_border_black_24dp);
-        drawableSwipeStarSolid = ResourceUtil.getDrawableIconInTextColor(this, R.drawable.ic_star_white_24dp);
-        drawableSwipeDelete = ResourceUtil.getDrawableIconInTextColor(this, R.drawable.ic_delete_black_24dp);
+        drawableSwipeStarBorder = ResourceUtil.getDrawableInTextColor(this, R.drawable.ic_star_border_black_24dp);
+        drawableSwipeStarSolid = ResourceUtil.getDrawableInTextColor(this, R.drawable.ic_star_white_24dp);
+        drawableSwipeDelete = ResourceUtil.getDrawableInTextColor(this, R.drawable.ic_delete_black_24dp);
 
         final boolean isRootActivity = isTaskRoot() && !shouldReturnResult;
 

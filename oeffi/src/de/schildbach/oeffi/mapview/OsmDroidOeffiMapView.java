@@ -39,6 +39,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.res.ResourcesCompat;
 
 import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.api.IMapController;
@@ -404,7 +405,7 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
 
     private Drawable drawablePointer(final int resId, final int sizeDivider) {
         final Resources res = getResources();
-        final Drawable drawable = res.getDrawable(resId);
+        final Drawable drawable = ResourcesCompat.getDrawable(res, resId, null);
         drawable.setBounds(-drawable.getIntrinsicWidth() / sizeDivider, -drawable.getIntrinsicHeight(),
                 drawable.getIntrinsicWidth() / sizeDivider, 0);
         return drawable;
@@ -412,7 +413,7 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
 
     private Drawable drawableCenter(final int resId, final int sizeDivider) {
         final Resources res = getResources();
-        final Drawable drawable = res.getDrawable(resId);
+        final Drawable drawable = ResourcesCompat.getDrawable(res, resId, null);
         drawable.setBounds(-drawable.getIntrinsicWidth() / sizeDivider, -drawable.getIntrinsicHeight() / sizeDivider,
                 drawable.getIntrinsicWidth() / sizeDivider, drawable.getIntrinsicHeight() / sizeDivider);
         return drawable;

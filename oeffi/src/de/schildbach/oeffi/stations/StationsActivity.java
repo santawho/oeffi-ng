@@ -320,9 +320,9 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         sensorMagnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 
         res = getResources();
-        drawableSwipeStar = ResourceUtil.getDrawableIconInTextColor(this, R.drawable.ic_star_border_black_24dp);
-        drawableSwipeClear = ResourceUtil.getDrawableIconInTextColor(this, R.drawable.ic_clear_black_24dp);
-        drawableSwipeBlock = ResourceUtil.getDrawableIconInTextColor(this, R.drawable.ic_block_black_24dp);
+        drawableSwipeStar = ResourceUtil.getDrawableInTextColor(this, R.drawable.ic_star_border_black_24dp);
+        drawableSwipeClear = ResourceUtil.getDrawableInTextColor(this, R.drawable.ic_clear_black_24dp);
+        drawableSwipeBlock = ResourceUtil.getDrawableInTextColor(this, R.drawable.ic_block_black_24dp);
 
         setContentView(R.layout.stations_content);
         final View contentView = findViewById(android.R.id.content);

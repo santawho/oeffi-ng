@@ -68,6 +68,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.core.graphics.ColorUtils;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -2260,7 +2261,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final View positionsToWalkArrow = findViewById(R.id.navigation_next_event_positions_to_walk_arrow);
             final int iconId = tripRenderer.nextEventTransferIconId;
             if (tripRenderer.nextEventStopChange) {
-                positionsWalkIcon.setImageDrawable(res.getDrawable(iconId != 0 ? iconId : R.drawable.ic_directions_walk_grey600_24dp));
+                positionsWalkIcon.setImageDrawable(ResourcesCompat.getDrawable(res, iconId != 0 ? iconId : R.drawable.ic_directions_walk_grey600_24dp, null));
                 positionsWalkIcon.setVisibility(View.VISIBLE);
                 positionsFromWalkArrow.setVisibility(View.VISIBLE);
                 positionsToWalkArrow.setVisibility(View.VISIBLE);
@@ -2274,7 +2275,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     ViewUtils.setVisibility(positionsFromWalkArrow, tripRenderer.nextEventArrivalPosName != null);
                 }
             } else {
-                positionsWalkIcon.setImageDrawable(res.getDrawable(iconId));
+                positionsWalkIcon.setImageDrawable(ResourcesCompat.getDrawable(res, iconId, null));
                 positionsWalkIcon.setVisibility(View.VISIBLE);
                 ViewUtils.setVisibility(positionsToWalkArrow, tripRenderer.nextEventDeparturePosName != null);
                 ViewUtils.setVisibility(positionsFromWalkArrow, tripRenderer.nextEventArrivalPosName != null);
@@ -2364,7 +2365,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 ((TextView) findViewById(R.id.navigation_next_event_walk_value))
                         .setText(tripRenderer.nextEventTransferWalkTimeValue);
                 ((ImageView) findViewById(R.id.navigation_next_event_walk_icon))
-                        .setImageDrawable(res.getDrawable(tripRenderer.nextEventTransferIconId));
+                        .setImageDrawable(ResourcesCompat.getDrawable(res, tripRenderer.nextEventTransferIconId, null));
             } else {
                 findViewById(R.id.navigation_next_event_walk)
                         .setVisibility(View.GONE);

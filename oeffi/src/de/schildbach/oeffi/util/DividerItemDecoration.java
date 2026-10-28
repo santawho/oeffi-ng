@@ -21,6 +21,8 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.view.View;
+
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import de.schildbach.oeffi.R;
@@ -33,7 +35,7 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration {
     private int mOrientation;
 
     public DividerItemDecoration(final Context context, final int orientation) {
-        mDivider = context.getDrawable(R.drawable.list_divider);
+        mDivider = AppCompatResources.getDrawable(context, R.drawable.list_divider);
         setOrientation(orientation);
     }
 

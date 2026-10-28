@@ -26,6 +26,8 @@ import java.util.Locale;
 
 import static java.util.Objects.requireNonNull;
 
+import androidx.core.content.res.ResourcesCompat;
+
 import de.schildbach.pte.NetworkId;
 
 public class NetworkResources {
@@ -56,10 +58,10 @@ public class NetworkResources {
         final Drawable icon;
         final boolean isLogo;
         if (logoId != 0) {
-            icon = res.getDrawable(logoId);
+            icon = ResourcesCompat.getDrawable(res, logoId, null);
             isLogo = true;
         } else if (iconId != 0) {
-            icon = res.getDrawable(iconId);
+            icon = ResourcesCompat.getDrawable(res, iconId, null);
             isLogo = false;
         } else {
             icon = null;

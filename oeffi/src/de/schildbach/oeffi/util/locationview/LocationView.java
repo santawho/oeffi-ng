@@ -50,6 +50,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresPermission;
 import de.schildbach.oeffi.util.PopupMenu;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -658,7 +659,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
             drawableId = locationTypeIconRes(LocationType.ADDRESS);
         else
             drawableId = locationTypeIconRes(locationType);
-        modeButton.setImageDrawable(res.getDrawable(drawableId));
+        modeButton.setImageDrawable(ResourcesCompat.getDrawable(res, drawableId, null));
 
         if (getText() == null) {
             typeButtons.setVisibility(View.VISIBLE);

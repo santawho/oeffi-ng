@@ -32,6 +32,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -629,7 +630,7 @@ public class LocationSelector extends LinearLayout implements
     }
 
     private void setItemBackground(final Item item, final int backgroundDrawableId) {
-        item.textView.setBackground(getContext().getDrawable(backgroundDrawableId));
+        item.textView.setBackground(AppCompatResources.getDrawable(getContext(), backgroundDrawableId));
     }
 
     private void setItemStationName(final Item item, final String stationName) {

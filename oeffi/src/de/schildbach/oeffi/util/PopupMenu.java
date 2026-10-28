@@ -100,8 +100,7 @@ public class PopupMenu extends androidx.appcompat.widget.PopupMenu {
             inflate(menuResId, getMenu());
 
         final int iconColor = context.getColor(R.color.fg_significant);
-        final Drawable defaultIcon = context.getDrawable(R.drawable.ic_dot_white_24dp);
-        defaultIcon.setTint(iconColor);
+        final Drawable defaultIcon = ResourceUtil.getColoredDrawable(context, R.drawable.ic_dot_white_24dp, iconColor);
         setupIcons(getMenu(), iconColor, defaultIcon);
     }
 

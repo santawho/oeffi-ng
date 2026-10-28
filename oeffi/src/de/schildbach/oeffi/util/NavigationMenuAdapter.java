@@ -35,6 +35,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import de.schildbach.oeffi.R;
 
@@ -399,7 +401,7 @@ public class NavigationMenuAdapter extends RecyclerView.Adapter<NavigationMenuAd
         }
 
         public MenuItem setIcon(final int iconRes) {
-            return setIcon(iconRes != 0 ? res.getDrawable(iconRes) : null);
+            return setIcon(iconRes != 0 ? ResourcesCompat.getDrawable(res, iconRes, null) : null);
         }
 
         public MenuItem setIntent(final Intent intent) {

@@ -27,6 +27,7 @@ import android.provider.BaseColumns;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import de.schildbach.oeffi.R;
@@ -186,7 +187,7 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
                         if (response.isSuccessful())
                             thumb = new BitmapDrawable(res, response.body().byteStream());
                         else
-                            thumb = res.getDrawable(R.drawable.ic_oeffi_plans_grey300_72dp).mutate();
+                            thumb = ResourcesCompat.getDrawable(res, R.drawable.ic_oeffi_plans_grey300_72dp, null).mutate();
                         plan.thumb = thumb;
                         handler.post(() -> {
                             holder.setCall(null);
