@@ -452,7 +452,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
                     this, null, queryJourneyRunnable,
                     handler, backgroundHandler,
-                    network, journeyRef, isDriverMode,
+                    selectedNetwork, journeyRef, isDriverMode,
                     selectedLocation, departureTime,
                     null, null,
                     true,
@@ -1277,7 +1277,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                     context.queryJourneyRunnable = QueryJourneyRunnable.startShowJourney(
                             context, clickedView, context.queryJourneyRunnable,
                             context.handler, context.backgroundHandler,
-                            network, departure.journeyRef, isDriverMode,
+                            selectedNetwork, departure.journeyRef, isDriverMode,
                             station, departure.plannedTime,
                             null, null,
                             true,
