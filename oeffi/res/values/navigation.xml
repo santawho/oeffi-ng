@@ -62,6 +62,14 @@
     <string name="navigation_preferences_refresh_beep_summary">Play beep sounds when refreshing the navigation in background</string>
     <string name="navigation_preferences_refresh_beep_title">Background Sounds</string>
 
+    <string name="navigation_notifications_in_call_category_title">While in a Phone Call …</string>
+    <string name="navigation_preferences_in_call_suppress_speech_title">Suppress speech</string>
+    <string name="navigation_preferences_in_call_suppress_speech_summary">Set to disable speech output while you are in a phone call</string>
+    <string name="navigation_preferences_in_call_suppress_sound_title">Suppress sounds</string>
+    <string name="navigation_preferences_in_call_suppress_sound_summary">Set to disable sounds while you are in a phone call</string>
+    <string name="navigation_preferences_in_call_vibrate_title">Vibrate</string>
+    <string name="navigation_preferences_in_call_vibrate_summary">Use vibration while you are in a phone call</string>
+
     <string name="navigation_alarm_dialog_message_start">Set travel alarm for journey from\n%1$s</string>
     <string name="navigation_alarm_dialog_message_arrival">Set travel alarm for arrival at\n%1$s</string>
     <string name="navigation_alarm_dialog_message_departure">Set travel alarm for departure at\n%1$s</string>

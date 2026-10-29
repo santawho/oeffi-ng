@@ -87,4 +87,26 @@
         android:summary="@string/navigation_preferences_refresh_beep_summary"
         android:title="@string/navigation_preferences_refresh_beep_title" />
 
+    <PreferenceCategory android:title="@string/navigation_notifications_in_call_category_title" >
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="navigation_in_call_suppress_speech"
+            android:summary="@string/navigation_preferences_in_call_suppress_speech_summary"
+            android:title="@string/navigation_preferences_in_call_suppress_speech_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="navigation_in_call_suppress_sound"
+            android:summary="@string/navigation_preferences_in_call_suppress_sound_summary"
+            android:title="@string/navigation_preferences_in_call_suppress_sound_title" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="navigation_in_call_vibrate"
+            android:summary="@string/navigation_preferences_in_call_vibrate_summary"
+            android:title="@string/navigation_preferences_in_call_vibrate_title" />
+
+    </PreferenceCategory>
+
 </PreferenceScreen>
