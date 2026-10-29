@@ -331,6 +331,7 @@ public class OeffiActionBar extends FrameLayout implements View.OnLayoutChangeLi
 
     public void stopProgress() {
         if (--progressCount <= 0) {
+            progressCount = 0;
             handler.postDelayed(() -> {
                 if (progressAnimation != null) {
                     progressButton.clearAnimation();
