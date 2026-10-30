@@ -53,11 +53,11 @@
 
     <string name="navigation_notifications_in_call_category_title">Während eines Telefongesprächs …</string>
     <string name="navigation_preferences_in_call_suppress_speech_title">Sprache unterdrücken</string>
-    <string name="navigation_preferences_in_call_suppress_speech_summary">Setze dies, um die Sprachausgabe während eines Telefonts abzuschalten</string>
+    <string name="navigation_preferences_in_call_suppress_speech_summary">Setze dies, um die Sprachausgabe während eines Telefonats abzuschalten</string>
     <string name="navigation_preferences_in_call_suppress_sound_title">Töne unterdrücken</string>
-    <string name="navigation_preferences_in_call_suppress_sound_summary">Setze dies, um die Töne während eines Telefonts abzuschalten</string>
+    <string name="navigation_preferences_in_call_suppress_sound_summary">Setze dies, um die Töne während eines Telefonats abzuschalten</string>
     <string name="navigation_preferences_in_call_vibrate_title">Vibrieren</string>
-    <string name="navigation_preferences_in_call_vibrate_summary">Nutze Vibration während eines Telefonts</string>
+    <string name="navigation_preferences_in_call_vibrate_summary">Nutze Vibration während eines Telefonats</string>
 
     <string name="navigation_alarm_dialog_message_start">Setze Reisewecker für die Reise von\n%1$s</string>
     <string name="navigation_alarm_dialog_message_arrival">Setze Reisewecker für die Ankunft in\n%1$s</string>
