@@ -504,8 +504,8 @@
     <string name="navigation_next_event_action_next_transfer">dort Übergang nach</string>
     <string name="navigation_next_event_action_next_interchange">dort umsteigen</string>
     <string name="navigation_next_event_action_next_final_transfer">dort zu Fuß</string>
-    <string name="directions_trip_details_departure_row_name_format">(Weiterfahrt) %1$s</string>
-    <string name="directions_trip_details_arrival_row_name_format">(Ankunft) %1$s</string>
+    <string name="directions_trip_details_departure_row_name_format">&lt;small>(Weiterfahrt) %1$s nach Aufenthalt von %2$s&amp;nbsp;min&lt;/small></string>
+    <string name="directions_trip_details_arrival_row_name_format">&lt;small>(Ankunft) %1$s mit Aufenthalt von %2$s&amp;nbsp;min&lt;/small></string>
     <string name="directions_trip_details_shortened_message">%1$s&lt;br>… mehr anzeigen …</string>
     <string name="directions_trip_details_see_below_message">Siehe Hinweise unten …</string>
     <string name="directions_trip_details_extra_data_error">Zusätzliche Informationen können nicht geladen werden.</string>

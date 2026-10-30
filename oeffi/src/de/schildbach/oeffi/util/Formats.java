@@ -28,6 +28,7 @@ import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.Position;
 import de.schildbach.pte.dto.PTDate;
+import de.schildbach.pte.dto.Stop;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -324,5 +325,42 @@ public final class Formats {
         return context.getString(
                 line.isTrain() ? R.string.position_platform_train : R.string.position_platform,
                 position);
+    }
+
+    final static String LAYOVER_SEPARATOR = "&nbsp;&#x2026&nbsp;"; // ellipsis "..."
+    public static String layoverIntervalAsHtml(final Stop stop) {
+        final PTDate sta = stop.getArrivalTime(true);
+        final PTDate eta = stop.getArrivalTime(false);
+        final PTDate std = stop.getDepartureTime(true);
+        final PTDate etd = stop.getDepartureTime(false);
+        final long sma = sta.getTime();
+        final long ema = eta.getTime();
+        final long smd = std.getTime();
+        final long emd = etd.getTime();
+        final long minA = Math.min(sma, ema);
+        final long maxA = Math.max(sma, ema);
+        final long minD = Math.min(smd, emd);
+        final long maxD = Math.max(smd, emd);
+        final long estL = Math.max(0, emd - ema);
+        final long minL = Math.min(estL, Math.max(0, minD - maxA));
+        final long maxL = Math.max(estL, Math.max(0, maxD - minA));
+
+        final String sEstL = Long.toString((estL + 30000) / 60000);
+        final String sMinL = Long.toString((minL + 30000) / 60000);
+        final String sMaxL = Long.toString((maxL + 30000) / 60000);
+
+        final StringBuilder sb = new StringBuilder();
+        if (!sMinL.equals(sEstL)) {
+            sb.append(sMinL);
+            sb.append(LAYOVER_SEPARATOR);
+        }
+        sb.append("<b>");
+        sb.append(sEstL);
+        sb.append("</b>");
+        if (!sMaxL.equals(sEstL)) {
+            sb.append(LAYOVER_SEPARATOR);
+            sb.append(sMaxL);
+        }
+        return sb.toString();
     }
 }

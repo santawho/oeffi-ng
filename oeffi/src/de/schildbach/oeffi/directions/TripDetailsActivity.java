@@ -2615,12 +2615,18 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         } else {
             uniqueShortName = location.uniqueShortName();
         }
-        stopNameView.setText(Html.fromHtml(Formats.makeBreakableStationName(
-                pearlType == PearlView.Type.DEPARTURE_FOR_INTERMEDIATE_ARRIVAL
-                        ? getString(R.string.directions_trip_details_departure_row_name_format, uniqueShortName)
-                        : pearlType == PearlView.Type.ARRIVAL_FOR_INTERMEDIATE_DEPARTURE
-                        ? getString(R.string.directions_trip_details_arrival_row_name_format, uniqueShortName)
-                        : uniqueShortName), Html.FROM_HTML_MODE_COMPACT));
+        final String breakableName = Formats.makeBreakableStationName(uniqueShortName);
+        final String nameText;
+        if (pearlType == PearlView.Type.DEPARTURE_FOR_INTERMEDIATE_ARRIVAL) {
+            nameText = getString(R.string.directions_trip_details_departure_row_name_format,
+                    breakableName, Formats.layoverIntervalAsHtml(stop));
+        } else if (pearlType == PearlView.Type.ARRIVAL_FOR_INTERMEDIATE_DEPARTURE) {
+            nameText = getString(R.string.directions_trip_details_arrival_row_name_format,
+                    breakableName, Formats.layoverIntervalAsHtml(stop));
+        } else {
+            nameText = breakableName;
+        }
+        stopNameView.setText(Html.fromHtml(nameText, Html.FROM_HTML_MODE_COMPACT));
         ViewUtils.setCancelledStrikeThru(stopNameView, isCancelled);
         if (highlightLocation) {
             stopNameView.setTextColor(colorHighlighted);
@@ -2629,6 +2635,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 : (pearlType == PearlView.Type.DEPARTURE || pearlType == PearlView.Type.ARRIVAL)) {
             stopNameView.setTextColor(colorSignificant);
             stopNameView.setTypeface(null, Typeface.BOLD);
+        } else if (pearlType == PearlView.Type.DEPARTURE_FOR_INTERMEDIATE_ARRIVAL
+                || pearlType == PearlView.Type.ARRIVAL_FOR_INTERMEDIATE_DEPARTURE) {
+            stopNameView.setTextColor(colorSignificant);
+            stopNameView.setTypeface(null, Typeface.NORMAL);
         } else if (pearlType == PearlView.Type.PASSING) {
             stopNameView.setTextColor(colorInsignificant);
             stopNameView.setTypeface(null, Typeface.NORMAL);
