@@ -154,6 +154,16 @@ android {
         }
         ng {
             res.srcDirs = ['./res']
+            assets.srcDirs = ['./assets']
+        }
+        debug {
+            assets.srcDirs = ['../../oeffi/assets-debug', '../../oeffi/assets-temp/debug']
+        }
+        preRelease {
+            assets.srcDirs = ['../../oeffi/assets-pre-release', '../../oeffi/assets-temp/pre-release']
+        }
+        release {
+            assets.srcDirs = ['../../oeffi/assets-main', '../../oeffi/assets-temp/main']
         }
     }
 
@@ -166,23 +176,27 @@ android {
             applicationIdSuffix '.debug'
             versionNameSuffix '-debug'
 
+            resValue "string", "release_type", "debug"
             resValue "string", "app_name", "Öffi NG${CREDENTIALS.editionName ? " ${CREDENTIALS.editionName}" : ''} Debug"
             resValue "string", "app_url_path_prefix", "/@apps/oeffi-ng${CREDENTIALS.editionName ? "-${CREDENTIALS.editionName}" : ''}-debug/"
             resValue "bool", "flags_no_update_check", "true"
         }
         preRelease {
+            resValue "string", "release_type", "pre-release"
 //            minifyEnabled true
 //            shrinkResources false
 //            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig = signingConfigs.oeffi_ng
         }
         mainRelease {
+            resValue "string", "release_type", "main"
 //            minifyEnabled true
 //            shrinkResources false
 //            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig = signingConfigs.oeffi_ng
         }
         release {
+            resValue "string", "release_type", "main"
 //            minifyEnabled true
 //            shrinkResources false
 //            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'

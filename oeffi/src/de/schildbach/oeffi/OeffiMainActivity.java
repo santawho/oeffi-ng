@@ -23,6 +23,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
+import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -30,6 +31,7 @@ import android.os.Bundle;
 import de.schildbach.oeffi.util.AppInstaller;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.Downloader;
+import de.schildbach.oeffi.util.IOUtils;
 import de.schildbach.oeffi.util.Installer;
 import de.schildbach.pte.NetworkId;
 import okhttp3.Call;
@@ -42,6 +44,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
@@ -57,6 +60,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class OeffiMainActivity extends OeffiActivity {
+    private static boolean stillShowAnnouncement = true;
     private static boolean stillCheckForUpdate = true;
 
     private int versionCode;
@@ -96,6 +100,12 @@ public abstract class OeffiMainActivity extends OeffiActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        if (stillShowAnnouncement) {
+            stillShowAnnouncement = false;
+            showAnnouncement();
+        }
+
         if (stillCheckForUpdate) {
             stillCheckForUpdate = false;
             new AppInstaller(this, null).checkForUpdate(false);
@@ -116,6 +126,23 @@ public abstract class OeffiMainActivity extends OeffiActivity {
         }
 
         return super.onCreateDialog(id, bundle);
+    }
+
+    private void showAnnouncement() {
+        final AssetManager assets = getAssets();
+        final String text;
+        try (final InputStream is = assets.open("startup-message.html")) {
+            text = IOUtils.readAllText(is);
+        } catch (final IOException ioe) {
+            // what can we do?
+            return;
+        }
+        DialogBuilder.get(this)
+                .setHtmlMessage(text)
+                .setCanceledOnTouchOutside(false)
+                .setPositiveButton(R.string.alert_message_button_dismiss,
+                        (dialog, which) -> dialog.dismiss())
+                .show();
     }
 
     private static boolean messagesAlreadyProcessedInThisProcess;

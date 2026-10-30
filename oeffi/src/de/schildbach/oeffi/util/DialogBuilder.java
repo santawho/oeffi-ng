@@ -23,9 +23,12 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.text.Html;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ScrollView;
+import android.widget.TextView;
 
 import androidx.appcompat.content.res.AppCompatResources;
 
@@ -72,6 +75,23 @@ public class DialogBuilder extends AlertDialog.Builder {
         super.setView(view);
         customView = view;
         return this;
+    }
+
+    public DialogBuilder setScrollView(final View view) {
+        final Context context = getContext();
+        final ScrollView scrollView = new ScrollView(context);
+        scrollView.addView(view);
+        return setView(scrollView);
+    }
+
+    public DialogBuilder setHtmlMessage(final String htmlText) {
+        final Context context = getContext();
+        final TextView textView = new TextView(context);
+        final int padHorizontal = (int) context.getResources().getDimension(R.dimen.text_padding_horizontal_verylax);
+        final int padVertical = (int) context.getResources().getDimension(R.dimen.text_padding_vertical_lax);
+        textView.setPadding(padHorizontal, padVertical, padHorizontal, padVertical);
+        textView.setText(Html.fromHtml(htmlText, Html.FROM_HTML_MODE_COMPACT));
+        return setScrollView(textView);
     }
 
     public <T extends View> T findViewById(final int resId) {

@@ -2,6 +2,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <string name="app_name" translatable="false">Öffi</string>
+    <string name="release_type" translatable="false">default</string>
+
     <string name="about_donate_bitcoin_uri" translatable="false">bitcoin:bc1q8ruc8hanp7hrzfs48dvtuzz4ukmpe7cgsvvzrt</string>
     <string name="about_git_url" translatable="false">https://gitlab.com/oeffi/oeffi</string>
     <string name="about_forum_url" translatable="false">https://matrix.to/#/#öffi:schildbach.de</string>
