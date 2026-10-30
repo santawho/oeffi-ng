@@ -960,6 +960,13 @@ public class NavigationNotification {
         return extraData;
     }
 
+    public static void requestRefreshTripFromUI(final Intent intent, final boolean refreshTripDetails) {
+        NavigationAlarmManager.runOnHandlerThread(() -> {
+            final NavigationNotification navigationNotification = new NavigationNotification(intent);
+            navigationNotification.refresh(true, refreshTripDetails, false, 0);
+        });
+    }
+
     public static void updateFromForeground(
             final Activity contextActivity, final Intent intent,
             final Configuration configuration,
@@ -1629,12 +1636,6 @@ public class NavigationNotification {
         intent.putExtra(TripDetailsActivity.INTENT_EXTRA_RENDERCONFIG, intentData.renderConfig);
         intent.putExtra(INTENT_EXTRA_ACTION, action);
         return PendingIntent.getBroadcast(context, action, intent, PendingIntent.FLAG_IMMUTABLE);
-    }
-
-    public void requestRefreshTripFromUI(final boolean refreshTripDetails) {
-        NavigationAlarmManager.runOnHandlerThread(() -> {
-            refresh(true, refreshTripDetails, false, 0);
-        });
     }
 
     private long refresh(

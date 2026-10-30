@@ -413,7 +413,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
 
     private void refreshNavigationByUserCommand() {
         actionBar.startProgress();
-        new NavigationNotification(getIntent()).requestRefreshTripFromUI(true);
+        NavigationNotification.requestRefreshTripFromUI(getIntent(), true);
     }
 
     private void updateTripFromNotification() {
