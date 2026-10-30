@@ -1545,7 +1545,7 @@ public class NavigationNotification {
         }
         final long[] actualVibrationPattern =
                 prefs.getBoolean("navigation_vibrate", false)
-                || soundManager.isInCommunicationModeAndPreferenceSet("navigation_in_call_vibrate")
+                || soundManager.isInCommunicationModeAndPreferenceSet("navigation_in_call_vibrate", true)
                         ? vibrationPattern : null;
         soundManager.playAlarmSoundAndVibration(
                 actualUsage, actualSoundId,

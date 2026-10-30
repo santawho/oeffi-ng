@@ -176,7 +176,7 @@ public class NotificationSoundManager {
         final boolean playSound = soundId != 0;
         final boolean playSpeech = speakTexts != null && !speakTexts.isEmpty();
 
-        if (playSound && !isInCommunicationModeAndPreferenceSet("navigation_in_call_suppress_sound")) {
+        if (playSound && !isInCommunicationModeAndPreferenceSet("navigation_in_call_suppress_sound", false)) {
             final AudioAttributes audioAttributes = new AudioAttributes.Builder()
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                     .setUsage(soundUsage)
@@ -197,7 +197,7 @@ public class NotificationSoundManager {
             log.info("sound has stopped: {} usage {}", soundId, soundUsage);
         }
 
-        if (playSpeech && !isInCommunicationModeAndPreferenceSet("navigation_in_call_suppress_speech")) {
+        if (playSpeech && !isInCommunicationModeAndPreferenceSet("navigation_in_call_suppress_speech", true)) {
             final AudioAttributes audioAttributes = new AudioAttributes.Builder()
                     .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
                     .setUsage(soundUsage)
@@ -237,7 +237,7 @@ public class NotificationSoundManager {
         abandonAudioFocusRequest();
     }
 
-    public boolean isInCommunicationModeAndPreferenceSet(final String prefKey) {
+    public boolean isInCommunicationModeAndPreferenceSet(final String prefKey, final boolean defaultValue) {
         final int audioManagerMode = getAudioManager().getMode();
         if (!(audioManagerMode == AudioManager.MODE_IN_CALL
                 || audioManagerMode == AudioManager.MODE_IN_COMMUNICATION)) {
@@ -248,7 +248,7 @@ public class NotificationSoundManager {
             return true;
 
         return Application.getInstance().getSharedPreferences()
-                .getBoolean(prefKey, false);
+                .getBoolean(prefKey, defaultValue);
     }
 
     private void requestAudioFocus(final AudioAttributes audioAttributes, final boolean exclusive) {

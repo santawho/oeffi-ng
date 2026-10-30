@@ -90,7 +90,7 @@
     <PreferenceCategory android:title="@string/navigation_notifications_in_call_category_title" >
 
         <CheckBoxPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="navigation_in_call_suppress_speech"
             android:summary="@string/navigation_preferences_in_call_suppress_speech_summary"
             android:title="@string/navigation_preferences_in_call_suppress_speech_title" />
@@ -102,7 +102,7 @@
             android:title="@string/navigation_preferences_in_call_suppress_sound_title" />
 
         <CheckBoxPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="navigation_in_call_vibrate"
             android:summary="@string/navigation_preferences_in_call_vibrate_summary"
             android:title="@string/navigation_preferences_in_call_vibrate_title" />
