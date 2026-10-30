@@ -195,11 +195,10 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         updateTriggerReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(final Context context, final Intent intent) {
-                if (!isPaused) {
-                    nextNavigationRefreshTime = 1; // forces refresh
-                    if (!doCheckAutoRefresh(false))
-                        updateGUI();
-                }
+                swipeRefreshForTripList.setRefreshing(false);
+                swipeRefreshForNextEvent.setRefreshing(false);
+                actionBar.stopProgress();
+                updateTripFromNotification();
             }
         };
         ContextCompat.registerReceiver(this, updateTriggerReceiver,
@@ -279,9 +278,13 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         if (!navigationNotificationBeingDeleted) {
             if (!permissionRequestRunning) {
                 if (NavigationNotification.requestPermissions(this, 1)) {
-                    final boolean doNotificationUpdate = !isStartupComplete;
-                    final boolean forceRefreshAll = !isStartupComplete;
-                    refreshNavigation(doNotificationUpdate, forceRefreshAll, false);
+                    if (!isStartupComplete) {
+                        isStartupComplete = true;
+                        updateNotification();
+                        refreshNavigationByUserCommand();
+                    } else {
+                        updateTripFromNotification();
+                    }
                 } else {
                     permissionRequestRunning = true;
                 }
@@ -336,7 +339,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     protected void onNewIntent(@NonNull final Intent intent) {
         super.onNewIntent(intent);
         if (!handleDeleteNotification(intent)) {
-            doCheckAutoRefresh(true);
+            updateTripFromNotification();
             handleSwitchToNextEvent(intent);
             handlePlayAlarm(intent);
         }
@@ -381,7 +384,6 @@ public class TripNavigatorActivity extends TripDetailsActivity {
                 })
                 .setNegativeButton(R.string.navigation_stopnav_continue, (dialogInterface, i) -> {
                     navigationNotificationBeingDeleted = false;
-                    doCheckAutoRefresh(true);
                     updateNotification();
                 })
                 .show();
@@ -409,74 +411,13 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         }
     }
 
-    @Override
-    protected boolean checkAutoRefresh() {
-        if (!isStartupComplete)
-            return false;
-        return doCheckAutoRefresh(true);
-    }
-
-    private boolean doCheckAutoRefresh(final boolean doNotificationUpdate) {
-        if (isPaused)
-            return false;
-        if (nextNavigationRefreshTime < 0)
-            return false;
-        final long now = new Date().getTime();
-        if (now < nextNavigationRefreshTime)
-            return false;
-        refreshNavigation(doNotificationUpdate, false, false);
-        return true;
-    }
-
     private void refreshNavigationByUserCommand() {
-        refreshNavigation(
-                true,
-                true,
-                isTripDetailsLoadingEnabled());
+        actionBar.startProgress();
+        new NavigationNotification(getIntent()).requestRefreshTripFromUI(true);
     }
 
-    private void refreshNavigation(
-            final boolean doNotificationUpdate,
-            final boolean forceRefreshAll,
-            final boolean refreshTripDetails) {
-        if (navigationRefreshRunnable != null)
-            return;
-
-        nextNavigationRefreshTime = -1; // block auto-refresh
-        actionBar.startProgress();
-        // swipeRefreshForTripList.setRefreshing(true);
-        // swipeRefreshForNextEvent.setRefreshing(true);
-
-        navigationRefreshRunnable = () -> {
-            try {
-                final Trip tripFromPresentNotification = new NavigationNotification(getIntent()).getTrip();
-                final Trip updatedTrip = forceRefreshAll
-                        ? TripUtils.refreshTrip(network, tripFromPresentNotification, forceRefreshAll, refreshTripDetails, new Date(), 30000)
-                        : tripFromPresentNotification;
-                if (updatedTrip == null) {
-                    handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));
-                } else {
-                    if (doNotificationUpdate) {
-                        isStartupComplete = true;
-                        runOnUiThread(() -> updateNotification(updatedTrip, () -> onTripUpdated(updatedTrip)));
-                    } else {
-                        runOnUiThread(() -> onTripUpdated(updatedTrip));
-                    }
-                }
-            } catch (final IOException ioe) {
-                handler.post(() -> new Toast(this).toast(R.string.toast_network_problem));
-            } finally {
-                navigationRefreshRunnable = null;
-                runOnUiThread(() -> {
-                    swipeRefreshForTripList.setRefreshing(false);
-                    swipeRefreshForNextEvent.setRefreshing(false);
-                    actionBar.stopProgress();
-                    nextNavigationRefreshTime = new Date().getTime()
-                            + NAVIGATION_AUTO_REFRESH_INTERVAL_SECS * 1000;
-                });
-            }
-        };
-        backgroundHandler.post(navigationRefreshRunnable);
+    private void updateTripFromNotification() {
+        onTripUpdated(new NavigationNotification(getIntent()).getTrip());
     }
 
     @Override
@@ -498,83 +439,6 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         final TripsOverviewActivity.RenderConfig overviewConfig = getOverviewConfig(
                 stop, isLegDeparture, currentJourneyRef, feederJourneyRef, connectionJourneyRef, time);
 
-//        final ProgressDialog progressDialog = ProgressDialog.show(TripNavigatorActivity.this, null,
-//                getString(R.string.directions_query_progress), true, true, dialog -> {
-//                    if (queryTripsRunnable != null)
-//                        queryTripsRunnable.cancel();
-//                });
-//        progressDialog.setCanceledOnTouchOutside(false);
-//
-//        final NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
-//        queryTripsRunnable = new QueryTripsRunnable(getResources(), progressDialog, handler,
-//                networkProvider, stop.location, null,
-//                queryTripsRequestData != null ? queryTripsRequestData.to : getLastPublicLocation(),
-//                time,
-//                queryTripsRequestData != null ? queryTripsRequestData.options : getTripOptionsFromPrefs()) {
-//            @Override
-//            protected void onPostExecute() {
-//                if (!isDestroyed())
-//                    progressDialog.dismiss();
-//            }
-//
-//            @Override
-//            protected void onResult(final QueryTripsResult result, TripRequestData reloadRequestData) {
-//                if (result.status == QueryTripsResult.Status.OK) {
-//                    log.debug("Got {}", result.toShortString());
-//
-//                    TripsOverviewActivity.start(TripNavigatorActivity.this, network,
-//                            TimeSpec.DepArr.DEPART, result, null, reloadRequestData, overviewConfig);
-//                } else if (result.status == QueryTripsResult.Status.UNKNOWN_FROM) {
-//                    new Toast(TripNavigatorActivity.this).longToast(R.string.directions_message_unknown_from);
-//                } else if (result.status == QueryTripsResult.Status.UNKNOWN_VIA) {
-//                    new Toast(TripNavigatorActivity.this).longToast(R.string.directions_message_unknown_via);
-//                } else if (result.status == QueryTripsResult.Status.UNKNOWN_TO) {
-//                    new Toast(TripNavigatorActivity.this).longToast(R.string.directions_message_unknown_to);
-//                } else if (result.status == QueryTripsResult.Status.UNKNOWN_LOCATION) {
-//                    new Toast(TripNavigatorActivity.this).longToast(R.string.directions_message_unknown_location);
-//                } else if (result.status == QueryTripsResult.Status.TOO_CLOSE) {
-//                    new Toast(TripNavigatorActivity.this).longToast(R.string.directions_message_too_close);
-//                } else if (result.status == QueryTripsResult.Status.UNRESOLVABLE_ADDRESS) {
-//                    new Toast(TripNavigatorActivity.this).longToast(R.string.directions_message_unresolvable_address);
-//                } else if (result.status == QueryTripsResult.Status.NO_TRIPS) {
-//                    new Toast(TripNavigatorActivity.this).longToast(R.string.directions_message_no_trips);
-//                } else if (result.status == QueryTripsResult.Status.INVALID_DATE) {
-//                    new Toast(TripNavigatorActivity.this).longToast(R.string.directions_message_invalid_date);
-//                } else if (result.status == QueryTripsResult.Status.SERVICE_DOWN) {
-//                    networkProblem();
-//                } else if (result.status == QueryTripsResult.Status.AMBIGUOUS) {
-//                    new Toast(TripNavigatorActivity.this).longToast(R.string.directions_message_ambiguous_location);
-//                }
-//            }
-//
-//            @Override
-//            protected void onRedirect(final HttpUrl url) {
-//                new Toast(TripNavigatorActivity.this).longToast(R.string.directions_alert_redirect_message);
-//            }
-//
-//            @Override
-//            protected void onBlocked(final HttpUrl url) {
-//                new Toast(TripNavigatorActivity.this).longToast(R.string.directions_alert_blocked_message);
-//            }
-//
-//            @Override
-//            protected void onInternalError(final HttpUrl url) {
-//                new Toast(TripNavigatorActivity.this).longToast(R.string.directions_alert_internal_error_message);
-//            }
-//
-//            @Override
-//            protected void onSSLException(final SSLException x) {
-//                new Toast(TripNavigatorActivity.this).longToast(R.string.directions_alert_ssl_exception_message);
-//            }
-//
-//            private void networkProblem() {
-//                new Toast(TripNavigatorActivity.this).longToast(R.string.alert_network_problem_message);
-//            }
-//        };
-//
-//        log.info("Executing: {}", queryTripsRunnable);
-//
-//        backgroundHandler.post(queryTripsRunnable);
         DirectionsActivity.start(TripNavigatorActivity.this,
                 getRequestedNetwork(),
                 stop.location,
@@ -589,10 +453,6 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     }
 
     private void updateNotification() {
-        updateNotification(tripRenderer.trip, this::updateGUI);
-    }
-
-    private void updateNotification(final @NonNull Trip trip, final Runnable doneListener) {
         if (!isStartupComplete)
             return;
 
@@ -600,7 +460,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         final NavigationNotification navigationNotification = new NavigationNotification(intent);
         final NavigationNotification.Configuration configuration = Objects.clone(navigationNotification.getConfiguration());
         configuration.soundEnabled = soundEnabled;
-        NavigationNotification.updateFromForeground(this, intent, trip, configuration, doneListener);
+        NavigationNotification.updateFromForeground(this, intent, null, configuration, this::updateGUI);
     }
 
     @Override

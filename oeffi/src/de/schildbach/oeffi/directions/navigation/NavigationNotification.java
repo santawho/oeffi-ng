@@ -416,7 +416,7 @@ public class NavigationNotification {
     public static long refreshAllGuides(final Context context) {
         final AtomicLong minRefreshAt = new AtomicLong(Long.MAX_VALUE);
         forAllActiveNotifications(context, "refresh", navigationNotification -> {
-            final long refreshAt = navigationNotification.refresh(false, false, 0);
+            final long refreshAt = navigationNotification.refresh(false, false, false, 0);
             if (refreshAt > 0 && refreshAt < minRefreshAt.get())
                 minRefreshAt.set(refreshAt);
             return true;
@@ -433,7 +433,7 @@ public class NavigationNotification {
         final AtomicBoolean anythingDone = new AtomicBoolean();
         forAllActiveNotifications(context, "speak", navigationNotification -> {
             NavigationAlarmManager.runOnHandlerThread(() -> {
-                navigationNotification.refresh(true, speakInstruction, delayUntil);
+                navigationNotification.refresh(true, false, speakInstruction, delayUntil);
                 // navigationNotification.update(null, speakInstruction, delayUntil);
             });
             if (showInformation) {
@@ -983,7 +983,7 @@ public class NavigationNotification {
         if (newConfiguration != null)
             this.configuration = newConfiguration;
         final Trip trip = newTrip != null ? newTrip : getTrip();
-        update(trip, false, 0);
+        update(false, trip, false, 0);
         if (lastNotified != null) {
             final long refreshAt = lastNotified.refreshNotificationRequiredAt;
             if (refreshAt > 0) {
@@ -1005,6 +1005,7 @@ public class NavigationNotification {
 
     @SuppressLint("ScheduleExactAlarm")
     private boolean update(
+            final boolean forced,
             final Trip aTrip,
             final boolean speakPreview,
             final long delaySoundUntil) {
@@ -1376,6 +1377,7 @@ public class NavigationNotification {
         newNotified.refreshNotificationRequiredAt = nextRefreshTimeMs;
         newNotified.refreshTripRequiredAt = nextTripReloadTimeMs;
         newNotified.refreshedAt = nowTime;
+        newNotified.refreshForcedAt = forced ? nowTime : lastNotified.refreshForcedAt;
 
         if (nextRefreshTimeMs > 0) {
             log.info("refreshing in {} secs at {} (reason: {}), reminder at {}, trip reload at {}",
@@ -1601,11 +1603,12 @@ public class NavigationNotification {
                 final NavigationNotification navigationNotification = new NavigationNotification(intent);
                 switch (intent.getIntExtra(INTENT_EXTRA_ACTION, 0)) {
                     case ACTION_REFRESH:
-                        navigationNotification.refresh(true, true, 0);
+                        navigationNotification.refresh(true, false, true, 0);
                         // navigationNotification.update(null, true);
                         break;
                     case ACTION_DELETE:
                         navigationNotification.remove();
+                        navigationNotification.internUpdateFromForeground(null, null);
                         break;
                     default:
                         break;
@@ -1628,21 +1631,35 @@ public class NavigationNotification {
         return PendingIntent.getBroadcast(context, action, intent, PendingIntent.FLAG_IMMUTABLE);
     }
 
+    public void requestRefreshTripFromUI(final boolean refreshTripDetails) {
+        NavigationAlarmManager.runOnHandlerThread(() -> {
+            refresh(true, refreshTripDetails, false, 0);
+        });
+    }
+
     private long refresh(
             final boolean force,
+            final boolean refreshTripDetails,
             final boolean speakPreview,
             final long delaySoundUntil) {
         log.info("refreshing notification");
         final Date now = new Date();
         final long nowTime = now.getTime();
-        final long refreshRequiredAt = lastNotified.refreshNotificationRequiredAt;
-        if (nowTime < refreshRequiredAt && nowTime - lastNotified.refreshedAt < INHIBIT_FAST_REFRESH_MS) {
-            if (speakPreview)
-                update(null, true, delaySoundUntil);
-            return refreshRequiredAt; // ignore multiple alarms in short time
+        final long refreshRequiredAt = lastNotified == null ? 0 : lastNotified.refreshNotificationRequiredAt;
+        if (nowTime < refreshRequiredAt) {
+            final long refreshedAt = lastNotified == null ? 0 : force ? lastNotified.refreshForcedAt : lastNotified.refreshedAt;
+            final long diff = nowTime - refreshedAt;
+            if (diff < INHIBIT_FAST_REFRESH_MS) {
+                log.warn("skipping refresh, last {}refresh was only {}ms ago", force ? "forced " : "", diff);
+                if (speakPreview)
+                    update(false, null, true, delaySoundUntil);
+                if (force)
+                    sendUpdateTriggerBroadcast();
+                return refreshRequiredAt; // ignore multiple alarms in short time
+            }
         }
         Trip newTrip = null;
-        final long refreshTripRequiredAt = lastNotified.refreshTripRequiredAt;
+        final long refreshTripRequiredAt = lastNotified == null ? 0 : lastNotified.refreshTripRequiredAt;
         final long refreshTripRequiredFromNow = refreshTripRequiredAt - nowTime;
         if (force || (refreshTripRequiredAt > 0 && refreshTripRequiredFromNow <= 0)) {
             log.info("refreshing trip");
@@ -1650,13 +1667,13 @@ public class NavigationNotification {
                 newTrip = TripUtils.refreshTrip(
                         intentData.network, getTrip(),
                         force || extraData.refreshAllLegs,
-                        false,
+                        refreshTripDetails,
                         now, 30000);
             } catch (final IOException e) {
                 log.error("error while refreshing trip", e);
             }
             if (newTrip != null) {
-                final boolean alarmPlayed = update(newTrip, speakPreview, delaySoundUntil);
+                final boolean alarmPlayed = update(force, newTrip, speakPreview, delaySoundUntil);
                 sendUpdateTriggerBroadcast();
                 if (!alarmPlayed && prefs.getBoolean(PREFS_KEY_NAVIGATION_REFRESH_BEEP, false)) {
                     playAlarmSoundAndVibration(
@@ -1664,14 +1681,16 @@ public class NavigationNotification {
                             null, null, null, false, 0);
                 }
             } else {
+                if (force)
+                    sendUpdateTriggerBroadcast();
                 playAlarmSoundAndVibration(
                         AudioAttributes.USAGE_NOTIFICATION, R.raw.nav_refresh_error,
                         null, null, null, false, 0);
-                update(null, speakPreview, delaySoundUntil);
+                update(force, null, speakPreview, delaySoundUntil);
             }
         } else {
             log.info("not refreshing trip, required in {} msec", refreshTripRequiredFromNow);
-            update(null, speakPreview, delaySoundUntil);
+            update(force, null, speakPreview, delaySoundUntil);
             sendUpdateTriggerBroadcast();
         }
         return lastNotified.refreshNotificationRequiredAt;

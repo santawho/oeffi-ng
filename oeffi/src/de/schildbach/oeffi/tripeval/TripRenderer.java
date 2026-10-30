@@ -623,6 +623,7 @@ public class TripRenderer {
         }
 
         public long refreshedAt;
+        public long refreshForcedAt;
         public long refreshNotificationRequiredAt;
         public long refreshTripRequiredAt;
         public int currentLegCIndex;
