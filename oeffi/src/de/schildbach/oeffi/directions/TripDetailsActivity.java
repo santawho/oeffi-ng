@@ -866,7 +866,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         isPaused = false;
         requestLocationUpdates();
         checkAutoRefresh();
-        if (!startPeriodicUpdateGuiRunnable())
+        if (!startPeriodicUpdateGuiRunnable() || getTripDetailsPeriodicUpdateIntervalMs() < 0)
             updateGUI();
 
         if (mustEnableTrackButton) {
@@ -1106,11 +1106,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     protected boolean updateGUI() {
+        log.debug("updating UI for trip updated at {}", tripRenderer.trip.updatedAt);
+
         if (!getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
             return false;
 
         legsScrollFocusView = null;
-
         isShowCompactTimes = isShowCompactTimes();
 
         final Date now = new Date();
