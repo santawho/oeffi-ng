@@ -2619,10 +2619,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final String nameText;
         if (pearlType == PearlView.Type.DEPARTURE_FOR_INTERMEDIATE_ARRIVAL) {
             nameText = getString(R.string.directions_trip_details_departure_row_name_format,
-                    breakableName, Formats.layoverIntervalAsHtml(stop));
+                    breakableName, layoverIntervalAsHtml(stop));
         } else if (pearlType == PearlView.Type.ARRIVAL_FOR_INTERMEDIATE_DEPARTURE) {
             nameText = getString(R.string.directions_trip_details_arrival_row_name_format,
-                    breakableName, Formats.layoverIntervalAsHtml(stop));
+                    breakableName, layoverIntervalAsHtml(stop));
         } else {
             nameText = breakableName;
         }
@@ -2928,9 +2928,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         final String eventText;
         if (arrivalEvent != null && departureEvent != null) {
+            final String layoverText = getString(
+                    R.string.directions_trip_details_public_entry_tooltip_format_layovers,
+                    getTooltipForLayover(realStop),
+                    getTooltipForLayover(simulatedStop));
             eventText = getString(
                     R.string.directions_trip_details_public_entry_tooltip_format_two_events,
-                    locationName, arrivalEvent, departureEvent);
+                    locationName, arrivalEvent, departureEvent, layoverText);
         } else {
             final String event = arrivalEvent != null ? arrivalEvent : departureEvent;
             if (event == null)
@@ -2953,8 +2957,8 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         if (plannedTime == null && predictedTime == null)
             return null;
 
-        final String noDataString = res.getString(R.string.directions_trip_details_public_entry_tooltip_no_data);
-        final String todayString = res.getString(R.string.time_today);
+        final String noDataString = getString(R.string.directions_trip_details_public_entry_tooltip_no_data);
+        final String todayString = getString(R.string.time_today);
         String plannedText = getTooltipForPTDate(plannedTime, todayString, now);
         if (plannedText == null)
             plannedText = noDataString;
@@ -2999,6 +3003,54 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final String dateText = Formats.formatDate(timeZoneSelector, now, displayTime, true, todayString);
         final String timeText = Formats.formatTime(timeZoneSelector, displayTime);
         return dateText + " " + timeText;
+    }
+
+    private String getTooltipForLayover(final Stop stop) {
+        final String text = layoverIntervalAsHtml(stop);
+        if (text == null)
+            return getString(R.string.directions_trip_details_public_entry_tooltip_no_data);
+        return getString(R.string.directions_trip_details_public_entry_tooltip_layover_format, text);
+    }
+
+    final static String LAYOVER_SEPARATOR = "&nbsp;&#x2026&nbsp;"; // ellipsis "..."
+    private static String layoverIntervalAsHtml(final Stop stop) {
+        if (stop == null)
+            return null;
+        final PTDate sta = stop.getArrivalTime(true);
+        final PTDate eta = stop.getArrivalTime(false);
+        final PTDate std = stop.getDepartureTime(true);
+        final PTDate etd = stop.getDepartureTime(false);
+        if (sta == null || std == null || eta == null || etd == null)
+            return null;
+        final long sma = sta.getTime();
+        final long ema = eta.getTime();
+        final long smd = std.getTime();
+        final long emd = etd.getTime();
+        final long minA = Math.min(sma, ema);
+        final long maxA = Math.max(sma, ema);
+        final long minD = Math.min(smd, emd);
+        final long maxD = Math.max(smd, emd);
+        final long estL = Math.max(0, emd - ema);
+        final long minL = Math.min(estL, Math.max(0, minD - maxA));
+        final long maxL = Math.max(estL, Math.max(0, maxD - minA));
+
+        final String sEstL = Long.toString((estL + 30000) / 60000);
+        final String sMinL = Long.toString((minL + 30000) / 60000);
+        final String sMaxL = Long.toString((maxL + 30000) / 60000);
+
+        final StringBuilder sb = new StringBuilder();
+        if (!sMinL.equals(sEstL)) {
+            sb.append(sMinL);
+            sb.append(LAYOVER_SEPARATOR);
+        }
+        sb.append("<b>");
+        sb.append(sEstL);
+        sb.append("</b>");
+        if (!sMaxL.equals(sEstL)) {
+            sb.append(LAYOVER_SEPARATOR);
+            sb.append(sMaxL);
+        }
+        return sb.toString();
     }
 
     private View collapsedIntermediateStopsRow(final Long duration, final int numIntermediateStops, final Style style) {

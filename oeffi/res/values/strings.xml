@@ -476,8 +476,10 @@
     <string name="directions_trip_details_public_entry_tooltip_delay_format">%d min</string>
     <string name="directions_trip_details_public_entry_tooltip_event_format">&lt;b>%1$s&lt;/b>%7$s&lt;br>planned: %2$s&lt;br>predicted: %3$s&lt;br>delay: %4$s&lt;br>simulated: %5$s&lt;br>sim. delay: %6$s</string>
     <string name="directions_trip_details_public_entry_tooltip_event_cancelled">cancelled</string>
+    <string name="directions_trip_details_public_entry_tooltip_layover_format">%1$s min</string>
+    <string name="directions_trip_details_public_entry_tooltip_format_layovers">&lt;b>Layover&lt;/b>&lt;br>predicted: %1$s&lt;br>simulated: %2$s</string>
     <string name="directions_trip_details_public_entry_tooltip_format_one_event">&lt;b>&lt;u>%1$s&lt;/u>&lt;/b>&lt;br>&lt;br>%2$s</string>
-    <string name="directions_trip_details_public_entry_tooltip_format_two_events">&lt;b>&lt;u>%1$s&lt;/u>&lt;/b>&lt;br>&lt;br>%2$s&lt;br>&lt;br>%3$s</string>
+    <string name="directions_trip_details_public_entry_tooltip_format_two_events">&lt;b>&lt;u>%1$s&lt;/u>&lt;/b>&lt;br>&lt;br>%2$s&lt;br>&lt;br>%4$s&lt;br>&lt;br>%3$s</string>
 
     <string name="directions_trip_details_public_entry_accessibility">Section is barrier free.</string>
     <string name="directions_trip_details_public_entry_bicycle_carriage">Bikes might be carried.</string>
