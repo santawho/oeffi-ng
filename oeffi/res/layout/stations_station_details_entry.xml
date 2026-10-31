@@ -58,13 +58,15 @@
             android:id="@+id/stations_station_entry_delay"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/text_padding_horizontal"
             android:layout_alignBaseline="@id/stations_station_entry_time_rel"
             android:textColor="@color/fg_highlighted" />
 
         <TextView
             android:id="@+id/stations_station_entry_time_rel"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/text_padding_horizontal" />
 
     </LinearLayout>
 

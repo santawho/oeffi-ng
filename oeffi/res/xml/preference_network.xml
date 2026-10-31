@@ -7,9 +7,26 @@
         android:key="network_provider"
         android:title="@string/network_preferences_provider_title"
         android:summary="@string/network_preferences_provider_summary" />
+
     <de.schildbach.oeffi.preference.CustomPreference
         android:key="network_credentials"
         android:title="@string/network_preferences_credentials_title"
         android:summary="@string/network_preferences_credentials_summary" />
+
+    <PreferenceCategory android:title="@string/network_preferences_prediction_missing_detection_title">
+        <CheckBoxPreference
+            android:key="network_preferences_prediction_missing_detection_enabled"
+            android:defaultValue="true"
+            android:title="@string/network_preferences_prediction_missing_detection_enabled_title" />
+
+        <EditTextPreference
+            android:key="network_preferences_prediction_expected_before_planned_time_minutes"
+            android:dependency="network_preferences_prediction_missing_detection_enabled"
+            android:singleLine="true"
+            android:inputType="numberDecimal"
+            android:defaultValue="@string/default_network_preferences_prediction_expected_before_planned_time_minutes"
+            android:title="@string/network_preferences_prediction_expected_before_planned_time_minutes_title"
+            android:summary="@string/network_preferences_prediction_expected_before_planned_time_minutes_summary" />
+    </PreferenceCategory>
 
 </PreferenceScreen>

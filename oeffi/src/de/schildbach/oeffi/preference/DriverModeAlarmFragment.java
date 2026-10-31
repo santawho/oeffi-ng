@@ -17,7 +17,6 @@
 
 package de.schildbach.oeffi.preference;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 

@@ -400,11 +400,12 @@ public class StationViewHolder extends RecyclerViewNG.HorizontalSwipeHolder {
                                 messageIndexView.setVisibility(View.GONE);
                             }
 
-                            long time;
+                            final long time;
                             final PTDate predictedTime = departure.predictedTime;
                             final PTDate plannedTime = departure.plannedTime;
                             final boolean isPredicted = predictedTime != null;
-                            if (predictedTime != null)
+                            final boolean isPredictedTimeMissing = departure.isPredictedTimeMissing;
+                            if (isPredicted)
                                 time = predictedTime.getTime();
                             else if (plannedTime != null)
                                 time = plannedTime.getTime();
@@ -422,13 +423,23 @@ public class StationViewHolder extends RecyclerViewNG.HorizontalSwipeHolder {
 
                             // delay
                             final TextView delayView = departureViewHolder.delay;
-                            final long delay = predictedTime != null && plannedTime != null
-                                    ? predictedTime.getTime() - plannedTime.getTime() : 0;
-                            final long delayMins = delay / Constants.MINUTE_IN_MILLIS;
-                            delayView.setText(delayMins != 0 ? String.format("(%+d)", delayMins) + ' ' : "");
-                            delayView.setTypeface(Typeface.DEFAULT, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
-                            delayView.setTextColor(isStale ? colorLessSignificant : (isGhosted ? colorSignificant :
-                                    colorHighlighted));
+                            if (isPredicted) {
+                                final long delay = predictedTime != null && plannedTime != null
+                                        ? predictedTime.getTime() - plannedTime.getTime() : 0;
+                                final long delayMins = delay / Constants.MINUTE_IN_MILLIS;
+                                delayView.setText(delayMins == 0 ? null : context.getString(R.string.stations_station_details_delay_format, delayMins));
+                                delayView.setTypeface(Typeface.DEFAULT, Typeface.ITALIC);
+                                delayView.setTextColor(
+                                        isStale ? colorLessSignificant
+                                        : isGhosted ? colorSignificant
+                                        : colorHighlighted);
+                            } else if (isPredictedTimeMissing) {
+                                delayView.setText(context.getString(R.string.stations_station_details_delay_missing));
+                                delayView.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+                                delayView.setTextColor(colorHighlighted);
+                            } else {
+                                delayView.setText(null);
+                            }
 
                             // position
                             final TextView positionView = departureViewHolder.position;

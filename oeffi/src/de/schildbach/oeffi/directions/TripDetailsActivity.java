@@ -2511,6 +2511,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final PTDate simulatedTime;
         final boolean isTimeDeparture;
         final Long providedDelay;
+        final boolean providedDelayMissing;
         final Long simulatedDelay;
         final boolean isCancelled;
         final boolean isPositionPredicted;
@@ -2555,6 +2556,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             isTimePredicted = !preferPlanTime && stop.isDepartureTimePredicted();
             providedTime = stop.getDepartureTime(preferPlanTime);
             providedDelay = stop.getDepartureDelay();
+            providedDelayMissing = stop.isPredictedDepartureTimeMissing;
             if (simulatedStop != null) {
                 simulatedTime = simulatedStop.getDepartureTime();
                 simulatedDelay = simulatedStop.getDepartureDelay();
@@ -2581,6 +2583,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             isTimePredicted = !preferPlanTime && stop.isArrivalTimePredicted();
             providedTime = stop.getArrivalTime(preferPlanTime);
             providedDelay = stop.getArrivalDelay();
+            providedDelayMissing = stop.isPredictedArrivalTimeMissing;
             if (simulatedStop != null) {
                 simulatedTime = simulatedStop.getArrivalTime();
                 simulatedDelay = simulatedStop.getArrivalDelay();
@@ -2790,16 +2793,20 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final long delayMins = providedDelay / Constants.MINUTE_IN_MILLIS;
             if (delayMins != 0) {
                 collapseColumns.collapseDelayColumn = false;
-                stopDelayProvidedView.setText(String.format("(%+d)", delayMins));
+                stopDelayProvidedView.setText(getString(R.string.directions_trip_details_delay_format, delayMins));
                 stopDelayProvidedView.setTypeface(Typeface.DEFAULT, Typeface.ITALIC);
             }
+        } else if (providedDelayMissing) {
+            collapseColumns.collapseDelayColumn = false;
+            stopDelayProvidedView.setText(getString(R.string.directions_trip_details_delay_missing));
+            stopDelayProvidedView.setTypeface(Typeface.DEFAULT, Typeface.NORMAL);
         }
 
         if (isShowSimulatedLine && simulatedDelay != null) {
             final long delayMins = simulatedDelay / Constants.MINUTE_IN_MILLIS;
             if (delayMins != 0) {
                 collapseColumns.collapseDelayColumn = false;
-                stopDelaySimulatedView.setText(String.format("(%+d)", delayMins));
+                stopDelaySimulatedView.setText(getString(R.string.directions_trip_details_delay_format, delayMins));
                 stopDelaySimulatedView.setTypeface(Typeface.DEFAULT, Typeface.ITALIC);
             }
         } else {

@@ -80,6 +80,10 @@
     <string name="network_preferences_credentials_not_working_title">Test failed</string>
     <string name="network_preferences_credentials_not_working_message">The network refused access using these credentials!</string>
     <string name="network_preferences_credentials_help_url" translatable="false">https://github.com/santawho/oeffi-ng/wiki/Credentials</string>
+    <string name="network_preferences_prediction_missing_detection_title">Detect missing predictions</string>
+    <string name="network_preferences_prediction_missing_detection_enabled_title">Activate</string>
+    <string name="network_preferences_prediction_expected_before_planned_time_minutes_title">… before the planned time</string>
+    <string name="network_preferences_prediction_expected_before_planned_time_minutes_summary">When should unavailable predictions be treated as missing?  [%s minutes before planned time]</string>
 
     <!-- preferences shortcuts -->
     <string name="shortcuts_preferences_title">Homescreen Shortcuts</string>
@@ -283,6 +287,8 @@
     <string name="stations_station_details_action_cancelled_title">Hide/show cancelled departures</string>
     <string name="stations_station_details_progress">Loading departures / arrivals …</string>
     <string name="stations_station_details_list_empty">No departures / arrivals</string>
+    <string name="stations_station_details_delay_format" translatable="false">(%1$+d)</string>
+    <string name="stations_station_details_delay_missing" translatable="false">\u2020</string> <!-- dagger (cross of death) -->
 
     <!-- station details options -->
     <string name="stations_station_details_options_add_favorite_title">Add favorite</string>
@@ -462,6 +468,8 @@
     <string name="directions_trip_details_bike">bike ride of &lt;b>%1$d minutes&lt;/b> %2$sto %3$s</string>
     <string name="directions_trip_details_car">car ride of &lt;b>%1$d minutes&lt;/b> %2$sto %3$s</string>
     <string name="directions_trip_details_transfer">&lt;b>%1$d minutes&lt;/b> %2$stransfer to %3$s</string>
+    <string name="directions_trip_details_delay_format" translatable="false">(%1$+d)</string>
+    <string name="directions_trip_details_delay_missing" translatable="false">\u2020</string> <!-- dagger (cross of death) -->
     <string name="directions_trip_details_realtime">
         Times printed in &lt;b>&lt;i>italics&lt;/i>&lt;/b> are &lt;b>predicted&lt;/b> times &lt;b>
         not guaranteed&lt;/b> to be real times.

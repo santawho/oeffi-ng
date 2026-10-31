@@ -54,6 +54,8 @@ public class NetworkFragment extends PreferenceFragment {
                 Constants.PREFS_KEY_NETWORK_PROVIDER, R.string.network_preferences_provider_summary,
                 networkIdName -> (networkIdName == null) ? "-"
                         : getNetworkLabel(NetworkId.valueOf((String) networkIdName)));
+        setupDynamicSummary("network_preferences_prediction_expected_before_planned_time_minutes",
+                R.string.network_preferences_prediction_expected_before_planned_time_minutes_summary);
     }
 
     private String getNetworkLabel(final NetworkId networkId) {

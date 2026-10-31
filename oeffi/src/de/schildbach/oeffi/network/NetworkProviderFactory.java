@@ -22,6 +22,7 @@ import android.util.Base64;
 
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
+import de.schildbach.oeffi.R;
 import de.schildbach.pte.provider.hafas.BvgProvider;
 import de.schildbach.pte.provider.hafas.CflProvider;
 import de.schildbach.pte.provider.efa.KvvProvider;
@@ -75,12 +76,31 @@ public final class NetworkProviderFactory extends de.schildbach.pte.NetworkProvi
         ));
     }
 
-    private void setupStandard() {
-        final SharedPreferences preferences = Application.getInstance().getSharedPreferences();
+    public static void setupStandard() {
+        final Application application = Application.getInstance();
+        final SharedPreferences preferences = application.getSharedPreferences();
         Standard.setDoNotUseSpecialLineStyles(preferences
                 .getBoolean(Constants.PREFS_KEY_USER_INTERFACE_NOPROVIDERCOLORS_ENABLED, false));
         Standard.setPreferPredefinedLineStyles(preferences
                 .getBoolean(Constants.PREFS_KEY_USER_INTERFACE_PREFERPREDEFINEDCOLORS_ENABLED, false));
+
+        Long predictionExpectedBeforePlannedTimeAtLeastMillis;
+        if (preferences.getBoolean("network_preferences_prediction_missing_detection_enabled", true)) {
+            final String minutesText = preferences.getString(
+                    "network_preferences_prediction_expected_before_planned_time_minutes",
+                    application.getString(R.string.default_network_preferences_prediction_expected_before_planned_time_minutes));
+            try {
+                predictionExpectedBeforePlannedTimeAtLeastMillis = (long) (Float.parseFloat(minutesText) * 60000f);
+            } catch (final NumberFormatException nfe) {
+                predictionExpectedBeforePlannedTimeAtLeastMillis = null;
+            }
+        } else {
+            predictionExpectedBeforePlannedTimeAtLeastMillis = null;
+        }
+        if (predictionExpectedBeforePlannedTimeAtLeastMillis != null)
+            Standard.setPredictionExpectedBeforePlannedTimeAtLeastMillis(predictionExpectedBeforePlannedTimeAtLeastMillis);
+        else
+            Standard.unsetPredictionExpectedBeforePlannedTimeAtLeastMillis();
     }
 
     public String getPrefsKeyNetworkCredentials(final NetworkId networkId) {
@@ -105,7 +125,7 @@ public final class NetworkProviderFactory extends de.schildbach.pte.NetworkProvi
 
     @Override
     public NetworkProvider getNetworkProvider(final NetworkId networkId) {
-        setupStandard();
+        // setupStandard();
         final NetworkProvider cachedNetworkProvider = providerCache.get(networkId);
         if (cachedNetworkProvider != null)
             return cachedNetworkProvider;

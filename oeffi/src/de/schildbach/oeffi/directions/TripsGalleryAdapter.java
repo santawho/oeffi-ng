@@ -814,9 +814,11 @@ public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.
             final Public firstPublicLeg = trip.getFirstPublicLeg();
             final PTDate publicDepartureTime;
             final boolean isPublicDeparturePredicted;
+            final boolean isPublicDeparturePredictionMissing;
             if (firstPublicLeg != null) {
                 final Stop publicDepartureStop = firstPublicLeg.departureStop;
                 isPublicDeparturePredicted = publicDepartureStop.predictedDepartureTime != null;
+                isPublicDeparturePredictionMissing = publicDepartureStop.isPredictedDepartureTimeMissing;
                 final boolean publicDepartureCancelled = publicDepartureStop.departureCancelled;
                 publicDepartureTime = publicDepartureStop.getDepartureTime();
                 if (publicDepartureTime != null) {
@@ -832,7 +834,7 @@ public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.
                     }
                     startYabs = drawTime(canvas, centerX, startYabs, height, true,
                             isPublicDeparturePredicted ? publicPredictedTimePaint : publicPlannedTimePaint,
-                            publicDepartureCancelled, publicDepartureTime);
+                            publicDepartureCancelled, publicDepartureTime, isPublicDeparturePredictionMissing);
                     final long diff = publicDepartureTime.getTime() - baseTime;
                     startYabs = drawRemaining(canvas, centerX, startYabs, height, true,
                             isPublicDeparturePredicted ? publicPredictedTimeDiffPaint : publicPlannedTimeDiffPaint,
@@ -841,6 +843,7 @@ public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.
             } else {
                 publicDepartureTime = null;
                 isPublicDeparturePredicted = false;
+                isPublicDeparturePredictionMissing = false;
             }
 
             final PTDate individualDepartureTime = trip.getFirstDepartureTime();
@@ -850,7 +853,7 @@ public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.
                     startYabs = timeYAbs;
                 startYabs = drawTime(canvas, centerX, startYabs, height, true,
                         isPublicDeparturePredicted ? individualPredictedTimePaint : individualPlannedTimePaint,
-                        false, individualDepartureTime);
+                        false, individualDepartureTime, isPublicDeparturePredictionMissing);
                 final long diff = individualDepartureTime.getTime() - baseTime;
                 startYabs = drawRemaining(canvas, centerX, startYabs, height, true,
                         isPublicDeparturePredicted ? individualPredictedTimeDiffPaint : individualPlannedTimeDiffPaint,
@@ -864,9 +867,11 @@ public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.
             final Public lastPublicLeg = trip.getLastPublicLeg();
             final PTDate publicArrivalTime;
             final boolean isPublicArrivalPredicted;
+            final boolean isPublicArrivalPredictionMissing;
             if (lastPublicLeg != null) {
                 final Stop publicArrivalStop = lastPublicLeg.arrivalStop;
                 final boolean publicArrivalCancelled = publicArrivalStop.arrivalCancelled;
+                isPublicArrivalPredictionMissing = publicArrivalStop.isPredictedArrivalTimeMissing;
                 publicArrivalTime = lastPublicLeg.getArrivalTime();
                 isPublicArrivalPredicted = publicArrivalStop.predictedArrivalTime != null;
                 if (publicArrivalTime != null) {
@@ -874,7 +879,7 @@ public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.
                     endYabs = (int) timeToCoord(publicArrivalTime.getTime(), height);
                     endYabs = drawTime(canvas, centerX, endYabs, height, false,
                             isPublicArrivalPredicted ? publicPredictedTimePaint : publicPlannedTimePaint,
-                            publicArrivalCancelled, publicArrivalTime);
+                            publicArrivalCancelled, publicArrivalTime, isPublicArrivalPredictionMissing);
                     if (isArrivalBased) {
                         final long diff = refTime - publicArrivalTime.getTime();
                         endYabs = drawRemaining(canvas, centerX, endYabs, height, false,
@@ -885,6 +890,7 @@ public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.
             } else {
                 publicArrivalTime = null;
                 isPublicArrivalPredicted = false;
+                isPublicArrivalPredictionMissing = false;
             }
 
             final PTDate individualArrivalTime = trip.getLastArrivalTime();
@@ -894,7 +900,7 @@ public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.
                     endYabs = timeYAbs;
                 endYabs = drawTime(canvas, centerX, endYabs, height, false,
                         isPublicArrivalPredicted ? individualPredictedTimePaint : individualPlannedTimePaint,
-                        false, individualArrivalTime);
+                        false, individualArrivalTime, isPublicArrivalPredictionMissing);
                 if (isArrivalBased) {
                     final long diff = refTime - individualArrivalTime.getTime();
                     endYabs = drawRemaining(canvas, centerX, endYabs, height, false,
@@ -1032,20 +1038,23 @@ public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.
         }
 
         private int drawTime(
-                final Canvas canvas, final int centerX, final int aY, final int height, final boolean above,
-                final Paint paint, final boolean strikeThru, final PTDate time) {
+                final Canvas canvas,
+                final int centerX, final int aY, final int height, final boolean above,
+                final Paint paint, final boolean strikeThru,
+                final PTDate time, final boolean showMissingPrediction) {
             paint.setStrikeThruText(strikeThru);
 
-            final String str = Formats.formatTime(context.getTimeZoneSelector(), time);
+            final String timeStr = Formats.formatTime(context.getTimeZoneSelector(), time);
+            final String displayStr = showMissingPrediction ? timeStr + " \u2020" : timeStr;
             final FontMetrics metrics = paint.getFontMetrics();
             final float fontHeight = (-metrics.ascent + metrics.descent); // + 4 * density;
 
             final float y = aY;
             if (above) {
-                drawText(canvas, str, centerX, y - metrics.descent, paint);
+                drawText(canvas, displayStr, centerX, y - metrics.descent, paint);
                 return (int) (y - fontHeight);
             } else {
-                drawText(canvas, str, centerX, y  - metrics.ascent, paint);
+                drawText(canvas, displayStr, centerX, y  - metrics.ascent, paint);
                 return (int) (y + fontHeight);
             }
         }

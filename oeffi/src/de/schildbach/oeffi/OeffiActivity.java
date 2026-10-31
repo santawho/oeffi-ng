@@ -340,6 +340,7 @@ public abstract class OeffiActivity extends AppCompatActivity
         timeZoneSelector = application.getPreferredNetworkTimeZoneSelector(network);
         isDriverMode = getIntent().getBooleanExtra(Constants.PREFS_KEY_EXTRAS_DRIVERMODE_ENABLED, false)
                 || (isTakeDriverModeFromApplication() && application.isDriverMode());
+        NetworkProviderFactory.setupStandard();
     }
 
     protected void setActionBarSecondaryTitleFromNetwork() {

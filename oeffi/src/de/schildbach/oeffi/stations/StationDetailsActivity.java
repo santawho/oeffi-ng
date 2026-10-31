@@ -1221,6 +1221,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             final PTDate predictedTime = departure.predictedTime;
             final PTDate plannedTime = departure.plannedTime;
             final boolean isCancelled = departure.cancelled;
+            final boolean isPredictedTimeMissing = departure.isPredictedTimeMissing;
 
             // time rel
             timeRelView.setTypeface(Typeface.DEFAULT, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
@@ -1232,11 +1233,19 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             timeAbsView.setTextColor(getColor(isCancelled ? R.color.fg_cancelled : R.color.fg_significant));
 
             // delay
-            final long delay = predictedTime != null && plannedTime != null
-                    ? predictedTime.getTime() - plannedTime.getTime() : 0;
-            final long delayMins = delay / Constants.MINUTE_IN_MILLIS;
-            delayView.setText(delayMins != 0 ? String.format(Locale.US, "(%+d)", delayMins) + ' ' : "");
-            delayView.setTypeface(Typeface.DEFAULT, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
+            if (isPredicted) {
+                final long delay = predictedTime != null && plannedTime != null
+                        ? predictedTime.getTime() - plannedTime.getTime() : 0;
+                final long delayMins = delay / Constants.MINUTE_IN_MILLIS;
+                delayView.setText(delayMins == 0 ? null : getString(R.string.stations_station_details_delay_format, delayMins));
+                delayView.setTypeface(Typeface.DEFAULT, Typeface.ITALIC);
+            } else if (isPredictedTimeMissing) {
+                delayView.setText(getString(R.string.stations_station_details_delay_missing));
+                delayView.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+            } else {
+                delayView.setText(null);
+                delayView.setTypeface(Typeface.DEFAULT, Typeface.NORMAL);
+            }
             ViewUtils.setCancelledStrikeThru(delayView, isCancelled);
 
             // line

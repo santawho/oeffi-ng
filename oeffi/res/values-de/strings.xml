@@ -79,6 +79,10 @@
     <string name="network_preferences_credentials_not_working_title">Test fehlgeschlagen</string>
     <string name="network_preferences_credentials_not_working_message">Das Netzwerk verweigert den Zugriff mit diesen Zugangsdaten!</string>
     <string name="network_preferences_credentials_edit_hint">… für %1$s</string>
+    <string name="network_preferences_prediction_missing_detection_title">Fehlende Prognosen erkennen</string>
+    <string name="network_preferences_prediction_missing_detection_enabled_title">Aktivieren</string>
+    <string name="network_preferences_prediction_expected_before_planned_time_minutes_title">… vor der Planzeit</string>
+    <string name="network_preferences_prediction_expected_before_planned_time_minutes_summary">Wann sollen nicht verhandene Prognosen als fehlend betrachtet werden?  [%s Minuten vor der geplanten Zeit]</string>
 
     <!-- preferences shortcuts -->
     <string name="shortcuts_preferences_title">Startbildschirm-Verknüpfungen</string>
