@@ -478,12 +478,14 @@ public class TripRenderer {
                 departureStop = new Stop(
                         departureStop.location,
                         departureStop.plannedArrivalTime, departureStop.predictedArrivalTime,
+                        departureStop.isPredictedArrivalTimeMissing,
                         departureStop.plannedArrivalPosition, departureStop.predictedArrivalPosition,
                         departureStop.arrivalCancelled,
                         departureStopPlannedDepartureTime,
                         new PTDate(
                                 departureStopPlannedDepartureTime.getTime() + currentDelay,
                                 departureStopPlannedDepartureTime.getOffset()),
+                        false,
                         departureStop.plannedDeparturePosition, departureStop.predictedDeparturePosition,
                         departureStop.departureCancelled);
             }
@@ -512,10 +514,12 @@ public class TripRenderer {
                             stop.location,
                             plannedArrivalTime,
                             predictedArrivalTime,
+                            false,
                             stop.plannedArrivalPosition, stop.predictedArrivalPosition,
                             stop.arrivalCancelled,
                             plannedDepartureTime,
                             predictedDepartureTime,
+                            false,
                             stop.plannedDeparturePosition, stop.predictedDeparturePosition,
                             stop.departureCancelled));
                     if (stop == beginStop)
@@ -527,9 +531,11 @@ public class TripRenderer {
                     arrivalStop.location,
                     arrivalStopPlannedArrivalTime,
                     new PTDate(arrivalStopPlannedArrivalTime.getTime() + currentDelay, arrivalStopPlannedArrivalTime.getOffset()),
+                    false,
                     arrivalStop.plannedArrivalPosition, arrivalStop.predictedArrivalPosition,
                     arrivalStop.arrivalCancelled,
                     arrivalStop.plannedDepartureTime, arrivalStop.predictedDepartureTime,
+                    arrivalStop.isPredictedDepartureTimeMissing,
                     arrivalStop.plannedDeparturePosition, arrivalStop.predictedDeparturePosition,
                     arrivalStop.departureCancelled);
 

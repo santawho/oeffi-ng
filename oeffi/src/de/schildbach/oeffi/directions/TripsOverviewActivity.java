@@ -865,11 +865,13 @@ public class TripsOverviewActivity extends OeffiActivity {
                     prependToStop.location,
                     prependToStop.plannedArrivalTime,
                     prependToStop.predictedArrivalTime,
+                    prependToStop.isPredictedArrivalTimeMissing,
                     prependToStop.plannedArrivalPosition,
                     prependToStop.predictedArrivalPosition,
                     prependToStop.arrivalCancelled,
                     null,
                     null,
+                    false,
                     null,
                     null,
                     false);
@@ -963,9 +965,11 @@ public class TripsOverviewActivity extends OeffiActivity {
             intermediateStops.add(new Stop(
                     contStop.location,
                     feedStop.plannedArrivalTime, feedStop.predictedArrivalTime,
+                    feedStop.isPredictedArrivalTimeMissing,
                     feedStop.plannedArrivalPosition, feedStop.predictedArrivalPosition,
                     feedStop.arrivalCancelled,
                     contStop.plannedDepartureTime, contStop.predictedDepartureTime,
+                    contStop.isPredictedDepartureTimeMissing,
                     contStop.plannedDeparturePosition, contStop.predictedDeparturePosition,
                     contStop.departureCancelled));
             if (contLeg.intermediateStops != null)
