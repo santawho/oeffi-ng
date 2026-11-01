@@ -24,9 +24,7 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Criteria;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Process;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.content.ContextCompat;
@@ -170,7 +168,7 @@ public class DirectionsShortcutActivity extends OeffiActivity implements Locatio
                     ? Optimize.valueOf(prefs.getString(Constants.PREFS_KEY_OPTIMIZE_TRIP, null)) : null;
             final WalkSpeed walkSpeed = WalkSpeed
                     .valueOf(prefs.getString(Constants.PREFS_KEY_WALK_SPEED, WalkSpeed.NORMAL.name()));
-            final int mwd = Integer.parseInt(prefs.getString(Constants.PREFS_KEY_MAX_WALK_DISTANCE, "-1"));
+            final int mwd = preferences.getInteger(Constants.PREFS_KEY_MAX_WALK_DISTANCE, -1, -1);
             final Integer maxWalkDistance = mwd < 0 ? null : mwd;
             final int mtt = Integer.parseInt(prefs.getString(Constants.PREFS_KEY_MIN_TRANSFER_TIME, "-1"));
             final Integer minTransferTime = mtt < 0 ? null : mtt;

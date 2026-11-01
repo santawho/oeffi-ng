@@ -23,7 +23,7 @@
 
     <PreferenceCategory android:title="@string/extras_drivermode_planning_title">
 
-        <EditTextPreference
+        <de.schildbach.oeffi.preference.NumericEditTextPreference
             android:dependency="extras_drivermode_enabled"
             android:key="extras_drivermode_stored_operations_retention_hours"
             android:singleLine="true"
@@ -36,7 +36,7 @@
 
     <PreferenceCategory android:title="@string/extras_drivermode_operations_title">
 
-        <EditTextPreference
+        <de.schildbach.oeffi.preference.NumericEditTextPreference
             android:dependency="extras_drivermode_enabled"
             android:key="extras_drivermode_threshold_early"
             android:singleLine="true"
@@ -45,7 +45,7 @@
             android:title="@string/extras_drivermode_threshold_early_title"
             android:summary="@string/extras_drivermode_threshold_early_summary" />
 
-        <EditTextPreference
+        <de.schildbach.oeffi.preference.NumericEditTextPreference
             android:dependency="extras_drivermode_enabled"
             android:key="extras_drivermode_threshold_delay"
             android:singleLine="true"
@@ -58,7 +58,7 @@
 
     <PreferenceCategory android:title="@string/extras_drivermode_navigation_title">
 
-        <EditTextPreference
+        <de.schildbach.oeffi.preference.NumericEditTextPreference
             android:dependency="extras_drivermode_enabled"
             android:key="extras_drivermode_navigation_refresh_battery_interval"
             android:singleLine="true"
@@ -67,7 +67,7 @@
             android:title="@string/extras_drivermode_navigation_refresh_battery_interval_title"
             android:summary="@string/extras_drivermode_navigation_refresh_battery_interval_summary" />
 
-        <EditTextPreference
+        <de.schildbach.oeffi.preference.NumericEditTextPreference
             android:dependency="extras_drivermode_enabled"
             android:key="extras_drivermode_navigation_refresh_charging_interval"
             android:singleLine="true"
@@ -85,7 +85,7 @@
             android:summary="@string/extras_drivermode_keep_active_summary"
             android:title="@string/extras_drivermode_keep_active_title" />
 
-        <EditTextPreference
+        <de.schildbach.oeffi.preference.NumericEditTextPreference
             android:dependency="extras_drivermode_enabled"
             android:key="extras_drivermode_navigation_scroll_inhibit_interval"
             android:singleLine="true"

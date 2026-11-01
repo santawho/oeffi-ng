@@ -89,6 +89,7 @@ import de.schildbach.oeffi.util.DividerItemDecoration;
 import de.schildbach.oeffi.util.ErrorReporter;
 import de.schildbach.oeffi.util.ExternalMapsUtils;
 import de.schildbach.oeffi.util.NavigationMenuAdapter;
+import de.schildbach.oeffi.util.Preferences;
 import de.schildbach.oeffi.util.ResourcesInterceptor;
 import de.schildbach.oeffi.util.SpeechInput;
 import de.schildbach.oeffi.util.TimeZoneSelector;
@@ -133,6 +134,7 @@ public abstract class OeffiActivity extends AppCompatActivity
     protected long lastUserInteractionTime;
 
     protected SharedPreferences prefs;
+    protected Preferences preferences;
     protected TimeZoneSelector timeZoneSelector;
     protected NetworkId network;
     protected String[] linkArgs;
@@ -166,7 +168,8 @@ public abstract class OeffiActivity extends AppCompatActivity
         this.application = (Application) getApplication();
         SplashScreen.installSplashScreen(this);
 
-        this.prefs = Application.getInstance().getSharedPreferences();
+        this.prefs = application.getSharedPreferences();
+        this.preferences = application.getPreferences();
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         final Intent intent = getIntent();

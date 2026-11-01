@@ -23,6 +23,7 @@ import android.util.Base64;
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.util.Preferences;
 import de.schildbach.pte.provider.hafas.BvgProvider;
 import de.schildbach.pte.provider.hafas.CflProvider;
 import de.schildbach.pte.provider.efa.KvvProvider;
@@ -78,22 +79,20 @@ public final class NetworkProviderFactory extends de.schildbach.pte.NetworkProvi
 
     public static void setupStandard() {
         final Application application = Application.getInstance();
-        final SharedPreferences preferences = application.getSharedPreferences();
-        Standard.setDoNotUseSpecialLineStyles(preferences
+        final SharedPreferences prefs = application.getSharedPreferences();
+        final Preferences preferences = application.getPreferences();
+        Standard.setDoNotUseSpecialLineStyles(prefs
                 .getBoolean(Constants.PREFS_KEY_USER_INTERFACE_NOPROVIDERCOLORS_ENABLED, false));
-        Standard.setPreferPredefinedLineStyles(preferences
+        Standard.setPreferPredefinedLineStyles(prefs
                 .getBoolean(Constants.PREFS_KEY_USER_INTERFACE_PREFERPREDEFINEDCOLORS_ENABLED, false));
 
-        Long predictionExpectedBeforePlannedTimeAtLeastMillis;
-        if (preferences.getBoolean("network_preferences_prediction_missing_detection_enabled", true)) {
-            final String minutesText = preferences.getString(
+        final Long predictionExpectedBeforePlannedTimeAtLeastMillis;
+        if (prefs.getBoolean("network_preferences_prediction_missing_detection_enabled", true)) {
+            predictionExpectedBeforePlannedTimeAtLeastMillis = preferences.getMillisR(
                     "network_preferences_prediction_expected_before_planned_time_minutes",
-                    application.getString(R.string.default_network_preferences_prediction_expected_before_planned_time_minutes));
-            try {
-                predictionExpectedBeforePlannedTimeAtLeastMillis = (long) (Float.parseFloat(minutesText) * 60000f);
-            } catch (final NumberFormatException nfe) {
-                predictionExpectedBeforePlannedTimeAtLeastMillis = null;
-            }
+                    Constants.MINUTE_IN_MILLIS,
+                    R.string.default_network_preferences_prediction_expected_before_planned_time_minutes,
+                    null);
         } else {
             predictionExpectedBeforePlannedTimeAtLeastMillis = null;
         }

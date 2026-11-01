@@ -54,8 +54,6 @@ import de.schildbach.oeffi.directions.navigation.NotificationSoundManager;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.LineView;
 import de.schildbach.oeffi.util.Formats;
-import de.schildbach.oeffi.util.LocationHelper;
-import de.schildbach.oeffi.util.LocationUtils;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.ToggleImageButton;
@@ -210,30 +208,26 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
     private long periodicUpdateIntervalMsOnBattery;
     private long periodicUpdateIntervalMsWhenCharging;
 
-    private int getIntegerValueFromPrefs(final String key, final int defaultValueResId) {
-        final String defaultValue = getString(defaultValueResId);
-        final String value = prefs.getString(key, defaultValue);
-        try {
-            return Integer.parseInt(value);
-        } catch (final NumberFormatException nfe) {
-            return Integer.parseInt(defaultValue);
-        }
-    }
-
     private void setupConfig() {
         final String value = prefs.getString("extras_drivermode_navigation_keep_active", S_KEEP_AWAKE_WHEN_CHARGING);
         keepDisplayOnConfig = S_KEEP_AWAKE_WHEN_CHARGING.equals(value) ? 0
                 : S_KEEP_AWAKE_ALWAYS.equals(value) ? 1
                 : -1;
-        periodicUpdateIntervalMsOnBattery = 1000L * getIntegerValueFromPrefs(
+        periodicUpdateIntervalMsOnBattery = preferences.getMillisR(
                 "extras_drivermode_navigation_refresh_battery_interval",
-                R.string.default_drivermode_navigation_refresh_battery_interval);
-        periodicUpdateIntervalMsWhenCharging = 1000L * getIntegerValueFromPrefs(
+                Constants.SECOND_IN_MILLIS,
+                R.string.default_drivermode_navigation_refresh_battery_interval,
+                15000L);
+        periodicUpdateIntervalMsWhenCharging = preferences.getMillisR(
                 "extras_drivermode_navigation_refresh_charging_interval",
-                R.string.default_drivermode_navigation_refresh_charging_interval);
-        autoScrollInhibitTimeMs = 1000L * getIntegerValueFromPrefs(
+                Constants.SECOND_IN_MILLIS,
+                R.string.default_drivermode_navigation_refresh_charging_interval,
+                1000L);
+        autoScrollInhibitTimeMs = preferences.getMillisR(
                 "extras_drivermode_navigation_scroll_inhibit_interval",
-                R.string.default_drivermode_navigation_scroll_inhibit_interval);
+                Constants.SECOND_IN_MILLIS,
+                R.string.default_drivermode_navigation_scroll_inhibit_interval,
+                10000L);
     }
 
     @Override
@@ -260,14 +254,16 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
                 .setOnClickListener(view -> askStopNavigation());
 
         if (prefs.getBoolean("extras_drivermode_announcements_enabled", false)) {
-            announcementLeadTimeSecs = getIntegerValueFromPrefs(
+            announcementLeadTimeSecs = preferences.getInteger(
                     "extras_drivermode_announcements_lead_time",
-                    R.string.default_drivermode_announcements_lead_time);
+                    R.string.default_drivermode_announcements_lead_time,
+                    60);
             announcementsEnabled = prefs.getBoolean("extras_drivermode_announcements_initially_active_enabled", true);
             announceLeavingEnabled = prefs.getBoolean("extras_drivermode_announce_leaving_enabled", false);
-            announceLeavingDelayTimeSecs = getIntegerValueFromPrefs(
+            announceLeavingDelayTimeSecs = preferences.getInteger(
                     "extras_drivermode_announce_leaving_time",
-                    R.string.default_drivermode_announce_leaving_time);
+                    R.string.default_drivermode_announce_leaving_time,
+                    30);
             final ToggleImageButton soundButton = actionBar.addToggleButton(R.drawable.ic_sound_white_24dp,
                     R.string.drivermode_navigation_action_annoucements);
             soundButton.setOnCheckedChangeListener((buttonView, isChecked) -> {

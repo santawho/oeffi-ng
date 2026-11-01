@@ -61,6 +61,7 @@ import de.schildbach.oeffi.stations.FavoriteStationsProvider;
 import de.schildbach.oeffi.stations.StationsActivity;
 import de.schildbach.oeffi.util.AppInstaller;
 import de.schildbach.oeffi.util.ErrorReporter;
+import de.schildbach.oeffi.util.Preferences;
 import de.schildbach.oeffi.util.ResourcesInterceptor;
 import de.schildbach.oeffi.util.SettingsUtil;
 import de.schildbach.oeffi.util.SpeechInput;
@@ -105,6 +106,7 @@ public class Application extends android.app.Application {
     private File logFile;
     private SpeechInput speechInput;
     private SharedPreferences prefs;
+    private Preferences preferences;
     private String appName;
     private TimeZoneSelector systemTimeZoneSelector;
 
@@ -198,6 +200,12 @@ public class Application extends android.app.Application {
 
     public SharedPreferences getSharedPreferences() {
         return prefs;
+    }
+
+    public Preferences getPreferences() {
+        if (preferences == null)
+            preferences = new Preferences(this, prefs);
+        return preferences;
     }
 
     public void postTerminate(@Nullable final Activity activity) {

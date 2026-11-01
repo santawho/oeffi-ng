@@ -45,6 +45,7 @@ import de.schildbach.oeffi.util.ColorHash;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
+import de.schildbach.oeffi.util.Preferences;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
 
@@ -133,26 +134,22 @@ public class LocationSelector extends LinearLayout implements
         this.locationSelectionListener = locationSelectionListener;
     }
 
-    public void setup(final Context context, final SharedPreferences prefs) {
+    public void setup(final Context context, final Preferences prefs) {
         if (this.preferences != null)
             this.preferences.unregisterOnSharedPreferenceChangeListener(this);
-        this.preferences = prefs;
-        prefs.registerOnSharedPreferenceChangeListener(this);
-        isEnabled = prefs.getBoolean(PREFS_ENABLED, true);
+        this.preferences = prefs.getSharedPreferences();
+        preferences.registerOnSharedPreferenceChangeListener(this);
+        isEnabled = preferences.getBoolean(PREFS_ENABLED, true);
         if (!isEnabled) {
             super.setVisibility(GONE);
             return;
         }
         super.setVisibility(VISIBLE);
-        isColorized = prefs.getBoolean(PREFS_COLORIZED, true);
-        numRows = Integer.parseInt(prefs.getString(PREFS_NUMROWS, Integer.toString(DEFAULT_NUM_ROWS)));
+        isColorized = preferences.getBoolean(PREFS_COLORIZED, true);
+        numRows = prefs.getInteger(PREFS_NUMROWS, DEFAULT_NUM_ROWS, DEFAULT_NUM_ROWS);
         numColumns = DEFAULT_NUM_COLUMNS;
-        try {
-            longHoldTime = Long.parseLong(prefs.getString(PREFS_LONGHOLDTIME, Long.toString(DEFAULT_LONG_HOLD_TIME)));
-        } catch (final Exception e) {
-            longHoldTime = DEFAULT_LONG_HOLD_TIME;
-        }
-        useLongHoldMenu = prefs.getBoolean(PREFS_LONGHOLDMENU, true);
+        longHoldTime = prefs.getMillis(PREFS_LONGHOLDTIME, 1, DEFAULT_LONG_HOLD_TIME, DEFAULT_LONG_HOLD_TIME);
+        useLongHoldMenu = preferences.getBoolean(PREFS_LONGHOLDMENU, true);
         availableItems = new Item[numRows * numColumns];
         this.removeAllViews();
         for (int iRow = 0, iItem = -1; iRow < numRows; iRow += 1) {
@@ -195,7 +192,7 @@ public class LocationSelector extends LinearLayout implements
             return;
         }
 
-        setup(getContext(), sharedPreferences);
+        setup(getContext(), Application.getInstance().getPreferences());
         setupContent();
     }
 

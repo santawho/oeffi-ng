@@ -656,7 +656,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
 
             locationSelector = findViewById(R.id.directions_location_selector);
             locationSelector.setLocationSelectionListener(this);
-            locationSelector.setup(this, prefs);
+            locationSelector.setup(this, preferences);
             locationSelector.setNetwork(network, getStoredTripsUsage());
 
             findViewById(R.id.directions_options_settings).setOnClickListener(v -> {
@@ -979,19 +979,17 @@ public class DirectionsActivity extends OeffiMainActivity implements
         if (queryHistoryListAdapter != null)
             queryHistoryListAdapter.close();
 
-        final int maxHistoryEntries = Integer.parseInt(prefs.getString(
+        final int maxHistoryEntries = preferences.getIntegerRI(
                 Constants.PREFS_KEY_MAX_HISTORY_ENTRIES,
-                Integer.toString(getResources().getInteger(R.integer.default_max_history_entries))));
+                R.integer.default_max_history_entries,
+                R.integer.default_max_history_entries);
 
-        final String deleteTripsAfterHoursText = prefs.getString(
+        final long deleteTripsAfterMillis = preferences.getMillisR(
                 get_PREFS_KEY_STORED_TRIPS_RETENTION_HOURS(),
-                getString(R.string.default_stored_trips_retention_hours));
-        long deleteTripsAfterMillis;
-        try {
-            deleteTripsAfterMillis = (long) (Float.parseFloat(deleteTripsAfterHoursText) * 3600000f);
-        } catch (final NumberFormatException nfe) {
-            deleteTripsAfterMillis = -1;
-        }
+                Constants.HOUR_IN_MILLIS,
+                R.string.default_stored_trips_retention_hours,
+                -1L);
+
         queryHistoryListAdapter = new QueryHistoryAdapter(this,
                 network, getStoredTripsUsage(), getStoredTripsCanBeMarkedAsDone(),
                 this, getHistoryEntryLayoutId(),
@@ -1449,7 +1447,6 @@ public class DirectionsActivity extends OeffiMainActivity implements
                 locationSelector.setPinned(location, false);
                 return true;
             }
-
             if (itemId == R.id.directions_location_selector_context_set_from) {
                 viewFromLocation.setLocation(location);
                 return true;

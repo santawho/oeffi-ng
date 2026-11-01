@@ -19,7 +19,7 @@
             android:defaultValue="true"
             android:title="@string/network_preferences_prediction_missing_detection_enabled_title" />
 
-        <EditTextPreference
+        <de.schildbach.oeffi.preference.NumericEditTextPreference
             android:key="network_preferences_prediction_expected_before_planned_time_minutes"
             android:dependency="network_preferences_prediction_missing_detection_enabled"
             android:singleLine="true"

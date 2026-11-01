@@ -44,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.schildbach.oeffi.Application;
+import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
 import de.schildbach.oeffi.tripeval.TripRenderer;
@@ -177,11 +178,9 @@ public class TravelAlarmManager {
     }
 
     private long getMinutePreferenceInMillis(final String key, final int defValue) {
-        final String string = getSharedPreferences().getString(key, null);
-        final int v = (string == null) ? defValue : Integer.parseInt(string);
-        if (v <= 0)
-            return v;
-        return (long) v * 60000;
+        final long defMillis = defValue * Constants.MINUTE_IN_MILLIS;
+        return Application.getInstance().getPreferences()
+                .getMillis(key, Constants.MINUTE_IN_MILLIS, defMillis, defMillis);
     }
 
     public long getStartAlarmTimeDefault() {

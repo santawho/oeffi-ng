@@ -17,7 +17,6 @@
 
 package de.schildbach.oeffi.stations;
 
-import android.content.SharedPreferences;
 import android.os.Handler;
 
 import de.schildbach.oeffi.Application;
@@ -83,18 +82,11 @@ public abstract class QueryDeparturesRunnable implements Runnable {
     }
 
     private static long getTimeOffset() {
-        final Application application = Application.getInstance();
-        final SharedPreferences prefs = application.getSharedPreferences();
-        final String offsetText = prefs.getString(
+        return -Application.getInstance().getPreferences().getMillisR(
                 "station_events_time_offset_minutes",
-                application.getString(R.string.default_station_events_time_offset_minutes));
-        long offset;
-        try {
-            offset = (long) (Float.parseFloat(offsetText) * 60000f);
-        } catch (final NumberFormatException nfe) {
-            offset = 0;
-        }
-        return -offset;
+                Constants.MINUTE_IN_MILLIS,
+                R.string.default_station_events_time_offset_minutes,
+                0L);
     }
 
     public void run() {

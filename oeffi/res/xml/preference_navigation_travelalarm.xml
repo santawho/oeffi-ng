@@ -13,14 +13,14 @@
         android:summary="@string/travelalarm_time_ratio_summary"/>
 
     <PreferenceCategory android:title="@string/travelalarm_start_time_category_title" >
-        <EditTextPreference
+        <de.schildbach.oeffi.preference.NumericEditTextPreference
             android:key="travelalarm_start_time_default"
             android:inputType="number"
             android:defaultValue="0"
             android:title="@string/travelalarm_start_time_default_title"
             android:summary="@string/travelalarm_start_time_default_summary"/>
 
-        <EditTextPreference
+        <de.schildbach.oeffi.preference.NumericEditTextPreference
             android:key="travelalarm_start_lead_time"
             android:inputType="number"
             android:defaultValue="15"
@@ -29,14 +29,14 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/travelalarm_arrival_time_category_title" >
-        <EditTextPreference
+        <de.schildbach.oeffi.preference.NumericEditTextPreference
             android:key="travelalarm_arrival_time_default"
             android:inputType="number"
             android:defaultValue="0"
             android:title="@string/travelalarm_arrival_time_default_title"
             android:summary="@string/travelalarm_arrival_time_default_summary"/>
 
-        <EditTextPreference
+        <de.schildbach.oeffi.preference.NumericEditTextPreference
             android:key="travelalarm_arrival_lead_time"
             android:inputType="number"
             android:defaultValue="120"
@@ -45,14 +45,14 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/travelalarm_departure_time_category_title" >
-        <EditTextPreference
+        <de.schildbach.oeffi.preference.NumericEditTextPreference
             android:key="travelalarm_departure_time_default"
             android:inputType="number"
             android:defaultValue="0"
             android:title="@string/travelalarm_departure_time_default_title"
             android:summary="@string/travelalarm_departure_time_default_summary"/>
 
-        <EditTextPreference
+        <de.schildbach.oeffi.preference.NumericEditTextPreference
             android:key="travelalarm_departure_lead_time"
             android:inputType="number"
             android:defaultValue="30"

@@ -21,7 +21,7 @@
         android:title="@string/user_interface_directions_compact_times_enabled_title"
         android:summary="@string/user_interface_directions_compact_times_enabled_summary" />
 
-    <EditTextPreference
+    <de.schildbach.oeffi.preference.NumericEditTextPreference
         android:key="max_history_entries"
         android:singleLine="true"
         android:inputType="number"
@@ -29,7 +29,7 @@
         android:title="@string/user_interface_max_history_entries_title"
         android:summary="@string/user_interface_max_history_entries_summary" />
 
-    <EditTextPreference
+    <de.schildbach.oeffi.preference.NumericEditTextPreference
         android:key="stored_trips_retention_hours"
         android:singleLine="true"
         android:inputType="numberDecimal"
@@ -77,7 +77,7 @@
             android:entryValues="@array/user_interface_location_selector_numrows_values"
             android:title="@string/user_interface_location_selector_numrows_title"
             android:summary="@string/user_interface_location_selector_numrows_summary" />
-        <EditTextPreference
+        <de.schildbach.oeffi.preference.NumericEditTextPreference
             android:key="user_interface_location_selector_longholdtime"
             android:singleLine="true"
             android:inputType="number"

@@ -88,8 +88,16 @@ public class OperationDetailsActivity extends TripDetailsActivity {
         colorTimeEarly = getColor(R.color.fg_operation_time_early);
         colorTimeDelay = getColor(R.color.fg_operation_time_delay);
 
-        thresholdEarlyMillis = Integer.parseInt(prefs.getString("extras_drivermode_threshold_early", getString(R.string.default_drivermode_threshold_early))) * 1000L;
-        thresholdDelayMillis = Integer.parseInt(prefs.getString("extras_drivermode_threshold_delay", getString(R.string.default_drivermode_threshold_delay))) * 1000L;
+        thresholdEarlyMillis = preferences.getMillisR(
+                "extras_drivermode_threshold_early",
+                Constants.SECOND_IN_MILLIS,
+                R.string.default_drivermode_threshold_early,
+                0L);
+        thresholdDelayMillis = preferences.getMillisR(
+                "extras_drivermode_threshold_delay",
+                Constants.SECOND_IN_MILLIS,
+                R.string.default_drivermode_threshold_delay,
+                300000L);
     }
 
     @Override

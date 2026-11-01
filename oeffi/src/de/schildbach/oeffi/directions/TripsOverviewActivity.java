@@ -672,9 +672,10 @@ public class TripsOverviewActivity extends OeffiActivity {
 
                                 if (result.from != null && result.from.name != null
                                         && result.to != null && result.to.name != null) {
-                                    final int maxHistoryEntries = Integer.parseInt(prefs.getString(
+                                    final int maxHistoryEntries = preferences.getIntegerRI(
                                             Constants.PREFS_KEY_MAX_HISTORY_ENTRIES,
-                                            Integer.toString(getResources().getInteger(R.integer.default_max_history_entries))));
+                                            R.integer.default_max_history_entries,
+                                            50);
                                     historyUri = QueryHistoryProvider.put(
                                             getContentResolver(), network, getStoredTripsUsage(),
                                             result.from, result.to, result.via, null, true,
