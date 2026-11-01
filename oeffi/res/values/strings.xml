@@ -84,6 +84,16 @@
     <string name="network_preferences_prediction_missing_detection_enabled_title">Activate</string>
     <string name="network_preferences_prediction_expected_before_planned_time_minutes_title">… before the planned time</string>
     <string name="network_preferences_prediction_expected_before_planned_time_minutes_summary">When should unavailable predictions be treated as missing?  [%s minutes before planned time]</string>
+    <string name="network_preferences_names_extraction_title">Names Extraction</string>
+    <string name="network_preferences_names_extraction_summary">
+        Some data providers send station names as one text consisting of the place (city, town, village) and the actual stop name.
+        The app can handle these two parts nicely if presented separately.
+        So it is recommended to have them split into their parts upon reception.
+    </string>
+    <string name="network_preferences_station_names_extraction_enabled_title">Stop names</string>
+    <string name="network_preferences_station_names_extraction_enabled_summary">(recommended) extract place names from station names and stop names</string>
+    <string name="network_preferences_direction_names_extraction_enabled_title">Directions</string>
+    <string name="network_preferences_direction_names_extraction_enabled_summary">(recommended) extract place names from line directions</string>
 
     <!-- preferences shortcuts -->
     <string name="shortcuts_preferences_title">Homescreen Shortcuts</string>

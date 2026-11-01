@@ -29,4 +29,21 @@
             android:summary="@string/network_preferences_prediction_expected_before_planned_time_minutes_summary" />
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:title="@string/network_preferences_names_extraction_title" >
+        <Preference android:summary="@string/network_preferences_names_extraction_summary" />
+
+        <CheckBoxPreference
+            android:key="network_preferences_station_names_extraction_enabled"
+            android:defaultValue="true"
+            android:summary="@string/network_preferences_station_names_extraction_enabled_summary"
+            android:title="@string/network_preferences_station_names_extraction_enabled_title" />
+
+        <CheckBoxPreference
+            android:key="network_preferences_direction_names_extraction_enabled"
+            android:defaultValue="true"
+            android:summary="@string/network_preferences_direction_names_extraction_enabled_summary"
+            android:title="@string/network_preferences_direction_names_extraction_enabled_title" />
+    </PreferenceCategory>
+
 </PreferenceScreen>

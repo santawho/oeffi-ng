@@ -100,6 +100,11 @@ public final class NetworkProviderFactory extends de.schildbach.pte.NetworkProvi
             Standard.setPredictionExpectedBeforePlannedTimeAtLeastMillis(predictionExpectedBeforePlannedTimeAtLeastMillis);
         else
             Standard.unsetPredictionExpectedBeforePlannedTimeAtLeastMillis();
+
+        Standard.doNotSplitStationNames = !prefs.getBoolean(
+                "network_preferences_station_names_extraction_enabled", true);
+        Standard.doNotSplitDirectionNames = !prefs.getBoolean(
+                "network_preferences_direction_names_extraction_enabled", true);
     }
 
     public String getPrefsKeyNetworkCredentials(final NetworkId networkId) {

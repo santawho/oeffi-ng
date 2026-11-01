@@ -83,6 +83,17 @@
     <string name="network_preferences_prediction_missing_detection_enabled_title">Aktivieren</string>
     <string name="network_preferences_prediction_expected_before_planned_time_minutes_title">… vor der Planzeit</string>
     <string name="network_preferences_prediction_expected_before_planned_time_minutes_summary">Wann sollen nicht vorhandene Prognosen als fehlend betrachtet werden?  [%s Minuten vor der geplanten Zeit]</string>
+    <string name="network_preferences_names_extraction_title">Namen extrahieren</string>
+    <string name="network_preferences_names_extraction_summary">
+        Einige Anbieter übermitteln Stationsnamen als zusammenhängender Text, der sowohl den Ort (Stadt, Dorf)
+        als auch den eigentlichen Namen der Haltestelle enthält.
+        Die App kann diese beiden Teile optimal verarbeiten, sofern sie getrennt voneinander vorliegen.
+        Daher empfiehlt es sich, die Daten beim Empfang in ihre Bestandteile aufzuteilen.
+    </string>
+    <string name="network_preferences_station_names_extraction_enabled_title">Haltestellen</string>
+    <string name="network_preferences_station_names_extraction_enabled_summary">(empfohlen) extrahiere Ortsnamen aus den Namen der Haltestellen</string>
+    <string name="network_preferences_direction_names_extraction_enabled_title">Richtungen</string>
+    <string name="network_preferences_direction_names_extraction_enabled_summary">(empfohlen) extrahiere Ortsnamen aus Richtungstexten von Linien</string>
 
     <!-- preferences shortcuts -->
     <string name="shortcuts_preferences_title">Startbildschirm-Verknüpfungen</string>
