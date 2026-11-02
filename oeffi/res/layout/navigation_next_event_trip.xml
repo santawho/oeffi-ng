@@ -207,6 +207,7 @@
                         android:id="@+id/navigation_next_event_connection_line"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:paddingLeft="@dimen/text_padding_horizontal"
                         android:textSize="@dimen/navigation_next_event_connection_line_fontsize"/>
                     <TextView
                         android:layout_width="wrap_content"
