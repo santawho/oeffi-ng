@@ -475,6 +475,8 @@
     <string name="directions_trip_details_walk">&lt;b>%1$d Minuten&lt;/b> %2$sFußweg nach %3$s</string>
     <string name="directions_trip_details_bike">&lt;b>%1$d Minuten&lt;/b> %2$sFahrt mit dem Fahrrad nach %3$s</string>
     <string name="directions_trip_details_car">&lt;b>%1$d Minuten&lt;/b> %2$sFahrt mit dem Auto nach %3$s</string>
+    <string name="directions_trip_details_check_in">Check-In benötigt &lt;b>%1$d Minuten&lt;/b></string>
+    <string name="directions_trip_details_check_out">Check-Out benötigt &lt;b>%1$d Minuten&lt;/b></string>
     <string name="directions_trip_details_transfer">&lt;b>%1$d Minuten&lt;/b> %2$sTransfer nach %3$s</string>
     <string name="directions_trip_details_realtime">
         &lt;b>&lt;i>Kursiv&lt;/i>&lt;/b> gedruckte Uhrzeiten sind &lt;b>prognostizierte&lt;/b> Zeiten &lt;b>
@@ -571,6 +573,8 @@
     <string name="directions_trip_details_text_long_walk">%1$d Minuten %2$sFußweg nach %3$s</string>
     <string name="directions_trip_details_text_long_bike">%1$d Minuten %2$sFahrt mit dem Fahrrad nach %3$s</string>
     <string name="directions_trip_details_text_long_car">%1$d Minuten %2$sFahrt mit dem Auto nach %3$s</string>
+    <string name="directions_trip_details_text_long_check_in">Check-In benötigt %1$d Minuten</string>
+    <string name="directions_trip_details_text_long_check_out">Check-Out benötigt %1$d Minuten</string>
     <string name="directions_trip_details_text_long_transfer">%1$d Minuten %2$sÜbergang nach %3$s</string>
 
     <!-- directions shortcut -->

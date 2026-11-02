@@ -146,7 +146,7 @@ public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.
 //@@@    private TripsGallery.ItemClickListener itemClickListener;
 
     private final Drawable
-            walkIcon, stayIcon, bikeIcon, carIcon,
+            walkIcon, stayIcon, bikeIcon, carIcon, checkInIcon, checkOutIcon,
             warningIcon,
             bookmarkedIcon, bookmarkableIcon,
             wheelChairIcon, bicycleIcon;
@@ -308,6 +308,8 @@ public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.
         stayIcon = ResourceUtil.getColoredDrawable(context, R.drawable.ic_directions_stay_grey600_24dp, colorLessSignificant);
         bikeIcon = ResourceUtil.getColoredDrawable(context, R.drawable.ic_directions_bike_grey600_24dp, colorLessSignificant);
         carIcon = ResourceUtil.getColoredDrawable(context, R.drawable.ic_local_taxi_grey600_24dp, colorLessSignificant);
+        checkInIcon = ResourceUtil.getColoredDrawable(context, R.drawable.ic_directions_check_in_grey600_24dp, colorLessSignificant);
+        checkOutIcon = ResourceUtil.getColoredDrawable(context, R.drawable.ic_directions_check_out_grey600_24dp, colorLessSignificant);
         wheelChairIcon = ResourceUtil.getColoredDrawable(context, R.drawable.ic_accessible_grey600_18dp, colorLessSignificant);
         bicycleIcon = ResourceUtil.getColoredDrawable(context, R.drawable.ic_directions_bike_grey600_18dp, colorLessSignificant);
         bookmarkedIcon = ResourceUtil.getColoredDrawable(context, R.drawable.ic_bookmarked_white_24dp, colorLessSignificant);
@@ -785,17 +787,28 @@ public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.
 
                     // symbol
                     final Drawable symbol;
-                    if (individualLeg.type == Individual.Type.WALK)
-                        symbol = isSamePlatform ? stayIcon : walkIcon;
-                    else if (individualLeg.type == Individual.Type.BIKE)
-                        symbol = bikeIcon;
-                    else if (individualLeg.type == Individual.Type.CAR)
-                        symbol = carIcon;
-                    else if (individualLeg.type == Individual.Type.TRANSFER)
-                        symbol = individualLeg.distance > maxWalkDistance ? carIcon
-                                : isSamePlatform ? stayIcon : walkIcon;
-                    else
-                        throw new IllegalStateException("unknown type: " + individualLeg.type);
+                    switch (individualLeg.type) {
+                        case WALK:
+                            symbol = isSamePlatform ? stayIcon : walkIcon;
+                            break;
+                        case BIKE:
+                            symbol = bikeIcon;
+                            break;
+                        case CAR:
+                            symbol = carIcon;
+                            break;
+                        case CHECK_IN:
+                            symbol = checkInIcon;
+                            break;
+                        case CHECK_OUT:
+                            symbol = checkOutIcon;
+                            break;
+                        case TRANSFER:
+                        default:
+                            symbol = individualLeg.distance > maxWalkDistance ? carIcon
+                                    : isSamePlatform ? stayIcon : walkIcon;
+                            break;
+                    }
                     final int symbolWidth = symbol.getIntrinsicWidth();
                     final int symbolHeight = symbol.getIntrinsicHeight();
                     if (legBox.height() >= symbolHeight) {

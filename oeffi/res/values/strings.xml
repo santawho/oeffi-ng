@@ -477,6 +477,8 @@
     <string name="directions_trip_details_walk">walk of &lt;b>%1$d minutes&lt;/b> %2$sto %3$s</string>
     <string name="directions_trip_details_bike">bike ride of &lt;b>%1$d minutes&lt;/b> %2$sto %3$s</string>
     <string name="directions_trip_details_car">car ride of &lt;b>%1$d minutes&lt;/b> %2$sto %3$s</string>
+    <string name="directions_trip_details_check_in">check-in taking &lt;b>%1$d minutes&lt;/b></string>
+    <string name="directions_trip_details_check_out">check-out taking &lt;b>%1$d minutes&lt;/b></string>
     <string name="directions_trip_details_transfer">&lt;b>%1$d minutes&lt;/b> %2$stransfer to %3$s</string>
     <string name="directions_trip_details_delay_format" translatable="false">(%1$+d)</string>
     <string name="directions_trip_details_delay_missing" translatable="false">\u2020</string> <!-- dagger (cross of death) -->
@@ -575,6 +577,8 @@
     <string name="directions_trip_details_text_long_walk">walk of %1$d minutes %2$sto %3$s</string>
     <string name="directions_trip_details_text_long_bike">bike ride of %1$d minutes %2$sto %3$s</string>
     <string name="directions_trip_details_text_long_car">car ride of %1$d minutes %2$sto %3$s</string>
+    <string name="directions_trip_details_text_long_check_in">check-in taking %1$d minutes</string>
+    <string name="directions_trip_details_text_long_check_out">check-out taking %1$d minutes</string>
     <string name="directions_trip_details_text_long_transfer">%1$d minutes %2$stransfer to %3$s</string>
 
     <!-- directions shortcut -->
