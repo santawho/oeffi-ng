@@ -269,19 +269,16 @@ public abstract class OeffiActivity extends AppCompatActivity
                 periodicUpdateGuiRunnable = new Runnable() {
                     @Override
                     public void run() {
-                        for (;;) {
+                        do {
                             final long nowMs = System.currentTimeMillis();
                             fastRefreshIntervalMs = getPeriodicUpdateIntervalMs(nowMs, -1);
                             doPeriodicUpdateGui(nowMs);
-                            if (fastRefreshIntervalMs != 0) {
-                                if (fastRefreshIntervalMs > 0) {
-                                    handler.postDelayed(this, fastRefreshIntervalMs);
-                                } else {
-                                    stopPeriodicUpdateGuiRunnable();
-                                }
-                                break;
-                            }
-                        }
+                        } while (fastRefreshIntervalMs == 0);
+
+                        if (fastRefreshIntervalMs > 0)
+                            handler.postDelayed(this, fastRefreshIntervalMs);
+                        else
+                            stopPeriodicUpdateGuiRunnable();
                     }
                 };
             }

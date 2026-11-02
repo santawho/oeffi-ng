@@ -95,7 +95,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -463,26 +462,31 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         startPeriodicUpdateGuiRunnable();
     }
 
-    private long nextTimesRefreshMs;
+    private long nextTimeRefreshMs;
 
     @Override
     protected long getPeriodicUpdateIntervalMs(final long nowMs, final long otherRequiredIntervalMs) {
         return super.getPeriodicUpdateIntervalMs(nowMs, minIntervalMs(otherRequiredIntervalMs,
-                Math.max(nextTimesRefreshMs, nowMs) - nowMs));
+                Math.max(nextTimeRefreshMs, nowMs) - nowMs));
     }
 
     @Override
     protected void doPeriodicUpdateGui(final long nowMs) {
         super.doPeriodicUpdateGui(nowMs);
 
-        if (nowMs >= nextTimesRefreshMs) {
+        if (nowMs >= nextTimeRefreshMs) {
             int itemPos = departuresAdapter.getItemCount();
             while (--itemPos >= 0) {
                 final DepartureViewHolder holder = (DepartureViewHolder) listView.findViewHolderForAdapterPosition(itemPos);
                 if (holder != null)
                     holder.renderTimeDependentElements(nowMs);
             }
-            nextTimesRefreshMs = nowMs - nowMs % 30000 + 30200;
+            // update at XX:XX:00.200 and XX:XX:30.200:
+            // final long t = nowMs - 200;
+            // nextTimeRefreshMs = t - t % 30000 + 30200;
+            // update only at XX:XX:30.200 (update at full minute is part of automatic data refresh)
+            final long t = nowMs - 30200;
+            nextTimeRefreshMs = t - t % 60000 + 90200;
         }
     }
 
