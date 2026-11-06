@@ -57,7 +57,7 @@ public class TripUtils {
                 null,
                 firstLeg.entryLocation != null ? firstLeg.entryLocation : firstLeg.departure,
                 lastLeg.exitLocation != null ? lastLeg.exitLocation : lastLeg.arrival,
-                journeyLegs,
+                new ArrayList<>(journeyLegs),
                 null,
                 null,
                 0);
