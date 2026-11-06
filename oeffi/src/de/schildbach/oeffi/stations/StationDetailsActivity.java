@@ -115,6 +115,27 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
     public static void start(
             final Context context, final NetworkId networkId,
+            final Location station, final Date presetTime) {
+        start(context, networkId, station, presetTime, null, false, null);
+    }
+
+    public static void start(
+            final Context context, final NetworkId networkId,
+            final Location station, final Date presetTime,
+            final boolean newTask,
+            final Intent returnToIntent) {
+        start(context, networkId, station, presetTime, null, newTask, returnToIntent);
+    }
+
+    public static void start(
+            final Context context, final NetworkId networkId,
+            final Location station, final Date presetTime,
+            final @NonNull List<Departure> departures) {
+        start(context, networkId, station, presetTime, departures, false, null);
+    }
+
+    private static void start(
+            final Context context, final NetworkId networkId,
             final Location station, final Date presetTime,
             final List<Departure> departures,
             final boolean newTask,
@@ -127,19 +148,16 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         Intent intent = StationDetailsActivity.fillIntent(
                 new Intent(context, StationDetailsActivity.class),
                 networkId, station, presetTime);
-        if (departures != null)
-            intent.putExtra(StationDetailsActivity.INTENT_EXTRA_DEPARTURES, (Serializable) departures);
+        if (departures != null) {
+            if (departures.size() > MAX_DEPARTURES)
+                intent.putExtra(StationDetailsActivity.INTENT_EXTRA_DEPARTURES, (Serializable) departures.subList(0, MAX_DEPARTURES));
+            else
+                intent.putExtra(StationDetailsActivity.INTENT_EXTRA_DEPARTURES, (Serializable) departures);
+        }
         if (newTask)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent = addFinishingPendingIntent(context, intent, returnToIntent);
         context.startActivity(intent);
-    }
-
-    public static void start(
-            final Context context, final NetworkId networkId,
-            final Location station, final Date presetTime,
-            final List<Departure> departures) {
-        start(context, networkId, station, presetTime, departures, false, null);
     }
 
     public static Intent fillIntent(

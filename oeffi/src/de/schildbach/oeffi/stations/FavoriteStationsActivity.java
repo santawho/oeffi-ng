@@ -272,7 +272,7 @@ public class FavoriteStationsActivity extends OeffiActivity
             setResult(RESULT_OK, intent);
             finish();
         } else if (newFavoriteStation.type == LocationType.STATION) {
-            StationDetailsActivity.start(FavoriteStationsActivity.this, network, newFavoriteStation, null, null);
+            StationDetailsActivity.start(FavoriteStationsActivity.this, network, newFavoriteStation, null);
         }
     }
 
@@ -292,7 +292,7 @@ public class FavoriteStationsActivity extends OeffiActivity
             return;
         }
 
-        StationDetailsActivity.start(FavoriteStationsActivity.this, stationNetwork, station, null, null);
+        StationDetailsActivity.start(FavoriteStationsActivity.this, stationNetwork, station, null);
     }
 
     public boolean onStationContextMenuItemClick(final int adapterPosition, final NetworkId stationNetwork,

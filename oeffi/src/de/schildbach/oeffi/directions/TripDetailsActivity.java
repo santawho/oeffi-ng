@@ -1414,7 +1414,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                         if (itemId == R.id.station_context_show_departures) {
                             StationDetailsActivity.start(
                                     TripDetailsActivity.this,
-                                    network, destinationLocation, leg.getArrivalTime(), null,
+                                    network, destinationLocation, leg.getArrivalTime(),
                                     shallShowChildActivitiesInNewTask(),
                                     getReturnHereIntent());
                             return true;
@@ -3182,7 +3182,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                             TripDetailsActivity.this,
                             network, stop.location,
                             time,
-                            null,
                             shallShowChildActivitiesInNewTask(),
                             getReturnHereIntent());
                     return true;

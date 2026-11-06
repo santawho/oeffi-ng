@@ -806,7 +806,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
             final Date time = command.time == null ? null : command.time.date();
             autoCompleteLocationsHandler.start(result -> {
                 if (!result.success) return;
-                StationDetailsActivity.start(this, network, result.location, time, null);
+                StationDetailsActivity.start(this, network, result.location, time);
             });
         }
 
@@ -1285,7 +1285,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                         reqProducts.addAll(requestedStation.products);
                         reqProducts.retainAll(products);
                     }
-                    final int maxDepartures = maxDeparturesPerStationExpanded * (reqProducts.isEmpty() ? 2 : products.size());
+                    final int maxDepartures = maxDeparturesPerStationExpanded * (reqProducts.isEmpty() ? 2 : reqProducts.size());
                     backgroundHandler.post(
                             new QueryDeparturesRunnable(
                                     handler, networkProvider,

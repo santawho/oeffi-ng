@@ -159,7 +159,7 @@ public class PlanActivity extends OeffiActivity {
                     false, false, false);
             contextMenu.setOnMenuItemClickListener(item -> {
                 if (item.getItemId() == R.id.station_context_show_departures) {
-                    StationDetailsActivity.start(PlanActivity.this, selection.network, selection.location, null, null);
+                    StationDetailsActivity.start(PlanActivity.this, selection.network, selection.location, null);
                     return true;
                 } else {
                     return false;

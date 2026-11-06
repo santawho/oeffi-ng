@@ -813,7 +813,7 @@ public class OperationDetailsActivity extends TripDetailsActivity {
                 if (time == null)
                     time = stop.getDepartureTime(true);
                 StationDetailsActivity.start(OperationDetailsActivity.this,
-                        network, stop.location, time, null,
+                        network, stop.location, time,
                         shallShowChildActivitiesInNewTask(),
                         getReturnHereIntent());
                 return true;

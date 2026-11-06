@@ -295,13 +295,8 @@ public class JourneyViewHolder extends RecyclerView.ViewHolder {
                 remaining.setTextColor(timeRemaining < 60000L ? colorWalkTimeBad : colorWalkTimeGood);
 
                 departureView.setOnClickListener(v -> {
-                    StationDetailsActivity.start(
-                            context,
-                            context.getNetwork(), station.location,
-                            departureTime,
-                            null,
-                            false,
-                            null);
+                    StationDetailsActivity.start(context,
+                            context.getNetwork(), station.location, departureTime);
                 });
                 departureView.setOnLongClickListener(v -> {
                     onContextClick(v, station);
