@@ -1314,22 +1314,34 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                                     }
 
                                     if (result.status == QueryDeparturesResult.Status.OK) {
-                                        List<Departure> newDepartures = null;
+                                        StationDepartures newDepartures = null;
                                         for (final StationDepartures subStationDepartures : result.stationDepartures) {
                                             final String subStationId = subStationDepartures.location.id;
                                             final List<Departure> departures = subStationDepartures.getNonCancelledDepartures();
                                             // Trim departures
                                             while (departures.size() > maxEvents)
                                                 departures.remove(departures.size() - 1);
-                                            final Station subStation = stationsMap.get(subStationId);
-                                            if (subStation != null && !subStationId.equals(requestedStation.id)) {
-                                                if (subStation.requestedAt == null && !departures.isEmpty()) {
-                                                    subStation.setDepartures(departures);
-                                                    subStation.departureQueryStatus = QueryDeparturesResult.Status.OK;
-                                                    subStation.updatedAt = now;
-                                                }
+                                            if (subStationId.equals(requestedStation.id)) {
+                                                // departures for the requested station
+                                                newDepartures = subStationDepartures;
                                             } else {
-                                                newDepartures = departures;
+                                                final Station subStation = stationsMap.get(subStationId);
+                                                if (subStation != null) {
+                                                    // substation already known
+                                                    if (subStation.requestedAt == null && !departures.isEmpty()) {
+                                                        subStation.setDepartures(departures);
+                                                        subStation.departureQueryStatus = QueryDeparturesResult.Status.OK;
+                                                        subStation.updatedAt = now;
+                                                    }
+                                                } else {
+                                                    // a new substation appeared
+                                                    final Station newStation = new Station(network, subStationDepartures.location);
+                                                    stations.add(newStation);
+                                                    stationsMap.put(newStation.location.id, newStation);
+                                                    newStation.setDepartures(departures);
+                                                    newStation.departureQueryStatus = QueryDeparturesResult.Status.OK;
+                                                    newStation.updatedAt = now;
+                                                }
                                             }
                                         }
 
@@ -1341,10 +1353,19 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                                                 requestedStation.departureQueryStatus = QueryDeparturesResult.Status.INVALID_STATION;
                                                 requestedStation.updatedAt = now;
                                             } else {
-                                                requestedStation.setDepartures(newDepartures);
+                                                // new departures for requested station
+                                                requestedStation.setDepartures(newDepartures.departures);
                                                 requestedStation.departureQueryStatus = QueryDeparturesResult.Status.OK;
                                                 requestedStation.updatedAt = now;
                                             }
+                                        } else if (newDepartures != null) {
+                                            // first departures for requested station
+                                            final Station newStation = new Station(network, newDepartures.location);
+                                            stations.add(newStation);
+                                            stationsMap.put(newStation.location.id, newStation);
+                                            newStation.setDepartures(newDepartures.departures);
+                                            newStation.departureQueryStatus = QueryDeparturesResult.Status.OK;
+                                            newStation.updatedAt = now;
                                         }
 
                                         stationListAdapter.notifyDataSetChanged();
