@@ -149,10 +149,11 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 new Intent(context, StationDetailsActivity.class),
                 networkId, station, presetTime);
         if (departures != null) {
-            if (departures.size() > MAX_DEPARTURES)
-                intent.putExtra(StationDetailsActivity.INTENT_EXTRA_DEPARTURES, (Serializable) departures.subList(0, MAX_DEPARTURES));
-            else
-                intent.putExtra(StationDetailsActivity.INTENT_EXTRA_DEPARTURES, (Serializable) departures);
+            final int size = Math.min(departures.size(), MAX_DEPARTURES);
+            final ArrayList<Departure> shortenedList = new ArrayList<>(size);
+            for (int i = 0; i < size; i++)
+                shortenedList.add(departures.get(i));
+            intent.putExtra(StationDetailsActivity.INTENT_EXTRA_DEPARTURES, shortenedList);
         }
         if (newTask)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
