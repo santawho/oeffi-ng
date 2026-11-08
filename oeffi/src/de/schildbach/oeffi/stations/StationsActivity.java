@@ -1314,26 +1314,33 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                                     }
 
                                     if (result.status == QueryDeparturesResult.Status.OK) {
+//                                        log.debug("OK for requested {}", requestedStation.id);
                                         StationDepartures newDepartures = null;
                                         for (final StationDepartures subStationDepartures : result.stationDepartures) {
                                             final String subStationId = subStationDepartures.location.id;
                                             final List<Departure> departures = subStationDepartures.getNonCancelledDepartures();
+//                                            log.debug("got {} for {}", departures.size(), subStationId);
                                             // Trim departures
                                             while (departures.size() > maxEvents)
                                                 departures.remove(departures.size() - 1);
                                             if (subStationId.equals(requestedStation.id)) {
+//                                                log.debug("  for requested");
                                                 // departures for the requested station
                                                 newDepartures = subStationDepartures;
                                             } else {
                                                 final Station subStation = stationsMap.get(subStationId);
                                                 if (subStation != null) {
+//                                                    log.debug("  for already known ...");
                                                     // substation already known
-                                                    if (subStation.requestedAt == null && !departures.isEmpty()) {
+//                                                    if (subStation.requestedAt == null && !departures.isEmpty()) {
+//                                                        log.debug("    taking");
                                                         subStation.setDepartures(departures);
                                                         subStation.departureQueryStatus = QueryDeparturesResult.Status.OK;
                                                         subStation.updatedAt = now;
-                                                    }
+                                                        subStation.requestedAt = now;
+//                                                    }
                                                 } else {
+//                                                    log.debug("  for new station");
                                                     // a new substation appeared
                                                     final Station newStation = new Station(network, subStationDepartures.location);
                                                     stations.add(newStation);
@@ -1341,24 +1348,36 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                                                     newStation.setDepartures(departures);
                                                     newStation.departureQueryStatus = QueryDeparturesResult.Status.OK;
                                                     newStation.updatedAt = now;
+                                                    newStation.requestedAt = now;
                                                 }
                                             }
                                         }
 
                                         final Station requestedStation = stationsMap.get(station.id);
                                         if (requestedStation != null) {
+//                                            log.debug("requested station is known ...");
                                             if (newDepartures == null) {
                                                 // requested station is not contained in response, may be meta-station
-                                                requestedStation.setDepartures(null);
-                                                requestedStation.departureQueryStatus = QueryDeparturesResult.Status.INVALID_STATION;
-                                                requestedStation.updatedAt = now;
+                                                final Date updatedAt = requestedStation.updatedAt;
+                                                if (updatedAt == null ||
+                                                        now.getTime() - updatedAt.getTime() > Constants.MINUTE_IN_MILLIS) {
+                                                    // if not updated within last minute, clear it away
+//                                                log.debug("  ... and got NO departures, clearing");
+                                                    requestedStation.setDepartures(null);
+                                                    requestedStation.departureQueryStatus = QueryDeparturesResult.Status.INVALID_STATION;
+                                                    requestedStation.updatedAt = now;
+                                                } else {
+//                                                log.debug("  ... and got NO departures, but was updated by request of another station");
+                                                }
                                             } else {
+//                                                log.debug("  ... with new departures");
                                                 // new departures for requested station
                                                 requestedStation.setDepartures(newDepartures.departures);
                                                 requestedStation.departureQueryStatus = QueryDeparturesResult.Status.OK;
                                                 requestedStation.updatedAt = now;
                                             }
                                         } else if (newDepartures != null) {
+//                                            log.debug("requested station is UNKNOWN with new departures");
                                             // first departures for requested station
                                             final Station newStation = new Station(network, newDepartures.location);
                                             stations.add(newStation);
@@ -1366,6 +1385,9 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                                             newStation.setDepartures(newDepartures.departures);
                                             newStation.departureQueryStatus = QueryDeparturesResult.Status.OK;
                                             newStation.updatedAt = now;
+                                            newStation.requestedAt = now;
+                                        } else {
+//                                            log.debug("requested station UNKNOWN ??");
                                         }
 
                                         stationListAdapter.notifyDataSetChanged();
@@ -1504,11 +1526,13 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                 if (station.distance > maxDistance)
                     continue;
 
-                if (station.requestedAt == null) {
-                    final Integer favState = favorites.get(station.location.id);
-                    if (favState == null)
-                        return station;
-                }
+                final Date requestedAt = station.requestedAt;
+                if (requestedAt != null && now - requestedAt.getTime() < Constants.MINUTE_IN_MILLIS)
+                    continue;
+
+                final Integer favState = favorites.get(station.location.id);
+                if (favState == null)
+                    return station;
             }
 
             return null;
