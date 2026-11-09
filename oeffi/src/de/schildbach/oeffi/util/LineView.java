@@ -63,6 +63,7 @@ public class LineView extends AppCompatTextView {
 
     private final float strokeWidth;
     private final int colorInsignificant;
+    private boolean disableTooltip;
 
     private static final Style DEFAULT_STYLE = new Style(Shape.ROUNDED, Color.BLACK, Color.WHITE, Color.BLACK);
 
@@ -85,6 +86,10 @@ public class LineView extends AppCompatTextView {
         final Resources res = getResources();
         strokeWidth = res.getDimension(R.dimen.line_style_border_stroke);
         colorInsignificant = res.getColor(R.color.fg_insignificant);
+    }
+
+    public void setDoNotConsumeClicks() {
+        this.disableTooltip = true;
     }
 
     public void setLine(final Line line) {
@@ -193,12 +198,14 @@ public class LineView extends AppCompatTextView {
                 setVisibility(GONE);
             setText(null);
         }
-        // setTooltipText(tooltip);
-        final CharSequence finalTooltip = tooltip;
-        setOnLongClickListener(tooltip == null ? null : view -> {
-            DialogBuilder.tooltip(getContext(), finalTooltip).show();
-            return true;
-        });
+        if (!disableTooltip) {
+            // setTooltipText(tooltip);
+            final CharSequence finalTooltip = tooltip;
+            setOnLongClickListener(tooltip == null ? null : view -> {
+                DialogBuilder.tooltip(getContext(), finalTooltip).show();
+                return true;
+            });
+        }
     }
 
     private static class Span extends ReplacementSpan {

@@ -32,18 +32,20 @@ import android.text.Html;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import de.schildbach.oeffi.util.PopupMenu;
+
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ViewAnimator;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -69,6 +71,7 @@ import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.pte.NetworkId;
+import de.schildbach.pte.Standard;
 import de.schildbach.pte.dto.Destination;
 import de.schildbach.pte.provider.ApiProvider;
 import de.schildbach.pte.provider.NetworkProvider;
@@ -84,10 +87,7 @@ import de.schildbach.pte.dto.QueryDeparturesResult;
 import de.schildbach.pte.dto.StationDepartures;
 import de.schildbach.pte.dto.PTDate;
 
-import javax.annotation.Nullable;
-
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -181,7 +181,39 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
     private static class CombinedStation {
         String id, name, place;
         Station baseStation;
-        final Map<String, Station> stations = new HashMap<>();
+        private final Map<String, Station> stations = new HashMap<>();
+        private final Set<Product> products = new HashSet<>();
+
+        public void addStation(final Station station) {
+            stations.put(station.location.id, station);
+        }
+
+        private List<Product> getProducts() {
+            final Collection<Station> stations = this.stations.values();
+            for (final Station station : stations) {
+                if (station.location.products != null)
+                    products.addAll(station.location.products);
+                final List<LineDestination> lines = station.getLines();
+                if (lines != null) {
+                    for (final LineDestination lineDestination : lines)
+                        products.add(lineDestination.line.product);
+                }
+                final List<Departure> departures = station.getDepartures();
+                if (departures != null) {
+                    for (final Departure departure : departures) {
+                        final Line line = departure.line;
+                        if (line != null) {
+                            final Product product = line.product;
+                            if (product != null)
+                                products.add(product);
+                        }
+                    }
+                }
+            }
+            final ArrayList<Product> productsList = new ArrayList<>(products);
+            productsList.sort(Product.comparator);
+            return productsList;
+        }
     }
     private final List<CombinedStation> combinedStations = new ArrayList<>();
 
@@ -230,15 +262,17 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
     private boolean showJourneyMessages = true;
 
     private View headerView;
-    private TextView nameView;
+    private Spinner dropdownView;
+//    private TextView nameView;
     private TextView timeView;
-    private TextView idView;
+//    private TextView idView;
     private ViewGroup linesGroup;
     private ViewAnimator linesGroupContainer;
     private NestedScrollView linesGroupFullScroll;
     private LinearLayout linesGroupFull;
     private LinearLayout linesGroupCompact;
-    private ImageView multiStationsView;
+    private ToggleImageButton linesGroupToggleButton;
+//    private ImageView multiStationsView;
     private LinearLayout.LayoutParams LINES_LAYOUT_PARAMS;
 
     @Override
@@ -404,16 +438,27 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         disclaimerSourceView = findViewById(R.id.stations_station_details_disclaimer_source);
 
         headerView = findViewById(R.id.stations_station_details_header);
-        nameView = findViewById(R.id.stations_station_details_header_name);
-        idView = findViewById(R.id.stations_station_details_header_id);
+//        nameView = findViewById(R.id.stations_station_details_header_name);
+//        idView = findViewById(R.id.stations_station_details_header_id);
+        dropdownView = findViewById(R.id.stations_station_details_header_dropdown);
+        dropdownView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(final AdapterView<?> parent, final View view, final int position, final long id) {
+                final Station newStation = combinedStations.get(position).baseStation;
+                selectStation(newStation);
+            }
+
+            @Override
+            public void onNothingSelected(final AdapterView<?> parent) {}
+        });
         linesGroup = findViewById(R.id.stations_station_details_header_lines);
         linesGroupContainer = findViewById(R.id.stations_station_details_header_lines_container);
         linesGroupContainer.setDisplayedChild(0);
         linesGroupFullScroll = findViewById(R.id.stations_station_details_header_lines_full_scroll);
         linesGroupFull = findViewById(R.id.stations_station_details_header_lines_full);
         linesGroupCompact = findViewById(R.id.stations_station_details_header_lines_compact);
-        multiStationsView = findViewById(R.id.stations_station_details_header_multistations);
-        multiStationsView.setVisibility(View.GONE);
+//        multiStationsView = findViewById(R.id.stations_station_details_header_multistations);
+//        multiStationsView.setVisibility(View.GONE);
         LINES_LAYOUT_PARAMS = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         LINES_LAYOUT_PARAMS.setMargins(
@@ -427,10 +472,10 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         statusMessage(getString(R.string.stations_station_details_progress));
         updateDisclaimerSource(disclaimerSourceView, selectedNetwork, null);
 
-        ((ToggleImageButton) findViewById(R.id.stations_station_details_header_lines_expand))
-                .setOnCheckedChangeListener((buttonView, isChecked) -> {
-                    linesGroupContainer.setDisplayedChild(isChecked ? 1 : 0);
-                });
+        linesGroupToggleButton = findViewById(R.id.stations_station_details_header_lines_expand);
+        linesGroupToggleButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            linesGroupContainer.setDisplayedChild(isChecked ? 1 : 0);
+        });
     }
 
     private boolean firstStart = true;
@@ -724,20 +769,15 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                                         break;
                                     }
                                     if (combinedStation == null) {
-                                        combinedStation = new CombinedStation();
-                                        combinedStation.id = locationId;
-                                        combinedStation.name = locationName;
-                                        combinedStation.place = locationPlace;
-                                        combinedStation.baseStation = station;
-                                        combinedStations.add(combinedStation);
-//                                    } else {
+                                        combinedStation = createCombinedStation(station);
+                                    } else {
                                         // why? changing the baseStation makes in unequal the selectedStation, and thereby not identifyable as the current one
                                         // if (locationId != null && locationId.compareTo(combinedStation.id) < 0) {
                                         //     combinedStation.id = locationId;
                                         //     combinedStation.baseStation = station;
                                         // }
+                                        combinedStation.addStation(station);
                                     }
-                                    combinedStation.stations.put(locationId, station);
                                 } else {
                                     for (final CombinedStation cs : combinedStations) {
                                         if (cs.stations.get(locationId) != null) {
@@ -853,6 +893,66 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         throw new UnsupportedOperationException();
     }
 
+    private CombinedStation createCombinedStation(final Station station) {
+        final CombinedStation combinedStation = new CombinedStation();
+        final Location location = station.location;
+        combinedStation.id = location.id;
+        combinedStation.name = location.name;
+        combinedStation.place = location.place;
+        combinedStation.baseStation = station;
+        combinedStation.addStation(station);
+        combinedStations.add(combinedStation);
+
+        final ArrayAdapter<CombinedStation> adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item,
+                combinedStations) {
+            @NonNull
+            @Override
+            public View getView(final int position, @Nullable final View convertView, @NonNull final ViewGroup parent) {
+                final View view = convertView != null ? convertView :
+                        LayoutInflater.from(StationDetailsActivity.this)
+                                .inflate(R.layout.station_selector_dropdown_closed, null);
+                final TextView textView = view.findViewById(R.id.station_selector_text);
+                final CombinedStation item = getItem(position);
+                final Location location = item.baseStation.location;
+                textView.setText(location.uniqueShortName());
+                return view;
+            }
+
+            @Override
+            public View getDropDownView(
+                    final int position,
+                    @Nullable final View convertView,
+                    @NonNull final ViewGroup parent) {
+                final View view = convertView != null ? convertView :
+                    LayoutInflater.from(StationDetailsActivity.this)
+                            .inflate(R.layout.station_selector_dropdown_list_entry, null);
+                final TextView textView = view.findViewById(R.id.station_selector_text);
+                final CombinedStation combinedStation = getItem(position);
+                final Location location = combinedStation.baseStation.location;
+                textView.setText(location.uniqueShortName());
+
+                final LineView productLineView = view.findViewById(R.id.station_selector_products);
+                productLineView.setDoNotConsumeClicks();
+                final List<Product> products = combinedStation.getProducts();
+                if (products == null || products.isEmpty()) {
+                    productLineView.setVisibility(View.GONE);
+                } else {
+                    productLineView.setVisibility(View.VISIBLE);
+                    final List<Line> productLines = new ArrayList<>();
+                    for (final Product product : products)
+                        productLines.add(new Line(null, null, product, null, Standard.STYLES.get(product)));
+                    productLineView.setLines(productLines);
+                }
+
+                return view;
+            }
+        };
+        dropdownView.setAdapter(adapter);
+
+        return combinedStation;
+    }
+
     private void statusMessage(final String message) {
         final List<Departure> selectedDepartures = this.getFilteredDepartures();
         if (selectedDepartures == null || selectedDepartures.isEmpty()) {
@@ -871,8 +971,6 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         if (location.hasCoord())
             setLocationForMap(location);
 
-        Station station = aStation;
-
         CombinedStation combinedStation = null;
         for (final CombinedStation cs : combinedStations) {
             if (cs.stations.get(locationId) != null) {
@@ -880,17 +978,10 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 break;
             }
         }
-        if (combinedStation == null) {
-            combinedStation = new CombinedStation();
-            combinedStation.id = locationId;
-            combinedStation.name = location.name;
-            combinedStation.place = location.place;
-            combinedStation.baseStation = station;
-            combinedStations.add(combinedStation);
-            combinedStation.stations.put(locationId, station);
-        }
+        if (combinedStation == null)
+            combinedStation = createCombinedStation(aStation);
 
-        station = combinedStation.baseStation;
+        final Station station = combinedStation.baseStation;
         final Collection<Station> stations = combinedStation.stations.values();
 
         final boolean changed = !station.location.equals(selectedLocation);
@@ -929,6 +1020,16 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
         if (selectedCoord != null) {
             getMapView().animateToLocation(selectedCoord.getLatAsDouble(), selectedCoord.getLonAsDouble());
+        }
+
+        for (int index = 0, combinedStationsSize = combinedStations.size(); index < combinedStationsSize; index++) {
+            final CombinedStation cs = combinedStations.get(index);
+            if (cs.baseStation.location.id.equals(selectedStation.location.id)) {
+                final int currentSelected = dropdownView.getSelectedItemPosition();
+                if (currentSelected != index)
+                    dropdownView.setSelection(index);
+                break;
+            }
         }
 
         setShowArrivals(showArrivals);
@@ -1021,45 +1122,60 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
     }
 
     public void updateHeader() {
-        // name and id
-        nameView.setText(selectedLocation.uniqueShortName());
-        idView.setText(selectedLocation.displayId != null ? selectedLocation.displayId : "");
-        if (combinedStations.size() > 1) {
-            // headerView.setVisibility(View.VISIBLE);
-            multiStationsView.setVisibility(View.VISIBLE);
-            headerView.setOnClickListener(v -> {
-                final PopupMenu popupMenu = new PopupMenu(v.getContext(), v);
-                final Menu menu = popupMenu.getMenu();
-                for (int i = 0; i < combinedStations.size(); i++) {
-                    final CombinedStation combinedStation = combinedStations.get(i);
-                    menu.add(Menu.NONE, i, Menu.NONE, combinedStation.baseStation.location.uniqueShortName());
-                }
-                popupMenu.setOnMenuItemClickListener(item -> {
-                    final Station newStation = combinedStations.get(item.getItemId()).baseStation;
-                    selectStation(newStation);
-                    return true;
-                });
-                popupMenu.show();
-            });
-        } else {
-            // headerView.setVisibility(View.GONE);
-            multiStationsView.setVisibility(View.GONE);
-            headerView.setOnClickListener(null);
-        }
+//        // name and id
+//        nameView.setText(selectedLocation.uniqueShortName());
+//        idView.setText(selectedLocation.displayId != null ? selectedLocation.displayId : "");
+//        if (combinedStations.size() > 1) {
+//            // headerView.setVisibility(View.VISIBLE);
+//            multiStationsView.setVisibility(View.VISIBLE);
+//            headerView.setOnClickListener(v -> {
+//                final PopupMenu popupMenu = new PopupMenu(v.getContext(), v);
+//                final Menu menu = popupMenu.getMenu();
+//                for (int i = 0; i < combinedStations.size(); i++) {
+//                    final CombinedStation combinedStation = combinedStations.get(i);
+//                    menu.add(Menu.NONE, i, Menu.NONE, combinedStation.baseStation.location.uniqueShortName());
+//                }
+//                popupMenu.setOnMenuItemClickListener(item -> {
+//                    final Station newStation = combinedStations.get(item.getItemId()).baseStation;
+//                    selectStation(newStation);
+//                    return true;
+//                });
+//                popupMenu.show();
+//            });
+//        } else {
+//            // headerView.setVisibility(View.GONE);
+//            multiStationsView.setVisibility(View.GONE);
+//            headerView.setOnClickListener(null);
+//        }
 
         // lines
+        linesGroupFull.removeAllViews();
+        linesGroupCompact.removeAllViews();
         if (selectedLines == null || selectedLines.isEmpty()) {
-            linesGroup.setVisibility(View.GONE);
+            final List<Product> products = selectedCombinedStation.getProducts();
+            if (products == null || products.isEmpty()) {
+                linesGroup.setVisibility(View.GONE);
+            } else {
+                linesGroup.setVisibility(View.VISIBLE);
+                linesGroupToggleButton.setVisibility(View.GONE);
+                linesGroupToggleButton.setChecked(false);
+                linesGroupContainer.setDisplayedChild(0);
+                for (final Product product : products) {
+                    final Line productLine = new Line(null, null, product, null, Standard.STYLES.get(product));
+                    final LineView productLineView = (LineView) getLayoutInflater().inflate(R.layout.stations_station_details_header_line_compact, null);
+                    productLineView.setLine(productLine);
+                    linesGroupCompact.addView(productLineView);
+                }
+            }
         } else {
             linesGroup.setVisibility(View.VISIBLE);
+            linesGroupToggleButton.setVisibility(View.VISIBLE);
             linesGroupFullScroll.setLayoutParams(
                     new FrameLayout.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             selectedLines.size() < 6
                                     ? ViewGroup.LayoutParams.WRAP_CONTENT
                                     : (int) getResources().getDimension(R.dimen.stations_station_details_header_lines_scroll_max_height)));
-            linesGroupFull.removeAllViews();
-            linesGroupCompact.removeAllViews();
             for (final Map.Entry<Line, List<Destination>> linesEntry : selectedLines.entrySet()) {
                 final Line line = linesEntry.getKey();
                 final List<Destination> destinations = linesEntry.getValue();

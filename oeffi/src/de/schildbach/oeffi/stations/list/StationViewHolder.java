@@ -214,9 +214,10 @@ public class StationViewHolder extends RecyclerViewNG.HorizontalSwipeHolder {
         // lines
         final Set<Line> lines = new TreeSet<>();
         final Set<Product> products = station.location.products;
-        if (products != null)
+        if (products != null) {
             for (final Product product : products)
                 lines.add(new Line(null, null, product, null, Standard.STYLES.get(product)));
+        }
         final List<LineDestination> stationLines = station.getLines();
         if (stationLines != null) {
             for (final LineDestination lineDestination : stationLines) {
