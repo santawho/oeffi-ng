@@ -37,6 +37,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.StationsAware;
+import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.stations.CompassNeedleView;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
 import de.schildbach.oeffi.stations.StationsActivity;
@@ -49,7 +50,7 @@ import de.schildbach.oeffi.util.HtmlUtils;
 import de.schildbach.oeffi.util.OverflowTextView;
 import de.schildbach.oeffi.util.RecyclerViewNG;
 import de.schildbach.oeffi.util.ViewUtils;
-import de.schildbach.pte.Standard;
+import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Departure;
 import de.schildbach.pte.dto.Destination;
 import de.schildbach.pte.dto.Line;
@@ -59,9 +60,11 @@ import de.schildbach.pte.dto.Position;
 import de.schildbach.pte.dto.Product;
 import de.schildbach.pte.dto.QueryDeparturesResult;
 import de.schildbach.pte.dto.PTDate;
+import de.schildbach.pte.provider.NetworkProvider;
 
 import javax.annotation.Nullable;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -212,20 +215,36 @@ public class StationViewHolder extends RecyclerViewNG.HorizontalSwipeHolder {
         placeView.setTextColor(this.colorSignificant);
 
         // lines
+        final Set<Product> lineProducts = new HashSet<>();
+        final List<LineDestination> stationLines = station.getLines();
+        if (stationLines != null) {
+            for (final LineDestination lineDestination : stationLines)
+                lineProducts.add(lineDestination.line.product);
+        }
         final Set<Line> lines = new TreeSet<>();
         final Set<Product> products = station.location.products;
         if (products != null) {
-            for (final Product product : products)
-                lines.add(new Line(null, null, product, null, Standard.STYLES.get(product)));
-        }
-        final List<LineDestination> stationLines = station.getLines();
-        if (stationLines != null) {
-            for (final LineDestination lineDestination : stationLines) {
-                final Line line = lineDestination.line;
-                lines.add(line);
-                lines.remove(new Line(null, null, line.product, null, Standard.STYLES.get(line.product)));
+            final NetworkId networkId = station.network;
+            final NetworkProvider networkProvider = networkId == null ? null : NetworkProviderFactory.provider(networkId);
+            for (final Product product : products) {
+                if (!lineProducts.contains(product))
+                    lines.add(NetworkProvider.productLine(networkProvider, product));
             }
         }
+        if (stationLines != null) {
+            for (final LineDestination lineDestination : stationLines)
+                lines.add(lineDestination.line);
+        }
+
+        final List<Departure> stationDepartures = station.getDepartures();
+        if (lines.isEmpty() && stationDepartures != null) {
+            for (final Departure departure : stationDepartures) {
+                final Line line = departure.line;
+                if (line != null)
+                    lines.add(line);
+            }
+        }
+
         linesView.setGhosted(isGhosted);
         linesView.setCondenseThreshold(CONDENSE_LINES_THRESHOLD);
         linesView.setLines(!lines.isEmpty() ? lines : null);
@@ -257,8 +276,6 @@ public class StationViewHolder extends RecyclerViewNG.HorizontalSwipeHolder {
         } : null);
 
         // departures
-        final List<Departure> stationDepartures = station.getDepartures();
-
         final List<String> messages = new LinkedList<>();
         if (queryNotOk) {
             departuresViewGroup.setVisibility(View.GONE);

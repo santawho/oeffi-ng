@@ -929,7 +929,7 @@ public class NavigationNotification {
                     b.append(dbJourneyRef.journeyId);
                     final Line line = dbJourneyRef.line;
                     b.append(",n=");
-                    b.append(line.network);
+                    b.append(line.operator);
                     b.append(",p=");
                     b.append(line.product);
                     b.append(",l=");

@@ -37,12 +37,14 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatTextView;
 
 import de.schildbach.oeffi.R;
-import de.schildbach.pte.Standard;
+import de.schildbach.oeffi.network.NetworkProviderFactory;
+import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Line.Attr;
 import de.schildbach.pte.dto.Product;
 import de.schildbach.pte.dto.Style;
 import de.schildbach.pte.dto.Style.Shape;
+import de.schildbach.pte.provider.NetworkProvider;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -136,16 +138,22 @@ public class LineView extends AppCompatTextView {
                 final List<Entry<Product, Integer>> sortedEntries = new ArrayList<>(productCounts.entrySet());
                 sortedEntries.sort((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue()));
 
-                // condense
-                for (final Map.Entry<Product, Integer> entry : sortedEntries) {
-                    // condense lines of product to just one label
-                    final Product productToRemove = entry.getKey();
-                    lines.removeIf(line -> line.product == productToRemove);
-                    lines.add(new Line(null, null, productToRemove, null, Standard.STYLES.get(productToRemove)));
+                if (!sortedEntries.isEmpty()) {
+                    // condense
+                    final Line firstLine = lines.isEmpty() ? null : lines.iterator().next();
+                    final NetworkId networkId = firstLine == null ? null : firstLine.networkId;
+                    final NetworkProvider networkProvider = networkId == null ? null : NetworkProviderFactory.provider(networkId);
 
-                    // stop condensing if few enough lines in total
-                    if (lines.size() <= condenseThreshold)
-                        break;
+                    for (final Map.Entry<Product, Integer> entry : sortedEntries) {
+                        // condense lines of product to just one label
+                        final Product productToRemove = entry.getKey();
+                        lines.removeIf(line -> line.product == productToRemove);
+                        lines.add(NetworkProvider.productLine(networkProvider, productToRemove));
+
+                        // stop condensing if few enough lines in total
+                        if (lines.size() <= condenseThreshold)
+                            break;
+                    }
                 }
             }
 
@@ -187,7 +195,7 @@ public class LineView extends AppCompatTextView {
                 final String sheet = Stream.of(
                                 line.name,
                                 ResourceUtil.getProductName(line.product),
-                                line.network)
+                                line.operator)
                         .filter(Objects::nonNull)
                         .collect(Collectors.joining("\n"));
                 if (!sheet.isEmpty())

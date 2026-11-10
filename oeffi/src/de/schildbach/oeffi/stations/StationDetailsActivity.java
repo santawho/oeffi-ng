@@ -71,7 +71,6 @@ import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.pte.NetworkId;
-import de.schildbach.pte.Standard;
 import de.schildbach.pte.dto.Destination;
 import de.schildbach.pte.provider.ApiProvider;
 import de.schildbach.pte.provider.NetworkProvider;
@@ -211,7 +210,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 }
             }
             final ArrayList<Product> productsList = new ArrayList<>(products);
-            productsList.sort(Product.comparator);
+            productsList.sort(Product.NATURAL_ORDER);
             return productsList;
         }
     }
@@ -457,6 +456,10 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         linesGroupFullScroll = findViewById(R.id.stations_station_details_header_lines_full_scroll);
         linesGroupFull = findViewById(R.id.stations_station_details_header_lines_full);
         linesGroupCompact = findViewById(R.id.stations_station_details_header_lines_compact);
+        linesGroupToggleButton = findViewById(R.id.stations_station_details_header_lines_expand);
+        linesGroupToggleButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            linesGroupContainer.setDisplayedChild(isChecked ? 1 : 0);
+        });
 //        multiStationsView = findViewById(R.id.stations_station_details_header_multistations);
 //        multiStationsView.setVisibility(View.GONE);
         LINES_LAYOUT_PARAMS = new LinearLayout.LayoutParams(
@@ -471,11 +474,6 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         selectStation(station);
         statusMessage(getString(R.string.stations_station_details_progress));
         updateDisclaimerSource(disclaimerSourceView, selectedNetwork, null);
-
-        linesGroupToggleButton = findViewById(R.id.stations_station_details_header_lines_expand);
-        linesGroupToggleButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            linesGroupContainer.setDisplayedChild(isChecked ? 1 : 0);
-        });
     }
 
     private boolean firstStart = true;
@@ -940,8 +938,9 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 } else {
                     productLineView.setVisibility(View.VISIBLE);
                     final List<Line> productLines = new ArrayList<>();
+                    final NetworkProvider networkProvider = NetworkProviderFactory.provider(selectedNetwork);
                     for (final Product product : products)
-                        productLines.add(new Line(null, null, product, null, Standard.STYLES.get(product)));
+                        productLines.add(NetworkProvider.productLine(networkProvider, product));
                     productLineView.setLines(productLines);
                 }
 
@@ -1160,8 +1159,9 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 linesGroupToggleButton.setVisibility(View.GONE);
                 linesGroupToggleButton.setChecked(false);
                 linesGroupContainer.setDisplayedChild(0);
+                final NetworkProvider networkProvider = NetworkProviderFactory.provider(selectedNetwork);
                 for (final Product product : products) {
-                    final Line productLine = new Line(null, null, product, null, Standard.STYLES.get(product));
+                    final Line productLine = NetworkProvider.productLine(networkProvider, product);
                     final LineView productLineView = (LineView) getLayoutInflater().inflate(R.layout.stations_station_details_header_line_compact, null);
                     productLineView.setLine(productLine);
                     linesGroupCompact.addView(productLineView);
