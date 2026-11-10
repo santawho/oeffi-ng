@@ -107,6 +107,10 @@ android {
             keyAlias "apk"
             storePassword oeffi_ng_password
             keyPassword oeffi_ng_password
+
+            enableV2Signing true
+            enableV3Signing true
+            enableV4Signing true
         }
     }
 
