@@ -53,6 +53,7 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GeoUtils;
+import de.schildbach.oeffi.util.LocationHelper;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.exception.RateLimitException;
@@ -309,7 +310,7 @@ public class NearestFavoriteStationWidgetService extends JobService {
                 }
             }
 
-            private void handleLocation(final int[] appWidgetIds, final android.location.Location here) {
+            private void handleLocation(final int[] appWidgetIds, final android.location.Location androidLocation) {
                 // determine nearest station
                 final List<Favorite> favorites = new ArrayList<>();
 
@@ -349,7 +350,9 @@ public class NearestFavoriteStationWidgetService extends JobService {
                                     stationId, stationType, stationPlace, stationName,
                                     stationNickName,
                                     stationPoint,
-                                    stationPoint == null ? 99999999.9f : GeoUtils.distanceBetween(here, stationPoint).distanceInMeters);
+                                    stationPoint == null ? 99999999.9f : GeoUtils.distanceBetween(
+                                            LocationHelper.locationToPoint(androidLocation),
+                                            stationPoint).distanceInMeters);
                             favorites.add(favorite);
                         } catch (final IllegalArgumentException x) {
                             log.info("Unknown network {}, favorite {}", network, stationId);

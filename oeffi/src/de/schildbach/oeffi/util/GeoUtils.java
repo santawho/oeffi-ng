@@ -19,8 +19,6 @@ package de.schildbach.oeffi.util;
 
 import static java.util.Objects.requireNonNull;
 
-import android.location.Location;
-
 import androidx.annotation.FloatRange;
 
 import de.schildbach.pte.dto.Point;
@@ -67,10 +65,5 @@ public class GeoUtils {
             final Point end) {
         requireNonNull(start);
         return distanceBetween(start.getLatAsDouble(), start.getLonAsDouble(), end);
-    }
-
-    public static DistanceResult distanceBetween(final Location start, final Point end) {
-        requireNonNull(start);
-        return distanceBetween(start.getLatitude(), start.getLongitude(), end);
     }
 }

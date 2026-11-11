@@ -90,6 +90,7 @@ import de.schildbach.oeffi.tripeval.TripGeoUtils;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.ExternalMapsUtils;
 import de.schildbach.oeffi.util.HorizontalPager;
+import de.schildbach.oeffi.util.LocationHelper;
 import de.schildbach.oeffi.util.MapPopupMenu;
 import de.schildbach.oeffi.util.PopupMenu;
 import de.schildbach.oeffi.util.VehicleInformationRenderer;
@@ -1019,7 +1020,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         if (accuracy > REQUIRED_ACCURACY_METERS)
             return;
 
-        final Point newDeviceLocation = Point.fromDouble(location.getLatitude(), location.getLongitude());
+        final Point newDeviceLocation = LocationHelper.locationToPoint(location);
         if (deviceLocation != null) {
             final double dist = TripGeoUtils.geoDistanceInMeters(deviceLocation, newDeviceLocation);
             if (dist < MINIMUM_MOTION_FOR_UPDATE)

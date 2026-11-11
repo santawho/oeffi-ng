@@ -116,6 +116,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
 
     private Location location;
     private LocationType locationType = LocationType.ANY;
+    private Location notifiedLocation;
     private boolean stationsOnly;
     private boolean stationAsAddress;
     private boolean stationAsAddressEnabled;
@@ -729,8 +730,17 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
     }
 
     private void fireChanged() {
-        if (listener != null)
-            listener.changed(this);
+        if (listener == null)
+            return;
+        if (location == null) {
+            if (notifiedLocation == null)
+                return;
+        } else if (notifiedLocation != null) {
+            if (location.equals(notifiedLocation))
+                return;
+        }
+        notifiedLocation = location;
+        listener.changed(this);
     }
 
     public static int locationTypeIconRes(final @Nullable LocationType locationType) {

@@ -59,6 +59,7 @@ import android.widget.TextView;
 import android.widget.ViewAnimator;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresPermission;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -84,6 +85,7 @@ import de.schildbach.oeffi.util.FilterSearchView;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GeoUtils;
 import de.schildbach.oeffi.util.KeyWordMatcher;
+import de.schildbach.oeffi.util.LocationHelper;
 import de.schildbach.oeffi.util.LocationUtils;
 import de.schildbach.oeffi.util.ResourceUtil;
 import de.schildbach.oeffi.util.TimeSpec;
@@ -154,6 +156,10 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     public static final String INTENT_EXTRA_LOCATION = StationsActivity.class.getName() + ".location";
     public static final String INTENT_EXTRA_TIME = StationsActivity.class.getName() + ".time";
     private static final String INTENT_EXTRA_COMMAND = StationsActivity.class.getName() + ".command";
+
+    private static final float MIN_DEVICE_LOCATION_CHANGE_LOAD_STATIONS_METERS = 50f;
+    private static final float MIN_DEVICE_LOCATION_CHANGE_UPDATE_DISTANCE_METERS = 10f;
+
     private ConnectivityManager connectivityManager;
     private SensorManager sensorManager;
     private Sensor sensorAccelerometer;
@@ -165,6 +171,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private final Map<String, Station> stationsMap = new HashMap<>();
     private final Map<String, Integer> favorites = new HashMap<>();
     private Station selectedStation;
+    private Point currentReferencePoint;
     private Point deviceLocation;
     private Location fixedLocation;
     private boolean fixedLocationResolving;
@@ -240,8 +247,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         @Override
         public void changed(final LocationView view) {
             final Location location = locationView.getLocation();
-            if (location != null)
-                setLocationByUser(location);
+            setLocationByUser(location);
         }
 
         @Override
@@ -425,9 +431,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                         products.clear();
                         products.addAll(filter);
 
-                        if (!added.isEmpty()) {
-                            handler.post(initStationsRunnable);
-                        }
+                        if (!added.isEmpty())
+                            postInitStations();
 
                         if (!removed.isEmpty()) {
                             for (final Iterator<Station> i = stations.iterator(); i.hasNext(); ) {
@@ -663,7 +668,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private void requestRefresh() {
         for (final Station station : stations)
             station.requestedAt = null;
-        handler.post(initStationsRunnable);
+        postInitStations();
     }
 
     private void resetContent() {
@@ -695,8 +700,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         updateGUI();
         setActionBarSecondaryTitleFromNetwork();
 
-        handler.removeCallbacksAndMessages(null);
-        handler.post(initStationsRunnable);
+        postInitStations();
     }
 
     protected void updateFragments() {
@@ -827,6 +831,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private void setLocationByUser(final Location location) {
         fixedLocation = location;
         fixedLocationResolving = false;
+        currentReferencePoint = null;
 
         stationList.scrollToPosition(0);
         journeyList.scrollToPosition(0);
@@ -855,7 +860,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         }
 
         stationListAdapter.notifyDataSetChanged();
-        handler.post(initStationsRunnable);
+        postInitStations();
 
         if (fixedLocation != null) {
             if (fixedLocation.hasCoord())
@@ -905,9 +910,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         journeyListAdapter.setFilterQuery(filterQuery);
         journeyListAdapter.notifyDataSetChanged();
 
-        if (searchQueryModified) {
-            handler.post(initStationsRunnable);
-        }
+        if (searchQueryModified)
+            postInitStations();
 
         updateGUI();
     }
@@ -1034,6 +1038,11 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         }
     }
 
+    private void postInitStations() {
+        handler.removeCallbacksAndMessages(null);
+        handler.post(initStationsRunnable);
+    }
+
     private final Runnable initStationsRunnable = new Runnable() {
         public void run() {
             if (network != null) {
@@ -1047,66 +1056,73 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         private void runNearbyQuery() {
             final Location referenceLocation = getReferenceLocation();
 
-            if (referenceLocation != null) {
-                final OeffiActionBar actionBar = getMyActionBar();
+            if (referenceLocation == null)
+                return;
 
-                final StringBuilder favoriteIds = new StringBuilder();
-                for (final Map.Entry<String, Integer> entry : favorites.entrySet())
-                    if (entry.getValue() == FavoriteStationsProvider.TYPE_FAVORITE)
-                        favoriteIds.append(entry.getKey()).append(',');
-                if (favoriteIds.length() != 0)
-                    favoriteIds.setLength(favoriteIds.length() - 1);
+            final Point referencePoint = referenceLocation.coord;
+            if (currentReferencePoint != null) {
+                final GeoUtils.DistanceResult d = GeoUtils.distanceBetween(referencePoint, currentReferencePoint);
+                if (d.distanceInMeters < MIN_DEVICE_LOCATION_CHANGE_LOAD_STATIONS_METERS)
+                    return;
+            }
+            currentReferencePoint = referencePoint;
 
-                backgroundHandler.post(() -> {
-                    runOnUiThread(() -> {
-                        actionBar.startProgress();
-                        // swipeRefresh.setRefreshing(true);
-                        loading = true;
-                        updateGUI();
-                    });
+            final StringBuilder favoriteIds = new StringBuilder();
+            for (final Map.Entry<String, Integer> entry : favorites.entrySet())
+                if (entry.getValue() == FavoriteStationsProvider.TYPE_FAVORITE)
+                    favoriteIds.append(entry.getKey()).append(',');
+            if (favoriteIds.length() != 0)
+                favoriteIds.setLength(favoriteIds.length() - 1);
 
-                    final NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
-                    try {
-                        queryFailed = true;
-                        final NearbyLocationsResult result =
-                                networkProvider.queryNearbyLocations(
-                                        EnumSet.of(LocationType.STATION),
-                                        referenceLocation,
-                                        NetworkProvider.EquivalentStationsMode.META_IF_SAME_NAME,
-                                        0,
-                                        0,
-                                        products);
-                        if (result.status == NearbyLocationsResult.Status.OK) {
-                            log.info("Got {}", result.toShortString());
+            backgroundHandler.post(() -> {
+                runOnUiThread(() -> {
+                    getMyActionBar().startProgress();
+                    // swipeRefresh.setRefreshing(true);
+                    loading = true;
+                    updateGUI();
+                });
 
-                            final List<Station> freshStations = new ArrayList<>(result.locations.size());
+                final NetworkProvider networkProvider = NetworkProviderFactory.provider(network);
+                try {
+                    queryFailed = true;
+                    final NearbyLocationsResult result =
+                            networkProvider.queryNearbyLocations(
+                                    EnumSet.of(LocationType.STATION),
+                                    referenceLocation,
+                                    NetworkProvider.EquivalentStationsMode.META_IF_SAME_NAME,
+                                    0,
+                                    0,
+                                    products);
+                    if (result.status == NearbyLocationsResult.Status.OK) {
+                        log.info("Got {}", result.toShortString());
 
-                            for (final Location location : result.locations) {
-                                if (location.type == LocationType.STATION) {
-                                    final Point coord = location.coord;
-                                    if (coord != null) {
-                                        final Station station = new Station(network, location);
-                                        station.setDistanceAndBearing(GeoUtils.distanceBetween(referenceLocation.coord, coord), walkPaceMillisPerMeter);
-                                        freshStations.add(station);
-                                    }
+                        final List<Station> freshStations = new ArrayList<>(result.locations.size());
+
+                        for (final Location location : result.locations) {
+                            if (location.type == LocationType.STATION) {
+                                final Point coord = location.coord;
+                                if (coord != null) {
+                                    final Station station = new Station(network, location);
+                                    station.setDistanceAndBearing(GeoUtils.distanceBetween(referencePoint, coord), walkPaceMillisPerMeter);
+                                    freshStations.add(station);
                                 }
                             }
-
-                            queryFailed = false;
-                            runOnUiThread(() -> mergeIntoStations(freshStations, true));
                         }
-                    } catch (final IOException x) {
-                        log.info("IO problem while querying for nearby locations to " + referenceLocation, x);
-                    } finally {
-                        runOnUiThread(() -> {
-                            swipeRefresh.setRefreshing(false);
-                            actionBar.stopProgress();
-                            loading = false;
-                            updateGUI();
-                        });
+
+                        queryFailed = false;
+                        runOnUiThread(() -> mergeIntoStations(freshStations, true));
                     }
-                });
-            }
+                } catch (final IOException x) {
+                    log.info("IO problem while querying for nearby locations to " + referenceLocation, x);
+                } finally {
+                    runOnUiThread(() -> {
+                        swipeRefresh.setRefreshing(false);
+                        getMyActionBar().stopProgress();
+                        loading = false;
+                        updateGUI();
+                    });
+                }
+            });
 
             // (do not, why?) refresh favorites
             // addFavoriteStationsToResult();
@@ -1771,24 +1787,34 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     }
 
     private final LocationListener locationListener = new LocationListener() {
-        public void onLocationChanged(final android.location.Location here) {
-            log.info("Got relevant location: {}", here);
+        public void onLocationChanged(@NonNull final android.location.Location androidLocation) {
+            log.info("Got relevant location: {}", androidLocation);
 
-            deviceLocation = Point.fromDouble(here.getLatitude(), here.getLongitude());
-            stationListAdapter.setDeviceLocation(here);
-            journeyListAdapter.setDeviceLocation(here);
+            final Point newLocation = LocationHelper.locationToPoint(androidLocation);
+            if (deviceLocation != null) {
+                final GeoUtils.DistanceResult d = GeoUtils.distanceBetween(newLocation, deviceLocation);
+                if (d.distanceInMeters < MIN_DEVICE_LOCATION_CHANGE_UPDATE_DISTANCE_METERS)
+                    return;
+            }
+
+            deviceLocation = newLocation;
+            stationListAdapter.setDeviceLocation(androidLocation);
+            journeyListAdapter.setDeviceLocation(androidLocation);
 
             // re-calculate distances for sorting
             if (fixedLocation == null) {
                 for (final Station station : stations) {
-                    if (station.location.hasCoord())
-                        station.setDistanceAndBearing(GeoUtils.distanceBetween(here, station.location.coord), walkPaceMillisPerMeter);
+                    if (station.location.hasCoord()) {
+                        station.setDistanceAndBearing(
+                                GeoUtils.distanceBetween(deviceLocation, station.location.coord),
+                                walkPaceMillisPerMeter);
+                    }
                 }
 
                 stationListAdapter.notifyDataSetChanged();
                 journeyListAdapter.notifyDataSetChanged();
 
-                handler.post(initStationsRunnable);
+                postInitStations();
             }
 
             updateGUI();
