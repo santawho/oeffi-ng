@@ -673,6 +673,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
     private void resetContent() {
         setListFilter(null);
+        currentReferencePoint = null;
 
         stations.clear();
         stationsMap.clear();
