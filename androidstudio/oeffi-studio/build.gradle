@@ -166,7 +166,16 @@ android {
         preRelease {
             assets.srcDirs = ['../../oeffi/assets-pre-release', '../../oeffi/assets-temp/pre-release']
         }
+        preReleaseNoUpload {
+            assets.srcDirs = ['../../oeffi/assets-pre-release', '../../oeffi/assets-temp/pre-release']
+        }
         release {
+            assets.srcDirs = ['../../oeffi/assets-main', '../../oeffi/assets-temp/main']
+        }
+        mainRelease {
+            assets.srcDirs = ['../../oeffi/assets-main', '../../oeffi/assets-temp/main']
+        }
+        mainReleaseNoUpload {
             assets.srcDirs = ['../../oeffi/assets-main', '../../oeffi/assets-temp/main']
         }
     }
@@ -192,7 +201,21 @@ android {
 //            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig = signingConfigs.oeffi_ng
         }
+        preReleaseNoUpload {
+            resValue "string", "release_type", "pre-release"
+//            minifyEnabled true
+//            shrinkResources false
+//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig = signingConfigs.oeffi_ng
+        }
         mainRelease {
+            resValue "string", "release_type", "main"
+//            minifyEnabled true
+//            shrinkResources false
+//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig = signingConfigs.oeffi_ng
+        }
+        mainReleaseNoUpload {
             resValue "string", "release_type", "main"
 //            minifyEnabled true
 //            shrinkResources false
