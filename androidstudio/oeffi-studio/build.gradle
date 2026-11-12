@@ -114,10 +114,10 @@ android {
         }
     }
 
-    flavorDimensions = ['flavor']
+    flavorDimensions = ['generation', "releaseType"]
     productFlavors {
         ng {
-            dimension 'flavor'
+            dimension 'generation'
             applicationId "${CREDENTIALS.applicationId}"
             // applicationIdSuffix '.ng'
             versionNameSuffix "-ng${CREDENTIALS.editionName ? "-${CREDENTIALS.editionName}" : ''}"
@@ -144,6 +144,22 @@ android {
             resValue "bool", "flags_show_twitter", "false"
             resValue "bool", "flags_show_navigation_drawer_footer", "false"
         }
+        dev {
+            dimension "releaseType"
+
+            resValue "string", "release_type", "dev"
+            resValue "string", "app_name", "Öffi NG${CREDENTIALS.editionName ? " ${CREDENTIALS.editionName}" : ''} Debug"
+            resValue "string", "app_url_path_prefix", "/@apps/oeffi-ng${CREDENTIALS.editionName ? "-${CREDENTIALS.editionName}" : ''}-debug/"
+            resValue "bool", "flags_no_update_check", "true"
+        }
+        pre {
+            dimension "releaseType"
+            resValue "string", "release_type", "pre-release"
+        }
+        full {
+            dimension "releaseType"
+            resValue "string", "release_type", "main"
+        }
     }
 
     sourceSets {
@@ -163,20 +179,14 @@ android {
         debug {
             assets.srcDirs = ['../../oeffi/assets-debug', '../../oeffi/assets-temp/debug']
         }
-        preRelease {
+        dev {
+            assets.srcDirs = ['../../oeffi/assets-dev', '../../oeffi/assets-temp/dev']
+        }
+        full {
+            assets.srcDirs = ['../../oeffi/assets-main', '../../oeffi/assets-temp/main']
+        }
+        pre {
             assets.srcDirs = ['../../oeffi/assets-pre-release', '../../oeffi/assets-temp/pre-release']
-        }
-        preReleaseNoUpload {
-            assets.srcDirs = ['../../oeffi/assets-pre-release', '../../oeffi/assets-temp/pre-release']
-        }
-        release {
-            assets.srcDirs = ['../../oeffi/assets-main', '../../oeffi/assets-temp/main']
-        }
-        mainRelease {
-            assets.srcDirs = ['../../oeffi/assets-main', '../../oeffi/assets-temp/main']
-        }
-        mainReleaseNoUpload {
-            assets.srcDirs = ['../../oeffi/assets-main', '../../oeffi/assets-temp/main']
         }
     }
 
@@ -188,56 +198,46 @@ android {
             debuggable true
             applicationIdSuffix '.debug'
             versionNameSuffix '-debug'
-
-            resValue "string", "release_type", "debug"
-            resValue "string", "app_name", "Öffi NG${CREDENTIALS.editionName ? " ${CREDENTIALS.editionName}" : ''} Debug"
-            resValue "string", "app_url_path_prefix", "/@apps/oeffi-ng${CREDENTIALS.editionName ? "-${CREDENTIALS.editionName}" : ''}-debug/"
-            resValue "bool", "flags_no_update_check", "true"
-        }
-        preRelease {
-            resValue "string", "release_type", "pre-release"
-//            minifyEnabled true
-//            shrinkResources false
-//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig = signingConfigs.oeffi_ng
-        }
-        preReleaseNoUpload {
-            resValue "string", "release_type", "pre-release"
-//            minifyEnabled true
-//            shrinkResources false
-//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig = signingConfigs.oeffi_ng
-        }
-        mainRelease {
-            resValue "string", "release_type", "main"
-//            minifyEnabled true
-//            shrinkResources false
-//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig = signingConfigs.oeffi_ng
-        }
-        mainReleaseNoUpload {
-            resValue "string", "release_type", "main"
-//            minifyEnabled true
-//            shrinkResources false
-//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig = signingConfigs.oeffi_ng
         }
         release {
-            resValue "string", "release_type", "main"
+            signingConfig = signingConfigs.oeffi_ng
+        }
+        releaseNoUpload {
+            initWith release
+        }
+//        releaseWithProguard {
+//            initWith release
 //            minifyEnabled true
-//            shrinkResources false
+//            // shrinkResources false
 //            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-        releaseWithProguard {
-//            minifyEnabled true
-//            shrinkResources false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
+//        }
     }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+androidComponents {
+    beforeVariants(selector().all()) { variantBuilder ->
+        println("----- VARIANT ${variantBuilder.name}")
+        println("flavorName: ${variantBuilder.flavorName}")
+        println("buildType: ${variantBuilder.buildType}")
+        def flavors = [:]
+        variantBuilder.productFlavors.each {
+            println("${it.first}: ${it.second} ")
+            flavors[it.first] = it.second
+        }
+        def releaseType = flavors["releaseType"]
+        if (variantBuilder.buildType == "debug") {
+            if (releaseType != "dev") {
+                println("--> disabled")
+                variantBuilder.enable = false
+            }
+        }
+
+        println()
     }
 }
 
@@ -287,23 +287,57 @@ dependencies {
 //}
 
 afterEvaluate {
-    assembleNgMainRelease.doLast {
-        // runs always after the NG main release build. Why the following ??
-//        android.applicationVariants.all { variant ->
-//            println "variant.buildType.name = ${variant.buildType.name}"
-//            if (variant.buildType.name == 'release') {
-//                def releaseBuildTask = tasks.create(name: "release") {
-//                    println("....................  test   ..............................")
-//                }
-//                releaseBuildTask.mustRunAfter variant.assembleProvider
-//            }
-//        }
-        createRelease(projectDefs, githubTag, new File("${projectDefs.projectDir}/build/outputs/apk/ng/mainRelease/oeffi-studio-ng-mainRelease.apk"), false, timeInt)
+    assembleNgFullRelease.doLast {
+        // runs always after the NG full release build
+        createRelease(projectDefs, githubTag, new File("${projectDefs.projectDir}/build/outputs/apk/ngFull/release/oeffi-studio-ng-full-release.apk"), false, timeInt)
     }
     assembleNgPreRelease.doLast {
         // runs always after the NG pre-release build
-        createRelease(projectDefs, githubTag, new File("${projectDefs.projectDir}/build/outputs/apk/ng/preRelease/oeffi-studio-ng-preRelease.apk"), true, timeInt)
+        createRelease(projectDefs, githubTag, new File("${projectDefs.projectDir}/build/outputs/apk/ngPre/release/oeffi-studio-ng-pre-release.apk"), true, timeInt)
     }
+    assembleNgDevRelease.doLast {
+        // runs always after the NG dev release build
+        // installRelease(projectDefs, new File("${projectDefs.projectDir}/build/outputs/apk/ngDev/release/oeffi-studio-ng-dev-release.apk"))
+        uploadRelease(projectDefs, new File("${projectDefs.projectDir}/build/outputs/apk/ngDev/release/oeffi-studio-ng-dev-release.apk"))
+    }
+}
+
+def installRelease(Project projectDefs, File apkFile) {
+    println "Installing from ${apkFile.absolutePath}"
+    execAdb "install ${apkFile.absolutePath}"
+}
+
+def uploadRelease(Project projectDefs, File apkFile) {
+    println "Installing from ${apkFile.absolutePath}"
+    execAdb "push ${apkFile.absolutePath} /sdcard/Download/oeffi.apk"
+    // execAdb "shell am start -a android.intent.action.VIEW -d \"content://com.android.externalstorage.documents/document/primary%3ADownload%2Foeffi.apk\" -t \"application/vnd.android.package-archive\" -f 1"
+}
+
+def execAdb(String adbCommand) {
+    def adbExecutable = "$System.env.ANDROID_HOME/platform-tools/adb"
+    def cmdline = "${adbExecutable} ${adbCommand}"
+    println cmdline
+    def adb = cmdline.execute()
+    println adb.err.text
+    println adb.text
+    if (adb.exitValue() != 0)
+        throw new ProcessExecutionException(adb.err.text)
+}
+
+def createRelease(Project projectDefs, String tagName, File apkFile, boolean preRelease, int versionCode) {
+    println "Creating ${ preRelease ? "pre-release" : "release" } ${tagName} from ${apkFile.absolutePath}"
+    if (!apkFile.exists()) {
+        println "${apkFile.absolutePath} does not exist"
+        throw "${apkFile.absolutePath} does not exist";
+    }
+    "git tag ${tagName}".execute()
+    "git push --tags".execute()
+
+    def manifestJson = "{\"tag\": \"${tagName}\", \"prerelease\": ${preRelease}, \"versionCode\": ${versionCode}}"
+
+    def releaseId = githubCreateRelease(projectDefs, tagName, preRelease)
+    uploadToGithub(projectDefs, releaseId, projectDefs.oeffi.CREDENTIALS.asset_name_apk_file, apkFile.readBytes())
+    uploadToGithub(projectDefs, releaseId, projectDefs.oeffi.CREDENTIALS.asset_name_manifest, manifestJson.getBytes("UTF-8"))
 }
 
 def githubCreateRelease(Project projectDefs, String tagName, boolean preRelease) {
@@ -339,22 +373,6 @@ def uploadToGithub(Project projectDefs, String releaseId, String assetName, byte
     println("upload ${assetName}: ${respCode}: ${respBody}")
     if (!respCode.equals(201))
         throw respBody
-}
-
-def createRelease(Project projectDefs, String tagName, File apkFile, boolean preRelease, int versionCode) {
-    println "Creating ${ preRelease ? "pre-release" : "release" } ${tagName} from ${apkFile.absolutePath}"
-    if (!apkFile.exists()) {
-        println "${apkFile.absolutePath} does not exist"
-        throw "${apkFile.absolutePath} does not exist";
-    }
-    "git tag ${tagName}".execute()
-    "git push --tags".execute()
-
-    def manifestJson = "{\"tag\": \"${tagName}\", \"prerelease\": ${preRelease}, \"versionCode\": ${versionCode}}"
-
-    def releaseId = githubCreateRelease(projectDefs, tagName, preRelease)
-    uploadToGithub(projectDefs, releaseId, projectDefs.oeffi.CREDENTIALS.asset_name_apk_file, apkFile.readBytes())
-    uploadToGithub(projectDefs, releaseId, projectDefs.oeffi.CREDENTIALS.asset_name_manifest, manifestJson.getBytes("UTF-8"))
 }
 
 def getCurrentGitBranch() {
