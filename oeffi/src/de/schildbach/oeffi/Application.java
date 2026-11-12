@@ -367,7 +367,7 @@ public class Application extends android.app.Application {
         ErrorReporter.getInstance().init(this);
 
         try {
-            packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            packageInfo = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_PERMISSIONS);
         } catch (final NameNotFoundException x) {
             throw new RuntimeException(x);
         }

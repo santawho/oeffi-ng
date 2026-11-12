@@ -1,12 +1,16 @@
 package de.schildbach.oeffi.util;
 
+import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.InstallSourceInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +20,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
@@ -60,18 +65,37 @@ public class AppInstaller {
 
     public static String getInstallerPackageName() {
         final Application application = Application.getInstance();
-        return application.getPackageManager().getInstallerPackageName(application.getPackageName());
+        final String applicationPackageName = application.getPackageName();
+        final PackageManager packageManager = application.getPackageManager();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            return packageManager.getInstallerPackageName(applicationPackageName);
+        } else {
+            try {
+                final InstallSourceInfo info = packageManager.getInstallSourceInfo(applicationPackageName);
+                return info.getInstallingPackageName();
+            } catch( final PackageManager.NameNotFoundException nnfe){
+                return null;
+            }
+        }
         // "com.android.packageinstaller"
         // "com.google.android.packageinstaller"
     }
 
-    public static boolean hasExternalInstaller() {
+    public static String getExternalInstallerName() {
         final String installerPackageName = getInstallerPackageName();
         log.info("package installer = {}", installerPackageName);
-        return !(installerPackageName == null
+        if (installerPackageName == null
                 || "com.android.packageinstaller".equals(installerPackageName)
-                || "com.google.android.packageinstaller".equals(installerPackageName)
-        );
+                || "com.google.android.packageinstaller".equals(installerPackageName)) {
+            return null;
+        }
+        try {
+            final PackageManager packageManager = Application.getInstance().getPackageManager();
+            final ApplicationInfo applicationInfo = packageManager.getApplicationInfo(installerPackageName, 0);
+            return packageManager.getApplicationLabel(applicationInfo).toString();
+        } catch (final PackageManager.NameNotFoundException nnfe) {
+            return installerPackageName;
+        }
     }
 
     public AppInstaller(final Activity context, final Consumer<Boolean> doneListener) {
@@ -80,13 +104,29 @@ public class AppInstaller {
     }
 
     public void downloadAndInstallApk() {
-        if (!isApkUrlAvailable() || hasExternalInstaller()) {
+        if (!isApkUrlAvailable() || getExternalInstallerName() != null) {
             done(false);
             return;
         }
 
+        final Application application = Application.getInstance();
+        if (!Arrays.stream(application.packageInfo().requestedPermissions)
+                .anyMatch(Manifest.permission.REQUEST_INSTALL_PACKAGES::equals)) {
+            DialogBuilder.get(context)
+                    .setTitle(R.string.app_installer_install_not_permitted_title)
+                    .setMessage(R.string.app_installer_install_not_permitted_message)
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setNeutralButton(R.string.help, (dialog, which) -> {
+                        context.startActivity(new Intent(Intent.ACTION_VIEW,
+                                Uri.parse(context.getString(R.string.about_git_url)))
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                    })
+                    .setOnDismissListener(dialog -> done(false))
+                    .show();
+            return;
+        }
+
         try {
-            final Application application = Application.getInstance();
             final String apkUrl = getApkUrl();
             log.info("downloading APK file for install from {}", apkUrl);
             final ProgressDialog progressDialog = new ProgressDialog(context);
@@ -185,10 +225,11 @@ public class AppInstaller {
                         if (context.isFinishing())
                             return;
                         if (isNewVersionAvailable) {
-                            if (hasExternalInstaller()) {
+                            final String installerName = getExternalInstallerName();
+                            if (installerName != null) {
                                 DialogBuilder.get(context)
                                         .setTitle(R.string.alert_update_available_title)
-                                        .setMessage(R.string.alert_update_available_message_external_installer)
+                                        .setMessage(context.getString(R.string.alert_update_available_message_external_installer, installerName))
                                         .setPositiveButton(android.R.string.ok, (d, i) -> done(false))
                                         .show();
                             } else {
@@ -213,7 +254,7 @@ public class AppInstaller {
                         }
                     });
                 }
-            } catch (IOException | ParseException e) {
+            } catch (final IOException | ParseException e) {
                 log.error("cannot HEAD {}: {}", manifestUrl, e.getMessage());
             }
         }).start();

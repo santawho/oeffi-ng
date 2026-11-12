@@ -32,14 +32,14 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
+<!--    <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />-->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM"/>
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
-    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
+<!--    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>-->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-permission android:name="android.permission.TURN_SCREEN_ON" />
@@ -86,6 +86,14 @@
                 android:name="android.intent.action.VIEW" />
             <data android:mimeType="application/vnd.google-earth.kml+xml" />
         </intent>
+        <!-- Android System Package Installer -->
+        <package android:name="com.google.android.packageinstaller" />
+        <package android:name="com.android.packageinstaller" />
+        <!-- Play Store -->
+        <package android:name="com.android.vending" />
+        <!-- Obtainium (Standard & F-Droid variants) -->
+        <package android:name="dev.imranr.obtainium" />
+        <package android:name="dev.imranr.obtainium.fdroid" />
     </queries>
 
     <supports-screens

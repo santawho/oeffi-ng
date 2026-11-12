@@ -665,7 +665,7 @@
     <string name="alert_update_available_button_yes">Jetzt herunterladen und installieren</string>
     <string name="alert_update_available_button_download_only">Herunterladen zur händischen Installation</string>
     <string name="alert_update_available_button_no">Vielleicht später</string>
-    <string name="alert_update_available_message_external_installer">Eine neue Version dieser Anwendung ist verfügbar. Bitte aktualisiere mit dem App-Store.</string>
+    <string name="alert_update_available_message_external_installer">Eine neue Version dieser Anwendung ist verfügbar. Bitte aktualisiere mit %1$s.</string>
 
     <!-- products -->
     <string name="product_i">Fernverkehr</string>
@@ -707,6 +707,8 @@
     <string name="app_installer_download_progress_message">App wird heruntergeladen …</string>
     <string name="app_installer_download_failed_title">Download fehlgeschlagen</string>
     <string name="app_installer_download_failed_message">Download der APK nicht möglich. Versuche es später noch einmal.</string>
+    <string name="app_installer_install_not_permitted_title">Installation nicht erlaubt</string>
+    <string name="app_installer_install_not_permitted_message">Die App kann keine Pakete (mehr) installieren. Bitte wechsele zu einer anderen Installationsmethode.</string>
 
     <!-- KML labeling -->
     <string name="kml_trip_name">Reise von %1$s nach %2$s</string>
