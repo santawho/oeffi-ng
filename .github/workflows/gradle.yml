@@ -45,7 +45,7 @@ jobs:
       working-directory: androidstudio
       env:
         OEFFI_NG_JKS_PASSWORD: ${{secrets.OEFFI_NG_JKS_PASSWORD}}
-      run: ./gradlew assembleNgRelease
+      run: ./gradlew assembleNgDevReleaseNoUpload
 
     - name: Upload unsigned APK
       uses: actions/upload-artifact@v7
