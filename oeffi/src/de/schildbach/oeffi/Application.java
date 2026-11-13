@@ -171,6 +171,11 @@ public class Application extends android.app.Application {
         return super.getDataDir();
     }
 
+    @Override
+    public File getFilesDir() {
+        return super.getFilesDir();
+    }
+
     public String getUserAgent(final ApiProvider.UserAgentType userAgentType) {
         switch (userAgentType) {
             case NONE:
