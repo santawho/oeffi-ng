@@ -17,7 +17,6 @@
 
 package de.schildbach.oeffi.util;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Typeface;
@@ -34,8 +33,7 @@ import java.util.function.Consumer;
 
 import de.schildbach.oeffi.R;
 
-@SuppressLint("AppCompatCustomView")
-public class OverflowTextView extends TextView {
+public class OverflowTextView extends AppTextView {
     public OverflowTextView(final Context context) {
         this(context, null);
     }
@@ -53,7 +51,8 @@ public class OverflowTextView extends TextView {
     private boolean overflowVisible;
 
     public OverflowTextView(final Context context, @Nullable final AttributeSet attrs, final int defStyleAttr, final int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
+//        super(context, attrs, defStyleAttr, defStyleRes);
+        super(context, attrs, defStyleAttr);
         construct(context, attrs, defStyleAttr, defStyleRes);
     }
 
@@ -92,13 +91,13 @@ public class OverflowTextView extends TextView {
     @Override
     public void setTypeface(@Nullable final Typeface tf, final int style) {
         super.setTypeface(tf, style);
-        doOnOverflowView(ovView -> ovView.setTypeface(tf, style));
+        doOnOverflowView(ovView -> ovView.setTypeface(ovView.getTypeface(), style));
     }
 
     @Override
     public void setTypeface(@Nullable final Typeface tf) {
         super.setTypeface(tf);
-        doOnOverflowView(ovView -> ovView.setTypeface(tf));
+        doOnOverflowView(ovView -> ovView.setTypeface(ovView.getTypeface()));
     }
 
     @Override

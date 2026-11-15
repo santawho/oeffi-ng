@@ -1363,11 +1363,11 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             final boolean isPredictedTimeMissing = departure.isPredictedTimeMissing;
 
             // time rel
-            timeRelView.setTypeface(Typeface.DEFAULT, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
+            ViewUtils.setTypeFace(timeRelView, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
             ViewUtils.setCancelledStrikeThru(timeRelView, isCancelled);
 
             // time abs
-            timeAbsView.setTypeface(Typeface.DEFAULT, (isPredicted ? Typeface.ITALIC : 0) + (isCancelled ? Typeface.BOLD : 0));
+            ViewUtils.setTypeFace(timeAbsView, (isPredicted ? Typeface.ITALIC : 0) + (isCancelled ? Typeface.BOLD : 0));
             ViewUtils.setCancelledStrikeThru(timeAbsView, isCancelled);
             timeAbsView.setTextColor(getColor(isCancelled ? R.color.fg_cancelled : R.color.fg_significant));
 
@@ -1377,13 +1377,13 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                         ? predictedTime.getTime() - plannedTime.getTime() : 0;
                 final long delayMins = delay / Constants.MINUTE_IN_MILLIS;
                 delayView.setText(delayMins == 0 ? null : getString(R.string.stations_station_details_delay_format, delayMins));
-                delayView.setTypeface(Typeface.DEFAULT, Typeface.ITALIC);
+                ViewUtils.setTypeFace(delayView, Typeface.ITALIC);
             } else if (isPredictedTimeMissing) {
                 delayView.setText(getString(R.string.stations_station_details_delay_missing));
-                delayView.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+                ViewUtils.setTypeFace(delayView, Typeface.BOLD);
             } else {
                 delayView.setText(null);
-                delayView.setTypeface(Typeface.DEFAULT, Typeface.NORMAL);
+                ViewUtils.setTypeFace(delayView, Typeface.NORMAL);
             }
             ViewUtils.setCancelledStrikeThru(delayView, isCancelled);
 

@@ -1676,7 +1676,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                     ? (acquiring ? R.string.stations_location_provider_acquiring
                             : R.string.stations_location_provider_enabled)
                     : R.string.stations_location_provider_disabled);
-            enabledView.setTypeface(acquiring ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT);
+            ViewUtils.setTypeFace(enabledView, acquiring ? Typeface.BOLD : Typeface.NORMAL);
             locationProvidersView.addView(row);
 
             if (enabled)

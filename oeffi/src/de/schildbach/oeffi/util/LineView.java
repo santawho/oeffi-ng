@@ -34,7 +34,6 @@ import android.text.style.ReplacementSpan;
 import android.util.AttributeSet;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.AppCompatTextView;
 
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
@@ -57,7 +56,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class LineView extends AppCompatTextView {
+public class LineView extends AppTextView {
     private final boolean hideIfEmpty;
     private Collection<Line> lines = null;
     private boolean ghosted = false;
@@ -82,7 +81,7 @@ public class LineView extends AppCompatTextView {
         this.hideIfEmpty = attrs != null && attrs.getAttributeBooleanValue(null, "hideIfEmpty", false);
 
         setSingleLine();
-        setTypeface(Typeface.DEFAULT_BOLD);
+        ViewUtils.setTypeFace(this, Typeface.BOLD);
         setLineSpacing(0, 1.1f);
 
         final Resources res = getResources();

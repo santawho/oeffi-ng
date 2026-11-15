@@ -433,7 +433,7 @@ public class StationViewHolder extends RecyclerViewNG.HorizontalSwipeHolder {
                             // time
                             final TextView timeView = departureViewHolder.time;
                             timeView.setText(Formats.formatTimeDiff(context, baseTime.getTime(), time, baseIsNow));
-                            timeView.setTypeface(Typeface.DEFAULT, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
+                            ViewUtils.setTypeFace(timeView, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
                             final Date updatedAt = station.updatedAt;
                             final boolean isStale = updatedAt != null
                                     && System.currentTimeMillis() - updatedAt.getTime() > Constants.STALE_UPDATE_MS;
@@ -446,14 +446,14 @@ public class StationViewHolder extends RecyclerViewNG.HorizontalSwipeHolder {
                                         ? predictedTime.getTime() - plannedTime.getTime() : 0;
                                 final long delayMins = delay / Constants.MINUTE_IN_MILLIS;
                                 delayView.setText(delayMins == 0 ? null : context.getString(R.string.stations_station_details_delay_format, delayMins));
-                                delayView.setTypeface(Typeface.DEFAULT, Typeface.ITALIC);
+                                ViewUtils.setTypeFace(delayView, Typeface.ITALIC);
                                 delayView.setTextColor(
                                         isStale ? colorLessSignificant
                                         : isGhosted ? colorSignificant
                                         : colorHighlighted);
                             } else if (isPredictedTimeMissing) {
                                 delayView.setText(context.getString(R.string.stations_station_details_delay_missing));
-                                delayView.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+                                ViewUtils.setTypeFace(delayView, Typeface.BOLD);
                                 delayView.setTextColor(colorHighlighted);
                             } else {
                                 delayView.setText(null);

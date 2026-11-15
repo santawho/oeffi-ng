@@ -61,6 +61,7 @@ import de.schildbach.oeffi.stations.FavoriteStationsProvider;
 import de.schildbach.oeffi.stations.StationsActivity;
 import de.schildbach.oeffi.util.AppInstaller;
 import de.schildbach.oeffi.util.ErrorReporter;
+import de.schildbach.oeffi.util.FontUtil;
 import de.schildbach.oeffi.util.Preferences;
 import de.schildbach.oeffi.util.ResourcesInterceptor;
 import de.schildbach.oeffi.util.SettingsUtil;
@@ -381,6 +382,7 @@ public class Application extends android.app.Application {
         log.info("=== Starting app {} version {} ({})", appName, packageInfo.versionName, packageInfo.versionCode);
 
         final String dimensionSelector = getString(R.string.dimension_selector);
+        FontUtil.setAppFontsFromPreferences();
 
         NotificationSoundManager.logAvailableTextToSpeechServices();
         SpeechInput.logAvailableSpeechRecognitionServices();

@@ -703,7 +703,7 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
                             final TextView bubble = new TextView(getContext());
                             bubble.setBackgroundResource(R.drawable.popup_dir_pointer_button);
                             bubble.setText(selectedStation.location.name);
-                            bubble.setTypeface(Typeface.DEFAULT_BOLD);
+                            ViewUtils.setTypeFace(bubble, Typeface.BOLD);
                             bubble.setTextSize(TypedValue.COMPLEX_UNIT_PX, stationFontSize);
                             bubble.setTextColor(bubbleTextColor);
                             bubble.setIncludeFontPadding(false);

@@ -48,6 +48,7 @@ import de.schildbach.oeffi.stations.StationsActivity;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.LineView;
 import de.schildbach.oeffi.util.OverflowTextView;
+import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.pte.dto.Departure;
 import de.schildbach.pte.dto.Destination;
 import de.schildbach.pte.dto.LocationType;
@@ -214,7 +215,7 @@ public class JourneyViewHolder extends RecyclerView.ViewHolder {
                 final String name = Formats.makeBreakableStationName(showPlace ? station.location.place : station.location.uniqueShortName());
                 final OverflowTextView nameView = departureViewHolder.nameView;
                 nameView.setText(name);
-                nameView.setTypeface(showPlace ? Typeface.DEFAULT : Typeface.DEFAULT_BOLD);
+                ViewUtils.setTypeFace(nameView, showPlace ? Typeface.NORMAL : Typeface.BOLD);
                 nameView.setTextColor(colorSignificant);
                 final TextView name2View = departureViewHolder.name2View;
                 name2View.setVisibility(showPlace ? View.VISIBLE : View.GONE);
@@ -257,7 +258,7 @@ public class JourneyViewHolder extends RecyclerView.ViewHolder {
                 // time
                 final TextView timeView = departureViewHolder.time;
                 timeView.setText(Formats.formatTimeDiff(context, baseTime, departureTime, baseIsNow));
-                timeView.setTypeface(Typeface.DEFAULT, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
+                ViewUtils.setTypeFace(timeView, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
                 final Date updatedAt = station.updatedAt;
                 final boolean isStale = updatedAt != null
                         && System.currentTimeMillis() - updatedAt.getTime() > Constants.STALE_UPDATE_MS;
@@ -269,7 +270,7 @@ public class JourneyViewHolder extends RecyclerView.ViewHolder {
                         ? predictedTime.getTime() - plannedTime.getTime() : 0;
                 final long delayMins = delay / Constants.MINUTE_IN_MILLIS;
                 delayView.setText(delayMins != 0 ? String.format("(%+d)", delayMins) + ' ' : "");
-                delayView.setTypeface(Typeface.DEFAULT, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
+                ViewUtils.setTypeFace(delayView, isPredicted ? Typeface.ITALIC : Typeface.NORMAL);
                 delayView.setTextColor(isStale ? colorLessSignificant : (isGhosted ? colorSignificant : colorHighlighted));
 
                 // position
@@ -291,7 +292,7 @@ public class JourneyViewHolder extends RecyclerView.ViewHolder {
                 final long timeRemaining = walkStartTime - baseTime.getTime();
                 final TextView remaining = departureViewHolder.remaining;
                 remaining.setText(Formats.formatTimeDiff(context, baseTime.getTime(), walkStartTime, baseIsNow));
-                remaining.setTypeface(Typeface.DEFAULT, isPredicted ? Typeface.BOLD_ITALIC : Typeface.BOLD);
+                ViewUtils.setTypeFace(remaining, isPredicted ? Typeface.BOLD_ITALIC : Typeface.BOLD);
                 remaining.setTextColor(timeRemaining < 60000L ? colorWalkTimeBad : colorWalkTimeGood);
 
                 departureView.setOnClickListener(v -> {

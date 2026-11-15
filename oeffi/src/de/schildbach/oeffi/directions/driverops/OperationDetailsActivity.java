@@ -43,6 +43,7 @@ import de.schildbach.oeffi.tripeval.TripRenderer;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.stations.StationDetailsActivity;
 import de.schildbach.oeffi.util.Formats;
+import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Destination;
 import de.schildbach.pte.dto.JourneyRef;
@@ -232,14 +233,14 @@ public class OperationDetailsActivity extends TripDetailsActivity {
 
         final long mins = intervalSecs / 60;
         minsView.setText((isNegative ? "-" : showPlus ? "+" : "") + mins);
-        minsView.setTypeface(null, style);
+        ViewUtils.setTypeFace(minsView, style);
         minsView.setTextColor(textColor);
 
         if (isShowSeconds()) {
             secsView.setVisibility(View.VISIBLE);
             final long secs = intervalSecs - mins * 60;
             secsView.setText((secs < 10 ? ":0" : ":") + secs);
-            secsView.setTypeface(null, style);
+            ViewUtils.setTypeFace(secsView, style);
             secsView.setTextColor(textColor);
         } else {
             secsView.setVisibility(View.GONE);

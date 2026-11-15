@@ -22,12 +22,13 @@ import android.text.Html;
 import android.util.AttributeSet;
 
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.util.AppTextView;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.pte.dto.Location;
 
 import java.util.Locale;
 
-public class LocationTextView extends androidx.appcompat.widget.AppCompatTextView {
+public class LocationTextView extends AppTextView {
     private String label = null;
     private Location location = null;
     private boolean showLocationType = true;

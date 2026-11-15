@@ -54,6 +54,7 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.ResourceUtil;
 import de.schildbach.oeffi.util.TimeSpec;
+import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Fare;
 import de.schildbach.pte.dto.Line;
@@ -194,7 +195,7 @@ public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.
         publicStrokePaint.setStrokeWidth(strokeWidth);
         publicStrokePaint.setAntiAlias(true);
 
-        publicLabelPaint.setTypeface(Typeface.DEFAULT_BOLD);
+        ViewUtils.setTypeFace(publicLabelPaint, Typeface.BOLD);
         publicLabelPaint.setTextAlign(Align.CENTER);
         publicLabelPaint.setAntiAlias(true);
 
@@ -202,54 +203,54 @@ public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.
         individualFillPaint.setColor(colorIndividual);
 
         // individualLabelPaint.setColor(Color.GRAY);
-        // individualLabelPaint.setTypeface(Typeface.DEFAULT);
+        // ViewUtils.setTypeFace(individualLabelPaint, Typeface.NORMAL);
         // individualLabelPaint.setTextSize(res.getDimension(R.dimen.font_size_xlarge));
         // individualLabelPaint.setTextAlign(Align.CENTER);
 
         individualPlannedTimePaint.setColor(colorLessSignificant);
-        individualPlannedTimePaint.setTypeface(Typeface.DEFAULT);
+        ViewUtils.setTypeFace(individualPlannedTimePaint, Typeface.NORMAL);
         individualPlannedTimePaint.setTextSize(res.getDimension(R.dimen.font_size_normal));
         individualPlannedTimePaint.setAntiAlias(true);
         individualPlannedTimePaint.setTextAlign(Align.CENTER);
 
         individualPredictedTimePaint.setColor(colorLessSignificant);
-        individualPredictedTimePaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.ITALIC));
+        ViewUtils.setTypeFace(individualPredictedTimePaint, Typeface.ITALIC);
         individualPredictedTimePaint.setTextSize(res.getDimension(R.dimen.font_size_normal));
         individualPredictedTimePaint.setAntiAlias(true);
         individualPredictedTimePaint.setTextAlign(Align.CENTER);
 
         individualPlannedTimeDiffPaint.setColor(colorLessSignificant);
-        individualPlannedTimeDiffPaint.setTypeface(Typeface.DEFAULT);
+        ViewUtils.setTypeFace(individualPlannedTimeDiffPaint, Typeface.NORMAL);
         individualPlannedTimeDiffPaint.setTextSize(res.getDimension(R.dimen.font_size_normal));
         individualPlannedTimeDiffPaint.setAntiAlias(true);
         individualPlannedTimeDiffPaint.setTextAlign(Align.CENTER);
 
         individualPredictedTimeDiffPaint.setColor(colorLessSignificant);
-        individualPredictedTimeDiffPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.ITALIC));
+        ViewUtils.setTypeFace(individualPredictedTimeDiffPaint, Typeface.ITALIC);
         individualPredictedTimeDiffPaint.setTextSize(res.getDimension(R.dimen.font_size_normal));
         individualPredictedTimeDiffPaint.setAntiAlias(true);
         individualPredictedTimeDiffPaint.setTextAlign(Align.CENTER);
 
         publicPlannedTimePaint.setColor(colorSignificant);
-        publicPlannedTimePaint.setTypeface(Typeface.DEFAULT_BOLD);
+        ViewUtils.setTypeFace(publicPlannedTimePaint, Typeface.BOLD);
         publicPlannedTimePaint.setTextSize(res.getDimension(R.dimen.font_size_normal));
         publicPlannedTimePaint.setAntiAlias(true);
         publicPlannedTimePaint.setTextAlign(Align.CENTER);
 
         publicPredictedTimePaint.setColor(colorSignificant);
-        publicPredictedTimePaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD_ITALIC));
+        ViewUtils.setTypeFace(publicPredictedTimePaint, Typeface.BOLD_ITALIC);
         publicPredictedTimePaint.setTextSize(res.getDimension(R.dimen.font_size_normal));
         publicPredictedTimePaint.setAntiAlias(true);
         publicPredictedTimePaint.setTextAlign(Align.CENTER);
 
         publicPlannedTimeDiffPaint.setColor(colorSignificant);
-        publicPlannedTimeDiffPaint.setTypeface(Typeface.DEFAULT);
+        ViewUtils.setTypeFace(publicPlannedTimeDiffPaint, Typeface.NORMAL);
         publicPlannedTimeDiffPaint.setTextSize(res.getDimension(R.dimen.font_size_normal));
         publicPlannedTimeDiffPaint.setAntiAlias(true);
         publicPlannedTimeDiffPaint.setTextAlign(Align.CENTER);
 
         publicPredictedTimeDiffPaint.setColor(colorSignificant);
-        publicPredictedTimeDiffPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.ITALIC));
+        ViewUtils.setTypeFace(publicPredictedTimeDiffPaint, Typeface.ITALIC);
         publicPredictedTimeDiffPaint.setTextSize(res.getDimension(R.dimen.font_size_normal));
         publicPredictedTimeDiffPaint.setAntiAlias(true);
         publicPredictedTimeDiffPaint.setTextAlign(Align.CENTER);
@@ -257,7 +258,7 @@ public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.
         plannedPositionPaintBackground.setColor(colorSignificant);
         changedPositionPaintBackground.setColor(colorPositionChanged);
         positionPaint.setColor(colorSignificantInverse);
-        positionPaint.setTypeface(Typeface.DEFAULT_BOLD);
+        ViewUtils.setTypeFace(positionPaint, Typeface.BOLD);
         positionPaint.setTextSize(res.getDimension(R.dimen.font_size_large));
         positionPaint.setAntiAlias(true);
         positionPaint.setTextAlign(Align.CENTER);
@@ -275,13 +276,13 @@ public final class TripsGalleryAdapter extends BaseAdapter { //@@@ RecyclerView.
         connectionStrokePaint.setAntiAlias(true);
 
         durationPaint.setColor(colorSignificant);
-        durationPaint.setTypeface(Typeface.DEFAULT);
+        ViewUtils.setTypeFace(durationPaint, Typeface.NORMAL);
         durationPaint.setTextSize(res.getDimension(R.dimen.font_size_normal));
         durationPaint.setAntiAlias(true);
         durationPaint.setTextAlign(Align.CENTER);
 
         farePaint.setColor(colorSignificant);
-        farePaint.setTypeface(Typeface.DEFAULT);
+        ViewUtils.setTypeFace(farePaint, Typeface.NORMAL);
         farePaint.setTextSize(res.getDimension(R.dimen.font_size_small));
         farePaint.setAntiAlias(true);
         farePaint.setTextAlign(Align.CENTER);

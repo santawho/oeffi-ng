@@ -36,9 +36,13 @@ import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -60,24 +64,29 @@ import de.schildbach.oeffi.R;
 
 public class ResourcesInterceptor extends Resources {
     public static Context getApplicationContext(final Context baseContext, final Resources resources, final Properties properties) {
-        if (properties == null)
-            return baseContext;
+        // if (properties == null)
+        //     return baseContext;
         mapper = new ResourcesMapper(resources);
         mapper.setConfiguration(properties);
-        return new ContextWrapper(baseContext, resources);
+        return new ContextWrapper(baseContext, null, resources);
     }
 
-    public static Context getActivityContext(final Context baseContext) {
+    public static Context getActivityContext(final Context baseContext, final AppCompatDelegate delegate) {
         if (mapper == null)
             return baseContext;
-        return new ContextWrapper(baseContext, null);
+        return new ContextWrapper(baseContext, delegate, null);
     }
 
     public static class ContextWrapper extends android.content.ContextWrapper {
+        final AppCompatDelegate delegate;
         private Resources resources;
 
-        private ContextWrapper(final Context baseContext, final Resources explicitResources) {
+        private ContextWrapper(
+                final Context baseContext,
+                final AppCompatDelegate delegate,
+                final Resources explicitResources) {
             super(baseContext);
+            this.delegate = delegate;
             if (explicitResources != null)
                 this.resources = new ResourcesInterceptor(explicitResources);
         }
@@ -89,53 +98,111 @@ public class ResourcesInterceptor extends Resources {
             return resources;
         }
 
-//        private LayoutInflater layoutInflaterInterceptor;
-//
-//        @Override
-//        public Object getSystemService(final String name) {
-//            if (Context.LAYOUT_INFLATER_SERVICE.equals(name)) {
-//                if (layoutInflaterInterceptor == null) {
-//                    final LayoutInflater original = LayoutInflater.from(getBaseContext());
-//                    layoutInflaterInterceptor = new LayoutInflaterInterceptor(original, this);
-//                }
-//                return layoutInflaterInterceptor;
-//            }
-//            return super.getSystemService(name);
-//        }
-//    }
-//
-//    public static class LayoutInflaterInterceptor extends LayoutInflater {
-//        final Context newContext;
-//
-//        protected LayoutInflaterInterceptor(final LayoutInflater original, final Context newContext) {
-//            super(original, newContext);
-//            this.newContext = newContext;
-//        }
-//
-//        @Override
-//        public LayoutInflater cloneInContext(final Context newContext) {
-//            return new LayoutInflaterInterceptor(this, newContext);
-//        }
-//
-//        private static final String[] classPrefixes = {
-//                "android.widget.",
-//                "android.view.",
-//                "android.webkit."
-//        };
-//
-//        @Override
-//        protected View onCreateView(final String name, final AttributeSet attrs) throws ClassNotFoundException {
-//            for (final String prefix : classPrefixes) {
-//                try {
-//                    final View view = createView(name, prefix, attrs);
-//                    if (view != null)
-//                        return view;
-//                } catch (ClassNotFoundException e) {
-//                    // loop
-//                }
-//            }
-//            return super.onCreateView(name, attrs);
-//        }
+        private LayoutInflater layoutInflaterInterceptor;
+
+        @Override
+        public Object getSystemService(final String name) {
+            if (Context.LAYOUT_INFLATER_SERVICE.equals(name)) {
+                if (layoutInflaterInterceptor == null) {
+                    final LayoutInflater original = LayoutInflater.from(getBaseContext());
+                    layoutInflaterInterceptor = new LayoutInflaterInterceptor(original, this);
+                }
+                return layoutInflaterInterceptor;
+            }
+            return super.getSystemService(name);
+        }
+    }
+
+    public static class LayoutInflaterInterceptor extends LayoutInflater implements LayoutInflater.Factory2 {
+        final Context newContext;
+        final ContextWrapper baseContext;
+
+        protected LayoutInflaterInterceptor(final LayoutInflaterInterceptor original, final Context newContext) {
+            super(original, newContext);
+            this.newContext = newContext;
+            this.baseContext = original.baseContext;
+        }
+
+        protected LayoutInflaterInterceptor(final LayoutInflater original, final ContextWrapper newContext) {
+            super(original, newContext);
+            this.baseContext = newContext;
+            this.newContext = newContext;
+            if (baseContext.delegate != null)
+                setFactory2(this);
+        }
+
+        @Override
+        public LayoutInflater cloneInContext(final Context newContext) {
+            return new LayoutInflaterInterceptor(this, newContext);
+        }
+
+        private static final String[] classPrefixes = {
+                "android.widget.",
+                "android.view.",
+                "android.webkit."
+        };
+
+        @Override
+        protected View onCreateView(
+                final String name,
+                final AttributeSet attrs) throws ClassNotFoundException {
+            for (final String prefix : classPrefixes) {
+                try {
+                    final View view = createView(name, prefix, attrs);
+                    if (view != null)
+                        return fixupView(view);
+                } catch (final ClassNotFoundException cnfe) {
+                    // loop
+                }
+            }
+            return fixupView(super.onCreateView(name, attrs));
+        }
+
+        private View fixupView(final View view) {
+            if (view instanceof TextView) {
+                final TextView textView = (TextView) view;
+                textView.setTypeface(FontUtil.getAppTypeFace(), textView.getTypeface().getStyle());
+            }
+            return view;
+        }
+
+        @Nullable
+        @Override
+        public View onCreateView(
+                @NonNull final Context viewContext,
+                @Nullable final View parent,
+                @NonNull final String name,
+                @Nullable final AttributeSet attrs) throws ClassNotFoundException {
+            return this.onCreateView(name, attrs);
+        }
+
+        @Override
+        protected View onCreateView(
+                final View parent,
+                final String name,
+                final AttributeSet attrs) throws ClassNotFoundException {
+            return this.onCreateView(name, attrs);
+        }
+
+        @Nullable
+        @Override
+        public View onCreateView( // Factory2
+                @Nullable final View parent,
+                @NonNull final String name,
+                @NonNull final Context context,
+                @NonNull final AttributeSet attrs) {
+            baseContext.delegate.createView(parent, name, context, attrs);
+            return fixupView(baseContext.delegate.createView(parent, name, context, attrs));
+        }
+
+        @Nullable
+        @Override
+        public View onCreateView( // Factory2
+                @NonNull final String name,
+                @NonNull final Context context,
+                @NonNull final AttributeSet attrs) {
+            return onCreateView(null, name, context, attrs);
+        }
     }
 
     private static class ResourcesMapper {

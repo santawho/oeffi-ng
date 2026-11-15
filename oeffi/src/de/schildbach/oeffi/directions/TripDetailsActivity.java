@@ -2644,21 +2644,21 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         ViewUtils.setCancelledStrikeThru(stopNameView, isCancelled);
         if (highlightLocation) {
             stopNameView.setTextColor(colorHighlighted);
-            stopNameView.setTypeface(null, Typeface.BOLD);
+            ViewUtils.setTypeFace(stopNameView, Typeface.BOLD);
         } else if (renderConfig.isJourney ? isEntryOrExit
                 : (pearlType == PearlView.Type.DEPARTURE || pearlType == PearlView.Type.ARRIVAL)) {
             stopNameView.setTextColor(colorSignificant);
-            stopNameView.setTypeface(null, Typeface.BOLD);
+            ViewUtils.setTypeFace(stopNameView, Typeface.BOLD);
         } else if (pearlType == PearlView.Type.DEPARTURE_FOR_INTERMEDIATE_ARRIVAL
                 || pearlType == PearlView.Type.ARRIVAL_FOR_INTERMEDIATE_DEPARTURE) {
             stopNameView.setTextColor(colorSignificant);
-            stopNameView.setTypeface(null, Typeface.NORMAL);
+            ViewUtils.setTypeFace(stopNameView, Typeface.NORMAL);
         } else if (pearlType == PearlView.Type.PASSING) {
             stopNameView.setTextColor(colorInsignificant);
-            stopNameView.setTypeface(null, Typeface.NORMAL);
+            ViewUtils.setTypeFace(stopNameView, Typeface.NORMAL);
         } else {
             stopNameView.setTextColor(colorSignificant);
-            stopNameView.setTypeface(null, Typeface.NORMAL);
+            ViewUtils.setTypeFace(stopNameView, Typeface.NORMAL);
         }
         stopNameView.setOnClickListener(null);
         stopNameView.setOnLongClickListener(null);
@@ -2767,8 +2767,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             stopTimeProvidedView.setTextColor(stopTimeColor);
             final boolean stopTimeBold = highlightThisTime || isCancelled || (renderConfig.isJourney ? isEntryOrExit
                     : (pearlType == PearlView.Type.DEPARTURE || pearlType == PearlView.Type.ARRIVAL));
-            stopDateProvidedView.setTypeface(null, (highlightThisTime ? Typeface.BOLD : 0) + (isTimePredicted ? Typeface.ITALIC : 0));
-            stopTimeProvidedView.setTypeface(null, (stopTimeBold ? Typeface.BOLD : 0) + (isTimePredicted ? Typeface.ITALIC : 0));
+            ViewUtils.setTypeFace(stopDateProvidedView,
+                    (highlightThisTime ? Typeface.BOLD : 0) + (isTimePredicted ? Typeface.ITALIC : 0));
+            ViewUtils.setTypeFace(stopTimeProvidedView,
+                    (stopTimeBold ? Typeface.BOLD : 0) + (isTimePredicted ? Typeface.ITALIC : 0));
         } else {
             stopDateProvidedView.setText(null);
             stopTimeProvidedView.setText(null);
@@ -2787,8 +2789,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             // ViewUtils.setCancelledStrikeThru(stopTimeSimulatedView, isCancelled);
             final boolean stopTimeBold = highlightThisTime || (renderConfig.isJourney ? isEntryOrExit
                     : (pearlType == PearlView.Type.DEPARTURE || pearlType == PearlView.Type.ARRIVAL));
-            stopDateSimulatedView.setTypeface(null, (highlightThisTime ? Typeface.BOLD : 0) + (isTimePredicted ? Typeface.ITALIC : 0));
-            stopTimeSimulatedView.setTypeface(null, (stopTimeBold ? Typeface.BOLD : 0) + (isTimePredicted ? Typeface.ITALIC : 0));
+            ViewUtils.setTypeFace(stopDateSimulatedView,
+                    (highlightThisTime ? Typeface.BOLD : 0) + (isTimePredicted ? Typeface.ITALIC : 0));
+            ViewUtils.setTypeFace(stopTimeSimulatedView,
+                    (stopTimeBold ? Typeface.BOLD : 0) + (isTimePredicted ? Typeface.ITALIC : 0));
 
             final int stopTimeColor = getSimulatedStopTimeColor(simulatedDelay);
             stopDateSimulatedView.setTextColor(stopTimeColor);
@@ -2805,12 +2809,12 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             if (delayMins != 0) {
                 collapseColumns.collapseDelayColumn = false;
                 stopDelayProvidedView.setText(getString(R.string.directions_trip_details_delay_format, delayMins));
-                stopDelayProvidedView.setTypeface(Typeface.DEFAULT, Typeface.ITALIC);
+                ViewUtils.setTypeFace(stopDelayProvidedView, Typeface.ITALIC);
             }
         } else if (providedDelayMissing) {
             collapseColumns.collapseDelayColumn = false;
             stopDelayProvidedView.setText(getString(R.string.directions_trip_details_delay_missing));
-            stopDelayProvidedView.setTypeface(Typeface.DEFAULT, Typeface.NORMAL);
+            ViewUtils.setTypeFace(stopDelayProvidedView, Typeface.NORMAL);
         }
 
         if (isShowSimulatedLine && simulatedDelay != null) {
@@ -2818,7 +2822,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             if (delayMins != 0) {
                 collapseColumns.collapseDelayColumn = false;
                 stopDelaySimulatedView.setText(getString(R.string.directions_trip_details_delay_format, delayMins));
-                stopDelaySimulatedView.setTypeface(Typeface.DEFAULT, Typeface.ITALIC);
+                ViewUtils.setTypeFace(stopDelaySimulatedView, Typeface.ITALIC);
             }
         } else {
             stopDelaySimulatedView.setVisibility(View.GONE);
@@ -2851,7 +2855,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
             stopPositionView.setText(positionStr);
-            stopPositionView.setTypeface(null, Typeface.BOLD + (isPositionPredicted ? Typeface.ITALIC : 0));
+            ViewUtils.setTypeFace(stopPositionView, Typeface.BOLD + (isPositionPredicted ? Typeface.ITALIC : 0));
             final int padding = (int) (2 * displayMetrics.density);
             stopPositionView.setBackgroundDrawable(new ColorDrawable(
                     positionChanged ? colorPositionBackgroundChanged : colorPositionBackground));

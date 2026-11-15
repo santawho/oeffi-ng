@@ -3,7 +3,9 @@ package de.schildbach.oeffi.util;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.view.View;
 import android.view.ViewParent;
@@ -76,5 +78,13 @@ public class ViewUtils {
             setBounds(bounds.left, center - halfThickness, bounds.right, center + halfThickness);
             super.draw(canvas);
         }
+    }
+
+    public static void setTypeFace(final TextView textView, final int style) {
+        textView.setTypeface(textView.getTypeface(), style);
+    }
+
+    public static void setTypeFace(final Paint paint, final int style) {
+        paint.setTypeface(Typeface.create(FontUtil.getAppTypeFace(), style));
     }
 }

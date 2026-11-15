@@ -128,7 +128,7 @@ public class NavigationMenuAdapter extends RecyclerView.Adapter<NavigationMenuAd
                 iconView.setImageState(new int[] { android.R.attr.state_checked }, false);
 
             titleView.setText(item.getTitle());
-            titleView.setTypeface(primaryItem ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT);
+            ViewUtils.setTypeFace(titleView, primaryItem ? Typeface.BOLD : Typeface.NORMAL);
             titleView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                     res.getDimension(primaryItem ? R.dimen.font_size_xlarge : R.dimen.font_size_large));
 

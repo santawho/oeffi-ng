@@ -45,6 +45,7 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.util.TimeZoneSelector;
+import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.PTDate;
 import de.schildbach.pte.dto.Trip;
@@ -103,7 +104,7 @@ public class TripsGallery extends Gallery { //@@@ RecyclerView {
             labelTextPaint.setColor(bgColor);
             labelTextPaint.setAntiAlias(true);
             labelTextPaint.setTextSize(textSize);
-            labelTextPaint.setTypeface(Typeface.DEFAULT_BOLD);
+            ViewUtils.setTypeFace(labelTextPaint, Typeface.BOLD);
             labelTextPaint.setTextAlign(Align.CENTER);
         }
 
