@@ -176,7 +176,7 @@ public class LineView extends AppCompatTextView {
                 if (line.label != null)
                     text.append(line.label);
                 else
-                    text.append(line.productCode());
+                    text.append(ResourceUtil.getProductLabel(line.validProduct()));
 
                 if (line.hasAttr(Attr.CIRCLE_CLOCKWISE))
                     text.append('\u21bb'); // clockwise arrow symbol
@@ -194,7 +194,7 @@ public class LineView extends AppCompatTextView {
                 final Line line = lines.iterator().next();
                 final String sheet = Stream.of(
                                 line.name,
-                                ResourceUtil.getProductName(line.product),
+                                ResourceUtil.getProductName(line.validProduct()),
                                 line.operator)
                         .filter(Objects::nonNull)
                         .collect(Collectors.joining("\n"));

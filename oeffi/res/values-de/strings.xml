@@ -668,16 +668,31 @@
     <string name="alert_update_available_message_external_installer">Eine neue Version dieser Anwendung ist verfügbar. Bitte aktualisiere mit %1$s.</string>
 
     <!-- products -->
-    <string name="product_i">Fernverkehr</string>
-    <string name="product_r">Regional</string>
-    <string name="product_s">S-Bahn</string>
-    <string name="product_u">U-Bahn</string>
-    <string name="product_t">Tram</string>
-    <string name="product_b">Bus</string>
-    <string name="product_h">Fernbus</string>
-    <string name="product_p">Bedarfsverkehr</string>
-    <string name="product_f">Fähre</string>
-    <string name="product_c">Seilbahn</string>
+    <string name="product_label_unknown">\?</string>
+    <string name="product_label_highspeed_train">IC</string>
+    <string name="product_label_regional_train">R</string>
+    <string name="product_label_suburban_train">S</string>
+    <string name="product_label_subway">U</string>
+    <string name="product_label_tram">T</string>
+    <string name="product_label_bus">B</string>
+    <string name="product_label_coach">C</string>
+    <string name="product_label_ondemand">A</string>
+    <string name="product_label_ferry">F</string>
+    <string name="product_label_cablecar">G</string>
+    <string name="product_label_replacement">EV</string>
+
+    <string name="product_name_unknown">Unbekanntes Produkt</string>
+    <string name="product_name_highspeed_train">Fernverkehr</string>
+    <string name="product_name_regional_train">Regional</string>
+    <string name="product_name_suburban_train">S-Bahn</string>
+    <string name="product_name_subway">U-Bahn</string>
+    <string name="product_name_tram">Tram</string>
+    <string name="product_name_bus">Bus</string>
+    <string name="product_name_coach">Fernbus</string>
+    <string name="product_name_ondemand">Bedarfsverkehr</string>
+    <string name="product_name_ferry">Fähre</string>
+    <string name="product_name_cablecar">Seilbahn</string>
+    <string name="product_name_replacement">Ersatzverkehr</string>
 
     <!-- time -->
     <string name="time_minutes">min</string>

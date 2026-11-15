@@ -24,21 +24,54 @@ import android.graphics.drawable.Drawable;
 
 import androidx.appcompat.content.res.AppCompatResources;
 
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+
+import javax.annotation.Nonnull;
 
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
 import de.schildbach.pte.dto.Product;
 
 public class ResourceUtil {
-    public static String getProductName(final Product product) {
-        final Application application = Application.getInstance();
-        final int productResId = application.getResources().getIdentifier(
-                "product_" + Character.toLowerCase((product == null ? Product.UNKNOWN : product).code),
-                "string", application.getPackageName());
-        if (productResId == 0)
-            return null;
-        return application.getString(productResId);
+    private static final Map<Product, Integer> PRODUCT_LABELS = new HashMap<>();
+    private static final Map<Product, Integer> PRODUCT_NAMES = new HashMap<>();
+    static {
+        PRODUCT_LABELS.put(Product.UNKNOWN, R.string.product_label_unknown);
+        PRODUCT_LABELS.put(Product.HIGH_SPEED_TRAIN, R.string.product_label_highspeed_train);
+        PRODUCT_LABELS.put(Product.REGIONAL_TRAIN, R.string.product_label_regional_train);
+        PRODUCT_LABELS.put(Product.SUBURBAN_TRAIN, R.string.product_label_suburban_train);
+        PRODUCT_LABELS.put(Product.SUBWAY, R.string.product_label_subway);
+        PRODUCT_LABELS.put(Product.TRAM, R.string.product_label_tram);
+        PRODUCT_LABELS.put(Product.BUS, R.string.product_label_bus);
+        PRODUCT_LABELS.put(Product.COACH, R.string.product_label_coach);
+        PRODUCT_LABELS.put(Product.ON_DEMAND, R.string.product_label_ondemand);
+        PRODUCT_LABELS.put(Product.FERRY, R.string.product_label_ferry);
+        PRODUCT_LABELS.put(Product.CABLECAR, R.string.product_label_cablecar);
+        PRODUCT_LABELS.put(Product.REPLACEMENT_SERVICE, R.string.product_label_replacement);
+
+        PRODUCT_NAMES.put(Product.UNKNOWN, R.string.product_name_unknown);
+        PRODUCT_NAMES.put(Product.HIGH_SPEED_TRAIN, R.string.product_name_highspeed_train);
+        PRODUCT_NAMES.put(Product.REGIONAL_TRAIN, R.string.product_name_regional_train);
+        PRODUCT_NAMES.put(Product.SUBURBAN_TRAIN, R.string.product_name_suburban_train);
+        PRODUCT_NAMES.put(Product.SUBWAY, R.string.product_name_subway);
+        PRODUCT_NAMES.put(Product.TRAM, R.string.product_name_tram);
+        PRODUCT_NAMES.put(Product.BUS, R.string.product_name_bus);
+        PRODUCT_NAMES.put(Product.COACH, R.string.product_name_coach);
+        PRODUCT_NAMES.put(Product.ON_DEMAND, R.string.product_name_ondemand);
+        PRODUCT_NAMES.put(Product.FERRY, R.string.product_name_ferry);
+        PRODUCT_NAMES.put(Product.CABLECAR, R.string.product_name_cablecar);
+        PRODUCT_NAMES.put(Product.REPLACEMENT_SERVICE, R.string.product_name_replacement);
+    }
+    public static String getProductLabel(final @Nonnull Product product) {
+        final Integer resId = PRODUCT_LABELS.get(product);
+        return Application.getInstance().getString(resId != null ? resId : R.string.product_label_unknown);
+    }
+
+    public static String getProductName(final @Nonnull Product product) {
+        final Integer resId = PRODUCT_NAMES.get(product);
+        return Application.getInstance().getString(resId != null ? resId : R.string.product_name_unknown);
     }
 
     public static String[] getStringArray(final int resId, final Object... formatArgs) {

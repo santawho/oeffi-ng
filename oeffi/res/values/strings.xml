@@ -672,16 +672,31 @@
     <string name="alert_update_available_message_external_installer">A new version of this application is available. Please update using %1$s.</string>
 
     <!-- products -->
-    <string name="product_i">Highspeed</string>
-    <string name="product_r">Regional</string>
-    <string name="product_s">Suburban</string>
-    <string name="product_u">Metro</string>
-    <string name="product_t">Tram</string>
-    <string name="product_b">Bus</string>
-    <string name="product_h">Coach</string>
-    <string name="product_p">On-Demand</string>
-    <string name="product_f">Ferry</string>
-    <string name="product_c">Cablecar</string>
+    <string name="product_label_unknown">\?</string>
+    <string name="product_label_highspeed_train">IC</string>
+    <string name="product_label_regional_train">R</string>
+    <string name="product_label_suburban_train">S</string>
+    <string name="product_label_subway">U</string>
+    <string name="product_label_tram">T</string>
+    <string name="product_label_bus">B</string>
+    <string name="product_label_coach">C</string>
+    <string name="product_label_ondemand">D</string>
+    <string name="product_label_ferry">F</string>
+    <string name="product_label_cablecar">G</string>
+    <string name="product_label_replacement">RS</string>
+
+    <string name="product_name_unknown">Unknown Product</string>
+    <string name="product_name_highspeed_train">Highspeed</string>
+    <string name="product_name_regional_train">Regional</string>
+    <string name="product_name_suburban_train">Suburban</string>
+    <string name="product_name_subway">Metro</string>
+    <string name="product_name_tram">Tram</string>
+    <string name="product_name_bus">Bus</string>
+    <string name="product_name_coach">Coach</string>
+    <string name="product_name_ondemand">On-Demand</string>
+    <string name="product_name_ferry">Ferry</string>
+    <string name="product_name_cablecar">Cablecar</string>
+    <string name="product_name_replacement">Replacement Service</string>
 
     <!-- time -->
     <string name="time_minutes">min</string>
