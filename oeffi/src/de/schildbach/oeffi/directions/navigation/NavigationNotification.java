@@ -1646,8 +1646,8 @@ public class NavigationNotification {
         log.info("refreshing notification");
         final Date now = new Date();
         final long nowTime = now.getTime();
-        final long refreshRequiredAt = lastNotified == null ? 0 : lastNotified.refreshNotificationRequiredAt;
-        if (nowTime < refreshRequiredAt) {
+        final long refreshNotificationRequiredAt = lastNotified == null ? 0 : lastNotified.refreshNotificationRequiredAt;
+        if (nowTime < refreshNotificationRequiredAt) {
             final long refreshedAt = lastNotified == null ? 0 : force ? lastNotified.refreshForcedAt : lastNotified.refreshedAt;
             final long diff = nowTime - refreshedAt;
             if (diff < INHIBIT_FAST_REFRESH_MS) {
@@ -1656,7 +1656,7 @@ public class NavigationNotification {
                     update(false, null, true, delaySoundUntil);
                 if (force)
                     sendUpdateTriggerBroadcast();
-                return refreshRequiredAt; // ignore multiple alarms in short time
+                return refreshNotificationRequiredAt; // ignore multiple alarms in short time
             }
         }
         Trip newTrip = null;
@@ -1694,7 +1694,7 @@ public class NavigationNotification {
             update(force, null, speakPreview, delaySoundUntil);
             sendUpdateTriggerBroadcast();
         }
-        return lastNotified.refreshNotificationRequiredAt;
+        return refreshNotificationRequiredAt;
     }
 
     private void sendUpdateTriggerBroadcast() {
