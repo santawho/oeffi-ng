@@ -135,7 +135,9 @@ public class PopupMenu extends androidx.appcompat.widget.PopupMenu {
             final Drawable icon = item.getIcon();
             if (icon != null) {
                 haveSomeIcons = true;
-                icon.setTint(iconColor);
+                final Drawable mutable = icon.mutate();
+                mutable.setTint(iconColor);
+                item.setIcon(mutable);
             } else {
                 someIconsMissing = true;
             }

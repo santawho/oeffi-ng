@@ -93,6 +93,7 @@ import de.schildbach.oeffi.util.HorizontalPager;
 import de.schildbach.oeffi.util.LocationHelper;
 import de.schildbach.oeffi.util.MapPopupMenu;
 import de.schildbach.oeffi.util.PopupMenu;
+import de.schildbach.oeffi.util.ResourceUtil;
 import de.schildbach.oeffi.util.VehicleInformationRenderer;
 import de.schildbach.oeffi.util.geofiles.GeoFileProducer;
 import de.schildbach.oeffi.util.geofiles.GpxProducer;
@@ -2012,10 +2013,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         }
 
         final ImageView iconView = elementView.findViewById(R.id.directions_trip_details_individual_entry_element_icon);
-        final Drawable drawable = getDrawable(iconResId);
-        if (drawable != null)
-            drawable.setTint(textColor);
-        iconView.setImageDrawable(drawable);
+        iconView.setImageDrawable(ResourceUtil.getColoredDrawable(this, iconResId, textColor));
 
         final View timeView = elementView.findViewById(R.id.directions_trip_details_individual_entry_element_time);
         if (timeText == null) {

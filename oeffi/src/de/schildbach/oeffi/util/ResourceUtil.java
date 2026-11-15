@@ -67,8 +67,11 @@ public class ResourceUtil {
     }
 
     public static Drawable getColoredDrawable(final Context context, final int iconResId, final int color) {
-        final Drawable drawable = AppCompatResources.getDrawable(context, iconResId).mutate();
-        drawable.setTint(color);
-        return drawable;
+        final Drawable drawable = AppCompatResources.getDrawable(context, iconResId);
+        if (drawable == null)
+            return null;
+        final Drawable mutable = drawable.mutate();
+        mutable.setTint(color);
+        return mutable;
     }
 }

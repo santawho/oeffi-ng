@@ -27,7 +27,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -48,7 +47,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -57,15 +55,14 @@ import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.directions.QueryTripRunnable;
-import de.schildbach.oeffi.directions.TripUtils;
 import de.schildbach.oeffi.tripeval.TripRenderer;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.Objects;
+import de.schildbach.oeffi.util.ResourceUtil;
 import de.schildbach.oeffi.util.TimeSpec;
 import de.schildbach.oeffi.directions.TripDetailsActivity;
 import de.schildbach.oeffi.directions.TripsOverviewActivity;
-import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.JourneyRef;
@@ -622,9 +619,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
             drawableResId = R.drawable.ic_bell_off_black_24dp;
             colorId = R.color.fg_insignificant;
         }
-        final Drawable drawable = getDrawable(drawableResId);
-        drawable.setTint(getColor(colorId));
-        bellButton.setImageDrawable(drawable);
+        bellButton.setImageDrawable(ResourceUtil.getColoredDrawable(this, drawableResId, getColor(colorId)));
     }
 
     private String formatDuration(final long millis) {
