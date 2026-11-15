@@ -208,15 +208,21 @@ public class TripUtils {
         }
         if (!doRefresh)
             return oldLeg;
-        final boolean mustLoadPath = oldLeg.getPath() == null;
-        final QueryJourneyResult result = networkProvider.queryJourney(journeyRef, false, mustLoadPath);
-        if (result == null
-                || result.status != QueryJourneyResult.Status.OK
-                || result.journeyLegs == null) {
+        try {
+            final boolean mustLoadPath = oldLeg.getPath() == null;
+            final QueryJourneyResult result = networkProvider.queryJourney(journeyRef, false, mustLoadPath);
+            if (result == null
+                    || result.status != QueryJourneyResult.Status.OK
+                    || result.journeyLegs == null) {
+                // signal error
+                return null;
+            }
+            return buildUpdatedLeg(oldLeg, result.journeyLegs.get(0), now);
+        } catch (final IOException ioe) {
+            log.error("query journey: {}", ioe.getMessage());
             // signal error
             return null;
         }
-        return buildUpdatedLeg(oldLeg, result.journeyLegs.get(0), now);
     }
 
     public static Trip.Public buildUpdatedLeg(
