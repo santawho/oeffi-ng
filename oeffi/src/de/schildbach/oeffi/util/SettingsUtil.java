@@ -49,7 +49,7 @@ public class SettingsUtil {
     }
 
     private File getRestoreFile() {
-        return new File(applicationContext.getCacheDir(), RESTORE_FILENAME_PATTERN);
+        return new File(applicationContext.getInternalCacheDir(), RESTORE_FILENAME_PATTERN);
     }
 
     public boolean backup(final OutputStream outputStream) {

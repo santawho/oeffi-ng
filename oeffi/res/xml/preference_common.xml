@@ -10,27 +10,48 @@
         android:entries="@array/common_preferred_timezone_entries"
         android:entryValues="@array/common_preferred_timezone_values"
         android:defaultValue="location" />
+
     <CheckBoxPreference
         android:defaultValue="true"
         android:key="check_for_updates"
         android:summary="@string/global_preferences_check_for_updates_summary"
         android:title="@string/global_preferences_check_for_updates_title" />
+
     <CheckBoxPreference
         android:defaultValue="true"
         android:key="show_hints"
         android:summary="@string/global_preferences_show_hints_summary"
         android:title="@string/global_preferences_show_hints_title" />
+
     <Preference
         android:key="location_settings"
         android:summary="@string/global_preferences_location_settings_summary"
         android:title="@string/global_preferences_location_settings_title">
         <intent android:action="android.settings.LOCATION_SOURCE_SETTINGS" />
     </Preference>
+
     <Preference
         android:key="battery_optimizations"
         android:summary="@string/global_preferences_battery_optimizations_summary"
         android:title="@string/global_preferences_battery_optimizations_title">
         <intent android:action="android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS" />
     </Preference>
+
+    <PreferenceCategory
+        android:title="@string/global_preferences_storage_settings_title">
+
+        <CheckBoxPreference
+            android:key="storage_external_obb_enabled"
+            android:defaultValue="false"
+            android:title="@string/global_preferences_storage_external_obb_title"
+            android:summary="@string/global_preferences_storage_external_obb_summary" />
+
+        <CheckBoxPreference
+            android:key="storage_external_cache_enabled"
+            android:defaultValue="false"
+            android:title="@string/global_preferences_storage_external_cache_title"
+            android:summary="@string/global_preferences_storage_external_cache_summary" />
+
+    </PreferenceCategory>
 
 </PreferenceScreen>

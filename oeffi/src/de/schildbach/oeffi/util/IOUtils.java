@@ -20,6 +20,7 @@ package de.schildbach.oeffi.util;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
 public class IOUtils {
@@ -35,5 +36,15 @@ public class IOUtils {
 
     public static String readAllText(final InputStream is) throws IOException {
         return new String(readAllBytes(is), StandardCharsets.UTF_8);
+    }
+
+    public static void copyAll(final InputStream is, final OutputStream os) throws IOException {
+        final byte[] data = new byte[4096];
+        for (;;) {
+            final int len = is.read(data);
+            if (len <= 0)
+                break;
+            os.write(data, 0, len);
+        }
     }
 }

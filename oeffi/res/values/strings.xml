@@ -68,6 +68,14 @@
     <string name="global_preferences_location_settings_summary">Enable location providers, e.g. GPS.</string>
     <string name="global_preferences_battery_optimizations_title">Battery optimizations</string>
     <string name="global_preferences_battery_optimizations_summary">If the app-widget cannot fetch departure times while your device is in standby, you should disable battery optimizations for Öffi.</string>
+    <string name="global_preferences_storage_settings_title">Storage</string>
+    <string name="global_preferences_storage_external_cache_title">Cache on SD-card</string>
+    <string name="global_preferences_storage_external_cache_summary">Store cached data (e.g. map tiles) on external storage (SD-card) if present.</string>
+    <string name="global_preferences_storage_external_obb_title">Additional files on SD-card</string>
+    <string name="global_preferences_storage_external_obb_summary">
+        Store additional files (e.g. network plans, fonts) on external storage (SD-card) if present.
+        On most devices these files are shared among multiple user profiles.
+    </string>
 
     <!-- data provider preferences -->
     <string name="network_preferences_title">Data Provider</string>

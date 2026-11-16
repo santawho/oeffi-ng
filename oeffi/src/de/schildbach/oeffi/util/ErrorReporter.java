@@ -94,7 +94,7 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
         Thread.setDefaultUncaughtExceptionHandler(this);
 
         filesDir = application.getFilesDir();
-        cacheDir = application.getCacheDir();
+        cacheDir = application.getInternalCacheDir();
 
         stackTraceFile = new File(cacheDir, STACKTRACE_FILENAME);
 

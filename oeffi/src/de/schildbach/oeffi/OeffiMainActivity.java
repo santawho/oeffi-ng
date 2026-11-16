@@ -147,6 +147,8 @@ public abstract class OeffiMainActivity extends OeffiActivity {
 
     private static boolean messagesAlreadyProcessedInThisProcess;
 
+    private static final String MESSAGES_TXT_FILENAME = "messages.txt";
+
     private void downloadAndProcessMessages(final NetworkId network) {
         if (messagesAlreadyProcessedInThisProcess)
             return;
@@ -159,10 +161,10 @@ public abstract class OeffiMainActivity extends OeffiActivity {
         remoteUrl.addQueryParameter("version", Integer.toString(versionCode));
         remoteUrl.addQueryParameter("sdk", Integer.toString(Build.VERSION.SDK_INT));
         remoteUrl.addQueryParameter("task", taskName());
-        final File localFile = new File(getFilesDir(), "messages.txt");
-        final Downloader downloader = new Downloader(application.getCacheDir());
-        final CompletableFuture<Integer> download = downloader.download(application.okHttpClient(), remoteUrl.build(),
-                localFile);
+        final File localFile = new File(application.getObbDir(), MESSAGES_TXT_FILENAME);
+        final Downloader downloader = new Downloader();
+        final CompletableFuture<Integer> download = downloader.download(
+                application.okHttpClient(), remoteUrl.build(), localFile);
         download.whenComplete((status, t) -> {
             if (t == null) {
                 runOnUiThread(() -> processMessages(network));
@@ -171,9 +173,9 @@ public abstract class OeffiMainActivity extends OeffiActivity {
     }
 
     private void processMessages(final NetworkId network) {
-        final File indexFile = new File(getFilesDir(), "messages.txt");
+        final File indexFile = new File(application.getObbDir(), MESSAGES_TXT_FILENAME);
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(
-                indexFile.exists() ? new FileInputStream(indexFile) : getAssets().open("messages.txt"),
+                indexFile.exists() ? new FileInputStream(indexFile) : getAssets().open(MESSAGES_TXT_FILENAME),
                 StandardCharsets.UTF_8))) {
             while (true) {
                 String line = reader.readLine();

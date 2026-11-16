@@ -283,7 +283,7 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
         }
 
         public File getPlanFile() {
-            return PlanContentProvider.getPlanFile(planId, isPDF);
+            return PlanContentProvider.instance.getPlanFile(planId, isPDF);
         }
 
         public String getPlanFilename() {

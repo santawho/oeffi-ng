@@ -26,4 +26,11 @@ public class CommonFragment extends PreferenceFragment {
     public void onCreatePreferences(@androidx.annotation.Nullable final Bundle savedInstanceState, @androidx.annotation.Nullable final String rootKey) {
         addPreferencesFromResource(R.xml.preference_common);
     }
+
+    @Override
+    protected boolean isPreferenceRequiringRestart(final String key) {
+        return "storage_external_obb_enabled".equals(key)
+                || "storage_external_cache_enabled".equals(key)
+                || super.isPreferenceRequiringRestart(key);
+    }
 }

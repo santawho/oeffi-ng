@@ -17,6 +17,7 @@
 
 package de.schildbach.oeffi.util;
 
+import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.util.bzip2.BZip2CompressorInputStream;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -26,6 +27,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import okhttp3.internal.http.DateFormattingKt;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +51,6 @@ import java.util.concurrent.Semaphore;
 import static de.schildbach.pte.util.Preconditions.checkState;
 
 public class Downloader {
-    private final File cacheDir;
     private final ConcurrentHashMap<File, Semaphore> semaphores = new ConcurrentHashMap<>();
 
     private static final Random random = new Random();
@@ -58,22 +60,33 @@ public class Downloader {
         void progress(long contentRead, long contentLength);
     }
 
-    public Downloader(final File cacheDir) {
-        this.cacheDir = cacheDir;
+    private final long timeStarted;
+
+    public Downloader() {
+        timeStarted = System.currentTimeMillis();
     }
 
-    public CompletableFuture<Integer> download(final OkHttpClient okHttpClient, final HttpUrl remoteUrl,
-                                                      final File targetFile) {
+    public CompletableFuture<Integer> download(
+            final OkHttpClient okHttpClient,
+            final HttpUrl remoteUrl,
+            final File targetFile) {
         return download(okHttpClient, remoteUrl, targetFile, false, null);
     }
 
-    public CompletableFuture<Integer> download(final OkHttpClient okHttpClient, final HttpUrl remoteUrl,
-            final File targetFile, final boolean unzip) {
+    public CompletableFuture<Integer> download(
+            final OkHttpClient okHttpClient,
+            final HttpUrl remoteUrl,
+            final File targetFile,
+            final boolean unzip) {
         return download(okHttpClient, remoteUrl, targetFile, unzip, null);
     }
 
-    public CompletableFuture<Integer> download(final OkHttpClient okHttpClient, final HttpUrl remoteUrl,
-            final File targetFile, final boolean unzip, @Nullable final ProgressCallback progressCallback) {
+    public CompletableFuture<Integer> download(
+            final OkHttpClient okHttpClient,
+            final HttpUrl remoteUrl,
+            final File targetFile,
+            final boolean unzip,
+            @Nullable final ProgressCallback progressCallback) {
         final CompletableFuture<Integer> future = new CompletableFuture<>();
         final Semaphore semaphore = semaphores.computeIfAbsent(targetFile, file -> new Semaphore(1));
         if (semaphore.tryAcquire()) {
@@ -81,8 +94,12 @@ public class Downloader {
             final Request.Builder request = new Request.Builder();
             request.url(remoteUrl);
             if (meta != null) {
+                final long now = System.currentTimeMillis();
+
+                final Date date = meta.getDate("Date");
                 final Date expires = meta.getDate("Expires");
-                if (expires != null && System.currentTimeMillis() < expires.getTime()) {
+                if ((date != null && date.getTime() > timeStarted && now < date.getTime() + Constants.HOUR_IN_MILLIS)
+                    || (expires != null && now < expires.getTime())) {
                     log.info("Download '{}' skipped; using cached copy.", remoteUrl);
                     future.complete(HttpURLConnection.HTTP_NOT_MODIFIED);
                     semaphore.release();
@@ -98,8 +115,7 @@ public class Downloader {
             }
             final Call call = okHttpClient.newCall(request.build());
             call.enqueue(new Callback() {
-                private final File tempFile = new File(cacheDir,
-                        targetFile.getName() + ".part." + String.format("%04x", random.nextInt(0x10000)));
+                private final File tempFile = new File(targetFile.getPath() + ".part." + String.format("%04x", random.nextInt(0x10000)));
 
                 public void onResponse(final Call call, final Response r) throws IOException {
                     try (final Response response = r) {
@@ -158,9 +174,11 @@ public class Downloader {
         final String expires = headers.get("Expires");
         final String lastModified = headers.get("Last-Modified");
         final String etag = headers.get("ETag");
+        final String date = headers.get("Date");
         final File metaFile = metaFile(file);
-        if (expires != null || etag != null) {
+        if (expires != null || etag != null || lastModified != null) {
             try (final PrintWriter writer = new PrintWriter(metaFile)) {
+                writer.println("Date: " + (date != null ? date : DateFormattingKt.toHttpDateString(new Date())));
                 if (expires != null)
                     writer.println("Expires: " + expires);
                 if (lastModified != null)

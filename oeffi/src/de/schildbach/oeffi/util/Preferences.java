@@ -31,6 +31,10 @@ public class Preferences {
         return prefs.getString(key, resources.getString(defaultValueResId));
     }
 
+    public boolean getBoolean(final String key, final boolean defaultValue) {
+        return prefs.getBoolean(key, defaultValue);
+    }
+
     public Integer getInteger(final String key) {
         final String text = getString(key, null);
         if (text == null)

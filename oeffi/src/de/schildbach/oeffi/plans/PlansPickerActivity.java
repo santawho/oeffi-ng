@@ -104,7 +104,7 @@ public class PlansPickerActivity extends OeffiMainActivity implements LocationHe
         connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         locationHelper = new LocationHelper(this, this);
 
-        final File cacheDir = new File(application.getCacheDir(), "thumbs");
+        final File cacheDir = new File(application.getObbDir(), "thumbs");
         thumbCache = new Cache(cacheDir, THUMB_CACHE_SIZE);
 
         setContentView(R.layout.plans_picker_content);
@@ -309,7 +309,7 @@ public class PlansPickerActivity extends OeffiMainActivity implements LocationHe
         if (planFile.exists()) {
             PlanActivity.start(this, plan.planId, null);
         } else {
-            final Downloader downloader = new Downloader(application.getCacheDir());
+            final Downloader downloader = new Downloader();
             final HttpUrl remoteUrl = plan.url != null ? plan.url
                     : URLs.getPlansBaseUrl().newBuilder().addEncodedPathSegment(plan.getPlanFilename()).build();
             final CompletableFuture<Integer> download = downloader.download(

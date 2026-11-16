@@ -66,6 +66,7 @@ import de.schildbach.oeffi.util.Preferences;
 import de.schildbach.oeffi.util.ResourcesInterceptor;
 import de.schildbach.oeffi.util.SettingsUtil;
 import de.schildbach.oeffi.util.SpeechInput;
+import de.schildbach.oeffi.util.StorageManager;
 import de.schildbach.oeffi.util.TimeZoneSelector;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.provider.ApiProvider;
@@ -110,6 +111,7 @@ public class Application extends android.app.Application {
     private Preferences preferences;
     private String appName;
     private TimeZoneSelector systemTimeZoneSelector;
+    private StorageManager storageManager;
 
     public Application() {
         instance = this;
@@ -163,11 +165,6 @@ public class Application extends android.app.Application {
     }
 
     @Override
-    public File getCacheDir() {
-        return super.getCacheDir();
-    }
-
-    @Override
     public File getDataDir() {
         return super.getDataDir();
     }
@@ -175,6 +172,24 @@ public class Application extends android.app.Application {
     @Override
     public File getFilesDir() {
         return super.getFilesDir();
+    }
+
+    public File getInternalCacheDir() {
+        return super.getCacheDir();
+    }
+
+        @Override
+    public File getCacheDir() {
+        if (storageManager != null)
+            return storageManager.getCacheDir();
+        return super.getCacheDir();
+    }
+
+    @Override
+    public File getObbDir() {
+        if (storageManager != null)
+            return storageManager.getObbDir();
+        return super.getObbDir();
     }
 
     public String getUserAgent(final ApiProvider.UserAgentType userAgentType) {
@@ -361,15 +376,14 @@ public class Application extends android.app.Application {
     }
 
     @Override
-    public void onCreate() {
-        super.onCreate();
+    protected void attachBaseContext(final Context base) {
+        super.attachBaseContext(base);
+
         commonPackageName = getClass().getPackage().getName();
-
         systemTimeZoneSelector = new TimeZoneSelector(this);
+
         initLogging();
-
         new SettingsUtil(this).restoreIfRequested();
-
         ErrorReporter.getInstance().init(this);
 
         try {
@@ -380,6 +394,13 @@ public class Application extends android.app.Application {
 
         this.appName = getString(R.string.app_name);
         log.info("=== Starting app {} version {} ({})", appName, packageInfo.versionName, packageInfo.versionCode);
+
+        this.storageManager = new StorageManager(this, getBaseContext());
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
 
         final String dimensionSelector = getString(R.string.dimension_selector);
         FontUtil.setAppFontsFromPreferences();

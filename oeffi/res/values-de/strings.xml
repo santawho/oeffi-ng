@@ -68,6 +68,14 @@
     <string name="global_preferences_location_settings_summary">Einstellung der Standortbestimmung, z.B. GPS.</string>
     <string name="global_preferences_battery_optimizations_title">Akku-Leistungsoptimierung</string>
     <string name="global_preferences_battery_optimizations_summary">Wenn das App-Widget keine Abfahrtszeiten laden kann, während dein Gerät im Standby ist, dann solltest du die Akku-Leistungsoptimierung für Öffi abschalten.</string>
+    <string name="global_preferences_storage_settings_title">Speicher</string>
+    <string name="global_preferences_storage_external_cache_title">Cache auf SD-Karte</string>
+    <string name="global_preferences_storage_external_cache_summary">Lege zwischengespeicherte Daten (z.B.. Kartenkacheln) auf dem externen Speicher (SD-Karte) ab, falls verfügbar</string>
+    <string name="global_preferences_storage_external_obb_title">Ergänzende Dateien auf SD-Karte</string>
+    <string name="global_preferences_storage_external_obb_summary">
+        Speichere ergänzende Dateien (z.B. Netzwerkpläne, Fonts) auf dem externen Speicher (SD-Karte), falls verfügbar.
+        Auf den meisten Geräten werden diese Dateien von mehreren Nutzerprofilen gemeinsam genutzt.
+    </string>
 
     <!-- data provider preferences -->
     <string name="network_preferences_title">Datenquelle</string>

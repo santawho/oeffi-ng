@@ -134,7 +134,7 @@ public class AppInstaller {
             final File localFile = new File(application.getShareDir(), "install.apk");
             if (localFile.exists())
                 localFile.delete();
-            final Downloader downloader = new Downloader(application.getCacheDir());
+            final Downloader downloader = new Downloader();
             final CompletableFuture<Integer> download = downloader.download(application.okHttpClient(),
                     remoteUrl, localFile);
             download.whenComplete((status, t) -> {

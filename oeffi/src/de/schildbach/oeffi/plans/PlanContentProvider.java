@@ -20,8 +20,6 @@ package de.schildbach.oeffi.plans;
 import android.app.SearchManager;
 import android.content.ContentProvider;
 import android.content.ContentValues;
-import android.content.Context;
-import android.database.AbstractCursor;
 import android.database.Cursor;
 import android.database.CursorWrapper;
 import android.database.MatrixCursor;
@@ -32,6 +30,7 @@ import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.URLs;
 import de.schildbach.oeffi.util.Downloader;
 import de.schildbach.oeffi.util.GeoUtils;
+import de.schildbach.oeffi.util.StorageManager;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Point;
 import okhttp3.HttpUrl;
@@ -67,6 +66,12 @@ import java.util.stream.Stream;
 import static java.util.Objects.requireNonNull;
 
 public class PlanContentProvider extends ContentProvider {
+    public static PlanContentProvider instance;
+
+    public PlanContentProvider() {
+        instance = this;
+    }
+
     public static float MAX_DISTANCE_NEARBY_PLAN = 25000f; // 25km
 
     public static Uri CONTENT_URI() {
@@ -109,13 +114,9 @@ public class PlanContentProvider extends ContentProvider {
         return planId + (isPDF ? FILENAME_EXTENSION_PDF : FILENAME_EXTENSION_PNG);
     }
 
-    public static File getPlanFile(final String planId, final boolean isPDF) {
-        final Application application = Application.getInstance();
-        final File plansDir =
-//                application.getDir(Constants.PLANS_DIR, Context.MODE_PRIVATE);
-                new File(application.getCacheDir(), Constants.PLANS_DIR);
-        if (!plansDir.exists())
-            plansDir.mkdirs();
+    public File plansDir;
+
+    public File getPlanFile(final String planId, final boolean isPDF) {
         return new File(plansDir, getPlanFilename(planId, isPDF));
     }
 
@@ -212,8 +213,16 @@ public class PlanContentProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        this.application = (Application) getContext();
-        downloader = new Downloader(application.getCacheDir());
+        this.application = Application.getInstance();
+
+        // legacy, see migration below: this.plansDir = new File(application.getCacheDir(), Constants.PLANS_DIR);
+        this.plansDir = new File(application.getObbDir(), Constants.PLANS_DIR);
+        if (!plansDir.exists())
+            plansDir.mkdirs();
+
+        final File legacyPlansDir = new File(application.getCacheDir(), Constants.PLANS_DIR);
+        StorageManager.migrateDir(legacyPlansDir, plansDir);
+
         return true;
     }
 
@@ -234,13 +243,16 @@ public class PlanContentProvider extends ContentProvider {
                 getContext().getContentResolver().notifyChange(uri, null);
         };
 
-        final File indexFile = new File(getContext().getFilesDir(), Constants.PLAN_INDEX_FILENAME);
+        if (downloader == null)
+            downloader = new Downloader();
+
+        final File indexFile = new File(plansDir, Constants.PLAN_INDEX_FILENAME);
         final HttpUrl remoteIndexUrl = URLs.getPlansBaseUrl().newBuilder()
                 .addPathSegment(Constants.PLAN_INDEX_FILENAME).build();
-        final CompletableFuture<Integer> download = downloader.download(application.okHttpClient(), remoteIndexUrl, indexFile);
-        download.whenComplete(notifyChangeCallback);
+        final CompletableFuture<Integer> indexDownload = downloader.download(application.okHttpClient(), remoteIndexUrl, indexFile);
+        indexDownload.whenComplete(notifyChangeCallback);
 
-        final File stationsFile = new File(getContext().getFilesDir(), Constants.PLAN_STATIONS_FILENAME);
+        final File stationsFile = new File(plansDir, Constants.PLAN_STATIONS_FILENAME);
         final HttpUrl remoteStationsUrl = URLs.getPlansBaseUrl().newBuilder()
                 .addPathSegment(Constants.PLAN_STATIONS_FILENAME + ".bz2").build();
         final CompletableFuture<Integer> stationsDownload = downloader.download(application.okHttpClient(), remoteStationsUrl, stationsFile, true);
@@ -470,9 +482,9 @@ public class PlanContentProvider extends ContentProvider {
             Integer n = planFileExistsMap.get(planId);
             if (n != null)
                 return n != 0;
-            if (getPlanFile(planId, false).exists())
+            if (instance.getPlanFile(planId, false).exists())
                 n = PNG_EXISTS;
-            else if (getPlanFile(planId, true).exists())
+            else if (instance.getPlanFile(planId, true).exists())
                 n = PDF_EXISTS;
             else
                 n = FILE_NOT_EXISTS;

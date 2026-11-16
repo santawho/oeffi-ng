@@ -193,7 +193,7 @@ public class PlanActivity extends OeffiActivity {
 
         final boolean isPDF = PlanContentProvider.isPdfUrl(planUrlStr);
         final HttpUrl planUrl = PlanContentProvider.getValidUrl(planUrlStr);
-        final File planFile = PlanContentProvider.getPlanFile(planId, isPDF);
+        final File planFile = PlanContentProvider.instance.getPlanFile(planId, isPDF);
         final HttpUrl remoteUrl = planUrl != null ? planUrl
                 : URLs.getPlansBaseUrl().newBuilder().addEncodedPathSegment(PlanContentProvider.getPlanFilename(planId, isPDF)).build();
 
@@ -220,7 +220,7 @@ public class PlanActivity extends OeffiActivity {
             stationsCursor.close();
         }
 
-        final Downloader downloader = new Downloader(application.getCacheDir());
+        final Downloader downloader = new Downloader();
         final CompletableFuture<Integer> download = downloader.download(application.okHttpClient(), remoteUrl, planFile);
 
         download.whenComplete((status, t) -> {
