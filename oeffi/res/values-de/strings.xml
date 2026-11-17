@@ -8,6 +8,8 @@
     <string name="find_hint">Suchen …</string>
     <string name="help">Hilfe</string>
     <string name="not_supported">Nicht unterstützt</string>
+    <string name="are_you_sure">Bist Du sicher?</string>
+    <string name="error_occurred">Ein Fehler ist aufgetreten</string>
 
     <string name="stations_icon_label">Öffi Haltestellen</string>
     <string name="favorite_stations_icon_label">Öffi Favoriten</string>
@@ -176,7 +178,6 @@
     <string name="backup_save_title">Einstellungen in Datei speichern</string>
     <string name="backup_restore_title">Einstellungen aus Datei wieder herstellen</string>
     <string name="backup_save_ok">Einstellungen gespeichert</string>
-    <string name="backup_error">Ein Fehler ist aufgetreten</string>
     <string name="backup_restore_ok">Einstellungen geladen. App startet neu.</string>
 
     <!-- preferences extras -->

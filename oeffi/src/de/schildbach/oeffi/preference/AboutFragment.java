@@ -191,7 +191,7 @@ public class AboutFragment extends PreferenceFragment {
 
     public static class CheckUpdateHandler extends ActionHandler {
         @Override
-        boolean handleAction(final PreferenceActivity context, final String prefkey) {
+        public boolean handleAction(final PreferenceActivity context, final String prefkey) {
             new AppInstaller(context, aBoolean -> dismissParentingActivity(context))
                     .checkForUpdate(true);
             return false;
@@ -200,7 +200,7 @@ public class AboutFragment extends PreferenceFragment {
 
     public static class InstallHandler extends ActionHandler {
         @Override
-        boolean handleAction(final PreferenceActivity context, final String prefkey) {
+        public boolean handleAction(final PreferenceActivity context, final String prefkey) {
             new AppInstaller(context, aBoolean -> dismissParentingActivity(context))
                     .downloadAndInstallApk();
             return false;
@@ -209,7 +209,7 @@ public class AboutFragment extends PreferenceFragment {
 
     public static class DownloadApkHandler extends ActionHandler {
         @Override
-        boolean handleAction(final PreferenceActivity context, final String prefkey) {
+        public boolean handleAction(final PreferenceActivity context, final String prefkey) {
             new AppInstaller(context, aBoolean -> dismissParentingActivity(context))
                     .showExternalDownloader();
             return true;

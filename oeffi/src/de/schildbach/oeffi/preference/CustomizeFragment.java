@@ -49,7 +49,7 @@ public class CustomizeFragment extends PreferenceFragment {
 
     public static class LoadActionHandler extends ActionHandler {
         @Override
-        boolean handleAction(final PreferenceActivity context, final String prefkey) {
+        public boolean handleAction(final PreferenceActivity context, final String prefkey) {
             final AtomicBoolean isOk = new AtomicBoolean(false);
             context.registerForActivityResult(
                     new ActivityResultContracts.OpenDocument(),
@@ -79,7 +79,7 @@ public class CustomizeFragment extends PreferenceFragment {
 
     public static class ClearActionHandler extends ActionHandler {
         @Override
-        boolean handleAction(final PreferenceActivity context, final String prefkey) {
+        public boolean handleAction(final PreferenceActivity context, final String prefkey) {
             try {
                 Application.getInstance().setCustomizationConfiguration(null);
             } catch (final IOException ioe) {
@@ -93,7 +93,7 @@ public class CustomizeFragment extends PreferenceFragment {
 
     public static class WriteReferenceActionHandler extends ActionHandler {
         @Override
-        boolean handleAction(final PreferenceActivity context, final String prefkey) {
+        public boolean handleAction(final PreferenceActivity context, final String prefkey) {
             final AtomicBoolean isOk = new AtomicBoolean(false);
             context.registerForActivityResult(
                     new ActivityResultContracts.CreateDocument("text/plain"),

@@ -42,7 +42,7 @@ public class BackupFragment extends PreferenceFragment {
 
     public static class SaveActionHandler extends ActionHandler {
         @Override
-        boolean handleAction(final PreferenceActivity context, final String prefkey) {
+        public boolean handleAction(final PreferenceActivity context, final String prefkey) {
             final AtomicBoolean isOk = new AtomicBoolean(false);
             context.registerForActivityResult(
                     new ActivityResultContracts.CreateDocument("application/zip"), uri -> {
@@ -56,7 +56,7 @@ public class BackupFragment extends PreferenceFragment {
                             if (isOk.get()) {
                                 new Toast(context).longToast(R.string.backup_save_ok);
                             } else {
-                                new Toast(context).longToast(R.string.backup_error);
+                                new Toast(context).longToast(R.string.error_occurred);
                             }
                         }
                         dismissParentingActivity(context);
@@ -67,7 +67,7 @@ public class BackupFragment extends PreferenceFragment {
 
     public static class RestoreActionHandler extends ActionHandler {
         @Override
-        boolean handleAction(final PreferenceActivity context, final String prefkey) {
+        public boolean handleAction(final PreferenceActivity context, final String prefkey) {
             final AtomicBoolean isOk = new AtomicBoolean(false);
             context.registerForActivityResult(
                     new ActivityResultContracts.OpenDocument(), uri -> {
@@ -84,7 +84,7 @@ public class BackupFragment extends PreferenceFragment {
                                     Application.getInstance().restart();
                                 });
                             } else {
-                                new Toast(context).longToast(R.string.backup_error);
+                                new Toast(context).longToast(R.string.error_occurred);
                             }
                         }
                         dismissParentingActivity(context);

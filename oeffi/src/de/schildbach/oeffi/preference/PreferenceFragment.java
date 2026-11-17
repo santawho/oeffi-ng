@@ -18,7 +18,7 @@ public abstract class PreferenceFragment extends androidx.preference.PreferenceF
     public static abstract class ActionHandler {
         // return true, to finish the parenting PreferenceActivity after handling the action
         // return false to do it later by calling dismissParentingActivity()
-        abstract boolean handleAction(final PreferenceActivity context, final String prefkey);
+        public abstract boolean handleAction(PreferenceActivity activity, String prefkey);
 
         protected void dismissParentingActivity(final PreferenceActivity context) {
             context.finish();
@@ -193,9 +193,14 @@ public abstract class PreferenceFragment extends androidx.preference.PreferenceF
 
     private static boolean restartRequired;
 
+    public static void setRestartRequired() {
+        restartRequired = true;
+    }
+
     public static void clearRestartRequired() {
         restartRequired = false;
     }
+
     public static boolean isRestartRequired() {
         return restartRequired;
     }

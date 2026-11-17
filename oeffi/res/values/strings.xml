@@ -8,6 +8,8 @@
     <string name="find_hint">Find …</string>
     <string name="help">Help</string>
     <string name="not_supported">Not supported</string>
+    <string name="are_you_sure">Are you sure?</string>
+    <string name="error_occurred">An error occurred</string>
 
     <string name="stations_icon_label">Öffi Stations</string>
     <string name="favorite_stations_icon_label">Öffi Favorites</string>
@@ -177,7 +179,6 @@
     <string name="backup_save_title">Save settings to file</string>
     <string name="backup_restore_title">Restore settings from file</string>
     <string name="backup_save_ok">Settings saved to file</string>
-    <string name="backup_error">An error occurred</string>
     <string name="backup_restore_ok">Settings restored. App restarting.</string>
 
     <!-- preferences extras -->

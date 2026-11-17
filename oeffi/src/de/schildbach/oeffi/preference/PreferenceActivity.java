@@ -20,6 +20,7 @@ package de.schildbach.oeffi.preference;
 import android.app.Activity;
 import android.app.ComponentCaller;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,14 +29,20 @@ import androidx.annotation.NonNull;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.preference.Preference;
+import androidx.preference.PreferenceFragmentCompat;
+
+import java.util.List;
 
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.OeffiActionBar;
 import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 
-public class PreferenceActivity extends OeffiActivity {
+public class PreferenceActivity extends OeffiActivity
+    implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
     public static final String EXTRA_PREFKEY = "prefkey";
     public static final String EXTRA_HANDLER = "handler";
     public static final String EXTRA_SHOW_FRAGMENT = "show_fragment";
@@ -72,8 +79,6 @@ public class PreferenceActivity extends OeffiActivity {
                 .putExtra(EXTRA_HANDLER, actionHandlerClass.getName()));
     }
 
-    private PreferenceFragment preferenceFragment;
-
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,6 +87,7 @@ public class PreferenceActivity extends OeffiActivity {
         final Intent intent = getIntent();
 
         try {
+            final PreferenceFragment preferenceFragment;
             if (savedInstanceState != null) {
                 preferenceFragment = (PreferenceFragment) getSupportFragmentManager()
                         .findFragmentByTag(PREFERENCE_FRAGMENT_TAG);
@@ -130,6 +136,24 @@ public class PreferenceActivity extends OeffiActivity {
         handleIntent(intent);
     }
 
+    @Override
+    public boolean onPreferenceStartFragment(
+            @NonNull final PreferenceFragmentCompat caller,
+            @NonNull final Preference pref) {
+        final FragmentManager fragmentManager = caller.getParentFragmentManager();
+        final Bundle args = pref.getExtras();
+        final Fragment fragment = fragmentManager.getFragmentFactory().instantiate(
+                caller.requireActivity().getClassLoader(), pref.getFragment());
+        fragment.setArguments(args);
+        fragment.setTargetFragment(caller, 0);
+        final int containerViewId = ((View) caller.requireView().getParent()).getId();
+        fragmentManager.beginTransaction()
+                .replace(containerViewId, fragment)
+                .addToBackStack(null)
+                .commit();
+        return true;
+    }
+
     private void handleIntent(final Intent intent) {
         final String prefkey = intent.getStringExtra(EXTRA_PREFKEY);
         final String handlerClassName = intent.getStringExtra(EXTRA_HANDLER);
@@ -153,6 +177,10 @@ public class PreferenceActivity extends OeffiActivity {
     @Override
     public void onBackPressedEvent() {
         realOnBackPressed();
+    }
+
+    public SharedPreferences getPreferences() {
+        return prefs;
     }
 
     public void setSubTitle(final CharSequence title) {
