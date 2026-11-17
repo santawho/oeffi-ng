@@ -72,6 +72,18 @@
     <string name="user_interface_location_action_buttons_enabled_title">Aktionssymbole in Ortseingabefeldern</string>
     <string name="user_interface_location_action_buttons_enabled_summary">Zeige die Aktionssymbole (Standort, Karte, Kontakte, Favoriten, Suche) in Feldern zur Eingabe von Orten. Ausschalten um das gesamte Feld zur Aktivierung der Tastatur zu verwenden; der Menü-Button bleibt und bietet alle Aktionen (Änderung erfordert Neustart der App)</string>
 
+    <string name="user_interface_font_category_title">Benutzerdefinierte Schriftart</string>
+    <string name="user_interface_font_enabled_title">Verwende die benutzerdefinierte Schriftart</string>
+    <string name="user_interface_font_enabled_summary">Die installierte Schriftart wird verwendet, wo dies möglich ist.</string>
+    <string name="user_interface_font_install_title">Schriftart installieren</string>
+    <string name="user_interface_font_install_summary">
+        Wähle eine ZIP-Datei, welche die Font-Dateien enthält.
+        Du kannst nur eine Schriftart installieren. Die zuvor installierte wird dabei ersetzt.
+        Der Inhalte der Datei muss so strukturiert sein wie bei den von Google Fonts heruntergeladenen Schriftarten.
+    </string>
+    <string name="user_interface_font_delete_title">Schriftart entfernen</string>
+    <string name="user_interface_font_delete_summary">Lösche die zuvor installierten Font-Dateien.</string>
+
     <string name="user_interface_category_map_title">Landkarten</string>
     <string name="user_interface_map_tile_resolution_title">Auflösung von Landkarten</string>
     <string name="user_interface_map_tile_resolution_summary">Setze dies höher für mehr Details, aber weniger Lesbarkeit, und umgekehrt. [%s]</string>

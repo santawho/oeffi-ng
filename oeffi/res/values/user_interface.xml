@@ -77,6 +77,18 @@
     <string name="user_interface_location_action_buttons_enabled_title">Action icons in location input fields</string>
     <string name="user_interface_location_action_buttons_enabled_summary">Show the action icons (current location, map, contacts, favourites, search) inside fields for input of locations. Turn off to use the full field for activation of the keyboard; the menu button stays and offers all actions (change requires restart of the app)</string>
 
+    <string name="user_interface_font_category_title">Custom Font</string>
+    <string name="user_interface_font_enabled_title">Use custom font</string>
+    <string name="user_interface_font_enabled_summary">Uses the installed font where possible.</string>
+    <string name="user_interface_font_install_title">Install font</string>
+    <string name="user_interface_font_install_summary">
+        Choose a ZIP-file containing the font files.
+        You can install only one font, replacing the previously installed one.
+        The contents of the file must be structured like those downloaded from Google Fonts.
+    </string>
+    <string name="user_interface_font_delete_title">Remove font</string>
+    <string name="user_interface_font_delete_summary">Delete the previously installed font files.</string>
+
     <string name="user_interface_category_map_title">Maps</string>
     <string name="user_interface_map_tile_resolution_title">Map resolution</string>
     <string name="user_interface_map_tile_resolution_summary">Set higher for more details, but less readability, and vice versa. [%s]</string>

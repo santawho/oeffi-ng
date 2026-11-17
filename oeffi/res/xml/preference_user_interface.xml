@@ -35,6 +35,27 @@
         android:title="@string/user_interface_location_action_buttons_enabled_title"
         android:summary="@string/user_interface_location_action_buttons_enabled_summary" />
 
+    <PreferenceCategory
+        android:title="@string/user_interface_font_category_title" >
+
+        <CheckBoxPreference
+            android:key="user_interface_font_enabled"
+            android:defaultValue="true"
+            android:title="@string/user_interface_font_enabled_title"
+            android:summary="@string/user_interface_font_enabled_summary" />
+
+        <de.schildbach.oeffi.preference.CustomPreference
+            android:key="user_interface_font_install"
+            android:title="@string/user_interface_font_install_title"
+            android:summary="@string/user_interface_font_install_summary" />
+
+        <de.schildbach.oeffi.preference.CustomPreference
+            android:key="user_interface_font_delete"
+            android:title="@string/user_interface_font_delete_title"
+            android:summary="@string/user_interface_font_delete_summary" />
+
+    </PreferenceCategory>
+
 <!--    <Preference-->
 <!--        android:enabled="false"-->
 <!--        android:key="user_interface_accessibility_settings"-->

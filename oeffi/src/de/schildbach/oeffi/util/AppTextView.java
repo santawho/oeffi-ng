@@ -43,6 +43,6 @@ public class AppTextView extends androidx.appcompat.widget.AppCompatTextView {
     }
 
     private void construct(final Context context, @Nullable final AttributeSet attrs, final int defStyleAttr, final int defStyleRes) {
-        setTypeface(FontUtil.getAppTypeFace(), getTypeface().getStyle());
+        setTypeface(FontManager.appTypeFace, getTypeface().getStyle());
     }
 }

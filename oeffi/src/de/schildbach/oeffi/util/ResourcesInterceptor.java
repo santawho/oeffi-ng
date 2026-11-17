@@ -161,7 +161,7 @@ public class ResourcesInterceptor extends Resources {
         private View fixupView(final View view) {
             if (view instanceof TextView) {
                 final TextView textView = (TextView) view;
-                textView.setTypeface(FontUtil.getAppTypeFace(), textView.getTypeface().getStyle());
+                textView.setTypeface(FontManager.appTypeFace, textView.getTypeface().getStyle());
             }
             return view;
         }
