@@ -18,6 +18,7 @@
 package de.schildbach.oeffi.util;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -38,13 +39,31 @@ public class IOUtils {
         return new String(readAllBytes(is), StandardCharsets.UTF_8);
     }
 
-    public static void copyAll(final InputStream is, final OutputStream os) throws IOException {
-        final byte[] data = new byte[4096];
+    public static void copyStream(final InputStream is, final OutputStream os) throws IOException {
+        final byte[] buffer = new byte[4096];
         for (;;) {
-            final int len = is.read(data);
+            final int len = is.read(buffer, 0, buffer.length);
             if (len <= 0)
                 break;
-            os.write(data, 0, len);
+            os.write(buffer, 0, len);
         }
+    }
+
+    public static void deleteDir(final File dir, final boolean deleteSelf) {
+        if (dir == null)
+            return;
+        if (!dir.isDirectory())
+            return;
+        final File[] files = dir.listFiles();
+        if (files == null)
+            return;
+        for (final File file : files) {
+            if (file.isFile())
+                file.delete();
+            else if (file.isDirectory())
+                deleteDir(file, true);
+        }
+        if (deleteSelf)
+            dir.delete();
     }
 }

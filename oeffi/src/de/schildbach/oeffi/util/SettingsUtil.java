@@ -53,7 +53,6 @@ public class SettingsUtil {
     }
 
     public boolean backup(final OutputStream outputStream) {
-        final byte[] buffer = new byte[4096];
         final AtomicBoolean anyError = new AtomicBoolean(false);
         try (final ZipOutputStream zos = new ZipOutputStream(outputStream)) {
             final Path dataDir = applicationContext.getDataDir().toPath();
@@ -73,7 +72,7 @@ public class SettingsUtil {
                                 final ZipEntry zipEntry = new ZipEntry(zipPath.toString());
                                 zipEntry.setTime(file.lastModified());
                                 zos.putNextEntry(zipEntry);
-                                copyStream(fis, zos, buffer);
+                                IOUtils.copyStream(fis, zos);
                                 zos.closeEntry();
                             } catch (final IOException ioe) {
                                 log.error("backup {}", path, ioe);
@@ -94,21 +93,13 @@ public class SettingsUtil {
     }
 
     public boolean prepareRestore(final InputStream inputStream) {
-        final byte[] buffer = new byte[4096];
         try (final FileOutputStream fos = new FileOutputStream(getRestoreFile())) {
-            copyStream(inputStream, fos, buffer);
+            IOUtils.copyStream(inputStream, fos);
         } catch (final IOException ioe) {
             log.error("prepareRestore", ioe);
             return false;
         }
         return true;
-    }
-
-    private void copyStream(final InputStream is, final OutputStream os, final byte[] buffer) throws IOException {
-        int count;
-        while ((count = is.read(buffer, 0, buffer.length)) > 0) {
-            os.write(buffer, 0, count);
-        }
     }
 
     public boolean restoreIfRequested() {
@@ -117,7 +108,6 @@ public class SettingsUtil {
             return false;
         log.info("restoring from previously selected settings");
         final Path dataDir = applicationContext.getDataDir().toPath();
-        final byte[] buffer = new byte[4096];
         final AtomicBoolean anyError = new AtomicBoolean(false);
         try (final FileInputStream fis = new FileInputStream(restoreFile)) {
             try (final ZipInputStream zis = new ZipInputStream(fis)) {
@@ -130,7 +120,7 @@ public class SettingsUtil {
                     final File file = dataDir.resolve(name).toFile();
                     file.getParentFile().mkdirs();
                     try (final FileOutputStream fos = new FileOutputStream(file)) {
-                        copyStream(zis, fos, buffer);
+                        IOUtils.copyStream(zis, fos);
                     } catch (final IOException ioe) {
                         log.error("restore {}", file, ioe);
                         anyError.set(true);

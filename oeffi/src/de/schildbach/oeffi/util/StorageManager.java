@@ -127,7 +127,7 @@ public class StorageManager {
             }
             try (final InputStream is = new FileInputStream(srcFile);
                  final OutputStream os = new FileOutputStream(destFile)) {
-                IOUtils.copyAll(is, os);
+                IOUtils.copyStream(is, os);
             } catch (final Exception e) {
                 log.error("cannot copy {} to {}", srcFile, destFile, e);
                 return false;
