@@ -81,7 +81,7 @@ public class ViewUtils {
     }
 
     public static void setTypeFace(final TextView textView, final int style) {
-        textView.setTypeface(textView.getTypeface(), style);
+        textView.setTypeface(Typeface.create(FontManager.appTypeFace, style));
     }
 
     public static void setTypeFace(final Paint paint, final int style) {
