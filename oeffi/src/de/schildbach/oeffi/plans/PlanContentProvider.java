@@ -41,6 +41,7 @@ import javax.annotation.Nullable;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -97,6 +98,8 @@ public class PlanContentProvider extends ContentProvider {
     public static final String URL_MARK_AS_PDF = "PDF";
     public static final String FILENAME_EXTENSION_PDF = ".pdf";
     public static final String FILENAME_EXTENSION_PNG = ".png";
+
+    public static final String QUERY_PARAM_RELOAD = "reload";
 
     public static boolean isPdfUrl(final String url) {
         if (url == null)
@@ -246,6 +249,9 @@ public class PlanContentProvider extends ContentProvider {
         if (downloader == null)
             downloader = new Downloader();
 
+        if (uri.getQueryParameter(QUERY_PARAM_RELOAD) != null)
+            downloader.invalidateCaches();
+
         final File indexFile = new File(plansDir, Constants.PLAN_INDEX_FILENAME);
         final HttpUrl remoteIndexUrl = URLs.getPlansBaseUrl().newBuilder()
                 .addPathSegment(Constants.PLAN_INDEX_FILENAME).build();
@@ -308,6 +314,8 @@ public class PlanContentProvider extends ContentProvider {
 
         try {
             return readIndexIntoCursor(getContext().getAssets().open(Constants.PLAN_INDEX_FILENAME), idFilter, query);
+        } catch (final FileNotFoundException fnfe) {
+            return null;
         } catch (final IOException | NumberFormatException x) {
             throw new RuntimeException("Fatal problem reading asset " + Constants.PLAN_INDEX_FILENAME, x);
         }
@@ -478,18 +486,31 @@ public class PlanContentProvider extends ContentProvider {
         private static final int PDF_EXISTS = 2;
         private final Map<String, Integer> planFileExistsMap = new HashMap<>();
 
+        private void initFileMap() {
+            final File[] files = instance.plansDir.listFiles();
+            if (files == null)
+                return;
+            for (final File file : files) {
+                final String fileName = file.getName();
+                final int lastDot = fileName.lastIndexOf('.');
+                if (lastDot < 0)
+                    continue;
+                final String planId = fileName.substring(0, lastDot);
+                final String extension = fileName.substring(lastDot);
+                final int n;
+                if (extension.equals(FILENAME_EXTENSION_PDF))
+                    n = PDF_EXISTS;
+                else if (extension.equals(FILENAME_EXTENSION_PNG))
+                    n = PNG_EXISTS;
+                else
+                    continue;
+                planFileExistsMap.put(planId, n);
+            }
+        }
+
         private boolean planFileExists(final String planId) {
-            Integer n = planFileExistsMap.get(planId);
-            if (n != null)
-                return n != 0;
-            if (instance.getPlanFile(planId, false).exists())
-                n = PNG_EXISTS;
-            else if (instance.getPlanFile(planId, true).exists())
-                n = PDF_EXISTS;
-            else
-                n = FILE_NOT_EXISTS;
-            planFileExistsMap.put(planId, n);
-            return n != 0;
+            final Integer n = planFileExistsMap.get(planId);
+            return n != null && n != FILE_NOT_EXISTS;
         }
 
         public DistanceSortingCursorWrapper(
@@ -497,6 +518,7 @@ public class PlanContentProvider extends ContentProvider {
                 final PlanList favoritePlans,
                 final Double lat, final Double lon) {
             super(cursor);
+            initFileMap();
 
             final boolean hasLocation = lat != null && lon != null;
 

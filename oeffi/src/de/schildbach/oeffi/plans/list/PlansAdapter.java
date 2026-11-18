@@ -27,6 +27,7 @@ import android.provider.BaseColumns;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -36,6 +37,7 @@ import de.schildbach.oeffi.plans.PlanContentProvider;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Point;
 import okhttp3.Cache;
+import okhttp3.CacheControl;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.HttpUrl;
@@ -50,6 +52,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static java.util.Objects.requireNonNull;
 
@@ -58,6 +61,8 @@ import org.slf4j.LoggerFactory;
 
 public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
     private static final Logger log = LoggerFactory.getLogger(PlansAdapter.class);
+
+    private static final int LOCAL_CACHE_DURATION_SECONDS = 10 * 60;
 
     private final Context context;
     private final Resources res;
@@ -74,7 +79,7 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
     private final int lonColumn;
     private final PlanClickListener clickListener;
     private final PlanContextMenuItemListener contextMenuItemListener;
-    private Map<Integer, Plan> plansByPosition = new HashMap<>();
+    private final Map<Integer, Plan> plansByPosition = new HashMap<>();
 
     private final Handler handler = new Handler();
     private final OkHttpClient cachingOkHttpClient;
@@ -107,7 +112,23 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
 
         setHasStableIds(true);
 
-        cachingOkHttpClient = okHttpClient.newBuilder().cache(thumbCache).build();
+        cachingOkHttpClient = okHttpClient.newBuilder()
+                .cache(thumbCache)
+                .addNetworkInterceptor(chain -> {
+                    final Response response = chain.proceed(chain.request());
+                    final int code = response.code();
+                    if (code == 200
+                            || code == 404) { // also cache 404 NOT FOUND
+                        // enforce cache duration
+                        return response.newBuilder()
+                                .removeHeader("Pragma")
+                                .removeHeader("Cache-Control")
+                                .header("Cache-Control", "public, max-age=" + LOCAL_CACHE_DURATION_SECONDS)
+                                .build();
+                    }
+                    return response;
+                })
+                .build();
     }
 
     public void setLocation(final Point location) {
@@ -176,13 +197,36 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
             return;
         final HttpUrl thumbUrl = URLs.getPlansBaseUrl().newBuilder()
                 .addEncodedPathSegment(plan.planId + "_thumb.png").build();
-        final Request request = new Request.Builder().url(thumbUrl).build();
-        final Call call = cachingOkHttpClient.newCall(request);
+        // first attempt, take directly from the cache
+        final Call call = cachingOkHttpClient.newCall(new Request.Builder()
+                .url(thumbUrl)
+                .cacheControl(new CacheControl.Builder()
+                        .onlyIfCached()
+                        .maxAge(LOCAL_CACHE_DURATION_SECONDS, TimeUnit.SECONDS)
+                        .build())
+                .build());
         holder.setCall(call);
-        call.enqueue(new Callback() {
-            public void onResponse(final Call call, final Response r) throws IOException {
-                try (final Response response = r) {
-                    if (!call.isCanceled()) {
+        call.enqueue(downloadThumbCall(true, plan, holder));
+    }
+
+    private Callback downloadThumbCall(
+            final boolean accept504notInCache,
+            final Plan plan,
+            final PlanViewHolder holder) {
+        return new Callback() {
+            public void onResponse(@NonNull final Call finishedCall, @NonNull final Response aResponse) throws IOException {
+                try (final Response response = aResponse) {
+                    if (!finishedCall.isCanceled()) {
+                        if (accept504notInCache && response.code() == 504) {
+                            // not in the cache
+                            // second attempt, contact the server, might still return 304 NOT MODIFIED
+                            final Call realCall = cachingOkHttpClient.newCall(new Request.Builder()
+                                    .url(finishedCall.request().url())
+                                    .build());
+                            holder.setCall(realCall);
+                            realCall.enqueue(downloadThumbCall(false, plan, holder));
+                            return;
+                        }
                         final Drawable thumb;
                         if (response.isSuccessful())
                             thumb = new BitmapDrawable(res, response.body().byteStream());
@@ -202,7 +246,7 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
             public void onFailure(final Call call, final IOException e) {
                 handler.post(() -> holder.setCall(null));
             }
-        });
+        };
     }
 
     @Override
@@ -232,7 +276,7 @@ public class PlansAdapter extends RecyclerView.Adapter<PlanViewHolder> {
         if (networkLogo != null) {
             try {
                 networkId = NetworkId.valueOf(networkLogo);
-            } catch (IllegalArgumentException iae) {
+            } catch (final IllegalArgumentException iae) {
                 log.warn("network plan \"{}\" references undefined network id \"{}\"", planId, networkLogo);
             }
         }

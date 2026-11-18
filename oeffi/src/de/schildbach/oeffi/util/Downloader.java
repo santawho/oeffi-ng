@@ -60,10 +60,14 @@ public class Downloader {
         void progress(long contentRead, long contentLength);
     }
 
-    private final long timeStarted;
+    private long timeStarted;
 
     public Downloader() {
-        timeStarted = System.currentTimeMillis();
+        invalidateCaches();
+    }
+
+    public void invalidateCaches() {
+        timeStarted = System.currentTimeMillis() - Constants.SECOND_IN_MILLIS;
     }
 
     public CompletableFuture<Integer> download(
@@ -96,11 +100,11 @@ public class Downloader {
             if (meta != null) {
                 final long now = System.currentTimeMillis();
 
-                final Date date = meta.getDate("Date");
+                final Date downloadedAt = meta.getDate("Downloaded");
                 final Date expires = meta.getDate("Expires");
-                if ((date != null && date.getTime() > timeStarted && now < date.getTime() + Constants.HOUR_IN_MILLIS)
+                if ((downloadedAt != null && downloadedAt.getTime() >= timeStarted)
                     || (expires != null && now < expires.getTime())) {
-                    log.info("Download '{}' skipped; using cached copy.", remoteUrl);
+                    log.info("Download using cached copy for {}", remoteUrl);
                     future.complete(HttpURLConnection.HTTP_NOT_MODIFIED);
                     semaphore.release();
                     return future;
@@ -140,14 +144,14 @@ public class Downloader {
                             os.close();
                             saveMeta(targetFile, response.headers());
                             tempFile.renameTo(targetFile); // Atomic operation
-                            log.info("Download '{}' successful; {} content bytes read.", call.request().url(), count);
+                            log.info("Download successful for {} ; {} content bytes read.", call.request().url(), count);
                             future.complete(status);
                         } else if (status == HttpURLConnection.HTTP_NOT_MODIFIED) {
-                            log.info("Download '{}' skipped; nothing changed.", call.request().url());
+                            log.info("Download nothing changed for {}", call.request().url());
                             saveMeta(targetFile, response.headers());
                             future.complete(status);
                         } else {
-                            log.info("Download '{}' failed: {} {}", call.request().url(), status, response.message());
+                            log.info("Download failed for {} : {} {}", call.request().url(), status, response.message());
                             future.completeExceptionally(new IOException(String.format(
                                     "download %s failed, status %d", call.request().url(), status)));
                         }
@@ -158,13 +162,13 @@ public class Downloader {
                 }
 
                 public void onFailure(final Call call, final IOException e) {
-                    log.info("Downloading {} failed: {}", call.request().url(), e.getMessage());
+                    log.info("Download failed for {} : {}", call.request().url(), e.getMessage());
                     future.completeExceptionally(e);
                     semaphore.release();
                 }
             });
         } else {
-            log.info("Download '{}' skipped; already in progress.", remoteUrl);
+            log.info("Download already in progress for {}", remoteUrl);
             future.complete(HttpURLConnection.HTTP_CONFLICT);
         }
         return future;
@@ -174,11 +178,10 @@ public class Downloader {
         final String expires = headers.get("Expires");
         final String lastModified = headers.get("Last-Modified");
         final String etag = headers.get("ETag");
-        final String date = headers.get("Date");
         final File metaFile = metaFile(file);
         if (expires != null || etag != null || lastModified != null) {
             try (final PrintWriter writer = new PrintWriter(metaFile)) {
-                writer.println("Date: " + (date != null ? date : DateFormattingKt.toHttpDateString(new Date())));
+                writer.println("Downloaded: " + DateFormattingKt.toHttpDateString(new Date()));
                 if (expires != null)
                     writer.println("Expires: " + expires);
                 if (lastModified != null)

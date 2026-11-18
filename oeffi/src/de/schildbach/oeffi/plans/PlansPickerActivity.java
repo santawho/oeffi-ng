@@ -119,7 +119,7 @@ public class PlansPickerActivity extends OeffiMainActivity implements LocationHe
         setPrimaryColor(R.color.bg_action_bar);
         actionBar.setPrimaryTitle(R.string.plans_activity_title);
         actionBar.addButton(R.drawable.ic_refresh_white_24dp, R.string.action_bar_progress_description)
-                .setOnClickListener(v -> requery());
+                .setOnClickListener(v -> requery(true));
         // actionBar.addButton(R.drawable.ic_search_white_24dp, R.string.plans_picker_action_search_title)
         //         .setOnClickListener(v -> setListFilter(""));
         actionBar.concludeSetup();
@@ -179,7 +179,7 @@ public class PlansPickerActivity extends OeffiMainActivity implements LocationHe
     protected void onStart() {
         super.onStart();
 
-        requery();
+        requery(false);
         maybeStartLocation();
     }
 
@@ -225,7 +225,7 @@ public class PlansPickerActivity extends OeffiMainActivity implements LocationHe
     public void onLocation(final Point here) {
         this.location = here;
         listAdapter.setLocation(here);
-        requery();
+        requery(false);
     }
 
     private void handleIntent() {
@@ -247,21 +247,23 @@ public class PlansPickerActivity extends OeffiMainActivity implements LocationHe
     private void setListFilter(final String filter) {
         this.filter = filter;
         // filterBox.setVisibility(View.VISIBLE);
-        requery();
+        requery(false);
     }
 
     private void clearListFilter() {
         filter = null;
         // filterBox.setVisibility(View.GONE);
-        requery();
+        requery(false);
     }
 
-    private void requery() {
+    private void requery(final boolean reloadData) {
         final String sortOrder = location != null
                 ? Double.toString(location.getLatAsDouble()) + "," + Double.toString(location.getLonAsDouble()) : null;
         final Uri.Builder uri = PlanContentProvider.CONTENT_URI().buildUpon();
         if (filter != null && !filter.isEmpty())
             uri.appendPath(SearchManager.SUGGEST_URI_PATH_QUERY).appendPath(filter);
+        if (reloadData)
+            uri.appendQueryParameter(PlanContentProvider.QUERY_PARAM_RELOAD, "1");
         cursor = getContentResolver().query(uri.build(), null, null, null, sortOrder);
         listAdapter = new PlansAdapter(this, cursor, thumbCache, this, this, application.okHttpClient());
         listAdapter.setLocation(location);
