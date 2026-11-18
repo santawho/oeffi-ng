@@ -314,8 +314,6 @@ public class PlanContentProvider extends ContentProvider {
 
         try {
             return readIndexIntoCursor(getContext().getAssets().open(Constants.PLAN_INDEX_FILENAME), idFilter, query);
-        } catch (final FileNotFoundException fnfe) {
-            return null;
         } catch (final IOException | NumberFormatException x) {
             throw new RuntimeException("Fatal problem reading asset " + Constants.PLAN_INDEX_FILENAME, x);
         }
