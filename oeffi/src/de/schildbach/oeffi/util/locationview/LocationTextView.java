@@ -18,12 +18,12 @@
 package de.schildbach.oeffi.util.locationview;
 
 import android.content.Context;
-import android.text.Html;
 import android.util.AttributeSet;
 
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.AppTextView;
 import de.schildbach.oeffi.util.Formats;
+import de.schildbach.oeffi.util.HtmlUtils;
 import de.schildbach.pte.dto.Location;
 
 import java.util.Locale;
@@ -74,7 +74,7 @@ public class LocationTextView extends AppTextView {
                 text.append(getContext().getString(R.string.directions_location_view_coordinate)).append(":<br/>")
                         .append(String.format(Locale.ENGLISH, "%1$.6f, %2$.6f", location.getLatAsDouble(),
                                 location.getLonAsDouble()));
-            setText(Html.fromHtml(text.toString(), Html.FROM_HTML_MODE_COMPACT));
+            setText(HtmlUtils.spannedFromHtml(text.toString()));
             setCompoundDrawablesWithIntrinsicBounds(
                     showLocationType ? LocationView.locationTypeIconRes(location.type) : 0, 0, 0, 0);
         } else {

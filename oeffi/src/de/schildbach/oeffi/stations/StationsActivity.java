@@ -48,7 +48,6 @@ import android.os.Looper;
 import android.os.Process;
 import android.provider.Settings;
 import android.text.Editable;
-import android.text.Html;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -84,6 +83,7 @@ import de.schildbach.oeffi.stations.list.JourneysAdapter;
 import de.schildbach.oeffi.util.FilterSearchView;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GeoUtils;
+import de.schildbach.oeffi.util.HtmlUtils;
 import de.schildbach.oeffi.util.KeyWordMatcher;
 import de.schildbach.oeffi.util.LocationHelper;
 import de.schildbach.oeffi.util.LocationUtils;
@@ -575,7 +575,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         maxDeparturesPerJourney = res.getInteger(R.integer.max_departures_per_journey);
         journeysContainer = findViewById(R.id.journeys_container);
         final TextView descriptionView = findViewById(R.id.journeys_description);
-        descriptionView.setText(Html.fromHtml(getString(R.string.stations_journeys_description), Html.FROM_HTML_MODE_COMPACT));
+        descriptionView.setText(HtmlUtils.spannedFromHtml(getString(R.string.stations_journeys_description)));
         journeyList = findViewById(R.id.journeys_list);
         journeyListLayoutManager = new LinearLayoutManager(this) {
             // override the layout manger, so that scrolling to the top of an item is always preferred

@@ -19,10 +19,11 @@ package de.schildbach.oeffi.network.list;
 
 import android.app.Activity;
 import android.content.res.Resources;
-import android.text.Html;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+
+import de.schildbach.oeffi.util.HtmlUtils;
 import de.schildbach.oeffi.util.PopupMenu;
 import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
@@ -103,7 +104,7 @@ public class NetworkViewHolder extends RecyclerView.ViewHolder {
             stateView.setText(null);
         }
 
-        commentView.setText(Html.fromHtml(networkRes.comment, Html.FROM_HTML_MODE_COMPACT));
+        commentView.setText(HtmlUtils.spannedFromHtml(networkRes.comment));
         commentView.setTextColor(isEnabled ? colorSignificant : colorLessSignificant);
 
         if (entry.credentialsRequired) {

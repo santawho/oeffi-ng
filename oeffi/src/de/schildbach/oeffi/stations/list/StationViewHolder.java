@@ -22,8 +22,6 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.text.Html;
-import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -510,10 +508,8 @@ public class StationViewHolder extends RecyclerViewNG.HorizontalSwipeHolder {
 
                 final TextView messageView = (TextView) inflater.inflate(R.layout.stations_station_entry_message,
                         messagesViewGroup, false);
-                Spanned html = Html.fromHtml(
-                        HtmlUtils.makeLinksClickableInHtml("<b>" + index + ".</b> " + message),
-                        Html.FROM_HTML_MODE_COMPACT);
-                messageView.setText(html);
+                messageView.setText(HtmlUtils.spannedFromHtml(HtmlUtils.makeLinksClickableInHtml(
+                        "<b>" + index + ".</b> " + message)));
                 messageView.setMovementMethod(LinkMovementMethod.getInstance());
                 messageView.setTextColor(colorSignificant);
                 messagesViewGroup.addView(messageView);

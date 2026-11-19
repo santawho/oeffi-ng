@@ -7,7 +7,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
-import android.text.Html;
 import android.view.View;
 import android.widget.Button;
 
@@ -19,6 +18,7 @@ import de.schildbach.oeffi.OeffiActivity;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.directions.DirectionsActivity;
 import de.schildbach.oeffi.stations.StationsActivity;
+import de.schildbach.oeffi.util.HtmlUtils;
 
 public class GeoLinkActivity extends OeffiActivity {
 
@@ -73,7 +73,7 @@ public class GeoLinkActivity extends OeffiActivity {
 
         newIntent.setComponent(new ComponentName(myPackageName, aliasName));
 
-        button.setText(Html.fromHtml(button.getText().toString()));
+        button.setText(HtmlUtils.spannedFromHtml(button.getText().toString()));
         button.setOnClickListener(v -> {
             startActivity(newIntent);
             dialog.dismiss();

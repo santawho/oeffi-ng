@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.text.Html;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.ImageView;
@@ -90,7 +89,7 @@ public class DialogBuilder extends AlertDialog.Builder {
         final int padHorizontal = (int) context.getResources().getDimension(R.dimen.text_padding_horizontal_verylax);
         final int padVertical = (int) context.getResources().getDimension(R.dimen.text_padding_vertical_lax);
         textView.setPadding(padHorizontal, padVertical, padHorizontal, padVertical);
-        textView.setText(Html.fromHtml(htmlText, Html.FROM_HTML_MODE_COMPACT));
+        textView.setText(HtmlUtils.spannedFromHtml(htmlText));
         return setScrollView(textView);
     }
 

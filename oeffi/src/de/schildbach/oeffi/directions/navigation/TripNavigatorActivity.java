@@ -30,7 +30,6 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.text.Html;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
@@ -58,6 +57,7 @@ import de.schildbach.oeffi.directions.QueryTripRunnable;
 import de.schildbach.oeffi.tripeval.TripRenderer;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.Formats;
+import de.schildbach.oeffi.util.HtmlUtils;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.ResourceUtil;
 import de.schildbach.oeffi.util.TimeSpec;
@@ -753,7 +753,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
                     Formats.formatTime(application.getSystemTimeZoneSelector(), eventLogEntry.timestamp, 0),
                     Formats.formatTimeDiff(application, System.currentTimeMillis(), eventLogEntry.timestamp));
             timestampView.setText(timeText);
-            messageView.setText(Html.fromHtml(eventLogEntry.message, Html.FROM_HTML_MODE_COMPACT));
+            messageView.setText(HtmlUtils.spannedFromHtml(eventLogEntry.message));
             final int textColorId;
             switch (eventLogEntry.type) {
                 case PUBLIC_LEG_START:

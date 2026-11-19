@@ -23,7 +23,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.Html;
 import android.view.View;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -42,6 +41,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.schildbach.oeffi.util.ColorHash;
+import de.schildbach.oeffi.util.HtmlUtils;
 import de.schildbach.oeffi.util.ViewUtils;
 
 public class LogViewerActivity extends OeffiActivity {
@@ -153,7 +153,7 @@ public class LogViewerActivity extends OeffiActivity {
             actionBar.stopProgress();
         }
         final TextView textView = findViewById(R.id.logviewer_list);
-        textView.setText(Html.fromHtml(sb.toString(), Html.FROM_HTML_MODE_COMPACT));
+        textView.setText(HtmlUtils.spannedFromHtml(sb.toString()));
         if (scrollToEnd) {
             final ScrollView scrollView = findViewById(R.id.logviewer_scroll);
             scrollView.getChildAt(0).post(() -> {
@@ -183,7 +183,7 @@ public class LogViewerActivity extends OeffiActivity {
                 color = colorHash.toHexString(loggerName);
                 colorMap.put(loggerName, color);
             }
-            return "<font color=\"" + color + "\">" + Html.escapeHtml(line) + "</font>";
+            return "<font color=\"" + color + "\">" + HtmlUtils.escapeHtml(line) + "</font>";
         }
         return line;
     }

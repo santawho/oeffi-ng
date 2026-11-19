@@ -43,7 +43,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
 import android.provider.CalendarContract;
-import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -534,7 +533,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             legsGroup.addView(row, i++);
         }
         ((TextView) findViewById(R.id.directions_trip_details_footer))
-                .setText(Html.fromHtml(getString(R.string.directions_trip_details_realtime), Html.FROM_HTML_MODE_COMPACT));
+                .setText(HtmlUtils.spannedFromHtml(getString(R.string.directions_trip_details_realtime)));
 
 //        final View disclaimerView = findViewById(R.id.directions_trip_details_disclaimer_group);
 //        ViewCompat.setOnApplyWindowInsetsListener(disclaimerView, (v, windowInsets) -> {
@@ -1658,7 +1657,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                         message.substring(0, Math.min(message.length(), 60)));
                 messageView.setTextColor(colorInsignificant);
             };
-            final Spanned html = Html.fromHtml(HtmlUtils.makeLinksClickableInHtml(displayMessage), Html.FROM_HTML_MODE_COMPACT);
+            final Spanned html = HtmlUtils.spannedFromHtml(HtmlUtils.makeLinksClickableInHtml(displayMessage));
             messageView.setText(html);
             messageView.setMovementMethod(LinkMovementMethod.getInstance());
             messageView.setOnClickListener(v -> {
@@ -2008,7 +2007,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             textView.setVisibility(View.GONE);
         } else {
             textView.setVisibility(View.VISIBLE);
-            textView.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_COMPACT));
+            textView.setText(HtmlUtils.spannedFromHtml(text));
             textView.setTextColor(textColor);
         }
 
@@ -2427,7 +2426,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 }
             }
         }
-        return Html.fromHtml(leftText, Html.FROM_HTML_MODE_COMPACT);
+        return HtmlUtils.spannedFromHtml(leftText);
     }
 
     private static class CollapseColumns {
@@ -2640,7 +2639,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         } else {
             nameText = breakableName;
         }
-        stopNameView.setText(Html.fromHtml(nameText, Html.FROM_HTML_MODE_COMPACT));
+        stopNameView.setText(HtmlUtils.spannedFromHtml(nameText));
         ViewUtils.setCancelledStrikeThru(stopNameView, isCancelled);
         if (highlightLocation) {
             stopNameView.setTextColor(colorHighlighted);
@@ -2966,7 +2965,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     locationName, event);
         }
 
-        return Html.fromHtml(eventText, Html.FROM_HTML_MODE_COMPACT);
+        return HtmlUtils.spannedFromHtml(eventText);
     }
 
     private String getTooltipForStopEvent(

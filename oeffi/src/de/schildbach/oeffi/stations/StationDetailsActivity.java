@@ -28,7 +28,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
-import android.text.Html;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
@@ -1515,7 +1514,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             };
             if (displayMessage.equals(msgViewMessageText))
                 msgViewExpanded = 2;
-            final Spanned html = Html.fromHtml(HtmlUtils.makeLinksClickableInHtml(displayMessage), Html.FROM_HTML_MODE_COMPACT);
+            final Spanned html = HtmlUtils.spannedFromHtml(HtmlUtils.makeLinksClickableInHtml(displayMessage));
             msgView.setText(html);
             msgView.setTextColor(context.getColor(colorResId));
             msgView.setMovementMethod(LinkMovementMethod.getInstance());

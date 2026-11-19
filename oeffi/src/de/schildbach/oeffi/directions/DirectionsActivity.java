@@ -33,7 +33,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
-import android.text.Html;
 import android.text.format.DateFormat;
 import android.util.TypedValue;
 import android.view.KeyEvent;
@@ -51,6 +50,7 @@ import android.widget.DatePicker;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import de.schildbach.oeffi.util.HtmlUtils;
 import de.schildbach.oeffi.util.MapPopupMenu;
 import de.schildbach.oeffi.util.PopupMenu;
 import android.widget.TextView;
@@ -461,7 +461,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
                 final int vPad = getResources().getDimensionPixelSize(R.dimen.text_padding_vertical_lax);
                 titleView.setPadding(hPad, vPad, hPad, vPad);
                 titleView.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimensionPixelSize(R.dimen.font_size_large));
-                titleView.setText(Html.fromHtml(getString(R.string.directions_products_prompt, productName), Html.FROM_HTML_MODE_COMPACT));
+                titleView.setText(HtmlUtils.spannedFromHtml(getString(R.string.directions_products_prompt, productName)));
                 DialogBuilder.get(DirectionsActivity.this)
                     .setCanceledOnTouchOutside(true)
                     .setCustomTitle(titleView)

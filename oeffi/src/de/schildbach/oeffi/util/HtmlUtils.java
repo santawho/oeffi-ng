@@ -18,6 +18,8 @@
 package de.schildbach.oeffi.util;
 
 import android.content.SharedPreferences;
+import android.text.Html;
+import android.text.Spanned;
 
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -27,6 +29,14 @@ import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
 
 public final class HtmlUtils {
+    public static Spanned spannedFromHtml(final String html) {
+        return Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT);
+    }
+
+    public static String escapeHtml(final String text) {
+        return Html.escapeHtml(text);
+    }
+
     public static String makeLinksClickableInHtml(String text) {
         final SharedPreferences preferences = Application.getInstance().getSharedPreferences();
 

@@ -21,7 +21,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Handler;
-import android.text.Html;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -44,6 +43,7 @@ import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.util.ColorHash;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.Formats;
+import de.schildbach.oeffi.util.HtmlUtils;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.Preferences;
 import de.schildbach.pte.NetworkId;
@@ -634,7 +634,7 @@ public class LocationSelector extends LinearLayout implements
         final TextView textView = item.textView;
         if (stationName != null) {
             final ColorHash colorHash = ColorHash.getExtendedColorHash(darkMode);
-            textView.setText(Html.fromHtml(Formats.makeBreakableStationName(stationName), Html.FROM_HTML_MODE_COMPACT));
+            textView.setText(HtmlUtils.spannedFromHtml(Formats.makeBreakableStationName(stationName)));
             final int color = isColorized ? colorHash.toARGB(stationName) : getResources().getColor(R.color.fg_significant);
             textView.setTextColor(color);
             textView.setEnabled(true);
