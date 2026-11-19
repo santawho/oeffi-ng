@@ -168,6 +168,7 @@
     <string-array name="navigation_notifications_scenarios">
         <item>zeige keine Benachrichtigungen</item>
         <item>zeige alle Benachrichtigungen als Pop-Ups</item>
+        <item>zeige alle Benachrichtigungen als Pop-Ups, nur während Du mit dem Gerät arbeitest</item>
         <item>zeige alle Benachrichtigungen auf der Smart-Watch</item>
         <item>zeige alle Benachrichtigungen auf der Smart-Watch, nur wenn der Bildschirm aus ist</item>
         <item>zeige alle Benachrichtigungen zu jeder Zeit</item>
@@ -179,8 +180,10 @@
     <string name="navigation_notifications_show_when_summary">Lege fest, wann Ereignis-Benachrichtigungen angezeigt werden sollen. [%s]</string>
     <string-array name="navigation_notifications_show_when">
         <item>niemals (Funktion ist abgeschaltet)</item>
-        <item>wenn Bildschirm gesperrt</item>
         <item>wenn Bildschirm aus ist</item>
+        <item>wenn Bildschirm an ist</item>
+        <item>wenn Bildschirm gesperrt</item>
+        <item>wenn Bildschirm entsperrt</item>
         <item>immer</item>
     </string-array>
     <string name="navigation_notifications_remove_when_title">Entferne Benachrichtigungen wenn …</string>

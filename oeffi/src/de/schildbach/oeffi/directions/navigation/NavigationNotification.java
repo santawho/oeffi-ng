@@ -594,19 +594,27 @@ public class NavigationNotification {
 
     private static final String S_ISSUE_NEVER = "never";
     private static final String S_ISSUE_WHEN_LOCKED = "when-locked";
+    private static final String S_ISSUE_WHEN_UNLOCKED = "when-unlocked";
     private static final String S_ISSUE_WHEN_OFF = "when-off";
+    private static final String S_ISSUE_WHEN_ON = "when-on";
     private static final String S_ISSUE_ALWAYS = "always";
     private static final int I_ISSUE_NEVER = 0;
     private static final int I_ISSUE_ALWAYS = -1;
     private static final int I_ISSUE_WHEN_LOCKED = -2;
     private static final int I_ISSUE_WHEN_OFF = -3;
+    private static final int I_ISSUE_WHEN_ON = -4;
+    private static final int I_ISSUE_WHEN_UNLOCKED = -5;
 
     private static int getIssueConfig(final String prefKey) {
         final String value = prefs.getString(prefKey, S_ISSUE_NEVER);
         if (S_ISSUE_WHEN_LOCKED.equals(value))
             return I_ISSUE_WHEN_LOCKED;
+        if (S_ISSUE_WHEN_UNLOCKED.equals(value))
+            return I_ISSUE_WHEN_UNLOCKED;
         if (S_ISSUE_WHEN_OFF.equals(value))
             return I_ISSUE_WHEN_OFF;
+        if (S_ISSUE_WHEN_ON.equals(value))
+            return I_ISSUE_WHEN_ON;
         if (S_ISSUE_ALWAYS.equals(value))
             return I_ISSUE_ALWAYS;
         return I_ISSUE_NEVER;
@@ -722,8 +730,12 @@ public class NavigationNotification {
                 doShow = true;
             else if (showWhen == I_ISSUE_WHEN_LOCKED)
                 doShow = isLocked;
+            else if (showWhen == I_ISSUE_WHEN_UNLOCKED)
+                doShow = !isLocked;
             else if (showWhen == I_ISSUE_WHEN_OFF)
                 doShow = isScreenOff;
+            else if (showWhen == I_ISSUE_WHEN_ON)
+                doShow = !isScreenOff;
             else
                 doShow = false;
 

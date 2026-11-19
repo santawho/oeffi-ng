@@ -19,6 +19,7 @@ package de.schildbach.oeffi.preference;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.text.Html;
 import android.util.AttributeSet;
 import androidx.preference.ListPreference;
 
@@ -49,6 +50,17 @@ public class ScenarioSelectorPreference extends ListPreference {
 
     private void construct() {
         setDefaultValue("justsomething"); // forces call of onSetInitialValue()
+    }
+
+    @Override
+    public CharSequence[] getEntries() {
+        final CharSequence[] entries = super.getEntries();
+        final CharSequence[] styledEntries = new CharSequence[entries.length];
+        for (int i = 0; i < entries.length; i++) {
+            final String styled = "_______________<br>" + entries[i];
+            styledEntries[i] = Html.fromHtml(styled, Html.FROM_HTML_MODE_COMPACT);
+        }
+        return styledEntries;
     }
 
     private boolean isAllSetLike(final String scenarioValue) {
