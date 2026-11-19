@@ -179,6 +179,7 @@
     <string-array name="navigation_notifications_scenarios">
         <item>do not show event notifications</item>
         <item>show all notifications as pop-ups</item>
+        <item>show all notifications as pop-ups, only while you are working on the device</item>
         <item>show all notifications on smartwatch</item>
         <item>show all notifications on smartwatch, only when display is off</item>
         <item>show all notifications at all times</item>
@@ -187,6 +188,7 @@
     <string-array name="navigation_notifications_scenario_values" translatable="false">
         <item translatable="false">navigation_notifications_enabled=Bfalse;navigation_notifications_changes_high_priority=Bfalse;navigation_notifications_direction_high_priority=Bfalse;navigation_notification_changes_show_when=Snever;navigation_notification_changes_remove_when=Snever;navigation_notification_directions_show_when=Snever;navigation_notification_directions_remove_when=Snever</item>
         <item translatable="false">navigation_notifications_enabled=Btrue;navigation_notifications_changes_high_priority=Btrue;navigation_notifications_direction_high_priority=Btrue;navigation_notification_changes_show_when=Salways;navigation_notification_changes_remove_when=S10;navigation_notification_directions_show_when=Salways;navigation_notification_directions_remove_when=S10;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_2_minutes_preview=Btrue;navigation_notifications_remind_6_minutes=Btrue;navigation_notifications_remind_6_minutes_preview=Btrue</item>
+        <item translatable="false">navigation_notifications_enabled=Btrue;navigation_notifications_changes_high_priority=Btrue;navigation_notifications_direction_high_priority=Btrue;navigation_notification_changes_show_when=Swhen-unlocked;navigation_notification_changes_remove_when=S30;navigation_notification_directions_show_when=Swhen-unlocked;navigation_notification_directions_remove_when=S30;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_2_minutes_preview=Btrue;navigation_notifications_remind_6_minutes=Btrue;navigation_notifications_remind_6_minutes_preview=Btrue</item>
         <item translatable="false">navigation_notifications_enabled=Btrue;navigation_notifications_changes_high_priority=Bfalse;navigation_notifications_direction_high_priority=Bfalse;navigation_notification_changes_show_when=Salways;navigation_notification_changes_remove_when=S2;navigation_notification_directions_show_when=Salways;navigation_notification_directions_remove_when=S2;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_2_minutes_preview=Btrue;navigation_notifications_remind_6_minutes=Btrue;navigation_notifications_remind_6_minutes_preview=Btrue</item>
         <item translatable="false">navigation_notifications_enabled=Btrue;navigation_notifications_changes_high_priority=Bfalse;navigation_notifications_direction_high_priority=Bfalse;navigation_notification_changes_show_when=Swhen-off;navigation_notification_changes_remove_when=S2;navigation_notification_directions_show_when=Swhen-off;navigation_notification_directions_remove_when=S2;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_2_minutes_preview=Btrue;navigation_notifications_remind_6_minutes=Btrue;navigation_notifications_remind_6_minutes_preview=Btrue</item>
         <item translatable="false">navigation_notifications_enabled=Btrue;navigation_notifications_changes_high_priority=Btrue;navigation_notifications_direction_high_priority=Btrue;navigation_notification_changes_show_when=Salways;navigation_notification_changes_remove_when=Snever;navigation_notification_directions_show_when=Salways;navigation_notification_directions_remove_when=Snever;navigation_notifications_remind_2_minutes=Btrue;navigation_notifications_remind_2_minutes_preview=Btrue;navigation_notifications_remind_6_minutes=Btrue;navigation_notifications_remind_6_minutes_preview=Btrue</item>
@@ -198,14 +200,18 @@
     <string name="navigation_notifications_show_when_summary">Determine when event notifications shall be issued. [%s]</string>
     <string-array name="navigation_notifications_show_when">
         <item>never (feature is off)</item>
-        <item>when display is locked</item>
         <item>when display is off</item>
+        <item>when display is on</item>
+        <item>when display is locked</item>
+        <item>when display is unlocked</item>
         <item>always</item>
     </string-array>
     <string-array name="navigation_notifications_show_when_values" translatable="false">
         <item translatable="false">never</item>
-        <item translatable="false">when-locked</item>
         <item translatable="false">when-off</item>
+        <item translatable="false">when-on</item>
+        <item translatable="false">when-locked</item>
+        <item translatable="false">when-unlocked</item>
         <item translatable="false">always</item>
     </string-array>
     <string name="navigation_notifications_remove_when_title">Remove notifications when …</string>
