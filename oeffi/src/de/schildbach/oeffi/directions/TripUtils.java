@@ -135,7 +135,7 @@ public class TripUtils {
             final NetworkProvider networkProvider,
             final Trip.Public oldLeg,
             final boolean forceRefresh,
-            final Date now) throws IOException {
+            final Date now) {
         final JourneyRef journeyRef = oldLeg.journeyRef;
         if (journeyRef == null)
             return oldLeg;
@@ -174,13 +174,22 @@ public class TripUtils {
                 final long timeLeft = nextEventTime - nowTime;
                 if (timeLeft < 240000) {
                     // last 4 minutes and after, 30 secs refresh interval
-                    nextRefreshTime = legLoadedAt + 30000;
+                    nextRefreshTime = Math.max(legLoadedAt + 30000, nextEventTime - 240000);
                 } else if (timeLeft < 600000) {
                     // last 10 minutes and after, 60 secs refresh interval
-                    nextRefreshTime = legLoadedAt + 60000;
+                    nextRefreshTime = Math.max(legLoadedAt + 60000, nextEventTime - 600000);
                 } else {
-                    // approaching, refresh after 25% of the remaining time
-                    nextRefreshTime = nowTime + timeLeft / 4;
+                    final long diff = nextEventTime - legLoadedAt;
+                    if (diff < 0) {
+                        // what is this? the next event is in the future,
+                        // but the leg has been loaded even after it.
+                        // this should never happen! but just to be sure ...
+                        nextRefreshTime = nextEventTime;
+                    } else {
+                        // approaching
+                        // refresh at 40% of the time span from the last load remaining
+                        nextRefreshTime = nextEventTime - ((diff * 40) / 100);
+                    }
                 }
             }
             if (nextRefreshTimeA < nextRefreshTime)
