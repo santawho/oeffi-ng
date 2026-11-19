@@ -1702,7 +1702,9 @@ public class NavigationNotification {
                 update(force, null, speakPreview, delaySoundUntil);
             }
         } else {
-            log.info("not refreshing trip, required in {} msec", refreshTripRequiredFromNow);
+            log.info("not refreshing trip, required in {} msec at {}",
+                    refreshTripRequiredFromNow,
+                    NavigationAlarmManager.LOG_TIME_FORMAT.format(refreshTripRequiredAt));
             update(force, null, speakPreview, delaySoundUntil);
             sendUpdateTriggerBroadcast();
         }
