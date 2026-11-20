@@ -34,7 +34,6 @@ import android.database.Cursor;
 import android.location.Criteria;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.location.LocationProvider;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -511,8 +510,8 @@ public class NearestFavoriteStationWidgetService extends JobService {
 
                 views.setPendingIntentTemplate(R.id.station_widget_departures,
                         PendingIntent.getActivity(Refresher.this, 0,
-                                StationDetailsActivity.fillIntent(
-                                        new Intent(Intent.ACTION_MAIN, null, Refresher.this, StationDetailsActivity.class)
+                                DeparturesActivity.fillIntent(
+                                        new Intent(Intent.ACTION_MAIN, null, Refresher.this, DeparturesActivity.class)
                                                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK),
                                         networkId, location, null),
                                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE));

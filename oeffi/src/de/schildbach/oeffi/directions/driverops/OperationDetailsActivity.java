@@ -41,7 +41,7 @@ import de.schildbach.oeffi.util.LineView;
 import de.schildbach.oeffi.tripeval.TripGeoUtils;
 import de.schildbach.oeffi.tripeval.TripRenderer;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
-import de.schildbach.oeffi.stations.StationDetailsActivity;
+import de.schildbach.oeffi.stations.DeparturesActivity;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.pte.NetworkId;
@@ -813,7 +813,7 @@ public class OperationDetailsActivity extends TripDetailsActivity {
                 PTDate time = stop.getArrivalTime();
                 if (time == null)
                     time = stop.getDepartureTime(true);
-                StationDetailsActivity.start(OperationDetailsActivity.this,
+                DeparturesActivity.start(OperationDetailsActivity.this,
                         network, stop.location, time,
                         shallShowChildActivitiesInNewTask(),
                         getReturnHereIntent());

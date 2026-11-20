@@ -272,7 +272,7 @@ public class FavoriteStationsActivity extends OeffiActivity
             setResult(RESULT_OK, intent);
             finish();
         } else if (newFavoriteStation.type == LocationType.STATION) {
-            StationDetailsActivity.start(FavoriteStationsActivity.this, network, newFavoriteStation, null);
+            DeparturesActivity.start(FavoriteStationsActivity.this, network, newFavoriteStation, null);
         }
     }
 
@@ -292,13 +292,13 @@ public class FavoriteStationsActivity extends OeffiActivity
             return;
         }
 
-        StationDetailsActivity.start(FavoriteStationsActivity.this, stationNetwork, station, null);
+        DeparturesActivity.start(FavoriteStationsActivity.this, stationNetwork, station, null);
     }
 
     public boolean onStationContextMenuItemClick(final int adapterPosition, final NetworkId stationNetwork,
             final Location station, final @Nullable List<Departure> departures, final int menuItemId) {
         if (menuItemId == R.id.station_context_show_departures) {
-            StationDetailsActivity.start(FavoriteStationsActivity.this, stationNetwork, station, null, departures);
+            DeparturesActivity.start(FavoriteStationsActivity.this, stationNetwork, station, null, departures);
             return true;
         } else if (menuItemId == R.id.station_context_nearby_departures) {
             StationsActivity.start(FavoriteStationsActivity.this, stationNetwork, station, null, getReturnHereIntent());

@@ -43,7 +43,7 @@ import de.schildbach.oeffi.StationsAware;
 import de.schildbach.oeffi.stations.CompassNeedleView;
 import de.schildbach.oeffi.stations.Station;
 import de.schildbach.oeffi.stations.StationContextMenu;
-import de.schildbach.oeffi.stations.StationDetailsActivity;
+import de.schildbach.oeffi.stations.DeparturesActivity;
 import de.schildbach.oeffi.stations.StationsActivity;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.LineView;
@@ -296,7 +296,7 @@ public class JourneyViewHolder extends RecyclerView.ViewHolder {
                 remaining.setTextColor(timeRemaining < 60000L ? colorWalkTimeBad : colorWalkTimeGood);
 
                 departureView.setOnClickListener(v -> {
-                    StationDetailsActivity.start(context,
+                    DeparturesActivity.start(context,
                             context.getNetwork(), station.location, departureTime);
                 });
                 departureView.setOnLongClickListener(v -> {

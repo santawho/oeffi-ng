@@ -104,7 +104,7 @@ import de.schildbach.oeffi.directions.navigation.TripNavigatorActivity;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.LineView;
 import de.schildbach.oeffi.stations.StationContextMenu;
-import de.schildbach.oeffi.stations.StationDetailsActivity;
+import de.schildbach.oeffi.stations.DeparturesActivity;
 import de.schildbach.oeffi.stations.StationsActivity;
 import de.schildbach.oeffi.util.ClockUtils;
 import de.schildbach.oeffi.util.Formats;
@@ -1413,7 +1413,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                     contextMenu.setOnMenuItemClickListener(item -> {
                         final int itemId = item.getItemId();
                         if (itemId == R.id.station_context_show_departures) {
-                            StationDetailsActivity.start(
+                            DeparturesActivity.start(
                                     TripDetailsActivity.this,
                                     network, destinationLocation, leg.getArrivalTime(),
                                     shallShowChildActivitiesInNewTask(),
@@ -3180,7 +3180,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
                 if (time == null)
                     time = stop.getDepartureTime(true);
                 if (menuItemId == R.id.station_context_show_departures) {
-                    StationDetailsActivity.start(
+                    DeparturesActivity.start(
                             TripDetailsActivity.this,
                             network, stop.location,
                             time,

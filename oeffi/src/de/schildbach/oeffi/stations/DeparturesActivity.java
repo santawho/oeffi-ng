@@ -101,15 +101,15 @@ import java.util.stream.Stream;
 import static de.schildbach.pte.util.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
-public class StationDetailsActivity extends OeffiActivity implements StationsAware {
+public class DeparturesActivity extends OeffiActivity implements StationsAware {
     private static final boolean COMBINE_STATIONS_BY_IDENTICAL_NAME = true;
 
-    public static final String INTENT_EXTRA_NETWORK = StationDetailsActivity.class.getName() + ".network";
-    public static final String INTENT_EXTRA_STATION = StationDetailsActivity.class.getName() + ".station";
-    public static final String INTENT_EXTRA_PRESETTIME = StationDetailsActivity.class.getName() + ".presettime";
-    public static final String INTENT_EXTRA_DEPARTURES = StationDetailsActivity.class.getName() + ".departures";
-    public static final String INTENT_EXTRA_JOURNEYREF = StationDetailsActivity.class.getName() + ".journeyref";
-    public static final String INTENT_EXTRA_DEPARTURETIME = StationDetailsActivity.class.getName() + ".departuretime";
+    public static final String INTENT_EXTRA_NETWORK = DeparturesActivity.class.getName() + ".network";
+    public static final String INTENT_EXTRA_STATION = DeparturesActivity.class.getName() + ".station";
+    public static final String INTENT_EXTRA_PRESETTIME = DeparturesActivity.class.getName() + ".presettime";
+    public static final String INTENT_EXTRA_DEPARTURES = DeparturesActivity.class.getName() + ".departures";
+    public static final String INTENT_EXTRA_JOURNEYREF = DeparturesActivity.class.getName() + ".journeyref";
+    public static final String INTENT_EXTRA_DEPARTURETIME = DeparturesActivity.class.getName() + ".departuretime";
 
     public static void start(
             final Context context, final NetworkId networkId,
@@ -143,15 +143,15 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             return;
         }
 
-        Intent intent = StationDetailsActivity.fillIntent(
-                new Intent(context, StationDetailsActivity.class),
+        Intent intent = DeparturesActivity.fillIntent(
+                new Intent(context, DeparturesActivity.class),
                 networkId, station, presetTime);
         if (departures != null) {
             final int size = Math.min(departures.size(), MAX_DEPARTURES);
             final ArrayList<Departure> shortenedList = new ArrayList<>(size);
             for (int i = 0; i < size; i++)
                 shortenedList.add(departures.get(i));
-            intent.putExtra(StationDetailsActivity.INTENT_EXTRA_DEPARTURES, shortenedList);
+            intent.putExtra(DeparturesActivity.INTENT_EXTRA_DEPARTURES, shortenedList);
         }
         if (newTask)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -166,10 +166,10 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             final Date presetTime) {
         checkArgument(station.type == LocationType.STATION);
         requireNonNull(networkId);
-        intent.putExtra(StationDetailsActivity.INTENT_EXTRA_NETWORK, networkId.name());
-        intent.putExtra(StationDetailsActivity.INTENT_EXTRA_STATION, Objects.serializeToString(station));
+        intent.putExtra(DeparturesActivity.INTENT_EXTRA_NETWORK, networkId.name());
+        intent.putExtra(DeparturesActivity.INTENT_EXTRA_STATION, Objects.serializeToString(station));
         if (presetTime != null)
-            intent.putExtra(StationDetailsActivity.INTENT_EXTRA_PRESETTIME, presetTime);
+            intent.putExtra(DeparturesActivity.INTENT_EXTRA_PRESETTIME, presetTime);
         return intent;
     }
 
@@ -281,7 +281,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         backgroundThread.start();
         backgroundHandler = new Handler(backgroundThread.getLooper());
 
-        setContentView(R.layout.station_details_content);
+        setContentView(R.layout.departures_content);
         final View contentView = findViewById(android.R.id.content);
         ViewCompat.setOnApplyWindowInsetsListener(contentView, (v, windowInsets) -> {
             final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -872,7 +872,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
                     @Override
                     protected void onRateLimit() {
-                        new Toast(StationDetailsActivity.this).toast(R.string.toast_network_rate_limit);
+                        new Toast(DeparturesActivity.this).toast(R.string.toast_network_rate_limit);
                     }
 
                     @Override
@@ -907,7 +907,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
             @Override
             public View getView(final int position, @Nullable final View convertView, @NonNull final ViewGroup parent) {
                 final View view = convertView != null ? convertView :
-                        LayoutInflater.from(StationDetailsActivity.this)
+                        LayoutInflater.from(DeparturesActivity.this)
                                 .inflate(R.layout.station_selector_dropdown_closed, null);
                 final TextView textView = view.findViewById(R.id.station_selector_text);
                 final CombinedStation item = getItem(position);
@@ -922,7 +922,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                     @Nullable final View convertView,
                     @NonNull final ViewGroup parent) {
                 final View view = convertView != null ? convertView :
-                    LayoutInflater.from(StationDetailsActivity.this)
+                    LayoutInflater.from(DeparturesActivity.this)
                             .inflate(R.layout.station_selector_dropdown_list_entry, null);
                 final TextView textView = view.findViewById(R.id.station_selector_text);
                 final CombinedStation combinedStation = getItem(position);
@@ -1161,7 +1161,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 final NetworkProvider networkProvider = NetworkProviderFactory.provider(selectedNetwork);
                 for (final Product product : products) {
                     final Line productLine = NetworkProvider.productLine(networkProvider, product);
-                    final LineView productLineView = (LineView) getLayoutInflater().inflate(R.layout.station_details_header_line_compact, null);
+                    final LineView productLineView = (LineView) getLayoutInflater().inflate(R.layout.departures_header_line_compact, null);
                     productLineView.setLine(productLine);
                     linesGroupCompact.addView(productLineView);
                 }
@@ -1179,11 +1179,11 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 final Line line = linesEntry.getKey();
                 final List<Destination> destinations = linesEntry.getValue();
 
-                final LineView compactLineView = (LineView) getLayoutInflater().inflate(R.layout.station_details_header_line_compact, null);
+                final LineView compactLineView = (LineView) getLayoutInflater().inflate(R.layout.departures_header_line_compact, null);
                 compactLineView.setLine(line);
                 linesGroupCompact.addView(compactLineView);
 
-                final View lineRow = getLayoutInflater().inflate(R.layout.station_details_header_line_full, null);
+                final View lineRow = getLayoutInflater().inflate(R.layout.departures_header_line_full, null);
                 linesGroupFull.addView(lineRow, LINES_LAYOUT_PARAMS);
 
                 final LineView lineView = lineRow
@@ -1209,10 +1209,10 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
     }
 
     private class DeparturesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-        private final StationDetailsActivity context;
+        private final DeparturesActivity context;
         private final LayoutInflater inflater;
 
-        public DeparturesAdapter(final StationDetailsActivity context) {
+        public DeparturesAdapter(final DeparturesActivity context) {
             this.context = context;
             this.inflater = LayoutInflater.from(context);
 
@@ -1221,13 +1221,13 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
         @Override
         public int getItemCount() {
-            final List<Departure> selectedDepartures = StationDetailsActivity.this.getFilteredDepartures();
+            final List<Departure> selectedDepartures = DeparturesActivity.this.getFilteredDepartures();
             return selectedDepartures != null ? selectedDepartures.size() : 0;
         }
 
         @Override
         public int getItemViewType(final int position) {
-            return R.layout.station_details_entry;
+            return R.layout.departures_entry;
         }
 
         public Departure getItem(final int position) {
@@ -1243,7 +1243,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
             return new DepartureViewHolder(context,
-                    inflater.inflate(R.layout.station_details_entry, parent, false));
+                    inflater.inflate(R.layout.departures_entry, parent, false));
         }
 
         @Override
@@ -1269,9 +1269,9 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         private String msgViewMessageText;
         private int msgViewExpanded;
 
-        private final StationDetailsActivity context;
+        private final DeparturesActivity context;
 
-        public DepartureViewHolder(final StationDetailsActivity context, final View itemView) {
+        public DepartureViewHolder(final DeparturesActivity context, final View itemView) {
             super(itemView);
 
             timeRelView = itemView.findViewById(R.id.stations_station_entry_time_rel);

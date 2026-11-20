@@ -56,7 +56,7 @@ import de.schildbach.oeffi.util.LineView;
 import de.schildbach.oeffi.stations.QueryDeparturesRunnable;
 import de.schildbach.oeffi.stations.Station;
 import de.schildbach.oeffi.stations.StationContextMenu;
-import de.schildbach.oeffi.stations.StationDetailsActivity;
+import de.schildbach.oeffi.stations.DeparturesActivity;
 import de.schildbach.oeffi.util.Downloader;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.ZoomControls;
@@ -159,7 +159,7 @@ public class PlanActivity extends OeffiActivity {
                     false, false, false);
             contextMenu.setOnMenuItemClickListener(item -> {
                 if (item.getItemId() == R.id.station_context_show_departures) {
-                    StationDetailsActivity.start(PlanActivity.this, selection.network, selection.location, null);
+                    DeparturesActivity.start(PlanActivity.this, selection.network, selection.location, null);
                     return true;
                 } else {
                     return false;

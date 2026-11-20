@@ -128,13 +128,13 @@ public class StationContextMenu extends PopupMenu {
                 } else {
                     if (departuresShortcutChecked) {
                         shortcutId = "departures-at-" + networkId.name() + "-" + location.id + "-" + shortcutName;
-                        shortcutIntent = StationDetailsActivity.fillIntent(
-                                new Intent(Intent.ACTION_MAIN, null, context, StationDetailsActivity.class)
+                        shortcutIntent = DeparturesActivity.fillIntent(
+                                new Intent(Intent.ACTION_MAIN, null, context, DeparturesActivity.class)
                                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK),
                                 networkId, location, null);
                         iconId = R.mipmap.ic_oeffi_ng_stations_color_48dp;
                         defaultNameId = R.string.departures_shortcut_default_name;
-                        activityClass = StationDetailsActivity.class;
+                        activityClass = DeparturesActivity.class;
                     } else {
                         shortcutId = "directions-to-" + networkId.name() + "-" + location.id + "-" + shortcutName;
                         shortcutIntent = DirectionsShortcutActivity.fillIntent(

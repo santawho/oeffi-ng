@@ -811,7 +811,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
             final Date time = command.time == null ? null : command.time.date();
             autoCompleteLocationsHandler.start(result -> {
                 if (!result.success) return;
-                StationDetailsActivity.start(this, network, result.location, time);
+                DeparturesActivity.start(this, network, result.location, time);
             });
         }
 
@@ -1737,7 +1737,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
                 stationListAdapter.notifyItemChanged(adapterPosition);
             return true;
         } else if (menuItemId == R.id.station_context_show_departures) {
-            StationDetailsActivity.start(StationsActivity.this, network, station, presetTime, departures);
+            DeparturesActivity.start(StationsActivity.this, network, station, presetTime, departures);
             return true;
         } else if (menuItemId == R.id.station_context_directions_from) {
             DirectionsActivity.start(StationsActivity.this,

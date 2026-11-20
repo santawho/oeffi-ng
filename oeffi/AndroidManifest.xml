@@ -209,7 +209,7 @@
         </activity>
 
         <activity
-            android:name=".stations.StationDetailsActivity"
+            android:name=".stations.DeparturesActivity"
             android:exported="true"
             android:configChanges="keyboard|keyboardHidden"
             android:label="@string/station_details_activity_title"

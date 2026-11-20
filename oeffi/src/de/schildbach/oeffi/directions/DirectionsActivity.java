@@ -84,7 +84,7 @@ import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.stations.FavoriteStationsProvider;
 import de.schildbach.oeffi.stations.FavoriteUtils;
 import de.schildbach.oeffi.stations.StationContextMenu;
-import de.schildbach.oeffi.stations.StationDetailsActivity;
+import de.schildbach.oeffi.stations.DeparturesActivity;
 import de.schildbach.oeffi.stations.StationsActivity;
 import de.schildbach.oeffi.util.ViewUtils;
 import de.schildbach.oeffi.util.locationview.AutoCompleteLocationsHandler;
@@ -1467,7 +1467,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
                             : new Date(timeSpec.timeInMillis());
 
             if (itemId == R.id.directions_location_selector_context_show_departures) {
-                StationDetailsActivity.start(this, network, location, departureDate);
+                DeparturesActivity.start(this, network, location, departureDate);
             } else if (itemId == R.id.directions_location_selector_context_nearby_departures) {
                 StationsActivity.start(this, network, location, departureDate, getReturnHereIntent());
             }
@@ -1633,7 +1633,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
             queryHistoryListAdapter.setIsFavorite(adapterPosition, false);
             return true;
         } else if (menuItemId == R.id.directions_query_history_location_context_details && menuItemLocation != null) {
-            StationDetailsActivity.start(this, network, menuItemLocation, null);
+            DeparturesActivity.start(this, network, menuItemLocation, null);
             return true;
         } else if (menuItemId == R.id.directions_query_history_location_context_add_favorite
                 && menuItemLocation != null) {
