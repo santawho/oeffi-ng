@@ -24,6 +24,14 @@
         android:textColor="@color/fg_significant_on_light" />
 
     <ImageButton
+        android:id="@+id/map_public_transport"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="top|left"
+        android:layout_margin="8dp"
+        android:background="@drawable/map_public_transport" />
+
+    <ImageButton
         android:id="@+id/map_close"
         android:layout_width="32dp"
         android:layout_height="32dp"

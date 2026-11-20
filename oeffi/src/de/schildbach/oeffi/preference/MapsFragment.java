@@ -45,8 +45,7 @@ public class MapsFragment extends PreferenceFragment {
     public static ActionMode getActionMode(final boolean forTrips) {
         final SharedPreferences prefs = Application.getInstance().getSharedPreferences();
         final String prefValue = prefs.getString(forTrips ? KEY_TRIP_ACTION : KEY_POINT_ACTION, ActionMode.INTERNAL.name());
-        final ActionMode actionMode = ActionMode.valueOf(prefValue);
-        return actionMode;
+        return ActionMode.valueOf(prefValue);
     }
 
     public static AppChooser.ComponentInfo getPreselectedApp(final boolean forTrips) {
@@ -75,9 +74,16 @@ public class MapsFragment extends PreferenceFragment {
 
     private void setupDynamicSummaries() {
         setupDynamicSummary("user_interface_map_tile_resolution", R.string.user_interface_map_tile_resolution_summary);
+        setupDynamicSummary("map_custom_provider_url", R.string.map_custom_provider_url_summary);
 
         setupDynamicSummary(KEY_POINT_APP, R.string.user_interface_map_app_summary, summaryValueMapper);
         setupDynamicSummary(KEY_TRIP_APP, R.string.user_interface_map_app_summary, summaryValueMapper);
+    }
+
+    @Override
+    protected boolean isPreferenceRequiringRestart(final String key) {
+        return "map_custom_provider_url".equals(key)
+                || super.isPreferenceRequiringRestart(key);
     }
 
     private void onAppValueChanged(

@@ -84,7 +84,7 @@ public abstract class PreferenceFragment extends androidx.preference.PreferenceF
         final Map<String, ?> all = preference.getSharedPreferences().getAll();
         final Object value = all.get(preference.getKey());
         final Object realValue = valueMapper == null ? value : valueMapper.apply(value);
-        preference.setSummary(getString(summaryResId, realValue));
+        preference.setSummary(getString(summaryResId, realValue == null ? "" : realValue));
     }
 
     public void preferenceChanged(final String preferenceKey, final Object newValue) {

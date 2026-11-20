@@ -108,6 +108,8 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
         return this;
     }
 
+    private Overlay publicTransportOverlay;
+    private boolean publicTransportOverlayEnabled;
     private ZoomControls zoomControls = null;
     private FromViaToAware fromViaToAware = null;
     private TripAware tripAware = null;
@@ -131,7 +133,12 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
     }
 
     public OsmDroidOeffiMapView(final Context context, final AttributeSet attrs) {
-        super(context, attrs);
+        super(context,
+                TileProviderFactory.getBaseTileProvider(context),
+                null, attrs);
+
+        publicTransportOverlay = new TileSourceTilesOverlay(context, TileProviderFactory.FACIL_PUBLIC_TRANSPORT_OVERLAY);
+        setPublicTransportOverlayEnabled(true);
 
         zoomControlsAnimation = AnimationUtils.loadAnimation(context, R.anim.zoom_controls);
         zoomControlsAnimation.setFillAfter(true); // workaround: set through code because XML does not work
@@ -168,6 +175,24 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
     @Override
     public void removeAllContent() {
         removeAllViews();
+    }
+
+    @Override
+    public void setPublicTransportOverlayEnabled(final boolean publicTransportOverlayEnabled) {
+        this.publicTransportOverlayEnabled = publicTransportOverlayEnabled;
+        final List<Overlay> overlays = getOverlays();
+        if (publicTransportOverlayEnabled) {
+            if (!overlays.contains(publicTransportOverlay))
+                overlays.add(0, publicTransportOverlay);
+        } else {
+            overlays.remove(publicTransportOverlay);
+        }
+        invalidate();
+    }
+
+    @Override
+    public boolean isPublicTransportOverlayEnabled() {
+        return publicTransportOverlayEnabled;
     }
 
     public void setZoomControls(final ZoomControls zoomControls) {
@@ -421,7 +446,15 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
 
     @Override
     public String getCopyrightNotice() {
-        return getTileProvider().getTileSource().getCopyrightNotice();
+        final List<String> copyrights = new ArrayList<>();
+        copyrights.add(getTileProvider().getTileSource().getCopyrightNotice());
+        for (final Overlay overlay : getOverlays()) {
+            if (overlay instanceof TileSourceTilesOverlay) {
+                final TileSourceTilesOverlay tilesOverlay = (TileSourceTilesOverlay) overlay;
+                copyrights.add(tilesOverlay.getTileSource().getCopyrightNotice());
+            }
+        }
+        return String.join("\n", copyrights);
     }
 
     public class DefaultOverlay extends Overlay {

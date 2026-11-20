@@ -992,6 +992,12 @@ public abstract class OeffiActivity extends AppCompatActivity
             mapClose.setOnClickListener(v -> setMapVisible(false));
         else
             mapClose.setVisibility(View.GONE);
+
+        final ImageButton mapPublicTransport = mapFrame.findViewById(R.id.map_public_transport);
+        mapPublicTransport.setOnClickListener(v -> {
+            mapView.setPublicTransportOverlayEnabled(!mapView.isPublicTransportOverlayEnabled());
+            mapDisclaimerView.setText(mapView.getCopyrightNotice());
+        });
     }
 
     protected void addShowMapButtonToActionBar(final boolean internalOnly, final boolean forTrip) {

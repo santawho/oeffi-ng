@@ -70,6 +70,8 @@ public class OeffiMapView extends FrameLayout {
                 final int maxStations);
         void setFromViaToAware(final FromViaToAware fromViaToAware);
         void setZoomControls(final ZoomControls zoom);
+        void setPublicTransportOverlayEnabled(final boolean enable);
+        boolean isPublicTransportOverlayEnabled();
     }
 
     public interface MapPointSelectionListener {
@@ -190,5 +192,13 @@ public class OeffiMapView extends FrameLayout {
 
     public void setZoomControls(final ZoomControls zoomControls) {
         viewImplementation.setZoomControls(zoomControls);
+    }
+
+    public void setPublicTransportOverlayEnabled(final boolean enable) {
+        viewImplementation.setPublicTransportOverlayEnabled(enable);
+    }
+
+    public boolean isPublicTransportOverlayEnabled() {
+        return viewImplementation.isPublicTransportOverlayEnabled();
     }
 }

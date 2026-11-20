@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:title="@string/user_interface_category_map_title" >
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/user_interface_category_map_title">
 
     <SeekBarPreference
         android:key="user_interface_map_tile_resolution"
@@ -10,8 +9,14 @@
         android:title="@string/user_interface_map_tile_resolution_title"
         android:summary="@string/user_interface_map_tile_resolution_summary"/>
 
+    <EditTextPreference
+        android:key="map_custom_provider_url"
+        android:title="@string/map_custom_provider_url_title"
+        android:summary="@string/map_custom_provider_url_summary" />
+
     <PreferenceCategory
-        android:summary="@string/user_interface_map_point_title">
+        android:title="@string/user_interface_map_point_title"
+        android:summary="@string/user_interface_map_point_summary">
 
         <ListPreference
             android:key="user_interface_map_point_action"
@@ -29,7 +34,8 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:summary="@string/user_interface_map_trip_title">
+        android:title="@string/user_interface_map_trip_title"
+        android:summary="@string/user_interface_map_trip_summary">
 
         <ListPreference
             android:key="user_interface_map_trip_action"

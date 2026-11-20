@@ -87,8 +87,12 @@
     <string name="user_interface_category_map_title">Landkarten</string>
     <string name="user_interface_map_tile_resolution_title">Auflösung von Landkarten</string>
     <string name="user_interface_map_tile_resolution_summary">Setze dies höher für mehr Details, aber weniger Lesbarkeit, und umgekehrt. [%s]</string>
-    <string name="user_interface_map_point_title">Wie sollen Punkte auf einer Landkarte angezeigt werden</string>
-    <string name="user_interface_map_trip_title">Wie sollen Reiseverläufe auf einer Landkarte angezeigt werden</string>
+    <string name="map_custom_provider_url_title">Custom Map Source</string>
+    <string name="map_custom_provider_url_summary">Eine URL-Vorlage für die Quelle der Kartenkacheln, z.B. \"https://example.com/{z}/{y}/{x}.png\"  [%s]</string>
+    <string name="user_interface_map_point_title">Punkte</string>
+    <string name="user_interface_map_point_summary">Wie sollen Punkte auf einer Landkarte angezeigt werden</string>
+    <string name="user_interface_map_trip_title">Reiseverläufe</string>
+    <string name="user_interface_map_trip_summary">Wie sollen Reiseverläufe auf einer Landkarte angezeigt werden</string>
     <string name="user_interface_map_action_title">Aktion</string>
     <string name="user_interface_map_action_summary">%s</string>
     <string name="user_interface_map_app_title">Externe App</string>
