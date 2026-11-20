@@ -359,7 +359,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         setupFromTrip(baseTrip);
 
-        setContentView(R.layout.directions_trip_details_content, isTaskRoot());
+        setContentView(R.layout.trip_details_content, isTaskRoot());
         ViewCompat.setOnApplyWindowInsetsListener(contentView, (v, windowInsets) -> {
             final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(insets.left, 0, insets.right, 0);
@@ -527,9 +527,9 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         for (final TripRenderer.LegContainer legC : tripRenderer.legs) {
             final View row;
             if (legC.publicLeg != null)
-                row = inflater.inflate(R.layout.directions_trip_details_public_entry, null);
+                row = inflater.inflate(R.layout.trip_details_public_entry, null);
             else
-                row = inflater.inflate(R.layout.directions_trip_details_individual_entry, null);
+                row = inflater.inflate(R.layout.trip_details_individual_entry, null);
             legsGroup.addView(row, i++);
         }
         ((TextView) findViewById(R.id.directions_trip_details_footer))
@@ -1297,7 +1297,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         int i = 0;
         for (final Fare fare : fares) {
-            final View fareRow = inflater.inflate(R.layout.directions_trip_details_fares_row, null);
+            final View fareRow = inflater.inflate(R.layout.trip_details_fares_row, null);
             ((TextView) fareRow.findViewById(R.id.directions_trip_details_fare_entry_row_type))
                     .setText(fareTypes[fare.type.ordinal()]);
             ((TextView) fareRow.findViewById(R.id.directions_trip_details_fare_entry_row_name)).setText(fare.name);
@@ -2503,7 +2503,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final Date now,
             final CollapseColumns collapseColumns,
             final Stop simulatedStop) {
-        final TableRow row = (TableRow) inflater.inflate(R.layout.directions_trip_details_public_entry_stop, null);
+        final TableRow row = (TableRow) inflater.inflate(R.layout.trip_details_public_entry_stop, null);
 
         final Trip.Public leg = legC.publicLeg;
         final int nearestStopIndex = legC.nearestStopIndex;
@@ -2917,7 +2917,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         if (isShowSimulatedLine && pearlType != PearlView.Type.ARRIVAL) {
             // add a divider row
-            final TableRow divider = (TableRow) inflater.inflate(R.layout.directions_trip_details_public_entry_stop_divider, null);
+            final TableRow divider = (TableRow) inflater.inflate(R.layout.trip_details_public_entry_stop_divider, null);
             addStopRow(tableLayout, divider, backgroundColor, PearlView.Type.PASSING, style, pearlHighlightColor, fontMetrics);
         }
     }
@@ -3075,7 +3075,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     }
 
     private View collapsedIntermediateStopsRow(final Long duration, final int numIntermediateStops, final Style style) {
-        final View row = inflater.inflate(R.layout.directions_trip_details_public_entry_collapsed, null);
+        final View row = inflater.inflate(R.layout.trip_details_public_entry_collapsed, null);
 
         // message
         final String durationString = duration == null ? null :

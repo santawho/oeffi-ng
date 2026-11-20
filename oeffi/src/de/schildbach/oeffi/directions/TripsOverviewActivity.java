@@ -253,7 +253,7 @@ public class TripsOverviewActivity extends OeffiActivity {
 
         this.searchMoreContext = new SearchMoreContext(NetworkProviderFactory.provider(network), reloadRequestData, dep);
 
-        setContentView(R.layout.directions_trip_overview_content);
+        setContentView(R.layout.trips_overview_content);
         final View contentView = findViewById(android.R.id.content);
         ViewCompat.setOnApplyWindowInsetsListener(contentView, (v, windowInsets) -> {
             final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -278,7 +278,7 @@ public class TripsOverviewActivity extends OeffiActivity {
         }
         actionBar.addProgressButton().setOnClickListener(v -> requestReload());
         actionBar.concludeSetup();
-        actionBar.setCustomTitles(R.layout.directions_trip_overview_custom_title);
+        actionBar.setCustomTitles(R.layout.trips_overview_custom_title);
 
         swipeRefresh = findViewById(R.id.trips_refresh);
         swipeRefresh.setOnRefreshListener(this::requestReload);

@@ -15,9 +15,9 @@
             android:layout_height="wrap_content"
             android:layout_width="0dp"
             android:layout_weight="1" >
-            <include layout="@layout/directions_trip_details_individual_entry_element"
+            <include layout="@layout/trip_details_individual_entry_element"
                 android:id="@+id/directions_trip_details_individual_entry_main_element" />
-            <include layout="@layout/directions_trip_details_individual_entry_element"
+            <include layout="@layout/trip_details_individual_entry_element"
                 android:id="@+id/directions_trip_details_individual_entry_simulated_element" />
         </LinearLayout>
 

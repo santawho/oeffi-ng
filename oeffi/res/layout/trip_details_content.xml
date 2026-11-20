@@ -34,7 +34,7 @@
                     android:layout_height="match_parent"
                     android:orientation="vertical">
 
-                    <include layout="@layout/directions_trip_details_list_content" />
+                    <include layout="@layout/trip_details_list_content" />
 
                     <include layout="@layout/map_frame" android:id="@+id/vertical_map_frame" />
                 </LinearLayout>
