@@ -298,22 +298,22 @@
     <string name="stations_search_list_empty">No stations found</string>
 
     <!-- station details -->
-    <string name="stations_station_details_action_load_later">Load later departures</string>
-    <string name="stations_station_details_action_load_earlier">Load earlier departures</string>
-    <string name="stations_station_details_action_explore_nearby_title">Show departures nearby</string>
-    <string name="stations_station_details_action_favorite_title">Favorite</string>
-    <string name="stations_station_details_action_show_arrivals_title">Show departures or arrivals</string>
-    <string name="stations_station_details_action_cancelled_title">Hide/show cancelled departures</string>
-    <string name="stations_station_details_progress">Loading departures / arrivals …</string>
-    <string name="stations_station_details_list_empty">No departures / arrivals</string>
-    <string name="stations_station_details_delay_format" translatable="false">(%1$+d)</string>
-    <string name="stations_station_details_delay_missing" translatable="false">\u2020</string> <!-- dagger (cross of death) -->
+    <string name="departures_action_load_later">Load later departures</string>
+    <string name="departures_action_load_earlier">Load earlier departures</string>
+    <string name="departures_action_explore_nearby_title">Show departures nearby</string>
+    <string name="departures_action_favorite_title">Favorite</string>
+    <string name="departures_action_show_arrivals_title">Show departures or arrivals</string>
+    <string name="departures_action_cancelled_title">Hide/show cancelled departures</string>
+    <string name="departures_progress">Loading departures / arrivals …</string>
+    <string name="departures_list_empty">No departures / arrivals</string>
+    <string name="departures_delay_format" translatable="false">(%1$+d)</string>
+    <string name="departures_delay_missing" translatable="false">\u2020</string> <!-- dagger (cross of death) -->
 
     <!-- station details options -->
-    <string name="stations_station_details_options_add_favorite_title">Add favorite</string>
-    <string name="stations_station_details_options_remove_favorite_title">Remove favorite</string>
-    <string name="stations_station_details_options_add_ignore_title">Ignore</string>
-    <string name="stations_station_details_options_remove_ignore_title">Make visible</string>
+    <string name="departures_options_add_favorite_title">Add favorite</string>
+    <string name="departures_options_remove_favorite_title">Remove favorite</string>
+    <string name="departures_options_add_ignore_title">Ignore</string>
+    <string name="departures_options_remove_ignore_title">Make visible</string>
 
     <!-- stations decode foreign -->
     <string name="stations_decode_foreign_progress">Decoding touch&amp;travel code…</string>

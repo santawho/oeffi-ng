@@ -298,20 +298,20 @@
     <string name="stations_search_list_empty">Keine Haltestellen gefunden</string>
 
     <!-- station details -->
-    <string name="stations_station_details_action_load_later">Lade spätere Abfahrten</string>
-    <string name="stations_station_details_action_load_earlier">Lade frühere Abfahrten</string>
-    <string name="stations_station_details_action_explore_nearby_title">Abfahrten in der Nähe</string>
-    <string name="stations_station_details_action_favorite_title">Favorit</string>
-    <string name="stations_station_details_action_show_arrivals_title">Abfahrten oder Ankünfte anzeigen</string>
-    <string name="stations_station_details_action_cancelled_title">Entferne/zeige stornierte Abfahrten</string>
-    <string name="stations_station_details_progress">Lade Abfahrts- bzw. Ankunftzeiten…</string>
-    <string name="stations_station_details_list_empty">Keine Abfahrten bzw. Ankünfte</string>
+    <string name="departures_action_load_later">Lade spätere Abfahrten</string>
+    <string name="departures_action_load_earlier">Lade frühere Abfahrten</string>
+    <string name="departures_action_explore_nearby_title">Abfahrten in der Nähe</string>
+    <string name="departures_action_favorite_title">Favorit</string>
+    <string name="departures_action_show_arrivals_title">Abfahrten oder Ankünfte anzeigen</string>
+    <string name="departures_action_cancelled_title">Entferne/zeige stornierte Abfahrten</string>
+    <string name="departures_progress">Lade Abfahrts- bzw. Ankunftzeiten…</string>
+    <string name="departures_list_empty">Keine Abfahrten bzw. Ankünfte</string>
 
     <!-- station details options -->
-    <string name="stations_station_details_options_add_favorite_title">Favorisieren</string>
-    <string name="stations_station_details_options_remove_favorite_title">Favorit entf.</string>
-    <string name="stations_station_details_options_add_ignore_title">Ignorieren</string>
-    <string name="stations_station_details_options_remove_ignore_title">Sichtbar machen</string>
+    <string name="departures_options_add_favorite_title">Favorisieren</string>
+    <string name="departures_options_remove_favorite_title">Favorit entf.</string>
+    <string name="departures_options_add_ignore_title">Ignorieren</string>
+    <string name="departures_options_remove_ignore_title">Sichtbar machen</string>
 
     <!-- stations decode foreign -->
     <string name="stations_decode_foreign_progress">Dekodiere touch&amp;travel-Code…</string>

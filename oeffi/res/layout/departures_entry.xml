@@ -21,19 +21,19 @@
         android:layout_height="wrap_content" >
 
         <de.schildbach.oeffi.util.LineView
-            android:id="@+id/stations_station_entry_line"
+            android:id="@+id/departures_entry_line"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBaseline="@id/stations_station_entry_time_rel"
+            android:layout_alignBaseline="@id/departures_entry_time_rel"
             android:maxWidth="96dp" />
 
         <de.schildbach.oeffi.util.OverflowTextView
-            android:id="@+id/stations_station_entry_destination"
-            app:overflow_id="@id/stations_station_entry_destination_overflow"
+            android:id="@+id/departures_entry_destination"
+            app:overflow_id="@id/departures_entry_destination_overflow"
             android:layout_width="0px"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_alignBaseline="@id/stations_station_entry_time_rel"
+            android:layout_alignBaseline="@id/departures_entry_time_rel"
             android:ellipsize="none"
             android:breakStrategy="high_quality"
             android:paddingLeft="@dimen/text_padding_horizontal"
@@ -41,10 +41,10 @@
             android:singleLine="false" />
 
         <TextView
-            android:id="@+id/stations_station_entry_position"
+            android:id="@+id/departures_entry_position"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBaseline="@id/stations_station_entry_time_rel"
+            android:layout_alignBaseline="@id/departures_entry_time_rel"
             android:layout_marginRight="@dimen/text_padding_horizontal_lax"
             android:ellipsize="none"
             android:gravity="center_horizontal"
@@ -55,15 +55,15 @@
             android:singleLine="true" />
 
         <TextView
-            android:id="@+id/stations_station_entry_delay"
+            android:id="@+id/departures_entry_delay"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingLeft="@dimen/text_padding_horizontal"
-            android:layout_alignBaseline="@id/stations_station_entry_time_rel"
+            android:layout_alignBaseline="@id/departures_entry_time_rel"
             android:textColor="@color/fg_highlighted" />
 
         <TextView
-            android:id="@+id/stations_station_entry_time_rel"
+            android:id="@+id/departures_entry_time_rel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingLeft="@dimen/text_padding_horizontal" />
@@ -77,12 +77,12 @@
         android:layout_height="wrap_content" >
 
         <TextView
-            android:id="@+id/stations_station_entry_destination_overflow"
+            android:id="@+id/departures_entry_destination_overflow"
             android:layout_width="0px"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginLeft="40dp"
-            android:layout_alignBaseline="@id/stations_station_entry_time_abs"
+            android:layout_alignBaseline="@id/departures_entry_time_abs"
             android:paddingHorizontal="@dimen/text_padding_horizontal"
             android:ellipsize="none"
             android:breakStrategy="high_quality" />
@@ -93,26 +93,26 @@
             android:layout_weight="0.01" />
 
         <TextView
-            android:id="@+id/stations_station_entry_capacity_1st_class"
+            android:id="@+id/departures_entry_capacity_1st_class"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBaseline="@id/stations_station_entry_time_abs"
-            android:layout_toLeftOf="@id/stations_station_entry_capacity_2nd_class"
+            android:layout_alignBaseline="@id/departures_entry_time_abs"
+            android:layout_toLeftOf="@id/departures_entry_capacity_2nd_class"
             android:singleLine="true"
             android:text="1." />
 
         <TextView
-            android:id="@+id/stations_station_entry_capacity_2nd_class"
+            android:id="@+id/departures_entry_capacity_2nd_class"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBaseline="@id/stations_station_entry_time_abs"
+            android:layout_alignBaseline="@id/departures_entry_time_abs"
             android:layout_marginRight="8dp"
-            android:layout_toLeftOf="@id/stations_station_entry_time_abs"
+            android:layout_toLeftOf="@id/departures_entry_time_abs"
             android:singleLine="true"
             android:text="2." />
 
         <TextView
-            android:id="@+id/stations_station_entry_time_abs"
+            android:id="@+id/departures_entry_time_abs"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true" />
@@ -126,7 +126,7 @@
         android:layout_height="wrap_content" >
 
         <TextView
-            android:id="@+id/stations_station_entry_msg"
+            android:id="@+id/departures_entry_msg"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dp"

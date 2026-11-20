@@ -297,7 +297,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
         actionBar.setPrimaryTitle(R.string.station_details_activity_departures_short_title);
         // actionBar.swapTitles();
         actionBar.addProgressButton().setOnClickListener(v -> requestRefresh(false));
-        nearbyButton = actionBar.addButton(R.drawable.ic_radar_white_24dp, R.string.stations_station_details_action_explore_nearby_title);
+        nearbyButton = actionBar.addButton(R.drawable.ic_radar_white_24dp, R.string.departures_action_explore_nearby_title);
         nearbyButton.setOnClickListener(v -> {
             if (selectedCoord != null)
                 StationsActivity.start(this, selectedNetwork, selectedCoord, presetTime, getReturnHereIntent());
@@ -305,7 +305,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
         nearbyButton.setVisibility(View.GONE);
         addShowMapButtonToActionBar(false, false);
         favoriteButton = actionBar.addToggleButton(R.drawable.ic_star_24dp,
-                R.string.stations_station_details_action_favorite_title);
+                R.string.departures_action_favorite_title);
         favoriteButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 final Uri rowUri = FavoriteUtils.persist(getContentResolver(),
@@ -323,10 +323,10 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
             }
         });
         showArrivalsButton = actionBar.addToggleButton(R.drawable.ic_arrival_departure_white_24dp,
-                R.string.stations_station_details_action_show_arrivals_title);
+                R.string.departures_action_show_arrivals_title);
         actionBar.addButtonSplit();
         hideCancelledDeparturesButton = actionBar.addToggleButton(R.drawable.ic_cancelled_toggle_24dp,
-                R.string.stations_station_details_action_cancelled_title);
+                R.string.departures_action_cancelled_title);
         hideCancelledDeparturesButton.setChecked(hideCancelledDepartures);
         hideCancelledDeparturesButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             hideCancelledDepartures = isChecked;
@@ -369,24 +369,24 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
                     });
             popup.showAsDropDown(v);
         });
-        loadLaterButton = actionBar.addButton(R.drawable.ic_later_white_24dp, R.string.stations_station_details_action_load_later);
+        loadLaterButton = actionBar.addButton(R.drawable.ic_later_white_24dp, R.string.departures_action_load_later);
         loadLaterButton.setOnClickListener(buttonView -> {
             autoRefreshDisabled = true;
             load(nextLaterTime, false);
         });
-        loadEarlierButton = actionBar.addButton(R.drawable.ic_earlier_white_24dp, R.string.stations_station_details_action_load_earlier);
+        loadEarlierButton = actionBar.addButton(R.drawable.ic_earlier_white_24dp, R.string.departures_action_load_earlier);
         loadEarlierButton.setOnClickListener(buttonView -> {
             autoRefreshDisabled = true;
             load(nextEarlierTime, true);
         });
         actionBar.concludeSetup();
 
-        swipeRefresh = findViewById(R.id.stations_station_details_refresh);
+        swipeRefresh = findViewById(R.id.departures_refresh);
         swipeRefresh.setOnRefreshListener(() -> requestRefresh(true));
 
-        viewAnimator = findViewById(R.id.stations_station_details_list_layout);
+        viewAnimator = findViewById(R.id.departures_list_layout);
 
-        listView = findViewById(R.id.stations_station_details_list);
+        listView = findViewById(R.id.departures_list);
         listView.setLayoutManager(new LinearLayoutManager(this));
         listView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
         departuresAdapter = new DeparturesAdapter(this);
@@ -400,7 +400,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
 
         getMapView().setStationsAware(this);
 
-        resultStatusView = findViewById(R.id.stations_station_details_result_status);
+        resultStatusView = findViewById(R.id.departures_result_status);
 
         final Intent intent = getIntent();
         final String networkName = intent.getStringExtra(INTENT_EXTRA_NETWORK);
@@ -418,7 +418,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
                     loadProductFilter()));
         }
 
-        timeView = findViewById(R.id.stations_station_details_time_text);
+        timeView = findViewById(R.id.departures_time_text);
         if (presetTime != null) {
             timeView.setVisibility(View.VISIBLE);
             final long presetTimeMs = presetTime.getTime();
@@ -428,18 +428,18 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
             timeView.setText(text);
         }
 
-        final View disclaimerView = findViewById(R.id.stations_station_details_disclaimer_group);
+        final View disclaimerView = findViewById(R.id.departures_disclaimer_group);
         ViewCompat.setOnApplyWindowInsetsListener(disclaimerView, (v, windowInsets) -> {
             final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(0, 0, 0, insets.bottom);
             return windowInsets;
         });
-        disclaimerSourceView = findViewById(R.id.stations_station_details_disclaimer_source);
+        disclaimerSourceView = findViewById(R.id.departures_disclaimer_source);
 
-        headerView = findViewById(R.id.stations_station_details_header);
-//        nameView = findViewById(R.id.stations_station_details_header_name);
-//        idView = findViewById(R.id.stations_station_details_header_id);
-        dropdownView = findViewById(R.id.stations_station_details_header_dropdown);
+        headerView = findViewById(R.id.departures_header);
+//        nameView = findViewById(R.id.departures_header_name);
+//        idView = findViewById(R.id.departures_header_id);
+        dropdownView = findViewById(R.id.departures_header_dropdown);
         dropdownView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(final AdapterView<?> parent, final View view, final int position, final long id) {
@@ -450,17 +450,17 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
             @Override
             public void onNothingSelected(final AdapterView<?> parent) {}
         });
-        linesGroup = findViewById(R.id.stations_station_details_header_lines);
-        linesGroupContainer = findViewById(R.id.stations_station_details_header_lines_container);
+        linesGroup = findViewById(R.id.departures_header_lines);
+        linesGroupContainer = findViewById(R.id.departures_header_lines_container);
         linesGroupContainer.setDisplayedChild(0);
-        linesGroupFullScroll = findViewById(R.id.stations_station_details_header_lines_full_scroll);
-        linesGroupFull = findViewById(R.id.stations_station_details_header_lines_full);
-        linesGroupCompact = findViewById(R.id.stations_station_details_header_lines_compact);
-        linesGroupToggleButton = findViewById(R.id.stations_station_details_header_lines_expand);
+        linesGroupFullScroll = findViewById(R.id.departures_header_lines_full_scroll);
+        linesGroupFull = findViewById(R.id.departures_header_lines_full);
+        linesGroupCompact = findViewById(R.id.departures_header_lines_compact);
+        linesGroupToggleButton = findViewById(R.id.departures_header_lines_expand);
         linesGroupToggleButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             linesGroupContainer.setDisplayedChild(isChecked ? 1 : 0);
         });
-//        multiStationsView = findViewById(R.id.stations_station_details_header_multistations);
+//        multiStationsView = findViewById(R.id.departures_header_multistations);
 //        multiStationsView.setVisibility(View.GONE);
         LINES_LAYOUT_PARAMS = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -472,7 +472,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
         products.addAll(loadProductFilter());
 
         selectStation(station);
-        statusMessage(getString(R.string.stations_station_details_progress));
+        statusMessage(getString(R.string.departures_progress));
         updateDisclaimerSource(disclaimerSourceView, selectedNetwork, null);
     }
 
@@ -621,7 +621,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
     }
 
     protected void updateFragments() {
-        updateFragments(R.id.stations_station_details_list_fragment);
+        updateFragments(R.id.departures_list_fragment);
     }
 
     private void updateGUI() {
@@ -636,7 +636,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
             viewAnimator.setDisplayedChild(0);
             departuresAdapter.notifyDataSetChanged();
         } else {
-            statusMessage(getString(R.string.stations_station_details_list_empty));
+            statusMessage(getString(R.string.departures_list_empty));
         }
     }
 
@@ -1175,7 +1175,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             selectedLines.size() < 6
                                     ? ViewGroup.LayoutParams.WRAP_CONTENT
-                                    : (int) getResources().getDimension(R.dimen.stations_station_details_header_lines_scroll_max_height)));
+                                    : (int) getResources().getDimension(R.dimen.departures_header_lines_scroll_max_height)));
             for (final Map.Entry<Line, List<Destination>> linesEntry : selectedLines.entrySet()) {
                 final Line line = linesEntry.getKey();
                 final List<Destination> destinations = linesEntry.getValue();
@@ -1188,11 +1188,11 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
                 linesGroupFull.addView(lineRow, LINES_LAYOUT_PARAMS);
 
                 final LineView lineView = lineRow
-                        .findViewById(R.id.stations_station_details_header_line_line);
+                        .findViewById(R.id.departures_header_line_line);
                 lineView.setLine(line);
 
                 final TextView destinationView = lineRow
-                        .findViewById(R.id.stations_station_details_header_line_destination);
+                        .findViewById(R.id.departures_header_line_destination);
                 final StringBuilder text = new StringBuilder();
                 if (destinations != null) {
                     for (final Destination destination : destinations) {
@@ -1275,16 +1275,16 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
         public DepartureViewHolder(final DeparturesActivity context, final View itemView) {
             super(itemView);
 
-            timeRelView = itemView.findViewById(R.id.stations_station_entry_time_rel);
-            timeAbsView = itemView.findViewById(R.id.stations_station_entry_time_abs);
-            delayView = itemView.findViewById(R.id.stations_station_entry_delay);
-            lineView = itemView.findViewById(R.id.stations_station_entry_line);
-            destinationView = itemView.findViewById(R.id.stations_station_entry_destination);
-            destinationOverflowView = itemView.findViewById(R.id.stations_station_entry_destination_overflow);
-            positionView = itemView.findViewById(R.id.stations_station_entry_position);
-            capacity1stView = itemView.findViewById(R.id.stations_station_entry_capacity_1st_class);
-            capacity2ndView = itemView.findViewById(R.id.stations_station_entry_capacity_2nd_class);
-            msgView = itemView.findViewById(R.id.stations_station_entry_msg);
+            timeRelView = itemView.findViewById(R.id.departures_entry_time_rel);
+            timeAbsView = itemView.findViewById(R.id.departures_entry_time_abs);
+            delayView = itemView.findViewById(R.id.departures_entry_delay);
+            lineView = itemView.findViewById(R.id.departures_entry_line);
+            destinationView = itemView.findViewById(R.id.departures_entry_destination);
+            destinationOverflowView = itemView.findViewById(R.id.departures_entry_destination_overflow);
+            positionView = itemView.findViewById(R.id.departures_entry_position);
+            capacity1stView = itemView.findViewById(R.id.departures_entry_capacity_1st_class);
+            capacity2ndView = itemView.findViewById(R.id.departures_entry_capacity_2nd_class);
+            msgView = itemView.findViewById(R.id.departures_entry_msg);
             msgViewExpanded = 0;
             msgViewMessageText = null;
             msgView.setOnClickListener(v -> {
@@ -1376,10 +1376,10 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
                 final long delay = predictedTime != null && plannedTime != null
                         ? predictedTime.getTime() - plannedTime.getTime() : 0;
                 final long delayMins = delay / Constants.MINUTE_IN_MILLIS;
-                delayView.setText(delayMins == 0 ? null : getString(R.string.stations_station_details_delay_format, delayMins));
+                delayView.setText(delayMins == 0 ? null : getString(R.string.departures_delay_format, delayMins));
                 ViewUtils.setTypeFace(delayView, Typeface.ITALIC);
             } else if (isPredictedTimeMissing) {
-                delayView.setText(getString(R.string.stations_station_details_delay_missing));
+                delayView.setText(getString(R.string.departures_delay_missing));
                 ViewUtils.setTypeFace(delayView, Typeface.BOLD);
             } else {
                 delayView.setText(null);

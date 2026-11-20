@@ -443,14 +443,14 @@ public class StationViewHolder extends RecyclerViewNG.HorizontalSwipeHolder {
                                 final long delay = predictedTime != null && plannedTime != null
                                         ? predictedTime.getTime() - plannedTime.getTime() : 0;
                                 final long delayMins = delay / Constants.MINUTE_IN_MILLIS;
-                                delayView.setText(delayMins == 0 ? null : context.getString(R.string.stations_station_details_delay_format, delayMins));
+                                delayView.setText(delayMins == 0 ? null : context.getString(R.string.departures_delay_format, delayMins));
                                 ViewUtils.setTypeFace(delayView, Typeface.ITALIC);
                                 delayView.setTextColor(
                                         isStale ? colorLessSignificant
                                         : isGhosted ? colorSignificant
                                         : colorHighlighted);
                             } else if (isPredictedTimeMissing) {
-                                delayView.setText(context.getString(R.string.stations_station_details_delay_missing));
+                                delayView.setText(context.getString(R.string.departures_delay_missing));
                                 ViewUtils.setTypeFace(delayView, Typeface.BOLD);
                                 delayView.setTextColor(colorHighlighted);
                             } else {
