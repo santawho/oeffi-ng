@@ -17,7 +17,7 @@
             android:layout_height="wrap_content"
             android:textColor="@color/fg_trip_next_event_normal"
             android:visibility="gone"
-            android:text="@string/directions_trip_details_finished"
+            android:text="@string/trip_details_finished"
             android:gravity="center"
             android:paddingHorizontal="20dp"
             android:textSize="@dimen/navigation_notification_next_event_time_fontsize"

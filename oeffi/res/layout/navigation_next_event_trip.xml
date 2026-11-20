@@ -28,7 +28,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:visibility="gone"
-                    android:text="@string/directions_trip_details_finished"
+                    android:text="@string/trip_details_finished"
                     android:gravity="center"
                     android:paddingHorizontal="20dp"
                     android:textColor="@color/fg_significant"

@@ -2,7 +2,7 @@
 <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/directions_trip_details_list_content"
+    android:id="@+id/trip_details_list_content"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -11,13 +11,13 @@
         android:layout_height="match_parent">
 
         <androidx.core.widget.NestedScrollView
-            android:id="@+id/directions_trip_details_legs_scroll"
+            android:id="@+id/trip_details_legs_scroll"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false">
 
             <LinearLayout
-                android:id="@+id/directions_trip_details_legs_group"
+                android:id="@+id/trip_details_legs_group"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:divider="@drawable/list_divider"
@@ -25,7 +25,7 @@
                 android:showDividers="middle">
 
                 <TextView
-                    android:id="@+id/directions_trip_details_devinfo"
+                    android:id="@+id/trip_details_devinfo"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@color/bg_divider"
@@ -36,7 +36,7 @@
                     android:visibility="gone" />
 
                 <LinearLayout
-                    android:id="@+id/directions_trip_details_summary"
+                    android:id="@+id/trip_details_summary"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@color/bg_divider"
@@ -55,13 +55,13 @@
                             android:layout_height="wrap_content"
                             android:orientation="horizontal">
                             <de.schildbach.oeffi.util.locationview.LocationTextView
-                                android:id="@+id/directions_trip_details_location_from"
+                                android:id="@+id/trip_details_location_from"
                                 android:layout_width="0px"
                                 android:layout_height="match_parent"
                                 android:layout_weight="50"
                                 android:drawablePadding="@dimen/text_padding_horizontal_lax" />
                             <de.schildbach.oeffi.util.locationview.LocationTextView
-                                android:id="@+id/directions_trip_details_location_to"
+                                android:id="@+id/trip_details_location_to"
                                 android:layout_width="0px"
                                 android:layout_height="match_parent"
                                 android:layout_weight="50"
@@ -72,13 +72,13 @@
                             android:layout_height="wrap_content"
                             android:orientation="horizontal">
                             <TextView
-                                android:id="@+id/directions_trip_details_duration"
+                                android:id="@+id/trip_details_duration"
                                 android:layout_width="0px"
                                 android:layout_height="match_parent"
                                 android:layout_weight="50"
                                 android:textStyle="bold"/>
                             <TextView
-                                android:id="@+id/directions_trip_details_numchanges"
+                                android:id="@+id/trip_details_numchanges"
                                 android:layout_width="0px"
                                 android:layout_height="match_parent"
                                 android:layout_weight="50"
@@ -87,7 +87,7 @@
                     </LinearLayout>
 
                     <LinearLayout
-                        android:id="@+id/directions_trip_details_toggle_fares"
+                        android:id="@+id/trip_details_toggle_fares"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:visibility="gone"
@@ -96,14 +96,14 @@
                         android:paddingHorizontal="@dimen/text_padding_horizontal"
                         android:orientation="horizontal">
                         <TextView
-                            android:id="@+id/directions_trip_details_toggle_fares_symbol"
+                            android:id="@+id/trip_details_toggle_fares_symbol"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:gravity="center"
                             android:textStyle="bold"
                             android:textSize="@dimen/font_size_large"/>
                         <de.schildbach.oeffi.util.ToggleImageButton
-                            android:id="@+id/directions_trip_details_toggle_fares_button"
+                            android:id="@+id/trip_details_toggle_fares_button"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:src="@drawable/ic_expand_black_24dp"/>
@@ -120,7 +120,7 @@
                 <!--     android:layout_width="match_parent" -->
                 <!--     android:layout_height="wrap_content"> -->
                 <TableLayout
-                    android:id="@+id/directions_trip_details_fares"
+                    android:id="@+id/trip_details_fares"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:visibility="gone"
@@ -135,29 +135,29 @@
                 <!-- </HorizontalScrollView> -->
 
                 <TextView
-                    android:id="@+id/directions_trip_details_not_feasible"
+                    android:id="@+id/trip_details_not_feasible"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@color/bg_highlighted_darkdefault"
                     android:textColor="@color/fg_significant_darkdefault"
                     android:textStyle="bold"
                     android:textSize="@dimen/font_size_xlarge"
-                    android:text="@string/directions_trip_details_not_travelable"
+                    android:text="@string/trip_details_not_travelable"
                     android:padding="8dp"
                     android:gravity="center"
                     android:visibility="gone"/>
 
                 <View
-                    android:id="@+id/directions_trip_details_legs_start_here"
+                    android:id="@+id/trip_details_legs_start_here"
                     android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 
                 <TextView
-                    android:id="@+id/directions_trip_details_finished"
+                    android:id="@+id/trip_details_finished"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/directions_trip_details_finished"
+                    android:text="@string/trip_details_finished"
                     android:paddingTop="@dimen/text_padding_vertical"
                     android:paddingBottom="@dimen/text_padding_vertical"
                     android:gravity="center"
@@ -166,7 +166,7 @@
                     android:visibility="gone" />
 
                 <TextView
-                    android:id="@+id/directions_trip_details_footer"
+                    android:id="@+id/trip_details_footer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:drawableLeft="@drawable/ic_settings_input_antenna_grey600_18dp"
@@ -180,7 +180,7 @@
                     android:paddingTop="@dimen/text_padding_vertical_verylax" />
 
                 <LinearLayout
-                    android:id="@+id/directions_trip_details_disclaimer_group"
+                    android:id="@+id/trip_details_disclaimer_group"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
@@ -188,7 +188,7 @@
                     android:orientation="horizontal">
 
                     <TextView
-                        android:id="@+id/directions_trip_details_disclaimer_source"
+                        android:id="@+id/trip_details_disclaimer_source"
                         android:visibility="gone"
                         android:layout_width="0px"
                         android:layout_height="wrap_content"
@@ -202,7 +202,7 @@
                 </LinearLayout>
 
                 <Space
-                    android:id="@+id/directions_trip_details_footer_margin"
+                    android:id="@+id/trip_details_footer_margin"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
             </LinearLayout>
@@ -210,7 +210,7 @@
 
         <!-- the disclaimer group fixed to the bottom was here ... now is above in the scroll view -->
         <!--                            <LinearLayout-->
-        <!--                                android:id="@+id/directions_trip_details_disclaimer_group" -->
+        <!--                                android:id="@+id/trip_details_disclaimer_group" -->
         <!--                                android:layout_marginLeft="@dimen/text_padding_horizontal_verylax"-->
         <!--                                android:layout_marginRight="@dimen/text_padding_horizontal_verylax"-->
         <!--                                android:layout_marginTop="@dimen/text_padding_vertical"-->

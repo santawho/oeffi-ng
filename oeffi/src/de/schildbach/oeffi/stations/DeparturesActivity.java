@@ -1503,12 +1503,12 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
                         displayMessage = msgViewMessageText;
                         colorResId = R.color.fg_significant;
                     } else {
-                        displayMessage = context.getString(R.string.directions_trip_details_shortened_message,
+                        displayMessage = context.getString(R.string.trip_details_shortened_message,
                                 msgViewMessageText.substring(0, splitIndex));
                         colorResId = R.color.fg_significant;
                     }
                 } else {
-                    displayMessage = context.getString(R.string.directions_trip_details_shortened_message,
+                    displayMessage = context.getString(R.string.trip_details_shortened_message,
                             msgViewMessageText.substring(0, Math.min(msgViewMessageText.length(), 60)));
                     colorResId = R.color.fg_insignificant;
                 }

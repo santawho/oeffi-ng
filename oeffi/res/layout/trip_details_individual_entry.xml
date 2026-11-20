@@ -16,13 +16,13 @@
             android:layout_width="0dp"
             android:layout_weight="1" >
             <include layout="@layout/trip_details_individual_entry_element"
-                android:id="@+id/directions_trip_details_individual_entry_main_element" />
+                android:id="@+id/trip_details_individual_entry_main_element" />
             <include layout="@layout/trip_details_individual_entry_element"
-                android:id="@+id/directions_trip_details_individual_entry_simulated_element" />
+                android:id="@+id/trip_details_individual_entry_simulated_element" />
         </LinearLayout>
 
         <ImageButton
-            android:id="@+id/directions_trip_details_individual_entry_map"
+            android:id="@+id/trip_details_individual_entry_map"
             android:layout_width="@dimen/action_bar_button_width"
             android:layout_height="match_parent"
             android:scaleType="center"
@@ -32,7 +32,7 @@
     </LinearLayout>
 
     <RelativeLayout
-        android:id="@+id/directions_trip_details_individual_entry_progress"
+        android:id="@+id/trip_details_individual_entry_progress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/bg_trip_details_time_left"
@@ -44,7 +44,7 @@
         android:paddingBottom="@dimen/text_padding_vertical"
         android:visibility="gone" >
         <TextView
-            android:id="@+id/directions_trip_details_individual_entry_progress_text"
+            android:id="@+id/trip_details_individual_entry_progress_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
@@ -55,7 +55,7 @@
             android:textColor="@color/fg_significant"
             android:textSize="@dimen/font_size_large" />
         <ImageButton
-            android:id="@+id/directions_trip_details_individual_entry_progress_bell"
+            android:id="@+id/trip_details_individual_entry_progress_bell"
             android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

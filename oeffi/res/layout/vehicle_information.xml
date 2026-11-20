@@ -12,7 +12,7 @@
         android:paddingBottom="@dimen/text_padding_vertical_verylax"
         android:textSize="@dimen/font_size_xlarge"
         android:textStyle="bold"
-        android:text="@string/directions_trip_details_vehicle_information_title" />
+        android:text="@string/trip_details_vehicle_information_title" />
 
     <LinearLayout
         android:orientation="horizontal"
@@ -58,14 +58,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="@dimen/font_size_large"
-            android:text="@string/directions_trip_details_vehicle_information_direction" />
+            android:text="@string/trip_details_vehicle_information_direction" />
     </LinearLayout>
 
     <CheckBox
         android:id="@+id/vehicle_information_showall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/directions_trip_details_vehicle_information_showall_label"/>
+        android:text="@string/trip_details_vehicle_information_showall_label"/>
 
     <ScrollView
         android:layout_width="match_parent"

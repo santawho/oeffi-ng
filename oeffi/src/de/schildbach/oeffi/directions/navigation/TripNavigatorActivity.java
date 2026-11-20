@@ -264,7 +264,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
     @Override
     public void onBackPressedEvent() {
         if (isShowingNextEvent())
-            setShowPage(R.id.directions_trip_details_list_frame);
+            setShowPage(R.id.trip_details_list_frame);
         else
             moveTaskToBack(true); // super.onBackPressedEvent();
     }
@@ -495,7 +495,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         final boolean isNow = super.updateIndividualLeg(row, legC, now);
 
         if (isNow) {
-            setupAlarmBellButton(row, R.id.directions_trip_details_individual_entry_progress_bell,
+            setupAlarmBellButton(row, R.id.trip_details_individual_entry_progress_bell,
                     legC.transferTo, true);
         }
 
@@ -507,7 +507,7 @@ public class TripNavigatorActivity extends TripDetailsActivity {
         final boolean isNow = super.updatePublicLeg(row, legC, walkLegC, nextLegC, now);
 
         if (isNow) {
-            setupAlarmBellButton(row, R.id.directions_trip_details_public_entry_progress_bell,
+            setupAlarmBellButton(row, R.id.trip_details_public_entry_progress_bell,
                     legC, false);
         }
 

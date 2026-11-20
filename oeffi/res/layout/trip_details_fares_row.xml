@@ -3,24 +3,24 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <TextView
-        android:id="@+id/directions_trip_details_fare_entry_row_type"
+        android:id="@+id/trip_details_fare_entry_row_type"
         android:textSize="@dimen/font_size_normal"
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/directions_trip_details_fare_entry_row_name"
+        android:id="@+id/trip_details_fare_entry_row_name"
         android:paddingLeft="@dimen/text_padding_horizontal_lax"
         android:textSize="@dimen/font_size_normal" />
 
     <TextView
-        android:id="@+id/directions_trip_details_fare_entry_row_fare"
+        android:id="@+id/trip_details_fare_entry_row_fare"
         android:gravity="right"
         android:paddingLeft="@dimen/text_padding_horizontal_lax"
         android:textSize="@dimen/font_size_normal"
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/directions_trip_details_fare_entry_row_unit"
+        android:id="@+id/trip_details_fare_entry_row_unit"
         android:paddingLeft="@dimen/text_padding_horizontal_lax"
         android:textSize="@dimen/font_size_normal" />
 

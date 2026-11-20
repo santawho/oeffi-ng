@@ -299,7 +299,7 @@ public class OperationNavigatorActivity extends OperationDetailsActivity {
     @Override
     public void onBackPressedEvent() {
         if (isShowingNextEvent())
-            setShowPage(R.id.directions_trip_details_list_frame);
+            setShowPage(R.id.trip_details_list_frame);
         else
             moveTaskToBack(true); // super.onBackPressedEvent();
     }

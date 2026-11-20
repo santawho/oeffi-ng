@@ -13,7 +13,7 @@
         android:orientation="vertical">
 
         <LinearLayout
-            android:id="@+id/directions_trip_details_content_frame"
+            android:id="@+id/trip_details_content_frame"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
@@ -24,12 +24,12 @@
                 android:layout_height="wrap_content"/>
 
             <de.schildbach.oeffi.util.HorizontalPager
-                android:id="@+id/directions_trip_details_pager"
+                android:id="@+id/trip_details_pager"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
                 <LinearLayout
-                    android:id="@+id/directions_trip_details_list_frame"
+                    android:id="@+id/trip_details_list_frame"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical">

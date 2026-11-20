@@ -473,21 +473,21 @@
     <string name="toast_trip_additional_transfertime">%1$d Minuten Umsteigezeit</string>
 
     <!-- directions trip details -->
-    <string name="directions_trip_details_not_travelable">Nicht durchführbar</string>
-    <string name="directions_trip_details_start">Beginn der Reise</string>
-    <string name="directions_trip_details_start_at">Beginn der Reise in &lt;b>%1$s&lt;/b></string>
-    <string name="directions_trip_details_start_journey">Beginn der Fahrt</string>
-    <string name="directions_trip_details_continue_journey">Fährt weiter als …</string>
-    <string name="directions_trip_details_finished">Beendet</string>
-    <string name="directions_trip_details_duration">Dauer: %s</string>
-    <string name="directions_trip_details_num_changes">%d Umst.</string>
-    <string name="directions_trip_details_walk">&lt;b>%1$d Minuten&lt;/b> %2$sFußweg nach %3$s</string>
-    <string name="directions_trip_details_bike">&lt;b>%1$d Minuten&lt;/b> %2$sFahrt mit dem Fahrrad nach %3$s</string>
-    <string name="directions_trip_details_car">&lt;b>%1$d Minuten&lt;/b> %2$sFahrt mit dem Auto nach %3$s</string>
-    <string name="directions_trip_details_check_in">Check-In benötigt &lt;b>%1$d Minuten&lt;/b></string>
-    <string name="directions_trip_details_check_out">Check-Out benötigt &lt;b>%1$d Minuten&lt;/b></string>
-    <string name="directions_trip_details_transfer">&lt;b>%1$d Minuten&lt;/b> %2$sTransfer nach %3$s</string>
-    <string name="directions_trip_details_realtime">
+    <string name="trip_details_not_travelable">Nicht durchführbar</string>
+    <string name="trip_details_start">Beginn der Reise</string>
+    <string name="trip_details_start_at">Beginn der Reise in &lt;b>%1$s&lt;/b></string>
+    <string name="trip_details_start_journey">Beginn der Fahrt</string>
+    <string name="trip_details_continue_journey">Fährt weiter als …</string>
+    <string name="trip_details_finished">Beendet</string>
+    <string name="trip_details_duration">Dauer: %s</string>
+    <string name="trip_details_num_changes">%d Umst.</string>
+    <string name="trip_details_walk">&lt;b>%1$d Minuten&lt;/b> %2$sFußweg nach %3$s</string>
+    <string name="trip_details_bike">&lt;b>%1$d Minuten&lt;/b> %2$sFahrt mit dem Fahrrad nach %3$s</string>
+    <string name="trip_details_car">&lt;b>%1$d Minuten&lt;/b> %2$sFahrt mit dem Auto nach %3$s</string>
+    <string name="trip_details_check_in">Check-In benötigt &lt;b>%1$d Minuten&lt;/b></string>
+    <string name="trip_details_check_out">Check-Out benötigt &lt;b>%1$d Minuten&lt;/b></string>
+    <string name="trip_details_transfer">&lt;b>%1$d Minuten&lt;/b> %2$sTransfer nach %3$s</string>
+    <string name="trip_details_realtime">
         &lt;b>&lt;i>Kursiv&lt;/i>&lt;/b> gedruckte Uhrzeiten sind &lt;b>prognostizierte&lt;/b> Zeiten &lt;b>
         ohne Garantie&lt;/b> Echtzeiten zu sein.
         Für die gelieferte Information ist das Auskunftsystem und das Verkehrsunternehmen verantwortlich.
@@ -495,27 +495,27 @@
         Zeiten in &lt;span style=\"color:#8800cc\">magenta&lt;/span> sind von der App durch Ortung berechnete Prognosen.
     </string>
 
-    <string name="directions_trip_details_public_entry_tooltip_label_arrival">Ankunft</string>
-    <string name="directions_trip_details_public_entry_tooltip_label_departure">Abfahrt</string>
-    <string name="directions_trip_details_public_entry_tooltip_no_data">-</string>
-    <string name="directions_trip_details_public_entry_tooltip_delay_format">%d min</string>
-    <string name="directions_trip_details_public_entry_tooltip_event_format">&lt;b>%1$s&lt;/b>%7$s&lt;br>geplant: %2$s&lt;br>Prognose: %3$s&lt;br>Verspätung: %4$s&lt;br>simuliert: %5$s&lt;br>sim. Verspätung: %6$s</string>
-    <string name="directions_trip_details_public_entry_tooltip_event_cancelled">entfällt</string>
-    <string name="directions_trip_details_public_entry_tooltip_layover_format">%1$s min</string>
-    <string name="directions_trip_details_public_entry_tooltip_format_layovers">&lt;b>Aufenthalt&lt;/b>&lt;br>Prognose: %1$s&lt;br>simuliert: %2$s</string>
-    <string name="directions_trip_details_public_entry_tooltip_format_one_event">&lt;b>&lt;u>%1$s&lt;/u>&lt;/b>&lt;br>&lt;br>%2$s</string>
-    <string name="directions_trip_details_public_entry_tooltip_format_two_events">&lt;b>&lt;u>%1$s&lt;/u>&lt;/b>&lt;br>&lt;br>%2$s&lt;br>&lt;br>%4$s&lt;br>&lt;br>%3$s</string>
+    <string name="trip_details_public_entry_tooltip_label_arrival">Ankunft</string>
+    <string name="trip_details_public_entry_tooltip_label_departure">Abfahrt</string>
+    <string name="trip_details_public_entry_tooltip_no_data">-</string>
+    <string name="trip_details_public_entry_tooltip_delay_format">%d min</string>
+    <string name="trip_details_public_entry_tooltip_event_format">&lt;b>%1$s&lt;/b>%7$s&lt;br>geplant: %2$s&lt;br>Prognose: %3$s&lt;br>Verspätung: %4$s&lt;br>simuliert: %5$s&lt;br>sim. Verspätung: %6$s</string>
+    <string name="trip_details_public_entry_tooltip_event_cancelled">entfällt</string>
+    <string name="trip_details_public_entry_tooltip_layover_format">%1$s min</string>
+    <string name="trip_details_public_entry_tooltip_format_layovers">&lt;b>Aufenthalt&lt;/b>&lt;br>Prognose: %1$s&lt;br>simuliert: %2$s</string>
+    <string name="trip_details_public_entry_tooltip_format_one_event">&lt;b>&lt;u>%1$s&lt;/u>&lt;/b>&lt;br>&lt;br>%2$s</string>
+    <string name="trip_details_public_entry_tooltip_format_two_events">&lt;b>&lt;u>%1$s&lt;/u>&lt;/b>&lt;br>&lt;br>%2$s&lt;br>&lt;br>%4$s&lt;br>&lt;br>%3$s</string>
 
-    <string name="directions_trip_details_public_entry_accessibility">Abschnitt ist barrierefrei</string>
-    <string name="directions_trip_details_public_entry_bicycle_carriage">Fahrradmitnahme ggf. möglich</string>
-    <string name="directions_trip_details_public_entry_vehicle_information_available">Wagenreihung ggf. verfügbar</string>
-    <string name="directions_trip_details_vehicle_information_title">Wagenreihung</string>
-    <string name="directions_trip_details_vehicle_information_direction">Fahrtrichtung</string>
-    <string name="directions_trip_details_vehicle_information_showall_label">Zeige alle Informationen</string>
-    <string name="directions_trip_details_time_left_minutes">Noch &lt;b>%1$d Minuten&lt;/b></string>
-    <string name="directions_trip_details_time_left_hours">Noch &lt;b>%1$d Stunden&lt;/b></string>
-    <string name="directions_trip_details_time_left_days">Noch &lt;b>%1$d Tage&lt;/b></string>
-    <string name="directions_trip_details_no_time_left">&lt;b>*** JETZT ***&lt;/b></string>
+    <string name="trip_details_public_entry_accessibility">Abschnitt ist barrierefrei</string>
+    <string name="trip_details_public_entry_bicycle_carriage">Fahrradmitnahme ggf. möglich</string>
+    <string name="trip_details_public_entry_vehicle_information_available">Wagenreihung ggf. verfügbar</string>
+    <string name="trip_details_vehicle_information_title">Wagenreihung</string>
+    <string name="trip_details_vehicle_information_direction">Fahrtrichtung</string>
+    <string name="trip_details_vehicle_information_showall_label">Zeige alle Informationen</string>
+    <string name="trip_details_time_left_minutes">Noch &lt;b>%1$d Minuten&lt;/b></string>
+    <string name="trip_details_time_left_hours">Noch &lt;b>%1$d Stunden&lt;/b></string>
+    <string name="trip_details_time_left_days">Noch &lt;b>%1$d Tage&lt;/b></string>
+    <string name="trip_details_no_time_left">&lt;b>*** JETZT ***&lt;/b></string>
     <string name="navigation_next_event_no_time_left">JETZT</string>
     <string name="navigation_next_event_action_departure">verbleiben bis Abfahrt in</string>
     <string name="navigation_next_event_action_departure_now">Abfahrt in</string>
@@ -532,59 +532,59 @@
     <string name="navigation_next_event_action_next_transfer">dort Übergang nach</string>
     <string name="navigation_next_event_action_next_interchange">dort umsteigen</string>
     <string name="navigation_next_event_action_next_final_transfer">dort zu Fuß</string>
-    <string name="directions_trip_details_departure_row_name_format">&lt;small>(Weiterfahrt) %1$s nach Aufenthalt von %2$s&amp;nbsp;min&lt;/small></string>
-    <string name="directions_trip_details_arrival_row_name_format">&lt;small>(Ankunft) %1$s mit Aufenthalt von %2$s&amp;nbsp;min&lt;/small></string>
-    <string name="directions_trip_details_shortened_message">%1$s&lt;br>… mehr anzeigen …</string>
-    <string name="directions_trip_details_see_below_message">Siehe Hinweise unten …</string>
-    <string name="directions_trip_details_extra_data_error">Zusätzliche Informationen können nicht geladen werden.</string>
-    <string name="directions_trip_details_vehicle_information_error">Daten zur Wagenreihung können nicht geladen werden.</string>
+    <string name="trip_details_departure_row_name_format">&lt;small>(Weiterfahrt) %1$s nach Aufenthalt von %2$s&amp;nbsp;min&lt;/small></string>
+    <string name="trip_details_arrival_row_name_format">&lt;small>(Ankunft) %1$s mit Aufenthalt von %2$s&amp;nbsp;min&lt;/small></string>
+    <string name="trip_details_shortened_message">%1$s&lt;br>… mehr anzeigen …</string>
+    <string name="trip_details_see_below_message">Siehe Hinweise unten …</string>
+    <string name="trip_details_extra_data_error">Zusätzliche Informationen können nicht geladen werden.</string>
+    <string name="trip_details_vehicle_information_error">Daten zur Wagenreihung können nicht geladen werden.</string>
 
     <!-- directions trip connection evaluation -->
-    <string name="directions_trip_conneval_with_transfer">%1$s mit %2$s</string>
-    <string name="directions_trip_conneval_with_transfer_probability">%1$s &lt;small>[P=%2$d%%]&lt;/small></string>
-    <string name="directions_trip_conneval_missed">&lt;b>Anschluss &lt;u>verpasst&lt;/u> um %1$d Minuten&lt;/b>%2$s</string>
-    <string name="directions_trip_conneval_difficult_possibly_missed">&lt;b>Anschluss schwierig trotz verspäteter Abfahrt, nur %1$d Minuten&lt;/b>%2$s</string>
-    <string name="directions_trip_conneval_difficult">&lt;b>Anschluss schwierig, nur %1$d Minuten&lt;/b>%2$s</string>
-    <string name="directions_trip_conneval_endangered_possibly_difficult">&lt;b>Anschluss gefährdet trotz verspäteter Abfahrt, nur %1$d Minuten&lt;/b>%2$s</string>
-    <string name="directions_trip_conneval_endangered">&lt;b>Anschluss gefährdet, nur %1$d Minuten&lt;/b>%2$s</string>
-    <string name="directions_trip_conneval_possibly_difficult">&lt;b>Anschluss nur durch verspätete Abfahrt erreichbar, aktuell in %1$d Minuten&lt;/b>%2$s</string>
-    <string name="directions_trip_conneval_possibly_endangered">&lt;b>Anschluss nur durch verspätete Abfahrt nicht gefährdet, aktuell in %1$d Minuten&lt;/b>%2$s</string>
-    <string name="directions_trip_conneval_possibly_good">Anschluss aktuell in &lt;b>%1$d Minuten&lt;/b>%2$s durch verspätete Abfahrt</string>
-    <string name="directions_trip_conneval_good">Anschluss (aktuell) in &lt;b>%1$d Minuten&lt;/b>%2$s</string>
-    <string name="directions_trip_conneval_same_platform">%1$s am selben Steig</string>
+    <string name="trip_conneval_with_transfer">%1$s mit %2$s</string>
+    <string name="trip_conneval_with_transfer_probability">%1$s &lt;small>[P=%2$d%%]&lt;/small></string>
+    <string name="trip_conneval_missed">&lt;b>Anschluss &lt;u>verpasst&lt;/u> um %1$d Minuten&lt;/b>%2$s</string>
+    <string name="trip_conneval_difficult_possibly_missed">&lt;b>Anschluss schwierig trotz verspäteter Abfahrt, nur %1$d Minuten&lt;/b>%2$s</string>
+    <string name="trip_conneval_difficult">&lt;b>Anschluss schwierig, nur %1$d Minuten&lt;/b>%2$s</string>
+    <string name="trip_conneval_endangered_possibly_difficult">&lt;b>Anschluss gefährdet trotz verspäteter Abfahrt, nur %1$d Minuten&lt;/b>%2$s</string>
+    <string name="trip_conneval_endangered">&lt;b>Anschluss gefährdet, nur %1$d Minuten&lt;/b>%2$s</string>
+    <string name="trip_conneval_possibly_difficult">&lt;b>Anschluss nur durch verspätete Abfahrt erreichbar, aktuell in %1$d Minuten&lt;/b>%2$s</string>
+    <string name="trip_conneval_possibly_endangered">&lt;b>Anschluss nur durch verspätete Abfahrt nicht gefährdet, aktuell in %1$d Minuten&lt;/b>%2$s</string>
+    <string name="trip_conneval_possibly_good">Anschluss aktuell in &lt;b>%1$d Minuten&lt;/b>%2$s durch verspätete Abfahrt</string>
+    <string name="trip_conneval_good">Anschluss (aktuell) in &lt;b>%1$d Minuten&lt;/b>%2$s</string>
+    <string name="trip_conneval_same_platform">%1$s am selben Steig</string>
 
-    <string name="directions_trip_details_public_entry_duration">Dauer: %s</string>
-    <plurals name="directions_trip_details_public_entry_collapsed_intermediate_stops">
+    <string name="trip_details_public_entry_duration">Dauer: %s</string>
+    <plurals name="trip_details_public_entry_collapsed_intermediate_stops">
         <item quantity="one">…%d Zwischenhalt…</item>
         <item quantity="other">…%d Zwischenhalte…</item>
     </plurals>
 
     <!-- directions trip details options -->
-    <string name="directions_trip_details_action_bookmark">Verbindung merken</string>
-    <string name="directions_trip_details_action_start_routing">Navigation starten</string>
-    <string name="directions_trip_details_action_calendar_title">Zum Kalender hinzufügen</string>
-    <string name="directions_trip_details_action_calendar_notfound">Es ist keine Kalender-App installiert</string>
-    <string name="directions_trip_details_action_track_title">Ortung</string>
-    <string name="directions_trip_details_action_showmap_title">Karte anzeigen</string>
-    <string name="directions_trip_details_action_share_title">Teilen…</string>
-    <string name="directions_trip_details_action_share_short_title">Kurznachricht teilen…</string>
-    <string name="directions_trip_details_action_share_long_title">Detaillierte Nachricht teilen…</string>
-    <string name="directions_trip_details_action_share_link_title">Mit Link teilen…</string>
-    <string name="directions_trip_details_action_open_share_link_title">In Provider-App öffnen (über "Teilen")</string>
-    <string name="directions_trip_details_action_open_direct_link_title">In Provider-App öffnen (direkter Link)</string>
-    <string name="directions_trip_details_action_open_external_kml_maps_app_title">KML in externer Karten-App anzeigen</string>
-    <string name="directions_trip_details_action_open_external_gpx_maps_app_title">GPX in externer Karten-App anzeigen</string>
-    <string name="directions_trip_details_text_short">ab %1$s %2$s\n%3$s  %4$s\n\nan %5$s %6$s\n%7$s  %8$s</string>
+    <string name="trip_details_action_bookmark">Verbindung merken</string>
+    <string name="trip_details_action_start_routing">Navigation starten</string>
+    <string name="trip_details_action_calendar_title">Zum Kalender hinzufügen</string>
+    <string name="trip_details_action_calendar_notfound">Es ist keine Kalender-App installiert</string>
+    <string name="trip_details_action_track_title">Ortung</string>
+    <string name="trip_details_action_showmap_title">Karte anzeigen</string>
+    <string name="trip_details_action_share_title">Teilen…</string>
+    <string name="trip_details_action_share_short_title">Kurznachricht teilen…</string>
+    <string name="trip_details_action_share_long_title">Detaillierte Nachricht teilen…</string>
+    <string name="trip_details_action_share_link_title">Mit Link teilen…</string>
+    <string name="trip_details_action_open_share_link_title">In Provider-App öffnen (über "Teilen")</string>
+    <string name="trip_details_action_open_direct_link_title">In Provider-App öffnen (direkter Link)</string>
+    <string name="trip_details_action_open_external_kml_maps_app_title">KML in externer Karten-App anzeigen</string>
+    <string name="trip_details_action_open_external_gpx_maps_app_title">GPX in externer Karten-App anzeigen</string>
+    <string name="trip_details_text_short">ab %1$s %2$s\n%3$s  %4$s\n\nan %5$s %6$s\n%7$s  %8$s</string>
 
     <!-- directions trip details options schedule -->
-    <string name="directions_trip_details_text_long_title">Fahrt: %1$s ➝ %2$s</string>
-    <string name="directions_trip_details_text_long_public">%1$s ➝ %2$s\nab: %3$s, %4$s  %5$s %6$s\nan: %7$s, %8$s  %9$s %10$s</string>
-    <string name="directions_trip_details_text_long_walk">%1$d Minuten %2$sFußweg nach %3$s</string>
-    <string name="directions_trip_details_text_long_bike">%1$d Minuten %2$sFahrt mit dem Fahrrad nach %3$s</string>
-    <string name="directions_trip_details_text_long_car">%1$d Minuten %2$sFahrt mit dem Auto nach %3$s</string>
-    <string name="directions_trip_details_text_long_check_in">Check-In benötigt %1$d Minuten</string>
-    <string name="directions_trip_details_text_long_check_out">Check-Out benötigt %1$d Minuten</string>
-    <string name="directions_trip_details_text_long_transfer">%1$d Minuten %2$sÜbergang nach %3$s</string>
+    <string name="trip_details_text_long_title">Fahrt: %1$s ➝ %2$s</string>
+    <string name="trip_details_text_long_public">%1$s ➝ %2$s\nab: %3$s, %4$s  %5$s %6$s\nan: %7$s, %8$s  %9$s %10$s</string>
+    <string name="trip_details_text_long_walk">%1$d Minuten %2$sFußweg nach %3$s</string>
+    <string name="trip_details_text_long_bike">%1$d Minuten %2$sFahrt mit dem Fahrrad nach %3$s</string>
+    <string name="trip_details_text_long_car">%1$d Minuten %2$sFahrt mit dem Auto nach %3$s</string>
+    <string name="trip_details_text_long_check_in">Check-In benötigt %1$d Minuten</string>
+    <string name="trip_details_text_long_check_out">Check-Out benötigt %1$d Minuten</string>
+    <string name="trip_details_text_long_transfer">%1$d Minuten %2$sÜbergang nach %3$s</string>
 
     <!-- directions shortcut -->
     <string name="create_launcher_shortcut_dialog_name_hint">Name d. Verknüpfung, z.B. \'Arbeit\'</string>

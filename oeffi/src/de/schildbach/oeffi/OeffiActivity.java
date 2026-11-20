@@ -997,7 +997,7 @@ public abstract class OeffiActivity extends AppCompatActivity
     protected void addShowMapButtonToActionBar(final boolean internalOnly, final boolean forTrip) {
         if (mapIsAtBottom && getResources().getBoolean(R.bool.layout_map_show_toggleable)) {
             final ImageButton button = getMyActionBar()
-                    .addButton(R.drawable.ic_map_white_24dp, R.string.directions_trip_details_action_showmap_title);
+                    .addButton(R.drawable.ic_map_white_24dp, R.string.trip_details_action_showmap_title);
             if (internalOnly) {
                 button.setOnClickListener(v -> setMapVisible(!mapEnabled));
             } else {

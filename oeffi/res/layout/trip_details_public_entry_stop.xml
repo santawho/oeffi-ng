@@ -3,27 +3,27 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <de.schildbach.oeffi.directions.PearlView
-        android:id="@+id/directions_trip_details_public_entry_stop_pearl"
+        android:id="@+id/trip_details_public_entry_stop_pearl"
         android:layout_width="24dp"
         android:layout_height="match_parent"
         android:paddingTop="@dimen/trip_details_stop_offset" />
 
     <LinearLayout
         android:orientation="vertical"
-        android:id="@+id/directions_trip_details_public_entry_stop_date"
+        android:id="@+id/trip_details_public_entry_stop_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingLeft="@dimen/text_padding_horizontal_cram"
         android:paddingRight="@dimen/text_padding_horizontal_cram" >
         <TextView
-            android:id="@+id/directions_trip_details_public_entry_stop_date_provided"
+            android:id="@+id/trip_details_public_entry_stop_date_provided"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:maxWidth="128dp"
             android:textColor="@color/fg_significant"
             android:textSize="@dimen/font_size_large" />
         <TextView
-            android:id="@+id/directions_trip_details_public_entry_stop_date_simulated"
+            android:id="@+id/trip_details_public_entry_stop_date_simulated"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:maxWidth="128dp"
@@ -33,18 +33,18 @@
 
     <LinearLayout
         android:orientation="vertical"
-        android:id="@+id/directions_trip_details_public_entry_stop_time"
+        android:id="@+id/trip_details_public_entry_stop_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingLeft="@dimen/text_padding_horizontal_cram" >
         <TextView
-            android:id="@+id/directions_trip_details_public_entry_stop_time_provided"
+            android:id="@+id/trip_details_public_entry_stop_time_provided"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/fg_significant"
             android:textSize="@dimen/font_size_large" />
         <TextView
-            android:id="@+id/directions_trip_details_public_entry_stop_time_simulated"
+            android:id="@+id/trip_details_public_entry_stop_time_simulated"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/fg_simulated"
@@ -53,18 +53,18 @@
 
     <LinearLayout
         android:orientation="vertical"
-        android:id="@+id/directions_trip_details_public_entry_stop_delay"
+        android:id="@+id/trip_details_public_entry_stop_delay"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingLeft="@dimen/text_padding_horizontal" >
         <TextView
-            android:id="@+id/directions_trip_details_public_entry_stop_delay_provided"
+            android:id="@+id/trip_details_public_entry_stop_delay_provided"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/fg_significant"
             android:textSize="@dimen/font_size_large" />
         <TextView
-            android:id="@+id/directions_trip_details_public_entry_stop_delay_simulated"
+            android:id="@+id/trip_details_public_entry_stop_delay_simulated"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/fg_simulated"
@@ -77,14 +77,14 @@
         android:layout_height="wrap_content"
         android:paddingLeft="@dimen/text_padding_horizontal_lax" >
 <!--        <ImageButton-->
-<!--            android:id="@+id/directions_trip_details_public_entry_vehicle_information_symbol"-->
+<!--            android:id="@+id/trip_details_public_entry_vehicle_information_symbol"-->
 <!--            android:visibility="gone"-->
 <!--            android:layout_width="wrap_content"-->
 <!--            android:layout_height="wrap_content"-->
 <!--            android:src="@drawable/ic_sequence_black_24dp"-->
 <!--            android:tint="@color/fg_significant" />-->
         <TextView
-            android:id="@+id/directions_trip_details_public_entry_stop_position"
+            android:id="@+id/trip_details_public_entry_stop_position"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="none"
@@ -103,14 +103,14 @@
         android:paddingLeft="@dimen/text_padding_horizontal_lax" >
 
         <TextView
-            android:id="@+id/directions_trip_details_public_entry_stop_name"
+            android:id="@+id/trip_details_public_entry_stop_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?android:attr/selectableItemBackground"
             android:textColor="@color/fg_significant"
             android:textSize="@dimen/font_size_large" />
         <TextView
-            android:id="@+id/directions_trip_details_public_entry_stop_remaining"
+            android:id="@+id/trip_details_public_entry_stop_remaining"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/fg_simulated"

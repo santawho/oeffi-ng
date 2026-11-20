@@ -17,7 +17,7 @@
         style="?android:attr/buttonBarStyle">
 
         <de.schildbach.oeffi.util.LineView
-            android:id="@+id/directions_trip_details_public_entry_line"
+            android:id="@+id/trip_details_public_entry_line"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="@dimen/font_size_xlarge" />
@@ -31,7 +31,7 @@
             android:paddingEnd="0px">
 
             <TextView
-                android:id="@+id/directions_trip_details_public_entry_destination"
+                android:id="@+id/trip_details_public_entry_destination"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:drawablePadding="@dimen/text_padding_horizontal"
@@ -40,43 +40,43 @@
 
             <LinearLayout
                 android:orientation="vertical"
-                android:id="@+id/directions_trip_details_public_entry_vehicle_information_click"
+                android:id="@+id/trip_details_public_entry_vehicle_information_click"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
                 <TextView
-                    android:id="@+id/directions_trip_details_public_entry_accessibility"
+                    android:id="@+id/trip_details_public_entry_accessibility"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:drawableLeft="@drawable/ic_accessible_grey600_18dp"
                     android:drawablePadding="@dimen/text_padding_horizontal"
-                    android:text="@string/directions_trip_details_public_entry_accessibility"
+                    android:text="@string/trip_details_public_entry_accessibility"
                     android:textColor="@color/fg_insignificant"
                     android:visibility="gone" />
 
                 <TextView
-                    android:id="@+id/directions_trip_details_public_entry_bicycle_carriage"
+                    android:id="@+id/trip_details_public_entry_bicycle_carriage"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:drawableLeft="@drawable/ic_directions_bike_grey600_18dp"
                     android:drawablePadding="@dimen/text_padding_horizontal"
-                    android:text="@string/directions_trip_details_public_entry_bicycle_carriage"
+                    android:text="@string/trip_details_public_entry_bicycle_carriage"
                     android:textColor="@color/fg_insignificant"
                     android:visibility="gone" />
 
                 <TextView
-                    android:id="@+id/directions_trip_details_public_entry_vehicle_information_available"
+                    android:id="@+id/trip_details_public_entry_vehicle_information_available"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:drawableLeft="@drawable/ic_direction_sequence_grey600_18dp"
                     android:drawablePadding="@dimen/text_padding_horizontal"
-                    android:text="@string/directions_trip_details_public_entry_vehicle_information_available"
+                    android:text="@string/trip_details_public_entry_vehicle_information_available"
                     android:textColor="@color/fg_insignificant"
                     android:visibility="gone" />
             </LinearLayout>
         </LinearLayout>
 
         <de.schildbach.oeffi.util.ToggleImageButton
-            android:id="@+id/directions_trip_details_public_entry_expand"
+            android:id="@+id/trip_details_public_entry_expand"
             android:layout_width="@dimen/action_bar_button_width"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
@@ -86,7 +86,7 @@
     </LinearLayout>
 
     <TableLayout
-        android:id="@+id/directions_trip_details_public_entry_stops"
+        android:id="@+id/trip_details_public_entry_stops"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/text_padding_horizontal_lax"
@@ -96,7 +96,7 @@
         android:stretchColumns="5" />
 
     <RelativeLayout
-        android:id="@+id/directions_trip_details_public_entry_progress"
+        android:id="@+id/trip_details_public_entry_progress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/bg_trip_details_time_left"
@@ -108,7 +108,7 @@
         android:paddingBottom="@dimen/text_padding_vertical"
         android:visibility="gone" >
         <TextView
-            android:id="@+id/directions_trip_details_public_entry_progress_text"
+            android:id="@+id/trip_details_public_entry_progress_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
@@ -119,7 +119,7 @@
             android:textColor="@color/fg_significant"
             android:textSize="@dimen/font_size_large" />
         <ImageButton
-            android:id="@+id/directions_trip_details_public_entry_progress_bell"
+            android:id="@+id/trip_details_public_entry_progress_bell"
             android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -132,7 +132,7 @@
     </RelativeLayout>
 
     <TextView
-        android:id="@+id/directions_trip_details_public_entry_message"
+        android:id="@+id/trip_details_public_entry_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/text_padding_horizontal_lax"
@@ -142,7 +142,7 @@
         android:visibility="gone" />
 
     <TextView
-        android:id="@+id/directions_trip_details_public_entry_devinfo"
+        android:id="@+id/trip_details_public_entry_devinfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/text_padding_horizontal_lax"
