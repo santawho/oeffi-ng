@@ -61,7 +61,7 @@ public class StationContextMenu extends PopupMenu {
             final boolean showTravelAlarmDeparture, final boolean showTravelAlarmArrival,
             final boolean showDirections, final boolean showDirectionsVia, final boolean showAlternativeDirections,
             final boolean showNavigateTo, final boolean showShortcut) {
-        super(context, R.menu.stations_station_context, anchor);
+        super(context, R.menu.station_context, anchor);
         final boolean isFavorite = favState != null && favState == FavoriteStationsProvider.TYPE_FAVORITE;
         final boolean isIgnored = favState != null && favState == FavoriteStationsProvider.TYPE_IGNORE;
         findItem(R.id.station_context_add_favorite).setVisible(showFavorite && !isFavorite);
