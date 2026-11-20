@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/departures_paging_name"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:paddingHorizontal="@dimen/text_padding_horizontal_verylax"
+            android:paddingVertical="@dimen/text_padding_vertical_verylax"
+            android:textSize="@dimen/font_size_2xlarge"
+            android:textColor="@color/fg_significant" />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:id="@+id/departures_paging_lines"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:paddingVertical="@dimen/text_padding_vertical_lax"
+            android:gravity="center_horizontal" >
+            <!-- includes dynamically added layout/departures_paging_line -->
+        </LinearLayout>
+
+    </LinearLayout>
+</FrameLayout>

@@ -34,174 +34,212 @@
             android:textColor="@color/fg_significant"
             />
 
-        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-            android:id="@+id/departures_refresh"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <FrameLayout
+            <de.schildbach.oeffi.util.HorizontalPager
+                android:id="@+id/departures_pager"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
                 <LinearLayout
-                    android:orientation="vertical"
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" >
+                    <Space
+                        android:layout_height="wrap_content"
+                        android:layout_width="0dp"
+                        android:layout_weight="1" />
+                    <include layout="@layout/departures_paging"
+                        android:id="@+id/departures_paging_previous"
+                        android:layout_height="match_parent"
+                        android:layout_width="0dp"
+                        android:layout_weight="2" />
+                </LinearLayout>
+
+                <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                    android:id="@+id/departures_refresh"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
                     <LinearLayout
-                        android:id="@+id/departures_header"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="?attr/bg_shaded"
                         android:orientation="vertical"
-                        android:paddingBottom="@dimen/text_padding_vertical_lax"
-                        android:paddingLeft="@dimen/text_padding_horizontal_verylax"
-                        android:paddingRight="@dimen/text_padding_horizontal_lax"
-                        android:paddingTop="@dimen/text_padding_vertical_lax">
-
-                        <androidx.appcompat.widget.AppCompatSpinner
-                            android:id="@+id/departures_header_dropdown"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:paddingVertical="@dimen/text_padding_vertical_verylax"
-                            android:paddingHorizontal="@dimen/text_padding_horizontal"
-                            android:spinnerMode="dropdown"
-                            />
-
-<!--                        <LinearLayout-->
-<!--                            android:layout_width="match_parent"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:layout_marginTop="@dimen/text_padding_vertical_lax"-->
-<!--                            android:baselineAligned="true"-->
-<!--                            android:orientation="horizontal">-->
-
-<!--                            <ImageView-->
-<!--                                android:id="@+id/departures_header_multistations"-->
-<!--                                android:layout_width="wrap_content"-->
-<!--                                android:layout_height="wrap_content"-->
-<!--                                android:src="@drawable/ic_expand_more_black_24dp"-->
-<!--                                android:tint="@color/fg_significant" />-->
-
-<!--                            <TextView-->
-<!--                                android:id="@+id/departures_header_name"-->
-<!--                                android:layout_width="wrap_content"-->
-<!--                                android:layout_height="wrap_content"-->
-<!--                                android:layout_weight="1"-->
-<!--                                android:paddingLeft="@dimen/text_padding_horizontal"-->
-<!--                                android:textColor="@color/fg_significant" />-->
-
-<!--                            <TextView-->
-<!--                                android:visibility="gone"-->
-<!--                                android:id="@+id/departures_header_id"-->
-<!--                                android:layout_width="wrap_content"-->
-<!--                                android:layout_height="wrap_content"-->
-<!--                                android:paddingLeft="@dimen/text_padding_horizontal"-->
-<!--                                android:textColor="@color/fg_less_significant" />-->
-<!--                        </LinearLayout>-->
-
-                        <LinearLayout
-                            android:id="@+id/departures_header_lines"
-                            android:orientation="horizontal"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content">
-                            <ViewAnimator
-                                android:id="@+id/departures_header_lines_container"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:layout_marginTop="@dimen/text_padding_vertical_lax"
-                                android:layout_marginBottom="@dimen/text_padding_vertical_lax"
-                                android:measureAllChildren="false" >
-
-                                <HorizontalScrollView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content" >
-                                    <LinearLayout
-                                        android:orientation="horizontal"
-                                        android:id="@+id/departures_header_lines_compact"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:paddingBottom="@dimen/text_padding_vertical_cram" />
-                                </HorizontalScrollView>
-
-                                <androidx.core.widget.NestedScrollView
-                                    android:id="@+id/departures_header_lines_full_scroll"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="@dimen/departures_header_lines_scroll_max_height" >
-                                    <LinearLayout
-                                        android:orientation="vertical"
-                                        android:id="@+id/departures_header_lines_full"
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content" />
-                                </androidx.core.widget.NestedScrollView>
-                            </ViewAnimator>
-
-                            <de.schildbach.oeffi.util.ToggleImageButton
-                                android:id="@+id/departures_header_lines_expand"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:paddingLeft="@dimen/text_padding_horizontal_cram"
-                                android:layout_gravity="top"
-                                android:scaleType="center"
-                                android:src="@drawable/ic_expand_black_24dp"
-                                android:tint="@color/fg_less_significant" />
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-                    <ViewAnimator
-                        android:id="@+id/departures_list_layout"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent">
 
-                        <androidx.recyclerview.widget.RecyclerView
-                            android:id="@+id/departures_list"
+                        <LinearLayout
+                            android:id="@+id/departures_header"
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:clipToPadding="false"
-                            android:scrollbars="none" />
-
-                        <TextView
-                            android:id="@+id/departures_result_status"
-                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginLeft="@dimen/text_padding_horizontal_verylax"
-                            android:layout_marginRight="@dimen/text_padding_horizontal_verylax"
-                            android:gravity="center"
-                            android:textSize="@dimen/font_size_large" />
-                    </ViewAnimator>
-                </LinearLayout>
+                            android:background="?attr/bg_shaded"
+                            android:orientation="vertical"
+                            android:paddingBottom="@dimen/text_padding_vertical_lax"
+                            android:paddingLeft="@dimen/text_padding_horizontal_verylax"
+                            android:paddingRight="@dimen/text_padding_horizontal_lax"
+                            android:paddingTop="@dimen/text_padding_vertical_lax">
+
+                            <androidx.appcompat.widget.AppCompatSpinner
+                                android:id="@+id/departures_header_dropdown"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:paddingVertical="@dimen/text_padding_vertical_verylax"
+                                android:paddingHorizontal="@dimen/text_padding_horizontal"
+                                android:spinnerMode="dropdown"
+                                />
+
+    <!--                        <LinearLayout-->
+    <!--                            android:layout_width="match_parent"-->
+    <!--                            android:layout_height="wrap_content"-->
+    <!--                            android:layout_marginTop="@dimen/text_padding_vertical_lax"-->
+    <!--                            android:baselineAligned="true"-->
+    <!--                            android:orientation="horizontal">-->
+
+    <!--                            <ImageView-->
+    <!--                                android:id="@+id/departures_header_multistations"-->
+    <!--                                android:layout_width="wrap_content"-->
+    <!--                                android:layout_height="wrap_content"-->
+    <!--                                android:src="@drawable/ic_expand_more_black_24dp"-->
+    <!--                                android:tint="@color/fg_significant" />-->
+
+    <!--                            <TextView-->
+    <!--                                android:id="@+id/departures_header_name"-->
+    <!--                                android:layout_width="wrap_content"-->
+    <!--                                android:layout_height="wrap_content"-->
+    <!--                                android:layout_weight="1"-->
+    <!--                                android:paddingLeft="@dimen/text_padding_horizontal"-->
+    <!--                                android:textColor="@color/fg_significant" />-->
+
+    <!--                            <TextView-->
+    <!--                                android:visibility="gone"-->
+    <!--                                android:id="@+id/departures_header_id"-->
+    <!--                                android:layout_width="wrap_content"-->
+    <!--                                android:layout_height="wrap_content"-->
+    <!--                                android:paddingLeft="@dimen/text_padding_horizontal"-->
+    <!--                                android:textColor="@color/fg_less_significant" />-->
+    <!--                        </LinearLayout>-->
+
+                            <LinearLayout
+                                android:id="@+id/departures_header_lines"
+                                android:orientation="horizontal"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
+                                <ViewAnimator
+                                    android:id="@+id/departures_header_lines_container"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:layout_marginTop="@dimen/text_padding_vertical_lax"
+                                    android:layout_marginBottom="@dimen/text_padding_vertical_lax"
+                                    android:measureAllChildren="false" >
+
+                                    <HorizontalScrollView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content" >
+                                        <LinearLayout
+                                            android:orientation="horizontal"
+                                            android:id="@+id/departures_header_lines_compact"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:paddingBottom="@dimen/text_padding_vertical_cram" />
+                                    </HorizontalScrollView>
+
+                                    <androidx.core.widget.NestedScrollView
+                                        android:id="@+id/departures_header_lines_full_scroll"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="@dimen/departures_header_lines_scroll_max_height" >
+                                        <LinearLayout
+                                            android:orientation="vertical"
+                                            android:id="@+id/departures_header_lines_full"
+                                            android:layout_width="match_parent"
+                                            android:layout_height="wrap_content" />
+                                    </androidx.core.widget.NestedScrollView>
+                                </ViewAnimator>
+
+                                <de.schildbach.oeffi.util.ToggleImageButton
+                                    android:id="@+id/departures_header_lines_expand"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:paddingLeft="@dimen/text_padding_horizontal_cram"
+                                    android:layout_gravity="top"
+                                    android:scaleType="center"
+                                    android:src="@drawable/ic_expand_black_24dp"
+                                    android:tint="@color/fg_less_significant" />
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                        <ViewAnimator
+                            android:id="@+id/departures_list_layout"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+
+                            <androidx.recyclerview.widget.RecyclerView
+                                android:id="@+id/departures_list"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:clipToPadding="false"
+                                android:scrollbars="none" />
+
+                            <TextView
+                                android:id="@+id/departures_result_status"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginLeft="@dimen/text_padding_horizontal_verylax"
+                                android:layout_marginRight="@dimen/text_padding_horizontal_verylax"
+                                android:gravity="center"
+                                android:textSize="@dimen/font_size_large" />
+                        </ViewAnimator>
+                    </LinearLayout>
+
+                </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
                 <LinearLayout
-                    android:id="@+id/departures_disclaimer_group"
+                    android:orientation="horizontal"
                     android:layout_width="match_parent"
+                    android:layout_height="match_parent" >
+                    <include layout="@layout/departures_paging"
+                        android:id="@+id/departures_paging_next"
+                        android:layout_height="match_parent"
+                        android:layout_width="0dp"
+                        android:layout_weight="2" />
+                    <Space
+                        android:layout_height="wrap_content"
+                        android:layout_width="0dp"
+                        android:layout_weight="1" />
+                </LinearLayout>
+
+            </de.schildbach.oeffi.util.HorizontalPager>
+
+            <LinearLayout
+                android:id="@+id/departures_disclaimer_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_marginLeft="@dimen/text_padding_horizontal_verylax"
+                android:layout_marginRight="@dimen/text_padding_horizontal_verylax"
+                android:layout_marginTop="@dimen/text_padding_vertical"
+                android:layout_marginBottom="@dimen/text_padding_vertical"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/departures_disclaimer_source"
+                    android:visibility="gone"
+                    android:layout_width="0px"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
-                    android:layout_marginLeft="@dimen/text_padding_horizontal_verylax"
-                    android:layout_marginRight="@dimen/text_padding_horizontal_verylax"
-                    android:layout_marginTop="@dimen/text_padding_vertical"
-                    android:layout_marginBottom="@dimen/text_padding_vertical"
-                    android:baselineAligned="false"
-                    android:orientation="horizontal">
+                    android:layout_weight="1"
+                    android:background="@color/bg_floating_disclaimer"
+                    android:drawablePadding="@dimen/text_padding_horizontal_lax"
+                    android:paddingHorizontal="@dimen/text_padding_horizontal_lax"
+                    android:paddingVertical="@dimen/text_padding_vertical_lax"
+                    android:gravity="bottom|left"
+                    android:textSize="@dimen/font_size_disclaimer" />
 
-                    <TextView
-                        android:id="@+id/departures_disclaimer_source"
-                        android:visibility="gone"
-                        android:layout_width="0px"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="bottom"
-                        android:layout_weight="1"
-                        android:background="@color/bg_floating_disclaimer"
-                        android:drawablePadding="@dimen/text_padding_horizontal_lax"
-                        android:paddingHorizontal="@dimen/text_padding_horizontal_lax"
-                        android:paddingVertical="@dimen/text_padding_vertical_lax"
-                        android:gravity="bottom|left"
-                        android:textSize="@dimen/font_size_disclaimer" />
-
-                </LinearLayout>
-            </FrameLayout>
-        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+            </LinearLayout>
+        </FrameLayout>
     </LinearLayout>
 
     <include layout="@layout/map_frame" />

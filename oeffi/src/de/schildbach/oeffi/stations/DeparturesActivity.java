@@ -62,6 +62,7 @@ import de.schildbach.oeffi.directions.QueryJourneyRunnable;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.DividerItemDecoration;
 import de.schildbach.oeffi.util.Formats;
+import de.schildbach.oeffi.util.HorizontalPager;
 import de.schildbach.oeffi.util.HtmlUtils;
 import de.schildbach.oeffi.util.LineView;
 import de.schildbach.oeffi.util.Objects;
@@ -243,6 +244,9 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
     private TextView resultStatusView;
     private TextView disclaimerSourceView;
     private boolean hideCancelledDepartures;
+    private HorizontalPager stationPager;
+    private Paging pagingPrevious;
+    private Paging pagingNext;
     private SwipeRefreshLayout swipeRefresh;
 
     private BroadcastReceiver tickReceiver;
@@ -380,6 +384,17 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
             load(nextEarlierTime, true);
         });
         actionBar.concludeSetup();
+
+        stationPager = findViewById(R.id.departures_pager);
+        pagingPrevious = new Paging(R.id.departures_paging_previous);
+        pagingNext = new Paging(R.id.departures_paging_next);
+        stationPager.setCurrentScreen(1, false);
+        stationPager.setOnScreenSwitchListener((prevPage, newPage) -> {
+            if (newPage == 0)
+                pagingPrevious.onPaged();
+            else if (newPage == 2)
+                pagingNext.onPaged();
+        });
 
         swipeRefresh = findViewById(R.id.departures_refresh);
         swipeRefresh.setOnRefreshListener(() -> requestRefresh(true));
@@ -1024,9 +1039,9 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
         for (int index = 0, combinedStationsSize = combinedStations.size(); index < combinedStationsSize; index++) {
             final CombinedStation cs = combinedStations.get(index);
             if (cs.baseStation.location.id.equals(selectedStation.location.id)) {
-                final int currentSelected = dropdownView.getSelectedItemPosition();
-                if (currentSelected != index)
-                    dropdownView.setSelection(index);
+                dropdownView.setSelection(index);
+                pagingPrevious.setStation(index - 1);
+                pagingNext.setStation(index + 1);
                 break;
             }
         }
@@ -1187,12 +1202,10 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
                 final View lineRow = getLayoutInflater().inflate(R.layout.departures_header_line_full, null);
                 linesGroupFull.addView(lineRow, LINES_LAYOUT_PARAMS);
 
-                final LineView lineView = lineRow
-                        .findViewById(R.id.departures_header_line_line);
+                final LineView lineView = lineRow.findViewById(R.id.departures_header_line_line);
                 lineView.setLine(line);
 
-                final TextView destinationView = lineRow
-                        .findViewById(R.id.departures_header_line_destination);
+                final TextView destinationView = lineRow.findViewById(R.id.departures_header_line_destination);
                 final StringBuilder text = new StringBuilder();
                 if (destinations != null) {
                     for (final Destination destination : destinations) {
@@ -1528,6 +1541,54 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
                 capacityView.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.capacity_2, 0);
             else if (capacity == 3)
                 capacityView.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.capacity_3, 0);
+        }
+    }
+
+    private class Paging {
+        private final ViewGroup page;
+        private final TextView name;
+        private final LinearLayout lines;
+
+        private int currentIndex;
+
+        private Paging(final int pageId) {
+            page = findViewById(pageId);
+            name = page.findViewById(R.id.departures_paging_name);
+            lines = page.findViewById(R.id.departures_paging_lines);
+        }
+
+        private void setStation(final int aIndex) {
+            final int numStations = combinedStations.size();
+            if (numStations < 2) {
+                page.setVisibility(View.GONE);
+                return;
+            }
+            page.setVisibility(View.VISIBLE);
+            currentIndex = aIndex < 0 ? numStations - 1 : aIndex >= numStations ? 0 : aIndex;
+            final CombinedStation combinedStation = combinedStations.get(currentIndex);
+            name.setText(Formats.makeBreakableStationName(combinedStation.baseStation.location.name));
+
+            lines.removeAllViews();
+            final List<Product> products = combinedStation.getProducts();
+            if (products == null || products.isEmpty()) {
+                lines.setVisibility(View.GONE);
+            } else {
+                lines.setVisibility(View.VISIBLE);
+                final NetworkProvider networkProvider = NetworkProviderFactory.provider(selectedNetwork);
+                for (final Product product : products) {
+                    final Line productLine = NetworkProvider.productLine(networkProvider, product);
+                    final LineView productLineView = (LineView) getLayoutInflater().inflate(R.layout.departures_paging_line, lines, false);
+                    productLineView.setLine(productLine);
+                    lines.addView(productLineView);
+                }
+            }
+        }
+
+        private void onPaged() {
+            final int newPosition = Math.min(Math.max(currentIndex, 0), combinedStations.size() - 1);
+            selectStation(combinedStations.get(newPosition).baseStation);
+
+            stationPager.setCurrentScreen(1, false);
         }
     }
 }
