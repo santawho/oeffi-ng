@@ -192,7 +192,7 @@ public class JourneysAdapter extends RecyclerView.Adapter<JourneyViewHolder> imp
 
     @Override
     public JourneyViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
-        return new JourneyViewHolder(context, inflater.inflate(R.layout.stations_journey_entry, parent, false),
+        return new JourneyViewHolder(context, inflater.inflate(R.layout.nearby_journey_entry, parent, false),
                 maxDepartures, showOriginalDirectionText, contextMenuItemListener, journeyClickListener);
     }
 

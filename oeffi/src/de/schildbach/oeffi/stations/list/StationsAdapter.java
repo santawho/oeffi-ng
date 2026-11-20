@@ -117,7 +117,7 @@ public class StationsAdapter extends RecyclerView.Adapter<StationViewHolder> imp
     @Override
     public StationViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
         return new StationViewHolder(context,
-                inflater.inflate(R.layout.stations_station_entry, parent, false),
+                inflater.inflate(R.layout.nearby_station_entry, parent, false),
                 maxDeparturesCollapsed, maxDeparturesExpanded,
                 showOriginalDirectionText, contextMenuItemListener, journeyClickListener);
     }

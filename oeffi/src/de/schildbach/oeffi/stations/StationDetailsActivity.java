@@ -281,7 +281,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         backgroundThread.start();
         backgroundHandler = new Handler(backgroundThread.getLooper());
 
-        setContentView(R.layout.stations_station_details_content);
+        setContentView(R.layout.station_details_content);
         final View contentView = findViewById(android.R.id.content);
         ViewCompat.setOnApplyWindowInsetsListener(contentView, (v, windowInsets) -> {
             final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -1161,7 +1161,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 final NetworkProvider networkProvider = NetworkProviderFactory.provider(selectedNetwork);
                 for (final Product product : products) {
                     final Line productLine = NetworkProvider.productLine(networkProvider, product);
-                    final LineView productLineView = (LineView) getLayoutInflater().inflate(R.layout.stations_station_details_header_line_compact, null);
+                    final LineView productLineView = (LineView) getLayoutInflater().inflate(R.layout.station_details_header_line_compact, null);
                     productLineView.setLine(productLine);
                     linesGroupCompact.addView(productLineView);
                 }
@@ -1179,11 +1179,11 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
                 final Line line = linesEntry.getKey();
                 final List<Destination> destinations = linesEntry.getValue();
 
-                final LineView compactLineView = (LineView) getLayoutInflater().inflate(R.layout.stations_station_details_header_line_compact, null);
+                final LineView compactLineView = (LineView) getLayoutInflater().inflate(R.layout.station_details_header_line_compact, null);
                 compactLineView.setLine(line);
                 linesGroupCompact.addView(compactLineView);
 
-                final View lineRow = getLayoutInflater().inflate(R.layout.stations_station_details_header_line_full, null);
+                final View lineRow = getLayoutInflater().inflate(R.layout.station_details_header_line_full, null);
                 linesGroupFull.addView(lineRow, LINES_LAYOUT_PARAMS);
 
                 final LineView lineView = lineRow
@@ -1227,7 +1227,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
 
         @Override
         public int getItemViewType(final int position) {
-            return R.layout.stations_station_details_entry;
+            return R.layout.station_details_entry;
         }
 
         public Departure getItem(final int position) {
@@ -1243,7 +1243,7 @@ public class StationDetailsActivity extends OeffiActivity implements StationsAwa
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
             return new DepartureViewHolder(context,
-                    inflater.inflate(R.layout.stations_station_details_entry, parent, false));
+                    inflater.inflate(R.layout.station_details_entry, parent, false));
         }
 
         @Override

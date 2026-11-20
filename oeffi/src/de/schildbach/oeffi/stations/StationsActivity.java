@@ -330,7 +330,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         drawableSwipeClear = ResourceUtil.getDrawableInTextColor(this, R.drawable.ic_clear_black_24dp);
         drawableSwipeBlock = ResourceUtil.getDrawableInTextColor(this, R.drawable.ic_block_black_24dp);
 
-        setContentView(R.layout.stations_content);
+        setContentView(R.layout.nearby_content);
         final View contentView = findViewById(android.R.id.content);
         ViewCompat.setOnApplyWindowInsetsListener(contentView, (v, windowInsets) -> {
             final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());

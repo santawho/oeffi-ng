@@ -194,7 +194,7 @@ public class JourneyViewHolder extends RecyclerView.ViewHolder {
                     departureView = (ViewGroup) departuresViewGroup.getChildAt(iDepartureView++);
                     departureViewHolder = (DepartureViewHolder) departureView.getTag();
                 } else {
-                    departureView = (ViewGroup) inflater.inflate(R.layout.stations_journey_entry_departure,
+                    departureView = (ViewGroup) inflater.inflate(R.layout.nearby_journey_entry_departure,
                             departuresViewGroup, false);
                     departureViewHolder = new DepartureViewHolder();
                     departureViewHolder.nameView = departureView.findViewById(R.id.jny_departure_entry_name);

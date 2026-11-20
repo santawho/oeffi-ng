@@ -306,7 +306,7 @@ public class StationViewHolder extends RecyclerViewNG.HorizontalSwipeHolder {
                                 departureView = (ViewGroup) departuresViewGroup.getChildAt(iDepartureView++);
                                 departureViewHolder = (DepartureViewHolder) departureView.getTag();
                             } else {
-                                departureView = (ViewGroup) inflater.inflate(R.layout.stations_station_entry_departure,
+                                departureView = (ViewGroup) inflater.inflate(R.layout.nearby_station_entry_departure,
                                         departuresViewGroup, false);
                                 departureViewHolder = new DepartureViewHolder();
                                 departureViewHolder.line = departureView
@@ -506,7 +506,7 @@ public class StationViewHolder extends RecyclerViewNG.HorizontalSwipeHolder {
             for (final String message : messages) {
                 index++;
 
-                final TextView messageView = (TextView) inflater.inflate(R.layout.stations_station_entry_message,
+                final TextView messageView = (TextView) inflater.inflate(R.layout.nearby_station_entry_message,
                         messagesViewGroup, false);
                 messageView.setText(HtmlUtils.spannedFromHtml(HtmlUtils.makeLinksClickableInHtml(
                         "<b>" + index + ".</b> " + message)));
