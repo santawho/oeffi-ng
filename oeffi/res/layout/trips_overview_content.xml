@@ -30,7 +30,7 @@
 
         <LinearLayout
             android:orientation="horizontal"
-            android:id="@+id/directions_trip_overview_disclaimer_group"
+            android:id="@+id/trips_overview_disclaimer_group"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="bottom"

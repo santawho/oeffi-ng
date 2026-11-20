@@ -291,7 +291,7 @@ public class TripsOverviewActivity extends OeffiActivity {
             postCheckMoreRunnable(true);
         });
 
-        final View disclaimerView = findViewById(R.id.directions_trip_overview_disclaimer_group);
+        final View disclaimerView = findViewById(R.id.trips_overview_disclaimer_group);
         ViewCompat.setOnApplyWindowInsetsListener(disclaimerView, (v, windowInsets) -> {
             final Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(0, 0, 0, insets.bottom);
@@ -302,19 +302,19 @@ public class TripsOverviewActivity extends OeffiActivity {
             processInitialResult(queryTripsResult, searchMoreContext);
         } else if (reloadRequestData != null) {
             if (reloadRequestData.from != null) {
-                ((TextView) findViewById(R.id.directions_trip_overview_custom_title_from))
+                ((TextView) findViewById(R.id.trips_overview_custom_title_from))
                         .setText(Formats.fullLocationName(reloadRequestData.from));
             }
             if (reloadRequestData.to != null) {
-                ((TextView) findViewById(R.id.directions_trip_overview_custom_title_to))
+                ((TextView) findViewById(R.id.trips_overview_custom_title_to))
                         .setText(Formats.fullLocationName(reloadRequestData.to));
             }
             if (reloadRequestData.via != null) {
-                findViewById(R.id.directions_trip_overview_custom_title_via_row).setVisibility(View.VISIBLE);
-                ((TextView) findViewById(R.id.directions_trip_overview_custom_title_via))
+                findViewById(R.id.trips_overview_custom_title_via_row).setVisibility(View.VISIBLE);
+                ((TextView) findViewById(R.id.trips_overview_custom_title_via))
                         .setText(Formats.fullLocationName(reloadRequestData.via));
             } else {
-                findViewById(R.id.directions_trip_overview_custom_title_via_row).setVisibility(View.GONE);
+                findViewById(R.id.trips_overview_custom_title_via_row).setVisibility(View.GONE);
             }
 
             initialRequested = true;
@@ -1018,14 +1018,14 @@ public class TripsOverviewActivity extends OeffiActivity {
             final SearchMoreContext searchMoreContext) {
         // update header
         if (result.from != null)
-            ((TextView) findViewById(R.id.directions_trip_overview_custom_title_from))
+            ((TextView) findViewById(R.id.trips_overview_custom_title_from))
                     .setText(Formats.fullLocationName(result.from));
-        findViewById(R.id.directions_trip_overview_custom_title_via_row)
+        findViewById(R.id.trips_overview_custom_title_via_row)
                 .setVisibility(result.via != null ? View.VISIBLE : View.GONE);
         if (result.via != null)
-            ((TextView) findViewById(R.id.directions_trip_overview_custom_title_via)).setText(Formats.fullLocationName(result.via));
+            ((TextView) findViewById(R.id.trips_overview_custom_title_via)).setText(Formats.fullLocationName(result.via));
         if (result.to != null)
-            ((TextView) findViewById(R.id.directions_trip_overview_custom_title_to)).setText(Formats.fullLocationName(result.to));
+            ((TextView) findViewById(R.id.trips_overview_custom_title_to)).setText(Formats.fullLocationName(result.to));
 
         // update server product
         if (result.header != null) {
