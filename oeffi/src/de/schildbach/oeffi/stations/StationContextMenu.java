@@ -39,6 +39,8 @@ import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.DialogBuilder;
 import de.schildbach.oeffi.util.MapPopupMenu;
 import de.schildbach.oeffi.util.PopupMenu;
+import de.schildbach.oeffi.widget.NearestFavoriteStationWidgetProvider;
+import de.schildbach.oeffi.widget.NearestFavoriteStationWidgetService;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;

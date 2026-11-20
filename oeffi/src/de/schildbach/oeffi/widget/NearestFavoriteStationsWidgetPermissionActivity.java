@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package de.schildbach.oeffi.stations;
+package de.schildbach.oeffi.widget;
 
 import android.Manifest;
 import android.content.Intent;

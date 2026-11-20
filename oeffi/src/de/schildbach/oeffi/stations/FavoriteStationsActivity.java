@@ -50,6 +50,7 @@ import de.schildbach.oeffi.stations.list.StationClickListener;
 import de.schildbach.oeffi.stations.list.StationContextMenuItemListener;
 import de.schildbach.oeffi.util.DividerItemDecoration;
 import de.schildbach.oeffi.util.Toast;
+import de.schildbach.oeffi.widget.NearestFavoriteStationWidgetService;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Departure;
 import de.schildbach.pte.dto.Location;

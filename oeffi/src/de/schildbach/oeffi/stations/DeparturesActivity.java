@@ -69,6 +69,7 @@ import de.schildbach.oeffi.util.OverflowTextView;
 import de.schildbach.oeffi.util.Toast;
 import de.schildbach.oeffi.util.ToggleImageButton;
 import de.schildbach.oeffi.util.ViewUtils;
+import de.schildbach.oeffi.widget.NearestFavoriteStationWidgetService;
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.dto.Destination;
 import de.schildbach.pte.provider.ApiProvider;

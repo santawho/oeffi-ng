@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package de.schildbach.oeffi.stations;
+package de.schildbach.oeffi.widget;
 
 import android.Manifest;
 import android.app.PendingIntent;
@@ -50,6 +50,9 @@ import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
+import de.schildbach.oeffi.stations.DeparturesActivity;
+import de.schildbach.oeffi.stations.FavoriteStationsProvider;
+import de.schildbach.oeffi.stations.QueryDeparturesRunnable;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.GeoUtils;
 import de.schildbach.oeffi.util.LocationHelper;

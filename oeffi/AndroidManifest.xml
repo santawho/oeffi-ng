@@ -237,11 +237,11 @@
             android:exported="false" />
 
         <activity
-            android:name=".stations.NearestFavoriteStationsWidgetPermissionActivity"
+            android:name=".widget.NearestFavoriteStationsWidgetPermissionActivity"
             android:theme="@style/My.Theme.Translucent" />
 
         <receiver
-            android:name=".stations.NearestFavoriteStationWidgetProvider"
+            android:name=".widget.NearestFavoriteStationWidgetProvider"
             android:exported="false"
             android:label="@string/nearest_favorite_station_widget_label">
             <intent-filter>
@@ -293,12 +293,12 @@
 <!--        </service>-->
 
         <service
-            android:name=".stations.NearestFavoriteStationWidgetService"
+            android:name=".widget.NearestFavoriteStationWidgetService"
             android:permission="android.permission.BIND_JOB_SERVICE"
             android:exported="false" />
 
         <service
-            android:name=".stations.NearestFavoriteStationWidgetListService"
+            android:name=".widget.NearestFavoriteStationWidgetListService"
             android:exported="false"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
 

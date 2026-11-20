@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package de.schildbach.oeffi.stations;
+package de.schildbach.oeffi.widget;
 
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
@@ -31,6 +31,7 @@ import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 import de.schildbach.oeffi.Constants;
 import de.schildbach.oeffi.R;
+import de.schildbach.oeffi.stations.DeparturesActivity;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.pte.dto.Departure;
 import de.schildbach.pte.dto.Destination;
