@@ -300,7 +300,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
         actionBar.setBack(isTaskRoot() ? null : v -> finish());
         actionBar.setPrimaryTitle(R.string.station_details_activity_departures_short_title);
         // actionBar.swapTitles();
-        actionBar.addProgressButton().setOnClickListener(v -> requestRefresh(false));
+        actionBar.addProgressButton().setOnClickListener(v -> requestRefresh(false, false));
         nearbyButton = actionBar.addButton(R.drawable.ic_radar_white_24dp, R.string.departures_action_explore_nearby_title);
         nearbyButton.setOnClickListener(v -> {
             if (selectedCoord != null)
@@ -351,9 +351,9 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
                         products.addAll(filter);
 
                         if (!added.isEmpty()) {
-                            handler.post(() -> requestRefresh(true));
+                            handler.post(() -> requestRefresh(true, false));
                         } else if (!removed.isEmpty()) {
-                            handler.post(() -> requestRefresh(true));
+                            handler.post(() -> requestRefresh(true, false));
 //                            for (final Iterator<Station> i = stations.iterator(); i.hasNext(); ) {
 //                                final Station station = i.next();
 //                                if (!station.filter(products)) {
@@ -397,7 +397,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
         });
 
         swipeRefresh = findViewById(R.id.departures_refresh);
-        swipeRefresh.setOnRefreshListener(() -> requestRefresh(true));
+        swipeRefresh.setOnRefreshListener(() -> requestRefresh(true, false));
 
         viewAnimator = findViewById(R.id.departures_list_layout);
 
@@ -502,7 +502,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
             @Override
             public void onReceive(final Context context, final Intent intent) {
                 if (!autoRefreshDisabled)
-                    requestRefresh(false);
+                    requestRefresh(false, false);
             }
         };
         registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
@@ -510,7 +510,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
         if (firstStart)
             firstStart = false;
         else if (!autoRefreshDisabled)
-            requestRefresh(true);
+            requestRefresh(true, false);
 
         updateFragments();
     }
@@ -613,7 +613,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
             actionBar.setPrimaryTitle(showArrivals
                     ? R.string.station_details_activity_arrivals_short_title
                     : R.string.station_details_activity_departures_short_title);
-            requestRefresh(true);
+            requestRefresh(true, true);
         }
 
         showArrivalsButton.setChecked(showArrivals);
@@ -681,10 +681,18 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
         return selectedFilteredDepartures;
     }
 
-    private void requestRefresh(final boolean resetScroll) {
+    private void requestRefresh(final boolean resetScroll, final boolean disableAnimation) {
         autoRefreshDisabled = false;
+
+        final RecyclerView.ItemAnimator animator = listView.getItemAnimator();
+        if (animator != null) {
+            // final long listViewChangeDuration = animator.getChangeDuration();
+            animator.setChangeDuration(disableAnimation ? 0 : 250);
+        }
+
         if (resetScroll)
             listView.scrollToPosition(0);
+
         load(null, false);
     }
 
@@ -1052,8 +1060,8 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
         // actionBar.setPrimaryTitle(selectedStation.name);
         // actionBar.setSecondaryTitle(selectedStation.place);
 
-        if (changed)
-            requestRefresh(true);
+        if (changed && selectedAllDepartures.isEmpty())
+            requestRefresh(true, true);
     }
 
     public boolean isSelectedStation(final String stationId) {
