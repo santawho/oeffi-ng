@@ -184,6 +184,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     private boolean anyProviderEnabled = false;
     private boolean loading = true;
     private boolean queryFailed = false;
+    private boolean locationListenerActive = false;
 
     private final Set<Product> products = new HashSet<>(Product.ALL_SELECTABLE);
     private String accurateLocationProvider, lowPowerLocationProvider;
@@ -265,6 +266,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
     private void resetLocationViewsBehaviour() {
         locationView.resetBehaviour();
+        locationView.setDoNotFireChangeWhenReset(true);
+        locationView.setResetWhenCurrentLocationRequested(true);
     }
 
     private static final int DIALOG_NEARBY_STATIONS_ERROR = 1;
@@ -636,6 +639,9 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         super.onStart();
         startBackgroundHandler();
 
+        if (prefs.getBoolean("user_interface_nearby_start_with_current_location", true))
+            locationListenerActive = true;
+
         if (network != null && NetworkProviderFactory.provider(network).hasCapabilities(Capability.DEPARTURES)) {
             startLocationProvider();
 
@@ -831,6 +837,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
     }
 
     private void setLocationByUser(final Location location) {
+        locationListenerActive = true;
+
         fixedLocation = location;
         fixedLocationResolving = false;
         currentReferencePoint = null;
@@ -939,6 +947,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
             childViewIndex = 3; // Location providers disabled
         } else if (searchQuery == null && fixedLocation == null && loading && deviceLocation == null && anyProviderEnabled) {
             childViewIndex = 4; // Acquiring location
+        } else if (stations.isEmpty() && searchQuery == null && loading && deviceLocation != null && !locationListenerActive) {
+            childViewIndex = 10; // Querying nearby stations
         } else if (stations.isEmpty() && searchQuery == null && loading && deviceLocation != null) {
             childViewIndex = 5; // Querying nearby stations
         } else if (stations.isEmpty() && searchQuery != null && loading) {
@@ -1790,9 +1800,14 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
 
     private final LocationListener locationListener = new LocationListener() {
         public void onLocationChanged(@NonNull final android.location.Location androidLocation) {
-            log.info("Got relevant location: {}", androidLocation);
+            log.info("{} relevant location: {}", locationListenerActive ? "got" : "ignoring", androidLocation);
 
             final Point newLocation = LocationHelper.locationToPoint(androidLocation);
+            if (!locationListenerActive) {
+                deviceLocation = newLocation;
+                return;
+            }
+
             if (deviceLocation != null) {
                 final GeoUtils.DistanceResult d = GeoUtils.distanceBetween(newLocation, deviceLocation);
                 if (d.distanceInMeters < MIN_DEVICE_LOCATION_CHANGE_UPDATE_DISTANCE_METERS)

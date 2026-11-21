@@ -120,6 +120,8 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
     private boolean stationsOnly;
     private boolean stationAsAddress;
     private boolean stationAsAddressEnabled;
+    private boolean doNotFireChangeWhenReset;
+    private boolean resetWhenCurrentLocationRequested;
     private String id = null;
     private Point coord;
     private String place;
@@ -167,6 +169,14 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
 
     public void setStationAsAddressEnabled(final boolean stationAsAddressEnabled) {
         this.stationAsAddressEnabled = stationAsAddressEnabled;
+    }
+
+    public void setDoNotFireChangeWhenReset(final boolean doNotFireChangeWhenReset) {
+        this.doNotFireChangeWhenReset = doNotFireChangeWhenReset;
+    }
+
+    public void setResetWhenCurrentLocationRequested(final boolean resetWhenCurrentLocationRequested) {
+        this.resetWhenCurrentLocationRequested = resetWhenCurrentLocationRequested;
     }
 
     public void toggleAlternateSearchProviderNominatim() {
@@ -434,6 +444,12 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
     private ActivityResultLauncher<String> locationPermissionAcquiryLauncher;
 
     public void setToCurrentLocation() {
+        if (resetWhenCurrentLocationRequested) {
+            reset();
+            fireChanged();
+            return;
+        }
+
         if (ContextCompat.checkSelfPermission(getContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             acquireLocation();
@@ -575,9 +591,10 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         autoCompleteLocationAdapter.resetFilters();
         resetBehaviour();
         updateAppearance();
-        fireChanged();
-
         locationHelper.stop();
+
+        if (!doNotFireChangeWhenReset)
+            fireChanged();
     }
 
     public void setLocation(final Location location) {
@@ -733,7 +750,7 @@ public class LocationView extends LinearLayout implements LocationHelper.Callbac
         if (listener == null)
             return;
         if (location == null) {
-            if (notifiedLocation == null)
+            if (notifiedLocation == null && !resetWhenCurrentLocationRequested)
                 return;
         } else if (notifiedLocation != null) {
             if (location.equals(notifiedLocation))

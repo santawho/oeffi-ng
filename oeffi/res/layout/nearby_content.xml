@@ -425,6 +425,26 @@
                                     android:text="@string/stations_list_network_error"
                                     android:textStyle="bold" />
                             </LinearLayout>
+
+                            <!-- #10: waiting for user input -->
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginLeft="@dimen/text_padding_horizontal_verylax"
+                                android:layout_marginRight="@dimen/text_padding_horizontal_verylax"
+                                android:gravity="center_horizontal"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="center"
+                                    android:maxWidth="256dp"
+                                    android:text="@string/stations_list_awaiting_user_location"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
                         </ViewAnimator>
                     </LinearLayout>
 

@@ -17,4 +17,10 @@
         android:title="@string/station_events_time_offset_minutes_title"
         android:summary="@string/station_events_time_offset_minutes_summary" />
 
+    <CheckBoxPreference
+        android:key="user_interface_nearby_start_with_current_location"
+        android:defaultValue="true"
+        android:title="@string/user_interface_nearby_start_with_current_location_title"
+        android:summary="@string/user_interface_nearby_start_with_current_location_summary" />
+
 </PreferenceScreen>
