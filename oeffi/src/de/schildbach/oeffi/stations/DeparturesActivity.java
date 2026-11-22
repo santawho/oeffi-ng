@@ -351,9 +351,9 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
                         products.addAll(filter);
 
                         if (!added.isEmpty()) {
-                            handler.post(() -> requestRefresh(true, false));
+                            handler.post(() -> requestRefresh(false, false));
                         } else if (!removed.isEmpty()) {
-                            handler.post(() -> requestRefresh(true, false));
+                            handler.post(() -> requestRefresh(false, false));
 //                            for (final Iterator<Station> i = stations.iterator(); i.hasNext(); ) {
 //                                final Station station = i.next();
 //                                if (!station.filter(products)) {
