@@ -57,8 +57,10 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import de.schildbach.oeffi.Application;
 import de.schildbach.oeffi.AreaAware;
@@ -428,19 +430,36 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
         return super.onTouchEvent(ev);
     }
 
-    private Drawable drawablePointer(final int resId, final int sizeDivider) {
+    static final int POINTER_SIZE_PERCENT = 75;
+    static final int SYMBOL_SIZE_PERCENT = 75;
+
+    private Drawable drawablePointer(final int resId) {
+        return drawablePointer(resId, POINTER_SIZE_PERCENT);
+    }
+
+    private Drawable drawablePointer(final int resId, final int sizePercent) {
         final Resources res = getResources();
         final Drawable drawable = ResourcesCompat.getDrawable(res, resId, null);
-        drawable.setBounds(-drawable.getIntrinsicWidth() / sizeDivider, -drawable.getIntrinsicHeight(),
-                drawable.getIntrinsicWidth() / sizeDivider, 0);
+        drawable.setBounds(
+                -(drawable.getIntrinsicWidth() * sizePercent) / 100,
+                -drawable.getIntrinsicHeight(),
+                (drawable.getIntrinsicWidth() * sizePercent) / 100,
+                0);
         return drawable;
     }
 
-    private Drawable drawableCenter(final int resId, final int sizeDivider) {
+    private Drawable drawableSymbol(final int resId) {
+        return drawableSymbol(resId, SYMBOL_SIZE_PERCENT);
+    }
+
+    private Drawable drawableSymbol(final int resId, final int sizePercent) {
         final Resources res = getResources();
         final Drawable drawable = ResourcesCompat.getDrawable(res, resId, null);
-        drawable.setBounds(-drawable.getIntrinsicWidth() / sizeDivider, -drawable.getIntrinsicHeight() / sizeDivider,
-                drawable.getIntrinsicWidth() / sizeDivider, drawable.getIntrinsicHeight() / sizeDivider);
+        drawable.setBounds(
+                -(drawable.getIntrinsicWidth() * sizePercent) / 100,
+                -(drawable.getIntrinsicHeight() * sizePercent) / 100,
+                (drawable.getIntrinsicWidth() * sizePercent) / 100,
+                (drawable.getIntrinsicHeight() * sizePercent) / 100);
         return drawable;
     }
 
@@ -464,24 +483,14 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
         final float tripStrokeWidthSelectedGlow;
         final int bubbleTextColor;
 
-        final Drawable startIcon = drawablePointer(R.drawable.ic_maps_indicator_startpoint_list, 2);
-        final Drawable pointIcon = drawableCenter(R.drawable.ic_maps_product_default, 2);
-        final Drawable endIcon = drawablePointer(R.drawable.ic_maps_indicator_endpoint_list, 2);
+        final Drawable startIcon = drawablePointer(R.drawable.ic_maps_indicator_startpoint_list);
+        final Drawable pointIcon = drawableSymbol(R.drawable.ic_maps_product_default);
+        final Drawable endIcon = drawablePointer(R.drawable.ic_maps_indicator_endpoint_list);
+        final Drawable deviceLocationIcon = drawableSymbol(R.drawable.location_on);
+        final Drawable referenceLocationIcon = drawablePointer(R.drawable.da_marker_red);
+        final Drawable stationDefaultIcon = drawableSymbol(R.drawable.ic_maps_product_default);
 
-        final Drawable deviceLocationIcon = drawableCenter(R.drawable.location_on, 2);
-        final Drawable referenceLocationIcon = drawablePointer(R.drawable.da_marker_red, 2);
-
-        final Drawable stationDefaultIcon = drawableCenter(R.drawable.ic_maps_product_default, 2);
-        final Drawable stationHighspeedIcon = drawableCenter(R.drawable.product_highspeed_color_22dp, 2);
-        final Drawable stationTrainIcon = drawableCenter(R.drawable.product_train_color_22dp, 2);
-        final Drawable stationSuburbanIcon = drawableCenter(R.drawable.product_suburban_color_22dp, 2);
-        final Drawable stationSubwayIcon = drawableCenter(R.drawable.product_subway_color_22dp, 2);
-        final Drawable stationTramIcon = drawableCenter(R.drawable.product_tram_color_22dp, 2);
-        final Drawable stationBusIcon = drawableCenter(R.drawable.product_bus_color_22dp, 2);
-        final Drawable stationCoachIcon = drawableCenter(R.drawable.product_coach_color_22dp, 2);
-        final Drawable stationFerryIcon = drawableCenter(R.drawable.product_ferry_color_22dp, 2);
-        final Drawable stationCablecarIcon = drawableCenter(R.drawable.product_cablecar_color_22dp, 2);
-        final Drawable stationCallIcon = drawableCenter(R.drawable.product_call_color_22dp, 2);
+        final Map<Product, Drawable> stationProductIcons = new HashMap<>();
 
         private DefaultOverlay() {
             final Resources res = getContext().getResources();
@@ -491,6 +500,18 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
             tripStrokeWidthSelected = res.getDimension(R.dimen.map_trip_stroke_width_selected);
             tripStrokeWidthSelectedGlow = res.getDimension(R.dimen.map_trip_stroke_width_selected_glow);
             bubbleTextColor = res.getColor(R.color.fg_significant_on_light);
+
+            stationProductIcons.put(Product.HIGH_SPEED_TRAIN, drawableSymbol(R.drawable.product_highspeed_color_22dp));
+            stationProductIcons.put(Product.REGIONAL_TRAIN, drawableSymbol(R.drawable.product_train_color_22dp));
+            stationProductIcons.put(Product.SUBURBAN_TRAIN, drawableSymbol(R.drawable.product_suburban_color_22dp));
+            stationProductIcons.put(Product.SUBWAY, drawableSymbol(R.drawable.product_subway_color_22dp));
+            stationProductIcons.put(Product.TRAM, drawableSymbol(R.drawable.product_tram_color_22dp));
+            stationProductIcons.put(Product.BUS, drawableSymbol(R.drawable.product_bus_color_22dp));
+            stationProductIcons.put(Product.REPLACEMENT_SERVICE, drawableSymbol(R.drawable.product_bus_color_22dp));
+            stationProductIcons.put(Product.COACH, drawableSymbol(R.drawable.product_coach_color_22dp));
+            stationProductIcons.put(Product.FERRY, drawableSymbol(R.drawable.product_ferry_color_22dp));
+            stationProductIcons.put(Product.CABLECAR, drawableSymbol(R.drawable.product_cablecar_color_22dp));
+            stationProductIcons.put(Product.ON_DEMAND, drawableSymbol(R.drawable.product_call_color_22dp));
         }
 
         @Override
@@ -698,33 +719,8 @@ public class OsmDroidOeffiMapView extends MapView implements OeffiMapView.Implem
                                 if (stationsAware.isSelectedStation(station.location.id))
                                     selectedStation = station;
 
-                                final Drawable iconDrawable;
-                                final Product product = station.getRelevantProduct();
-                                if (product == null)
-                                    iconDrawable = stationDefaultIcon;
-                                else if (product == Product.HIGH_SPEED_TRAIN)
-                                    iconDrawable = stationHighspeedIcon;
-                                else if (product == Product.REGIONAL_TRAIN)
-                                    iconDrawable = stationTrainIcon;
-                                else if (product == Product.SUBURBAN_TRAIN)
-                                    iconDrawable = stationSuburbanIcon;
-                                else if (product == Product.SUBWAY)
-                                    iconDrawable = stationSubwayIcon;
-                                else if (product == Product.TRAM)
-                                    iconDrawable = stationTramIcon;
-                                else if (product == Product.BUS)
-                                    iconDrawable = stationBusIcon;
-                                else if (product == Product.COACH)
-                                    iconDrawable = stationCoachIcon;
-                                else if (product == Product.FERRY)
-                                    iconDrawable = stationFerryIcon;
-                                else if (product == Product.CABLECAR)
-                                    iconDrawable = stationCablecarIcon;
-                                else if (product == Product.ON_DEMAND)
-                                    iconDrawable = stationCallIcon;
-                                else if (product == Product.REPLACEMENT_SERVICE)
-                                    iconDrawable = stationBusIcon;
-                                else
+                                Drawable iconDrawable = stationProductIcons.get(station.getRelevantProduct());
+                                if (iconDrawable == null)
                                     iconDrawable = stationDefaultIcon;
                                 drawAt(canvas, iconDrawable, point.x, point.y, false, 0);
                             }
