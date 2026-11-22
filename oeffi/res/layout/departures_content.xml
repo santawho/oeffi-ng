@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:baselineAligned="false"
@@ -41,7 +41,8 @@
             <de.schildbach.oeffi.util.HorizontalPager
                 android:id="@+id/departures_pager"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                app:paging_style="carddeck" >
 
                 <LinearLayout
                     android:orientation="horizontal"

@@ -24,7 +24,9 @@ package de.schildbach.oeffi.util;
  */
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Rect;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -37,8 +39,12 @@ import android.view.ViewParent;
 import android.view.WindowManager;
 import android.widget.Scroller;
 
+import androidx.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import de.schildbach.oeffi.R;
 
 /**
  * A view group that allows users to switch between multiple screens (layouts) in the same way as
@@ -84,6 +90,11 @@ public final class HorizontalPager extends ViewGroup {
     private static final int TOUCH_STATE_VERTICAL_SCROLLING = -1;
     private final List<View> visibleChildren = new ArrayList<>();
     private final List<View> dragExceptionViews = new ArrayList<>();
+
+    private static final int PAGING_STYLE_SLIDING = 0;
+    private static final int PAGING_STYLE_CARDDECK = 1;
+    private int pagingStyle;
+
     private int mCurrentScreen;
     private int mDensityAdjustedSnapVelocity;
     private boolean mFirstLayout = true;
@@ -105,8 +116,7 @@ public final class HorizontalPager extends ViewGroup {
      *        access the current theme, resources, etc.
      */
     public HorizontalPager(final Context context) {
-        super(context);
-        init();
+        this(context, null);
     }
 
     /**
@@ -127,13 +137,38 @@ public final class HorizontalPager extends ViewGroup {
      */
     public HorizontalPager(final Context context, final AttributeSet attrs) {
         super(context, attrs);
-        init();
+        construct(context, attrs, 0, 0);
+    }
+
+    public HorizontalPager(final Context context, @Nullable final AttributeSet attrs, final int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public HorizontalPager(final Context context, @Nullable final AttributeSet attrs, final int defStyleAttr, final int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+//        super(context, attrs, defStyleAttr);
+        construct(context, attrs, defStyleAttr, defStyleRes);
     }
 
     /**
      * Sets up the scroller and touch/fling sensitivity parameters for the pager.
      */
-    private void init() {
+    private void construct(final Context context, @Nullable final AttributeSet attrs, final int defStyleAttr, final int defStyleRes) {
+        final int[] overflowTextViewAttrs = R.styleable.HorizontalPager;
+        final TypedArray a = context.getTheme().obtainStyledAttributes(attrs, overflowTextViewAttrs, defStyleAttr, defStyleRes);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+            saveAttributeDataForStyleable(context, overflowTextViewAttrs, attrs, a, defStyleAttr, defStyleRes);
+        final int n = a.getIndexCount();
+        for (int i = 0; i < n; i++) {
+            final int attr = a.getIndex(i);
+
+            if (attr == R.styleable.HorizontalPager_paging_style) {
+                pagingStyle = a.getInt(attr, 0);
+                break;
+            }
+        }
+        a.recycle();
+
         mScroller = new Scroller(getContext());
 
         // Calculate the density-dependent snap velocity in pixels
@@ -220,15 +255,16 @@ public final class HorizontalPager extends ViewGroup {
     @Override
     protected void onLayout(
             final boolean changed,
-            final int l, final int t, final int r, final int b) {
+            final int left, final int top, final int right, final int bottom) {
         // updateVisibleChildren();
-        int childLeft = 0;
         final int count = getVisibleChildCount();
+        int childLeft = 0;
         for (int i = 0; i < count; i++) {
             final View child = visibleChildren.get(i);
             final int childWidth = child.getMeasuredWidth();
-            child.layout(childLeft, 0, childLeft + childWidth, child.getMeasuredHeight());
-            childLeft += childWidth;
+            final int childRight = childLeft + childWidth;
+            child.layout(childLeft, 0, childRight, child.getMeasuredHeight());
+            childLeft = childRight;
         }
     }
 
@@ -432,6 +468,35 @@ public final class HorizontalPager extends ViewGroup {
         return true;
     }
 
+    private void positionChildrenWhileScrolling(final int scrollX) {
+        if (pagingStyle == PAGING_STYLE_CARDDECK) {
+            final int currentScreen = getCurrentScreen();
+            final int childCount = getVisibleChildCount();
+            int childLeft = 0;
+            for (int pos = 0; pos < childCount; ++pos) {
+                final View child = getChildAt(pos);
+                final int childWidth = child.getWidth();
+                int newLeft = childLeft;
+                if (pos == currentScreen && childWidth != 0) {
+                    final int scrollOffset = scrollX - childLeft;
+                    if (scrollOffset != 0) {
+                        newLeft = scrollX;
+                        child.setAlpha(1f - Math.min(1f, ((float) Math.abs(scrollOffset) / childWidth) * 1.5f));
+                    }
+                }
+                child.setLeft(newLeft);
+                child.setRight(newLeft + childWidth);
+                childLeft += childWidth;
+            }
+        }
+    }
+
+    @Override
+    public void scrollTo(final int x, final int y) {
+        positionChildrenWhileScrolling(x);
+        super.scrollTo(x, y);
+    }
+
     @Override
     public void computeScroll() {
         if (mScroller.computeScrollOffset()) {
@@ -439,7 +504,7 @@ public final class HorizontalPager extends ViewGroup {
             postInvalidate();
         } else if (mNextScreen != INVALID_SCREEN) {
             final int prevScreen = mCurrentScreen;
-            mCurrentScreen = Math.max(0, Math.min(mNextScreen, getVisibleChildCount() - 1));
+            setCurrentScreen(mNextScreen);
 
             // Notify observer about screen change
             if (mCurrentScreen != prevScreen && mOnScreenSwitchListener != null) {
@@ -487,13 +552,25 @@ public final class HorizontalPager extends ViewGroup {
         if (newScreen == mCurrentScreen)
             return;
 
-        mCurrentScreen = Math.max(0, Math.min(newScreen, getVisibleChildCount() - 1));
+        setCurrentScreen(newScreen);
         if (animate) {
             snapToScreen(mCurrentScreen, ANIMATION_SCREEN_SET_DURATION_MILLIS);
         } else {
             scrollTo(mCurrentScreen * getWidth(), 0);
         }
         invalidate();
+    }
+
+    private void setCurrentScreen(final int newScreen) {
+        mCurrentScreen = Math.max(0, Math.min(newScreen, getVisibleChildCount() - 1));
+        if (pagingStyle == PAGING_STYLE_CARDDECK) {
+            final int childCount = getChildCount();
+            for (int pos = 0; pos < childCount; ++pos) {
+                final View child = getChildAt(pos);
+                child.setZ(pos == mCurrentScreen ? 0 : 1);
+                child.setAlpha(1f);
+            }
+        }
     }
 
     /**

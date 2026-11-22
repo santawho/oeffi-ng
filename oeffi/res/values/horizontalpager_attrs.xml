@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="HorizontalPager">
+        <attr name="paging_style" format="enum">
+            <enum name="sliding" value="0" />
+            <enum name="carddeck" value="1" />
+        </attr>
+    </declare-styleable>
+
+</resources>
