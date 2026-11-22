@@ -191,8 +191,6 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
         private List<Product> getProducts() {
             final Collection<Station> stations = this.stations.values();
             for (final Station station : stations) {
-                if (station.location.products != null)
-                    products.addAll(station.location.products);
                 final List<LineDestination> lines = station.getLines();
                 if (lines != null) {
                     for (final LineDestination lineDestination : lines)
@@ -209,6 +207,8 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
                         }
                     }
                 }
+                if (products.isEmpty() && station.location.products != null)
+                    products.addAll(station.location.products);
             }
             final ArrayList<Product> productsList = new ArrayList<>(products);
             productsList.sort(Product.NATURAL_ORDER);
@@ -906,10 +906,32 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
                 });
     }
 
+    @Override
     public List<Station> getStations() {
-        return stations;
+//        return stations;
+        final List<Station> list = new ArrayList<>(combinedStations.size());
+        for (final CombinedStation combinedStation : combinedStations) {
+            final Station station = combinedStation.baseStation;
+            final Location location = station.location;
+            final Station mapStation = new Station(
+                    station.network,
+                    new Location(
+                            location.type,
+                            location.id,
+                            location.identityId,
+                            location.displayId,
+                            location.coord,
+                            location.place,
+                            location.name,
+                            Set.copyOf(combinedStation.getProducts()),
+                            location.language,
+                            location.additionalData));
+            list.add(mapStation);
+        }
+        return list;
     }
 
+    @Override
     public Integer getFavoriteState(final String stationId) {
         throw new UnsupportedOperationException();
     }
@@ -983,6 +1005,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
         }
     }
 
+    @Override
     public void selectStation(final Station aStation) {
         if (aStation == null)
             return;
@@ -1064,6 +1087,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
             requestRefresh(true, true);
     }
 
+    @Override
     public boolean isSelectedStation(final String stationId) {
         return selectedLocation != null && stationId.equals(selectedLocation.id);
     }
