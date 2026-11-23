@@ -90,7 +90,7 @@ public class Application extends android.app.Application {
     public static final Logger log = LoggerFactory.getLogger(Application.class);
 
     private String APP_USER_AGENT;
-    private static final String BROWSER_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0";
+    private static final String BROWSER_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:160.0) Gecko/20100101 Firefox/158.0";
 
     private static Application instance;
 
