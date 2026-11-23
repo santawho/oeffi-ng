@@ -1132,21 +1132,33 @@ public abstract class OeffiActivity extends AppCompatActivity
         return networkProvider != null ? networkProvider.defaultProducts() : Product.ALL_SELECTABLE;
     }
 
-    protected boolean productsAreNetworkDefault(final Collection<Product> products) {
-        final Collection<Product> networkDefaultProducts = getNetworkDefaultProducts();
-        return // products.size() == networkDefaultProducts.size() &&
-                networkDefaultProducts.containsAll(products) &&
-                products.containsAll(networkDefaultProducts);
+    protected boolean productsAreDefault(final Collection<Product> products) {
+        final Collection<Product> defaultProducts = getCustomDefaultProducts(); // getNetworkDefaultProducts();
+        return // products.size() == defaultProducts.size() &&
+                defaultProducts.containsAll(products) &&
+                products.containsAll(defaultProducts);
     }
 
     protected String getProductsPrefsKey() {
         return Constants.PREFS_KEY_PRODUCT_FILTER + "_" + network;
     }
 
+    protected String getCustomProductsPrefsKey() {
+        return Constants.PREFS_KEY_DEFAULT_PRODUCT_FILTER + "_" + network;
+    }
+
+    protected Set<Product> getCustomDefaultProducts() {
+        return loadProductFilter(getCustomProductsPrefsKey());
+    }
+
     protected Set<Product> loadProductFilter() {
+        return loadProductFilter(getProductsPrefsKey());
+    }
+
+    protected Set<Product> loadProductFilter(final String prefsKey) {
         final Set<Product> networkDefaultProducts = getNetworkDefaultProducts();
         final Set<Product> keepProducts;
-        final String value = prefs.getString(getProductsPrefsKey(), null);
+        final String value = prefs.getString(prefsKey, null);
         if (value != null) {
             keepProducts = Product.ALL_SELECTABLE;
         } else {
@@ -1166,15 +1178,24 @@ public abstract class OeffiActivity extends AppCompatActivity
         return products;
     }
 
+    protected void saveCustomDefaultProducts(final Set<Product> products) {
+        saveProductFilter(getCustomProductsPrefsKey(), products);
+    }
+
     protected void saveProductFilter(final Set<Product> products) {
-        final StringBuilder p = new StringBuilder();
-        for (final Product product : products)
-            p.append(product.code);
-        final String value = p.toString();
-        prefs.edit()
-                .putString(Constants.PREFS_KEY_PRODUCT_FILTER, value)
-                .putString(getProductsPrefsKey(), value)
-                .apply();
+        saveProductFilter(getProductsPrefsKey(), products);
+    }
+
+    protected void saveProductFilter(final String prefsKey, final Set<Product> products) {
+        if (products == null) {
+            prefs.edit().remove(prefsKey).apply();
+        } else {
+            final StringBuilder p = new StringBuilder();
+            for (final Product product : products)
+                p.append(product.code);
+            final String value = p.toString();
+            prefs.edit().putString(prefsKey, value).apply();
+        }
     }
 
     @NonNull

@@ -146,13 +146,17 @@ public class OperationsActivity extends DirectionsActivity {
     }
 
     @Override
-    protected boolean productsAreNetworkDefault(final Collection<Product> products) {
+    protected boolean productsAreDefault(final Collection<Product> products) {
         return !products.isEmpty();
     }
 
     @Override
     protected String getProductsPrefsKey() {
         return super.getProductsPrefsKey() + "@OP";
+    }
+
+    protected String getCustomProductsPrefsKey() {
+        return super.getCustomProductsPrefsKey() + "@OP";
     }
 
     @Override

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources
-    xmlns:tools="http://schemas.android.com/tools">
+<resources>
 
     <string name="directions_location_context_current_location">My current location</string>
     <string name="directions_location_context_map">Location on map</string>
@@ -16,6 +15,9 @@
         <item>reset to network defaults</item>
         <item>all means of transport</item>
         <item>local transport authority only</item>
+        <item>save as my defaults</item>
+        <item>clear my defaults</item>
+        <item>reset to my defaults</item>
     </string-array>
 
     <string name="directions_set_time_prompt">Set time to</string>

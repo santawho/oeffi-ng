@@ -641,7 +641,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
 
     private void updateGUI() {
         // filter indicator
-        filterActionButton.setSelected(!productsAreNetworkDefault(products));
+        filterActionButton.setSelected(!productsAreDefault(products));
 
         showJourneyMessages = prefs.getBoolean("user_interface_station_departures_show_journey_messages", true);
         updateHeader();

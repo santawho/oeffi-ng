@@ -468,7 +468,8 @@ public class DirectionsActivity extends OeffiMainActivity implements
                     .setItems(ResourceUtil.getStringArray(R.array.directions_products, productName),
                             (dialog, which) -> {
                                 final Set<Product> networkDefaultProducts = getNetworkDefaultProducts();
-                                final Function<View, Boolean> checkedStateFunction;
+                                final Set<Product> customDefaultProducts = getCustomDefaultProducts();
+                                final Function<ToggleImageButton, Boolean> checkedStateFunction;
                                 switch (which) {
                                     case 0: // only this
                                         checkedStateFunction = (view) -> view.equals(clickedView);
@@ -487,11 +488,30 @@ public class DirectionsActivity extends OeffiMainActivity implements
                                         checkedStateFunction = (view) -> Product.LOCAL_PRODUCTS.contains(
                                                 Product.fromCode(((String) view.getTag()).charAt(0)));
                                         break;
+                                    case 5: // save as defaults
+                                        customDefaultProducts.clear();
+                                        for (final ToggleImageButton view : viewProductToggles) {
+                                            if (view.isChecked())
+                                                customDefaultProducts.add(Product.fromCode(((String) view.getTag()).charAt(0)));
+                                        }
+                                        saveCustomDefaultProducts(customDefaultProducts);
+                                        checkedStateFunction = null;
+                                        break;
+                                    case 6: // clear saved defaults
+                                        saveCustomDefaultProducts(null);
+                                        checkedStateFunction = null;
+                                        break;
+                                    case 7: // apply saved defaults
+                                        checkedStateFunction = (view) -> customDefaultProducts.contains(
+                                                Product.fromCode(((String) view.getTag()).charAt(0)));
+                                        break;
                                     default:
                                         return;
                                 }
                                 for (final ToggleImageButton view : viewProductToggles) {
-                                    final Boolean checked = checkedStateFunction.apply(view);
+                                    final boolean checked = checkedStateFunction != null
+                                            ? checkedStateFunction.apply(view)
+                                            : view.isChecked();
                                     setProductToggle(view, checked);
                                 }
                             })
@@ -1058,15 +1078,18 @@ public class DirectionsActivity extends OeffiMainActivity implements
             final boolean checked = setProducts.contains(product);
             setProductToggle(view, checked);
         }
-        return !productsAreNetworkDefault(setProducts);
+        return !productsAreDefault(setProducts);
     }
 
     private void setProductToggle(final ToggleImageButton view, final boolean checked) {
-        final boolean defaultChecked = getNetworkDefaultProducts().contains(
-                Product.fromCode(((String) view.getTag()).charAt(0)));
+        final Product product = Product.fromCode(((String) view.getTag()).charAt(0));
+        final boolean customDefaultChecked = getCustomDefaultProducts().contains(product);
+        final boolean networkDefaultChecked = getNetworkDefaultProducts().contains(product);
         view.setChecked(checked);
-        if (checked != defaultChecked) {
+        if (checked != customDefaultChecked) {
             view.setBackgroundResource(R.drawable.product_toggle_non_default_background);
+        } else if (checked != networkDefaultChecked) {
+            view.setBackgroundResource(R.drawable.product_toggle_non_network_default_background);
         } else {
             view.setBackground(null);
         }
@@ -1660,7 +1683,7 @@ public class DirectionsActivity extends OeffiMainActivity implements
         viewToLocation.setLocation(to);
         viewViaLocation.setLocation(via);
         quickReturnView.setTranslationY(0); // show
-        expandForm(!productsAreNetworkDefault(getProductToggles()) || via != null);
+        expandForm(!productsAreDefault(getProductToggles()) || via != null);
     }
 
     protected void handleShowSavedTrip(

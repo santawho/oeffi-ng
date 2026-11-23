@@ -934,7 +934,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
         ViewUtils.setVisibility(journeysContainer, sortByWalkAccess);
 
         // filter indicator
-        filterActionButton.setSelected(!productsAreNetworkDefault(products));
+        filterActionButton.setSelected(!productsAreDefault(products));
 
         final ViewAnimator viewAnimator = findViewById(R.id.stations_list_layout);
         final int childViewIndex;

@@ -66,6 +66,7 @@ public class Constants {
     public static final String PREFS_KEY_HISTORY_ENTRY_SHOW_TRIP = "user_interface_directions_history_show_saved_trip_enabled";
     public static final String PREFS_KEY_STORED_TRIPS_RETENTION_HOURS = "stored_trips_retention_hours";
     public static final String PREFS_KEY_PRODUCT_FILTER = "product_filter";
+    public static final String PREFS_KEY_DEFAULT_PRODUCT_FILTER = "default_product_filter";
     public static final String PREFS_KEY_OPTIMIZE_TRIP = "optimize_trip";
     public static final String PREFS_KEY_WALK_SPEED = "walk_speed";
     public static final String PREFS_KEY_MIN_TRANSFER_TIME = "min_transfer_time";
