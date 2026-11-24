@@ -3059,15 +3059,22 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final String sMinL = Long.toString((minL + 30000) / 60000);
         final String sMaxL = Long.toString((maxL + 30000) / 60000);
 
+        final boolean showMin = !sMinL.equals(sEstL);
+        final boolean showMax = !sMaxL.equals(sEstL);
+        final boolean highlightEst = showMin || showMax;
         final StringBuilder sb = new StringBuilder();
-        if (!sMinL.equals(sEstL)) {
+        if (showMin) {
             sb.append(sMinL);
             sb.append(LAYOVER_SEPARATOR);
         }
-        sb.append("<b>");
-        sb.append(sEstL);
-        sb.append("</b>");
-        if (!sMaxL.equals(sEstL)) {
+        if (highlightEst) {
+            sb.append("<u>");
+            sb.append(sEstL);
+            sb.append("</u>");
+        } else {
+            sb.append(sEstL);
+        }
+        if (showMax) {
             sb.append(LAYOVER_SEPARATOR);
             sb.append(sMaxL);
         }
