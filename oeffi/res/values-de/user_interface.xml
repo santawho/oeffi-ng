@@ -44,6 +44,13 @@
     <string name="user_interface_results_remark_links_clickable_enabled_summary">Zeige klickbare Links (wie http:// und Telefonnummern), um den Web-Browser oder die Telefon-App zu öffnen</string>
     <string name="user_interface_results_show_original_directions_enabled_title">Original Richtungstexte</string>
     <string name="user_interface_results_show_original_directions_enabled_summary">Zeige die Richtungstexte so wie sie vom Netzwerk geliefert werden. Beachte, dass dadurch Funktionalität verloren geht.</string>
+    <string name="user_interface_results_show_times_mode_title">Zeiten im Reiseverlauf</string>
+    <string name="user_interface_results_show_times_mode_summary">Ankunfts- und Abfahrtszeiten an jedem Halt als relative Zeit anzeigen.  [%s]</string>
+    <string-array name="user_interface_results_show_times_mode_entries">
+        <item>absolut</item>
+        <item>dynamisch relativ</item>
+        <item>alle relativ</item>
+    </string-array>
 
     <string name="user_interface_category_station_departures_title">Stations-Abfahrten</string>
     <string name="user_interface_station_departures_show_journey_messages_title">Zeige Fahrt-Meldungen</string>
@@ -188,11 +195,11 @@
 
     <string name="common_preferred_timezone_title">Zeitzone</string>
     <string name="common_preferred_timezone_summary">Bevorzugte Quelle der Zeitzone. [%s]</string>
-    <array name="common_preferred_timezone_entries">
+    <string-array name="common_preferred_timezone_entries">
         <item>UTC</item>
         <item>System</item>
         <item>Verkehrsnetz</item>
         <item>Lokation</item>
-    </array>
+    </string-array>
 
 </resources>

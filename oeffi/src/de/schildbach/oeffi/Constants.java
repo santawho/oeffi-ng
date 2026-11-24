@@ -53,6 +53,10 @@ public class Constants {
     public static final double INITIAL_MAP_ZOOM_LEVEL = 17.0;
     public static final int MAX_TRIES_ON_IO_PROBLEM = 2;
 
+    public static final int TIMES_MODE_ABSOLUTE = 0;
+    public static final int TIMES_MODE_DYNAMIC = 1;
+    public static final int TIMES_MODE_RELATIVE = 2;
+
     public static final Locale DEFAULT_LOCALE = Locale.GERMAN;
 
     public static final String PREFS_KEY_PREFERRED_TIMEZONE = "common_preferred_timezone";

@@ -49,6 +49,18 @@
     <string name="user_interface_results_remark_links_clickable_enabled_summary">Show clickable links (like http:// and phone numbers) to open the web browser or telephone app</string>
     <string name="user_interface_results_show_original_directions_enabled_title">Original direction text</string>
     <string name="user_interface_results_show_original_directions_enabled_summary">Show direction texts as delivered by the network. Beware that you may lose functionality.</string>
+    <string name="user_interface_results_show_times_mode_title">Times in itinerary</string>
+    <string name="user_interface_results_show_times_mode_summary">You may show arrival and departure times of each stop as relative times.  [%s]</string>
+    <string-array name="user_interface_results_show_times_mode_entries">
+        <item>absolute</item>
+        <item>dynamically relative</item>
+        <item>all relative</item>
+    </string-array>
+    <string-array name="user_interface_results_show_times_mode_values" translatable="false">
+        <item translatable="false">0</item>
+        <item translatable="false">1</item>
+        <item translatable="false">2</item>
+    </string-array>
 
     <string name="user_interface_category_station_departures_title">Station Departures</string>
     <string name="user_interface_station_departures_show_journey_messages_title">Show journey messages</string>
@@ -211,17 +223,17 @@
 
     <string name="common_preferred_timezone_title">Timezone</string>
     <string name="common_preferred_timezone_summary">Preferred source of timezone. [%s]</string>
-    <array name="common_preferred_timezone_entries">
+    <string-array name="common_preferred_timezone_entries">
         <item>UTC</item>
         <item>System</item>
         <item>Network Provider</item>
         <item>Location</item>
-    </array>
-    <array name="common_preferred_timezone_values" translatable="false">
+    </string-array>
+    <string-array name="common_preferred_timezone_values" translatable="false">
         <item translatable="false">utc</item>
         <item translatable="false">system</item>
         <item translatable="false">network</item>
         <item translatable="false">location</item>
-    </array>
+    </string-array>
 
 </resources>

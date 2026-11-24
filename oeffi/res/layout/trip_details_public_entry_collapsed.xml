@@ -17,6 +17,8 @@
 
     <Space />
 
+    <Space />
+
     <TextView
         android:id="@+id/trip_details_public_entry_collapsed_message"
         android:layout_marginLeft="@dimen/text_padding_horizontal_lax"

@@ -41,4 +41,12 @@
         android:title="@string/user_interface_results_show_original_directions_enabled_title"
         android:summary="@string/user_interface_results_show_original_directions_enabled_summary" />
 
+    <ListPreference
+        android:key="user_interface_results_show_times_mode"
+        android:defaultValue="0"
+        android:entries="@array/user_interface_results_show_times_mode_entries"
+        android:entryValues="@array/user_interface_results_show_times_mode_values"
+        android:title="@string/user_interface_results_show_times_mode_title"
+        android:summary="@string/user_interface_results_show_times_mode_summary" />
+
 </PreferenceScreen>

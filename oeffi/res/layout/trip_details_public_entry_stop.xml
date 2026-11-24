@@ -36,20 +36,29 @@
         android:id="@+id/trip_details_public_entry_stop_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:gravity="end"
         android:paddingLeft="@dimen/text_padding_horizontal_cram" >
         <TextView
             android:id="@+id/trip_details_public_entry_stop_time_provided"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/fg_significant"
             android:textSize="@dimen/font_size_large" />
         <TextView
             android:id="@+id/trip_details_public_entry_stop_time_simulated"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/fg_simulated"
             android:textSize="@dimen/font_size_large" />
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/trip_details_public_entry_stop_time_provided_marker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/fg_significant"
+        android:textSize="@dimen/font_size_large"/>
 
     <LinearLayout
         android:orientation="vertical"

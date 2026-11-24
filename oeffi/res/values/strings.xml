@@ -492,6 +492,8 @@
     <string name="trip_details_transfer">&lt;b>%1$d minutes&lt;/b> %2$stransfer to %3$s</string>
     <string name="trip_details_delay_format" translatable="false">(%1$+d)</string>
     <string name="trip_details_delay_missing" translatable="false">\u2020</string> <!-- dagger (cross of death) -->
+    <string name="trip_details_time_marker_departure" translatable="false">°</string>
+    <string name="trip_details_time_marker_arrival" translatable="false"></string>
     <string name="trip_details_realtime">
         Times printed in &lt;b>&lt;i>italics&lt;/i>&lt;/b> are &lt;b>predicted&lt;/b> times &lt;b>
         not guaranteed&lt;/b> to be real times.

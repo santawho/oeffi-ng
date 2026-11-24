@@ -92,8 +92,8 @@
         android:layout_marginLeft="@dimen/text_padding_horizontal_lax"
         android:layout_marginRight="@dimen/text_padding_horizontal_lax"
         android:baselineAligned="true"
-        android:shrinkColumns="5"
-        android:stretchColumns="5" />
+        android:shrinkColumns="6"
+        android:stretchColumns="6" />
 
     <RelativeLayout
         android:id="@+id/trip_details_public_entry_progress"

@@ -307,6 +307,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     protected final Handler handler = new Handler();
 
     protected boolean isShowCompactTimes;
+    protected int showRelativeTimesMode;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -826,6 +827,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
     @Override
     protected void onStart() {
         super.onStart();
+        showRelativeTimesMode = preferences.getInteger("user_interface_results_show_times_mode", 0, 0);
 
         // periodic refresh
         tickReceiver = new BroadcastReceiver() {
@@ -2503,6 +2505,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             final Date now,
             final CollapseColumns collapseColumns,
             final Stop simulatedStop) {
+        final long nowTime = now.getTime();
         final TableRow row = (TableRow) inflater.inflate(R.layout.trip_details_public_entry_stop, null);
 
         final Trip.Public leg = legC.publicLeg;
@@ -2728,6 +2731,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final ViewGroup stopDelayFrameView = row.findViewById(R.id.trip_details_public_entry_stop_delay);
         final TextView stopDateProvidedView = row.findViewById(R.id.trip_details_public_entry_stop_date_provided);
         final TextView stopTimeProvidedView = row.findViewById(R.id.trip_details_public_entry_stop_time_provided);
+        final TextView stopTimeProvidedMarkerView = row.findViewById(R.id.trip_details_public_entry_stop_time_provided_marker);
         final TextView stopDelayProvidedView = row.findViewById(R.id.trip_details_public_entry_stop_delay_provided);
         final TextView stopDateSimulatedView = row.findViewById(R.id.trip_details_public_entry_stop_date_simulated);
         final TextView stopTimeSimulatedView = row.findViewById(R.id.trip_details_public_entry_stop_time_simulated);
@@ -2753,13 +2757,19 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             }
 
             final PTDate displayTime = timeZoneSelector.getDisplay(providedTime);
-            if (collapseColumns.dateChanged(displayTime)) {
+            final long relativeTime = displayTime.getTime() - nowTime;
+            final boolean showRelativeTime = isDynamicRelativeTime(relativeTime);
+            if (!showRelativeTime && collapseColumns.dateChanged(displayTime)) {
                 stopDateProvidedView.setText(Formats.formatDate(timeZoneSelector,
-                        now.getTime(), displayTime, true, res.getString(R.string.time_today_abbrev)));
+                        nowTime, displayTime, true, res.getString(R.string.time_today_abbrev)));
                 collapseColumns.collapseDateColumn = false;
             }
-            final String timeText = Formats.formatTime(timeZoneSelector, displayTime);
-            stopTimeProvidedView.setText(isTimeDeparture ? timeText + "°" : timeText);
+            stopTimeProvidedView.setText(showRelativeTime
+                    ? Formats.formatTimeSpanHM(relativeTime, true)
+                    : Formats.formatTime(timeZoneSelector, displayTime));
+            stopTimeProvidedMarkerView.setText(isTimeDeparture
+                    ? R.string.trip_details_time_marker_departure
+                    : R.string.trip_details_time_marker_arrival);
             ViewUtils.setCancelledStrikeThru(stopDateProvidedView, isCancelled);
             ViewUtils.setCancelledStrikeThru(stopTimeProvidedView, isCancelled);
             stopDateProvidedView.setTextColor(stopTimeColor);
@@ -2778,13 +2788,16 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
         if (isShowSimulatedLine && simulatedTime != null) {
             final PTDate displayTime = timeZoneSelector.getDisplay(simulatedTime);
-            if (collapseColumns.dateChanged(displayTime)) {
+            final long relativeTime = displayTime.getTime() - nowTime;
+            final boolean showRelativeTime = isDynamicRelativeTime(relativeTime);
+            if (!showRelativeTime && collapseColumns.dateChanged(displayTime)) {
                 stopDateSimulatedView.setText(Formats.formatDate(timeZoneSelector,
-                        now.getTime(), displayTime, true, res.getString(R.string.time_today_abbrev)));
+                        nowTime, displayTime, true, res.getString(R.string.time_today_abbrev)));
                 collapseColumns.collapseDateColumn = false;
             }
-            final String timeText = Formats.formatTime(timeZoneSelector, displayTime);
-            stopTimeSimulatedView.setText(isTimeDeparture ? timeText + "°" : timeText);
+            stopTimeSimulatedView.setText(showRelativeTime
+                    ? Formats.formatTimeSpanHM(displayTime.getTime() - nowTime, true)
+                    : Formats.formatTime(timeZoneSelector, displayTime));
             // ViewUtils.setCancelledStrikeThru(stopTimeSimulatedView, isCancelled);
             final boolean stopTimeBold = highlightThisTime || (renderConfig.isJourney ? isEntryOrExit
                     : (pearlType == PearlView.Type.DEPARTURE || pearlType == PearlView.Type.ARRIVAL));
@@ -2827,9 +2840,13 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             stopDelaySimulatedView.setVisibility(View.GONE);
         }
 
+        stopDateFrameView.setOnLongClickListener(this::toggleShowRelativeTimes);
+        stopTimeFrameView.setOnLongClickListener(this::toggleShowRelativeTimes);
+        stopDelayFrameView.setOnLongClickListener(this::toggleShowRelativeTimes);
+
         if (providedTime != null || simulatedTime != null) {
             final View.OnClickListener onClickListener = v -> DialogBuilder.tooltip(this,
-                    getTooltipForStop(stop, simulatedStop, now.getTime())).show();
+                    getTooltipForStop(stop, simulatedStop, nowTime)).show();
             stopDateFrameView.setOnClickListener(onClickListener);
             stopTimeFrameView.setOnClickListener(onClickListener);
             stopDelayFrameView.setOnClickListener(onClickListener);
@@ -2865,7 +2882,7 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         // remaining time and distance
         final TextView remainingView = row.findViewById(R.id.trip_details_public_entry_stop_remaining);
         if (isShowSimulatedLine && simulatedTime != null) {
-            final long remainingTime = simulatedTime.getTime() - now.getTime();
+            final long remainingTime = simulatedTime.getTime() - nowTime;
             final Point locationCoord = stop.location.coord;
             final Point deviceCoord = getDeviceLocation();
             final Double deviceBearing = getDeviceBearing();
@@ -2896,7 +2913,6 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
             remainingView.setVisibility(View.GONE);
         }
 
-
         final int pearlHighlightColor;
         if (highlightLocation)
             pearlHighlightColor = colorSimulated;
@@ -2924,6 +2940,29 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
 
     protected int getSimulatedStopTimeColor(final Long simulatedDelay) {
         return colorSimulated;
+    }
+
+    protected boolean toggleShowRelativeTimes(final View v) {
+        int mode = showRelativeTimesMode + 1;
+        if (mode > Constants.TIMES_MODE_RELATIVE)
+            mode = Constants.TIMES_MODE_ABSOLUTE;
+        setShowRelativeTimes(mode);
+        return true;
+    }
+
+    protected void setShowRelativeTimes(final int mode) {
+        this.showRelativeTimesMode = mode;
+        updateGUI();
+    }
+
+    private boolean isDynamicRelativeTime(final long relativeTime) {
+        if (showRelativeTimesMode == Constants.TIMES_MODE_RELATIVE)
+            return true;
+        if (showRelativeTimesMode == Constants.TIMES_MODE_DYNAMIC) {
+            return relativeTime < 90 * Constants.MINUTE_IN_MILLIS
+                    && relativeTime > -30 * Constants.MINUTE_IN_MILLIS;
+        }
+        return false;
     }
 
     private Spanned getTooltipForStop(final Stop realStop, final Stop simulatedStop, final long now) {
