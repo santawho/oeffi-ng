@@ -19,8 +19,8 @@
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:versionCode="140011"
-    android:versionName="14.0.11">
+    android:versionCode="140012"
+    android:versionName="14.0.12">
 
     <!-- possibly required by ContextCompat.registerReceiver(... ContextCompat.RECEIVER_NOT_EXPORTED) -->
     <permission android:name="${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
