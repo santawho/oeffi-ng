@@ -3023,7 +3023,10 @@ public class TripDetailsActivity extends OeffiActivity implements LocationListen
         final PTDate displayTime = timeZoneSelector.getDisplay(timestamp);
         final String dateText = Formats.formatDate(timeZoneSelector, now, displayTime, true, todayString);
         final String timeText = Formats.formatTime(timeZoneSelector, displayTime);
-        return dateText + " " + timeText;
+        final String relText = Formats.formatTimeDiff(this,
+                now + Constants.MINUTE_IN_MILLIS, timestamp.getTime(),
+                true, false, true);
+        return dateText + " " + timeText + " " + relText;
     }
 
     private String getTooltipForLayover(final Stop stop) {
