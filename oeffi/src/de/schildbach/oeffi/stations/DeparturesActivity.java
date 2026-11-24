@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -266,6 +267,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
 
     private View headerView;
     private Spinner dropdownView;
+    private Drawable dropdownViewBackground;
 //    private TextView nameView;
     private TextView timeView;
 //    private TextView idView;
@@ -455,6 +457,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
 //        nameView = findViewById(R.id.departures_header_name);
 //        idView = findViewById(R.id.departures_header_id);
         dropdownView = findViewById(R.id.departures_header_dropdown);
+        dropdownViewBackground = dropdownView.getBackground();
         dropdownView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(final AdapterView<?> parent, final View view, final int position, final long id) {
@@ -993,6 +996,11 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
             }
         };
         dropdownView.setAdapter(adapter);
+
+        final boolean isSelectable = combinedStations.size() > 1;
+        dropdownView.setEnabled(isSelectable);
+        dropdownView.setClickable(isSelectable);
+        dropdownView.setBackground(isSelectable ? dropdownViewBackground : null);
 
         return combinedStation;
     }
