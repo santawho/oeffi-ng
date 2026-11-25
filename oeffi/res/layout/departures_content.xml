@@ -46,6 +46,7 @@
 
                 <LinearLayout
                     android:orientation="horizontal"
+                    android:id="@+id/departures_paging_previous"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" >
                     <Space
@@ -53,7 +54,6 @@
                         android:layout_width="0dp"
                         android:layout_weight="1" />
                     <include layout="@layout/departures_paging"
-                        android:id="@+id/departures_paging_previous"
                         android:layout_height="match_parent"
                         android:layout_width="0dp"
                         android:layout_weight="2" />
@@ -198,10 +198,10 @@
 
                 <LinearLayout
                     android:orientation="horizontal"
+                    android:id="@+id/departures_paging_next"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" >
                     <include layout="@layout/departures_paging"
-                        android:id="@+id/departures_paging_next"
                         android:layout_height="match_parent"
                         android:layout_width="0dp"
                         android:layout_weight="2" />

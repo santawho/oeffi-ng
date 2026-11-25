@@ -302,7 +302,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
         actionBar.setBack(isTaskRoot() ? null : v -> finish());
         actionBar.setPrimaryTitle(R.string.station_details_activity_departures_short_title);
         // actionBar.swapTitles();
-        actionBar.addProgressButton().setOnClickListener(v -> requestRefresh(false, false));
+        actionBar.addProgressButton().setOnClickListener(v -> requestRefresh(false, true));
         nearbyButton = actionBar.addButton(R.drawable.ic_radar_white_24dp, R.string.departures_action_explore_nearby_title);
         nearbyButton.setOnClickListener(v -> {
             if (selectedCoord != null)
@@ -337,7 +337,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
         hideCancelledDeparturesButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             hideCancelledDepartures = isChecked;
             selectedFilteredDepartures = null;
-            updateGUI();
+            updateGUI(true);
         });
         filterActionButton = actionBar.addButton(R.drawable.ic_filter_list_24dp, R.string.stations_filter_title);
         filterActionButton.setOnClickListener(v -> {
@@ -353,9 +353,9 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
                         products.addAll(filter);
 
                         if (!added.isEmpty()) {
-                            handler.post(() -> requestRefresh(false, false));
+                            handler.post(() -> requestRefresh(false, true));
                         } else if (!removed.isEmpty()) {
-                            handler.post(() -> requestRefresh(false, false));
+                            handler.post(() -> requestRefresh(false, true));
 //                            for (final Iterator<Station> i = stations.iterator(); i.hasNext(); ) {
 //                                final Station station = i.next();
 //                                if (!station.filter(products)) {
@@ -371,35 +371,35 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
 //                            getMapView().invalidate();
                         }
 
-                        updateGUI();
+                        updateGUI(true);
                     });
             popup.showAsDropDown(v);
         });
         loadLaterButton = actionBar.addButton(R.drawable.ic_later_white_24dp, R.string.departures_action_load_later);
         loadLaterButton.setOnClickListener(buttonView -> {
             autoRefreshDisabled = true;
-            load(nextLaterTime, false);
+            load(nextLaterTime, false, true);
         });
         loadEarlierButton = actionBar.addButton(R.drawable.ic_earlier_white_24dp, R.string.departures_action_load_earlier);
         loadEarlierButton.setOnClickListener(buttonView -> {
             autoRefreshDisabled = true;
-            load(nextEarlierTime, true);
+            load(nextEarlierTime, true, true);
         });
         actionBar.concludeSetup();
+
+        swipeRefresh = findViewById(R.id.departures_refresh);
+        swipeRefresh.setOnRefreshListener(() -> requestRefresh(true, true));
 
         stationPager = findViewById(R.id.departures_pager);
         pagingPrevious = new Paging(R.id.departures_paging_previous);
         pagingNext = new Paging(R.id.departures_paging_next);
-        stationPager.setCurrentScreen(1, false);
+        stationPager.setCurrentView(swipeRefresh, false);
         stationPager.setOnScreenSwitchListener((prevPage, newPage) -> {
             if (newPage == 0)
                 pagingPrevious.onPaged();
             else if (newPage == 2)
                 pagingNext.onPaged();
         });
-
-        swipeRefresh = findViewById(R.id.departures_refresh);
-        swipeRefresh.setOnRefreshListener(() -> requestRefresh(true, false));
 
         viewAnimator = findViewById(R.id.departures_list_layout);
 
@@ -462,7 +462,8 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
             @Override
             public void onItemSelected(final AdapterView<?> parent, final View view, final int position, final long id) {
                 final Station newStation = combinedStations.get(position).baseStation;
-                selectStation(newStation);
+                if (newStation != selectedStation)
+                    selectStation(newStation);
             }
 
             @Override
@@ -505,7 +506,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
             @Override
             public void onReceive(final Context context, final Intent intent) {
                 if (!autoRefreshDisabled)
-                    requestRefresh(false, false);
+                    requestRefresh(false, true);
             }
         };
         registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
@@ -616,7 +617,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
             actionBar.setPrimaryTitle(showArrivals
                     ? R.string.station_details_activity_arrivals_short_title
                     : R.string.station_details_activity_departures_short_title);
-            requestRefresh(true, true);
+            requestRefresh(true, false);
         }
 
         showArrivalsButton.setChecked(showArrivals);
@@ -638,16 +639,28 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
         }
     }
 
+    private void setListAnimation(final boolean enabled) {
+        final RecyclerView.ItemAnimator animator = listView.getItemAnimator();
+        if (animator != null) {
+            final long duration = enabled ? 700 : 0; // 250 would be default
+            animator.setChangeDuration(0);
+            animator.setAddDuration(duration);
+            animator.setMoveDuration(duration);
+            animator.setRemoveDuration(duration);
+        }
+    }
+
     protected void updateFragments() {
         updateFragments(R.id.departures_list_fragment);
     }
 
-    private void updateGUI() {
+    private void updateGUI(final boolean listAnimation) {
         // filter indicator
         filterActionButton.setSelected(!productsAreDefault(products));
 
         showJourneyMessages = prefs.getBoolean("user_interface_station_departures_show_journey_messages", true);
         updateHeader();
+        setListAnimation(listAnimation);
 
         final List<Departure> selectedDepartures = this.getFilteredDepartures();
         if (selectedDepartures != null && !selectedDepartures.isEmpty()) {
@@ -656,6 +669,8 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
         } else {
             statusMessage(getString(R.string.departures_list_empty));
         }
+
+        stationPager.setCurrentView(swipeRefresh, false);
     }
 
     private static List<Departure> filterDeparturesByProducts(
@@ -684,22 +699,16 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
         return selectedFilteredDepartures;
     }
 
-    private void requestRefresh(final boolean resetScroll, final boolean disableAnimation) {
+    private void requestRefresh(final boolean resetScroll, final boolean listAnimation) {
         autoRefreshDisabled = false;
-
-        final RecyclerView.ItemAnimator animator = listView.getItemAnimator();
-        if (animator != null) {
-            // final long listViewChangeDuration = animator.getChangeDuration();
-            animator.setChangeDuration(disableAnimation ? 0 : 250);
-        }
 
         if (resetScroll)
             listView.scrollToPosition(0);
 
-        load(null, false);
+        load(null, false, listAnimation);
     }
 
-    private void load(final Date time, final boolean earlier) {
+    private void load(final Date time, final boolean earlier, final boolean listAnimation) {
         final boolean modeAppend;
         final Date fromTime;
         if (time != null) {
@@ -885,7 +894,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
                                 selectStation(selectedStation);
                             }
 
-                            updateGUI();
+                            updateGUI(listAnimation);
                         } else {
                             log.info("Got {}", result.toShortString());
                             statusMessage(getString(QueryDeparturesRunnable.statusMsgResId(result.status)));
@@ -1007,10 +1016,10 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
 
     private void statusMessage(final String message) {
         final List<Departure> selectedDepartures = this.getFilteredDepartures();
-        if (selectedDepartures == null || selectedDepartures.isEmpty()) {
-            viewAnimator.setDisplayedChild(1);
-            resultStatusView.setText(message);
-        }
+        if (!(selectedDepartures == null || selectedDepartures.isEmpty()))
+            return;
+        viewAnimator.setDisplayedChild(1);
+        resultStatusView.setText(message);
     }
 
     @Override
@@ -1086,13 +1095,13 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
         }
 
         setShowArrivals(showArrivals);
-        updateGUI();
+        updateGUI(false);
 
         // actionBar.setPrimaryTitle(selectedStation.name);
         // actionBar.setSecondaryTitle(selectedStation.place);
 
         if (changed && selectedAllDepartures.isEmpty())
-            requestRefresh(true, true);
+            requestRefresh(true, false);
     }
 
     @Override
@@ -1627,8 +1636,6 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
         private void onPaged() {
             final int newPosition = Math.min(Math.max(currentIndex, 0), combinedStations.size() - 1);
             selectStation(combinedStations.get(newPosition).baseStation);
-
-            stationPager.setCurrentScreen(1, false);
         }
     }
 }

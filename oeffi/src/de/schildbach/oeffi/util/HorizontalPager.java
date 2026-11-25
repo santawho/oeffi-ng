@@ -95,6 +95,7 @@ public final class HorizontalPager extends ViewGroup {
     private static final int PAGING_STYLE_CARDDECK = 1;
     private int pagingStyle;
 
+    private View mCurrentView;
     private int mCurrentScreen;
     private int mDensityAdjustedSnapVelocity;
     private boolean mFirstLayout = true;
@@ -229,6 +230,8 @@ public final class HorizontalPager extends ViewGroup {
         }
 
         if (mFirstLayout) {
+            if (mCurrentView != null)
+                setCurrentView(mCurrentView, false);
             scrollTo(mCurrentScreen * width, 0);
             mFirstLayout = false;
         } else if (width != mLastSeenLayoutWidth) { // Width has changed
@@ -380,6 +383,8 @@ public final class HorizontalPager extends ViewGroup {
         final int action = ev.getAction();
         final float x = ev.getX();
 
+        final int visibleChildCount = getVisibleChildCount();
+
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 /*
@@ -392,43 +397,41 @@ public final class HorizontalPager extends ViewGroup {
 
                 // Remember where the motion event started
                 mLastMotionX = x;
-
-                if (mScroller.isFinished()) {
-                    mTouchState = TOUCH_STATE_REST;
-                } else {
-                    mTouchState = TOUCH_STATE_HORIZONTAL_SCROLLING;
-                }
-
+                mTouchState = TOUCH_STATE_REST;
                 break;
+
             case MotionEvent.ACTION_MOVE:
                 final int xDiff = (int) Math.abs(x - mLastMotionX);
-                final boolean xMoved = xDiff > mTouchSlop;
-
-                if (xMoved) {
+                if (mTouchState == TOUCH_STATE_REST && xDiff > mTouchSlop) {
                     // Scroll if the user moved far enough along the X axis
                     mTouchState = TOUCH_STATE_HORIZONTAL_SCROLLING;
                 }
 
                 if (mTouchState == TOUCH_STATE_HORIZONTAL_SCROLLING) {
                     // Scroll to follow the motion event
-                    final int deltaX = (int) (mLastMotionX - x);
-                    mLastMotionX = x;
-                    final int scrollX = getScrollX();
+                    if (visibleChildCount > 1) {
+                        final int deltaX = (int) (mLastMotionX - x);
+                        mLastMotionX = x;
+                        final int scrollX = getScrollX();
+                        if (deltaX < 0) {
+                            final int availableToScroll =
+                                    visibleChildren.get(0).getLeft() + scrollX;
 
-                    if (deltaX < 0) {
-                        if (scrollX > 0) {
-                            scrollBy(Math.max(-scrollX, deltaX), 0);
-                        }
-                    } else if (deltaX > 0) {
-                        final int availableToScroll =
-                                visibleChildren.get(getVisibleChildCount() - 1).getRight() - scrollX - getWidth();
+                            if (availableToScroll > 0) {
+                                final int scroll = Math.max(-availableToScroll, deltaX);
+                                scrollBy(scroll, 0);
+                            }
+                        } else if (deltaX > 0) {
+                            final int availableToScroll =
+                                    visibleChildren.get(visibleChildCount - 1).getRight() - getWidth() - scrollX;
 
-                        if (availableToScroll > 0) {
-                            scrollBy(Math.min(availableToScroll, deltaX), 0);
+                            if (availableToScroll > 0) {
+                                final int scroll = Math.min(availableToScroll, deltaX);
+                                scrollBy(scroll, 0);
+                            }
                         }
                     }
                 }
-
                 break;
 
             case MotionEvent.ACTION_UP:
@@ -442,7 +445,7 @@ public final class HorizontalPager extends ViewGroup {
                         // Fling hard enough to move left
                         snapToScreen(mCurrentScreen - 1);
                     } else if (velocityX < -mDensityAdjustedSnapVelocity
-                            && mCurrentScreen < getVisibleChildCount() - 1) {
+                            && mCurrentScreen < visibleChildCount - 1) {
                         // Fling hard enough to move right
                         snapToScreen(mCurrentScreen + 1);
                     } else {
@@ -456,11 +459,12 @@ public final class HorizontalPager extends ViewGroup {
                 }
 
                 mTouchState = TOUCH_STATE_REST;
-
                 break;
+
             case MotionEvent.ACTION_CANCEL:
                 mTouchState = TOUCH_STATE_REST;
                 break;
+
             default:
                 break;
         }
@@ -472,29 +476,22 @@ public final class HorizontalPager extends ViewGroup {
         if (pagingStyle == PAGING_STYLE_CARDDECK) {
             final int currentScreen = getCurrentScreen();
             final int childCount = getVisibleChildCount();
-            int childLeft = 0;
-            for (int pos = 0; pos < childCount; ++pos) {
-                final View child = getChildAt(pos);
+            if (currentScreen < childCount) {
+                final View child = visibleChildren.get(currentScreen);
                 final int childWidth = child.getWidth();
-                int newLeft = childLeft;
-                if (pos == currentScreen && childWidth != 0) {
-                    final int scrollOffset = scrollX - childLeft;
-                    if (scrollOffset != 0) {
-                        newLeft = scrollX;
-                        child.setAlpha(1f - Math.min(1f, ((float) Math.abs(scrollOffset) / childWidth) * 1.5f));
-                    }
+                if (childWidth != 0) {
+                    final int scrollOffset = scrollX - this.getWidth() * currentScreen;
+                    child.setTranslationX(scrollOffset);
+                    child.setAlpha(1f - Math.min(1f, ((float) Math.abs(scrollOffset) / childWidth) * 1.5f));
                 }
-                child.setLeft(newLeft);
-                child.setRight(newLeft + childWidth);
-                childLeft += childWidth;
             }
         }
     }
 
     @Override
-    public void scrollTo(final int x, final int y) {
-        positionChildrenWhileScrolling(x);
-        super.scrollTo(x, y);
+    protected void onScrollChanged(final int left, final int top, final int oldLeft, final int oldTop) {
+        positionChildrenWhileScrolling(left);
+        super.onScrollChanged(left, top, oldLeft, oldTop);
     }
 
     @Override
@@ -502,15 +499,18 @@ public final class HorizontalPager extends ViewGroup {
         if (mScroller.computeScrollOffset()) {
             scrollTo(mScroller.getCurrX(), mScroller.getCurrY());
             postInvalidate();
-        } else if (mNextScreen != INVALID_SCREEN) {
-            final int prevScreen = mCurrentScreen;
-            setCurrentScreen(mNextScreen);
+            return;
+        }
 
-            // Notify observer about screen change
-            if (mCurrentScreen != prevScreen && mOnScreenSwitchListener != null) {
-                mOnScreenSwitchListener.onScreenSwitched(prevScreen, mCurrentScreen);
+        if (mNextScreen != INVALID_SCREEN) {
+            if (mNextScreen != mCurrentScreen) {
+                // Notify observer about screen change
+                if (mOnScreenSwitchListener != null) {
+                    final int prevScreen = mCurrentScreen;
+                    setCurrentScreen(mNextScreen);
+                    mOnScreenSwitchListener.onScreenSwitched(prevScreen, mCurrentScreen);
+                }
             }
-
             mNextScreen = INVALID_SCREEN;
         }
     }
@@ -534,8 +534,19 @@ public final class HorizontalPager extends ViewGroup {
         for (int pos = 0; pos < childCount; ++pos) {
             final View child = visibleChildren.get(pos);
             if (child.getId() == id) {
-                if (pos != mCurrentScreen)
-                    setCurrentScreen(pos, animate);
+                setCurrentScreen(pos, animate);
+                break;
+            }
+        }
+    }
+
+    public void setCurrentView(final View view, final boolean animate) {
+        updateVisibleChildren();
+        final int childCount = getVisibleChildCount();
+        for (int pos = 0; pos < childCount; ++pos) {
+            final View child = visibleChildren.get(pos);
+            if (child == view) {
+                setCurrentScreen(pos, animate);
                 break;
             }
         }
@@ -544,15 +555,15 @@ public final class HorizontalPager extends ViewGroup {
     /**
      * Sets the current screen.
      *
-     * @param newScreen The new screen.
+     * @param newScreenWithinVisibleChildren The new screen.
      * @param animate True to smoothly scroll to the screen, false to snap instantly
      */
-    public void setCurrentScreen(final int newScreen, final boolean animate) {
+    public void setCurrentScreen(final int newScreenWithinVisibleChildren, final boolean animate) {
         updateVisibleChildren();
-        if (newScreen == mCurrentScreen)
+        if (newScreenWithinVisibleChildren == mCurrentScreen && getCurrentView() == mCurrentView)
             return;
 
-        setCurrentScreen(newScreen);
+        setCurrentScreen(newScreenWithinVisibleChildren);
         if (animate) {
             snapToScreen(mCurrentScreen, ANIMATION_SCREEN_SET_DURATION_MILLIS);
         } else {
@@ -561,12 +572,13 @@ public final class HorizontalPager extends ViewGroup {
         invalidate();
     }
 
-    private void setCurrentScreen(final int newScreen) {
-        mCurrentScreen = Math.max(0, Math.min(newScreen, getVisibleChildCount() - 1));
+    private void setCurrentScreen(final int newScreenWithinVisibleChildren) {
+        mCurrentScreen = Math.max(0, Math.min(newScreenWithinVisibleChildren, getVisibleChildCount() - 1));
+        mCurrentView = getCurrentView();
         if (pagingStyle == PAGING_STYLE_CARDDECK) {
-            final int childCount = getChildCount();
+            final int childCount = getVisibleChildCount();
             for (int pos = 0; pos < childCount; ++pos) {
-                final View child = getChildAt(pos);
+                final View child = visibleChildren.get(pos);
                 child.setZ(pos == mCurrentScreen ? 0 : 1);
                 child.setAlpha(1f);
             }
@@ -631,14 +643,17 @@ public final class HorizontalPager extends ViewGroup {
          */
         mNextScreen = Math.max(0, Math.min(whichScreen, getVisibleChildCount() - 1));
         final int newX = mNextScreen * getWidth();
-        final int delta = newX - getScrollX();
+        final int scrollX = getScrollX();
+        final int delta = newX - scrollX;
 
-        if (duration < 0) {
-            // E.g. if they've scrolled 80% of the way, only animation for 20% of the duration
-            mScroller.startScroll(getScrollX(), 0, delta, 0, (int) (Math.abs(delta)
-                    / (float) getWidth() * ANIMATION_SCREEN_SET_DURATION_MILLIS));
-        } else {
-            mScroller.startScroll(getScrollX(), 0, delta, 0, duration);
+        if (delta != 0) {
+            if (duration < 0) {
+                // E.g. if they've scrolled 80% of the way, only animation for 20% of the duration
+                mScroller.startScroll(scrollX, 0, delta, 0,
+                        (int) (Math.abs(delta) / (float) getWidth() * ANIMATION_SCREEN_SET_DURATION_MILLIS));
+            } else {
+                mScroller.startScroll(scrollX, 0, delta, 0, duration);
+            }
         }
 
         invalidate();
