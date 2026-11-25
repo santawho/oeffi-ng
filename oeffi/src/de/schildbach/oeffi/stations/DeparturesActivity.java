@@ -238,6 +238,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
     private ToggleImageButton favoriteButton;
     private ToggleImageButton showArrivalsButton;
     private ToggleImageButton hideCancelledDeparturesButton;
+    private ToggleImageButton sortByScheduledTimeButton;
     private View filterActionButton;
     private ViewAnimator viewAnimator;
     private RecyclerView listView;
@@ -245,6 +246,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
     private TextView resultStatusView;
     private TextView disclaimerSourceView;
     private boolean hideCancelledDepartures;
+    private boolean sortByScheduledTime;
     private HorizontalPager stationPager;
     private Paging pagingPrevious;
     private Paging pagingNext;
@@ -336,6 +338,15 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
         hideCancelledDeparturesButton.setChecked(hideCancelledDepartures);
         hideCancelledDeparturesButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             hideCancelledDepartures = isChecked;
+            selectedFilteredDepartures = null;
+            updateGUI(true);
+        });
+        sortByScheduledTimeButton = actionBar.addToggleButton(R.drawable.ic_list_arrow_24dp,
+                R.color.order_by_schedule_toggle,
+                R.string.departures_action_order_by_schedule_title);
+        sortByScheduledTimeButton.setChecked(sortByScheduledTime);
+        sortByScheduledTimeButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            sortByScheduledTime = isChecked;
             selectedFilteredDepartures = null;
             updateGUI(true);
         });
@@ -662,7 +673,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
         updateHeader();
         setListAnimation(listAnimation);
 
-        final List<Departure> selectedDepartures = this.getFilteredDepartures();
+        final List<Departure> selectedDepartures = getFilteredDepartures();
         if (selectedDepartures != null && !selectedDepartures.isEmpty()) {
             viewAnimator.setDisplayedChild(0);
             departuresAdapter.notifyDataSetChanged();
@@ -693,6 +704,9 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
             if (selectedAllDepartures != null) {
                 selectedFilteredDepartures = selectedAllDepartures.stream()
                         .filter(departure -> !hideCancelledDepartures || !departure.cancelled)
+                        .sorted((d1, d2) -> (int) (
+                                d1.getTime(sortByScheduledTime).getTime()
+                                        - d2.getTime(sortByScheduledTime).getTime()))
                         .collect(Collectors.toList());
             }
         }
@@ -1015,7 +1029,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
     }
 
     private void statusMessage(final String message) {
-        final List<Departure> selectedDepartures = this.getFilteredDepartures();
+        final List<Departure> selectedDepartures = getFilteredDepartures();
         if (!(selectedDepartures == null || selectedDepartures.isEmpty()))
             return;
         viewAnimator.setDisplayedChild(1);
@@ -1284,7 +1298,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
 
         @Override
         public int getItemCount() {
-            final List<Departure> selectedDepartures = DeparturesActivity.this.getFilteredDepartures();
+            final List<Departure> selectedDepartures = getFilteredDepartures();
             return selectedDepartures != null ? selectedDepartures.size() : 0;
         }
 

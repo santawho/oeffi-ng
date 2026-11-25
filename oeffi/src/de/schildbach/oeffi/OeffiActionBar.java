@@ -305,6 +305,12 @@ public class OeffiActionBar extends FrameLayout implements View.OnLayoutChangeLi
         return addButton(new ToggleImageButton(context), drawableRes, descriptionRes);
     }
 
+    public ToggleImageButton addToggleButton(final int drawableRes, final int tintListRes, final int descriptionRes) {
+        final ToggleImageButton button = addButton(new ToggleImageButton(context), drawableRes, descriptionRes);
+        button.setImageTintList(getContext().getColorStateList(tintListRes));
+        return button;
+    }
+
     public View addProgressButton() {
         progressAlwaysVisible = true;
         progressButton.setVisibility(View.VISIBLE);

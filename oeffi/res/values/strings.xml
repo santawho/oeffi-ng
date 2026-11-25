@@ -305,6 +305,7 @@
     <string name="departures_action_favorite_title">Favorite</string>
     <string name="departures_action_show_arrivals_title">Show departures or arrivals</string>
     <string name="departures_action_cancelled_title">Hide/show cancelled departures</string>
+    <string name="departures_action_order_by_schedule_title">Sort by scheduled time</string>
     <string name="departures_progress">Loading departures / arrivals …</string>
     <string name="departures_list_empty">No departures / arrivals</string>
     <string name="departures_delay_format" translatable="false">(%1$+d)</string>
