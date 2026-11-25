@@ -62,7 +62,7 @@
     <string name="user_interface_directions_time_and_go_bottom_enabled_title">Eingabe der Zeit und \"Los\" unten</string>
     <string name="user_interface_directions_time_and_go_bottom_enabled_summary">Verwende das alte Aussehen. Zeigt die Eingabe der Zeit und den Los-Button unterhalb an. (erfordert Neustart)</string>
     <string name="user_interface_directions_autogo_enabled_title">Automatisches \"Los\"</string>
-    <string name="user_interface_directions_autogo_enabled_summary">Starte die Verbindungssuche automatisch, wenn Start and Ziel eingegeben wurden</string>
+    <string name="user_interface_directions_autogo_enabled_summary">Starte die Verbindungssuche automatisch, wenn Start und Ziel eingegeben wurden</string>
     <string name="user_interface_directions_compact_times_enabled_title">Kompakte Zeiten</string>
     <string name="user_interface_directions_compact_times_enabled_summary">Zeigt prognostizierte Zeiten (aus Ort und vom Netzwerk) in einer Zeile, wenn identisch</string>
     <string name="user_interface_directions_tripextrainfo_enabled_title">Lade Zusatzinfos für Verbindungen</string>
