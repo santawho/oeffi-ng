@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public final class KeyWordMatcher {
-    private static final boolean USE_OR_MATCHING = false; // false uses "AND" matching
-
     public static class SearchableItem {
         private SearchableItem() {}
 
@@ -39,11 +37,18 @@ public final class KeyWordMatcher {
     }
 
     public static class Query {
+        public enum Type {
+            AND, OR, COMPLEX
+        }
+
         public Match matchTo(final SearchableItem item) {
             return match(item, this);
         }
 
-        private Query(final String query) {
+        private final Type type; // false uses "AND" matching
+
+        private Query(final String query, final Type type) {
+            this.type = type;
             this.queryStrings = new ArrayList<>();
             addKeyWordsFromText(query, queryStrings);
         }
@@ -52,6 +57,9 @@ public final class KeyWordMatcher {
     }
 
     public static class Match {
+        public static final Match FULL = new Match(true, 1);
+        public static final Match NONE = new Match(false, 0);
+
         public final boolean matches;
         public final int score;
 
@@ -65,8 +73,16 @@ public final class KeyWordMatcher {
         return new SearchableItem();
     }
 
-    public static Query createQuery(final String filter) {
-        return new Query(filter);
+    public static Query createAndQuery(final String filter) {
+        return new Query(filter, Query.Type.AND);
+    }
+
+    public static Query createOrQuery(final String filter) {
+        return new Query(filter, Query.Type.OR);
+    }
+
+    public static Query createComplexQuery(final String filter) {
+        return new Query(filter, Query.Type.COMPLEX);
     }
 
     private static final Pattern patternNoWordChars = Pattern.compile("[^\\sa-z0-9]+");
@@ -96,48 +112,66 @@ public final class KeyWordMatcher {
             keyWords.add(word);
     }
 
+    private static Match matchAnd(final SearchableItem item, final List<String> queryStrings) {
+        boolean matches;
+        int score = 0;
+        matches = true;
+        for (final String queryString : queryStrings) {
+            final int queryStringLength = queryString.length();
+            boolean queryMatches = false;
+            for (final String itemKeyWord : item.keyWords) {
+                final int itemKeyWordLength = itemKeyWord.length();
+                if (itemKeyWord.contains(queryString)) {
+                    queryMatches = true;
+                    score += queryStringLength;
+                    if (queryStringLength == itemKeyWordLength)
+                        score += 10;
+                }
+            }
+            matches &= queryMatches;
+        }
+        return new Match(matches, score);
+    }
+
+    private static Match matchOr(final SearchableItem item, final List<String> queryStrings) {
+        boolean matches;
+        int score = 0;
+        matches = false;
+        for (final String itemKeyWord : item.keyWords) {
+            final int itemKeyWordLength = itemKeyWord.length();
+            boolean itemMatches = false;
+            for (final String queryString : queryStrings) {
+                final int queryStringLength = queryString.length();
+                if (itemKeyWord.contains(queryString)) {
+                    itemMatches = true;
+                    score += queryStringLength;
+                    if (queryStringLength == itemKeyWordLength)
+                        score += 10;
+                }
+            }
+            matches |= itemMatches;
+        }
+        return new Match(matches, score);
+    }
+
+    private static Match matchComplex(final SearchableItem item, final List<String> queryStrings) {
+        return Match.NONE;
+    }
+
     private static Match match(final SearchableItem item, final Query query) {
         final List<String> queryStrings = query.queryStrings;
         if (queryStrings.isEmpty())
-            return new Match(true, 1);
+            return Match.FULL;
 
-        boolean matches;
-        int score = 0;
-
-        if (USE_OR_MATCHING) {
-            matches = false;
-            for (final String itemKeyWord : item.keyWords) {
-                final int itemKeyWordLength = itemKeyWord.length();
-                boolean itemMatches = false;
-                for (final String queryString : queryStrings) {
-                    final int queryStringLength = queryString.length();
-                    if (itemKeyWord.contains(queryString)) {
-                        itemMatches = true;
-                        score += queryStringLength;
-                        if (queryStringLength == itemKeyWordLength)
-                            score += 10;
-                    }
-                }
-                matches |= itemMatches;
-            }
-        } else {
-            matches = true;
-            for (final String queryString : queryStrings) {
-                final int queryStringLength = queryString.length();
-                boolean queryMatches = false;
-                for (final String itemKeyWord : item.keyWords) {
-                    final int itemKeyWordLength = itemKeyWord.length();
-                    if (itemKeyWord.contains(queryString)) {
-                        queryMatches = true;
-                        score += queryStringLength;
-                        if (queryStringLength == itemKeyWordLength)
-                            score += 10;
-                    }
-                }
-                matches &= queryMatches;
-            }
+        switch (query.type) {
+            case AND:
+                return matchAnd(item, queryStrings);
+            case OR:
+                return matchOr(item, queryStrings);
+            case COMPLEX:
+                return matchComplex(item, queryStrings);
+            default:
+                return Match.NONE;
         }
-
-        return new Match(matches, score);
     }
 }

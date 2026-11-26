@@ -69,6 +69,11 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent">
 
+                        <include layout="@layout/find_edittext"
+                            android:id="@+id/stations_filter_text"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+
                         <LinearLayout
                             android:id="@+id/departures_header"
                             android:layout_width="match_parent"

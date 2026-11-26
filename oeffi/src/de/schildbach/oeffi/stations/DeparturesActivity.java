@@ -29,6 +29,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
+import android.text.Editable;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
@@ -62,9 +63,11 @@ import de.schildbach.oeffi.StationsAware;
 import de.schildbach.oeffi.directions.QueryJourneyRunnable;
 import de.schildbach.oeffi.network.NetworkProviderFactory;
 import de.schildbach.oeffi.util.DividerItemDecoration;
+import de.schildbach.oeffi.util.FilterSearchView;
 import de.schildbach.oeffi.util.Formats;
 import de.schildbach.oeffi.util.HorizontalPager;
 import de.schildbach.oeffi.util.HtmlUtils;
+import de.schildbach.oeffi.util.KeyWordMatcher;
 import de.schildbach.oeffi.util.LineView;
 import de.schildbach.oeffi.util.Objects;
 import de.schildbach.oeffi.util.OverflowTextView;
@@ -239,6 +242,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
     private ToggleImageButton showArrivalsButton;
     private ToggleImageButton hideCancelledDeparturesButton;
     private ToggleImageButton sortByScheduledTimeButton;
+    private FilterSearchView newFilterSearchView;
     private View filterActionButton;
     private ViewAnimator viewAnimator;
     private RecyclerView listView;
@@ -259,6 +263,8 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
     private JourneyRef presetJourneyRef;
     private Date presetDepartureTime;
     private boolean showArrivals = false;
+    private String filterByText;
+    private KeyWordMatcher.Query filterQuery;
 
     private QueryJourneyRunnable queryJourneyRunnable;
     private final Handler handler = new Handler();
@@ -351,6 +357,24 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
             sortByScheduledTime = isChecked;
             selectedFilteredDepartures = null;
             updateGUI(true);
+        });
+        actionBar.addButton(R.drawable.ic_search_white_24dp, R.string.departures_action_search_title)
+                .setOnClickListener(v -> {
+                    if (newFilterSearchView.getVisibility() == View.VISIBLE) {
+                        final Editable text = newFilterSearchView.getText();
+                        if (text == null || text.length() == 0) {
+                            ViewUtils.setVisibility(newFilterSearchView, false);
+                        }
+                    } else {
+                        ViewUtils.setVisibility(newFilterSearchView, true);
+                    }
+                });
+        newFilterSearchView = findViewById(R.id.stations_filter_text);
+        newFilterSearchView.setHint(R.string.departures_filter_hint);
+        ViewUtils.setVisibility(newFilterSearchView, false);
+        newFilterSearchView.setTextChangeListener(this::setListFilter);
+        newFilterSearchView.setOnClearListener(v -> {
+            ViewUtils.setVisibility(newFilterSearchView, false);
         });
         filterActionButton = actionBar.addColoredButton(R.drawable.ic_filter_list_white_24dp,
                 R.color.fg_action_bar_toggle_button, R.string.stations_filter_title);
@@ -664,6 +688,14 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
         }
     }
 
+    private void setListFilter(final String filter) {
+        filterByText = filter;
+        filterQuery = filterByText == null ? null : KeyWordMatcher.createOrQuery(filterByText);
+
+        selectedFilteredDepartures = null;
+        updateGUI(true);
+    }
+
     protected void updateFragments() {
         updateFragments(R.id.departures_list_fragment);
     }
@@ -707,6 +739,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
             if (selectedAllDepartures != null) {
                 selectedFilteredDepartures = selectedAllDepartures.stream()
                         .filter(departure -> !hideCancelledDepartures || !departure.cancelled)
+                        .filter(departure -> matchDeparture(departure, filterQuery))
                         .sorted((d1, d2) -> (int) (
                                 d1.getTime(sortByScheduledTime).getTime()
                                         - d2.getTime(sortByScheduledTime).getTime()))
@@ -714,6 +747,29 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
             }
         }
         return selectedFilteredDepartures;
+    }
+
+    private static boolean matchDeparture(final Departure departure, final KeyWordMatcher.Query query) {
+        if (query == null)
+            return true;
+        final KeyWordMatcher.SearchableItem searchableItem = KeyWordMatcher.createSearchableItem();
+        final Line line = departure.line;
+        if (line != null) {
+            final String label = line.label;
+            if (label != null) {
+                searchableItem.addIndexableString(label.replace(" ", ""));
+            }
+        }
+        final Destination destination = departure.destination;
+        if (destination != null) {
+            searchableItem.addIndexableString(destination.directionText);
+            final Location location = destination.location;
+            if (location != null) {
+                searchableItem.addIndexableString(location.name);
+                searchableItem.addIndexableString(location.place);
+            }
+        }
+        return query.matchTo(searchableItem).matches;
     }
 
     private void requestRefresh(final boolean resetScroll, final boolean listAnimation) {

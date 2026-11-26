@@ -298,6 +298,10 @@
     <string name="stations_searchable_hint">Search name or number</string>
     <string name="stations_search_list_empty">No stations found</string>
 
+    <!-- search/filter departures -->
+    <string name="departures_action_search_title">Filter departures / arrivals</string>
+    <string name="departures_filter_hint">Filter by line, destination …</string>
+
     <!-- station details -->
     <string name="departures_action_load_later">Load later departures</string>
     <string name="departures_action_load_earlier">Load earlier departures</string>

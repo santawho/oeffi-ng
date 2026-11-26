@@ -903,7 +903,7 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
             searchQueryModified = true;
             filterQuery = null;
         } else {
-            filterQuery = filterByText == null ? null : KeyWordMatcher.createQuery(filterByText);
+            filterQuery = filterByText == null ? null : KeyWordMatcher.createAndQuery(filterByText);
             searchQueryModified = searchQuery != null;
             searchQuery = null;
         }
