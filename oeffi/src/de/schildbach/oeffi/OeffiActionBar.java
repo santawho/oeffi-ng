@@ -301,11 +301,21 @@ public class OeffiActionBar extends FrameLayout implements View.OnLayoutChangeLi
         return addButton(new AppCompatImageButton(context), drawableRes, descriptionRes);
     }
 
+    public ImageButton addColoredButton(final int drawableRes, final int tintListRes, final int descriptionRes) {
+        final AppCompatImageButton button = addButton(new AppCompatImageButton(context), drawableRes, descriptionRes);
+        button.setImageTintList(getContext().getColorStateList(tintListRes));
+        return button;
+    }
+
     public ToggleImageButton addToggleButton(final int drawableRes, final int descriptionRes) {
         return addButton(new ToggleImageButton(context), drawableRes, descriptionRes);
     }
 
-    public ToggleImageButton addToggleButton(final int drawableRes, final int tintListRes, final int descriptionRes) {
+    public ToggleImageButton addColoredToggleButton(final int drawableRes, final int descriptionRes) {
+        return addColoredToggleButton(drawableRes, R.color.fg_action_bar_toggle_button, descriptionRes);
+    }
+
+    public ToggleImageButton addColoredToggleButton(final int drawableRes, final int tintListRes, final int descriptionRes) {
         final ToggleImageButton button = addButton(new ToggleImageButton(context), drawableRes, descriptionRes);
         button.setImageTintList(getContext().getColorStateList(tintListRes));
         return button;

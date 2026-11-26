@@ -304,7 +304,7 @@
     <string name="departures_action_explore_nearby_title">Abfahrten in der Nähe</string>
     <string name="departures_action_favorite_title">Favorit</string>
     <string name="departures_action_show_arrivals_title">Abfahrten oder Ankünfte anzeigen</string>
-    <string name="departures_action_cancelled_title">Entferne/zeige stornierte Abfahrten</string>
+    <string name="departures_action_cancelled_title">Entferne ausfallende Abfahrten</string>
     <string name="departures_action_order_by_schedule_title">Nach geplanter Zeit sortieren</string>
     <string name="departures_progress">Lade Abfahrts- bzw. Ankunftzeiten…</string>
     <string name="departures_list_empty">Keine Abfahrten bzw. Ankünfte</string>

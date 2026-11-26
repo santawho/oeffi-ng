@@ -333,16 +333,17 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
         showArrivalsButton = actionBar.addToggleButton(R.drawable.ic_arrival_departure_white_24dp,
                 R.string.departures_action_show_arrivals_title);
         actionBar.addButtonSplit();
-        hideCancelledDeparturesButton = actionBar.addToggleButton(R.drawable.ic_cancelled_toggle_24dp,
-                R.string.departures_action_cancelled_title);
+        hideCancelledDeparturesButton = actionBar
+                // .addToggleButton(R.drawable.ic_cancelled_toggle_24dp,
+                .addColoredToggleButton(R.drawable.ic_cancelled_hide_24dp,
+                        R.string.departures_action_cancelled_title);
         hideCancelledDeparturesButton.setChecked(hideCancelledDepartures);
         hideCancelledDeparturesButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             hideCancelledDepartures = isChecked;
             selectedFilteredDepartures = null;
             updateGUI(true);
         });
-        sortByScheduledTimeButton = actionBar.addToggleButton(R.drawable.ic_list_arrow_24dp,
-                R.color.order_by_schedule_toggle,
+        sortByScheduledTimeButton = actionBar.addColoredToggleButton(R.drawable.ic_list_arrow_24dp,
                 R.string.departures_action_order_by_schedule_title);
         sortByScheduledTimeButton.setChecked(sortByScheduledTime);
         sortByScheduledTimeButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -350,7 +351,8 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
             selectedFilteredDepartures = null;
             updateGUI(true);
         });
-        filterActionButton = actionBar.addButton(R.drawable.ic_filter_list_24dp, R.string.stations_filter_title);
+        filterActionButton = actionBar.addColoredButton(R.drawable.ic_filter_list_white_24dp,
+                R.color.fg_action_bar_toggle_button, R.string.stations_filter_title);
         filterActionButton.setOnClickListener(v -> {
             final StationsFilterPopup popup = new StationsFilterPopup(this, products,
                     filter -> {

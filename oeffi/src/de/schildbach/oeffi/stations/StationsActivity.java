@@ -422,7 +422,8 @@ public class StationsActivity extends OeffiMainActivity implements StationsAware
             @Override
             public void afterTextChanged(final Editable s) {}
         });
-        filterActionButton = actionBar.addButton(R.drawable.ic_filter_list_24dp, R.string.stations_filter_title);
+        filterActionButton = actionBar.addColoredButton(R.drawable.ic_filter_list_white_24dp,
+                R.color.fg_action_bar_toggle_button, R.string.stations_filter_title);
         filterActionButton.setOnClickListener(v -> {
             final StationsFilterPopup popup = new StationsFilterPopup(StationsActivity.this, products,
                     filter -> {
