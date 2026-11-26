@@ -23,4 +23,10 @@
         android:title="@string/user_interface_nearby_start_with_current_location_title"
         android:summary="@string/user_interface_nearby_start_with_current_location_summary" />
 
+    <CheckBoxPreference
+        android:key="user_interface_station_departures_sort_by_scheduled_time"
+        android:defaultValue="false"
+        android:title="@string/user_interface_station_departures_sort_by_scheduled_time_title"
+        android:summary="@string/user_interface_station_departures_sort_by_scheduled_time_summary" />
+
 </PreferenceScreen>

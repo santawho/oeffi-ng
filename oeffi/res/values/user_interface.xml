@@ -67,6 +67,8 @@
     <string name="user_interface_station_departures_show_journey_messages_summary">When deactivated, hide messages for each journey</string>
     <string name="user_interface_nearby_start_with_current_location_title">Auto-start nearby departures</string>
     <string name="user_interface_nearby_start_with_current_location_summary">When starting the nearby stations view, automatically show departures for the current device location</string>
+    <string name="user_interface_station_departures_sort_by_scheduled_time_title">Sort by scheduled time</string>
+    <string name="user_interface_station_departures_sort_by_scheduled_time_summary">Sort the departures by their scheduled time instead of the estimated time</string>
 
     <string name="user_interface_category_directions_title">Directions</string>
     <string name="user_interface_directions_time_and_go_bottom_enabled_title">Time input and \"Go\" at bottom</string>

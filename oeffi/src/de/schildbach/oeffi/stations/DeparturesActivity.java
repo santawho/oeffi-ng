@@ -343,6 +343,7 @@ public class DeparturesActivity extends OeffiActivity implements StationsAware {
             selectedFilteredDepartures = null;
             updateGUI(true);
         });
+        sortByScheduledTime = preferences.getBoolean("user_interface_station_departures_sort_by_scheduled_time", false);
         sortByScheduledTimeButton = actionBar.addColoredToggleButton(R.drawable.ic_list_arrow_24dp,
                 R.string.departures_action_order_by_schedule_title);
         sortByScheduledTimeButton.setChecked(sortByScheduledTime);
